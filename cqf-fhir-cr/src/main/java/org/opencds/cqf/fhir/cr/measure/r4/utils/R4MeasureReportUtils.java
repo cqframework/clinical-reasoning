@@ -360,30 +360,55 @@ public class R4MeasureReportUtils {
                 .orElse(BigDecimal.ZERO);
     }
 
-    public static void addAggregationResultAndMethod(
-            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
-
-        addAggregationResultAndMethod(
-                reportPopulation, populationDef.getAggregateMethod(), populationDef.getAggregationResult());
+    @Nullable
+    public static String getCriteriaReference(MeasureReportGroupPopulationComponent reportPopulation) {
+        return Optional.ofNullable(reportPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE))
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .orElse(null);
     }
 
-    public static void addAggregationResultAndMethod(
+    public static void addAggregationResultMethodAndCriteriaRef(
+            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
+
+        addAggregationResultMethodAndCriteriaRef(
+                reportPopulation,
+                populationDef.getAggregateMethod(),
+                populationDef.getAggregationResult(),
+                populationDef.getCriteriaReference());
+    }
+
+    public static void addAggregationResultMethodAndCriteriaRef(
             MeasureReportGroupPopulationComponent measurePopulation,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
-            @Nullable BigDecimal aggregationResult) {
+            @Nullable BigDecimal aggregationResult,
+            @Nullable String criteriaReference) {
 
-        addAggregationResultAndMethod(
+        addAggregationResultMethodAndCriteriaRef(
                 measurePopulation,
                 aggregateMethod,
                 Optional.ofNullable(aggregationResult)
                         .map(BigDecimal::doubleValue)
-                        .orElse(null));
+                        .orElse(null),
+                criteriaReference);
     }
 
-    public static void addAggregationResultAndMethod(
+    /**
+     * We need to capture all 3 data points:
+     * <ul>
+     *     <li>aggregation method: Downstream clients need this to combine scores among reports</li>
+     *     <li>aggregate result: Numeric value needed for downstream clients to combine scores</li>
+     *     <li>criteriaReference: Downstream clients need this to associate MEASUREOBSERVATION
+     *     populations with NUMERATOR and DENOMINATOR populations to calculate RCV scores</li>
+     * </ul>
+     */
+    public static void addAggregationResultMethodAndCriteriaRef(
             MeasureReportGroupPopulationComponent measurePopulation,
             @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
-            @Nullable Double aggregationResult) {
+            @Nullable Double aggregationResult,
+            @Nullable String criteriaReference) {
 
         if (aggregateMethod != null
                 && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
@@ -391,6 +416,9 @@ public class R4MeasureReportUtils {
 
             addAggregateMethodInner(measurePopulation, aggregateMethod);
             addAggregationResultInner(measurePopulation, aggregationResult);
+            if (criteriaReference != null) {
+                addCriteriaReferenceInner(measurePopulation, criteriaReference);
+            }
         }
     }
 
@@ -409,6 +437,13 @@ public class R4MeasureReportUtils {
 
         addExtensionValueInner(
                 measurePopulation, MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(aggregationResult));
+    }
+
+    private static void addCriteriaReferenceInner(
+            MeasureReportGroupPopulationComponent measurePopulation, String criteriaReference) {
+
+        addExtensionValueInner(
+                measurePopulation, MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE, new StringType(criteriaReference));
     }
 
     private static void addExtensionValueInner(

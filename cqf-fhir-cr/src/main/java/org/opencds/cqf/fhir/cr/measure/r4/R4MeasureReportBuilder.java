@@ -636,7 +636,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private void copyPopulationAggregationResults(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
         for (MeasureReportGroupPopulationComponent reportPopulation : reportGroup.getPopulation()) {
             var populationDef = groupDef.findPopulationById(reportPopulation.getId());
-            R4MeasureReportUtils.addAggregationResultAndMethod(reportPopulation, populationDef);
+            R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(reportPopulation, populationDef);
         }
     }
 

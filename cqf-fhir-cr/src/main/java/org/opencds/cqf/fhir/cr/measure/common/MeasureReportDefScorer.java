@@ -435,7 +435,7 @@ public class MeasureReportDefScorer {
     @Nullable
     private PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        PopulationDef firstPop = groupDef.getFirstWithId(type);
+        PopulationDef firstPop = groupDef.getFirstWithTypeAndNonNullId(type);
         if (firstPop == null) {
             return null;
         }
@@ -443,7 +443,7 @@ public class MeasureReportDefScorer {
         String criteriaId = firstPop.id();
 
         return populationDefs.stream()
-                .filter(p -> criteriaId.equals(p.getCriteriaReference()))
+                .filter(populationDef -> criteriaId.equals(populationDef.getCriteriaReference()))
                 .findFirst()
                 .orElse(null);
     }

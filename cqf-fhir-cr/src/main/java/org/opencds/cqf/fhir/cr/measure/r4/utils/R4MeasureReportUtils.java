@@ -283,14 +283,49 @@ public class R4MeasureReportUtils {
         return Objects.equals(reportText, defText);
     }
 
-    public static boolean hasAggregateMethod(
+    public static boolean hasAnyPopulationOfType(
+            MeasureReportGroupComponent reportGroup, MeasurePopulationType populationType) {
+        return reportGroup.getPopulation().stream()
+                .anyMatch(population -> doesPopulationTypeMatch(population, populationType));
+    }
+
+    public static boolean hasAggregationMethod(
+            String measureUrl,
+            MeasureReportGroupComponent reportGroup,
+            ContinuousVariableObservationAggregateMethod method) {
+        return method == getAggregationMethodFromGroup(measureUrl, reportGroup);
+    }
+
+    public static ContinuousVariableObservationAggregateMethod getAggregationMethodFromGroup(
+            String measureUrl, MeasureReportGroupComponent reportGroup) {
+
+        final Set<ContinuousVariableObservationAggregateMethod> aggregationMethods =
+                reportGroup.getPopulation().stream()
+                        .map(pop -> getAggregationMethodFromPopulation(measureUrl, pop))
+                        // We don't to throw if we have, for example SUM and N_A for a count of 2
+                        .filter(method -> ContinuousVariableObservationAggregateMethod.N_A != method)
+                        .collect(Collectors.toUnmodifiableSet());
+
+        if (aggregationMethods.isEmpty()) {
+            return ContinuousVariableObservationAggregateMethod.N_A;
+        }
+
+        if (aggregationMethods.size() > 1) {
+            throw new InvalidRequestException("Expected only one aggregation method for group, but instead got: %s"
+                    .formatted(aggregationMethods.size()));
+        }
+
+        return aggregationMethods.iterator().next();
+    }
+
+    public static boolean hasAggregationMethod(
             String measureUrl,
             MeasureReportGroupPopulationComponent groupPopulation,
             ContinuousVariableObservationAggregateMethod aggregateMethod) {
-        return aggregateMethod == getAggregateMethod(measureUrl, groupPopulation);
+        return aggregateMethod == getAggregationMethodFromPopulation(measureUrl, groupPopulation);
     }
 
-    public static ContinuousVariableObservationAggregateMethod getAggregateMethod(
+    public static ContinuousVariableObservationAggregateMethod getAggregationMethodFromPopulation(
             String measureUrl, @Nullable MeasureReportGroupPopulationComponent groupPopulation) {
 
         if (groupPopulation == null) {
@@ -316,7 +351,7 @@ public class R4MeasureReportUtils {
         return ContinuousVariableObservationAggregateMethod.N_A;
     }
 
-    public static BigDecimal getAggregationResult(MeasureReportGroupPopulationComponent reportPopulation) {
+    public static BigDecimal getAggregateResult(MeasureReportGroupPopulationComponent reportPopulation) {
         return Optional.ofNullable(reportPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT))
                 .map(Extension::getValue)
                 .filter(DecimalType.class::isInstance)

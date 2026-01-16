@@ -145,10 +145,6 @@ public class MeasureReportDefScorer {
 
                 final QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
 
-                // LUKETODO:  is this the right place for this, or do we maintain this at the group level,
-                // since that's where the score is?
-                // LUKETODO:  since we don't have numerators and denominators here, only a single MEASUREOBSERVATION
-                // doesn't that make sense?
                 // We want to record the aggregate result for later computation for continuous variable reports
                 measureObsPop.setAggregationResult(quantityDef);
 

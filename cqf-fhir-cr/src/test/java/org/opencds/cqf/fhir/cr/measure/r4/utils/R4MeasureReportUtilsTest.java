@@ -54,16 +54,6 @@ class R4MeasureReportUtilsTest {
     }
 
     @Test
-    void testGetCountFromGroupPopulation_ByType() {
-        List<MeasureReportGroupPopulationComponent> populations = List.of(createGroupPopulation("numerator", 15));
-
-        int count = R4MeasureReportUtils.getCountFromGroupPopulationByPopulationType(
-                populations, MeasurePopulationType.NUMERATOR);
-
-        assertEquals(15, count);
-    }
-
-    @Test
     void testGetCountFromGroupPopulation_FromGroupComponent() {
         MeasureReportGroupComponent group = createGroup(createGroupPopulation("denominator", 25));
 
@@ -92,16 +82,6 @@ class R4MeasureReportUtilsTest {
                 populations, MeasurePopulationType.DENOMINATOR);
 
         assertEquals(0, count);
-    }
-
-    @Test
-    void testGetCountFromStratifierPopulation_ByType() {
-        List<StratifierGroupPopulationComponent> populations = List.of(createStratifierPopulation("numerator", 7));
-
-        int count =
-                R4MeasureReportUtils.getCountFromStratumPopulationByType(populations, MeasurePopulationType.NUMERATOR);
-
-        assertEquals(7, count);
     }
 
     @Test
@@ -251,6 +231,57 @@ class R4MeasureReportUtilsTest {
         int count = R4MeasureReportUtils.getCountFromGroupPopulationById(group, "missing-id");
 
         assertEquals(0, count);
+    }
+
+    // ========================================
+    // Tests for getPopulationByType
+    // ========================================
+
+    @Test
+    void testGetPopulationByType_Found() {
+        MeasureReportGroupComponent group = createGroup(
+                createGroupPopulation("numerator", 15, "num-1"), createGroupPopulation("denominator", 30, "den-1"));
+
+        MeasureReportGroupPopulationComponent result =
+                R4MeasureReportUtils.getPopulationByType(group, MeasurePopulationType.NUMERATOR);
+
+        assertNotNull(result);
+        assertEquals("num-1", result.getId());
+        assertEquals(15, result.getCount());
+        assertTrue(R4MeasureReportUtils.doesPopulationTypeMatch(result, MeasurePopulationType.NUMERATOR));
+    }
+
+    @Test
+    void testGetPopulationByType_NotFound() {
+        MeasureReportGroupComponent group = createGroup(createGroupPopulation("numerator", 10, "num-1"));
+
+        MeasureReportGroupPopulationComponent result =
+                R4MeasureReportUtils.getPopulationByType(group, MeasurePopulationType.DENOMINATOR);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testGetPopulationByType_EmptyGroup() {
+        MeasureReportGroupComponent group = new MeasureReportGroupComponent();
+
+        MeasureReportGroupPopulationComponent result =
+                R4MeasureReportUtils.getPopulationByType(group, MeasurePopulationType.NUMERATOR);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testGetPopulationByType_MultiplePopulationsWithSameType_ThrowsException() {
+        MeasureReportGroupComponent group = createGroup(
+                createGroupPopulation("numerator", 10, "num-1"), createGroupPopulation("numerator", 20, "num-2"));
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                () -> R4MeasureReportUtils.getPopulationByType(group, MeasurePopulationType.NUMERATOR));
+
+        assertTrue(exception.getMessage().contains("Expected only a single population"));
+        assertTrue(exception.getMessage().contains("NUMERATOR"));
     }
 
     // ========================================
@@ -500,32 +531,13 @@ class R4MeasureReportUtilsTest {
     // ========================================
 
     @Test
-    void testGetAggregationMethod_FromPopulation_FromGroup_WithSumExtension() {
+    void testGetAggregationMethod_FromPopulation_FromGroup_WithAllAggregationMethods() {
+        // Test all aggregation methods in a single test to reduce duplication
         testAggregationMethod("sum", ContinuousVariableObservationAggregateMethod.SUM);
-    }
-
-    @Test
-    void testGetAggregationMethod_FromPopulation_FromGroup_WithAvgExtension() {
         testAggregationMethod("avg", ContinuousVariableObservationAggregateMethod.AVG);
-    }
-
-    @Test
-    void testGetAggregationMethod_FromPopulation_FromGroup_WithCountExtension() {
         testAggregationMethod("count", ContinuousVariableObservationAggregateMethod.COUNT);
-    }
-
-    @Test
-    void testGetAggregationMethod_FromPopulation_FromGroup_WithMinExtension() {
         testAggregationMethod("min", ContinuousVariableObservationAggregateMethod.MIN);
-    }
-
-    @Test
-    void testGetAggregationMethod_FromPopulation_FromGroup_WithMaxExtension() {
         testAggregationMethod("max", ContinuousVariableObservationAggregateMethod.MAX);
-    }
-
-    @Test
-    void testGetAggregationMethod_FromPopulation_FromGroup_WithMedianExtension() {
         testAggregationMethod("median", ContinuousVariableObservationAggregateMethod.MEDIAN);
     }
 

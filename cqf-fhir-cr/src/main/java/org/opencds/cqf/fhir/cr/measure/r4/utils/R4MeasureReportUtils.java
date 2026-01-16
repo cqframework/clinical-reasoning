@@ -120,7 +120,6 @@ public class R4MeasureReportUtils {
     public static int getCountFromGroupPopulationById(MeasureReportGroupComponent group, String populationId) {
         return getCountFromGroupPopulationByPopulationId(group.getPopulation(), populationId);
     }
-
     /**
      * Get population count from a list of StratifierGroupPopulationComponents by population code.
      *
@@ -147,6 +146,28 @@ public class R4MeasureReportUtils {
         }
 
         return matchingStratumPopulations.get(0).getCount();
+    }
+
+    @Nullable
+    public static MeasureReportGroupPopulationComponent getPopulationByType(
+            MeasureReportGroupComponent group, MeasurePopulationType populationType) {
+        final List<MeasureReportGroupPopulationComponent> filteredPopulations = group.getPopulation().stream()
+                .filter(population -> populationType
+                        .toCode()
+                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                .toList();
+
+        if (filteredPopulations.isEmpty()) {
+            return null;
+        }
+
+        if (filteredPopulations.size() > 1) {
+            throw new InvalidRequestException(
+                    "Expected only a single population for this type, but found more than one for population type: %s"
+                            .formatted(populationType));
+        }
+
+        return filteredPopulations.get(0);
     }
 
     /**

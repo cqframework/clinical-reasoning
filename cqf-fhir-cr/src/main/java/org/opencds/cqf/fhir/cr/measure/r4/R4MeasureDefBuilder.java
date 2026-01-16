@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
@@ -103,7 +104,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Stratifiers
         var stratifiers = group.getStratifier().stream()
-                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc))
+                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc, populationBasisDef))
                 .toList();
 
         return new GroupDef(
@@ -260,9 +261,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc) {
+    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
         checkId(mgsc);
 
+        // How we validate if subject based, Patient context or otherwise
+        boolean isBooleanBasis = populationBasisDef.code().equals(FHIRAllTypes.BOOLEAN.toCode());
         // Components
         var components = new ArrayList<StratifierComponentDef>();
         for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
@@ -285,7 +288,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 mgsc.getId(),
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
-                getStratifierType(measureUrl, mgsc),
+                getStratifierType(measureUrl, mgsc, isBooleanBasis),
                 components);
     }
 
@@ -307,9 +310,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private static MeasureStratifierType getStratifierType(
-            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent, boolean isBooleanBasis) {
         if (measureGroupStratifierComponent == null) {
-            return MeasureStratifierType.VALUE;
+            return null;
         }
 
         final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria();
@@ -330,9 +333,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         if (hasCriteria) {
             return MeasureStratifierType.CRITERIA;
+        } else if (hasAnyComponentCriteria && !isBooleanBasis) {
+            return MeasureStratifierType.NON_SUBJECT_VALUE;
+        } else {
+            return MeasureStratifierType.VALUE;
         }
-
-        return MeasureStratifierType.VALUE;
     }
 
     private static void triggerFirstPassValidation(Measure measure) {

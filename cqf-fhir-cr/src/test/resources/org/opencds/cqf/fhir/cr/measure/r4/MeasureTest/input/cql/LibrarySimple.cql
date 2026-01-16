@@ -243,3 +243,16 @@ define "num date":
 
 define "exc date":
     "Date"
+
+// valueStratifier function for non-subject based measures
+
+define function "Age Range Stratifier"(encounter Encounter):
+  case
+    when AgeInYearsAt(start of encounter.period) between 0 and 20 then 'P0Y--P21Y'
+    when AgeInYearsAt(start of encounter.period) between 21 and 40 then 'P21Y--P41Y'
+    when AgeInYearsAt(start of encounter.period) > 41 then 'P41Y--P9999Y'
+    else null
+  end
+
+define function "Encounter Status Stratifier"(encounter Encounter):
+  Coalesce(encounter.status.value, 'unknown')

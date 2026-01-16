@@ -26,27 +26,28 @@ import org.slf4j.LoggerFactory;
 /**
  * Capture all logic for measure evaluation for continuous variable scoring.
  */
-public class ContinuousVariableObservationHandler {
-    private static final Logger logger = LoggerFactory.getLogger(ContinuousVariableObservationHandler.class);
+public class FunctionEvaluationHandler {
+    private static final Logger logger = LoggerFactory.getLogger(FunctionEvaluationHandler.class);
 
-    private ContinuousVariableObservationHandler() {
+    private FunctionEvaluationHandler() {
         // static class with private constructor
     }
 
-    static List<EvaluationResult> continuousVariableEvaluation(
+    static List<EvaluationResult> cqlFunctionEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart) {
 
-        final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
+        // MeasureDefs where functions need to evaluate
+        final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
-                .filter(ContinuousVariableObservationHandler::hasMeasureObservation)
+                .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
                 .toList();
 
-        if (measureDefsWithMeasureObservations.isEmpty()) {
-            // Don't need to do anything if there are no measure observations to process
+        if (measureDefsWithFunctions.isEmpty()) {
+            // Don't need to do anything if there are no functions to process
             return List.of();
         }
 
@@ -56,11 +57,12 @@ public class ContinuousVariableObservationHandler {
 
         try {
             // one Library may be linked to multiple Measures
-            for (MeasureDef measureDefWithMeasureObservations : measureDefsWithMeasureObservations) {
+            for (MeasureDef measureDefWithFunctions : measureDefsWithFunctions) {
 
                 // get function for measure-observation from populationDef
-                for (GroupDef groupDef : measureDefWithMeasureObservations.groups()) {
+                for (GroupDef groupDef : measureDefWithFunctions.groups()) {
 
+                    // measure observations to evaluate
                     final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
                             .filter(populationDef ->
                                     MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
@@ -72,7 +74,18 @@ public class ContinuousVariableObservationHandler {
 
                         finalResults.add(result);
                     }
+                    // get function for non-subject value stratifiers and evaluate for each populationDef
+                    final List<StratifierDef> stratifierDefs = groupDef.stratifiers().stream()
+                        .filter(StratifierDef::isNonSubjectValueStratifier)
+                        .toList();
+                    for(StratifierDef stratDef : stratifierDefs) {
+                        // each stratifier (could be multiple defined in component)
+                        var result = processNonSubValueStratifiers(context, evaluationResult, subjectTypePart, groupDef, stratDef);
+                        finalResults.add(result);
+                    }
+
                 }
+
             }
         } finally {
             // We don't want to pop a non-existent library
@@ -130,7 +143,7 @@ public class ContinuousVariableObservationHandler {
 
         for (Object result : resultsIter) {
             final ExpressionResult observationResult =
-                    evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
+                evaluateFunctionCriteria(result, observationExpression, groupDef.isBooleanBasis(), context, true);
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
@@ -146,7 +159,65 @@ public class ContinuousVariableObservationHandler {
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
     }
 
-    // Added by Claude Sonnet 4.5 on 2025-12-02
+    /**
+     * For a given non-subject based stratifier(s), do an ad-hoc function evaluation against group populations and
+     * accumulate the results that will be subsequently added to the CQL evaluation result.
+     */
+    private static EvaluationResult processNonSubValueStratifiers(
+        CqlEngine context,
+        EvaluationResult evaluationResult,
+        String subjectTypePart,
+        GroupDef groupDef,
+        StratifierDef stratifierDef) {
+
+        EvaluationResult evalResult = new EvaluationResult();
+
+        for(StratifierComponentDef componentDef: stratifierDef.components()) {
+            if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
+                // We screwed up defining component correctly
+                throw new InternalErrorException(
+                    "StratifierDef component expression is missing.");
+            }
+            var stratifierExpression = componentDef.expression();
+            // input parameter data for value stratifier functions
+            for (PopulationDef popDef : groupDef.populations()) {
+
+                // retrieve group.population results to input into valueStrat function
+                Optional<ExpressionResult> optExpressionResult =
+                    tryGetExpressionResult(popDef.expression(), evaluationResult);
+
+                final ExpressionResult expressionResult = optExpressionResult.get();
+                final Iterable<?> resultsIter = getResultIterable(evaluationResult,
+                    expressionResult, subjectTypePart);
+                // make new expression name for uniquely extracting results
+                // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
+                var expressionName = popDef.id() + "-" + stratifierExpression;
+                final Map<Object, Object> functionResults = new HashMap<>();
+                final Set<Object> evaluatedResources = new HashSet<>();
+
+                for (Object result : resultsIter) {
+                    final ExpressionResult functionResult =
+                        evaluateFunctionCriteria(result, stratifierExpression,
+                            groupDef.isBooleanBasis(), context, true);
+                    // add function results to existing EvaluationResult under new expression
+                    // name
+                    // need a way to capture input parameter here too, otherwise we have no way
+                    // to connect input objects related to output object
+                    // key= input parameter to function
+                    // value= the output Observation resource containing calculated value
+                    functionResults.put(result, functionResult.getValue());
+                    assert functionResult.getEvaluatedResources() != null;
+                    evaluatedResources.addAll(functionResult.getEvaluatedResources());
+                }
+                // add to EvaluationResult
+                addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
+            }
+
+
+        }
+        return evalResult;
+    }
+
     /**
      * Convert CQL evaluation result to QuantityDef.
      *
@@ -194,8 +265,8 @@ public class ContinuousVariableObservationHandler {
      * @return cql results for subject requested
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public static ExpressionResult evaluateObservationCriteria(
-            Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context) {
+    public static ExpressionResult evaluateFunctionCriteria(
+            Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context, boolean isMeasureObservation) {
 
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
@@ -230,7 +301,10 @@ public class ContinuousVariableObservationHandler {
 
         final Set<Object> evaluatedResources = captureEvaluatedResources(context);
 
-        validateObservationResult(resource, result);
+        // validates return types
+        if(isMeasureObservation) {
+            validateObservationResult(resource, result);
+        }
 
         return new ExpressionResult(result, evaluatedResources);
     }
@@ -307,6 +381,17 @@ public class ContinuousVariableObservationHandler {
                 .anyMatch(pop -> pop.type() == MeasurePopulationType.MEASUREOBSERVATION);
     }
 
+    private static boolean hasNonSubValueStratifier(MeasureDef measureDef) {
+        if (measureDef == null || measureDef.groups() == null) {
+            return false;
+        }
+
+        return measureDef.groups().stream()
+            .filter(x -> x.stratifiers() !=null)
+            .flatMap(y -> y.stratifiers().stream())
+            .anyMatch(StratifierDef::isNonSubjectValueStratifier);
+    }
+
     /**
      * method used to extract evaluated resources touched by CQL criteria expressions
      * @param context cql engine context
@@ -338,5 +423,20 @@ public class ContinuousVariableObservationHandler {
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
+    }
+
+    @Nonnull
+    private static EvaluationResult addToEvaluationResult(
+        @Nonnull EvaluationResult result,
+        @Nonnull String expressionName,
+        @Nonnull Map<Object, Object> functionResults,
+        @Nonnull Set<Object> evaluatedResources) {
+
+        result.set(
+            new EvaluationExpressionRef(expressionName),
+            new ExpressionResult(functionResults, evaluatedResources)
+        );
+
+        return result;
     }
 }

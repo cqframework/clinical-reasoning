@@ -122,7 +122,6 @@ public class MeasureMultiSubjectEvaluator {
      * linked to NUMERATOR and DENOMINATOR populations (e.g., ratio measures with observations).
      * Returns null if not applicable or if lookups fail (preserves existing null behavior).
      * <p>
-     * Added by Claude Sonnet 4.5 on 2025-12-05 for measure observation optimization.
      *
      * @param groupDef the group definition
      * @param stratumPopulations the list of stratum populations for this stratum
@@ -286,18 +285,33 @@ public class MeasureMultiSubjectEvaluator {
     private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
             Table<String, StratumValueWrapper, StratifierComponentDef> table) {
         // input format
-        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
-        // | ---------------- | ----------------------------- | ---------------------- |
-        // | subject-a        | M                             | gender                 |
-        // | subject-b        | F                             | gender                 |
-        // | subject-c        | M                             | gender                 |
-        // | subject-d        | F                             | gender                 |
-        // | subject-e        | F                             | gender                 |
-        // | subject-a        | white                         | race                   |
-        // | subject-b        | hispanic/latino               | race                   |
-        // | subject-c        | hispanic/latino               | race                   |
-        // | subject-d        | black                         | race                   |
-        // | subject-e        | black                         | race                   |
+        // non-subject value stratifier- intersect results by population result
+        // | Subject (String) | Input Parameter   | CriteriaResult (ValueWrapper) | StratifierComponentDef |
+        // | ---------------- | ------------------ | ----------------------------- | ---------------------- |
+        // | subject-a        | Encounter/1001     | M                             | gender                 |
+        // | subject-b        | Encounter/1002     | F                             | gender                 |
+        // | subject-c        | Encounter/1003     | M                             | gender                 |
+        // | subject-d        | Encounter/1004     | F                             | gender                 |
+        // | subject-e        | Encounter/1005     | F                             | gender                 |
+        // | subject-a        | Encounter/1001     | white                         | race                   |
+        // | subject-b        | Encounter/1002     | hispanic/latino               | race                   |
+        // | subject-c        | Encounter/1003     | hispanic/latino               | race                   |
+        // | subject-d        | Encounter/1004     | black                         | race                   |
+        // | subject-e        | Encounter/1005     | black                         | race                   |
+
+        // subject value stratifier
+        // | Subject (String) | Input Parameter   | CriteriaResult (ValueWrapper) | StratifierComponentDef |
+        // | ---------------- | ------------------ | ----------------------------- | ---------------------- |
+        // | subject-a        | empty              | M                             | gender                 |
+        // | subject-b        | empty              | F                             | gender                 |
+        // | subject-c        | empty              | M                             | gender                 |
+        // | subject-d        | empty              | F                             | gender                 |
+        // | subject-e        | empty              | F                             | gender                 |
+        // | subject-a        | empty              | white                         | race                   |
+        // | subject-b        | empty              | hispanic/latino               | race                   |
+        // | subject-c        | empty              | hispanic/latino               | race                   |
+        // | subject-d        | empty              | black                         | race                   |
+        // | subject-e        | empty              | black                         | race                   |
 
         // Step 1: Build Map<Subject, Set<ValueDef>>
         final Map<String, Set<StratumValueDef>> subjectToValueDefs = new HashMap<>();

@@ -24,7 +24,8 @@ class MeasureStratifierTest {
             Measure.given().repositoryFor("CriteriaBasedStratifiersSimple");
     private static final Given GIVEN_CRITERIA_BASED_STRAT_COMPLEX =
             Measure.given().repositoryFor("CriteriaBasedStratifiersComplex");
-
+    private static final Given GIVEN_SIMPLE =
+        Measure.given().repositoryFor("MeasureTest");
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
@@ -710,5 +711,34 @@ class MeasureStratifierTest {
                 .up()
                 .up()
                 .report();
+    }
+
+    /**
+     * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
+     */
+    @Test
+    void cohortResourceValueStrat() {
+
+
+        GIVEN_SIMPLE
+            .when()
+            .measureId("CohortResourceAllPopulationsValueStrat")
+            .subject("Patient/patient-9")
+            .evaluate()
+            .then()
+            .firstGroup()
+            .firstStratifier()
+            // This is a value stratifier, which does not pull in the measure populations and
+            // does not use the CQL expression for the code text
+            .hasCodeText("Encounter Age and Status")
+            .hasStratumCount(1)
+            .stratum("P21Y--P41Y")
+            .firstPopulation()
+            .hasCount(2)
+            .up()
+            .up()
+            .up()
+            .up()
+            .report();
     }
 }

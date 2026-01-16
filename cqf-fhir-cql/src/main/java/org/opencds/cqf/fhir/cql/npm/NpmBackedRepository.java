@@ -89,7 +89,6 @@ public class NpmBackedRepository implements INpmRepository {
         }
     }
 
-
     private static final Logger log = LoggerFactory.getLogger(NpmBackedRepository.class);
 
     private final FhirContext fhirContext;
@@ -180,8 +179,8 @@ public class NpmBackedRepository implements INpmRepository {
             resources = canonicalUrl2Resource.get(searchUrl);
             if (hasVersion) {
                 resources = resources.stream()
-                    .filter(wr -> wr.getCanonicalUrl(true).equals(url))
-                    .collect(Collectors.toList());
+                        .filter(wr -> wr.getCanonicalUrl(true).equals(url))
+                        .collect(Collectors.toList());
             }
         } else {
             resources = resourceType2Resource.get(type);

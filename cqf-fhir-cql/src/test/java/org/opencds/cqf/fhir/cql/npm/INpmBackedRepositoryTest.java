@@ -108,15 +108,15 @@ public interface INpmBackedRepositoryTest {
     }
 
     @Test
-    default void resolveByUrl_urlWithVersion_fetchesOnlyResourceWithExactUrl(@TempDir Path tempDir)
-        throws IOException {
+    default void resolveByUrl_urlWithVersion_fetchesOnlyResourceWithExactUrl(@TempDir Path tempDir) throws IOException {
         // setup
         String name = "testIg";
         int count = 3;
         String urlBase = "http://example.com/";
 
         createPackage(tempDir, name, count, (Function<Integer, IBaseResource>) val -> {
-            return createLibraryResource("Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
+            return createLibraryResource(
+                    "Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
         });
 
         // create the repo
@@ -141,7 +141,8 @@ public interface INpmBackedRepositoryTest {
         String urlBase = "http://example.com/";
 
         createPackage(tempDir, name, count, (Function<Integer, IBaseResource>) val -> {
-            return createLibraryResource("Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
+            return createLibraryResource(
+                    "Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
         });
 
         // create the repo

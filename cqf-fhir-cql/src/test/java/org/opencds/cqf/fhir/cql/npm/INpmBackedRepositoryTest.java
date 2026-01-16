@@ -134,6 +134,30 @@ public interface INpmBackedRepositoryTest {
     }
 
     @Test
+    default void resolveByUrl_urlWithVersionNotInIG_returnsNothing(@TempDir Path tempDir) throws IOException {
+        // setup
+        String name = "testIg";
+        int count = 3;
+        String urlBase = "http://example.com/";
+
+        createPackage(tempDir, name, count, (Function<Integer, IBaseResource>) val -> {
+            return createLibraryResource(
+                    "Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
+        });
+
+        // create the repo
+        NpmBackedRepository repo = new NpmBackedRepository(getFhirContext(), EvaluationSettings.getDefault());
+
+        // test
+        repo.loadIg(tempDir.toString(), name);
+        String urlToSearch = urlBase + "Library|1.2.3";
+        List<IBaseResource> resources = repo.resolveByUrl(getResourceClass("Library"), urlToSearch);
+
+        // validate
+        assertTrue(resources.isEmpty());
+    }
+
+    @Test
     default void resolveByUrl_urlWithoutVersion_fetchesAllWithSimilarUrls(@TempDir Path tempDir) throws IOException {
         // setup
         String name = "testIg";

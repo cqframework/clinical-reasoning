@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -46,9 +47,10 @@ public class NpmBackedRepository implements INpmRepository {
         private final IBaseResource resource;
 
         /**
-         * The canonical url (if available)
+         * The canonical url with version (if available);
+         * eg: http://example.com/resource|1.2.3
          */
-        private String canonical;
+        private String canonicalWithVersion;
 
         public WrappedResource(IBaseResource resource) {
             this.resource = resource;
@@ -64,7 +66,7 @@ public class NpmBackedRepository implements INpmRepository {
                 Optional<IBase> valueOp = urlField.getAccessor().getFirstValueOrNull(resource);
                 valueOp.ifPresent(v -> {
                     if (v instanceof IPrimitiveType<?> pt) {
-                        canonical = pt.getValueAsString();
+                        canonicalWithVersion = pt.getValueAsString();
                     }
                 });
             }
@@ -75,13 +77,18 @@ public class NpmBackedRepository implements INpmRepository {
         }
 
         public boolean hasCanonicalUrl() {
-            return !isEmpty(canonical);
+            return !isEmpty(canonicalWithVersion);
         }
 
-        public String getCanonicalUrl() {
-            return canonical;
+        public String getCanonicalUrl(boolean withVersion) {
+            String url = canonicalWithVersion;
+            if (!withVersion && hasVersion(url)) {
+                return getUrlWithoutVersion(url);
+            }
+            return url;
         }
     }
+
 
     private static final Logger log = LoggerFactory.getLogger(NpmBackedRepository.class);
 
@@ -165,7 +172,17 @@ public class NpmBackedRepository implements INpmRepository {
 
         Collection<WrappedResource> resources = null;
         if (hasUrl) {
-            resources = canonicalUrl2Resource.get(url);
+            String searchUrl = url;
+            boolean hasVersion = hasVersion(searchUrl);
+            if (hasVersion) {
+                searchUrl = getUrlWithoutVersion(url);
+            }
+            resources = canonicalUrl2Resource.get(searchUrl);
+            if (hasVersion) {
+                resources = resources.stream()
+                    .filter(wr -> wr.getCanonicalUrl(true).equals(url))
+                    .collect(Collectors.toList());
+            }
         } else {
             resources = resourceType2Resource.get(type);
         }
@@ -192,7 +209,7 @@ public class NpmBackedRepository implements INpmRepository {
                     WrappedResource wrappedResource = new WrappedResource(resource);
                     resourceType2Resource.put(type, wrappedResource);
                     if (wrappedResource.hasCanonicalUrl()) {
-                        canonicalUrl2Resource.put(wrappedResource.getCanonicalUrl(), wrappedResource);
+                        canonicalUrl2Resource.put(wrappedResource.getCanonicalUrl(false), wrappedResource);
                     }
                 }
             }
@@ -223,5 +240,17 @@ public class NpmBackedRepository implements INpmRepository {
 
     private boolean isListEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    private boolean hasVersion(String url) {
+        return url.contains("|");
+    }
+
+    private String getUrlWithoutVersion(String url) {
+        int barIndex = url.indexOf("|");
+        if (barIndex != -1) {
+            return url.substring(0, barIndex);
+        }
+        return url;
     }
 }

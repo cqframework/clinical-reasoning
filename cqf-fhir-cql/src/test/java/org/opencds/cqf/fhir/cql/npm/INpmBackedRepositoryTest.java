@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cql.npm;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -103,6 +104,60 @@ public interface INpmBackedRepositoryTest {
             for (IBaseResource resource : measures) {
                 assertEquals("Measure", resource.fhirType());
             }
+        }
+    }
+
+    @Test
+    default void resolveByUrl_urlWithVersion_fetchesOnlyResourceWithExactUrl(@TempDir Path tempDir)
+        throws IOException {
+        // setup
+        String name = "testIg";
+        int count = 3;
+        String urlBase = "http://example.com/";
+
+        createPackage(tempDir, name, count, (Function<Integer, IBaseResource>) val -> {
+            return createLibraryResource("Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
+        });
+
+        // create the repo
+        NpmBackedRepository repo = new NpmBackedRepository(getFhirContext(), EvaluationSettings.getDefault());
+
+        // test
+        repo.loadIg(tempDir.toString(), name);
+        String urlToSearch = urlBase + "Library|1.0.0";
+        List<IBaseResource> resources = repo.resolveByUrl(getResourceClass("Library"), urlToSearch);
+
+        // validate
+        assertEquals(1, resources.size());
+        IBaseResource resource = resources.get(0);
+        assertEquals(urlToSearch, getCanonicalUrlFromResource(resource));
+    }
+
+    @Test
+    default void resolveByUrl_urlWithoutVersion_fetchesAllWithSimilarUrls(@TempDir Path tempDir) throws IOException {
+        // setup
+        String name = "testIg";
+        int count = 3;
+        String urlBase = "http://example.com/";
+
+        createPackage(tempDir, name, count, (Function<Integer, IBaseResource>) val -> {
+            return createLibraryResource("Library" + val, String.format(urlBase + "%s|%s", "Library", (val + 1) + ".0.0"));
+        });
+
+        // create the repo
+        NpmBackedRepository repo = new NpmBackedRepository(getFhirContext(), EvaluationSettings.getDefault());
+
+        // test
+        repo.loadIg(tempDir.toString(), name);
+        String urlToSearch = urlBase + "Library";
+        List<IBaseResource> resources = repo.resolveByUrl(getResourceClass("Library"), urlToSearch);
+
+        // verify
+        assertNotNull(resources);
+        assertEquals(3, resources.size());
+        for (IBaseResource resource : resources) {
+            String url = getCanonicalUrlFromResource(resource);
+            assertTrue(url.startsWith(urlToSearch));
         }
     }
 

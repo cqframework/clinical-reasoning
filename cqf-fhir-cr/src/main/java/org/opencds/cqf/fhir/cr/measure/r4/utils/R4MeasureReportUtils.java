@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -26,7 +27,6 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
@@ -120,7 +120,6 @@ public class R4MeasureReportUtils {
     public static int getCountFromGroupPopulationById(MeasureReportGroupComponent group, String populationId) {
         return getCountFromGroupPopulationByPopulationId(group.getPopulation(), populationId);
     }
-
     /**
      * Get population count from a list of StratifierGroupPopulationComponents by population code.
      *
@@ -147,6 +146,28 @@ public class R4MeasureReportUtils {
         }
 
         return matchingStratumPopulations.get(0).getCount();
+    }
+
+    @Nullable
+    public static MeasureReportGroupPopulationComponent getPopulationByType(
+            MeasureReportGroupComponent group, MeasurePopulationType populationType) {
+        final List<MeasureReportGroupPopulationComponent> filteredPopulations = group.getPopulation().stream()
+                .filter(population -> populationType
+                        .toCode()
+                        .equals(population.getCode().getCodingFirstRep().getCode()))
+                .toList();
+
+        if (filteredPopulations.isEmpty()) {
+            return null;
+        }
+
+        if (filteredPopulations.size() > 1) {
+            throw new InvalidRequestException(
+                    "Expected only a single population for this type, but found more than one for population type: %s"
+                            .formatted(populationType));
+        }
+
+        return filteredPopulations.get(0);
     }
 
     /**
@@ -283,14 +304,49 @@ public class R4MeasureReportUtils {
         return Objects.equals(reportText, defText);
     }
 
-    public static boolean hasAggregateMethod(
+    public static boolean hasAnyPopulationOfType(
+            MeasureReportGroupComponent reportGroup, MeasurePopulationType populationType) {
+        return reportGroup.getPopulation().stream()
+                .anyMatch(population -> doesPopulationTypeMatch(population, populationType));
+    }
+
+    public static boolean hasAggregationMethod(
+            String measureUrl,
+            MeasureReportGroupComponent reportGroup,
+            ContinuousVariableObservationAggregateMethod method) {
+        return method == getAggregationMethodFromGroup(measureUrl, reportGroup);
+    }
+
+    public static ContinuousVariableObservationAggregateMethod getAggregationMethodFromGroup(
+            String measureUrl, MeasureReportGroupComponent reportGroup) {
+
+        final Set<ContinuousVariableObservationAggregateMethod> aggregationMethods =
+                reportGroup.getPopulation().stream()
+                        .map(pop -> getAggregationMethodFromPopulation(measureUrl, pop))
+                        // We don't to throw if we have, for example SUM and N_A for a count of 2
+                        .filter(method -> ContinuousVariableObservationAggregateMethod.N_A != method)
+                        .collect(Collectors.toUnmodifiableSet());
+
+        if (aggregationMethods.isEmpty()) {
+            return ContinuousVariableObservationAggregateMethod.N_A;
+        }
+
+        if (aggregationMethods.size() > 1) {
+            throw new InvalidRequestException("Expected only one aggregation method for group, but instead got: %s"
+                    .formatted(aggregationMethods.size()));
+        }
+
+        return aggregationMethods.iterator().next();
+    }
+
+    public static boolean hasAggregationMethod(
             String measureUrl,
             MeasureReportGroupPopulationComponent groupPopulation,
             ContinuousVariableObservationAggregateMethod aggregateMethod) {
-        return aggregateMethod == getAggregateMethod(measureUrl, groupPopulation);
+        return aggregateMethod == getAggregationMethodFromPopulation(measureUrl, groupPopulation);
     }
 
-    public static ContinuousVariableObservationAggregateMethod getAggregateMethod(
+    public static ContinuousVariableObservationAggregateMethod getAggregationMethodFromPopulation(
             String measureUrl, @Nullable MeasureReportGroupPopulationComponent groupPopulation) {
 
         if (groupPopulation == null) {
@@ -316,7 +372,7 @@ public class R4MeasureReportUtils {
         return ContinuousVariableObservationAggregateMethod.N_A;
     }
 
-    public static BigDecimal getAggregationResult(MeasureReportGroupPopulationComponent reportPopulation) {
+    public static BigDecimal getAggregateResult(MeasureReportGroupPopulationComponent reportPopulation) {
         return Optional.ofNullable(reportPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT))
                 .map(Extension::getValue)
                 .filter(DecimalType.class::isInstance)
@@ -325,48 +381,99 @@ public class R4MeasureReportUtils {
                 .orElse(BigDecimal.ZERO);
     }
 
-    public static void addAggregationResult(
-            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
-
-        addAggregationResult(measurePopulation, populationDef.getAggregationResult());
+    @Nullable
+    public static String getCriteriaReference(MeasureReportGroupPopulationComponent reportPopulation) {
+        return Optional.ofNullable(reportPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE))
+                .map(Extension::getValue)
+                .filter(StringType.class::isInstance)
+                .map(StringType.class::cast)
+                .map(StringType::getValue)
+                .orElse(null);
     }
 
-    public static void addAggregationResult(
-            MeasureReportGroupPopulationComponent measurePopulation, @Nullable Double aggregationResult) {
+    public static void addAggregationResultMethodAndCriteriaRef(
+            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
 
-        Optional.ofNullable(aggregationResult)
-                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
+        addAggregationResultMethodAndCriteriaRef(
+                reportPopulation,
+                populationDef.getAggregateMethod(),
+                populationDef.getAggregationResult(),
+                populationDef.getCriteriaReference());
     }
 
-    public static void addAggregateMethod(
-            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
-
-        addAggregateMethod(measurePopulation, populationDef.getAggregateMethod());
-    }
-
-    public static void addAggregateMethod(
+    public static void addAggregationResultMethodAndCriteriaRef(
             MeasureReportGroupPopulationComponent measurePopulation,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable BigDecimal aggregationResult,
+            @Nullable String criteriaReference) {
 
-        Optional.ofNullable(aggregateMethod)
-                // There's no point in capturing "N_A" aggregation methods here, as this could cause
-                // bugs
-                .filter(nonNonAggregateMethod ->
-                        ContinuousVariableObservationAggregateMethod.N_A != nonNonAggregateMethod)
-                .ifPresent(nonNonAggregateMethod -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
-                        new StringType(nonNonAggregateMethod.getText())));
+        addAggregationResultMethodAndCriteriaRef(
+                measurePopulation,
+                aggregateMethod,
+                Optional.ofNullable(aggregationResult)
+                        .map(BigDecimal::doubleValue)
+                        .orElse(null),
+                criteriaReference);
     }
 
     /**
-     * Helper method to convert expression result to CodeableConcept for stratum text extraction.
-     * Used internally by getStratumDefText for non-CodeableConcept values.
-     *
-     * @param value the StratumValueWrapper to convert
-     * @return a CodeableConcept with the text set to the string value
+     * We need to capture all 3 data points:
+     * <ul>
+     *     <li>aggregation method: Downstream clients need this to combine scores among reports</li>
+     *     <li>aggregate result: Numeric value needed for downstream clients to combine scores</li>
+     *     <li>criteriaReference: Downstream clients need this to associate MEASUREOBSERVATION
+     *     populations with NUMERATOR and DENOMINATOR populations to calculate RCV scores</li>
+     * </ul>
      */
-    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
-        return new CodeableConcept().setText(value.getValueAsString());
+    public static void addAggregationResultMethodAndCriteriaRef(
+            MeasureReportGroupPopulationComponent measurePopulation,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable Double aggregationResult,
+            @Nullable String criteriaReference) {
+
+        if (aggregateMethod != null
+                && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
+                && aggregationResult != null) {
+
+            addAggregateMethodInner(measurePopulation, aggregateMethod);
+            addAggregationResultInner(measurePopulation, aggregationResult);
+            if (criteriaReference != null) {
+                addCriteriaReferenceInner(measurePopulation, criteriaReference);
+            }
+        }
+    }
+
+    private static void addAggregateMethodInner(
+            MeasureReportGroupPopulationComponent measurePopulation,
+            ContinuousVariableObservationAggregateMethod aggregateMethod) {
+
+        addExtensionValueInner(
+                measurePopulation,
+                MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
+                new StringType(aggregateMethod.getText()));
+    }
+
+    private static void addAggregationResultInner(
+            MeasureReportGroupPopulationComponent measurePopulation, double aggregationResult) {
+
+        addExtensionValueInner(
+                measurePopulation, MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(aggregationResult));
+    }
+
+    private static void addCriteriaReferenceInner(
+            MeasureReportGroupPopulationComponent measurePopulation, String criteriaReference) {
+
+        addExtensionValueInner(
+                measurePopulation, MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE, new StringType(criteriaReference));
+    }
+
+    private static void addExtensionValueInner(
+            MeasureReportGroupPopulationComponent measurePopulation, String extensionUrl, Type extensionValue) {
+
+        if (measurePopulation.hasExtension(extensionUrl)) {
+            measurePopulation.getExtensionByUrl(extensionUrl).setValue(extensionValue);
+        } else {
+            measurePopulation.addExtension(extensionUrl, extensionValue);
+        }
     }
 }

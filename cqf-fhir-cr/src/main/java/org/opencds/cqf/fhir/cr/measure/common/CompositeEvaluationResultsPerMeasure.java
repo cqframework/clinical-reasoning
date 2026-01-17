@@ -71,6 +71,69 @@ public class CompositeEvaluationResultsPerMeasure {
         return this.errorsPerMeasure;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(CompositeEvaluationResultsPerMeasure.class.getSimpleName()).append(":\n");
+
+        // Format resultsPerMeasure
+        sb.append("Results Per Measure:\n");
+        if (resultsPerMeasure.isEmpty()) {
+            sb.append("  (none)\n");
+        } else {
+            for (Map.Entry<MeasureDef, Map<String, EvaluationResult>> measureEntry : resultsPerMeasure.entrySet()) {
+                MeasureDef measureDef = measureEntry.getKey();
+                Map<String, EvaluationResult> subjectResults = measureEntry.getValue();
+
+                sb.append("  Measure ID: ").append(measureDef.id()).append("\n");
+                sb.append("  Measure URL: ")
+                        .append(measureDef.url() != null ? measureDef.url() : "(none)")
+                        .append("\n");
+
+                if (subjectResults.isEmpty()) {
+                    sb.append("    (no subject results)\n");
+                } else {
+                    for (Map.Entry<String, EvaluationResult> subjectEntry : subjectResults.entrySet()) {
+                        String subjectId = subjectEntry.getKey();
+                        EvaluationResult evaluationResult = subjectEntry.getValue();
+
+                        sb.append("    Subject: ").append(subjectId).append("\n");
+                        sb.append(EvaluationResultFormatter.format(evaluationResult, 3));
+                    }
+                }
+                sb.append("\n");
+            }
+        }
+
+        // Format errorsPerMeasure
+        sb.append("Errors Per Measure:\n");
+        if (errorsPerMeasure.isEmpty()) {
+            sb.append("  (none)\n");
+        } else {
+            for (Map.Entry<MeasureDef, List<String>> measureEntry : errorsPerMeasure.entrySet()) {
+                MeasureDef measureDef = measureEntry.getKey();
+                List<String> errors = measureEntry.getValue();
+
+                sb.append("  Measure ID: ").append(measureDef.id()).append("\n");
+                sb.append("  Measure URL: ")
+                        .append(measureDef.url() != null ? measureDef.url() : "(none)")
+                        .append("\n");
+
+                if (errors.isEmpty()) {
+                    sb.append("    (no errors)\n");
+                } else {
+                    for (String error : errors) {
+                        String truncatedError = error.length() > 20 ? error.substring(0, 20) + "..." : error;
+                        sb.append("    ").append(truncatedError).append("\n");
+                    }
+                }
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
+    }
+
     public static Builder builder() {
         return new Builder();
     }

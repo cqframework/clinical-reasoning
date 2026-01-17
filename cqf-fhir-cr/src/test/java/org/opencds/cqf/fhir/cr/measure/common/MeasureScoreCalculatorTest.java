@@ -135,6 +135,34 @@ class MeasureScoreCalculatorTest {
         assertEquals(0.5, score, 0.0001);
     }
 
+    @Test
+    void testCalculateRatioScore_NullNumerator() {
+        // Test with null numerator - should return null
+        assertNull(MeasureScoreCalculator.calculateRatioScore(null, 50.0), "Should return null when numerator is null");
+    }
+
+    @Test
+    void testCalculateRatioScore_NullDenominator() {
+        // Test with null denominator - should return null
+        assertNull(
+                MeasureScoreCalculator.calculateRatioScore(100.0, null), "Should return null when denominator is null");
+    }
+
+    @Test
+    void testCalculateRatioScore_BothNull() {
+        // Test with both null - should return null
+        assertNull(
+                MeasureScoreCalculator.calculateRatioScore(null, null),
+                "Should return null when both parameters are null");
+    }
+
+    @Test
+    void testCalculateRatioScore_NullNumeratorWithZeroDenominator() {
+        // Test with null numerator and zero denominator - should return null
+        Double score = MeasureScoreCalculator.calculateRatioScore(null, 0.0);
+        assertNull(score, "Should return null when numerator is null even if denominator is zero");
+    }
+
     // ========== aggregateContinuousVariable Tests ==========
 
     @Test

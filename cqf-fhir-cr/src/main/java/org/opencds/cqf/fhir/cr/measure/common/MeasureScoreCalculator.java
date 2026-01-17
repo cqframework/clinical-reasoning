@@ -126,7 +126,12 @@ public class MeasureScoreCalculator {
      * @param denominatorAggregate Aggregated denominator observation value
      * @return The calculated score, or {@code null} if denominator is 0, or {@code 0.0} if numerator is 0
      */
-    public static Double calculateRatioScore(double numeratorAggregate, double denominatorAggregate) {
+    @Nullable
+    public static Double calculateRatioScore(Double numeratorAggregate, Double denominatorAggregate) {
+        if (numeratorAggregate == null || denominatorAggregate == null) {
+            return null;
+        }
+
         // Handle zero or null denominator
         if (denominatorAggregate == 0.0) {
             return null;

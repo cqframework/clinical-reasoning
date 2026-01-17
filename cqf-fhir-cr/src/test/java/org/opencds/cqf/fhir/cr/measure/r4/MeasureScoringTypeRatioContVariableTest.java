@@ -1115,7 +1115,9 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationById("observation-den")
                 .hasType(MeasurePopulationType.MEASUREOBSERVATION)
                 .hasCount(2)
-                .hasNoAggregationResult()
+                // If there's no numerator, we still want to capture the aggregate result
+                .hasAggregationResult(210.0)
+                .hasAggregateMethod(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .populationById("observation-num")
                 .hasType(MeasurePopulationType.MEASUREOBSERVATION)
@@ -1154,8 +1156,8 @@ class MeasureScoringTypeRatioContVariableTest {
                 .populationId("observation-den")
                 .hasCode(MeasurePopulationType.MEASUREOBSERVATION)
                 .hasCount(2) // we remove exclusions in these counts so users can see final Observation count used
-                .hasNoAggregationResultsExtensionValue()
-                .hasNoAggregateMethodExtension()
+                .hasAggregationResultsExtensionValue(210.0)
+                .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .populationId("observation-num")
                 .hasCode(MeasurePopulationType.MEASUREOBSERVATION)

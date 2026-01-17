@@ -1068,6 +1068,230 @@ class MeasureReportDefScorerTest {
     }
 
     @Test
+    void testScoreGroup_RatioWithObservations_NullNumeratorPopulation() {
+        // Setup: RATIO measure where numerator population is not found (null)
+        // Should still set aggregation result for denominator
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
+
+        // Create DENOMINATOR population WITHOUT a matching NUMERATOR population
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
+
+        // Create only denominator MEASUREOBSERVATION (no numerator reference)
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                booleanBasis,
+                "den-1", // criteriaReference to DENOMINATOR population
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Add denominator observations
+        Map<String, QuantityDef> denObs1 = new HashMap<>();
+        denObs1.put("obs-den-1", new QuantityDef(5.0));
+        denominatorMeasureObs.addResource("p1", denObs1);
+
+        Map<String, QuantityDef> denObs2 = new HashMap<>();
+        denObs2.put("obs-den-2", new QuantityDef(10.0));
+        denominatorMeasureObs.addResource("p2", denObs2);
+
+        Map<String, QuantityDef> denObs3 = new HashMap<>();
+        denObs3.put("obs-den-3", new QuantityDef(15.0));
+        denominatorMeasureObs.addResource("p3", denObs3);
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Ratio with Null Numerator"),
+                List.of(),
+                List.of(initialPopulation, denominatorPop, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        assertNull(groupDef.getScore());
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-null-num", groupDef);
+
+        // VERIFY: Denominator aggregation result IS set even though numerator is null
+        assertNotNull(denominatorMeasureObs.getAggregationResult());
+        assertEquals(30.0, denominatorMeasureObs.getAggregationResult(), 0.001); // 5+10+15
+
+        // VERIFY: Score is null (because numerator is null)
+        assertNull(groupDef.getScore());
+    }
+
+    @Test
+    void testScoreGroup_RatioWithObservations_NullDenominatorPopulation() {
+        // Setup: RATIO measure where denominator population is not found (null)
+        // Should still set aggregation result for numerator
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
+
+        // Create NUMERATOR population WITHOUT a matching DENOMINATOR population
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"), booleanBasis);
+
+        // Create only numerator MEASUREOBSERVATION (no denominator reference)
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                booleanBasis,
+                "num-1", // criteriaReference to NUMERATOR population
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Add numerator observations
+        Map<String, QuantityDef> numObs1 = new HashMap<>();
+        numObs1.put("obs-num-1", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p1", numObs1);
+
+        Map<String, QuantityDef> numObs2 = new HashMap<>();
+        numObs2.put("obs-num-2", new QuantityDef(20.0));
+        numeratorMeasureObs.addResource("p2", numObs2);
+
+        Map<String, QuantityDef> numObs3 = new HashMap<>();
+        numObs3.put("obs-num-3", new QuantityDef(30.0));
+        numeratorMeasureObs.addResource("p3", numObs3);
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Ratio with Null Denominator"),
+                List.of(),
+                List.of(initialPopulation, numeratorPop, numeratorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        assertNull(groupDef.getScore());
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-null-den", groupDef);
+
+        // VERIFY: Numerator aggregation result IS set even though denominator is null
+        assertNotNull(numeratorMeasureObs.getAggregationResult());
+        assertEquals(60.0, numeratorMeasureObs.getAggregationResult(), 0.001); // 10+20+30
+
+        // VERIFY: Score is null (because denominator is null)
+        assertNull(groupDef.getScore());
+    }
+
+    @Test
+    void testScoreGroup_RatioWithObservations_BothPopulationsNull() {
+        // Setup: RATIO measure where both numerator and denominator populations are not found
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), booleanBasis);
+
+        // Create MEASUREOBSERVATION without any matching NUMERATOR or DENOMINATOR populations
+        ConceptDef obsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObs = new PopulationDef(
+                "obs-1",
+                obsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "Expression",
+                booleanBasis,
+                "nonexistent-1", // No matching population
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Ratio with Both Null"),
+                List.of(),
+                List.of(initialPopulation, measureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        assertNull(groupDef.getScore());
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-both-null", groupDef);
+
+        // VERIFY: No aggregation results are set (both populations null)
+        assertNull(measureObs.getAggregationResult());
+
+        // VERIFY: Score is null
+        assertNull(groupDef.getScore());
+    }
+
+    @Test
+    void testScoreGroup_RatioWithObservations_NullAggregateForNumerator() {
+        // Setup: RATIO measure where numerator aggregate calculation returns null
+        // (e.g., no observations for numerator)
+        // Should still set denominator aggregation result
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), booleanBasis);
+
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
+
+        // Numerator MEASUREOBSERVATION with NO observations
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                booleanBasis,
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+        // No observations added - will result in null aggregate
+
+        // Denominator MEASUREOBSERVATION with observations
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                booleanBasis,
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        Map<String, QuantityDef> denObs1 = new HashMap<>();
+        denObs1.put("obs-den-1", new QuantityDef(10.0));
+        denominatorMeasureObs.addResource("p1", denObs1);
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Ratio with Null Numerator Aggregate"),
+                List.of(),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-null-num-agg", groupDef);
+
+        // VERIFY: Numerator aggregation result is null (no observations)
+        assertNull(numeratorMeasureObs.getAggregationResult());
+
+        // VERIFY: Denominator aggregation result IS set
+        assertNotNull(denominatorMeasureObs.getAggregationResult());
+        assertEquals(10.0, denominatorMeasureObs.getAggregationResult(), 0.001);
+
+        // VERIFY: Score is null (because numerator aggregate is null)
+        assertNull(groupDef.getScore());
+    }
+
+    @Test
     void testScoreGroup_RatioWithObservations_AvgAggregation() {
         // Setup: RATIO measure with AVG aggregation (not SUM)
         // Numerator obs: 10, 20, 30 → AVG = 20.0

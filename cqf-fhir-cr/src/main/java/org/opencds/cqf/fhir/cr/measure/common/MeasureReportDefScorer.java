@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -178,37 +179,33 @@ public class MeasureReportDefScorer {
         var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
         // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef =
+        final PopulationDef numeratorPopulation =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef =
+        final PopulationDef denominatorPopulation =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
 
-        if (numPopDef == null || denPopDef == null) {
-            return null;
-        }
-
         // Calculate aggregate quantities for numerator and denominator
-        QuantityDef numeratorAgg = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
-        QuantityDef denominatorAgg = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denPopDef, PopulationDef::getAllSubjectResources);
+        final QuantityDef numeratorAggregate = calculateContinuousVariableAggregateQuantity(
+                measureUrl, numeratorPopulation, PopulationDef::getAllSubjectResources);
+        final QuantityDef denominatorAggregate = calculateContinuousVariableAggregateQuantity(
+                measureUrl, denominatorPopulation, PopulationDef::getAllSubjectResources);
 
-        if (numeratorAgg == null || denominatorAgg == null) {
+        // If there's no numerator or not denominator result, we still want to capture the
+        // other result
+        setAggregateResultIfPopNonNull(numeratorPopulation, numeratorAggregate);
+        setAggregateResultIfPopNonNull(denominatorPopulation, denominatorAggregate);
+
+        if (numeratorAggregate == null || denominatorAggregate == null) {
             return null;
         }
 
-        Double aggregatedResultNumerator = numeratorAgg.value();
-        Double aggregatedResultDenominator = denominatorAgg.value();
+        return MeasureScoreCalculator.calculateRatioScore(numeratorAggregate.value(), denominatorAggregate.value());
+    }
 
-        if (aggregatedResultNumerator == null || aggregatedResultDenominator == null) {
-            return null;
-        }
-
-        numPopDef.setAggregationResult(aggregatedResultNumerator);
-        denPopDef.setAggregationResult(aggregatedResultDenominator);
-
-        // Delegate ratio scoring to MeasureScoreCalculator
-        return MeasureScoreCalculator.calculateRatioScore(aggregatedResultNumerator, aggregatedResultDenominator);
+    private static void setAggregateResultIfPopNonNull(@Nullable PopulationDef populationDef, QuantityDef quantityDef) {
+        Optional.ofNullable(populationDef).ifPresent(nonNullPopulationDef -> {
+            nonNullPopulationDef.setAggregationResult(quantityDef);
+        });
     }
 
     /**
@@ -511,7 +508,7 @@ public class MeasureReportDefScorer {
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
             String measureUrl,
-            PopulationDef populationDef,
+            @Nullable PopulationDef populationDef,
             Function<PopulationDef, Collection<Object>> popDefToResources) {
 
         if (populationDef == null) {

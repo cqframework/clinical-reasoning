@@ -202,12 +202,6 @@ public class MeasureReportDefScorer {
         return MeasureScoreCalculator.calculateRatioScore(numeratorAggregate.value(), denominatorAggregate.value());
     }
 
-    private static void setAggregateResultIfPopNonNull(@Nullable PopulationDef populationDef, QuantityDef quantityDef) {
-        Optional.ofNullable(populationDef).ifPresent(nonNullPopulationDef -> {
-            nonNullPopulationDef.setAggregationResult(quantityDef);
-        });
-    }
-
     /**
      * Score continuous variable measure - returns QuantityDef with aggregated value.
      * Simplified version of R4MeasureReportScorer#scoreContinuousVariable that just
@@ -534,6 +528,12 @@ public class MeasureReportDefScorer {
         // Delegate to MeasureScoreCalculator for collection and aggregation
         var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
         return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
+    }
+
+    private static void setAggregateResultIfPopNonNull(@Nullable PopulationDef populationDef, QuantityDef quantityDef) {
+        Optional.ofNullable(populationDef).ifPresent(nonNullPopulationDef -> {
+            nonNullPopulationDef.setAggregationResult(quantityDef);
+        });
     }
 
     /**

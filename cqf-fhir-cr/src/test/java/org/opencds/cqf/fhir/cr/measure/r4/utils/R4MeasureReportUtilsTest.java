@@ -748,11 +748,16 @@ class R4MeasureReportUtilsTest {
 
         R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, null, BigDecimal.valueOf(50.5), "");
 
-        // Assert neither extension is set when method is null
+        // Assert method and result extensions are not set when method is null, but criteriaReference is added
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNull(methodExt, "No method extension should be added when method is null");
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNull(resultExt, "No result extension should be added when method is null");
+
+        // criteriaReference should be added even when method is null
+        Extension criteriaRefExt = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt, "Criteria reference extension should be added even when method is null");
+        assertEquals("", ((StringType) criteriaRefExt.getValue()).getValue());
     }
 
     @Test
@@ -762,11 +767,16 @@ class R4MeasureReportUtilsTest {
         R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
                 population, ContinuousVariableObservationAggregateMethod.N_A, BigDecimal.valueOf(75.25), "");
 
-        // Assert neither extension is set when method is N_A
+        // Assert method and result extensions are not set when method is N_A, but criteriaReference is added
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNull(methodExt, "No method extension should be added when method is N_A");
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNull(resultExt, "No result extension should be added when method is N_A");
+
+        // criteriaReference should be added even when method is N_A
+        Extension criteriaRefExt = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt, "Criteria reference extension should be added even when method is N_A");
+        assertEquals("", ((StringType) criteriaRefExt.getValue()).getValue());
     }
 
     @Test
@@ -929,11 +939,16 @@ class R4MeasureReportUtilsTest {
         R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
                 population, (ContinuousVariableObservationAggregateMethod) null, 1.6, "");
 
-        // Assert neither extension is set when method is null
+        // Assert method and result extensions are not set when method is null, but criteriaReference is added
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNull(methodExt, "No method extension should be added when method is null");
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNull(resultExt, "No result extension should be added when method is null");
+
+        // criteriaReference should be added even when method is null
+        Extension criteriaRefExt = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt, "Criteria reference extension should be added even when method is null");
+        assertEquals("", ((StringType) criteriaRefExt.getValue()).getValue());
     }
 
     @Test
@@ -943,11 +958,16 @@ class R4MeasureReportUtilsTest {
         R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
                 population, ContinuousVariableObservationAggregateMethod.N_A, 1.7, "");
 
-        // Assert neither extension is set when method is N_A
+        // Assert method and result extensions are not set when method is N_A, but criteriaReference is added
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNull(methodExt, "No method extension should be added when method is N_A");
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNull(resultExt, "No result extension should be added when method is N_A");
+
+        // criteriaReference should be added even when method is N_A
+        Extension criteriaRefExt = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt, "Criteria reference extension should be added even when method is N_A");
+        assertEquals("", ((StringType) criteriaRefExt.getValue()).getValue());
     }
 
     @Test
@@ -957,11 +977,16 @@ class R4MeasureReportUtilsTest {
         R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
                 population, ContinuousVariableObservationAggregateMethod.AVG, (Double) null, "");
 
-        // Assert neither extension is set when result is null
+        // Assert method and result extensions are not set when result is null, but criteriaReference is added
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNull(methodExt, "No method extension should be added when result is null");
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNull(resultExt, "No result extension should be added when result is null");
+
+        // criteriaReference should be added even when result is null
+        Extension criteriaRefExt = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt, "Criteria reference extension should be added even when result is null");
+        assertEquals("", ((StringType) criteriaRefExt.getValue()).getValue());
     }
 
     // ========================================

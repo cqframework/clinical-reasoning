@@ -431,15 +431,17 @@ public class R4MeasureReportUtils {
             @Nullable Double aggregationResult,
             @Nullable String criteriaReference) {
 
+        // We always copy the criteriaReference, even if there are no results
+        if (criteriaReference != null) {
+            addCriteriaReferenceInner(measurePopulation, criteriaReference);
+        }
+
         if (aggregateMethod != null
                 && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
                 && aggregationResult != null) {
 
             addAggregateMethodInner(measurePopulation, aggregateMethod);
             addAggregationResultInner(measurePopulation, aggregationResult);
-            if (criteriaReference != null) {
-                addCriteriaReferenceInner(measurePopulation, criteriaReference);
-            }
         }
     }
 

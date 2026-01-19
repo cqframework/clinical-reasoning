@@ -39,4 +39,16 @@ class InvalidMeasureTest {
         var e = assertThrows(IllegalStateException.class, when::then);
         assertTrue(e.getMessage().contains("Unable to load CQL/ELM for libraries"));
     }
+
+    @Test
+    void evaluateThrowsErrorWithDuplicatePopulationIds() {
+        var when = GIVEN_INVALID_MEASURE_REPO
+                .when()
+                .measureId("DuplicatePopulationIds")
+                .evaluate();
+        var e = assertThrows(InvalidRequestException.class, when::then);
+        assertTrue(e.getMessage().contains("Duplicate population ID"));
+        assertTrue(e.getMessage().contains("initial-population"));
+        assertTrue(e.getMessage().contains("group-1"));
+    }
 }

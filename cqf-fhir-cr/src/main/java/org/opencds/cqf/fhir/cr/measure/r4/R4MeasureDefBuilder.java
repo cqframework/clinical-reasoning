@@ -12,8 +12,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -337,6 +339,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         checkId(measure);
 
+        // Validate unique population IDs within each group
+        validateUniquePopulationIds(measure);
+
         // SDES
         for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
             checkId(s);
@@ -386,6 +391,37 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private static void checkId(Resource r) {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
             throw new InvalidRequestException("id is required on all Resources of type: " + r.fhirType());
+        }
+    }
+
+    /**
+     * Validates that all population IDs within each group are unique.
+     *
+     * @param measure the Measure to validate
+     * @throws InvalidRequestException if duplicate population IDs exist within a group
+     */
+    private static void validateUniquePopulationIds(Measure measure) {
+        String measureIdentifier = measure.hasUrl() ? measure.getUrl() : measure.getId();
+
+        for (int groupIndex = 0; groupIndex < measure.getGroup().size(); groupIndex++) {
+            MeasureGroupComponent group = measure.getGroup().get(groupIndex);
+            String groupIdentifier = group.hasId() ? group.getId() : "group-" + (groupIndex + 1);
+
+            Set<String> seenPopulationIds = new HashSet<>();
+
+            for (MeasureGroupPopulationComponent population : group.getPopulation()) {
+                String populationId = population.getId();
+
+                // Skip null/blank IDs - they will be caught by checkId() validation
+                if (populationId == null || populationId.isBlank()) {
+                    continue;
+                }
+
+                if (!seenPopulationIds.add(populationId)) {
+                    throw new InvalidRequestException("Duplicate population ID '%s' found in %s of Measure: %s"
+                            .formatted(populationId, groupIdentifier, measureIdentifier));
+                }
+            }
         }
     }
 

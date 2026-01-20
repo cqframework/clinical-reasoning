@@ -395,7 +395,7 @@ public interface INpmBackedRepositoryTest {
     // TODO - we might want to put this into a test util if we're going to use it over and over
     private void createPackage(
             Path tempDir, String pkgName, int resourceCount, Function<Integer, IBaseResource> resourceCreator)
-        throws IOException {
+            throws IOException {
         IParser parser = getFhirContext().newJsonParser();
 
         // create the default guide...

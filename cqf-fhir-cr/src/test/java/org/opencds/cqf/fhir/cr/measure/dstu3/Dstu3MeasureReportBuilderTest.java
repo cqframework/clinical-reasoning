@@ -52,7 +52,7 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Manually set a score on the first group
-        measureDef.groups().get(0).setScore(0.80);
+        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(0.80);
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
@@ -77,7 +77,7 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Explicitly set null score (or just don't set it)
-        measureDef.groups().get(0).setScore(null);
+        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(null);
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
@@ -98,7 +98,7 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Set negative score
-        measureDef.groups().get(0).setScore(-1.0);
+        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(-1.0);
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
@@ -269,7 +269,7 @@ class Dstu3MeasureReportBuilderTest {
                 List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "numerator")),
                 "numerator");
         PopulationDef numeratorPop =
-                new PopulationDef("num-1", numCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis);
+                new PopulationDef("num-1", numCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
         // Add resources with UNQUALIFIED IDs
         numeratorPop.addResource("patient-1", true);
         numeratorPop.addResource("patient-2", true);
@@ -279,8 +279,8 @@ class Dstu3MeasureReportBuilderTest {
         ConceptDef denCode = new ConceptDef(
                 List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "denominator")),
                 "denominator");
-        PopulationDef denominatorPop =
-                new PopulationDef("den-1", denCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis);
+        PopulationDef denominatorPop = new PopulationDef(
+                "den-1", denCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
         // Add resources with UNQUALIFIED IDs
         denominatorPop.addResource("patient-1", true);
         denominatorPop.addResource("patient-2", true);

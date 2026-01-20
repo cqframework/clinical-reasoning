@@ -95,7 +95,7 @@ public class GroupDef {
      * @return the first PopulationDef of the specified type if it has a non-null ID, or null otherwise
      */
     @Nullable
-    public PopulationDef getFirstWithId(MeasurePopulationType type) {
+    public PopulationDef getFirstWithTypeAndNonNullId(MeasurePopulationType type) {
         return this.getPopulationDefs(type).stream()
                 .findFirst()
                 .filter(pop -> pop.id() != null)
@@ -132,7 +132,7 @@ public class GroupDef {
     public PopulationDef findRatioObservationPopulationDef(
             List<PopulationDef> measureObservationPopulationDefs, MeasurePopulationType targetType) {
 
-        PopulationDef referencedPopulation = this.getFirstWithId(targetType);
+        PopulationDef referencedPopulation = this.getFirstWithTypeAndNonNullId(targetType);
         if (referencedPopulation == null) {
             return null;
         }
@@ -195,7 +195,6 @@ public class GroupDef {
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-03
      * Get the computed score for this group.
      * Used by version-agnostic MeasureDefScorer.
      *
@@ -205,42 +204,13 @@ public class GroupDef {
         return this.score;
     }
 
-    /**
-     * Added by Claude Sonnet 4.5 on 2025-12-03
-     * Set the computed score for this group.
-     * Used by version-agnostic MeasureDefScorer to store computed scores.
-     *
-     * @param score the computed score
-     */
-    public void setScore(Double score) {
-        this.score = score;
-    }
-
-    /**
-     * Added by Claude Sonnet 4.5 on 2025-12-03
-     * Get the measure score adjusted for improvement notation.
-     * <p>
-     * Similar to R4MeasureReportScorer#scoreGroup(Double, boolean, MeasureReportGroupComponent),
-     * this method:
-     * <ul>
-     *   <li>Returns null if score is null</li>
-     *   <li>Returns null if score is negative (invalid score scenario)</li>
-     *   <li>Returns score as-is if improvement notation is "increase"</li>
-     *   <li>Returns (1 - score) if improvement notation is "decrease"</li>
-     * </ul>
-     *
-     * @return the adjusted score, or null if score is null or negative
-     */
-    public Double getMeasureScore() {
-        // When applySetMembership=false, this value can receive strange values
-        // This should prevent scoring in certain scenarios like <0
-        if (this.score != null && this.score >= 0) {
-            if (isIncreaseImprovementNotation()) {
-                return this.score;
-            } else {
-                return 1 - this.score;
-            }
+    public void setScoreAndAdaptToImprovementNotation(Double originalScore) {
+        if ((MeasureScoring.RATIO == measureScoring && hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
+                || MeasureScoring.PROPORTION == measureScoring) {
+            this.score = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                    originalScore, isIncreaseImprovementNotation());
+        } else {
+            this.score = originalScore;
         }
-        return null;
     }
 }

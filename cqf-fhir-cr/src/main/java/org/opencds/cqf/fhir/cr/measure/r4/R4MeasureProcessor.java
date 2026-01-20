@@ -52,6 +52,7 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureProcessorUtils measureProcessorUtils;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
+    private final MeasureEvaluationResultHandler measureEvaluationResultHandler;
 
     public R4MeasureProcessor(
             IRepository repository,
@@ -62,6 +63,8 @@ public class R4MeasureProcessor {
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.measureProcessorUtils = measureProcessorUtils;
+        this.measureEvaluationResultHandler =
+                new MeasureEvaluationResultHandler(this.measureEvaluationOptions, new R4PopulationBasisValidator());
     }
 
     // Expose this so CQL measure evaluation can use the same Repository as the one passed to the
@@ -108,7 +111,7 @@ public class R4MeasureProcessor {
             @Nonnull List<String> subjectIds,
             @Nonnull Map<String, EvaluationResult> results) {
 
-        return evaluateMeasureCaptureDefs(measure, periodStart, periodEnd, reportType, subjectIds, results)
+        return evaluateMeasureCaptureDef(measure, periodStart, periodEnd, reportType, subjectIds, results)
                 .measureReport();
     }
 
@@ -132,7 +135,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        return evaluateMeasureCaptureDefs(
+        return evaluateMeasureCaptureDef(
                         measure,
                         periodStart,
                         periodEnd,
@@ -164,7 +167,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -182,13 +185,7 @@ public class R4MeasureProcessor {
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
         // Process Criteria Expression Results
-        MeasureEvaluationResultHandler.processResults(
-                fhirContext,
-                results,
-                measureDef,
-                evaluationType,
-                this.measureEvaluationOptions.getApplyScoringSetMembership(),
-                new R4PopulationBasisValidator());
+        measureEvaluationResultHandler.processResults(fhirContext, results, measureDef, evaluationType);
 
         // Build Measure Report with Results
         MeasureReport measureReport = new R4MeasureReportBuilder()
@@ -222,7 +219,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Measure measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -240,13 +237,7 @@ public class R4MeasureProcessor {
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
-        MeasureEvaluationResultHandler.processResults(
-                fhirContext,
-                resultForThisMeasure,
-                measureDef,
-                evaluationType,
-                this.measureEvaluationOptions.getApplyScoringSetMembership(),
-                new R4PopulationBasisValidator());
+        measureEvaluationResultHandler.processResults(fhirContext, resultForThisMeasure, measureDef, evaluationType);
 
         var measurementPeriod = measureProcessorUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
@@ -283,7 +274,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
+    MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Either3<CanonicalType, IdType, Measure> measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
@@ -293,7 +284,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        return evaluateMeasureCaptureDefs(
+        return evaluateMeasureCaptureDef(
                 R4MeasureServiceUtils.foldMeasure(measure, this.repository),
                 periodStart,
                 periodEnd,

@@ -496,6 +496,50 @@ class MeasureStratifierTest {
                 .hasCount(1);
     }
 
+    /*
+    This test proves that if measure evaluation returns empty stratum results that we'll no longer
+    get error:  criteria-based stratifier is invalid for expression: ...
+     */
+    @Test
+    void cohortEncounterCriteriaStratSinglePatientSingleEncounterZeroResultsOutsideOfPeriodNoError() {
+        GIVEN_CRITERIA_BASED_STRAT_COMPLEX
+                .when()
+                .measureId("CriteriaBasedStratifiersComplex")
+                .periodStart("2024-02-11")
+                .periodEnd("2024-12-31")
+                .evaluate()
+                .then()
+                .hasGroupCount(1)
+                .firstGroup()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(11)
+                .up()
+                .population("denominator")
+                .hasCount(8)
+                .up()
+                .population("numerator")
+                // due to apply scoring, we keep only those numerator encounters that are also in the denominator
+                .hasCount(5)
+                .up()
+                .hasMeasureScore(true)
+                .hasScore("0.625")
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("Encounters in Period")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(3)
+                .population("initial-population")
+                .hasCount(0)
+                .up()
+                .population("denominator")
+                .hasCount(0)
+                .up()
+                .population("numerator")
+                .hasCount(0);
+    }
+
     @Test
     void cohortResourceCriteriaStratSingleBadExpressionForValueInvalid() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE

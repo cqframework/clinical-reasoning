@@ -22,6 +22,8 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Validates group populations and stratifiers against population basis-es for R4 only.
@@ -48,6 +50,8 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             // CQL type returned by some stratifier expression that don't map neatly to FHIR types
             Code.class));
 
+    private static final Logger log = LoggerFactory.getLogger(R4PopulationBasisValidator.class);
+
     @Override
     public void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
         groupDef.populations()
@@ -69,13 +73,17 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         var scoring = groupDef.measureScoring();
         // Numerator
         var populationExpression = populationDef.expression();
-        var expressionResult = evaluationResult.forExpression(populationDef.expression());
-
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (populationExpression == null || populationExpression.isBlank()) {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
+        var expressionResult = evaluationResult.get(populationExpression);
+
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            return;
+        }
+
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.getValue());
         // Encounter
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
@@ -119,16 +127,21 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             EvaluationResult evaluationResult,
             String url) {
 
-        var expressionResult = evaluationResult.forExpression(expression);
+        var expressionResult = evaluationResult.get(expression);
 
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (expressionResult == null || expressionResult.getValue() == null) {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.value());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.getValue());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
         if (stratifierDef.isCriteriaStratifier()) {
+            if (resultClasses.isEmpty()) {
+                log.warn("Criteria-based stratifier results are empty for measure: {}", url);
+                return;
+            }
+
             if (resultClasses.stream()
                     .map(Class::getSimpleName)
                     .noneMatch(simpleName -> simpleName.equals(groupPopulationBasisCode))) {

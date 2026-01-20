@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -458,6 +459,7 @@ class R4PopulationBasisValidatorTest {
                 resolveExpressionFor(measurePopulationType),
                 basis.codeDef,
                 null,
+                null,
                 null);
     }
 
@@ -481,22 +483,20 @@ class R4PopulationBasisValidatorTest {
     private static EvaluationResult buildEvaluationResult(Map<String, Object> expressionResultMap) {
         final EvaluationResult evaluationResult = new EvaluationResult();
         expressionResultMap.forEach((key, value) ->
-                evaluationResult.getExpressionResults().put(key, new ExpressionResult(value, Set.of())));
+                evaluationResult.set(new EvaluationExpressionRef(key), new ExpressionResult(value, Set.of())));
         return evaluationResult;
     }
 
     @Nonnull
     private static EvaluationResult buildEvaluationResult(Object expressionResult) {
         final EvaluationResult evaluationResult = new EvaluationResult();
-        evaluationResult
-                .getExpressionResults()
-                .put(EXPRESSION_INITIALPOPULATION, new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult
-                .getExpressionResults()
-                .put(EXPRESSION_DENOMINATOR, new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult
-                .getExpressionResults()
-                .put(EXPRESSION_NUMERATOR, new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult.set(
+                new EvaluationExpressionRef(EXPRESSION_INITIALPOPULATION),
+                new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult.set(
+                new EvaluationExpressionRef(EXPRESSION_DENOMINATOR), new ExpressionResult(expressionResult, Set.of()));
+        evaluationResult.set(
+                new EvaluationExpressionRef(EXPRESSION_NUMERATOR), new ExpressionResult(expressionResult, Set.of()));
         return evaluationResult;
     }
 }

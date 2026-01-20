@@ -30,7 +30,8 @@ public class MeasureConstants {
     // http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html
     public static final String EXT_SDE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
-
+    public static final String EXT_SUPPORTING_EVIDENCE_DEFINITION_URL =
+            "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-criteriaReference.html
     public static final String EXT_CRITERIA_REFERENCE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";
@@ -47,4 +48,9 @@ public class MeasureConstants {
     public static final String FHIR_ALL_TYPES_SYSTEM_URL = "http://hl7.org/fhir/fhir-types";
     public static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
+
+    // Capture the numerator or denominator aggregation result in the population
+    public static final String EXT_AGGREGATION_METHOD_RESULT =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/extension-aggregationMethodResult";
+    public static final String EXT_CQF_EXPRESSION_CODE = "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode";
 }

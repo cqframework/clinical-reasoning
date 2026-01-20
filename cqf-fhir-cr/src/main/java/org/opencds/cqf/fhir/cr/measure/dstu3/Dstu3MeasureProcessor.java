@@ -44,6 +44,7 @@ public class Dstu3MeasureProcessor {
     private final SubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+    private final MeasureEvaluationResultHandler measureEvaluationResultHandler;
 
     public Dstu3MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
@@ -57,6 +58,8 @@ public class Dstu3MeasureProcessor {
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
+        this.measureEvaluationResultHandler =
+                new MeasureEvaluationResultHandler(this.measureEvaluationOptions, new Dstu3PopulationBasisValidator());
     }
 
     public MeasureReport evaluateMeasure(
@@ -190,13 +193,8 @@ public class Dstu3MeasureProcessor {
                     subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
 
             // Process Criteria Expression Results
-            MeasureEvaluationResultHandler.processResults(
-                    fhirContext,
-                    results.processMeasureForSuccessOrFailure(measureDef),
-                    measureDef,
-                    evalType,
-                    measureEvaluationOptions.getApplyScoringSetMembership(),
-                    new Dstu3PopulationBasisValidator());
+            measureEvaluationResultHandler.processResults(
+                    fhirContext, results.processMeasureForSuccessOrFailure(measureDef), measureDef, evalType);
         }
 
         // Build Measure Report with Results

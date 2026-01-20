@@ -101,19 +101,19 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult,
             Set<Object> outEvaluatedResources) {
 
-        if (expressionResult != null && !expressionResult.evaluatedResources().isEmpty()) {
-            outEvaluatedResources.addAll(expressionResult.evaluatedResources());
+        if (expressionResult != null
+                && !expressionResult.getEvaluatedResources().isEmpty()) {
+            outEvaluatedResources.addAll(expressionResult.getEvaluatedResources());
         }
 
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (expressionResult == null || expressionResult.getValue() == null) {
             return Collections.emptyList();
         }
 
-        if (expressionResult.value() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.value()))) {
+        if (expressionResult.getValue() instanceof Boolean) {
+            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult =
-                        evaluationResult.forExpression(subjectType).value();
+                Object booleanResult = evaluationResult.get(subjectType).getValue();
                 // remove evaluated resources
                 return Collections.singletonList(booleanResult);
             } else {
@@ -122,12 +122,31 @@ public class MeasureEvaluator {
             }
         }
 
-        Object value = expressionResult.value();
+        Object value = expressionResult.getValue();
         if (value instanceof Iterable<?>) {
             return (Iterable<Object>) value;
         } else {
             return Collections.singletonList(value);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
+
+        // Case 1 — true null
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            return null; // need to preserve result
+        }
+
+        Object value = expressionResult.getValue();
+
+        // Case 2 — list
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value; // may be empty or not
+        }
+
+        // Case 3 — scalar
+        return List.of(value);
     }
 
     protected PopulationDef evaluatePopulationMembership(
@@ -147,9 +166,9 @@ public class MeasureEvaluator {
         ExpressionResult matchingResult;
         if (expression == null || expression.isEmpty()) {
             // find matching expression
-            matchingResult = evaluationResult.forExpression(inclusionDef.expression());
+            matchingResult = evaluationResult.get(inclusionDef.expression());
         } else {
-            matchingResult = evaluationResult.forExpression(expression);
+            matchingResult = evaluationResult.get(expression);
         }
 
         // Add Resources from SubjectId
@@ -302,6 +321,9 @@ public class MeasureEvaluator {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             dateOfCompliance.addResource(subjectId, doc);
         }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
         // Ratio Cont Variable Scoring
         if (observationNum != null && observationDen != null) {
             // Num alignment
@@ -335,6 +357,28 @@ public class MeasureEvaluator {
         }
     }
 
+    protected void populateSupportingEvidence(
+            PopulationDef populationDef,
+            MeasureReportType reportType,
+            EvaluationResult evaluationResult,
+            String subjectId) {
+        // only enabled for subject level reports
+        if (reportType == MeasureReportType.INDIVIDUAL
+                && !CollectionUtils.isEmpty(populationDef.getSupportingEvidenceDefs())) {
+            var extDef = populationDef.getSupportingEvidenceDefs();
+            for (SupportingEvidenceDef e : extDef) {
+                var result = evaluationResult.get(e.getExpression());
+                if (result == null) {
+                    throw new InvalidRequestException(
+                            "Supporting Evidence defined expression: '%s', is not found in Evaluation Results"
+                                    .formatted(e.getExpression()));
+                }
+                var object = evaluateSupportingCriteria(result);
+                e.addResource(subjectId, object);
+            }
+        }
+    }
+
     protected String getCriteriaExpressionName(PopulationDef populationDef) {
         return populationDef.getCriteriaReference() + "-" + populationDef.expression();
     }
@@ -344,7 +388,8 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            boolean applyScoring,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
@@ -393,6 +438,9 @@ public class MeasureEvaluator {
                             measurePopulationObservation.getSubjectResources());
                 }
             }
+        }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
         }
     }
     /**
@@ -595,13 +643,22 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+
+        // supporting evidence
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
     }
 
     protected void evaluateGroup(
@@ -624,28 +681,29 @@ public class MeasureEvaluator {
                 evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateContinuousVariable(
+                        groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, reportType);
                 break;
         }
     }
 
     protected Object evaluateDateOfCompliance(PopulationDef populationDef, EvaluationResult evaluationResult) {
-        return evaluationResult.forExpression(populationDef.expression()).value();
+        return evaluationResult.get(populationDef.expression()).getValue();
     }
 
     protected void evaluateSdes(String subjectId, List<SdeDef> sdes, EvaluationResult evaluationResult) {
         for (SdeDef sde : sdes) {
-            var expressionResult = evaluationResult.forExpression(sde.expression());
-            Object result = expressionResult.value();
+            var expressionResult = evaluationResult.get(sde.expression());
+            Object result = expressionResult.getValue();
             // TODO: This is a hack-around for an cql engine bug. Need to investigate.
             if ((result instanceof List<?> list) && (list.size() == 1) && list.get(0) == null) {
                 result = null;
             }
 
-            sde.putResult(subjectId, result, expressionResult.evaluatedResources());
+            sde.putResult(subjectId, result, expressionResult.getEvaluatedResources());
         }
     }
 
@@ -674,9 +732,9 @@ public class MeasureEvaluator {
             List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
 
         for (StratifierComponentDef component : components) {
-            var expressionResult = evaluationResult.forExpression(component.expression());
+            var expressionResult = evaluationResult.get(component.expression());
 
-            if (expressionResult == null || expressionResult.value() == null) {
+            if (expressionResult == null || expressionResult.getValue() == null) {
                 logger.warn(
                         "Stratifier component expression '{}' returned null result for subject '{}'",
                         component.expression(),
@@ -684,7 +742,7 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            component.putResult(subjectId, expressionResult.value(), expressionResult.evaluatedResources());
+            component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
         }
     }
 
@@ -696,9 +754,9 @@ public class MeasureEvaluator {
     void addStratifierNonComponentResult(
             String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
-        var expressionResult = evaluationResult.forExpression(stratifierDef.expression());
+        var expressionResult = evaluationResult.get(stratifierDef.expression());
 
-        if (expressionResult == null || expressionResult.value() == null) {
+        if (expressionResult == null || expressionResult.getValue() == null) {
             logger.warn(
                     "Stratifier expression '{}' returned null result for subject '{}'",
                     stratifierDef.expression(),
@@ -706,6 +764,6 @@ public class MeasureEvaluator {
             return;
         }
 
-        stratifierDef.putResult(subjectId, expressionResult.value(), expressionResult.evaluatedResources());
+        stratifierDef.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
     }
 }

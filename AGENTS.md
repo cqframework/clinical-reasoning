@@ -156,6 +156,56 @@ This project supports multiple FHIR versions (DSTU3, R4, R5) through the adapter
 - **JSON Assertions**: Use `jsonassert` for comparing JSON structures
 - **Equality Tests**: Use `equalsverifier` for testing equals/hashCode contracts
 
+## Measure Scoring Architecture
+
+### MeasureReportDefScorer Integration (2025-12-16)
+
+The measure evaluation workflow uses a version-agnostic scorer that operates on Def objects:
+
+**Architecture:**
+- **MeasureReportDefScorer**: Version-agnostic scorer in `cqf-fhir-cr/measure/common/`
+- **MeasureEvaluationResultHandler**: Orchestrates scoring by calling MeasureReportDefScorer
+- **Builders**: R4/Dstu3MeasureReportBuilder copy scores from Def to FHIR MeasureReport via `copyScoresFromDef()`
+
+**Workflow:**
+1. Measure evaluation creates MeasureDef with populations
+2. MeasureEvaluationResultHandler calls `MeasureReportDefScorer.score()`
+3. Scorer iterates Def objects (GroupDef, StratifierDef, StratumDef) and sets scores
+4. Builder copies scores from Def objects to FHIR MeasureReport
+
+**Key Classes:**
+- `MeasureReportDefScorer` (common): Version-agnostic scoring logic (primary scorer)
+- `R4MeasureReportScorer` (r4): **Retained for external callers only** - internal usage deprecated as of 2025-12-16. Provides R4-specific helpers for stratifier population counts. A proper external API will be implemented in a future release.
+
+**Testing Pattern:**
+Tests use def/report dual structure to verify both internal state and FHIR output:
+```java
+.then()
+    // MeasureDef assertions (pre-scoring) - verify internal state
+    .def()
+        .hasNoErrors()
+        .firstGroup()
+            .population("numerator").hasCount(2).up()
+            .hasScore(0.25)  // numeric score
+        .up()
+    .up()
+    // MeasureReport assertions (post-scoring) - verify FHIR resource output
+    .report()
+        .firstGroup()
+            .population("numerator").hasCount(2).up()
+            .hasScore("0.25")  // string score
+        .up()
+    .report();
+```
+
+**Migration Notes (Old Scorer Removal):**
+- ❌ Old pattern: `measureReportScorer.score()` called in builders
+- ✅ New pattern: `copyScoresFromDef()` copies pre-computed scores from Def objects
+- The old R4/Dstu3 scorer fields and calls were removed from builders in Phase 2 (2025-12-16)
+- `Dstu3MeasureReportScorer` class deleted (2025-12-16) - no longer needed after MeasureReportDefScorer integration
+- `R4MeasureReportScorer` retained for external callers only - internal usage deprecated
+- Scoring now happens once in MeasureEvaluationResultHandler, not per-builder
+
 ## Dependencies
 
 Key dependencies (versions in parent pom.xml properties):

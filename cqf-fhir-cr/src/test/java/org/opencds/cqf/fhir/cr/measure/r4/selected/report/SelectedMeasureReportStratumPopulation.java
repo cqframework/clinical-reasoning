@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 
 public class SelectedMeasureReportStratumPopulation
@@ -34,6 +35,14 @@ public class SelectedMeasureReportStratumPopulation
      */
     public SelectedMeasureReportStratumPopulation hasNoStratumPopulationSubjectResults() {
         assertNull(value().getSubjectResults().getReference());
+        return this;
+    }
+
+    public SelectedMeasureReportStratumPopulation hasCode(MeasurePopulationType expectedMeasurePopulationType) {
+        assertNotNull(value());
+        assertEquals(
+                expectedMeasurePopulationType.toCode(),
+                value().getCode().getCodingFirstRep().getCode());
         return this;
     }
 }

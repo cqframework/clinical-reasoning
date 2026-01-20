@@ -170,13 +170,28 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        libraryAdapter.accept(packageVisitor, params);
+        var result = (Bundle) libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
-        assertTrue(libraryAdapter.hasContained());
-        assertTrue(libraryAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
-        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
-        assertEquals(oo.getIssueFirstRep().getDiagnostics(), expectedError);
+        // Get the Library from the result bundle to check for messages
+        Library bundledLibrary = result.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
+                .map(entry -> (Library) entry.getResource())
+                .filter(lib -> lib.getUrl().equals(library.getUrl()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(bundledLibrary, "Expected Library to be in the packaged bundle");
+        ILibraryAdapter bundledAdapter = new AdapterFactory().createLibrary(bundledLibrary);
+
+        assertTrue(bundledAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+        assertTrue(bundledAdapter.hasContained());
+        assertTrue(bundledAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
+        var oo = (OperationOutcome) bundledAdapter.getContained().get(0);
+
+        // Check that the expected error exists in the issues (may not be the first issue)
+        boolean foundExpectedError =
+                oo.getIssue().stream().anyMatch(issue -> issue.getDiagnostics().equals(expectedError));
+        assertTrue(foundExpectedError, "Expected to find issue with diagnostics: " + expectedError);
     }
 
     @Test
@@ -1291,6 +1306,93 @@ class PackageVisitorTests {
         assertTrue(packagedBundle.getEntry().stream()
                 .anyMatch(e -> e.getResource() instanceof ValueSet
                         && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/production-vs")));
+    void packageOperation_should_report_version_mismatch_and_exclude_resource() {
+        // Create a ValueSet with version "1.0.0"
+        ValueSet valueSet = new ValueSet();
+        valueSet.setId("test-valueset");
+        valueSet.setUrl("http://example.org/fhir/ValueSet/test-valueset");
+        valueSet.setVersion("1.0.0");
+        valueSet.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        valueSet.setName("TestValueSet");
+
+        // Create a Library that depends on version "2.0.0" of the same ValueSet
+        Library library = new Library();
+        library.setId("test-library");
+        library.setUrl("http://example.org/fhir/Library/test-library");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        library.setName("TestLibrary");
+        library.setType(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+                        .setCode("asset-collection")));
+
+        // Add a dependency on the ValueSet with the wrong version (2.0.0 instead of 1.0.0)
+        library.addRelatedArtifact()
+                .setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://example.org/fhir/ValueSet/test-valueset|2.0.0");
+
+        // Store resources in repository
+        repo.create(valueSet);
+        repo.create(library);
+
+        // Run package operation
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+
+        Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Verify the bundle was created
+        assertNotNull(packagedBundle);
+
+        // Verify the ValueSet is NOT in the packaged bundle (only the Library should be there)
+        long valueSetCount = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.ValueSet)
+                .count();
+        assertEquals(0, valueSetCount, "Expected ValueSet with wrong version to be excluded from package");
+
+        // Get the Library from the bundle (it has the messages, not the original libraryAdapter)
+        Library bundledLibrary = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
+                .map(entry -> (Library) entry.getResource())
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(bundledLibrary, "Expected Library to be in the packaged bundle");
+
+        // Create an adapter from the bundled library to check for messages
+        ILibraryAdapter bundledAdapter = new AdapterFactory().createLibrary(bundledLibrary);
+
+        // Verify that an error message was added to the OperationOutcome
+        assertTrue(
+                bundledAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL),
+                "Expected manifest adapter to have cqf-messages extension for version mismatch");
+        assertTrue(
+                bundledAdapter.hasContained(),
+                "Expected manifest adapter to contain an OperationOutcome for version mismatch");
+
+        var oo = (OperationOutcome) bundledAdapter.getContained().get(0);
+        String diagnostics = oo.getIssueFirstRep().getDiagnostics();
+
+        assertTrue(
+                diagnostics.contains("Requested version '2.0.0'"),
+                "Expected error message to mention requested version 2.0.0");
+        assertTrue(
+                diagnostics.contains("http://example.org/fhir/ValueSet/test-valueset"),
+                "Expected error message to mention the ValueSet URL");
+        assertTrue(
+                diagnostics.contains("not found in repository"),
+                "Expected error message to indicate version not found");
+        assertTrue(
+                diagnostics.contains("will not be included in package"),
+                "Expected error message to indicate resource exclusion");
+
+        // Verify the error severity is "error"
+        assertEquals(
+                OperationOutcome.IssueSeverity.ERROR,
+                oo.getIssueFirstRep().getSeverity(),
+                "Expected error severity for version mismatch");
     }
 
     /**

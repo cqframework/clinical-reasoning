@@ -130,40 +130,6 @@ class R4MeasureUtilsTest {
     }
 
     @Test
-    void testGetMeasureScoring_FromEnum_Proportion() {
-        CodeableConcept result = R4MeasureUtils.getMeasureScoring(MeasureScoring.PROPORTION);
-
-        assertNotNull(result);
-        assertNotNull(result.getCoding());
-        assertEquals(1, result.getCoding().size());
-        assertEquals("proportion", result.getCodingFirstRep().getCode());
-    }
-
-    @Test
-    void testGetMeasureScoring_FromEnum_Ratio() {
-        CodeableConcept result = R4MeasureUtils.getMeasureScoring(MeasureScoring.RATIO);
-
-        assertNotNull(result);
-        assertEquals("ratio", result.getCodingFirstRep().getCode());
-    }
-
-    @Test
-    void testGetMeasureScoring_FromEnum_ContinuousVariable() {
-        CodeableConcept result = R4MeasureUtils.getMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE);
-
-        assertNotNull(result);
-        assertEquals("continuous-variable", result.getCodingFirstRep().getCode());
-    }
-
-    @Test
-    void testGetMeasureScoring_FromEnum_Cohort() {
-        CodeableConcept result = R4MeasureUtils.getMeasureScoring(MeasureScoring.COHORT);
-
-        assertNotNull(result);
-        assertEquals("cohort", result.getCodingFirstRep().getCode());
-    }
-
-    @Test
     void testGetGroupMeasureScoring_WithExtension() {
         Measure measure = new Measure();
         measure.setUrl("http://example.com/Measure/test");
@@ -614,52 +580,6 @@ class R4MeasureUtilsTest {
 
         assertTrue(exception.getMessage().contains("Aggregation method: invalid-method is not a valid value"));
         assertTrue(exception.getMessage().contains(measureUrl));
-    }
-
-    // ========================================
-    // Tests for isRatioContinuousVariable
-    // ========================================
-
-    @Test
-    void testIsRatioContinuousVariable_WithMeasure_RatioWithAggregateMethod() {
-        Measure measure = createMeasureWithScoring("ratio");
-
-        MeasureGroupComponent group = new MeasureGroupComponent();
-        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
-        addAggregateMethodExtension(measureObs, "sum");
-        group.addPopulation(measureObs);
-
-        boolean result = R4MeasureUtils.isRatioContinuousVariable(measure, group);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void testIsRatioContinuousVariable_WithMeasure_RatioWithoutAggregateMethod() {
-        Measure measure = createMeasureWithScoring("ratio");
-
-        MeasureGroupComponent group = new MeasureGroupComponent();
-        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
-        // No aggregate method extension
-        group.addPopulation(measureObs);
-
-        boolean result = R4MeasureUtils.isRatioContinuousVariable(measure, group);
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testIsRatioContinuousVariable_WithMeasure_ProportionScoring() {
-        Measure measure = createMeasureWithScoring("proportion");
-
-        MeasureGroupComponent group = new MeasureGroupComponent();
-        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
-        addAggregateMethodExtension(measureObs, "sum");
-        group.addPopulation(measureObs);
-
-        boolean result = R4MeasureUtils.isRatioContinuousVariable(measure, group);
-
-        assertFalse(result);
     }
 
     @Test

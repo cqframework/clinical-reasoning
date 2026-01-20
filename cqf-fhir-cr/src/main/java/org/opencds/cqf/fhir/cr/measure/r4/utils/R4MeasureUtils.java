@@ -12,7 +12,6 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
@@ -76,11 +75,6 @@ public class R4MeasureUtils {
             }
         }
         return null;
-    }
-
-    // For testing:  map a MeasureScoring to a CodeableConcept to set on a Measure
-    public static CodeableConcept getMeasureScoring(MeasureScoring measureScoring) {
-        return new CodeableConcept().addCoding(new Coding().setCode(measureScoring.toCode()));
     }
 
     /**
@@ -270,18 +264,6 @@ public class R4MeasureUtils {
         }
 
         return ContinuousVariableObservationAggregateMethod.N_A;
-    }
-
-    /**
-     * Determine if a measure group is ratio continuous variable scoring.
-     *
-     * @param measure the Measure resource
-     * @param measureGroup the MeasureGroupComponent
-     * @return true if the group is ratio continuous variable
-     */
-    public static boolean isRatioContinuousVariable(Measure measure, MeasureGroupComponent measureGroup) {
-        MeasureScoring scoring = computeScoring(measure, measureGroup);
-        return isRatioContinuousVariable(scoring, measureGroup);
     }
 
     /**

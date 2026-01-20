@@ -19,6 +19,8 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -393,7 +395,7 @@ public interface INpmBackedRepositoryTest {
     // TODO - we might want to put this into a test util if we're going to use it over and over
     private void createPackage(
             Path tempDir, String pkgName, int resourceCount, Function<Integer, IBaseResource> resourceCreator)
-            throws IOException {
+        throws IOException {
         IParser parser = getFhirContext().newJsonParser();
 
         // create the default guide...
@@ -423,16 +425,22 @@ public interface INpmBackedRepositoryTest {
         }
 
         // create the package speck (package.json)
+        URI uri = null;
+        try {
+            uri = new URI("file://" + packagePath.toString());
+        } catch (URISyntaxException ex) {
+            fail(ex);
+        }
         String pkgJson = String.format(
                 """
             {
-                "packageUrl": "file://%s",
+                "packageUrl": "%s",
                 "name": "%s",
                 "version": "1.0.0",
                 "installMode": "STORE_ONLY"
             }
             """,
-                packagePath.toString(), pkgName);
+                uri, pkgName);
 
         File packagejson = new File(packagePath.toString(), "package.json");
         Files.writeString(packagejson.toPath(), pkgJson);

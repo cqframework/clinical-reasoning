@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.opencds.cqf.fhir.cr.common.ExtensionBuilders;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -411,6 +412,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
                     ensureResourceTypeExtension(getResourceType(dependency), newDep);
 
+                    // Add CRMI dependency management extensions
+                    addCrmiExtensionsToRelatedArtifact(
+                            newDep, dependency, artifactAdapter, dependencyAdapter, repository);
+
                     var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
                     updatedRelatedArtifacts.add(newDep);
                     rootAdapter.setRelatedArtifact(updatedRelatedArtifacts);
@@ -748,6 +753,70 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         boolean matchFound = matcher.find();
         if (!matchFound) {
             throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH");
+        }
+    }
+
+    /**
+     * Adds CRMI dependency management extensions to a RelatedArtifact element.
+     * <p>
+     * This method adds three types of extensions:
+     * <ul>
+     *   <li>crmi-dependencyRole: categorizes the dependency (key, default, example, test)</li>
+     *   <li>package-source: identifies which package supplied the dependency</li>
+     *   <li>crmi-referenceSource: tracks where the dependency was referenced</li>
+     * </ul>
+     *
+     * @param relatedArtifact the RelatedArtifact to add extensions to
+     * @param dependency the dependency information
+     * @param sourceArtifact the artifact that has this dependency
+     * @param dependencyArtifact the artifact being depended on (may be null)
+     * @param repository the repository for looking up additional information
+     */
+    private void addCrmiExtensionsToRelatedArtifact(
+            ICompositeType relatedArtifact,
+            IDependencyInfo dependency,
+            IKnowledgeArtifactAdapter sourceArtifact,
+            IKnowledgeArtifactAdapter dependencyArtifact,
+            IRepository repository) {
+
+        // 1. Classify dependency roles
+        List<String> roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, sourceArtifact, dependencyArtifact, repository);
+        dependency.setRoles(roles);
+
+        // 2. Resolve package source
+        if (dependencyArtifact != null) {
+            PackageSourceResolver.resolvePackageSource(dependencyArtifact, repository)
+                    .ifPresent(dependency::setReferencePackageId);
+        }
+
+        // 3. Preserve original extensions and add new CRMI extensions
+        @SuppressWarnings("unchecked")
+        List<IBaseExtension<?, ?>> extensionList =
+                (List<IBaseExtension<?, ?>>) ((IBaseHasExtensions) relatedArtifact).getExtension();
+
+        // First, copy any existing extensions from the original dependency
+        if (dependency.getExtension() != null) {
+            extensionList.addAll(dependency.getExtension());
+        }
+
+        // Add role extensions (one per role)
+        for (String role : dependency.getRoles()) {
+            extensionList.add(ExtensionBuilders.buildDependencyRoleExt(fhirVersion(), role));
+        }
+
+        // Add package-source extension if available
+        if (dependency.getReferencePackageId() != null) {
+            extensionList.add(
+                    ExtensionBuilders.buildPackageSourceExt(fhirVersion(), dependency.getReferencePackageId()));
+        }
+
+        // Add crmi-referenceSource extensions (one per source/path combination)
+        for (String path : dependency.getFhirPaths()) {
+            if (dependency.getReferenceSource() != null) {
+                extensionList.add(ExtensionBuilders.buildReferenceSourceExt(
+                        fhirVersion(), dependency.getReferenceSource(), path));
+            }
         }
     }
 }

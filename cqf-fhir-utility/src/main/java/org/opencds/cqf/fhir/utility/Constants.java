@@ -136,6 +136,11 @@ public class Constants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode";
     public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements";
+    public static final String CRMI_DEPENDENCY_ROLE =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-dependencyRole";
+    public static final String CRMI_REFERENCE_SOURCE =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-referenceSource";
+    public static final String PACKAGE_SOURCE = "http://hl7.org/fhir/StructureDefinition/package-source";
     public static final String CRMI_VERSION_1 = "1.0.0";
     public static final String CRMI_VERSION_2 = "2.0.0";
 

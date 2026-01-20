@@ -1306,6 +1306,9 @@ class PackageVisitorTests {
         assertTrue(packagedBundle.getEntry().stream()
                 .anyMatch(e -> e.getResource() instanceof ValueSet
                         && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/production-vs")));
+    }
+
+    @Test
     void packageOperation_should_report_version_mismatch_and_exclude_resource() {
         // Create a ValueSet with version "1.0.0"
         ValueSet valueSet = new ValueSet();

@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 
 /**
@@ -235,5 +237,24 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
         // We're relying on all CqlTypes to implement equal() properly
         // Note this is equal(), not Object.equals()
         return Boolean.TRUE.equals(cqlDate1.equal(cqlDate2));
+    }
+
+    @Override
+    public String toString() {
+        if (isEmpty()) {
+            return "[]";
+        }
+
+        final T firstElement = iterator().next();
+
+        if (firstElement instanceof IBaseResource) {
+            return stream()
+                    .map(IBaseResource.class::cast)
+                    .map(IBaseResource::getIdElement)
+                    .map(IPrimitiveType::getValueAsString)
+                    .collect(Collectors.joining(",", "[", "]"));
+        }
+
+        return super.toString();
     }
 }

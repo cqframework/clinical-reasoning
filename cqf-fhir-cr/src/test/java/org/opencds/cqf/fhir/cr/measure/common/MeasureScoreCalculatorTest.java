@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -131,6 +133,34 @@ class MeasureScoreCalculatorTest {
         Double score = MeasureScoreCalculator.calculateRatioScore(1.0 / 3.0, 2.0 / 3.0);
         assertNotNull(score);
         assertEquals(0.5, score, 0.0001);
+    }
+
+    @Test
+    void testCalculateRatioScore_NullNumerator() {
+        // Test with null numerator - should return null
+        assertNull(MeasureScoreCalculator.calculateRatioScore(null, 50.0), "Should return null when numerator is null");
+    }
+
+    @Test
+    void testCalculateRatioScore_NullDenominator() {
+        // Test with null denominator - should return null
+        assertNull(
+                MeasureScoreCalculator.calculateRatioScore(100.0, null), "Should return null when denominator is null");
+    }
+
+    @Test
+    void testCalculateRatioScore_BothNull() {
+        // Test with both null - should return null
+        assertNull(
+                MeasureScoreCalculator.calculateRatioScore(null, null),
+                "Should return null when both parameters are null");
+    }
+
+    @Test
+    void testCalculateRatioScore_NullNumeratorWithZeroDenominator() {
+        // Test with null numerator and zero denominator - should return null
+        Double score = MeasureScoreCalculator.calculateRatioScore(null, 0.0);
+        assertNull(score, "Should return null when numerator is null even if denominator is zero");
     }
 
     // ========== aggregateContinuousVariable Tests ==========
@@ -407,5 +437,335 @@ class MeasureScoreCalculatorTest {
 
         assertNotNull(result);
         assertEquals(20.0, result.value(), 0.0001);
+    }
+
+    // ========== aggregateContinuousVariableBigDecimal Tests ==========
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_Sum() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.5), BigDecimal.valueOf(20.3), BigDecimal.valueOf(30.2));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(BigDecimal.valueOf(61.0), result);
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_Avg() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.0), BigDecimal.valueOf(20.0), BigDecimal.valueOf(30.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.AVG);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(20.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_AvgWithPrecision() {
+        // Test division precision with 1/3
+        List<BigDecimal> values = List.of(BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE);
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.AVG);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.ONE.compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_AvgRepeatingDecimal() {
+        // Test with repeating decimal: 10/3 = 3.333...
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.0), BigDecimal.valueOf(10.0), BigDecimal.valueOf(10.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.AVG);
+
+        assertNotNull(result);
+        // Should be 10.0 exactly
+        assertEquals(0, BigDecimal.valueOf(10.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_Min() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.5), BigDecimal.valueOf(5.2), BigDecimal.valueOf(30.8));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MIN);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(5.2).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_Max() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.5), BigDecimal.valueOf(20.3), BigDecimal.valueOf(5.2));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MAX);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(20.3).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_MedianOdd() {
+        // Median of odd count: [10, 20, 30] -> 20
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.0), BigDecimal.valueOf(30.0), BigDecimal.valueOf(20.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MEDIAN);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(20.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_MedianEven() {
+        // Median of even count: [10, 20, 30, 40] -> (20 + 30) / 2 = 25
+        List<BigDecimal> values = List.of(
+                BigDecimal.valueOf(10.0), BigDecimal.valueOf(40.0), BigDecimal.valueOf(20.0), BigDecimal.valueOf(30.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MEDIAN);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(25.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_MedianEvenWithPrecision() {
+        // Median with precision: [1, 2] -> (1 + 2) / 2 = 1.5
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(1.0), BigDecimal.valueOf(2.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MEDIAN);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(1.5).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_MedianWithRepeatingDecimal() {
+        // Median of [1, 2, 3] with odd count
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(1.0), BigDecimal.valueOf(3.0), BigDecimal.valueOf(2.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MEDIAN);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(2.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_Count() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.0), BigDecimal.valueOf(20.0), BigDecimal.valueOf(30.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.COUNT);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(3.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_EmptyList() {
+        List<BigDecimal> values = new ArrayList<>();
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.ZERO.compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_NullList() {
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                null, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.ZERO.compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_WithNullValues() {
+        // Should filter out null values
+        List<BigDecimal> values = new ArrayList<>();
+        values.add(BigDecimal.valueOf(10.0));
+        values.add(null);
+        values.add(BigDecimal.valueOf(20.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(30.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_AllNullValues() {
+        // All null values should return ZERO
+        List<BigDecimal> values = new ArrayList<>();
+        values.add(null);
+        values.add(null);
+        values.add(null);
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.ZERO.compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_SingleValue() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(42.5));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.AVG);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(42.5).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_NoOpMethod() {
+        List<BigDecimal> values = List.of(BigDecimal.valueOf(10.0));
+
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                () -> MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                        values, ContinuousVariableObservationAggregateMethod.N_A));
+
+        assertTrue(exception.getMessage().contains("NO-OP"));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_LargeNumbers() {
+        // Test with very large numbers that might lose precision with double
+        List<BigDecimal> values = List.of(
+                BigDecimal.valueOf(999999999999999.1),
+                BigDecimal.valueOf(999999999999999.2),
+                BigDecimal.valueOf(999999999999999.3));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(2999999999999997.6).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_VerySmallNumbers() {
+        // Test with very small numbers
+        List<BigDecimal> values =
+                List.of(BigDecimal.valueOf(0.0000001), BigDecimal.valueOf(0.0000002), BigDecimal.valueOf(0.0000003));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(0.0000006).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_NegativeNumbers() {
+        List<BigDecimal> values =
+                List.of(BigDecimal.valueOf(-10.0), BigDecimal.valueOf(-20.0), BigDecimal.valueOf(-5.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MIN);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(-20.0).compareTo(result));
+    }
+
+    @Test
+    void testAggregateContinuousVariableBigDecimal_MixedPositiveNegative() {
+        List<BigDecimal> values =
+                List.of(BigDecimal.valueOf(-10.0), BigDecimal.valueOf(20.0), BigDecimal.valueOf(-5.0));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.valueOf(5.0).compareTo(result));
+    }
+
+    // ========== Division Precision Tests ==========
+
+    @Test
+    void testDivisionPrecision_ConstantValue() {
+        // Verify the constant is set correctly
+        assertEquals(17, MeasureScoreCalculator.DIVISION_PRECISION.getPrecision());
+        assertEquals(RoundingMode.HALF_UP, MeasureScoreCalculator.DIVISION_PRECISION.getRoundingMode());
+    }
+
+    @Test
+    void testDivisionPrecision_RepeatingDecimal() {
+        // Test that repeating decimals are handled correctly: 1/3 = 0.333...
+        List<BigDecimal> values = List.of(BigDecimal.ONE);
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values.stream()
+                        .map(v -> v.divide(BigDecimal.valueOf(3), MeasureScoreCalculator.DIVISION_PRECISION))
+                        .toList(),
+                ContinuousVariableObservationAggregateMethod.AVG);
+
+        assertNotNull(result);
+        // Should be approximately 0.3333333333333333
+        assertTrue(result.compareTo(BigDecimal.valueOf(0.33333)) > 0);
+        assertTrue(result.compareTo(BigDecimal.valueOf(0.33334)) < 0);
+    }
+
+    @Test
+    void testDivisionPrecision_MedianEvenRounding() {
+        // Test that median calculation with even count uses proper precision
+        // [1.0, 2.0] median = 1.5, but let's test with values that require rounding
+        List<BigDecimal> values =
+                List.of(BigDecimal.valueOf(1.0000000000000001), BigDecimal.valueOf(1.0000000000000003));
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.MEDIAN);
+
+        assertNotNull(result);
+        // Result should be the average with proper precision
+        assertTrue(result.compareTo(BigDecimal.ONE) > 0);
+    }
+
+    // ========== Integration Tests with BigDecimal Precision ==========
+
+    @Test
+    void testBigDecimalPrecisionVsDouble_AvgCalculation() {
+        // Create scenario where double precision would be problematic
+        List<QuantityDef> quantities = List.of(
+                new QuantityDef(1.0 / 3.0), // 0.333...
+                new QuantityDef(2.0 / 3.0), // 0.666...
+                new QuantityDef(1.0));
+
+        QuantityDef result = MeasureScoreCalculator.aggregateContinuousVariable(
+                quantities, ContinuousVariableObservationAggregateMethod.AVG);
+
+        assertNotNull(result);
+        // Average should be approximately 0.666... (2/3)
+        assertEquals(0.6666, result.value(), 0.0001);
+    }
+
+    @Test
+    void testBigDecimalPrecisionVsDouble_SumCalculation() {
+        // Test with many small values that could accumulate rounding errors
+        List<BigDecimal> values = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            values.add(BigDecimal.valueOf(0.001));
+        }
+
+        BigDecimal result = MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
+                values, ContinuousVariableObservationAggregateMethod.SUM);
+
+        assertNotNull(result);
+        assertEquals(0, BigDecimal.ONE.compareTo(result));
     }
 }

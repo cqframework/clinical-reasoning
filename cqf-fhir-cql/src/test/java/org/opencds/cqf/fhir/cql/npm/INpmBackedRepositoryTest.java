@@ -425,12 +425,7 @@ public interface INpmBackedRepositoryTest {
         }
 
         // create the package speck (package.json)
-        URI uri = null;
-        try {
-            uri = new URI("file", null, packagePath.toString(), null);
-        } catch (URISyntaxException ex) {
-            fail(ex);
-        }
+        URI uri = packagePath.toUri();
         String pkgJson = String.format(
                 """
             {

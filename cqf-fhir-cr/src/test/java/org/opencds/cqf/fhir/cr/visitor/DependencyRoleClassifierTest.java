@@ -3,14 +3,12 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
-import java.util.List;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -35,8 +33,7 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/Library/helper");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, measureAdapter, null, repository);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, null, repository);
 
         assertTrue(roles.contains("default"), "All dependencies should get default role");
     }
@@ -85,8 +82,8 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/Library/helper");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, libraryAdapter, helperAdapter, repository);
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, helperAdapter, repository);
 
         assertEquals(1, roles.size());
         assertTrue(roles.contains("default"));
@@ -106,8 +103,7 @@ class DependencyRoleClassifierTest {
         // Dependency is not a ValueSet (e.g., another profile)
         var dependency = createDependency("http://hl7.org/fhir/StructureDefinition/Patient");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, profileAdapter, null, repository);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, null, repository);
 
         assertEquals(1, roles.size());
         assertTrue(roles.contains("default"));
@@ -232,16 +228,14 @@ class DependencyRoleClassifierTest {
 
         // Test first ValueSet
         var dependency1 = createDependency("http://hl7.org/fhir/ValueSet/marital-status");
-        var roles1 = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency1, profileAdapter, null, repository);
+        var roles1 = DependencyRoleClassifier.classifyDependencyRoles(dependency1, profileAdapter, null, repository);
 
         assertTrue(roles1.contains("key"));
         assertTrue(roles1.contains("default"));
 
         // Test second ValueSet
         var dependency2 = createDependency("http://hl7.org/fhir/ValueSet/administrative-gender");
-        var roles2 = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency2, profileAdapter, null, repository);
+        var roles2 = DependencyRoleClassifier.classifyDependencyRoles(dependency2, profileAdapter, null, repository);
 
         assertTrue(roles2.contains("key"));
         assertTrue(roles2.contains("default"));
@@ -256,8 +250,7 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/ValueSet/test");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, profileAdapter, null, null);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, null, null);
 
         assertTrue(roles.contains("default"), "Should handle null repository gracefully");
     }
@@ -273,8 +266,7 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/Library/helper");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, measureAdapter, null, repository);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, null, repository);
 
         assertTrue(roles.contains("default"), "Should handle null dependency artifact");
         assertEquals(1, roles.size());
@@ -346,8 +338,8 @@ class DependencyRoleClassifierTest {
         var experimentalLibrary = new Library();
         experimentalLibrary.setUrl("http://example.org/Library/experimental");
         experimentalLibrary.setExperimental(true);
-        var experimentalAdapter = (IKnowledgeArtifactAdapter)
-                adapterFactory.createKnowledgeArtifactAdapter(experimentalLibrary);
+        var experimentalAdapter =
+                (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(experimentalLibrary);
 
         var dependency = createDependency("http://example.org/Library/experimental");
 

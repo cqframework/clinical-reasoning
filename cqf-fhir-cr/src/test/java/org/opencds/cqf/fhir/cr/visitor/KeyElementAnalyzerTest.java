@@ -3,14 +3,11 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.Set;
-import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -41,8 +38,7 @@ class KeyElementAnalyzerTest {
         var element = profile.getDifferential().addElement();
         element.setPath("Patient.maritalStatus");
         element.setMustSupport(true);
-        element.getBinding()
-                .setValueSet("http://hl7.org/fhir/ValueSet/marital-status");
+        element.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/marital-status");
 
         var result = analyzer.getKeyElementValueSets(profile);
 
@@ -94,7 +90,8 @@ class KeyElementAnalyzerTest {
 
         var result = analyzer.getKeyElementValueSets(profile);
 
-        assertTrue(result.contains("http://example.org/ValueSet/component-codes"),
+        assertTrue(
+                result.contains("http://example.org/ValueSet/component-codes"),
                 "Should include ValueSet from mandatory child of key element");
     }
 
@@ -119,7 +116,8 @@ class KeyElementAnalyzerTest {
 
         var result = analyzer.getKeyElementValueSets(profile);
 
-        assertTrue(result.contains("http://example.org/ValueSet/bp-codes"),
+        assertTrue(
+                result.contains("http://example.org/ValueSet/bp-codes"),
                 "Should include ValueSet from slice of key element");
     }
 
@@ -144,7 +142,8 @@ class KeyElementAnalyzerTest {
 
         var result = analyzer.getKeyElementValueSets(profile);
 
-        assertTrue(result.contains("http://example.org/ValueSet/identifier-types"),
+        assertTrue(
+                result.contains("http://example.org/ValueSet/identifier-types"),
                 "Should include ValueSet from constrained child");
     }
 
@@ -154,8 +153,7 @@ class KeyElementAnalyzerTest {
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
 
         var analyzer = new KeyElementAnalyzer(repository);
-        var profile = createSimpleProfile("AllergyIntolerance",
-                "http://example.org/StructureDefinition/TestAllergy");
+        var profile = createSimpleProfile("AllergyIntolerance", "http://example.org/StructureDefinition/TestAllergy");
 
         // Add parent element
         var parentElement = profile.getDifferential().addElement();
@@ -170,7 +168,8 @@ class KeyElementAnalyzerTest {
 
         var result = analyzer.getKeyElementValueSets(profile);
 
-        assertTrue(result.contains("http://example.org/ValueSet/allergy-status"),
+        assertTrue(
+                result.contains("http://example.org/ValueSet/allergy-status"),
                 "Should include ValueSet from modifier element");
     }
 
@@ -217,7 +216,8 @@ class KeyElementAnalyzerTest {
         var result = analyzer.getKeyElementValueSets(profile);
 
         assertEquals(1, result.size());
-        assertTrue(result.contains("http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"),
+        assertTrue(
+                result.contains("http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1"),
                 "Should preserve version in ValueSet URL");
     }
 
@@ -256,7 +256,8 @@ class KeyElementAnalyzerTest {
         var result = analyzer.getKeyElementValueSets(profile);
 
         // Should not error even though base definition resolution stops at core
-        assertFalse(result.contains("http://hl7.org/fhir/StructureDefinition/Patient"),
+        assertFalse(
+                result.contains("http://hl7.org/fhir/StructureDefinition/Patient"),
                 "Should not include base definition in ValueSet results");
     }
 
@@ -303,7 +304,8 @@ class KeyElementAnalyzerTest {
         var result = analyzer.getKeyElementValueSets(profile);
 
         // Should work with snapshot if differential is empty
-        assertTrue(result.contains("http://hl7.org/fhir/ValueSet/administrative-gender"),
+        assertTrue(
+                result.contains("http://hl7.org/fhir/ValueSet/administrative-gender"),
                 "Should extract ValueSets from snapshot when differential is empty");
     }
 

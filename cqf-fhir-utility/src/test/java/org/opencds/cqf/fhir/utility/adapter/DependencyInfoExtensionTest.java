@@ -44,8 +44,7 @@ class DependencyInfoExtensionTest {
         dependency.addFhirPath("library[0]");
         dependency.addFhirPath("population[0].criteria");
 
-        var extensions =
-                dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
+        var extensions = dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
 
         assertEquals(3, extensions.size(), "Should have 1 role + 2 reference-source extensions");
         assertTrue(hasExtensionWithUrl(extensions, Constants.CRMI_DEPENDENCY_ROLE));
@@ -60,8 +59,7 @@ class DependencyInfoExtensionTest {
         dependency.setReferencePackageId("hl7.fhir.us.core#6.1.0");
         dependency.addFhirPath("library[0]");
 
-        var extensions =
-                dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
+        var extensions = dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
 
         assertEquals(4, extensions.size(), "Should have 2 roles + 1 package + 1 reference-source");
         assertEquals(2, countExtensionsWithUrl(extensions, Constants.CRMI_DEPENDENCY_ROLE));
@@ -75,8 +73,7 @@ class DependencyInfoExtensionTest {
         dependency.addRole("default");
         dependency.setReferencePackageId("hl7.fhir.us.core#3.1.0");
 
-        var extensions =
-                dependency.buildDependencyExtensions(FhirVersionEnum.DSTU3, "http://example.org/Measure/test");
+        var extensions = dependency.buildDependencyExtensions(FhirVersionEnum.DSTU3, "http://example.org/Measure/test");
 
         assertEquals(2, extensions.size(), "Should work with DSTU3");
         assertTrue(hasExtensionWithUrl(extensions, Constants.CRMI_DEPENDENCY_ROLE));
@@ -100,8 +97,7 @@ class DependencyInfoExtensionTest {
     void testBuildDependencyExtensions_EmptyDependency() {
         var dependency = createDependency("http://example.org/Library/helper");
 
-        var extensions =
-                dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
+        var extensions = dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
 
         assertEquals(0, extensions.size(), "Should have no extensions when dependency has no metadata");
     }
@@ -114,10 +110,7 @@ class DependencyInfoExtensionTest {
 
         var extensions = dependency.buildDependencyExtensions(FhirVersionEnum.R4, null);
 
-        assertEquals(
-                1,
-                extensions.size(),
-                "Should only have role extension, no reference-source without source URL");
+        assertEquals(1, extensions.size(), "Should only have role extension, no reference-source without source URL");
         assertTrue(hasExtensionWithUrl(extensions, Constants.CRMI_DEPENDENCY_ROLE));
     }
 
@@ -126,8 +119,7 @@ class DependencyInfoExtensionTest {
         var dependency = createDependency("http://example.org/Library/helper");
         dependency.addFhirPath("library[0]");
 
-        var extensions =
-                dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
+        var extensions = dependency.buildDependencyExtensions(FhirVersionEnum.R4, "http://example.org/Measure/test");
 
         assertEquals(1, extensions.size());
         var ext = extensions.get(0);

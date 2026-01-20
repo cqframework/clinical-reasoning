@@ -8,12 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.List;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Measure;
@@ -24,9 +26,62 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 class R4MeasureUtilsTest {
+
+    // ========================================
+    // Helper Methods for Test Setup
+    // ========================================
+
+    /**
+     * Creates a Measure with the specified scoring code.
+     */
+    private static Measure createMeasureWithScoring(String scoringCode) {
+        Measure measure = new Measure();
+        measure.setUrl("http://example.com/Measure/test");
+        measure.setScoring(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
+                        .setCode(scoringCode)));
+        return measure;
+    }
+
+    /**
+     * Creates a MeasureGroupPopulationComponent with the specified population type.
+     */
+    private static MeasureGroupPopulationComponent createPopulation(MeasurePopulationType type) {
+        MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
+        population.setCode(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/measure-population")
+                        .setCode(type.toCode())));
+        return population;
+    }
+
+    /**
+     * Creates a MeasureGroupPopulationComponent with the specified population type and ID.
+     */
+    private static MeasureGroupPopulationComponent createPopulation(MeasurePopulationType type, String id) {
+        MeasureGroupPopulationComponent population = createPopulation(type);
+        population.setId(id);
+        return population;
+    }
+
+    /**
+     * Adds an aggregate method extension to a population.
+     */
+    private static void addAggregateMethodExtension(MeasureGroupPopulationComponent population, String method) {
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType(method));
+    }
+
+    /**
+     * Adds a criteria reference extension to a population.
+     */
+    private static void addCriteriaReferenceExtension(MeasureGroupPopulationComponent population, String reference) {
+        population.addExtension(EXT_CQFM_CRITERIA_REFERENCE, new StringType(reference));
+    }
 
     @Test
     void testGetMeasureScoring_FromMeasure() {
@@ -559,5 +614,352 @@ class R4MeasureUtilsTest {
 
         assertTrue(exception.getMessage().contains("Aggregation method: invalid-method is not a valid value"));
         assertTrue(exception.getMessage().contains(measureUrl));
+    }
+
+    // ========================================
+    // Tests for isRatioContinuousVariable
+    // ========================================
+
+    @Test
+    void testIsRatioContinuousVariable_WithMeasure_RatioWithAggregateMethod() {
+        Measure measure = createMeasureWithScoring("ratio");
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addAggregateMethodExtension(measureObs, "sum");
+        group.addPopulation(measureObs);
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(measure, group);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsRatioContinuousVariable_WithMeasure_RatioWithoutAggregateMethod() {
+        Measure measure = createMeasureWithScoring("ratio");
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        // No aggregate method extension
+        group.addPopulation(measureObs);
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(measure, group);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testIsRatioContinuousVariable_WithMeasure_ProportionScoring() {
+        Measure measure = createMeasureWithScoring("proportion");
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addAggregateMethodExtension(measureObs, "sum");
+        group.addPopulation(measureObs);
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(measure, group);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testIsRatioContinuousVariable_WithScoring_RatioWithAggregateMethod() {
+        MeasureScoring scoring = MeasureScoring.RATIO;
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addAggregateMethodExtension(measureObs, "avg");
+        group.addPopulation(measureObs);
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(scoring, group);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testIsRatioContinuousVariable_WithScoring_RatioWithoutAggregateMethod() {
+        MeasureScoring scoring = MeasureScoring.RATIO;
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        // No aggregate method extension
+        group.addPopulation(measureObs);
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(scoring, group);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testIsRatioContinuousVariable_WithScoring_NonRatioScoring() {
+        MeasureScoring scoring = MeasureScoring.COHORT;
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addAggregateMethodExtension(measureObs, "sum");
+        group.addPopulation(measureObs);
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(scoring, group);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testIsRatioContinuousVariable_WithScoring_NoMeasureObservations() {
+        MeasureScoring scoring = MeasureScoring.RATIO;
+
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.NUMERATOR));
+
+        boolean result = R4MeasureUtils.isRatioContinuousVariable(scoring, group);
+
+        assertFalse(result);
+    }
+
+    // ========================================
+    // Tests for getMeasureObservationPopulations
+    // ========================================
+
+    @Test
+    void testGetMeasureObservationPopulations_TwoMeasureObservations() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.NUMERATOR, "numerator"));
+        group.addPopulation(createPopulation(MeasurePopulationType.MEASUREOBSERVATION, "measure-obs-1"));
+        group.addPopulation(createPopulation(MeasurePopulationType.DENOMINATOR, "denominator"));
+        group.addPopulation(createPopulation(MeasurePopulationType.MEASUREOBSERVATION, "measure-obs-2"));
+
+        List<MeasureGroupPopulationComponent> result = R4MeasureUtils.getMeasureObservationPopulations(group);
+
+        assertEquals(2, result.size());
+        assertEquals("measure-obs-1", result.get(0).getId());
+        assertEquals("measure-obs-2", result.get(1).getId());
+    }
+
+    @Test
+    void testGetMeasureObservationPopulations_NoMeasureObservations() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.NUMERATOR));
+        group.addPopulation(createPopulation(MeasurePopulationType.DENOMINATOR));
+
+        List<MeasureGroupPopulationComponent> result = R4MeasureUtils.getMeasureObservationPopulations(group);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetMeasureObservationPopulations_EmptyGroup() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+
+        List<MeasureGroupPopulationComponent> result = R4MeasureUtils.getMeasureObservationPopulations(group);
+
+        assertTrue(result.isEmpty());
+    }
+
+    // ========================================
+    // Tests for getPopulationsByType
+    // ========================================
+
+    @Test
+    void testGetPopulationsByType_Numerator() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.NUMERATOR, "numerator"));
+        group.addPopulation(createPopulation(MeasurePopulationType.DENOMINATOR, "denominator"));
+
+        List<MeasureGroupPopulationComponent> result =
+                R4MeasureUtils.getPopulationsByType(group, MeasurePopulationType.NUMERATOR);
+
+        assertEquals(1, result.size());
+        assertEquals("numerator", result.get(0).getId());
+    }
+
+    @Test
+    void testGetPopulationsByType_Denominator() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.NUMERATOR));
+        group.addPopulation(createPopulation(MeasurePopulationType.DENOMINATOR, "denominator"));
+
+        List<MeasureGroupPopulationComponent> result =
+                R4MeasureUtils.getPopulationsByType(group, MeasurePopulationType.DENOMINATOR);
+
+        assertEquals(1, result.size());
+        assertEquals("denominator", result.get(0).getId());
+    }
+
+    @Test
+    void testGetPopulationsByType_MeasureObservation_Multiple() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.MEASUREOBSERVATION, "obs-1"));
+        group.addPopulation(createPopulation(MeasurePopulationType.MEASUREOBSERVATION, "obs-2"));
+
+        List<MeasureGroupPopulationComponent> result =
+                R4MeasureUtils.getPopulationsByType(group, MeasurePopulationType.MEASUREOBSERVATION);
+
+        assertEquals(2, result.size());
+        assertEquals("obs-1", result.get(0).getId());
+        assertEquals("obs-2", result.get(1).getId());
+    }
+
+    @Test
+    void testGetPopulationsByType_NotFound() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+        group.addPopulation(createPopulation(MeasurePopulationType.NUMERATOR));
+
+        List<MeasureGroupPopulationComponent> result =
+                R4MeasureUtils.getPopulationsByType(group, MeasurePopulationType.DENOMINATOR);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetPopulationsByType_EmptyGroup() {
+        MeasureGroupComponent group = new MeasureGroupComponent();
+
+        List<MeasureGroupPopulationComponent> result =
+                R4MeasureUtils.getPopulationsByType(group, MeasurePopulationType.NUMERATOR);
+
+        assertTrue(result.isEmpty());
+    }
+
+    // ========================================
+    // Tests for getCriteriaReferenceFromPopulation
+    // ========================================
+
+    @Test
+    void testGetCriteriaReferenceFromPopulation_WithExtension() {
+        MeasureGroupPopulationComponent population = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addCriteriaReferenceExtension(population, "numerator");
+
+        String result = R4MeasureUtils.getCriteriaReferenceFromPopulation(population);
+
+        assertEquals("numerator", result);
+    }
+
+    @Test
+    void testGetCriteriaReferenceFromPopulation_WithDenominatorReference() {
+        MeasureGroupPopulationComponent population = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addCriteriaReferenceExtension(population, "denominator");
+
+        String result = R4MeasureUtils.getCriteriaReferenceFromPopulation(population);
+
+        assertEquals("denominator", result);
+    }
+
+    @Test
+    void testGetCriteriaReferenceFromPopulation_NoExtension() {
+        MeasureGroupPopulationComponent population = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+
+        String result = R4MeasureUtils.getCriteriaReferenceFromPopulation(population);
+
+        assertNull(result);
+    }
+
+    @Test
+    void testGetCriteriaReferenceFromPopulation_EmptyExtension() {
+        MeasureGroupPopulationComponent population = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        addCriteriaReferenceExtension(population, "");
+
+        String result = R4MeasureUtils.getCriteriaReferenceFromPopulation(population);
+
+        assertEquals("", result);
+    }
+
+    @Test
+    void testGetCriteriaReferenceFromPopulation_WrongExtensionType() {
+        MeasureGroupPopulationComponent population = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
+        population.addExtension(EXT_CQFM_CRITERIA_REFERENCE, new CodeableConcept());
+
+        String result = R4MeasureUtils.getCriteriaReferenceFromPopulation(population);
+
+        assertNull(result);
+    }
+
+    // ========================================
+    // Tests for criteriaReferenceMatches
+    // ========================================
+
+    @Test
+    void testCriteriaReferenceMatches_NumeratorExactMatch() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("numerator", MeasurePopulationType.NUMERATOR);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_NumeratorCaseInsensitive() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("NUMERATOR", MeasurePopulationType.NUMERATOR);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_NumeratorMixedCase() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("Numerator", MeasurePopulationType.NUMERATOR);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_DenominatorExactMatch() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("denominator", MeasurePopulationType.DENOMINATOR);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_DenominatorCaseInsensitive() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("DENOMINATOR", MeasurePopulationType.DENOMINATOR);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_NoMatch() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("numerator", MeasurePopulationType.DENOMINATOR);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_NullCriteriaReference() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches(null, MeasurePopulationType.NUMERATOR);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_NullPopulationType() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("numerator", null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_BothNull() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches(null, null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_EmptyCriteriaReference() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches("", MeasurePopulationType.NUMERATOR);
+
+        assertFalse(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_MeasureObservation() {
+        boolean result = R4MeasureUtils.criteriaReferenceMatches(
+                "measure-observation", MeasurePopulationType.MEASUREOBSERVATION);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testCriteriaReferenceMatches_InitialPopulation() {
+        boolean result =
+                R4MeasureUtils.criteriaReferenceMatches("initial-population", MeasurePopulationType.INITIALPOPULATION);
+
+        assertTrue(result);
     }
 }

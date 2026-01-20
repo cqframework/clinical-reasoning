@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -20,7 +21,9 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
  * Utility class for extracting data from R4 FHIR Measure resources.
@@ -267,5 +270,91 @@ public class R4MeasureUtils {
         }
 
         return ContinuousVariableObservationAggregateMethod.N_A;
+    }
+
+    /**
+     * Determine if a measure group is ratio continuous variable scoring.
+     *
+     * @param measure the Measure resource
+     * @param measureGroup the MeasureGroupComponent
+     * @return true if the group is ratio continuous variable
+     */
+    public static boolean isRatioContinuousVariable(Measure measure, MeasureGroupComponent measureGroup) {
+        MeasureScoring scoring = computeScoring(measure, measureGroup);
+        return isRatioContinuousVariable(scoring, measureGroup);
+    }
+
+    /**
+     * Determine if a measure group is ratio continuous variable scoring.
+     *
+     * @param scoring the MeasureScoring for the group
+     * @param measureGroup the MeasureGroupComponent
+     * @return true if the group is ratio continuous variable
+     */
+    public static boolean isRatioContinuousVariable(MeasureScoring scoring, MeasureGroupComponent measureGroup) {
+        if (scoring != MeasureScoring.RATIO) {
+            return false;
+        }
+
+        // Check if any measure observation populations have an aggregate method extension
+        return getMeasureObservationPopulations(measureGroup).stream()
+                .anyMatch(pop -> pop.hasExtension(EXT_CQFM_AGGREGATE_METHOD_URL));
+    }
+
+    /**
+     * Get all MEASURE_OBSERVATION populations from a measure group.
+     *
+     * @param measureGroup the MeasureGroupComponent
+     * @return list of MEASURE_OBSERVATION populations
+     */
+    public static List<MeasureGroupPopulationComponent> getMeasureObservationPopulations(
+            MeasureGroupComponent measureGroup) {
+        return getPopulationsByType(measureGroup, MeasurePopulationType.MEASUREOBSERVATION);
+    }
+
+    /**
+     * Get populations of a specific type from a measure group.
+     *
+     * @param measureGroup the MeasureGroupComponent
+     * @param populationType the MeasurePopulationType to filter by
+     * @return list of populations of the specified type
+     */
+    public static List<MeasureGroupPopulationComponent> getPopulationsByType(
+            MeasureGroupComponent measureGroup, MeasurePopulationType populationType) {
+        return measureGroup.getPopulation().stream()
+                .filter(pop -> populationType
+                        .toCode()
+                        .equals(pop.getCode().getCodingFirstRep().getCode()))
+                .toList();
+    }
+
+    /**
+     * Extract the criteria reference from a population.
+     *
+     * @param population the MeasureGroupPopulationComponent
+     * @return the criteria reference value, or null if not present
+     */
+    @Nullable
+    public static String getCriteriaReferenceFromPopulation(MeasureGroupPopulationComponent population) {
+        var ext = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        if (ext != null && ext.getValue() instanceof org.hl7.fhir.r4.model.StringType stringType) {
+            return stringType.getValue();
+        }
+        return null;
+    }
+
+    /**
+     * Check if a criteria reference matches a specific population type.
+     *
+     * @param criteriaReference the criteria reference string
+     * @param populationType the MeasurePopulationType to check against
+     * @return true if the criteria reference matches the population type ID
+     */
+    public static boolean criteriaReferenceMatches(String criteriaReference, MeasurePopulationType populationType) {
+        if (criteriaReference == null || populationType == null) {
+            return false;
+        }
+        // Common pattern: criteria references use lowercase IDs like "numerator", "denominator"
+        return criteriaReference.equalsIgnoreCase(populationType.toCode());
     }
 }

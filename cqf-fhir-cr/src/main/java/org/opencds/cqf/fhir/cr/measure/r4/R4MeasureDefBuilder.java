@@ -91,6 +91,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Populations
         checkIds(group);
+        validateRatioContinuousVariableIfApplicable(measure, group, groupScoring, measureScoring);
 
         var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
@@ -168,6 +169,84 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private void checkIds(MeasureGroupComponent group) {
         group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
+    }
+
+    /**
+     * Validate ratio continuous variable measure structure if applicable.
+     *
+     * <p>For ratio continuous variable measures, validates:
+     * - Exactly 2 MEASURE_OBSERVATION populations exist
+     * - Each MEASURE_OBSERVATION has a criteria reference extension
+     * - One MEASURE_OBSERVATION references NUMERATOR, one references DENOMINATOR
+     *
+     * @param measure the Measure resource
+     * @param group the MeasureGroupComponent to validate
+     * @param groupScoring the group-level scoring (may be null)
+     * @param measureScoring the measure-level scoring
+     */
+    private void validateRatioContinuousVariableIfApplicable(
+            Measure measure, MeasureGroupComponent group, MeasureScoring groupScoring, MeasureScoring measureScoring) {
+
+        var effectiveScoring = R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring);
+
+        if (!R4MeasureUtils.isRatioContinuousVariable(effectiveScoring, group)) {
+            return;
+        }
+
+        var measureObservations = R4MeasureUtils.getMeasureObservationPopulations(group);
+
+        // Validate exactly 2 measure observations
+        if (measureObservations.size() != 2) {
+            throw new InvalidRequestException(
+                    "Ratio Continuous Variable requires 2 Measure Observations defined, you have: %s"
+                            .formatted(measureObservations.size()));
+        }
+
+        // Extract criteria references from both measure observations
+        var criteriaRef1 = R4MeasureUtils.getCriteriaReferenceFromPopulation(measureObservations.get(0));
+        var criteriaRef2 = R4MeasureUtils.getCriteriaReferenceFromPopulation(measureObservations.get(1));
+
+        // Both must have criteria references
+        if (criteriaRef1 == null) {
+            throw new InvalidRequestException(
+                    "MEASURE_OBSERVATION population with id '%s' is missing criteria reference extension for Measure: %s"
+                            .formatted(measureObservations.get(0).getId(), measure.getUrl()));
+        }
+        if (criteriaRef2 == null) {
+            throw new InvalidRequestException(
+                    "MEASURE_OBSERVATION population with id '%s' is missing criteria reference extension for Measure: %s"
+                            .formatted(measureObservations.get(1).getId(), measure.getUrl()));
+        }
+
+        // Verify criteria references exist as population IDs
+        // If they don't, skip this validation - getCriteriaReference will catch that error later
+        var criteriaRef1ExistsAsPopId =
+                group.getPopulation().stream().map(Element::getId).anyMatch(id -> id.equals(criteriaRef1));
+        var criteriaRef2ExistsAsPopId =
+                group.getPopulation().stream().map(Element::getId).anyMatch(id -> id.equals(criteriaRef2));
+
+        if (!criteriaRef1ExistsAsPopId || !criteriaRef2ExistsAsPopId) {
+            // Let getCriteriaReference handle this validation
+            return;
+        }
+
+        // One must reference numerator, one must reference denominator
+        var hasNumeratorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.NUMERATOR)
+                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.NUMERATOR);
+        var hasDenominatorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.DENOMINATOR)
+                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.DENOMINATOR);
+
+        if (!hasNumeratorRef || !hasDenominatorRef) {
+            throw new InvalidRequestException(
+                    ("Ratio Continuous Variable requires one MEASURE_OBSERVATION to reference '%s' "
+                                    + "and one to reference '%s', but found criteria references: '%s' and '%s' for Measure: %s")
+                            .formatted(
+                                    MeasurePopulationType.NUMERATOR.toCode(),
+                                    MeasurePopulationType.DENOMINATOR.toCode(),
+                                    criteriaRef1,
+                                    criteriaRef2,
+                                    measure.getUrl()));
+        }
     }
 
     @Nonnull

@@ -124,7 +124,7 @@ public class MeasureReportDefScorer {
                 // Special case: RATIO with separate numerator/denominator observations
                 if (measureScoring == MeasureScoring.RATIO
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationGroup(measureUrl, groupDef);
+                    return scoreRatioMeasureObservationGroup(groupDef);
                 }
 
                 // Standard proportion/ratio scoring: (n - nx) / (d - dx - de)
@@ -169,12 +169,11 @@ public class MeasureReportDefScorer {
      * Score a group for RATIO measures with MEASUREOBSERVATION populations.
      * Handles continuous variable ratio scoring where numerator and denominator have separate observations.
      *
-     * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationGroup(String measureUrl, GroupDef groupDef) {
+    private Double scoreRatioMeasureObservationGroup(GroupDef groupDef) {
         // Get all MEASUREOBSERVATION populations
         var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
@@ -186,9 +185,9 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate quantities for numerator and denominator
         final QuantityDef numeratorAggregate = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numeratorPopulation, PopulationDef::getAllSubjectResources);
+                numeratorPopulation, PopulationDef::getAllSubjectResources);
         final QuantityDef denominatorAggregate = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denominatorPopulation, PopulationDef::getAllSubjectResources);
+                denominatorPopulation, PopulationDef::getAllSubjectResources);
 
         // If there's no numerator or not denominator result, we still want to capture the
         // other result
@@ -208,8 +207,7 @@ public class MeasureReportDefScorer {
      * returns the aggregate without setting it on a FHIR report.
      */
     private QuantityDef scoreContinuousVariable(String measureUrl, PopulationDef populationDef) {
-        return calculateContinuousVariableAggregateQuantity(
-                measureUrl, populationDef, PopulationDef::getAllSubjectResources);
+        return calculateContinuousVariableAggregateQuantity(populationDef, PopulationDef::getAllSubjectResources);
     }
 
     /**
@@ -268,7 +266,7 @@ public class MeasureReportDefScorer {
                 // Check for special RATIO continuous variable case
                 if (measureScoring.equals(MeasureScoring.RATIO)
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationStratum(measureUrl, groupDef, stratumDef);
+                    return scoreRatioMeasureObservationStratum(measureUrl, stratumDef);
                 } else {
                     return scoreProportionRatioStratum(groupDef, stratumDef);
                 }
@@ -287,12 +285,11 @@ public class MeasureReportDefScorer {
      * Uses pre-computed cache to eliminate redundant lookups during scoring.
      *
      * @param measureUrl the measure URL for error reporting
-     * @param groupDef the group definition
      * @param stratumDef the stratum definition
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationStratum(String measureUrl, GroupDef groupDef, StratumDef stratumDef) {
+    private Double scoreRatioMeasureObservationStratum(String measureUrl, StratumDef stratumDef) {
 
         if (stratumDef == null) {
             return null;
@@ -364,7 +361,7 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate using stratum-filtered resources
         QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
+                measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
 
         return quantityDef != null ? quantityDef.value() : null;
     }
@@ -389,11 +386,11 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate for numerator observations filtered by stratum
         QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+                numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
 
         // Calculate aggregate for denominator observations filtered by stratum
         QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+                denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
 
         if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
             return null;
@@ -494,19 +491,15 @@ public class MeasureReportDefScorer {
      * Calculate continuous variable aggregate quantity.
      * Delegates to {@link MeasureScoreCalculator} for the actual aggregation.
      *
-     * @param measureUrl the measure URL for error reporting
      * @param populationDef the population definition containing observation data
      * @param popDefToResources function to extract resources from population def
      * @return aggregated QuantityDef or null if population is null
      */
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
-            String measureUrl,
-            @Nullable PopulationDef populationDef,
-            Function<PopulationDef, Collection<Object>> popDefToResources) {
+            @Nullable PopulationDef populationDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
 
         if (populationDef == null) {
-            logger.warn("Measure population group has no measure population defined for measure: {}", measureUrl);
             return null;
         }
 

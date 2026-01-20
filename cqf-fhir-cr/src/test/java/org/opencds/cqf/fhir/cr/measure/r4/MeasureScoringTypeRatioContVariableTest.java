@@ -1319,21 +1319,14 @@ class MeasureScoringTypeRatioContVariableTest {
      */
     @Test
     void ratioContinuousVariableNoDenDef() {
-        given.when()
+        var when = given.when()
                 .measureId("RatioContVarResourceSumError")
                 .subject("Patient/patient-9")
-                .evaluate()
-                .then()
-                .def()
-                .hasError("Ratio Continuous Variable requires 2 Measure Observations defined, you have: 1")
-                .up()
-                .hasStatus(MeasureReportStatus.ERROR)
-                .hasContainedOperationOutcomeMsg(
-                        "Ratio Continuous Variable requires 2 Measure Observations defined, you have: 1")
-                .firstGroup()
-                .hasMeasureScore(false)
-                .up()
-                .report();
+                .evaluate();
+        var exception = assertThrows(InvalidRequestException.class, when::then);
+        assertTrue(exception
+                .getMessage()
+                .contains("Ratio Continuous Variable requires 2 Measure Observations defined, you have: 1"));
     }
 
     /**

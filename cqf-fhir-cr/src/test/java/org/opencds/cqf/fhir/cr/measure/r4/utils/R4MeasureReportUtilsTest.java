@@ -990,6 +990,122 @@ class R4MeasureReportUtilsTest {
     }
 
     // ========================================
+    // Tests for updateAggregationResult
+    // ========================================
+
+    @Test
+    void testUpdateAggregationResult_WithValidAggregationResult() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population =
+                createPopulationWithAggregationData("sum", "Numerator", 100.0);
+
+        R4MeasureReportUtils.updateAggregationResult(measureUrl, population, BigDecimal.valueOf(250.5));
+
+        assertAggregationResultEquals(population, BigDecimal.valueOf(250.5));
+        assertAggregationMethodEquals(population, "sum");
+        assertCriteriaReferenceEquals(population, "Numerator");
+    }
+
+    @Test
+    void testUpdateAggregationResult_WithNullAggregationResult() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population =
+                createPopulationWithAggregationData("avg", "Denominator", 100.0);
+
+        R4MeasureReportUtils.updateAggregationResult(measureUrl, population, null);
+
+        // When aggregationResult is null, the implementation doesn't update method or result extensions
+        assertAggregationResultEquals(population, BigDecimal.valueOf(100.0));
+        assertAggregationMethodEquals(population, "avg");
+        assertCriteriaReferenceEquals(population, "Denominator");
+    }
+
+    @Test
+    void testUpdateAggregationResult_WithZeroAggregationResult() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population =
+                createPopulationWithAggregationData("count", "Numerator", 100.0);
+
+        R4MeasureReportUtils.updateAggregationResult(measureUrl, population, BigDecimal.ZERO);
+
+        assertAggregationResultEquals(population, BigDecimal.ZERO);
+        assertAggregationMethodEquals(population, "count");
+    }
+
+    @Test
+    void testUpdateAggregationResult_WithNegativeAggregationResult() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population =
+                createPopulationWithAggregationData("min", "Numerator", 50.0);
+
+        R4MeasureReportUtils.updateAggregationResult(measureUrl, population, BigDecimal.valueOf(-25.75));
+
+        assertAggregationResultEquals(population, BigDecimal.valueOf(-25.75));
+    }
+
+    @Test
+    void testUpdateAggregationResult_MissingAggregationMethod_ThrowsException() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.setId("pop-1");
+        population.addExtension(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE, new StringType("Numerator"));
+
+        assertUpdateAggregationResultThrowsInvalidRequest(measureUrl, population, BigDecimal.valueOf(100.0), "pop-1");
+    }
+
+    @Test
+    void testUpdateAggregationResult_MissingCriteriaReference_ThrowsException() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.setId("pop-2");
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("sum"));
+
+        assertUpdateAggregationResultThrowsInvalidRequest(measureUrl, population, BigDecimal.valueOf(100.0), "pop-2");
+    }
+
+    @Test
+    void testUpdateAggregationResult_MissingBothMethodAndReference_ThrowsException() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.setId("pop-3");
+
+        assertUpdateAggregationResultThrowsInvalidRequest(measureUrl, population, BigDecimal.valueOf(100.0), "pop-3");
+    }
+
+    @Test
+    void testUpdateAggregationResult_WithDifferentAggregationMethods() {
+        String measureUrl = "http://example.com/Measure/test";
+        String[] methods = {"sum", "avg", "min", "max", "median", "count"};
+
+        for (String method : methods) {
+            MeasureReportGroupPopulationComponent population =
+                    createPopulationWithAggregationData(method, "TestRef", 50.0);
+
+            R4MeasureReportUtils.updateAggregationResult(measureUrl, population, BigDecimal.valueOf(123.456));
+
+            assertAggregationMethodEquals(population, method);
+            assertAggregationResultEquals(population, BigDecimal.valueOf(123.456));
+        }
+    }
+
+    @Test
+    void testUpdateAggregationResult_UpdatesExistingResult() {
+        String measureUrl = "http://example.com/Measure/test";
+        MeasureReportGroupPopulationComponent population =
+                createPopulationWithAggregationData("sum", "Numerator", 100.0);
+
+        assertAggregationResultEquals(population, BigDecimal.valueOf(100.0));
+
+        R4MeasureReportUtils.updateAggregationResult(measureUrl, population, BigDecimal.valueOf(200.0));
+        assertAggregationResultEquals(population, BigDecimal.valueOf(200.0));
+
+        R4MeasureReportUtils.updateAggregationResult(measureUrl, population, BigDecimal.valueOf(300.0));
+        assertAggregationResultEquals(population, BigDecimal.valueOf(300.0));
+
+        assertEquals(3, population.getExtension().size(), "Should have exactly 3 extensions (not duplicated)");
+    }
+
+    // ========================================
     // Tests for getCriteriaReference
     // ========================================
 
@@ -1348,5 +1464,69 @@ class R4MeasureReportUtilsTest {
             group.addPopulation(population);
         }
         return group;
+    }
+
+    // ========================================
+    // Helper methods for updateAggregationResult tests
+    // ========================================
+
+    /**
+     * Create a MeasureReportGroupPopulationComponent with aggregation method, criteria reference, and result.
+     */
+    private static MeasureReportGroupPopulationComponent createPopulationWithAggregationData(
+            String aggregationMethod, String criteriaReference, double aggregationResult) {
+        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType(aggregationMethod));
+        population.addExtension(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE, new StringType(criteriaReference));
+        population.addExtension(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(aggregationResult));
+        return population;
+    }
+
+    /**
+     * Assert that aggregation result extension has the expected value.
+     */
+    private static void assertAggregationResultEquals(
+            MeasureReportGroupPopulationComponent population, BigDecimal expected) {
+        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt, "Aggregation result extension should be present");
+        BigDecimal actual = ((DecimalType) resultExt.getValue()).getValue();
+        assertEquals(0, expected.compareTo(actual), "Aggregation result should match expected value");
+    }
+
+    /**
+     * Assert that aggregation method extension has the expected value.
+     */
+    private static void assertAggregationMethodEquals(
+            MeasureReportGroupPopulationComponent population, String expected) {
+        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt, "Aggregation method extension should be present");
+        assertEquals(expected, ((StringType) methodExt.getValue()).getValue());
+    }
+
+    /**
+     * Assert that criteria reference extension has the expected value.
+     */
+    private static void assertCriteriaReferenceEquals(
+            MeasureReportGroupPopulationComponent population, String expected) {
+        Extension criteriaRefExt = population.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt, "Criteria reference extension should be present");
+        assertEquals(expected, ((StringType) criteriaRefExt.getValue()).getValue());
+    }
+
+    /**
+     * Assert that updateAggregationResult throws InvalidRequestException with proper error message.
+     */
+    private static void assertUpdateAggregationResultThrowsInvalidRequest(
+            String measureUrl,
+            MeasureReportGroupPopulationComponent population,
+            BigDecimal aggregationResult,
+            String populationId) {
+        InvalidRequestException exception = assertThrows(
+                InvalidRequestException.class,
+                () -> R4MeasureReportUtils.updateAggregationResult(measureUrl, population, aggregationResult));
+
+        assertTrue(exception.getMessage().contains("Aggregation method and criteria reference must already be set"));
+        assertTrue(exception.getMessage().contains(measureUrl));
+        assertTrue(exception.getMessage().contains(populationId));
     }
 }

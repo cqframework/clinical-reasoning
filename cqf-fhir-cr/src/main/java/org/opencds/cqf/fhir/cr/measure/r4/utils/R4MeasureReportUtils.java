@@ -391,6 +391,30 @@ public class R4MeasureReportUtils {
                 .orElse(null);
     }
 
+    public static void updateAggregationResult(
+            String measureUrl,
+            MeasureReportGroupPopulationComponent reportPopulation,
+            @Nullable BigDecimal aggregationResult) {
+
+        final ContinuousVariableObservationAggregateMethod aggregateMethod =
+                getAggregationMethodFromPopulation(measureUrl, reportPopulation);
+        final String criteriaReference = getCriteriaReference(reportPopulation);
+
+        if (aggregateMethod == null
+                || aggregateMethod == ContinuousVariableObservationAggregateMethod.N_A
+                || criteriaReference == null) {
+            throw new InvalidRequestException(
+                    "Aggregation method and criteria reference must already be set for report with measure: %s and population: %s"
+                            .formatted(measureUrl, reportPopulation.getId()));
+        }
+
+        addAggregationResultMethodAndCriteriaRef(
+                reportPopulation,
+                getAggregationMethodFromPopulation(measureUrl, reportPopulation),
+                aggregationResult,
+                criteriaReference);
+    }
+
     public static void addAggregationResultMethodAndCriteriaRef(
             MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
 

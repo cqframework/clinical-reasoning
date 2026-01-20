@@ -163,7 +163,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 new HashMap<>(),
                 inputExpansionParams,
                 latestFromTxServer,
-                terminologyEndpoint.orElse(null));
+                terminologyEndpoint.orElse(null),
+                new ArrayList<>());
 
         // remove duplicates and add
         var relatedArtifacts = rootAdapter.getRelatedArtifact();
@@ -314,7 +315,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             Map<String, IDomainResource> alreadyUpdatedDependencies,
             IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
-            IEndpointAdapter endpoint) {
+            IEndpointAdapter endpoint,
+            List<String> parentRoles) {
         if (artifactAdapter == null) {
             return;
         }
@@ -385,6 +387,16 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 }
                 if (dependencyAdapter != null) {
                     dependency.setReference(dependencyAdapter.getCanonical());
+
+                    // Classify roles for this dependency to determine if it's key
+                    List<String> currentDependencyRoles = DependencyRoleClassifier.classifyDependencyRoles(
+                            dependency, artifactAdapter, dependencyAdapter, repository);
+
+                    // Propagate key role from parent if needed
+                    if (parentRoles.contains("key") && !currentDependencyRoles.contains("key")) {
+                        currentDependencyRoles.add(0, "key"); // Add key at the beginning
+                    }
+
                     gatherDependencies(
                             rootAdapter,
                             dependencyAdapter,
@@ -393,7 +405,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                             alreadyUpdatedDependencies,
                             inputExpansionParameters,
                             latestFromTxServer,
-                            endpoint);
+                            endpoint,
+                            currentDependencyRoles);
                 }
                 // only add the dependency to the manifest if it is from a leaf artifact
                 if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
@@ -414,7 +427,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
                     // Add CRMI dependency management extensions
                     addCrmiExtensionsToRelatedArtifact(
-                            newDep, dependency, artifactAdapter, dependencyAdapter, repository);
+                            newDep, dependency, artifactAdapter, dependencyAdapter, repository, parentRoles);
 
                     var updatedRelatedArtifacts = rootAdapter.getRelatedArtifact();
                     updatedRelatedArtifacts.add(newDep);
@@ -777,20 +790,27 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             IDependencyInfo dependency,
             IKnowledgeArtifactAdapter sourceArtifact,
             IKnowledgeArtifactAdapter dependencyArtifact,
-            IRepository repository) {
+            IRepository repository,
+            List<String> parentRoles) {
 
         // 1. Classify dependency roles
         List<String> roles = DependencyRoleClassifier.classifyDependencyRoles(
                 dependency, sourceArtifact, dependencyArtifact, repository);
+
+        // 2. Propagate "key" role from parent if this is a transitive dependency
+        if (parentRoles != null && parentRoles.contains("key") && !roles.contains("key")) {
+            roles.add(0, "key"); // Add key role at the beginning
+        }
+
         dependency.setRoles(roles);
 
-        // 2. Resolve package source
+        // 3. Resolve package source
         if (dependencyArtifact != null) {
             PackageSourceResolver.resolvePackageSource(dependencyArtifact, repository)
                     .ifPresent(dependency::setReferencePackageId);
         }
 
-        // 3. Preserve original extensions and add new CRMI extensions
+        // 4. Preserve original extensions and add new CRMI extensions
         @SuppressWarnings("unchecked")
         List<IBaseExtension<?, ?>> extensionList =
                 (List<IBaseExtension<?, ?>>) ((IBaseHasExtensions) relatedArtifact).getExtension();

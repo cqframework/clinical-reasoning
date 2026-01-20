@@ -256,6 +256,32 @@ class DependencyRoleClassifierTest {
     }
 
     @Test
+    void testTransitiveKeyRoleNotPropagatedByClassifier() {
+        // DependencyRoleClassifier only classifies direct relationships
+        // Transitive propagation is handled by ReleaseVisitor
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/parent");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var childVs = new ValueSet();
+        childVs.setUrl("http://example.org/ValueSet/child");
+        var childAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(childVs);
+
+        var dependency = createDependency("http://example.org/ValueSet/child");
+
+        // Direct classification - library to valueset - should only be default
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, childAdapter, repository);
+
+        assertEquals(1, roles.size(), "Direct library->valueset dependency should only get default role");
+        assertTrue(roles.contains("default"));
+        assertFalse(roles.contains("key"), "Transitive propagation is not classifier's responsibility");
+    }
+
+    @Test
     void testNullDependencyArtifact() {
         var repository = mock(IRepository.class);
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());

@@ -79,4 +79,66 @@ public class ExtensionBuilders {
             default -> null;
         };
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IBaseExtension<?, ?>> T buildDependencyRoleExt(
+            FhirVersionEnum fhirVersion, String roleCode) {
+        var value =
+                switch (fhirVersion) {
+                    case DSTU3 -> new org.hl7.fhir.dstu3.model.CodeType(roleCode);
+                    case R4 -> new org.hl7.fhir.r4.model.CodeType(roleCode);
+                    case R5 -> new org.hl7.fhir.r5.model.CodeType(roleCode);
+                    default -> null;
+                };
+        return switch (fhirVersion) {
+            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.Extension(Constants.CRMI_DEPENDENCY_ROLE, value);
+            case R4 -> (T) new org.hl7.fhir.r4.model.Extension(Constants.CRMI_DEPENDENCY_ROLE, value);
+            case R5 -> (T) new org.hl7.fhir.r5.model.Extension(Constants.CRMI_DEPENDENCY_ROLE, value);
+            default -> null;
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IBaseExtension<?, ?>> T buildPackageSourceExt(
+            FhirVersionEnum fhirVersion, String packageSource) {
+        var value =
+                switch (fhirVersion) {
+                    case DSTU3 -> new org.hl7.fhir.dstu3.model.StringType(packageSource);
+                    case R4 -> new org.hl7.fhir.r4.model.StringType(packageSource);
+                    case R5 -> new org.hl7.fhir.r5.model.StringType(packageSource);
+                    default -> null;
+                };
+        return switch (fhirVersion) {
+            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.Extension(Constants.PACKAGE_SOURCE, value);
+            case R4 -> (T) new org.hl7.fhir.r4.model.Extension(Constants.PACKAGE_SOURCE, value);
+            case R5 -> (T) new org.hl7.fhir.r5.model.Extension(Constants.PACKAGE_SOURCE, value);
+            default -> null;
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IBaseExtension<?, ?>> T buildReferenceSourceExt(
+            FhirVersionEnum fhirVersion, String artifactCanonical, String fhirPath) {
+        return switch (fhirVersion) {
+            case DSTU3 -> {
+                var ext = new org.hl7.fhir.dstu3.model.Extension(Constants.CRMI_REFERENCE_SOURCE);
+                ext.addExtension("artifact", new org.hl7.fhir.dstu3.model.UriType(artifactCanonical));
+                ext.addExtension("path", new org.hl7.fhir.dstu3.model.StringType(fhirPath));
+                yield (T) ext;
+            }
+            case R4 -> {
+                var ext = new org.hl7.fhir.r4.model.Extension(Constants.CRMI_REFERENCE_SOURCE);
+                ext.addExtension("artifact", new org.hl7.fhir.r4.model.CanonicalType(artifactCanonical));
+                ext.addExtension("path", new org.hl7.fhir.r4.model.StringType(fhirPath));
+                yield (T) ext;
+            }
+            case R5 -> {
+                var ext = new org.hl7.fhir.r5.model.Extension(Constants.CRMI_REFERENCE_SOURCE);
+                ext.addExtension("artifact", new org.hl7.fhir.r5.model.CanonicalType(artifactCanonical));
+                ext.addExtension("path", new org.hl7.fhir.r5.model.StringType(fhirPath));
+                yield (T) ext;
+            }
+            default -> null;
+        };
+    }
 }

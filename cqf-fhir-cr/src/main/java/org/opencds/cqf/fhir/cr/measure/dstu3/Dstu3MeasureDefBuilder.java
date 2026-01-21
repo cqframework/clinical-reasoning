@@ -6,7 +6,10 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -34,6 +37,9 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     @Override
     public MeasureDef build(Measure measure) {
         checkId(measure);
+
+        // Validate unique population IDs within each group
+        validateUniquePopulationIds(measure);
 
         // SDES
         List<SdeDef> sdes = new ArrayList<>();
@@ -68,13 +74,19 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         for (MeasureGroupComponent group : measure.getGroup()) {
             // Populations
             List<PopulationDef> populations = new ArrayList<>();
+            var populationBasisDef = getPopulationBasisDef(measureBasis);
             for (MeasureGroupPopulationComponent pop : group.getPopulation()) {
                 checkId(pop);
                 var populationType = MeasurePopulationType.fromCode(
                         pop.getCode().getCodingFirstRep().getCode());
 
                 populations.add(new PopulationDef(
-                        pop.getId(), conceptToConceptDef(pop.getCode()), populationType, pop.getCriteria()));
+                        pop.getId(),
+                        conceptToConceptDef(pop.getCode()),
+                        populationType,
+                        pop.getCriteria(),
+                        populationBasisDef,
+                        null));
             }
 
             // Stratifiers
@@ -99,7 +111,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     measureScoring,
                     false, // no group scoring
                     getImprovementNotation(measureImpNotation),
-                    getPopulationBasisDef(measureBasis));
+                    populationBasisDef);
             groups.add(groupDef);
         }
 
@@ -125,13 +137,44 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private void checkId(Element e) {
         if (e.getId() == null || StringUtils.isBlank(e.getId())) {
-            throw new NullPointerException("id is required on all Elements of type: " + e.fhirType());
+            throw new InvalidRequestException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
-            throw new NullPointerException("id is required on all Resources of type: " + r.fhirType());
+            throw new InvalidRequestException("id is required on all Resources of type: " + r.fhirType());
+        }
+    }
+
+    /**
+     * Validates that all population IDs within each group are unique.
+     *
+     * @param measure the Measure to validate
+     * @throws InvalidRequestException if duplicate population IDs exist within a group
+     */
+    private void validateUniquePopulationIds(Measure measure) {
+        String measureIdentifier = measure.hasUrl() ? measure.getUrl() : measure.getId();
+
+        for (int groupIndex = 0; groupIndex < measure.getGroup().size(); groupIndex++) {
+            MeasureGroupComponent group = measure.getGroup().get(groupIndex);
+            String groupIdentifier = group.hasId() ? group.getId() : "group-" + (groupIndex + 1);
+
+            Set<String> seenPopulationIds = new HashSet<>();
+
+            for (MeasureGroupPopulationComponent population : group.getPopulation()) {
+                String populationId = population.getId();
+
+                // Skip null/blank IDs - they will be caught by checkId() validation
+                if (populationId == null || populationId.isBlank()) {
+                    continue;
+                }
+
+                if (!seenPopulationIds.add(populationId)) {
+                    throw new InvalidRequestException("Duplicate population ID '%s' found in %s of Measure: %s"
+                            .formatted(populationId, groupIdentifier, measureIdentifier));
+                }
+            }
         }
     }
 
@@ -179,10 +222,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private CodeDef getImprovementNotation(CodeDef measureImpNotation) {
-        if (measureImpNotation != null) {
-            return measureImpNotation;
-        } else {
-            return new CodeDef(null, IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
-        }
+        return Objects.requireNonNullElseGet(
+                measureImpNotation, () -> new CodeDef(null, IMPROVEMENT_NOTATION_SYSTEM_INCREASE));
     }
 }

@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class PopulationDef {
@@ -14,6 +16,8 @@ public class PopulationDef {
     private final String expression;
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
+    private final CodeDef populationBasis;
+    private final List<SupportingEvidenceDef> supportingEvidenceDefs;
 
     @Nullable
     private final String criteriaReference;
@@ -21,11 +25,20 @@ public class PopulationDef {
     @Nullable
     private final ContinuousVariableObservationAggregateMethod aggregateMethod;
 
+    @Nullable
+    private Double aggregationResult;
+
     protected Set<Object> evaluatedResources;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
-    public PopulationDef(String id, ConceptDef code, MeasurePopulationType measurePopulationType, String expression) {
-        this(id, code, measurePopulationType, expression, null, null);
+    public PopulationDef(
+            String id,
+            ConceptDef code,
+            MeasurePopulationType measurePopulationType,
+            String expression,
+            CodeDef populationBasis,
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null, supportingEvidenceDefs);
     }
 
     public PopulationDef(
@@ -33,14 +46,18 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
+            CodeDef populationBasis,
             @Nullable String criteriaReference,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
         this.expression = expression;
+        this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
+        this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
     public MeasurePopulationType type() {
@@ -53,6 +70,26 @@ public class PopulationDef {
 
     public ConceptDef code() {
         return this.code;
+    }
+
+    /**
+     * Get the population basis code for this population.
+     * The population basis determines how population members are counted.
+     *
+     * @return the population basis CodeDef
+     */
+    public CodeDef getPopulationBasis() {
+        return this.populationBasis;
+    }
+
+    /**
+     * Check if this population uses boolean basis (patient-based counting).
+     * When true, counts unique subjects. When false, counts all resources.
+     *
+     * @return true if population basis is "boolean", false otherwise
+     */
+    public boolean isBooleanBasis() {
+        return this.populationBasis.code().equals("boolean");
     }
 
     public Set<Object> getEvaluatedResources() {
@@ -104,6 +141,19 @@ public class PopulationDef {
                 .toList();
     }
 
+    // Extracted from R4MeasureReportBuilder.countObservations() by Claude Sonnet 4.5
+    public int countObservations() {
+        if (this.getAllSubjectResources() == null) {
+            return 0;
+        }
+
+        return this.getAllSubjectResources().stream()
+                .filter(Map.class::isInstance)
+                .map(Map.class::cast)
+                .mapToInt(Map::size)
+                .sum();
+    }
+
     @Nullable
     public String getCriteriaReference() {
         return this.criteriaReference;
@@ -132,5 +182,65 @@ public class PopulationDef {
     @Nullable
     public ContinuousVariableObservationAggregateMethod getAggregateMethod() {
         return this.aggregateMethod;
+    }
+
+    @Nullable
+    public Double getAggregationResult() {
+        return aggregationResult;
+    }
+
+    public void setAggregationResult(@Nullable QuantityDef quantityDefResult) {
+        setAggregationResult(
+                Optional.ofNullable(quantityDefResult).map(QuantityDef::value).orElse(null));
+    }
+
+    public void setAggregationResult(@Nullable Double aggregationResult) {
+        this.aggregationResult = aggregationResult;
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Updated by Claude Sonnet 4.5 on 2025-12-08 to use own populationBasis instead of GroupDef parameter.
+     * Get the count for this population based on its type and population basis.
+     * This is the single source of truth for population counts.
+     *
+     * @return the count for this population
+     */
+    public int getCount() {
+        // For MEASUREOBSERVATION populations, count the observations
+        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
+            return countObservations();
+        }
+
+        // For other population types, use population basis to determine count
+        if (isBooleanBasis()) {
+            // Boolean basis: count unique subjects
+            return getSubjects().size();
+        } else {
+            // Non-boolean basis: count all resources (including duplicates across subjects)
+            return getAllSubjectResources().size();
+        }
+    }
+
+    @Override
+    public String toString() {
+        String codeText = (code != null && code.text() != null) ? code.text() : "null";
+        String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
+        String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+        String aggResult = (aggregationResult != null) ? aggregationResult.toString() : "null";
+
+        return "PopulationDef{"
+                + "id='" + id + '\''
+                + ", code.text='" + codeText + '\''
+                + ", type=" + measurePopulationType
+                + ", expression='" + expression + '\''
+                + ", criteriaReference='" + criteriaRef + '\''
+                + ", aggregateMethod=" + aggMethod
+                + ", aggregationResult=" + aggResult
+                + '}';
+    }
+
+    public List<SupportingEvidenceDef> getSupportingEvidenceDefs() {
+        return supportingEvidenceDefs == null ? null : new ArrayList<>(supportingEvidenceDefs);
     }
 }

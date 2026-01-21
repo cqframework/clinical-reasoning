@@ -14,8 +14,8 @@ import java.util.Set;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
@@ -33,15 +33,12 @@ public class ContinuousVariableObservationHandler {
         // static class with private constructor
     }
 
-    static <T extends ICompositeType> List<EvaluationResult> continuousVariableEvaluation(
+    static List<EvaluationResult> continuousVariableEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
-            String subjectTypePart,
-            // This is a temporary hack to inject FHIR version specific behaviour for
-            // Observations and Quantities for continuous variable observations
-            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
+            String subjectTypePart) {
 
         final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
@@ -71,12 +68,7 @@ public class ContinuousVariableObservationHandler {
                     for (PopulationDef populationDef : measureObservationPopulations) {
                         // each measureObservation is evaluated
                         var result = processMeasureObservation(
-                                context,
-                                evaluationResult,
-                                subjectTypePart,
-                                groupDef,
-                                populationDef,
-                                continuousVariableObservationConverter);
+                                context, evaluationResult, subjectTypePart, groupDef, populationDef);
 
                         finalResults.add(result);
                     }
@@ -96,13 +88,12 @@ public class ContinuousVariableObservationHandler {
      * For a given measure observation population, do an ad-hoc function evaluation and
      * accumulate the results that will be subsequently added to the CQL evaluation result.
      */
-    private static <T extends ICompositeType> EvaluationResult processMeasureObservation(
+    private static EvaluationResult processMeasureObservation(
             CqlEngine context,
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
-            PopulationDef populationDef,
-            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
+            PopulationDef populationDef) {
 
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
@@ -141,7 +132,7 @@ public class ContinuousVariableObservationHandler {
             final ExpressionResult observationResult =
                     evaluateObservationCriteria(result, observationExpression, groupDef.isBooleanBasis(), context);
 
-            var quantity = continuousVariableObservationConverter.wrapResultAsQuantity(observationResult.value());
+            var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
             // name
             // need a way to capture input parameter here too, otherwise we have no way
@@ -149,10 +140,46 @@ public class ContinuousVariableObservationHandler {
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
             functionResults.put(result, quantity);
-            evaluatedResources.addAll(observationResult.evaluatedResources());
+            evaluatedResources.addAll(observationResult.getEvaluatedResources());
         }
 
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
+    }
+
+    // Added by Claude Sonnet 4.5 on 2025-12-02
+    /**
+     * Convert CQL evaluation result to QuantityDef.
+     *
+     * CQL evaluation can return Number, String, or CQL Quantity - never FHIR Quantities.
+     *
+     * @param result the CQL evaluation result
+     * @return QuantityDef containing the numeric value
+     * @throws InvalidRequestException if result cannot be converted to a number
+     */
+    private static QuantityDef convertCqlResultToQuantityDef(Object result) {
+        if (result == null) {
+            return null;
+        }
+
+        // Handle Number (most common case)
+        if (result instanceof Number number) {
+            return new QuantityDef(number.doubleValue());
+        }
+
+        // Handle String with validation
+        if (result instanceof String s) {
+            try {
+                return new QuantityDef(Double.parseDouble(s));
+            } catch (NumberFormatException e) {
+                throw new InvalidRequestException("String is not a valid number: " + s, e);
+            }
+        }
+
+        // TODO: Handle CQL Quantity if needed (org.opencds.cqf.cql.engine.runtime.Quantity)
+        // For now, unsupported
+
+        throw new InvalidRequestException("Cannot convert CQL result of type " + result.getClass() + " to QuantityDef. "
+                + "Expected Number or String.");
     }
 
     /**
@@ -222,7 +249,9 @@ public class ContinuousVariableObservationHandler {
         final Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
 
         if (!expressionResults.containsKey(expressionName)) {
-            throw new InvalidRequestException("Could not find expression result for expression: " + expressionName);
+            throw new InvalidRequestException(
+                    "Could not find expression result for expression: %s. Available expressions: %s"
+                            .formatted(expressionName, expressionResults.keySet()));
         }
 
         return Optional.of(evaluationResult.getExpressionResults().get(expressionName));
@@ -230,11 +259,10 @@ public class ContinuousVariableObservationHandler {
 
     private static Iterable<?> getResultIterable(
             EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
-        if (expressionResult.value() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.value()))) {
+        if (expressionResult.getValue() instanceof Boolean) {
+            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult =
-                        evaluationResult.forExpression(subjectTypePart).value();
+                Object booleanResult = evaluationResult.get(subjectTypePart).getValue();
                 // remove evaluated resources
                 return Collections.singletonList(booleanResult);
             } else {
@@ -243,7 +271,7 @@ public class ContinuousVariableObservationHandler {
             }
         }
 
-        Object value = expressionResult.value();
+        Object value = expressionResult.getValue();
         if (value instanceof Iterable<?> iterable) {
             return iterable;
         } else {
@@ -306,9 +334,8 @@ public class ContinuousVariableObservationHandler {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-        evaluationResultToReturn
-                .getExpressionResults()
-                .put(expressionName, new ExpressionResult(functionResults, evaluatedResources));
+        evaluationResultToReturn.set(
+                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }

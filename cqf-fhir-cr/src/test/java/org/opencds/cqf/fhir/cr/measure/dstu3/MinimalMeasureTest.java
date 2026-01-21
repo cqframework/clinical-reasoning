@@ -16,7 +16,7 @@ class MinimalMeasureTest {
     void evaluateSucceedsWithMinimalMeasure() {
         var when = GIVEN_MINIMAL_MEASURE_REPO.when().measureId("Minimal").evaluate();
 
-        var report = when.then().report();
+        var report = when.then().measureReport();
         assertNotNull(report);
         assertEquals(0, report.getGroup().size());
     }
@@ -26,7 +26,7 @@ class MinimalMeasureTest {
         var when =
                 GIVEN_MINIMAL_MEASURE_REPO.when().measureId("MinimalWithGroup").evaluate();
 
-        var report = when.then().report();
+        var report = when.then().measureReport();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
         assertEquals(0, report.getGroupFirstRep().getPopulation().size());
@@ -39,7 +39,7 @@ class MinimalMeasureTest {
                 .measureId("MinimalWithPopulation")
                 .evaluate();
 
-        var report = when.then().report();
+        var report = when.then().measureReport();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
         assertEquals(1, report.getGroupFirstRep().getPopulation().size());
@@ -53,7 +53,7 @@ class MinimalMeasureTest {
                 .measureId("MinimalWithParameter")
                 .evaluate();
 
-        var report = when.then().report();
+        var report = when.then().measureReport();
         assertNotNull(report);
         assertEquals(1, report.getGroup().size());
         assertEquals(1, report.getGroupFirstRep().getPopulation().size());

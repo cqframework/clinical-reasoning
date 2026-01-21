@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.annotations.VisibleForTesting;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +43,8 @@ public class Dstu3MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
     private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+    private final MeasureEvaluationResultHandler measureEvaluationResultHandler;
 
     public Dstu3MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this(repository, measureEvaluationOptions, new Dstu3RepositorySubjectProvider());
@@ -54,6 +58,8 @@ public class Dstu3MeasureProcessor {
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.subjectProvider = subjectProvider;
+        this.measureEvaluationResultHandler =
+                new MeasureEvaluationResultHandler(this.measureEvaluationOptions, new Dstu3PopulationBasisValidator());
     }
 
     public MeasureReport evaluateMeasure(
@@ -73,6 +79,75 @@ public class Dstu3MeasureProcessor {
     // ensures that
     // the repositories are set up correctly.
     protected MeasureReport evaluateMeasure(
+            Measure measure,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData,
+            Parameters parameters) {
+
+        return evaluateMeasureCaptureDefs(
+                        measure, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters)
+                .measureReport();
+    }
+
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     * <p>
+     * This overload reads the Measure from the repository by ID and delegates to
+     * evaluateMeasureCaptureDefs(Measure, ...).
+     * </p>
+     *
+     * @param measureId Measure ID
+     * @param periodStart start date string of Measurement Period
+     * @param periodEnd end date string of Measurement Period
+     * @param reportType type of report
+     * @param subjectIds the subjectIds to process
+     * @param additionalData additional data bundle
+     * @param parameters CQL parameters
+     * @return MeasureDefAndDstu3MeasureReport containing both MeasureDef and MeasureReport
+     */
+    @VisibleForTesting
+    MeasureDefAndDstu3MeasureReport evaluateMeasureCaptureDefs(
+            IdType measureId,
+            String periodStart,
+            String periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData,
+            Parameters parameters) {
+
+        Measure measure = this.repository.read(Measure.class, measureId);
+        return evaluateMeasureCaptureDefs(
+                measure, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters);
+    }
+
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     * <p>
+     * This method is package-private and annotated with @VisibleForTesting to support
+     * test frameworks that need to assert on both pre-scoring state (MeasureDef) and
+     * post-scoring state (MeasureReport).
+     * </p>
+     *
+     * @param measure Measure resource
+     * @param periodStart start date string of Measurement Period
+     * @param periodEnd end date string of Measurement Period
+     * @param reportType type of report
+     * @param subjectIds the subjectIds to process
+     * @param additionalData additional data bundle
+     * @param parameters CQL parameters
+     * @return MeasureDefAndDstu3MeasureReport containing both MeasureDef and MeasureReport
+     */
+    @VisibleForTesting
+    MeasureDefAndDstu3MeasureReport evaluateMeasureCaptureDefs(
             Measure measure,
             String periodStart,
             String periodEnd,
@@ -115,24 +190,18 @@ public class Dstu3MeasureProcessor {
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = MeasureEvaluationResultHandler.getEvaluationResults(
-                    subjectIds,
-                    zonedMeasurementPeriod,
-                    context,
-                    measureLibraryIdEngineDetails,
-                    Dstu3ContinuousVariableObservationConverter.INSTANCE);
+                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
 
             // Process Criteria Expression Results
-            MeasureEvaluationResultHandler.processResults(
-                    results.processMeasureForSuccessOrFailure(measureDef),
-                    measureDef,
-                    evalType,
-                    measureEvaluationOptions.getApplyScoringSetMembership(),
-                    new Dstu3PopulationBasisValidator());
+            measureEvaluationResultHandler.processResults(
+                    fhirContext, results.processMeasureForSuccessOrFailure(measureDef), measureDef, evalType);
         }
 
         // Build Measure Report with Results
-        return new Dstu3MeasureReportBuilder()
+        MeasureReport measureReport = new Dstu3MeasureReportBuilder()
                 .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
+
+        return new MeasureDefAndDstu3MeasureReport(measureDef, measureReport);
     }
 
     // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now

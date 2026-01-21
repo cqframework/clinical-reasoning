@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -344,6 +346,242 @@ class ExpandHelperTest {
         // trivial checks
         verify(rep, never()).search(any(), any(), any(Multimap.class));
         verify(client, times(1)).expand(eq(adapter), any(), any());
+    }
+
+    @Test
+    void expansionUsingExpectedParametersDoesNotAddWarning() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        // setup ValueSet to be expanded (no version, no expansion)
+        var url = baseUrl + "/ValueSet/leaf";
+        var initiallyNoVersionNoExpansion = createLeafWithUrl(url);
+        initiallyNoVersionNoExpansion.setExpansion(null);
+        initiallyNoVersionNoExpansion.setVersion(null);
+        var adapter = (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(initiallyNoVersionNoExpansion);
+        var version = "1.2.3";
+
+        // setup the expanded ValueSet returned by the terminology server
+        var expandedValueSet = createLeafWithUrl(url);
+        expandedValueSet.setVersion(version);
+        expandedValueSet
+                .getExpansion()
+                .addParameter()
+                .setName("used-system-version")
+                .setValue(new UriType("http://example.org/system|1.0.0"));
+        expandedValueSet
+                .getExpansion()
+                .addParameter()
+                .setName("used-valueset-version")
+                .setValue(new UriType(version));
+
+        // repository should not be used
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // terminology server should be used and return the expanded value set with parameters
+        var client = mockTerminologyServerWithValueSetR4(expandedValueSet);
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        // expansion parameters we pass to the expand call
+        var expansionParams = new Parameters();
+        expansionParams.addParameter("system-version", "http://example.org/system|1.0.0");
+        expansionParams.addParameter("valueset-version", version);
+
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(expansionParams),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        // Verify that the ValueSet was expanded and that no warning parameter was added
+        assertNotNull(initiallyNoVersionNoExpansion.getExpansion());
+        var parameters = initiallyNoVersionNoExpansion.getExpansion().getParameter();
+        assertNotNull(parameters);
+        assertFalse(parameters.stream().anyMatch(p -> "warning".equals(p.getName())));
+    }
+
+    @Test
+    void expansionMissingExpectedParametersAddsWarning() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        // setup ValueSet to be expanded (no version, no expansion)
+        var url = baseUrl + "/ValueSet/leaf";
+        var initiallyNoVersionNoExpansion = createLeafWithUrl(url);
+        initiallyNoVersionNoExpansion.setExpansion(null);
+        initiallyNoVersionNoExpansion.setVersion(null);
+        var adapter = (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(initiallyNoVersionNoExpansion);
+
+        // setup the expanded ValueSet returned by the terminology server WITHOUT system/version parameters
+        var expandedValueSet = createLeafWithUrl(url);
+        expandedValueSet.setVersion("1.2.3");
+        // intentionally do not add system-version or valueset-version (or used-*) parameters
+
+        // repository should not be used
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // terminology server should be used and return the expanded value set without parameters
+        var client = mockTerminologyServerWithValueSetR4(expandedValueSet);
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        // expansion parameters we pass to the expand call that we expect to be reflected in the expansion
+        var expansionParams = new Parameters();
+        expansionParams.addParameter("system-version", "http://example.org/system|1.0.0");
+        expansionParams.addParameter("valueset-version", "1.2.3");
+
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(expansionParams),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        // Verify that a warning parameter was added to the expansion
+        assertNotNull(initiallyNoVersionNoExpansion.getExpansion());
+        var parameters = initiallyNoVersionNoExpansion.getExpansion().getParameter();
+        assertNotNull(parameters);
+        var warningParameters =
+                parameters.stream().filter(p -> "warning".equals(p.getName())).toList();
+        assertEquals(1, warningParameters.size());
+        var warningValue = warningParameters.get(0).getValue();
+        assertNotNull(warningValue);
+        var warningText = warningValue.primitiveValue();
+        assertTrue(
+                warningText.contains("did not use expected expansion parameters"),
+                "Warning should indicate that expected expansion parameters were not used");
+        assertTrue(
+                warningText.contains("system-version=http://example.org/system|1.0.0"),
+                "Warning should include the expected system-version value");
+        assertTrue(
+                warningText.contains("valueset-version=1.2.3"),
+                "Warning should include the expected valueset-version value");
+    }
+
+    @Test
+    void expansionWithMismatchedValuesetVersionAddsWarning() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        // setup ValueSet to be expanded (no version, no expansion)
+        var url = baseUrl + "/ValueSet/leaf";
+        var initiallyNoVersionNoExpansion = createLeafWithUrl(url);
+        initiallyNoVersionNoExpansion.setExpansion(null);
+        initiallyNoVersionNoExpansion.setVersion(null);
+        var adapter = (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(initiallyNoVersionNoExpansion);
+
+        // setup the expanded ValueSet returned by the terminology server WITH a mismatched valueset version
+        var expandedValueSet = createLeafWithUrl(url);
+        var requestedVersion = "1.2.3";
+        var actualVersion = "9.9.9";
+        expandedValueSet.setVersion(actualVersion);
+        expandedValueSet
+                .getExpansion()
+                .addParameter()
+                .setName("used-system-version")
+                .setValue(new UriType("http://example.org/system|1.0.0"));
+        // note: used-valueset-version is present, but has a different value than requested
+        expandedValueSet
+                .getExpansion()
+                .addParameter()
+                .setName("used-valueset-version")
+                .setValue(new UriType(actualVersion));
+
+        // repository should not be used
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // terminology server should be used and return the expanded value set with mismatched valueset version
+        var client = mockTerminologyServerWithValueSetR4(expandedValueSet);
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        // expansion parameters we pass to the expand call that we expect to be honored
+        var expansionParams = new Parameters();
+        expansionParams.addParameter("system-version", "http://example.org/system|1.0.0");
+        expansionParams.addParameter("valueset-version", requestedVersion);
+
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(expansionParams),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        // Verify that a warning parameter was added to the expansion due to the mismatched valueset-version
+        assertNotNull(initiallyNoVersionNoExpansion.getExpansion());
+        var parameters = initiallyNoVersionNoExpansion.getExpansion().getParameter();
+        assertNotNull(parameters);
+        var warningParameters =
+                parameters.stream().filter(p -> "warning".equals(p.getName())).toList();
+        assertEquals(1, warningParameters.size());
+        var warningValue = warningParameters.get(0).getValue();
+        assertNotNull(warningValue);
+        var warningText = warningValue.primitiveValue();
+        assertTrue(
+                warningText.contains("did not use expected expansion parameters"),
+                "Warning should indicate that expected expansion parameters were not used");
+        // Only valueset-version should be reported here, because system-version is honored
+        assertTrue(
+                warningText.contains("valueset-version=" + requestedVersion),
+                "Warning should include the expected valueset-version value");
+        assertFalse(
+                warningText.contains("system-version="), "Warning should not flag system-version when it was honored");
+    }
+
+    @Test
+    void expansionWithNoRequestedParametersDoesNotAddWarning() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        // setup ValueSet to be expanded (no version, no expansion)
+        var url = baseUrl + "/ValueSet/leaf";
+        var initiallyNoVersionNoExpansion = createLeafWithUrl(url);
+        initiallyNoVersionNoExpansion.setExpansion(null);
+        initiallyNoVersionNoExpansion.setVersion(null);
+        var adapter = (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(initiallyNoVersionNoExpansion);
+        var version = "1.2.3";
+
+        // expanded ValueSet with some expansion, but no system/version params
+        var expandedValueSet = createLeafWithUrl(url);
+        expandedValueSet.setVersion(version);
+
+        // repository should not be used
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // terminology server returns the expanded value set
+        var client = mockTerminologyServerWithValueSetR4(expandedValueSet);
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        // no expansion parameters requested
+        var expansionParams = new Parameters();
+
+        expandHelper.expandValueSet(
+                adapter,
+                factory.createParameters(expansionParams),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        // We didn't ask for system-version/valueset-version, so we must not get a warning
+        assertNotNull(initiallyNoVersionNoExpansion.getExpansion());
+        var parameters = initiallyNoVersionNoExpansion.getExpansion().getParameter();
+        assertNotNull(parameters);
+        assertFalse(parameters.stream().anyMatch(p -> "warning".equals(p.getName())));
     }
 
     ValueSet createLeafWithUrl(String url) {

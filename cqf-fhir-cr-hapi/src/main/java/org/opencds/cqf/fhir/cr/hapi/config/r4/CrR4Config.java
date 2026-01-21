@@ -47,7 +47,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -63,7 +62,9 @@ import org.springframework.context.annotation.Import;
     ReleaseOperationConfig.class,
     DeleteOperationConfig.class,
     RetireOperationConfig.class,
-    WithdrawOperationConfig.class
+    WithdrawOperationConfig.class,
+    ReviseOperationConfig.class,
+    ArtifactDiffOperationConfig.class
 })
 public class CrR4Config {
 
@@ -72,7 +73,12 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
+        // We are effectively returning an R4MeasureEvaluatorSingle her
+        return requestDetails -> new R4MultiMeasureService(
+                repositoryFactory.create(requestDetails),
+                evaluationOptions,
+                requestDetails.getFhirServerBase(),
+                measurePeriodValidator);
     }
 
     @Bean

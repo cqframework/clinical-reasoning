@@ -47,14 +47,18 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportScorer;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
+
+    private static final Logger logger = LoggerFactory.getLogger(Dstu3MeasureReportBuilder.class);
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static final String EXT_POPULATION_DESCRIPTION_URL =
@@ -63,12 +67,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
     protected static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
-
-    protected MeasureReportScorer<MeasureReport> measureReportScorer;
-
-    public Dstu3MeasureReportBuilder() {
-        this.measureReportScorer = new Dstu3MeasureReportScorer();
-    }
 
     protected Measure measure = null;
     protected MeasureReport report = null;
@@ -95,7 +93,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         buildGroups(measure, measureDef);
         processSdes(measure, measureDef, subjectIds);
 
-        this.measureReportScorer.score(measure.getUrl(), measureDef, this.report);
+        // Copy scores from Def objects (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
+        copyScoresFromDef(measureDef);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
@@ -737,5 +736,135 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         private String joinValues(String... elements) {
             return String.join("-", elements);
         }
+    }
+
+    /**
+     * Copy scores from MeasureDef to MeasureReport.
+     * Part 1: Does nothing (MeasureDef scores are null - MeasureDefScorer not yet integrated).
+     * Part 2: Becomes active when MeasureDefScorer is called during evaluation flow.
+     * <p>
+     * Logic is driven by GroupDef objects (from MeasureDef), matching report groups by ID.
+     *
+     * @param measureDef the MeasureDef containing computed scores
+     */
+    private void copyScoresFromDef(MeasureDef measureDef) {
+        // Iterate through GroupDefs (drive from Def side)
+        for (var groupDef : measureDef.groups()) {
+            MeasureReportGroupComponent reportGroup = null;
+
+            // For single-group measures, use positional matching (no ID required)
+            // For multi-group measures, match by ID
+            if (this.report.getGroup().size() == 1) {
+                reportGroup = this.report.getGroupFirstRep();
+            } else {
+                // Multi-group: match by ID
+                reportGroup = this.report.getGroup().stream()
+                        .filter(rg -> groupDef.id() != null && groupDef.id().equals(rg.getId()))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (reportGroup == null) {
+                logger.warn("No matching MeasureReport group found for GroupDef with id: {}", groupDef.id());
+                continue;
+            }
+
+            // Copy group-level score (DSTU3 uses setMeasureScore(Double) directly)
+            Double groupScore = groupDef.getScore();
+            if (groupScore != null) {
+                reportGroup.setMeasureScore(groupScore);
+            }
+
+            // Copy stratifier scores
+            copyStratifierScores(reportGroup, groupDef);
+        }
+    }
+
+    /**
+     * Copy stratifier and stratum scores from GroupDef to MeasureReport group.
+     * Part 1: Does nothing (scores are null).
+     * Part 2: Copies computed stratifier scores after MeasureDefScorer runs.
+     * <p>
+     * Logic is driven by StratifierDef objects, matching report stratifiers by ID.
+     *
+     * @param reportGroup the MeasureReport group component
+     * @param groupDef the GroupDef containing stratifier scores
+     */
+    private void copyStratifierScores(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        // Iterate through StratifierDefs (drive from Def side)
+        for (var stratifierDef : groupDef.stratifiers()) {
+            // Find matching report stratifier by ID
+            var reportStratifier = reportGroup.getStratifier().stream()
+                    .filter(rs -> stratifierDef.id().equals(rs.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (reportStratifier == null) {
+                logger.warn(
+                        "No matching MeasureReport stratifier found for StratifierDef with id: {}", stratifierDef.id());
+                continue;
+            }
+
+            // Iterate through StratumDefs (drive from Def side)
+            for (var stratumDef : stratifierDef.getStratum()) {
+                // Find matching report stratum by comparing value strings
+                var reportStratum = reportStratifier.getStratum().stream()
+                        .filter(rs -> matchesStratumValue(rs, stratumDef))
+                        .findFirst()
+                        .orElse(null);
+
+                if (reportStratum == null) {
+                    logger.debug(
+                            "No matching MeasureReport stratum found for StratumDef in stratifier: {}",
+                            stratifierDef.id());
+                    continue;
+                }
+
+                // Copy stratum score (DSTU3 uses setMeasureScore(Double) directly)
+                Double stratumScore = stratumDef.getScore();
+                if (stratumScore != null) {
+                    reportStratum.setMeasureScore(stratumScore);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if a MeasureReport stratum matches a StratumDef.
+     * DSTU3 uses simple string-based comparison (no component stratifiers in DSTU3).
+     *
+     * @param reportStratum the MeasureReport stratum component
+     * @param stratumDef the StratumDef to match
+     * @return true if the stratum matches
+     */
+    private boolean matchesStratumValue(StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+        // DSTU3: getValue() returns String directly (simpler than R4)
+        String reportValue = reportStratum.hasValue() ? reportStratum.getValue() : null;
+        String defValue = getStratumDefValue(stratumDef);
+        return java.util.Objects.equals(reportValue, defValue);
+    }
+
+    /**
+     * Extract the value string from a StratumDef for DSTU3 matching.
+     * DSTU3 doesn't have component stratifiers, so this is simpler than R4.
+     *
+     * @param stratumDef the StratumDef
+     * @return the value string representation
+     */
+    private String getStratumDefValue(StratumDef stratumDef) {
+        // DSTU3: Single value, no components
+        if (stratumDef.valueDefs().isEmpty()) {
+            return null;
+        }
+
+        var valuePair = stratumDef.valueDefs().iterator().next();
+        var value = valuePair.value();
+
+        if (value == null) {
+            return null;
+        }
+
+        // Use getValueAsString() for consistent string representation
+        return value.getValueAsString();
     }
 }

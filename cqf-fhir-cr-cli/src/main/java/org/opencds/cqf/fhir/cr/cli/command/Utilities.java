@@ -135,6 +135,9 @@ public class Utilities {
         if (modelUrl != null) {
             Path path = Path.of(modelUrl);
             data = new IgRepository(fhirContext, path);
+            if (terminologyUrl == null) {
+                return data;
+            }
         }
 
         if (terminologyUrl != null) {
@@ -163,7 +166,7 @@ public class Utilities {
             for (Map.Entry<String, ExpressionResult> libraryEntry :
                     result.getExpressionResults().entrySet()) {
                 String key = libraryEntry.getKey();
-                Object value = Utilities.tempConvert(libraryEntry.getValue().value());
+                Object value = Utilities.tempConvert(libraryEntry.getValue().getValue());
                 writer.write(key + "=" + value);
                 writer.newLine();
             }

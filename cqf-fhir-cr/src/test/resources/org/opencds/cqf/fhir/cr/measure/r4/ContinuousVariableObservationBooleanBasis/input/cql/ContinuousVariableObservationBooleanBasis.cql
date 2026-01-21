@@ -16,7 +16,7 @@ context Patient
 define "Initial Population Boolean":
   exists "All Encounters"
 
-define "Measure Population Exclusions Boolean":
+define "Measure Population Exclusion Boolean":
   exists "Encounter Cancelled"
 
 define "Measure Population Boolean":

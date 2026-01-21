@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,10 @@ public class GroupDef {
     private final CodeDef populationBasis;
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
+
+    // Added by Claude Sonnet 4.5 on 2025-12-03
+    // Mutable score field for version-agnostic scoring
+    private Double score;
 
     public GroupDef(
             String id,
@@ -77,8 +82,67 @@ public class GroupDef {
         return defs.get(0);
     }
 
-    public List<PopulationDef> get(MeasurePopulationType type) {
+    public List<PopulationDef> getPopulationDefs(MeasurePopulationType type) {
         return this.populationIndex.computeIfAbsent(type, x -> Collections.emptyList());
+    }
+
+    /**
+     * Get the first population of the specified type, but only if it has a non-null ID.
+     * Returns null if the first population doesn't have an ID.
+     * Used for finding populations that can be referenced by criteriaReference.
+     *
+     * @param type the population type to find
+     * @return the first PopulationDef of the specified type if it has a non-null ID, or null otherwise
+     */
+    @Nullable
+    public PopulationDef getFirstWithTypeAndNonNullId(MeasurePopulationType type) {
+        return this.getPopulationDefs(type).stream()
+                .findFirst()
+                .filter(pop -> pop.id() != null)
+                .orElse(null);
+    }
+
+    // Extracted from R4MeasureReportBuilder.getReportPopulation() by Claude Sonnet 4.5
+    public PopulationDef findPopulationByType(MeasurePopulationType type) {
+        return this.populations.stream()
+                .filter(e -> e.code().first().code().equals(type.toCode()))
+                .findAny()
+                .orElse(null);
+    }
+
+    // Extracted from R4MeasureReportBuilder.buildGroup() loop by Claude Sonnet 4.5
+    public PopulationDef findPopulationById(String id) {
+        return this.populations.stream()
+                .filter(p -> p.id().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Find MEASUREOBSERVATION PopulationDef that references the specified population type.
+     * Used for ratio observation scoring to locate numerator/denominator observations.
+     * <p>
+     * Added by Claude Sonnet 4.5 on 2025-12-05 for ratio observation optimization.
+     *
+     * @param measureObservationPopulationDefs list of MEASUREOBSERVATION populations
+     * @param targetType the population type (NUMERATOR or DENOMINATOR) to find
+     * @return matching PopulationDef or null
+     */
+    @Nullable
+    public PopulationDef findRatioObservationPopulationDef(
+            List<PopulationDef> measureObservationPopulationDefs, MeasurePopulationType targetType) {
+
+        PopulationDef referencedPopulation = this.getFirstWithTypeAndNonNullId(targetType);
+        if (referencedPopulation == null) {
+            return null;
+        }
+
+        String targetId = referencedPopulation.id();
+        return measureObservationPopulationDefs.stream()
+                .filter(obs -> obs.getCriteriaReference() != null
+                        && obs.getCriteriaReference().equals(targetId))
+                .findFirst()
+                .orElse(null);
     }
 
     private Map<MeasurePopulationType, List<PopulationDef>> index(List<PopulationDef> populations) {
@@ -112,5 +176,41 @@ public class GroupDef {
 
     public CodeDef getImprovementNotation() {
         return this.improvementNotation;
+    }
+
+    /**
+     * Added by Claude Sonnet 4.5 on 2025-12-02
+     * Get the count for a specific population type in this group.
+     * Moved from R4MeasureReportScorer to make it reusable across FHIR versions.
+     *
+     * @param populationType the MeasurePopulationType to find
+     * @return the count for the population, or 0 if not found
+     */
+    public int getPopulationCount(MeasurePopulationType populationType) {
+        return this.populations.stream()
+                .filter(pop -> pop.type() == populationType)
+                .findFirst()
+                .map(PopulationDef::getCount)
+                .orElse(0);
+    }
+
+    /**
+     * Get the computed score for this group.
+     * Used by version-agnostic MeasureDefScorer.
+     *
+     * @return the score, or null if not yet computed
+     */
+    public Double getScore() {
+        return this.score;
+    }
+
+    public void setScoreAndAdaptToImprovementNotation(Double originalScore) {
+        if ((MeasureScoring.RATIO == measureScoring && hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
+                || MeasureScoring.PROPORTION == measureScoring) {
+            this.score = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                    originalScore, isIncreaseImprovementNotation());
+        } else {
+            this.score = originalScore;
+        }
     }
 }

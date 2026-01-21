@@ -18,6 +18,6 @@ public class FhirPathCache {
 
     public static IFhirPath cachedForVersion(FhirVersionEnum fhirVersionEnum) {
         return CACHE.computeIfAbsent(
-                fhirVersionEnum, x -> FhirContext.forVersion(x).newFhirPath());
+                fhirVersionEnum, x -> FhirContext.forCached(x).newFhirPath());
     }
 }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -21,6 +23,7 @@ import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UsageContext;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetComposeComponent;
@@ -28,12 +31,15 @@ import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapterTest;
 import org.opencds.cqf.fhir.utility.adapter.TestVisitor;
 
-class ValueSetAdapterTest {
+class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
     private final org.opencds.cqf.fhir.utility.adapter.IAdapterFactory adapterFactory = new AdapterFactory();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
 
     @Test
     void invalid_object_fails() {
@@ -210,6 +216,56 @@ class ValueSetAdapterTest {
     }
 
     @Test
+    void testHasExpansionStringParameterFalseWhenMissing() {
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        // Add a parameter with a different name and value to ensure no false positives
+        expansion.addParameter().setName("other-parameter").setValue(new StringType("other-value"));
+
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        assertTrue(adapter.hasExpansion(), "ValueSet should report having an expansion");
+        assertFalse(
+                adapter.hasExpansionStringParameter("system-version", "http://example.org/system|1.0.0"),
+                "Expected hasExpansionStringParameter to be false when no matching parameter is present");
+        assertFalse(
+                adapter.hasExpansionStringParameter("valueset-version", "1.2.3"),
+                "Expected hasExpansionStringParameter to be false when no matching parameter is present");
+    }
+
+    @Test
+    void testAddAndDetectExpansionStringParameter() {
+        var expansion = new ValueSet.ValueSetExpansionComponent();
+        var valueSet = new ValueSet().setExpansion(expansion);
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        var name = "warning";
+        var message = "Expansion for ValueSet X did not use expected expansion parameters.";
+
+        // Initially, there should be no such parameter
+        assertFalse(
+                adapter.hasExpansionStringParameter(name, message),
+                "Expected hasExpansionStringParameter to be false before parameter is added");
+
+        // Use the adapter helper to add a string parameter to the expansion
+        adapter.addExpansionStringParameter(name, message);
+
+        // Verify the helper reports the parameter as present with the expected value
+        assertTrue(
+                adapter.hasExpansionStringParameter(name, message),
+                "Expected hasExpansionStringParameter to be true after parameter is added");
+
+        // Also verify the underlying expansion has the parameter with the correct name and value
+        var expansionComponent = (ValueSet.ValueSetExpansionComponent) adapter.getExpansion();
+        assertTrue(
+                expansionComponent.getParameter().stream()
+                        .anyMatch(p -> name.equals(p.getName())
+                                && p.getValue().hasPrimitiveValue()
+                                && message.equals(p.getValue().primitiveValue())),
+                "Underlying expansion should contain the added warning parameter with the expected value");
+    }
+
+    @Test
     void testAppendExpansionContains() {
         var contains = new ValueSet.ValueSetExpansionContainsComponent().setCode("test");
         var expansion = new ValueSet.ValueSetExpansionComponent().addContains(contains);
@@ -313,5 +369,27 @@ class ValueSetAdapterTest {
         assertEquals(2, vs.getUseContext().size(), "incoming non-duplicate should be added");
         assertTrue(vs.getUseContext().get(0).equalsDeep(pre));
         assertTrue(vs.getUseContext().get(1).equalsDeep(incoming));
+    }
+
+    @Override
+    public Class<ValueSet> valueSetClass() {
+        return ValueSet.class;
+    }
+
+    @Override
+    public FhirContext fhirContext() {
+        return fhirContext;
+    }
+
+    @Override
+    public IAdapterFactory getAdapterFactory() {
+        return adapterFactory;
+    }
+
+    @Override
+    public String toRelatedArtifactCanonicalReference(String ref) {
+        // dstu3 does not set canonical references as urls directly,
+        // but wraps them in a reference
+        return String.format("{\"reference\":\"%s\"}", ref);
     }
 }

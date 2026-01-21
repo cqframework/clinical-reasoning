@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -9,10 +10,10 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.EvaluationResultsForMultiLib;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
+import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,27 +27,31 @@ public class MeasureEvaluationResultHandler {
 
     private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
 
-    private MeasureEvaluationResultHandler() {
-        // static class
+    private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final MeasureEvaluator measureEvaluator;
+    private final MeasureReportDefScorer measureReportDefScorer = new MeasureReportDefScorer();
+
+    public MeasureEvaluationResultHandler(
+            MeasureEvaluationOptions measureEvaluationOptions, PopulationBasisValidator populationBasisValidator) {
+        this.measureEvaluationOptions = measureEvaluationOptions;
+        this.measureEvaluator = new MeasureEvaluator(populationBasisValidator);
     }
 
     /**
-     * Method that consumes pre-generated CQL results into Measure defined fields that reference associated CQL expressions
-     * This is meant to be called by CQL CLI.
+     * Method that consumes pre-generated CQL results into Measure defined fields that reference
+     * associated CQL expressions This is meant to be called by CQL CLI.
      *
+     * @param fhirContext           FHIR context for FHIR version
      * @param evalResultsPerSubject criteria expression evalResultsPerSubject
-     * @param measureDef Measure defined objects
-     * @param measureEvalType the type of evaluation algorithm to apply to Criteria results
-     * @param applyScoring whether Measure Evaluator will apply set membership per measure scoring algorithm
-     * @param populationBasisValidator the validator class to use for checking consistency of results
+     * @param measureDef            Measure defined objects
+     * @param measureEvalType       the type of evaluation algorithm to apply to Criteria results
      */
-    public static void processResults(
+    public void processResults(
+            FhirContext fhirContext,
             Map<String, EvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
-            @Nonnull MeasureEvalType measureEvalType,
-            boolean applyScoring,
-            PopulationBasisValidator populationBasisValidator) {
-        MeasureEvaluator evaluator = new MeasureEvaluator(populationBasisValidator);
+            @Nonnull MeasureEvalType measureEvalType) {
+
         // Populate MeasureDef using MeasureEvaluator
         for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
             // subject
@@ -57,8 +62,13 @@ public class MeasureEvaluationResultHandler {
             EvaluationResult evalResult = entry.getValue();
             try {
                 // populate CQL results into MeasureDef
-                evaluator.evaluate(
-                        measureDef, measureEvalType, subjectTypePart, subjectIdPart, evalResult, applyScoring);
+                measureEvaluator.evaluate(
+                        measureDef,
+                        measureEvalType,
+                        subjectTypePart,
+                        subjectIdPart,
+                        evalResult,
+                        measureEvaluationOptions.getApplyScoringSetMembership());
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
@@ -69,7 +79,14 @@ public class MeasureEvaluationResultHandler {
             }
         }
 
-        evaluator.postEvaluation(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
+
+        // Score all groups and stratifiers using version-agnostic scorer
+        // Populates scores in MeasureDef before builders run
+        // Note: Scoring is always performed, independent of applyScoring flag
+        // (applyScoring controls set membership filtering, not numeric scoring)
+        logger.debug("Scoring MeasureDef using MeasureReportDefScorer for measure: {}", measureDef.url());
+        measureReportDefScorer.score(measureDef.url(), measureDef);
     }
 
     /**
@@ -79,16 +96,13 @@ public class MeasureEvaluationResultHandler {
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
-     * @param continuousVariableObservationConverter used for continuous variable scoring FHIR version
-     *                                               specific
      * @return CQL results for Library defined in the Measure resource
      */
-    public static <T extends ICompositeType> CompositeEvaluationResultsPerMeasure getEvaluationResults(
+    public static CompositeEvaluationResultsPerMeasure getEvaluationResults(
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
-            ContinuousVariableObservationConverter<T> continuousVariableObservationConverter) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -124,6 +138,7 @@ public class MeasureEvaluationResultHandler {
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
+
                     var evaluationResult = evaluationResultsForMultiLib.getResultFor(libraryVersionedIdentifier);
 
                     var measureDefs =
@@ -135,8 +150,7 @@ public class MeasureEvaluationResultHandler {
                                     measureDefs,
                                     libraryVersionedIdentifier,
                                     evaluationResult,
-                                    subjectTypePart,
-                                    continuousVariableObservationConverter);
+                                    subjectTypePart);
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
 
@@ -174,11 +188,10 @@ public class MeasureEvaluationResultHandler {
     }
 
     private static void validateEvaluationResultExistsForIdentifier(
-            VersionedIdentifier versionedIdentifierFromQuery,
-            EvaluationResultsForMultiLib evaluationResultsForMultiLib) {
+            VersionedIdentifier versionedIdentifierFromQuery, EvaluationResults evaluationResults) {
 
-        var containsResults = evaluationResultsForMultiLib.containsResultsFor(versionedIdentifierFromQuery);
-        var containsExceptions = evaluationResultsForMultiLib.containsExceptionsFor(versionedIdentifierFromQuery);
+        var containsResults = evaluationResults.containsResultsFor(versionedIdentifierFromQuery);
+        var containsExceptions = evaluationResults.containsExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsExceptions) {
             throw new InternalErrorException(

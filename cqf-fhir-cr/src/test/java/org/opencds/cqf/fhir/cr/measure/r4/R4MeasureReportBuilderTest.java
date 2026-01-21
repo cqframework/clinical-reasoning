@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
@@ -18,6 +18,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
@@ -33,6 +35,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -167,7 +170,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
-        } catch (InvalidRequestException exception) {
+        } catch (InternalErrorException exception) {
             assertEquals(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: http://something.com/measure1",
                     exception.getMessage());
@@ -184,7 +187,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
-        } catch (InvalidRequestException exception) {
+        } catch (InternalErrorException exception) {
             assertEquals(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: http://something.com/measure1",
                     exception.getMessage());
@@ -257,10 +260,13 @@ class R4MeasureReportBuilderTest {
     }
 
     private static PopulationDef buildPopulationRef(Collection<Object> resources) {
+        CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
         final PopulationDef populationDef = new PopulationDef(
                 null,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
                 MeasurePopulationType.DATEOFCOMPLIANCE,
+                null,
+                booleanBasis,
                 null,
                 null,
                 null);
@@ -286,7 +292,7 @@ class R4MeasureReportBuilderTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef() {
-        return new StratifierDef(null, null, null, MeasureStratifierType.VALUE);
+        return new StratifierDef("stratifier-1", null, null, MeasureStratifierType.VALUE);
     }
 
     private static Measure buildMeasure(String id, String url, int numGroups, int numSdes) {
@@ -308,5 +314,71 @@ class R4MeasureReportBuilderTest {
         return (MeasureGroupComponent) new MeasureGroupComponent()
                 .addStratifier(new MeasureGroupStratifierComponent())
                 .setId(id);
+    }
+
+    @Test
+    void aggregateMethodExtensionNotAddedForNA() {
+        // Test that N_A aggregate method does not add extension to MeasureReport
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+
+        // Create measure with one group containing a MEASUREOBSERVATION population
+        var measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 0);
+        var group = measure.getGroupFirstRep();
+        var population = group.addPopulation();
+        population.setId("measure-obs-na");
+        population.setCode(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/measure-population")
+                        .setCode(MeasurePopulationType.MEASUREOBSERVATION.toCode())));
+
+        // Create MeasureDef with corresponding population that has N_A aggregate method
+        var populationDefNA = new PopulationDef(
+                "measure-obs-na",
+                new ConceptDef(
+                        List.of(new CodeDef(
+                                "http://terminology.hl7.org/CodeSystem/measure-population",
+                                MeasurePopulationType.MEASUREOBSERVATION.toCode())),
+                        null),
+                MeasurePopulationType.MEASUREOBSERVATION,
+                null,
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"),
+                null,
+                ContinuousVariableObservationAggregateMethod.N_A,
+                List.of());
+
+        var groupDef = new GroupDef(
+                "group_0",
+                null,
+                List.of(buildStratifierDef()),
+                List.of(populationDefNA),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                null,
+                new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
+
+        var measureDef = new MeasureDef(
+                new IdType(ResourceType.Measure.name(), MEASURE_ID_1),
+                MEASURE_URL_1,
+                null,
+                List.of(groupDef),
+                List.of());
+
+        var measureReport =
+                r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.SUMMARY, null, List.of());
+
+        assertNotNull(measureReport);
+        assertEquals(1, measureReport.getGroup().size());
+
+        var reportGroup = measureReport.getGroupFirstRep();
+        assertEquals(1, reportGroup.getPopulation().size());
+
+        var reportPopulation = reportGroup.getPopulationFirstRep();
+        assertEquals("measure-obs-na", reportPopulation.getId());
+
+        // Verify the aggregate method extension is NOT present for N_A
+        var aggregateMethodExtension =
+                reportPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNull(
+                aggregateMethodExtension, "Aggregate method extension should not be present for N_A aggregate method");
     }
 }

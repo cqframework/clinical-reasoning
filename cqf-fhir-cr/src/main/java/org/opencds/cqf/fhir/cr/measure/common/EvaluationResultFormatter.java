@@ -39,7 +39,7 @@ public class EvaluationResultFormatter {
         }
 
         Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
-        if (expressionResults == null || expressionResults.isEmpty()) {
+        if (expressionResults.isEmpty()) {
             return indent(baseIndent) + "(no expression results)";
         }
 
@@ -49,9 +49,9 @@ public class EvaluationResultFormatter {
             ExpressionResult expressionResult = entry.getValue();
 
             sb.append(indent(baseIndent))
-                    .append("Expression: ")
+                    .append("Expression: \"")
                     .append(expressionName)
-                    .append("\n");
+                    .append("\"\n");
 
             if (expressionResult == null) {
                 sb.append(indent(baseIndent + 1))
@@ -74,7 +74,7 @@ public class EvaluationResultFormatter {
             // Format value
             Object value = expressionResult.getValue();
             sb.append(indent(baseIndent + 1)).append("Value: ");
-            sb.append(formatValue(value, baseIndent + 2)).append("\n");
+            sb.append(formatValue(value)).append("\n");
         }
 
         return sb.toString();
@@ -88,28 +88,35 @@ public class EvaluationResultFormatter {
      * @return formatted string representation
      */
     public static String formatExpressionValue(Object value) {
-        return formatValue(value, 0);
+        return formatValue(value);
     }
 
     /**
      * Formats a value according to its type: collections, resources, primitives, dates, etc.
      *
      * @param value the value to format
-     * @param indentLevel the indentation level for multi-line values
      * @return formatted string representation
      */
-    private static String formatValue(Object value, int indentLevel) {
+    private static String formatValue(Object value) {
         if (value == null) {
             return "null";
         }
 
+        // LUKETODO:  print results if they're empty, dont' exclude them
+
         // Handle iterables and collections
-        if (value instanceof Iterable<?>) {
-            Iterable<?> iterable = (Iterable<?>) value;
+        if (value instanceof Iterable<?> iterable) {
             String items = StreamSupport.stream(iterable.spliterator(), false)
-                    .map(item -> formatSingleValue(item))
+                    .map(EvaluationResultFormatter::formatSingleValue)
                     .collect(Collectors.joining(", "));
             return "[" + items + "]";
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            return map.entrySet().stream()
+                    .map(entry -> "%s -> %s"
+                            .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
+                    .collect(Collectors.joining(", "));
         }
 
         return formatSingleValue(value);

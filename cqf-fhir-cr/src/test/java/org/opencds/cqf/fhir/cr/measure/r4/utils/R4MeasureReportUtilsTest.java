@@ -4,21 +4,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 
 class R4MeasureReportUtilsTest {
 
@@ -593,5 +600,167 @@ class R4MeasureReportUtilsTest {
         }
 
         return populationDef;
+    }
+
+    // ========================================
+    // Tests for addExtensionImprovementNotation
+    // ========================================
+
+    @Test
+    void testAddExtensionImprovementNotation_WithIncreaseNotation() {
+        // Arrange
+        MeasureReportGroupComponent reportGroup = new MeasureReportGroupComponent();
+        GroupDef groupDef = createGroupDef(true, "increase");
+
+        // Act
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
+
+        // Assert
+        Extension extension =
+                reportGroup.getExtensionByUrl(MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        assertNotNull(extension, "Improvement notation extension should be added");
+
+        assertInstanceOf(CodeableConcept.class, extension.getValue());
+        CodeableConcept codeableConcept = (CodeableConcept) extension.getValue();
+
+        assertEquals(1, codeableConcept.getCoding().size(), "Should have exactly one coding");
+        Coding coding = codeableConcept.getCoding().get(0);
+
+        assertEquals(
+                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+                coding.getSystem(),
+                "System should match");
+        assertEquals(
+                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
+                coding.getCode(),
+                "Code should be 'increase'");
+        assertEquals(
+                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE_DISPLAY,
+                coding.getDisplay(),
+                "Display should be 'Increase'");
+    }
+
+    @Test
+    void testAddExtensionImprovementNotation_WithDecreaseNotation() {
+        // Arrange
+        MeasureReportGroupComponent reportGroup = new MeasureReportGroupComponent();
+        GroupDef groupDef = createGroupDef(true, "decrease");
+
+        // Act
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
+
+        // Assert
+        Extension extension =
+                reportGroup.getExtensionByUrl(MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        assertNotNull(extension, "Improvement notation extension should be added");
+
+        assertInstanceOf(CodeableConcept.class, extension.getValue());
+        CodeableConcept codeableConcept = (CodeableConcept) extension.getValue();
+
+        assertEquals(1, codeableConcept.getCoding().size(), "Should have exactly one coding");
+        Coding coding = codeableConcept.getCoding().get(0);
+
+        assertEquals(
+                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+                coding.getSystem(),
+                "System should match");
+        assertEquals(
+                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE,
+                coding.getCode(),
+                "Code should be 'decrease'");
+        assertEquals(
+                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE_DISPLAY,
+                coding.getDisplay(),
+                "Display should be 'Decrease'");
+    }
+
+    @Test
+    void testAddExtensionImprovementNotation_WithGroupNotationFalse_DoesNotAddExtension() {
+        // Arrange
+        MeasureReportGroupComponent reportGroup = new MeasureReportGroupComponent();
+        GroupDef groupDef = createGroupDef(false, "increase");
+
+        // Act
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
+
+        // Assert
+        Extension extension =
+                reportGroup.getExtensionByUrl(MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        assertNull(extension, "No extension should be added when isGroupImprovementNotation is false");
+        assertTrue(reportGroup.getExtension().isEmpty(), "Report group should have no extensions");
+    }
+
+    @Test
+    void testAddExtensionImprovementNotation_WithExistingExtensions_AddsNewExtension() {
+        // Arrange
+        MeasureReportGroupComponent reportGroup = new MeasureReportGroupComponent();
+        reportGroup.addExtension("http://example.com/some-other-extension", new StringType("some value"));
+
+        GroupDef groupDef = createGroupDef(true, "increase");
+
+        // Act
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
+
+        // Assert
+        assertEquals(2, reportGroup.getExtension().size(), "Should have 2 extensions");
+
+        Extension improvementExtension =
+                reportGroup.getExtensionByUrl(MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        assertNotNull(improvementExtension, "Improvement notation extension should be added");
+    }
+
+    @Test
+    void testAddExtensionImprovementNotation_CalledMultipleTimes_UpdatesExtension() {
+        // Arrange
+        MeasureReportGroupComponent reportGroup = new MeasureReportGroupComponent();
+        GroupDef groupDefIncrease = createGroupDef(true, "increase");
+        GroupDef groupDefDecrease = createGroupDef(true, "decrease");
+
+        // Act - First call with increase
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDefIncrease);
+
+        Extension firstExtension =
+                reportGroup.getExtensionByUrl(MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        assertNotNull(firstExtension);
+        CodeableConcept firstConcept = (CodeableConcept) firstExtension.getValue();
+        assertEquals(
+                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
+                firstConcept.getCodingFirstRep().getCode());
+
+        // Act - Second call with decrease
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDefDecrease);
+
+        // Assert - Should have 2 extensions (one from each call)
+        List<Extension> extensions =
+                reportGroup.getExtensionsByUrl(MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
+        assertEquals(2, extensions.size(), "Should have 2 improvement notation extensions after calling twice");
+
+        // Verify the second extension has decrease
+        Extension secondExtension = extensions.get(1);
+        CodeableConcept secondConcept = (CodeableConcept) secondExtension.getValue();
+        assertEquals(
+                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE,
+                secondConcept.getCodingFirstRep().getCode());
+    }
+
+    /**
+     * Helper to create a GroupDef for testing improvement notation.
+     */
+    private GroupDef createGroupDef(boolean isGroupImprovementNotation, String improvementNotationCode) {
+        CodeDef populationBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        CodeDef improvementNotation = improvementNotationCode != null
+                ? new CodeDef(
+                        "http://terminology.hl7.org/CodeSystem/measure-improvement-notation", improvementNotationCode)
+                : null;
+
+        return new GroupDef(
+                "group-1",
+                new ConceptDef(List.of(), "Test Group"),
+                List.of(),
+                List.of(),
+                MeasureScoring.PROPORTION,
+                isGroupImprovementNotation,
+                improvementNotation,
+                populationBasis);
     }
 }

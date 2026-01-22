@@ -7,11 +7,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 
 class EvaluationResultFormatterTest {
 
@@ -286,5 +293,405 @@ class EvaluationResultFormatterTest {
 
         // Assert
         assertEquals("3.14", result);
+    }
+
+    @Test
+    void formatExpressionValue_withEmptyMap_returnsEmptyString() {
+        // Arrange
+        Map<String, String> emptyMap = new HashMap<>();
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(emptyMap);
+
+        // Assert
+        assertEquals("", result);
+    }
+
+    @Test
+    void formatExpressionValue_withSimpleMap_returnsFormattedMap() {
+        // Arrange
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+        map.put("c", 3);
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals("a -> 1, b -> 2, c -> 3", result);
+    }
+
+    @Test
+    void formatExpressionValue_withMapOfResources_returnsResourceIds() {
+        // Arrange
+        Patient patient1 = new Patient();
+        patient1.setId("Patient/patient-1");
+
+        Patient patient2 = new Patient();
+        patient2.setId("Patient/patient-2");
+
+        Map<String, Patient> map = new LinkedHashMap<>();
+        map.put("p1", patient1);
+        map.put("p2", patient2);
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals("p1 -> Patient/patient-1, p2 -> Patient/patient-2", result);
+    }
+
+    @Test
+    void formatExpressionValue_withMapContainingNull_handlesNull() {
+        // Arrange
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("key1", "value1");
+        map.put("key2", null);
+        map.put("key3", "value3");
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals("key1 -> value1, key2 -> null, key3 -> value3", result);
+    }
+
+    @Test
+    void formatExpressionValue_withMapOfMixedTypes_returnsFormattedMap() {
+        // Arrange
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("string", "text");
+        map.put("number", 42);
+        map.put("boolean", true);
+        map.put("date", LocalDate.of(2024, 3, 15));
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals("string -> text, number -> 42, boolean -> true, date -> 2024-03-15", result);
+    }
+
+    @Test
+    void formatExpressionValue_withMapOfEncounterToQuantityDef_returnsFormattedMap() {
+        // Arrange
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/encounter-1");
+
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/encounter-2");
+
+        QuantityDef quantity1 = new QuantityDef(75.0);
+        QuantityDef quantity2 = new QuantityDef(120.5);
+
+        Map<Encounter, QuantityDef> map = new LinkedHashMap<>();
+        map.put(encounter1, quantity1);
+        map.put(encounter2, quantity2);
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals(
+                "Encounter/encounter-1 -> QuantityDef{value=75.0}, Encounter/encounter-2 -> QuantityDef{value=120.5}",
+                result);
+    }
+
+    @Test
+    void formatExpressionValue_withMapOfEncounterToQuantityDef_withNullValue_handlesNull() {
+        // Arrange
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/encounter-1");
+
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/encounter-2");
+
+        Encounter encounter3 = new Encounter();
+        encounter3.setId("Encounter/encounter-3");
+
+        QuantityDef quantity1 = new QuantityDef(75.0);
+        QuantityDef quantity2 = new QuantityDef(null);
+        QuantityDef quantity3 = new QuantityDef(42.5);
+
+        Map<Encounter, QuantityDef> map = new LinkedHashMap<>();
+        map.put(encounter1, quantity1);
+        map.put(encounter2, quantity2);
+        map.put(encounter3, quantity3);
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals(
+                "Encounter/encounter-1 -> QuantityDef{value=75.0}, Encounter/encounter-2 -> QuantityDef{value=null}, Encounter/encounter-3 -> QuantityDef{value=42.5}",
+                result);
+    }
+
+    @Test
+    void formatExpressionValue_withMapOfEncounterToQuantityDef_multipleEntries_returnsAllFormatted() {
+        // Arrange
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/patient-1-encounter-1");
+
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/patient-1-encounter-2");
+
+        Encounter encounter3 = new Encounter();
+        encounter3.setId("Encounter/patient-2-encounter-1");
+
+        QuantityDef quantity1 = new QuantityDef(100.0);
+        QuantityDef quantity2 = new QuantityDef(200.0);
+        QuantityDef quantity3 = new QuantityDef(150.0);
+
+        Map<Encounter, QuantityDef> map = new LinkedHashMap<>();
+        map.put(encounter1, quantity1);
+        map.put(encounter2, quantity2);
+        map.put(encounter3, quantity3);
+
+        // Act
+        String result = EvaluationResultFormatter.formatExpressionValue(map);
+
+        // Assert
+        assertEquals(
+                "Encounter/patient-1-encounter-1 -> QuantityDef{value=100.0}, "
+                        + "Encounter/patient-1-encounter-2 -> QuantityDef{value=200.0}, "
+                        + "Encounter/patient-2-encounter-1 -> QuantityDef{value=150.0}",
+                result);
+    }
+
+    @Test
+    void format_withNullEvaluationResult_returnsNull() {
+        // Act
+        String result = EvaluationResultFormatter.format(null, 0);
+
+        // Assert
+        assertEquals("null", result);
+    }
+
+    @Test
+    void format_withEmptyExpressionResults_returnsMessage() {
+        // Arrange
+        EvaluationResult evaluationResult = new EvaluationResult();
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertEquals("(no expression results)", result);
+    }
+
+    @Test
+    void format_withSingleExpression_formatsWithQuotedName() {
+        // Arrange
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(42, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("TestExpression"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"TestExpression\""));
+        assertTrue(result.contains("Value: 42"));
+    }
+
+    @Test
+    void format_withMultipleExpressions_formatsAll() {
+        // Arrange
+        EvaluationResult evaluationResult = new EvaluationResult();
+
+        ExpressionResult expr1 = new ExpressionResult("text", Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("Expression1"), expr1);
+
+        ExpressionResult expr2 = new ExpressionResult(true, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("Expression2"), expr2);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"Expression1\""));
+        assertTrue(result.contains("Value: text"));
+        assertTrue(result.contains("Expression: \"Expression2\""));
+        assertTrue(result.contains("Value: true"));
+    }
+
+    @Test
+    void format_withEvaluatedResources_includesResources() {
+        // Arrange
+        Patient patient1 = new Patient();
+        patient1.setId("Patient/patient-1");
+
+        Patient patient2 = new Patient();
+        patient2.setId("Patient/patient-2");
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(2, Set.of(patient1, patient2));
+        evaluationResult.set(new EvaluationExpressionRef("PatientExpression"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"PatientExpression\""));
+        assertTrue(result.contains("Evaluated Resources:"));
+        assertTrue(result.contains("Patient/patient-1"));
+        assertTrue(result.contains("Patient/patient-2"));
+        assertTrue(result.contains("Value: 2"));
+    }
+
+    @Test
+    void format_withBaseIndent_appliesIndentation() {
+        // Arrange
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(42, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("TestExpression"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 2);
+
+        // Assert
+        // With baseIndent of 2, we expect 4 spaces at the start (2 * "  ")
+        assertTrue(result.startsWith("    Expression: \"TestExpression\""));
+        assertTrue(result.contains("      Value: 42")); // 6 spaces for indent level 3
+    }
+
+    @Test
+    void format_withListValue_formatsCorrectly() {
+        // Arrange
+        List<Integer> numbers = Arrays.asList(1, 2, 3);
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(numbers, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("ListExpression"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"ListExpression\""));
+        assertTrue(result.contains("Value: [1, 2, 3]"));
+    }
+
+    @Test
+    void format_withMapValue_formatsCorrectly() {
+        // Arrange
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(map, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("MapExpression"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"MapExpression\""));
+        assertTrue(result.contains("Value: a -> 1, b -> 2"));
+    }
+
+    @Test
+    void format_withMapOfEncounterToQuantityDef_formatsCorrectly() {
+        // Arrange
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/encounter-1");
+
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/encounter-2");
+
+        QuantityDef quantity1 = new QuantityDef(75.0);
+        QuantityDef quantity2 = new QuantityDef(120.5);
+
+        Map<Encounter, QuantityDef> map = new LinkedHashMap<>();
+        map.put(encounter1, quantity1);
+        map.put(encounter2, quantity2);
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(map, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("ObservationExpression"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"ObservationExpression\""));
+        assertTrue(
+                result.contains(
+                        "Value: Encounter/encounter-1 -> QuantityDef{value=75.0}, Encounter/encounter-2 -> QuantityDef{value=120.5}"));
+    }
+
+    @Test
+    void format_withMapOfEncounterToQuantityDef_withEvaluatedResources_includesResourcesAndValue() {
+        // Arrange
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/patient-1-encounter-1");
+
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/patient-1-encounter-2");
+
+        Patient patient = new Patient();
+        patient.setId("Patient/patient-1");
+
+        QuantityDef quantity1 = new QuantityDef(100.0);
+        QuantityDef quantity2 = new QuantityDef(200.0);
+
+        Map<Encounter, QuantityDef> map = new LinkedHashMap<>();
+        map.put(encounter1, quantity1);
+        map.put(encounter2, quantity2);
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expressionResult = new ExpressionResult(map, Set.of(encounter1, encounter2, patient));
+        evaluationResult.set(new EvaluationExpressionRef("MeasureObservation"), expressionResult);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"MeasureObservation\""));
+        assertTrue(result.contains("Evaluated Resources:"));
+        assertTrue(result.contains("Patient/patient-1"));
+        assertTrue(result.contains("Encounter/patient-1-encounter-1"));
+        assertTrue(result.contains("Encounter/patient-1-encounter-2"));
+        assertTrue(
+                result.contains(
+                        "Value: Encounter/patient-1-encounter-1 -> QuantityDef{value=100.0}, Encounter/patient-1-encounter-2 -> QuantityDef{value=200.0}"));
+    }
+
+    @Test
+    void format_withMapOfEncounterToQuantityDef_multipleExpressions_formatsAll() {
+        // Arrange
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/encounter-1");
+
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/encounter-2");
+
+        QuantityDef quantity1 = new QuantityDef(75.0);
+        QuantityDef quantity2 = new QuantityDef(120.5);
+
+        Map<Encounter, QuantityDef> map1 = new LinkedHashMap<>();
+        map1.put(encounter1, quantity1);
+
+        Map<Encounter, QuantityDef> map2 = new LinkedHashMap<>();
+        map2.put(encounter2, quantity2);
+
+        EvaluationResult evaluationResult = new EvaluationResult();
+        ExpressionResult expr1 = new ExpressionResult(map1, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("Observation1"), expr1);
+
+        ExpressionResult expr2 = new ExpressionResult(map2, Set.of());
+        evaluationResult.set(new EvaluationExpressionRef("Observation2"), expr2);
+
+        // Act
+        String result = EvaluationResultFormatter.format(evaluationResult, 0);
+
+        // Assert
+        assertTrue(result.contains("Expression: \"Observation1\""));
+        assertTrue(result.contains("Value: Encounter/encounter-1 -> QuantityDef{value=75.0}"));
+        assertTrue(result.contains("Expression: \"Observation2\""));
+        assertTrue(result.contains("Value: Encounter/encounter-2 -> QuantityDef{value=120.5}"));
     }
 }

@@ -35,7 +35,21 @@ public class R4InferManifestParametersService {
         if (resource == null) {
             throw new ResourceNotFoundException(id);
         }
-        var adapter = adapterFactory.createKnowledgeArtifactAdapter(resource);
+        return inferManifestParameters(resource);
+    }
+
+    /**
+     * Infers manifest expansion parameters from a module-definition Library.
+     * This operation takes a module-definition Library (output of $data-requirements)
+     * and converts its relatedArtifacts into manifest expansion parameters following
+     * CRMI conventions.
+     *
+     * @param library  The module-definition Library to process
+     * @return         The {@link Library Library} result (asset-collection manifest with
+     *                 expansion parameters)
+     */
+    public Library inferManifestParameters(Library library) throws FHIRException {
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         var visitor = new InferManifestParametersVisitor(repository);
         return (Library) adapter.accept(visitor, null);
     }

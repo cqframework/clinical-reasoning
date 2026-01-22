@@ -214,8 +214,7 @@ class PopulationDefTest {
         popDef.addResource("Patient/2", obs2);
         popDef.addResource("Patient/3", obs3);
 
-        // For MEASUREOBSERVATION, getCount() should count observations (sum of map sizes)
-        int expectedCount = obs1.size() + obs2.size() + obs3.size(); // 1 + 2 + 1 = 4
-        assertEquals(expectedCount, popDef.getCount(), "MEASUREOBSERVATION should count observation entries");
+        // For MEASUREOBSERVATION, getCount() should count subjects
+        assertEquals(3, popDef.getCount(), "MEASUREOBSERVATION should count observation entries");
     }
 }

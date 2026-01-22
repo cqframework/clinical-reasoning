@@ -60,6 +60,31 @@ public class PopulationDef {
         this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
+    // LUKETODO: refactor
+    // LUKETODO: move
+    public void removeExcludedMeasureObservationResource(String subjectId, Object measureObservationResourceKey) {
+        if (!hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+            // skip since this is another population type
+            return;
+        }
+
+        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
+
+        // 2. Iterate and mutate the inner Maps
+        resourcesForSubject.forEach(element -> {
+            // LUKETODO:  should we throw an IllegalStateException if it isn't
+            // 3. Pattern match: Is the element a Map that could contain our key?
+            if (element instanceof Map<?, ?> innerMap) {
+                // We remove the key. If it's not there, remove() does nothing.
+                innerMap.remove(measureObservationResourceKey);
+            }
+        });
+
+        //        // 4. Optional: Clean up empty inner maps if they become empty after removal
+        //        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+
+    }
+
     public MeasurePopulationType type() {
         return this.measurePopulationType;
     }
@@ -90,6 +115,10 @@ public class PopulationDef {
      */
     public boolean isBooleanBasis() {
         return this.populationBasis.code().equals("boolean");
+    }
+
+    public boolean hasPopulationType(MeasurePopulationType populationType) {
+        return populationType == this.measurePopulationType;
     }
 
     public Set<Object> getEvaluatedResources() {
@@ -198,25 +227,17 @@ public class PopulationDef {
         this.aggregationResult = aggregationResult;
     }
 
-    /**
-     * Added by Claude Sonnet 4.5 on 2025-12-02
-     * Updated by Claude Sonnet 4.5 on 2025-12-08 to use own populationBasis instead of GroupDef parameter.
-     * Get the count for this population based on its type and population basis.
-     * This is the single source of truth for population counts.
-     *
-     * @return the count for this population
-     */
     public int getCount() {
-        // For MEASUREOBSERVATION populations, count the observations
-        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
-            return countObservations();
-        }
-
         // For other population types, use population basis to determine count
         if (isBooleanBasis()) {
             // Boolean basis: count unique subjects
             return getSubjects().size();
         } else {
+            if (hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+                // resources has nested maps containing correct qty of resources
+                // Ratio Cont-Variable Measures have two MeasureObservations
+                return countObservations();
+            }
             // Non-boolean basis: count all resources (including duplicates across subjects)
             return getAllSubjectResources().size();
         }

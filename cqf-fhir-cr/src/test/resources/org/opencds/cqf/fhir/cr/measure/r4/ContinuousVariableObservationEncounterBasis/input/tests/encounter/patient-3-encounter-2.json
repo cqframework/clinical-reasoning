@@ -1,0 +1,12 @@
+{
+  "resourceType": "Encounter",
+  "id": "patient-3-encounter-2",
+  "status": "cancelled",
+  "subject": {
+    "reference": "Patient/patient-3"
+  },
+  "period": {
+    "start": "2024-01-01T07:00:00Z",
+    "end": "2024-01-01T14:00:00Z"
+  }
+}

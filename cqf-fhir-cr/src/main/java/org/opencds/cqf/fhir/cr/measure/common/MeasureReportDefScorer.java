@@ -144,7 +144,7 @@ public class MeasureReportDefScorer {
                     return null;
                 }
 
-                final QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
+                final QuantityDef quantityDef = scoreContinuousVariable(measureObsPop);
 
                 // We want to record the aggregate result for later computation for continuous variable reports
                 measureObsPop.setAggregationResult(quantityDef);
@@ -206,7 +206,7 @@ public class MeasureReportDefScorer {
      * Simplified version of R4MeasureReportScorer#scoreContinuousVariable that just
      * returns the aggregate without setting it on a FHIR report.
      */
-    private QuantityDef scoreContinuousVariable(String measureUrl, PopulationDef populationDef) {
+    private QuantityDef scoreContinuousVariable(PopulationDef populationDef) {
         return calculateContinuousVariableAggregateQuantity(populationDef, PopulationDef::getAllSubjectResources);
     }
 

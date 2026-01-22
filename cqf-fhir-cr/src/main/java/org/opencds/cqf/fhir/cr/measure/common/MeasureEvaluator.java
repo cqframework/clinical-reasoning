@@ -14,14 +14,19 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
@@ -399,13 +404,33 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
-        measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         // Evaluate Population Expressions
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
+
+        logger.info("evaluationResult:\n{}", EvaluationResultFormatter.format(evaluationResult, 2));
+
+        if (measurePopulation != null && measurePopulationExclusion != null) {
+            logger.info(
+                    "1234: BEFORE subjectID: {}, \nmeasurePopulationMap: \n{}, \nmeasurePopulationExclusionMap: \n{}, \nmeasureObservationMap: \n{}",
+                    subjectId,
+                    printSubjectResources(measurePopulation, subjectId),
+                    printSubjectResources(measurePopulationExclusion, subjectId),
+                    printSubjectResources(measurePopulationObservation, subjectId));
+        }
+
         if (measurePopulation != null && initialPopulation != null && applyScoring) {
             // verify initial-population are in measure-population
             measurePopulation.retainAllResources(subjectId, initialPopulation);
             measurePopulation.retainAllSubjects(initialPopulation);
+        }
+
+        if (measurePopulation != null && measurePopulationExclusion != null) {
+            logger.info(
+                    "1234: RETAIN subjectID: {}, \nmeasurePopulationMap: \n{}, \nmeasurePopulationExclusionMap: \n{}, \nmeasureObservationMap: \n{}",
+                    subjectId,
+                    printSubjectResources(measurePopulation, subjectId),
+                    printSubjectResources(measurePopulationExclusion, subjectId),
+                    printSubjectResources(measurePopulationObservation, subjectId));
         }
 
         if (measurePopulationExclusion != null) {
@@ -417,32 +442,173 @@ public class MeasureEvaluator {
                 measurePopulationExclusion.retainAllSubjects(measurePopulation);
             }
         }
+        if (measurePopulation != null && measurePopulationExclusion != null) {
+            logger.info(
+                    "1234: REMOVE subjectID: {}, \nmeasurePopulationMap: \n{}, \nmeasurePopulationExclusionMap: \n{}, \nmeasureObservationMap: \n{}",
+                    subjectId,
+                    printSubjectResources(measurePopulation, subjectId),
+                    printSubjectResources(measurePopulationExclusion, subjectId),
+                    printSubjectResources(measurePopulationObservation, subjectId));
+        }
+        // LUKETODO:   this is moment of truth:
         if (measurePopulationObservation != null) {
             // only Measure Population resources need to be removed
             var expressionName = measurePopulationObservation.getCriteriaReference() + "-"
                     + measurePopulationObservation.expression();
+            logger.info(
+                    "1234: BEFORE  evaluatePopulationMembership(): {}\nmeasureObservationMap:\n{}",
+                    subjectId,
+                    printSubjectResources(measurePopulationObservation, subjectId));
             // assumes only one population
+            // LUKETODO:  this ADDS the evaluation results to MEASUREOBSERVATION
             evaluatePopulationMembership(
                     subjectType, subjectId, groupDef.getSingle(MEASUREOBSERVATION), evaluationResult, expressionName);
+            logger.info(
+                    "1234: AFTER  evaluatePopulationMembership(): {}\nmeasureObservationMap:\n{}, applyScoring:{}",
+                    subjectId,
+                    printSubjectResources(measurePopulationObservation, subjectId),
+                    applyScoring);
+
             if (applyScoring && measurePopulation != null) {
                 // only measureObservations that intersect with measureObservation should be retained
                 retainObservationResourcesInPopulation(subjectId, measurePopulation, measurePopulationObservation);
+                logger.info(
+                        "1234: AFTER  retainObservationResourcesInPopulation(): {}\nmeasureObservationMap:\n{}",
+                        subjectId,
+                        printSubjectResources(measurePopulationObservation, subjectId));
                 retainObservationSubjectResourcesInPopulation(
                         measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
+                logger.info(
+                        "1234: AFTER  retainObservationSubjectResourcesInPopulation(): {}\nmeasureObservationMap:\n{}",
+                        subjectId,
+                        printSubjectResources(measurePopulationObservation, subjectId));
                 // measure observations also need to make sure they remove measure-population-exclusions
                 if (measurePopulationExclusion != null) {
+
                     removeObservationResourcesInPopulation(
                             subjectId, measurePopulationExclusion, measurePopulationObservation);
+                    logger.info(
+                            "1234: AFTER  removeObservationResourcesInPopulation(): {}\nmeasureObservationMap:\n{}",
+                            subjectId,
+                            printSubjectResources(measurePopulationObservation, subjectId));
                     removeObservationSubjectResourcesInPopulation(
                             measurePopulationExclusion.subjectResources,
                             measurePopulationObservation.getSubjectResources());
+                    logger.info(
+                            "1234: AFTER  removeObservationSubjectResourcesInPopulation(): {}\nmeasureObservationMap:\n{}",
+                            subjectId,
+                            printSubjectResources(measurePopulationObservation, subjectId));
                 }
             }
         }
         for (PopulationDef p : groupDef.populations()) {
             populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
         }
+
+        if (measurePopulationObservation == null) {
+            // skip math if there's no measure observation population
+            return;
+        }
+
+        final int measurePopulationCount = Optional.ofNullable(measurePopulation)
+                .map(PopulationDef::getCount)
+                .orElse(0);
+        final int measurePopulationExclusionCount = Optional.ofNullable(measurePopulationExclusion)
+                .map(PopulationDef::getCount)
+                .orElse(0);
+        final int measureObservationCount = measurePopulationObservation.getCount();
+
+        final int popMinusExclusionCount = measurePopulationCount - measurePopulationExclusionCount;
+
+        if (measurePopulation != null && measurePopulationExclusion != null) {
+            logger.info(
+                    "1234: AFTER subjectID: {}, \nmeasurePopulationMap: \n{}, \nmeasurePopulationExclusionMap: \n{}, \nmeasureObservationMap: \n{}",
+                    subjectId,
+                    printSubjectResources(measurePopulation, subjectId),
+                    printSubjectResources(measurePopulationExclusion, subjectId),
+                    printSubjectResources(measurePopulationObservation, subjectId));
+        }
+
+        logger.info(
+                "1234: subjectID: {}, measurePopulationCount: {}, measurePopulationExclusionCount: {}, measureObservationCount: {}",
+                subjectId,
+                measurePopulationCount,
+                measurePopulationExclusionCount,
+                measureObservationCount);
+
+        if (measureObservationCount != popMinusExclusionCount) {
+
+            final boolean isMeasureObsExpressionPresent = Optional.ofNullable(
+                            evaluationResult.getExpressionResults().get("measure-population-MeasureObservation"))
+                    .map(ExpressionResult::getValue)
+                    .filter(Map.class::isInstance)
+                    .map(Map.class::cast)
+                    .map(map -> !map.isEmpty())
+                    .orElse(false);
+
+            logger.warn(
+                    "1234: COUNTS DO NOT MATCH for subject: {}, is measure-obs expression missing?: {}",
+                    subjectId,
+                    isMeasureObsExpressionPresent);
+            throw new IllegalStateException(
+                    "COUNTS DO NOT MATCH for subject: %s! is measure-obs expression present?: %s"
+                            .formatted(subjectId, isMeasureObsExpressionPresent));
+        }
     }
+
+    private Object printSubjectResources(PopulationDef populationDef, String subjectId) {
+        if (populationDef == null) {
+            return "{empty}";
+        }
+
+        final Set<Object> resources = populationDef.subjectResources.get(subjectId);
+
+        if (CollectionUtils.isEmpty(resources)) {
+            return subjectId + ": {empty}";
+        }
+
+        final String toString = resources.stream().map(this::printValue).collect(Collectors.joining(", "));
+
+        if (StringUtils.isBlank(toString)) {
+            return subjectId + ": {empty}";
+        }
+
+        return subjectId + ": " + toString;
+    }
+
+    private String printValues(Collection<Object> values) {
+
+        if (values == null || values.isEmpty()) {
+            return "{empty}";
+        }
+
+        return values.stream().map(this::printValue).collect(Collectors.joining(", "));
+    }
+
+    private String printValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+
+        if (value instanceof IBaseResource resource) {
+            return resource.getIdElement().getValueAsString();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            final String toString = map.entrySet().stream()
+                    .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
+                    .collect(Collectors.joining(", "));
+
+            if (StringUtils.isBlank(toString)) {
+                return "{empty}";
+            }
+
+            return toString;
+        }
+
+        return value.toString();
+    }
+
     /**
      * Keeps Measure-Observation values found in measurePopulation
      * are not found in the corresponding measurePopulation set.
@@ -578,7 +744,7 @@ public class MeasureEvaluator {
 
     /**
      * Removes measureObservationDef resources for a subject when their "key" is
-     * found in the corresponding measurePopulationDef resources for that subject.
+     * found in the corresponding measurePopulationExclusionDef resources for that subject.
      *
      * In other words: delete observation results that are ALSO present in the
      * population resources.
@@ -586,60 +752,154 @@ public class MeasureEvaluator {
     protected void removeObservationResourcesInPopulation(
             String subjectId,
             // MeasurePopulationType.MEASUREPOPULATIONEXCLUSION
-            PopulationDef measurePopulationDef,
+            PopulationDef measurePopulationExclusionDef,
             // MeasurePopulationType.MEASUREOBSERVATION
             PopulationDef measureObservationDef) {
 
-        if (measureObservationDef == null || measurePopulationDef == null) {
+        if (measureObservationDef == null || measurePopulationExclusionDef == null) {
             return;
         }
 
         // Population keys to match against
-        final Set<Object> measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
+        final Set<Object> measurePopulationExclusionResourcesForSubject =
+                measurePopulationExclusionDef.getResourcesForSubject(subjectId);
 
-        if (measurePopulationResourcesForSubject == null || measurePopulationResourcesForSubject.isEmpty()) {
+        if (CollectionUtils.isEmpty(measurePopulationExclusionResourcesForSubject)) {
             // nothing to compare against -> nothing to remove
             return;
         }
 
+        logger.info(
+                "1234: measurePopulationExclusionResourcesForSubject: {}",
+                printValue(measurePopulationExclusionResourcesForSubject));
+
         // Work on a copy to avoid concurrent modification issues while removing
-        HashSetForFhirResourcesAndCqlTypes<Object> observationResources =
+        final HashSetForFhirResourcesAndCqlTypes<Object> measureObservationResourcesForSubject =
                 new HashSetForFhirResourcesAndCqlTypes<>(measureObservationDef.getResourcesForSubject(subjectId));
 
-        for (Object populationResource : observationResources) {
+        logger.info(
+                "1234: PRE measureObservationDef resources: {}",
+                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
 
-            if (!(populationResource instanceof Map<?, ?> measureObservationResourceAsMap)) {
+        for (Object populationResourceForSubject : measureObservationResourcesForSubject) {
+
+            if (!(populationResourceForSubject instanceof Map<?, ?> measureObservationResourceAsMap)) {
                 continue;
             }
 
-            // process this single populationResource
+            // process this single populationResourceForSubject
             processSingleResource(
-                    populationResource,
                     measureObservationResourceAsMap,
-                    measurePopulationResourcesForSubject,
+                    measurePopulationExclusionResourcesForSubject,
                     measureObservationDef,
                     subjectId);
         }
+
+        logger.info(
+                "1234: POST measureObservationDef resources: {}",
+                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
     }
 
     private void processSingleResource(
-            Object populationResource,
             Map<?, ?> measureObservationResourceAsMap,
-            Set<Object> measurePopulationResourcesForSubject,
+            Set<Object> measurePopulationExclusionResourcesForSubject,
             PopulationDef measureObservationDef,
             String subjectId) {
 
-        for (Map.Entry<?, ?> entry : measureObservationResourceAsMap.entrySet()) {
-            Object key = entry.getKey();
-
-            // If the key is present in the population resources → remove this item
-            if (measurePopulationResourcesForSubject.contains(key)) {
-                measureObservationDef.getResourcesForSubject(subjectId).remove(populationResource);
-
-                // short-circuits this resource entirely
+        for (Map.Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
+            if (processSingleKey(
+                    measureObservationResourceAsMap,
+                    measurePopulationExclusionResourcesForSubject,
+                    measureObservationDef,
+                    subjectId,
+                    measureObservationResourceMapEntry)) {
                 return;
             }
         }
+    }
+
+    private boolean processSingleKey(
+            Map<?, ?> measureObservationResourceAsMap,
+            Set<Object> measurePopulationExclusionResourcesForSubject,
+            PopulationDef measureObservationDef,
+            String subjectId,
+            Entry<?, ?> measureObservationResourceMapEntry) {
+
+        final Object measureObservationResourceMapKey = measureObservationResourceMapEntry.getKey();
+
+        // LUKETODO:  there's a bug here:  it should match
+
+        // If the key is present in the population resources → remove this item
+        logger.info(
+                "1234: Processing\nmeasureObservationResourceMapKey:\n[{}] for subject [{}],\nmeasurePopulationExclusionResourcesForSubject:\n{}",
+                printResource(measureObservationResourceMapKey),
+                subjectId,
+                measurePopulationExclusionResourcesForSubject);
+
+        logger.info(
+                "1234: PRE SINGLE RES:  measureObservationDef resources: {}",
+                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
+
+        final Optional<Object> optMatchingMeasurePopulationExclusionResourcesForSubject =
+                measurePopulationExclusionResourcesForSubject.stream()
+                        .filter(entry -> entry.equals(measureObservationResourceMapKey))
+                        .findAny();
+
+        if (optMatchingMeasurePopulationExclusionResourcesForSubject.isPresent()) {
+
+            var matchingMeasurePopulationExclusionResourcesForSubject =
+                    optMatchingMeasurePopulationExclusionResourcesForSubject.get();
+
+            processResource(
+                    measureObservationResourceAsMap,
+                    measureObservationDef,
+                    subjectId,
+                    measureObservationResourceMapKey,
+                    matchingMeasurePopulationExclusionResourcesForSubject);
+            //            logger.info("1234: removed: {}", printResource(measureObservationResourceMapKey));
+
+            // short-circuits this resource entirely
+            return true;
+        }
+
+        logger.info(
+                "1234: POST NOT FOUND SINGLE RES: measureObservationDef resources: {}",
+                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
+
+        return false;
+    }
+
+    private void processResource(
+            Map<?, ?> measureObservationResourceAsMap,
+            PopulationDef measureObservationDef,
+            String subjectId,
+            Object measureObservationResourceMapKey,
+            Object matchingMeasurePopulationExclusionResourceForSubject) {
+
+        // All the resources for the subject
+        final Set<Object> measureObservationResourcesForSubject =
+                measureObservationDef.getResourcesForSubject(subjectId);
+
+        logger.info(
+                "1234: \nmeasureObservationResourcesForSubject:\n{}\n,\nmeasureObservationResourceAsMap:\n{}\nmeasureObservationResourceMapKey:\n{}",
+                printValues(measureObservationResourcesForSubject),
+                printValue(measureObservationResourceAsMap),
+                printValue(measureObservationResourceMapKey));
+
+        // LUKETODO:  where's the Encounter resource?
+        measureObservationDef.removeExcludedMeasureObservationResource(
+                subjectId, matchingMeasurePopulationExclusionResourceForSubject);
+
+        logger.info(
+                "1234: POST FOUND SINGLE RES: measureObservationDef resources: {}",
+                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
+    }
+
+    private Object printResource(Object key) {
+        if (key instanceof IBaseResource res) {
+            return res.getIdElement().getValueAsString();
+        }
+        return key.toString();
     }
 
     protected void evaluateCohort(

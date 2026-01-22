@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +124,9 @@ public class ContinuousVariableObservationHandler {
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        final Map<Object, Object> functionResults = new HashMap<>();
+        // VERY IMPORTANT: We need a custom Map to ensure remove by FHIR resource key does not
+        // use object identity (AKA ==)
+        final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
         for (Object result : resultsIter) {
@@ -140,7 +141,7 @@ public class ContinuousVariableObservationHandler {
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
             functionResults.put(result, quantity);
-            evaluatedResources.addAll(observationResult.getEvaluatedResources());
+            Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::addAll);
         }
 
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);

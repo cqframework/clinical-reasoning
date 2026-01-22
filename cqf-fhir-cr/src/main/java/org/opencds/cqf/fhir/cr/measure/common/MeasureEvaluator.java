@@ -14,8 +14,10 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -510,13 +512,41 @@ public class MeasureEvaluator {
             return;
         }
 
-        final int measurePopulationCount = Optional.ofNullable(measurePopulation)
-                .map(PopulationDef::getCount)
-                .orElse(0);
-        final int measurePopulationExclusionCount = Optional.ofNullable(measurePopulationExclusion)
-                .map(PopulationDef::getCount)
-                .orElse(0);
-        final int measureObservationCount = measurePopulationObservation.getCount();
+        // LUKETODO:  clean all this up once testing is complete
+        final Set<Object> measurePopulationSubjectResources = Optional.ofNullable(measurePopulation)
+                .map(pop -> pop.subjectResources.get(subjectId))
+                .orElse(Set.of());
+        final Set<Object> measurePopulationExclusionSubjectResources = Optional.ofNullable(measurePopulationExclusion)
+                .map(pop -> pop.subjectResources.get(subjectId))
+                .orElse(Set.of());
+        //        final Set<Object> measureObservationSubjectResources = measurePopulationObservation)
+        //            .map(pop -> pop.subjectResources.get(subjectId))
+        //            .orElse(Set.of());
+
+        final Set<Object> measureObservationSubjectResources =
+                measurePopulationObservation.subjectResources.get(subjectId);
+
+        final Set<Object> measureObservationSubjectResourcesAsFhirResources = new HashSet<>();
+
+        if (!CollectionUtils.isEmpty(measureObservationSubjectResources)) {
+            for (Object measureObservationSubjectResourcesAsFhirResource : measureObservationSubjectResources) {
+                if (measureObservationSubjectResourcesAsFhirResource instanceof Map<?, ?> map) {
+
+                    measureObservationSubjectResourcesAsFhirResources.addAll(map.keySet());
+                }
+            }
+        }
+
+        logger.info(
+                "1234: AFTER subjectID: {}, \nmeasurePopulationSubjectResources: \n{}, \nmeasurePopulationExclusionSubjectResources: \n{}, \nmeasureObservationSubjectResources: \n{}",
+                subjectId,
+                printValues(measurePopulationSubjectResources),
+                printValues(measurePopulationExclusionSubjectResources),
+                printValues(measureObservationSubjectResourcesAsFhirResources));
+
+        final int measurePopulationCount = new ArrayList<>(measurePopulationSubjectResources).size();
+        final int measurePopulationExclusionCount = new ArrayList<>(measurePopulationExclusionSubjectResources).size();
+        final int measureObservationCount = new ArrayList<>(measureObservationSubjectResourcesAsFhirResources).size();
 
         final int popMinusExclusionCount = measurePopulationCount - measurePopulationExclusionCount;
 
@@ -742,6 +772,9 @@ public class MeasureEvaluator {
         }
     }
 
+    // LUKETODO:  separate class with tons of unit tests
+    // LUKETODO:  ensure this new test uses SEPARATE INSTANCES OF FHIR RESOURCES in the Map
+    // and the Parameterized call
     /**
      * Removes measureObservationDef resources for a subject when their "key" is
      * found in the corresponding measurePopulationExclusionDef resources for that subject.
@@ -842,7 +875,11 @@ public class MeasureEvaluator {
 
         final Optional<Object> optMatchingMeasurePopulationExclusionResourcesForSubject =
                 measurePopulationExclusionResourcesForSubject.stream()
-                        .filter(entry -> entry.equals(measureObservationResourceMapKey))
+                        // LUKETODO: explain why and try to test for this, specifically:
+                        //                        .filter(entry -> entry.equals(measureObservationResourceMapKey))
+                        // THIS IS CRUCIAL:  We CANNOT call plain equals() here
+                        .filter(entry ->
+                                CqlFhirResourceAndCqlTypeUtils.areObjectsEqual(entry, measureObservationResourceMapKey))
                         .findAny();
 
         if (optMatchingMeasurePopulationExclusionResourcesForSubject.isPresent()) {
@@ -886,7 +923,8 @@ public class MeasureEvaluator {
                 printValue(measureObservationResourceAsMap),
                 printValue(measureObservationResourceMapKey));
 
-        // LUKETODO:  where's the Encounter resource?
+        // This is CRUCIAL:  This is a Map<String,Set<Map<? extends IBaseResource, QuantityDef>>
+        // and we must remove only ONE entry corresponding to ONE key in the INNER Map
         measureObservationDef.removeExcludedMeasureObservationResource(
                 subjectId, matchingMeasurePopulationExclusionResourceForSubject);
 

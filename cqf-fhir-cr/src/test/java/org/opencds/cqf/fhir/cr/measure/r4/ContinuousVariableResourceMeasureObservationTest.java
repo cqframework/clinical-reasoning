@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -1492,10 +1493,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .report();
     }
 
-    // patient-3
-    // measurePopulationCount:  4
-    // measurePopulationExclusionCount:  1
-    // measureObservationCount:  1
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisSpecificSubjectIdSum() {
 
@@ -1521,6 +1518,82 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .population("measure-observation")
                 .hasAggregationResult(420.0)
+                .hasAggregateMethod(ContinuousVariableObservationAggregateMethod.SUM)
+                .up()
+                .hasScore(420.0)
+                .up()
+                .up()
+                // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                .report()
+                .logReportJson()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(2)
+                .hasNoAggregationResultsExtensionValue()
+                .hasNoAggregateMethodExtension()
+                .up()
+                .population("measure-population")
+                .hasCount(2)
+                .hasNoAggregationResultsExtensionValue()
+                .hasNoAggregateMethodExtension()
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(1)
+                .hasNoAggregationResultsExtensionValue()
+                .hasNoAggregateMethodExtension()
+                .up()
+                .population("measure-observation")
+                .hasCount(1)
+                .hasAggregationResultsExtensionValue(420.0)
+                .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.SUM)
+                .up()
+                .hasScore("420.0")
+                .stratifierById("stratifier-age")
+                .hasStratumCount(1)
+                .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
+                .hasScore("420.0")
+                .hasPopulationCount(4)
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .population("measure-population")
+                .hasCount(2)
+                .up()
+                .population("measure-population-exclusion")
+                .hasCount(1)
+                .up()
+                .population("measure-observation")
+                .hasCount(1);
+    }
+
+    // LUKETODO: re-enable and fix
+    @Disabled
+    @Test
+    void continuousVariableResourceMeasureObservationEncounterBasisAnotherSpecificSubjectIdSum() {
+
+        GIVEN_ENCOUNTER_BASIS
+                .when()
+                .measureId("ContinuousVariableResourceMeasureObservationEncounterBasisSum")
+                .subject("patient-0")
+                .evaluate()
+                .then()
+                // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                .def()
+                .hasNoErrors()
+                .firstGroup()
+                .population("initial-population")
+                .hasNoAggregationResult()
+                .up()
+                .population("measure-population")
+                .hasSubjectCount(1)
+                .hasNoAggregationResult()
+                .up()
+                .population("measure-population-exclusion")
+                .hasNoAggregationResult()
+                .up()
+                .population("measure-observation")
+                .hasAggregationResult(120.0)
                 .hasAggregateMethod(ContinuousVariableObservationAggregateMethod.SUM)
                 .up()
                 .hasScore(420.0)

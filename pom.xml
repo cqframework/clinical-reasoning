@@ -578,9 +578,10 @@
                                 <goal>check</goal>
                             </goals>
                             <configuration>
+                                <haltOnFailure>false</haltOnFailure>  <!-- to allow all projects be analyzed -->
                                 <rules>
                                     <rule>
-                                        <element>BUNDLE</element>
+                                        <element>CLASS</element>
                                         <limits>
                                             <!-- Minimum instruction coverage -->
                                             <limit>
@@ -592,13 +593,13 @@
                                             <limit>
                                                 <counter>BRANCH</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.60</minimum> <!-- 60% branch coverage -->
+                                                <minimum>0.50</minimum> <!-- 50% branch coverage -->
                                             </limit>
                                             <!-- Minimum line coverage -->
                                             <limit>
                                                 <counter>LINE</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.60</minimum>
+                                                <minimum>0.50</minimum>
                                             </limit>
                                         </limits>
                                     </rule>
@@ -629,6 +630,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

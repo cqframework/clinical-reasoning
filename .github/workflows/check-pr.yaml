@@ -40,7 +40,24 @@ jobs:
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
       - name: Tests and additional checks
-        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+        run: |
+            set +e # don't immediately exit
+            ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage --fail-neer 2>&1 | tee build.log
+            
+            if grep -q "Rule violated" build.log; then
+                echo ""
+                echo "❌ Coverage violations found:"
+                echo "=========================="
+                echo "Rule violated" build.log
+                exit 1
+            fi
+            
+            if grep -q "BUILD FAILURE" build.log; then
+                echo "❌ Build failed"
+                exit 1
+            fi
+            
+            echo "✅ Build and coverage checks passed"
       - name: SonarCloud Analysis
         if: matrix.os == 'ubuntu.latest'
         env:

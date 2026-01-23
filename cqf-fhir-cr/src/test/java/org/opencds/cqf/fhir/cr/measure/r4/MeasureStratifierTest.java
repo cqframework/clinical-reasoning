@@ -645,4 +645,37 @@ class MeasureStratifierTest {
                 .up()
                 .report();
     }
+
+    @Test
+    void cohortResourceValueStratNull() {
+
+        GIVEN_SIMPLE
+            .when()
+            .measureId("CohortResourceAllPopulationsValueStratNull")
+            .subject("Patient/patient-9")
+            .evaluate()
+            .then()
+            .firstGroup()
+            .firstStratifier()
+            .hasCodeText("Empty and Null")
+            // 2 strata: one for each unique (AgeRange, Status) combination
+            .hasStratumCount(2)
+            // Stratum for "P21Y--P41Y + finished" - identified by unique "finished" status
+            .stratumByComponentValueText("Empty")
+            .hasComponentStratifierCount(2) // two components: age range + status
+            .firstPopulation()
+            .hasCount(1)
+            .up()
+            .up()
+            // Stratum for "P21Y--P41Y + in-progress" - identified by unique "in-progress" status
+            .stratumByComponentValueText("null")
+            .hasComponentStratifierCount(2) // two components: age range + status
+            .firstPopulation()
+            .hasCount(1)
+            .up()
+            .up()
+            .up()
+            .up()
+            .report();
+    }
 }

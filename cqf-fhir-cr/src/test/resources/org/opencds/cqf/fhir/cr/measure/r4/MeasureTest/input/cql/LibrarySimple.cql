@@ -261,3 +261,9 @@ define function "Age Function"(encounter Encounter):
 
 define function "Encounter Status Stratifier"(encounter Encounter):
   Coalesce(encounter.status.value, 'unknown')
+
+define function "Empty Function"(encounter Encounter):
+  {}
+
+define function "Null Function"(encounter Encounter):
+  null

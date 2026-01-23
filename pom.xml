@@ -30,6 +30,27 @@
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>
         <checkstyle.version>10.12.7</checkstyle.version>
+
+        <!-- SonarCloud configuration -->
+        <sonar.organization>cqframework</sonar.organization>
+        <sonar.projectKey>cqframework_clinical-reasoning</sonar.projectKey>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+        <!-- Coverage settings -->
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+
+        <!-- Exclusions -->
+        <sonar.exclusions>**/generated/**,**/benchmark/**</sonar.exclusions>
+        <sonar.coverage.exclusions>**/config/**,**/constants/**</sonar.coverage.exclusions>
+
+        <!-- Multi-module aggregation -->
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+
+        <!-- coverage badge -->
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <licenses>
@@ -548,6 +569,41 @@
                             <goals>
                                 <goal>report-aggregate</goal>
                             </goals>
+                        </execution>
+                        <!-- test coverage -->
+                        <execution>
+                            <id>jacoco-check</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <rule>
+                                        <element>BUNDLE</element>
+                                        <limits>
+                                            <!-- Minimum instruction coverage -->
+                                            <limit>
+                                                <counter>INSTRUCTION</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.50</minimum> <!-- 50% coverage -->
+                                            </limit>
+                                            <!-- Minimum branch coverage -->
+                                            <limit>
+                                                <counter>BRANCH</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.60</minimum> <!-- 60% branch coverage -->
+                                            </limit>
+                                            <!-- Minimum line coverage -->
+                                            <limit>
+                                                <counter>LINE</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.60</minimum>
+                                            </limit>
+                                        </limits>
+                                    </rule>
+                                </rules>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>

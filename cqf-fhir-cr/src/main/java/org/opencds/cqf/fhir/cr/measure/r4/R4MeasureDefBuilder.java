@@ -261,7 +261,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
+    private StratifierDef buildStratifierDef(
+            String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
         checkId(mgsc);
 
         // How we validate if subject based, Patient context or otherwise
@@ -310,7 +311,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     private static MeasureStratifierType getStratifierType(
-            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent, boolean isBooleanBasis) {
+            String measureUrl,
+            MeasureGroupStratifierComponent measureGroupStratifierComponent,
+            boolean isBooleanBasis) {
         if (measureGroupStratifierComponent == null) {
             return null;
         }

@@ -178,6 +178,8 @@ define function "MeasureObservationBoolean"():
 define "Gender Stratification":
   "SDE Sex"
 
+define function "Age of Period" (i Interval<DateTime>):
+  AgeInYearsAt(end of i)
 // boolean criteria stratifier
 
 define "boolean strat not finished":
@@ -253,6 +255,9 @@ define function "Age Range Stratifier"(encounter Encounter):
     when AgeInYearsAt(start of encounter.period) > 41 then 'P41Y--P9999Y'
     else null
   end
+
+define function "Age Function"(encounter Encounter):
+  AgeInYearsAt(start of encounter.period)
 
 define function "Encounter Status Stratifier"(encounter Encounter):
   Coalesce(encounter.status.value, 'unknown')

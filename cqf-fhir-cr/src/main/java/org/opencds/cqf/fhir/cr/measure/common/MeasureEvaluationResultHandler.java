@@ -146,7 +146,7 @@ public class MeasureEvaluationResultHandler {
 
                     // function evaluation
                     final List<EvaluationResult> functionEvaluationResults =
-                        FunctionEvaluationHandler.cqlFunctionEvaluation(
+                            FunctionEvaluationHandler.cqlFunctionEvaluation(
                                     context,
                                     measureDefs,
                                     libraryVersionedIdentifier,

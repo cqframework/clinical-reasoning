@@ -40,22 +40,29 @@ public class FunctionEvaluationHandler {
             EvaluationResult evaluationResult,
             String subjectTypePart) {
 
-        // MeasureDefs where functions need to evaluate
-        final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
-                // if measure contains measure-observation, otherwise short circuit
-                .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
-                .toList();
-
-        if (measureDefsWithFunctions.isEmpty()) {
-            // Don't need to do anything if there are no functions to process
-            return List.of();
-        }
-
         final boolean hasLibraryInitialized = LibraryInitHandler.initLibrary(context, libraryIdentifier);
 
-        final List<EvaluationResult> finalResults = new ArrayList<>();
-
         try {
+            // Validate all stratifier expression types before processing
+            for (MeasureDef measureDef : measureDefs) {
+                for (GroupDef groupDef : measureDef.groups()) {
+                    validateStratifierExpressionTypes(context, measureDef.url(), groupDef);
+                }
+            }
+
+            // MeasureDefs where functions need to evaluate
+            final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
+                    // if measure contains measure-observation, otherwise short circuit
+                    .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
+                    .toList();
+
+            if (measureDefsWithFunctions.isEmpty()) {
+                // Don't need to do anything if there are no functions to process
+                return List.of();
+            }
+
+            final List<EvaluationResult> finalResults = new ArrayList<>();
+
             // one Library may be linked to multiple Measures
             for (MeasureDef measureDefWithFunctions : measureDefsWithFunctions) {
 
@@ -76,25 +83,79 @@ public class FunctionEvaluationHandler {
                     }
                     // get function for non-subject value stratifiers and evaluate for each populationDef
                     final List<StratifierDef> stratifierDefs = groupDef.stratifiers().stream()
-                        .filter(StratifierDef::isNonSubjectValueStratifier)
-                        .toList();
-                    for(StratifierDef stratDef : stratifierDefs) {
+                            .filter(StratifierDef::isNonSubjectValueStratifier)
+                            .toList();
+                    for (StratifierDef stratDef : stratifierDefs) {
                         // each stratifier (could be multiple defined in component)
-                        var result = processNonSubValueStratifiers(context, evaluationResult, subjectTypePart, groupDef, stratDef);
+                        var result = processNonSubValueStratifiers(
+                                context, evaluationResult, subjectTypePart, groupDef, stratDef);
                         finalResults.add(result);
                     }
-
                 }
-
             }
+
+            return finalResults;
         } finally {
             // We don't want to pop a non-existent library
             if (hasLibraryInitialized) {
                 LibraryInitHandler.popLibrary(context);
             }
         }
+    }
 
-        return finalResults;
+    /**
+     * Validates that stratifier expressions use the correct expression type based on stratifier type:
+     * <ul>
+     *   <li>CRITERIA stratifier: must NOT be a CQL function, result must match population-basis</li>
+     *   <li>VALUE stratifier (boolean basis): must NOT be a CQL function</li>
+     *   <li>NON_SUBJECT_VALUE stratifier: must BE a CQL function with input matching population-basis</li>
+     * </ul>
+     *
+     * @param context the CQL engine context
+     * @param measureUrl the measure URL for error messages
+     * @param groupDef the group definition containing stratifiers
+     */
+    private static void validateStratifierExpressionTypes(CqlEngine context, String measureUrl, GroupDef groupDef) {
+        for (StratifierDef stratifierDef : groupDef.stratifiers()) {
+            if (stratifierDef.isCriteriaStratifier()) {
+                // CRITERIA stratifier: must NOT be a function
+                validateNotFunction(context, measureUrl, stratifierDef.expression(), "CRITERIA");
+            } else if (!stratifierDef.isNonSubjectValueStratifier()) {
+                // VALUE stratifier (boolean basis): must NOT be a function
+                if (stratifierDef.isComponentStratifier()) {
+                    for (var component : stratifierDef.components()) {
+                        validateNotFunction(context, measureUrl, component.expression(), "VALUE (subject-based)");
+                    }
+                } else {
+                    validateNotFunction(context, measureUrl, stratifierDef.expression(), "VALUE (subject-based)");
+                }
+            }
+            // NON_SUBJECT_VALUE stratifier validation happens in processNonSubValueStratifiers
+        }
+    }
+
+    /**
+     * Validates that an expression is NOT a CQL function definition.
+     *
+     * @param context the CQL engine context
+     * @param measureUrl the measure URL for error messages
+     * @param expression the expression name to check
+     * @param stratifierType the type of stratifier for error messages
+     */
+    private static void validateNotFunction(
+            CqlEngine context, String measureUrl, String expression, String stratifierType) {
+        if (expression == null || expression.isBlank()) {
+            return;
+        }
+
+        var ed = Libraries.resolveExpressionRef(expression, context.getState().getCurrentLibrary());
+        if (ed instanceof FunctionDef) {
+            throw new InvalidRequestException(
+                    ("%s stratifier expression '%s' must NOT be a CQL function definition for measure: %s. "
+                                    + "Only NON_SUBJECT_VALUE stratifiers (non-boolean population basis with component criteria) "
+                                    + "should use CQL function definitions.")
+                            .formatted(stratifierType, expression, measureUrl));
+        }
     }
 
     /**
@@ -143,7 +204,7 @@ public class FunctionEvaluationHandler {
 
         for (Object result : resultsIter) {
             final ExpressionResult observationResult =
-                evaluateFunctionCriteria(result, observationExpression, groupDef.isBooleanBasis(), context, true);
+                    evaluateFunctionCriteria(result, observationExpression, groupDef.isBooleanBasis(), context, true);
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
@@ -162,33 +223,59 @@ public class FunctionEvaluationHandler {
     /**
      * For a given non-subject based stratifier(s), do an ad-hoc function evaluation against group populations and
      * accumulate the results that will be subsequently added to the CQL evaluation result.
+     *
+     * <p>Supports two scenarios:
+     * <ul>
+     *   <li><b>Function expression</b>: CQL function takes each population resource as input, returns a value
+     *       per resource. Used for resource-level stratification (e.g., age range per encounter).</li>
+     *   <li><b>Scalar expression</b>: CQL expression returns a scalar value per subject (not a function).
+     *       Falls back to subject-level stratification - the scalar value applies to all resources for that subject.</li>
+     * </ul>
      */
     private static EvaluationResult processNonSubValueStratifiers(
-        CqlEngine context,
-        EvaluationResult evaluationResult,
-        String subjectTypePart,
-        GroupDef groupDef,
-        StratifierDef stratifierDef) {
+            CqlEngine context,
+            EvaluationResult evaluationResult,
+            String subjectTypePart,
+            GroupDef groupDef,
+            StratifierDef stratifierDef) {
 
         EvaluationResult evalResult = new EvaluationResult();
 
-        for(StratifierComponentDef componentDef: stratifierDef.components()) {
+        for (StratifierComponentDef componentDef : stratifierDef.components()) {
             if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
                 // We screwed up defining component correctly
-                throw new InternalErrorException(
-                    "StratifierDef component expression is missing.");
+                throw new InternalErrorException("StratifierDef component expression is missing.");
             }
             var stratifierExpression = componentDef.expression();
-            // input parameter data for value stratifier functions
-            for (PopulationDef popDef : groupDef.populations()) {
+
+            // Validate that NON_SUBJECT_VALUE stratifier expression is a CQL function
+            var ed = Libraries.resolveExpressionRef(
+                    stratifierExpression, context.getState().getCurrentLibrary());
+            boolean isFunction = ed instanceof FunctionDef;
+
+            if (!isFunction) {
+                // NON_SUBJECT_VALUE stratifiers MUST use CQL function definitions
+                throw new InvalidRequestException(
+                        ("Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not. "
+                                        + "For non-boolean population basis, stratifier component criteria expressions must be "
+                                        + "CQL functions that take a parameter matching the population basis type.")
+                                .formatted(stratifierExpression));
+            }
+
+            // Function expression: input parameter data for value stratifier functions
+            // Exclude MEASUREOBSERVATION populations - they have function expressions that aren't in regular results
+            var nonObservationPopulations = groupDef.populations().stream()
+                    .filter(pop -> pop.type() != MeasurePopulationType.MEASUREOBSERVATION)
+                    .toList();
+
+            for (PopulationDef popDef : nonObservationPopulations) {
 
                 // retrieve group.population results to input into valueStrat function
                 Optional<ExpressionResult> optExpressionResult =
-                    tryGetExpressionResult(popDef.expression(), evaluationResult);
+                        tryGetExpressionResult(popDef.expression(), evaluationResult);
 
                 final ExpressionResult expressionResult = optExpressionResult.get();
-                final Iterable<?> resultsIter = getResultIterable(evaluationResult,
-                    expressionResult, subjectTypePart);
+                final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
                 // make new expression name for uniquely extracting results
                 // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
                 var expressionName = popDef.id() + "-" + stratifierExpression;
@@ -196,9 +283,8 @@ public class FunctionEvaluationHandler {
                 final Set<Object> evaluatedResources = new HashSet<>();
 
                 for (Object result : resultsIter) {
-                    final ExpressionResult functionResult =
-                        evaluateFunctionCriteria(result, stratifierExpression,
-                            groupDef.isBooleanBasis(), context, true);
+                    final ExpressionResult functionResult = evaluateFunctionCriteria(
+                            result, stratifierExpression, groupDef.isBooleanBasis(), context, false);
                     // add function results to existing EvaluationResult under new expression
                     // name
                     // need a way to capture input parameter here too, otherwise we have no way
@@ -212,8 +298,6 @@ public class FunctionEvaluationHandler {
                 // add to EvaluationResult
                 addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
             }
-
-
         }
         return evalResult;
     }
@@ -266,7 +350,11 @@ public class FunctionEvaluationHandler {
      */
     @SuppressWarnings({"deprecation", "removal"})
     public static ExpressionResult evaluateFunctionCriteria(
-            Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context, boolean isMeasureObservation) {
+            Object resource,
+            String criteriaExpression,
+            boolean isBooleanBasis,
+            CqlEngine context,
+            boolean isMeasureObservation) {
 
         var ed = Libraries.resolveExpressionRef(
                 criteriaExpression, context.getState().getCurrentLibrary());
@@ -302,7 +390,7 @@ public class FunctionEvaluationHandler {
         final Set<Object> evaluatedResources = captureEvaluatedResources(context);
 
         // validates return types
-        if(isMeasureObservation) {
+        if (isMeasureObservation) {
             validateObservationResult(resource, result);
         }
 
@@ -387,9 +475,9 @@ public class FunctionEvaluationHandler {
         }
 
         return measureDef.groups().stream()
-            .filter(x -> x.stratifiers() !=null)
-            .flatMap(y -> y.stratifiers().stream())
-            .anyMatch(StratifierDef::isNonSubjectValueStratifier);
+                .filter(x -> x.stratifiers() != null)
+                .flatMap(y -> y.stratifiers().stream())
+                .anyMatch(StratifierDef::isNonSubjectValueStratifier);
     }
 
     /**
@@ -427,15 +515,13 @@ public class FunctionEvaluationHandler {
 
     @Nonnull
     private static EvaluationResult addToEvaluationResult(
-        @Nonnull EvaluationResult result,
-        @Nonnull String expressionName,
-        @Nonnull Map<Object, Object> functionResults,
-        @Nonnull Set<Object> evaluatedResources) {
+            @Nonnull EvaluationResult result,
+            @Nonnull String expressionName,
+            @Nonnull Map<Object, Object> functionResults,
+            @Nonnull Set<Object> evaluatedResources) {
 
         result.set(
-            new EvaluationExpressionRef(expressionName),
-            new ExpressionResult(functionResults, evaluatedResources)
-        );
+                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
 
         return result;
     }

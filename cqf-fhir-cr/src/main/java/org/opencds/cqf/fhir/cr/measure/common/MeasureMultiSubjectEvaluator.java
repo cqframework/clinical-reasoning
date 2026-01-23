@@ -12,77 +12,97 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Aggregates individual subject evaluation results into stratum definitions for measure reporting across multiple subjects.
+ * Aggregates individual subject evaluation results into stratum definitions for measure reporting
+ * across multiple subjects.
  *
- * Supports:
- *  - subject-basis stratifiers (subject -> scalar)
- *  - non-subject / function-result stratifiers (subject -> Map<inputParam, producedValue>)
+ * <h2>Stratifier Set Intersection Rules</h2>
  *
- * For Map<inputParam, producedValue>:
- *  - inputParam (key) is used for alignment + population intersection (pop-basis)
- *  - producedValue (value) is what becomes StratumValueWrapper (component.text display)
+ * <p>The stratifier intersection problem has four quadrants based on two dimensions:
+ * <ol>
+ *   <li><b>Stratifier Type</b>: CRITERIA vs VALUE (including NON_SUBJECT_VALUE)</li>
+ *   <li><b>Population Basis</b>: Boolean vs any other FHIR Type (from fhir-types ValueSet)</li>
+ * </ol>
  *
- * This refactor removes string row keys like "Patient/x|Encounter/y" and replaces them with a structured RowKey.
+ * <p>Population basis can be ANY FHIR type from the
+ * <a href="https://build.fhir.org/valueset-fhir-types.html">fhir-types ValueSet</a>, including:
+ * <ul>
+ *   <li><b>Primitive types</b>: boolean, string, integer, decimal, date, dateTime, etc.</li>
+ *   <li><b>Complex types</b>: CodeableConcept, Coding, Identifier, Period, Quantity, etc.</li>
+ *   <li><b>Resource types</b>: Encounter, Observation, Patient, Condition, etc.</li>
+ * </ul>
+ *
+ * <p>The key distinction is between:
+ * <ul>
+ *   <li><b>Boolean basis</b>: Population membership is true/false per subject. Count = number of subjects.</li>
+ *   <li><b>Non-boolean basis</b>: Population results are FHIR types (resources, complex types, primitives).
+ *       Count = number of result items, with intersection based on the specific FHIR type's identity.</li>
+ * </ul>
+ *
+ * <h3>Intersection Table</h3>
+ * <pre>
+ * ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+ * │                           STRATIFIER SET INTERSECTION RULES                                 │
+ * ├─────────────────┬───────────────────────────────────────────────────────────────────────────┤
+ * │                 │                        STRATIFIER TYPE                                    │
+ * │ POPULATION      ├───────────────────────────────────┬───────────────────────────────────────┤
+ * │ BASIS           │ CRITERIA                          │ VALUE / NON_SUBJECT_VALUE             │
+ * ├─────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+ * │                 │ Stratifier Result: Boolean        │ Stratifier Result: Scalar value       │
+ * │ BOOLEAN         │ Criteria Key: Subject ID          │ Criteria Key: Subject ID              │
+ * │                 │ Pop Result: Boolean per Subject   │ Pop Result: Boolean per Subject       │
+ * │                 │                                   │                                       │
+ * │                 │ INTERSECTION: Subject-based       │ INTERSECTION: Subject-based           │
+ * │                 │ Count = subjects where            │ Count = subjects where                │
+ * │                 │   strat_result ∩ pop_result       │   pop_result = TRUE (grouped by       │
+ * │                 │   both TRUE (or matching sets)    │   stratifier value)                   │
+ * ├─────────────────┼───────────────────────────────────┼───────────────────────────────────────┤
+ * │                 │ Stratifier Result: FHIR types     │ Stratifier Result: Map&lt;FHIRType,Val&gt; │
+ * │ NON-BOOLEAN     │ Criteria Key: FHIR type ID        │ Criteria Key: FHIR type ID (input)    │
+ * │ (any FHIR type: │ Pop Result: FHIR types per Subj   │ Pop Result: FHIR types per Subject    │
+ * │  Resource,      │                                   │ Display Value: Value (output)         │
+ * │  Identifier,    │ INTERSECTION: Type-based          │                                       │
+ * │  CodeableConcept│ Count = items where               │ INTERSECTION: Type-based              │
+ * │  Period, etc.)  │   strat_items ∩ pop_items         │ Count = items where                   │
+ * │                 │   (same item in both)             │   input_item ∩ pop_items              │
+ * │                 │                                   │   (grouped by output value)           │
+ * └─────────────────┴───────────────────────────────────┴───────────────────────────────────────┘
+ * </pre>
+ *
+ * <h3>Non-Subject Value Stratifier (Key Case)</h3>
+ * <p>For NON_SUBJECT_VALUE stratifiers with non-boolean population basis:
+ * <ul>
+ *   <li>CQL function takes each population result item as input, returns a value</li>
+ *   <li>Criteria Key = normalized ID of the input item (e.g., "Encounter/123" for resources)</li>
+ *   <li>Display Value = function output (e.g., "Finished", "P21Y--P41Y")</li>
+ *   <li>Intersection: check if criteria key exists in population results</li>
+ *   <li>Group rows by display value to form strata</li>
+ * </ul>
+ *
+ * @see <a href="https://build.fhir.org/valueset-fhir-types.html">FHIR Types ValueSet</a>
+ * @see <a href="https://build.fhir.org/clinicalreasoning-quality-reporting.html#stratification">
+ *      FHIR Clinical Reasoning - Stratification</a>
  */
 public class MeasureMultiSubjectEvaluator {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);
 
     /**
-     * Row identifier for component stratification results.
-     *
-     * - subjectQualified: "Patient/patient-1" (always present)
-     * - criteriaKey: the "pop-basis" alignment key (e.g., Encounter/123) for non-subject stratifiers
-     *   null for subject-basis stratifiers.
-     */
-    private static final class RowKey {
-        private final String subjectQualified;
-        private final String criteriaKey; // nullable
-
-        private RowKey(String subjectQualified, String criteriaKey) {
-            this.subjectQualified = subjectQualified;
-            this.criteriaKey = criteriaKey;
-        }
-
-        public String subjectQualified() {
-            return subjectQualified;
-        }
-
-        public String criteriaKey() {
-            return criteriaKey;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof RowKey other)) return false;
-            return Objects.equals(subjectQualified, other.subjectQualified)
-                && Objects.equals(criteriaKey, other.criteriaKey);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(subjectQualified, criteriaKey);
-        }
-
-        @Override
-        public String toString() {
-            return "RowKey{subject=" + subjectQualified + ", criteriaKey=" + criteriaKey + "}";
-        }
-    }
-
-    /**
      * Take the accumulated subject-by-subject evaluation results and use it to build StratumDefs
-     * and StratumPopulationDefs.
+     * and StratumPopulationDefs
+     *
+     * @param fhirContext  FHIR context for FHIR version used
+     * @param measureDef  to mutate post-evaluation with results of initial stratifier
+     *                    subject-by-subject accumulations.
+     *
      */
     public static void postEvaluationMultiSubject(FhirContext fhirContext, MeasureDef measureDef) {
 
@@ -94,7 +114,7 @@ public class MeasureMultiSubjectEvaluator {
                     stratumDefs = componentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
                 } else {
                     stratumDefs =
-                        nonComponentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
+                            nonComponentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
@@ -103,108 +123,126 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     private static StratumDef buildStratumDef(
-        FhirContext fhirContext,
-        StratifierDef stratifierDef,
-        Set<StratumValueDef> values,
-        List<String> subjectIds,
-        List<PopulationDef> populationDefs,
-        GroupDef groupDef) {
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            Set<StratumValueDef> values,
+            List<String> subjectIds,
+            List<String> rowKeys,
+            List<PopulationDef> populationDefs,
+            GroupDef groupDef) {
 
+        // Build all stratum populations
         List<StratumPopulationDef> stratumPopulations = populationDefs.stream()
-            .map(popDef -> buildStratumPopulationDef(fhirContext, stratifierDef, popDef, subjectIds, groupDef))
-            .toList();
+                .map(popDef ->
+                        buildStratumPopulationDef(fhirContext, stratifierDef, popDef, subjectIds, rowKeys, groupDef))
+                .toList();
 
+        // Pre-compute measure observation cache if applicable
         MeasureObservationStratumCache observationCache =
-            buildMeasureObservationCacheIfApplicable(groupDef, stratumPopulations);
+                buildMeasureObservationCacheIfApplicable(groupDef, stratumPopulations);
 
         return new StratumDef(stratumPopulations, values, subjectIds, observationCache);
     }
 
+    // Enhanced by Claude Sonnet 4.5 to calculate and populate all StratumPopulationDef fields
     private static StratumPopulationDef buildStratumPopulationDef(
-        FhirContext fhirContext,
-        StratifierDef stratifierDef,
-        PopulationDef populationDef,
-        List<String> subjectIds,
-        GroupDef groupDef) {
-
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            PopulationDef populationDef,
+            List<String> subjectIds,
+            List<String> rowKeys,
+            GroupDef groupDef) {
+        // population subjectIds
         var popSubjectIds = populationDef.getSubjects().stream()
-            .map(FhirResourceUtils::addPatientQualifier)
-            .collect(Collectors.toUnmodifiableSet());
-
+                .map(FhirResourceUtils::addPatientQualifier)
+                .collect(Collectors.toUnmodifiableSet());
+        // intersect stratum subjectIds and population subjectIds
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
+        // Calculate intersection and resource IDs based on stratifier type and basis
         Set<Object> populationDefEvaluationResultIntersection;
         List<String> resourceIdsForSubjectList;
 
+        // For criteria stratifiers, always calculate the intersection regardless of basis
         if (stratifierDef.isCriteriaStratifier()) {
-            if (groupDef.isBooleanBasis()) {
-                // boolean-basis criteria: subject-alignment intersection
-                populationDefEvaluationResultIntersection =
-                    calculateCriteriaStratifierIntersectionBySubject(stratifierDef, populationDef);
-            } else {
-                // non-boolean basis: if stratifier results are Map<inputParam, value>, intersect by inputParam keys
-                if (hasInputParameterFunctionResults(stratifierDef)) {
-                    populationDefEvaluationResultIntersection =
-                        calculateCriteriaStratifierIntersectionByInputParameter(stratifierDef, populationDef);
-                } else {
-                    // legacy fallback
-                    populationDefEvaluationResultIntersection =
-                        calculateCriteriaStratifierIntersectionBySubject(stratifierDef, populationDef);
-                }
-            }
+            populationDefEvaluationResultIntersection =
+                    calculateCriteriaStratifierIntersection(stratifierDef, populationDef);
         } else {
             populationDefEvaluationResultIntersection = Set.of();
         }
 
         if (groupDef.isBooleanBasis()) {
+            // For boolean basis, we don't need resource IDs
             resourceIdsForSubjectList = List.of();
         } else {
-            resourceIdsForSubjectList =
-                getResourceIds(fhirContext, qualifiedSubjectIdsCommonToPopulation, groupDef, populationDef);
+            // For resource basis stratifiers, calculate resource IDs based on stratifier type
+            resourceIdsForSubjectList = getResourceIdsForValueStratifier(
+                    fhirContext,
+                    stratifierDef,
+                    rowKeys,
+                    qualifiedSubjectIdsCommonToPopulation,
+                    groupDef,
+                    populationDef);
         }
 
         return new StratumPopulationDef(
-            populationDef,
-            qualifiedSubjectIdsCommonToPopulation,
-            populationDefEvaluationResultIntersection,
-            resourceIdsForSubjectList,
-            stratifierDef.getStratifierType(),
-            groupDef.getPopulationBasis());
+                populationDef,
+                qualifiedSubjectIdsCommonToPopulation,
+                populationDefEvaluationResultIntersection,
+                resourceIdsForSubjectList,
+                stratifierDef.getStratifierType(),
+                groupDef.getPopulationBasis());
     }
 
+    /**
+     * Build measure observation cache if this measure has MEASUREOBSERVATION populations
+     * linked to NUMERATOR and DENOMINATOR populations (e.g., ratio measures with observations).
+     * Returns null if not applicable or if lookups fail (preserves existing null behavior).
+     * <p>
+     * Added by Claude Sonnet 4.5 on 2025-12-05 for measure observation optimization.
+     *
+     * @param groupDef the group definition
+     * @param stratumPopulations the list of stratum populations for this stratum
+     * @return the cache or null if not applicable
+     */
     private static MeasureObservationStratumCache buildMeasureObservationCacheIfApplicable(
-        GroupDef groupDef, List<StratumPopulationDef> stratumPopulations) {
+            GroupDef groupDef, List<StratumPopulationDef> stratumPopulations) {
 
+        // Only applicable for measures with observations
         if (!groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
             return null;
         }
 
+        // Get all MEASUREOBSERVATION populations
         List<PopulationDef> measureObservationPopulationDefs =
-            groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
+                groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
         if (measureObservationPopulationDefs.isEmpty()) {
             return null;
         }
 
+        // Find numerator and denominator observation PopulationDefs
         PopulationDef numObsPopDef = groupDef.findRatioObservationPopulationDef(
-            measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
+                measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
         PopulationDef denObsPopDef = groupDef.findRatioObservationPopulationDef(
-            measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
+                measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
 
         if (numObsPopDef == null || denObsPopDef == null) {
             return null;
         }
 
+        // Find corresponding StratumPopulationDefs
         StratumPopulationDef numObsStratumPop = stratumPopulations.stream()
-            .filter(sp -> sp.populationDef() == numObsPopDef)
-            .findFirst()
-            .orElse(null);
+                .filter(sp -> sp.populationDef() == numObsPopDef)
+                .findFirst()
+                .orElse(null);
 
         StratumPopulationDef denObsStratumPop = stratumPopulations.stream()
-            .filter(sp -> sp.populationDef() == denObsPopDef)
-            .findFirst()
-            .orElse(null);
+                .filter(sp -> sp.populationDef() == denObsPopDef)
+                .findFirst()
+                .orElse(null);
 
+        // All-or-nothing: only create cache if both found
         if (numObsStratumPop == null || denObsStratumPop == null) {
             return null;
         }
@@ -212,36 +250,47 @@ public class MeasureMultiSubjectEvaluator {
         return new MeasureObservationStratumCache(numObsStratumPop, denObsStratumPop);
     }
 
-    // ---------------------------------------------------------------------
-    // COMPONENT STRATIFIERS (refactored table structure)
-    // ---------------------------------------------------------------------
-
     private static List<StratumDef> componentStratumPlural(
-        FhirContext fhirContext,
-        StratifierDef stratifierDef,
-        List<PopulationDef> populationDefs,
-        GroupDef groupDef) {
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            List<PopulationDef> populationDefs,
+            GroupDef groupDef) {
 
-        // Unified table:
-        // rowKey = RowKey(subjectQualified, criteriaKey?)  (criteriaKey is null for subject-basis)
-        // colKey = StratifierComponentDef
-        // value  = StratumValueWrapper(displayValue)
-        final Table<RowKey, StratifierComponentDef, StratumValueWrapper> table =
-            buildUnifiedComponentResultsTable(stratifierDef.components());
+        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
+                buildSubjectResultsTable(stratifierDef.components());
 
-        // Group rows by the Set<StratumValueDef> combination (across components)
-        final Map<Set<StratumValueDef>, List<RowKey>> rowsByValueDefSet = groupRowsByValueDefSet(table);
+        // Stratifiers should be of the same basis as population
+        // Split subjects by result values
+        // ex. all Male Patients and all Female Patients
+
+        var componentSubjects = groupSubjectsByValueDefSet(subjectResultTable);
 
         var stratumDefs = new ArrayList<StratumDef>();
 
-        rowsByValueDefSet.forEach((valueSet, rowKeys) -> {
-            // StratumDef still expects subjectIds; collapse RowKey -> distinct subjects
-            List<String> subjects = rowKeys.stream()
-                .map(RowKey::subjectQualified)
-                .distinct()
-                .toList();
+        componentSubjects.forEach((valueSet, rowKeys) -> {
+            // converts table into component value combinations
+            // | Stratum   | Set<ValueDef>           | List<RowKeys(String)>  |
+            // | --------- | ----------------------- | ---------------------- |
+            // | Stratum-1 | <'M','White>            | [subject-a]            |
+            // | Stratum-2 | <'F','hispanic/latino'> | [subject-b]            |
+            // | Stratum-3 | <'M','hispanic/latino'> | [subject-c]            |
+            // | Stratum-4 | <'F','black'>           | [subject-d, subject-e] |
+            //
+            // For non-subject value stratifiers with function results:
+            // | Stratum   | Set<ValueDef>           | List<RowKeys(String)>              |
+            // | --------- | ----------------------- | ---------------------------------- |
+            // | Stratum-1 | <'35'>                  | [Patient/1|Encounter/a, Patient/2|Encounter/b] |
+            // | Stratum-2 | <'38'>                  | [Patient/3|Encounter/c]            |
 
-            var stratumDef = buildStratumDef(fhirContext, stratifierDef, valueSet, subjects, populationDefs, groupDef);
+            // Extract subjects from row keys (handles both "Patient/xxx" and "Patient/xxx|Resource/yyy")
+            List<String> subjects = rowKeys.stream()
+                    .map(MeasureMultiSubjectEvaluator::extractSubjectFromRowKey)
+                    .distinct()
+                    .toList();
+
+            var stratumDef =
+                    buildStratumDef(fhirContext, stratifierDef, valueSet, subjects, rowKeys, populationDefs, groupDef);
+
             stratumDefs.add(stratumDef);
         });
 
@@ -249,247 +298,310 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Builds a unified table for component stratifiers.
-     *
-     * SUBJECT-BASIS:
-     *   subject -> scalar
-     *   RowKey(subjectQualified, null) => displayValue
-     *
-     * NON-SUBJECT / FUNCTION RESULTS:
-     *   subject -> Map<inputParam, producedValue>
-     *   RowKey(subjectQualified, normalizeKey(inputParam)) => displayValue(producedValue)
-     *
-     * NOTE: displayValue is what eventually becomes MeasureReport...stratum.component.text (via wrappers/defs).
-     *       criteriaKey is only used for alignment/intersection logic.
+     * Extract the subject portion from a row key.
+     * Handles both "Patient/xxx" and composite "Patient/xxx|Resource/yyy" formats.
      */
-    private static Table<RowKey, StratifierComponentDef, StratumValueWrapper> buildUnifiedComponentResultsTable(
-        List<StratifierComponentDef> componentDefs) {
-
-        final Table<RowKey, StratifierComponentDef, StratumValueWrapper> t = HashBasedTable.create();
-
-        componentDefs.forEach(componentDef ->
-            componentDef.getResults().forEach((subject, criteriaResult) -> {
-
-                String subjectQualified = FhirResourceUtils.addPatientQualifier(subject);
-                Object raw = criteriaResult == null ? null : criteriaResult.rawValue();
-
-                // Non-subject / function results: Map<inputParam, producedValue>
-                if (raw instanceof Map<?, ?> m) {
-                    for (Map.Entry<?, ?> e : m.entrySet()) {
-                        String criteriaKey = normalizeKey(e.getKey()); // pop-basis key used for alignment
-                        RowKey rk = new RowKey(subjectQualified, criteriaKey);
-
-                        // Produced value is what we display (NOT the input parameter)
-                        StratumValueWrapper wrapper = new StratumValueWrapper(e.getValue());
-                        t.put(rk, componentDef, wrapper);
-                    }
-                    return;
-                }
-
-                // Subject-basis result
-                RowKey rk = new RowKey(subjectQualified, null);
-                t.put(rk, componentDef, new StratumValueWrapper(raw));
-            }));
-
-        return t;
+    private static String extractSubjectFromRowKey(String rowKey) {
+        int pipeIndex = rowKey.indexOf('|');
+        return pipeIndex >= 0 ? rowKey.substring(0, pipeIndex) : rowKey;
     }
-
-    /**
-     * Group RowKeys by the set of value defs present across components.
-     */
-    private static Map<Set<StratumValueDef>, List<RowKey>> groupRowsByValueDefSet(
-        Table<RowKey, StratifierComponentDef, StratumValueWrapper> table) {
-
-        final Map<RowKey, Set<StratumValueDef>> rowToValueDefs = new HashMap<>();
-
-        for (Table.Cell<RowKey, StratifierComponentDef, StratumValueWrapper> cell : table.cellSet()) {
-            RowKey rowKey = cell.getRowKey();
-            StratifierComponentDef componentDef = cell.getColumnKey();
-            StratumValueWrapper wrapper = cell.getValue();
-
-            rowToValueDefs
-                .computeIfAbsent(rowKey, k -> new HashSet<>())
-                .add(new StratumValueDef(wrapper, componentDef));
-        }
-
-        return rowToValueDefs.entrySet().stream()
-            .collect(Collectors.groupingBy(
-                Map.Entry::getValue,
-                Collector.of(
-                    ArrayList::new,
-                    (list, e) -> list.add(e.getKey()),
-                    (l1, l2) -> {
-                        l1.addAll(l2);
-                        return l1;
-                    })));
-    }
-
-    // ---------------------------------------------------------------------
-    // NON-COMPONENT STRATIFIERS (unchanged, but left here)
-    // ---------------------------------------------------------------------
 
     private static List<StratumDef> nonComponentStratumPlural(
-        FhirContext fhirContext,
-        StratifierDef stratifierDef,
-        List<PopulationDef> populationDefs,
-        GroupDef groupDef) {
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            List<PopulationDef> populationDefs,
+            GroupDef groupDef) {
+        // standard Stratifier
+        // one criteria expression defined, one set of criteria results
 
+        // standard Stratifier
+        // one criteria expression defined, one set of criteria results
         final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
 
+        // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
+        // combinations of results
+        // example: 'gender' expression could produce values of 'M', 'F'
+        // subject1: 'gender'--> 'M'
+        // subject2: 'gender'--> 'F'
+        // stratifier criteria results are: 'M', 'F'
+
         if (stratifierDef.isCriteriaStratifier()) {
+            // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
+            // Seems to be irrelevant for criteria based stratifiers
             var patients = List.<String>of();
-            var stratum = buildStratumDef(fhirContext, stratifierDef, stratValues, patients, populationDefs, groupDef);
+            // Row keys same as patients for non-component criteria stratifiers
+            var rowKeys = List.<String>of();
+
+            var stratum = buildStratumDef(
+                    fhirContext, stratifierDef, stratValues, patients, rowKeys, populationDefs, groupDef);
             return List.of(stratum);
         }
 
         Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-            .collect(Collectors.groupingBy(x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
+                .collect(Collectors.groupingBy(
+                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
 
         var stratumMultiple = new ArrayList<StratumDef>();
 
+        // Stratum 1
+        // Value: 'M'--> subjects: subject1
+        // Stratum 2
+        // Value: 'F'--> subjects: subject2
+        // loop through each value key
         for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+            // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
+            // TODO: should match context of CQL, not only Patient
             var patientsSubjects = stratValue.getValue().stream()
-                .map(FhirResourceUtils::addPatientQualifier)
-                .toList();
-
+                    .map(FhirResourceUtils::addPatientQualifier)
+                    .toList();
+            // For non-component stratifiers, row keys are the same as patient subjects
+            var rowKeys = patientsSubjects;
+            // build the stratum for each unique value
+            // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
+            // multiple criteria
+            // TODO: build out nonComponent stratum method
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
-
             var stratum = buildStratumDef(
-                fhirContext, stratifierDef, stratValues, patientsSubjects, populationDefs, groupDef);
-
+                    fhirContext, stratifierDef, stratValues, patientsSubjects, rowKeys, populationDefs, groupDef);
             stratumMultiple.add(stratum);
         }
 
         return stratumMultiple;
     }
 
-    // ---------------------------------------------------------------------
-    // CRITERIA STRATIFIER INTERSECTION RULES (separated + explicit)
-    // ---------------------------------------------------------------------
-
-    private static boolean hasInputParameterFunctionResults(StratifierDef stratifierDef) {
-        if (stratifierDef == null) return false;
-        Map<String, CriteriaResult> results = stratifierDef.getResults();
-        if (results == null || results.isEmpty()) return false;
-        return results.values().stream()
-            .map(CriteriaResult::rawValue)
-            .anyMatch(v -> v instanceof Map<?, ?>);
-    }
-
     /**
-     * Subject-key intersection (works for boolean basis + legacy cases).
-     */
-    private static Set<Object> calculateCriteriaStratifierIntersectionBySubject(
-        StratifierDef stratifierDef, PopulationDef populationDef) {
-
-        final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
-        final List<Object> all = new ArrayList<>();
-
-        for (Entry<String, CriteriaResult> e : stratifierResultsBySubject.entrySet()) {
-            final Set<Object> stratifierSet = e.getValue() != null ? e.getValue().valueAsSet() : Set.of();
-            final Set<Object> popSet = populationDef.getResourcesForSubject(e.getKey());
-            if (popSet == null || popSet.isEmpty()) continue;
-
-            all.addAll(Sets.intersection(popSet, stratifierSet));
-        }
-
-        return new HashSetForFhirResourcesAndCqlTypes<>(all);
-    }
-
-    /**
-     * Input-parameter-key intersection for non-subject criteria stratifiers:
+     * Builds a table mapping subjects (or subject|resource pairs) to their stratifier values.
      *
-     * Stratifier results per subject are Map<inputParam, producedValue>.
-     * We intersect population results against Map KEYS (inputParam) to count membership.
+     * <p>Handles two cases:
+     * <ul>
+     *   <li><b>Subject-basis (scalar values)</b>: Row key is "Patient/xxx", value is the scalar result</li>
+     *   <li><b>Non-subject value (function results)</b>: Row key is "Patient/xxx|Resource/yyy",
+     *       value is the function output for that resource</li>
+     * </ul>
      *
-     * IMPORTANT: The producedValue is display-only and must NOT drive population counting.
+     * <p>For non-subject value stratifiers, the CQL function returns Map&lt;inputResource, outputValue&gt;.
+     * We expand this into multiple rows, one per input resource, using a composite row key.
      */
-    private static Set<Object> calculateCriteriaStratifierIntersectionByInputParameter(
-        StratifierDef stratifierDef, PopulationDef populationDef) {
+    private static Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
+            List<StratifierComponentDef> componentDefs) {
 
-        final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
-        final List<Object> all = new ArrayList<>();
+        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
 
-        for (Entry<String, CriteriaResult> entry : stratifierResultsBySubject.entrySet()) {
-            final String subjectId = entry.getKey();
-            final CriteriaResult crit = entry.getValue();
-            final Object raw = crit == null ? null : crit.rawValue();
+        componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
+            String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subject);
+            Object rawValue = result == null ? null : result.rawValue();
 
-            if (!(raw instanceof Map<?, ?> functionResults)) {
-                continue;
-            }
+            // Handle non-subject value stratifiers with function results (Map<inputResource, outputValue>)
+            if (rawValue instanceof Map<?, ?> functionResults) {
+                for (Map.Entry<?, ?> entry : functionResults.entrySet()) {
+                    // Build composite row key: "Patient/xxx|Resource/yyy"
+                    String inputResourceKey = normalizeResourceKey(entry.getKey());
+                    String rowKey = qualifiedSubject + "|" + inputResourceKey;
 
-            final Set<Object> popSet = populationDef.getResourcesForSubject(subjectId);
-            if (popSet == null || popSet.isEmpty()) {
-                continue;
-            }
-
-            // normalize population objects to comparable keys
-            final Map<String, Object> popKeyToObj = new HashMap<>();
-            for (Object popObj : popSet) {
-                String k = normalizeKey(popObj);
-                if (k != null) popKeyToObj.put(k, popObj);
-            }
-
-            // intersect using Map keys
-            for (Object inputParam : functionResults.keySet()) {
-                String k = normalizeKey(inputParam);
-                if (k == null) continue;
-
-                Object matched = popKeyToObj.get(k);
-                if (matched != null) {
-                    all.add(matched);
+                    // The output value becomes the stratum value (what's displayed)
+                    StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(entry.getValue());
+                    subjectResultTable.put(rowKey, stratumValueWrapper, componentDef);
                 }
+                return;
             }
-        }
 
-        return new HashSetForFhirResourcesAndCqlTypes<>(all);
+            // Standard case: scalar value per subject
+            StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(rawValue);
+            subjectResultTable.put(qualifiedSubject, stratumValueWrapper, componentDef);
+        }));
+
+        return subjectResultTable;
     }
-
-    // ---------------------------------------------------------------------
-    // UTILITIES
-    // ---------------------------------------------------------------------
 
     /**
-     * Normalize keys to allow comparing:
-     * - Resources -> "ResourceType/id" (versionless)
-     * - everything else -> toString()
+     * Normalize a resource to its ID string for use as a row key component.
      */
-    private static String normalizeKey(Object o) {
-        if (o == null) return null;
-
-        if (o instanceof IBaseResource r) {
-            if (r.getIdElement() == null || r.getIdElement().isEmpty()) return null;
-            return r.getIdElement().toVersionless().getValueAsString();
+    private static String normalizeResourceKey(Object obj) {
+        if (obj instanceof IBaseResource resource) {
+            if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
+                return resource.getIdElement().toVersionless().getValue();
+            }
         }
-        return o.toString();
+        return String.valueOf(obj);
     }
 
+    private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
+            Table<String, StratumValueWrapper, StratifierComponentDef> table) {
+        // input format
+        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
+        // | ---------------- | ----------------------------- | ---------------------- |
+        // | subject-a        | M                             | gender                 |
+        // | subject-b        | F                             | gender                 |
+        // | subject-c        | M                             | gender                 |
+        // | subject-d        | F                             | gender                 |
+        // | subject-e        | F                             | gender                 |
+        // | subject-a        | white                         | race                   |
+        // | subject-b        | hispanic/latino               | race                   |
+        // | subject-c        | hispanic/latino               | race                   |
+        // | subject-d        | black                         | race                   |
+        // | subject-e        | black                         | race                   |
+
+        // Step 1: Build Map<Subject, Set<ValueDef>>
+        final Map<String, Set<StratumValueDef>> subjectToValueDefs = new HashMap<>();
+
+        for (Table.Cell<String, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+            subjectToValueDefs
+                    .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
+                    .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
+        }
+        // output format:
+        // | Set<ValueDef>           | List<Subjects(String)> |
+        // | ----------------------- | ---------------------- |
+        // | <'M','White>            | [subject-a]            |
+        // | <'F','hispanic/latino'> | [subject-b]            |
+        // | <'M','hispanic/latino'> | [subject-c]            |
+        // | <'F','black'>           | [subject-d, subject-e] |
+
+        // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
+        return subjectToValueDefs.entrySet().stream()
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getValue,
+                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
+                            l1.addAll(l2);
+                            return l1;
+                        })));
+    }
+
+    /**
+     * Calculate the intersection between stratifier results and population results for criteria-based stratifiers.
+     *
+     * Example:
+     * *population*:
+     *
+     * patient2
+     *     Encounter/enc_in_progress_pat2_1
+     *     Encounter/enc_triaged_pat2_1
+     *     Encounter/enc_planned_pat2_1
+     *     Encounter/enc_in_progress_pat2_2
+     *     Encounter/enc_finished_pat2_1
+     *
+     *  patient1
+     *     Encounter/enc_triaged_pat1_1
+     *     Encounter/enc_planned_pat1_1
+     *     Encounter/enc_in_progress_pat1_1
+     *     Encounter/enc_finished_pat1_1
+     *
+     * *stratifier*:
+     *   patient2
+     *       Encounter/enc_in_progress_pat2_2
+     *       Encounter/enc_in_progress_pat2_1
+     *
+     *   patient1
+     *       Encounter/enc_in_progress_pat1_1
+     *
+     *   patient2:  intersection:   enc_in_progress_pat2_2, enc_in_progress_pat2_1
+     *   patient1:  intersection:   enc_in_progress_pat1_1
+     *
+     *   result:
+     *
+     *   enc_in_progress_pat2_2, enc_in_progress_pat2_1, enc_in_progress_pat1_1
+     *
+     *   count: 3
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
+    private static Set<Object> calculateCriteriaStratifierIntersection(
+            StratifierDef stratifierDef, PopulationDef populationDef) {
+
+        final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
+        final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
+
+        // For each subject, we intersect between the population and stratifier results
+        for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
+            final Set<Object> stratifierResultsPerSubject =
+                    stratifierEntryBySubject.getValue().valueAsSet();
+            final Set<Object> populationResultsPerSubject =
+                    populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
+
+            allPopulationStratumIntersectingResources.addAll(
+                    Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
+        }
+
+        // We add up all the results of the intersections here:
+        return new HashSetForFhirResourcesAndCqlTypes<>(allPopulationStratumIntersectingResources);
+    }
+
+    /**
+     * Calculate resource IDs for value stratifiers (VALUE and NON_SUBJECT_VALUE types).
+     *
+     * <p>For NON_SUBJECT_VALUE stratifiers with function results, the row keys contain composite keys
+     * like "Patient/xxx|Encounter/yyy". We need to:
+     * <ol>
+     *   <li>Extract the resource IDs from the row keys (the part after the |)</li>
+     *   <li>Intersect those with the population's resources to get only resources that qualify</li>
+     * </ol>
+     *
+     * <p>For VALUE stratifiers (subject-basis scalar values), we fall back to the original behavior
+     * of getting all resources for the qualifying subjects.
+     */
     @Nonnull
-    private static List<String> getResourceIds(
-        FhirContext fhirContext, Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
-        final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
+    private static List<String> getResourceIdsForValueStratifier(
+            FhirContext fhirContext,
+            StratifierDef stratifierDef,
+            List<String> rowKeys,
+            Collection<String> subjectIds,
+            GroupDef groupDef,
+            PopulationDef populationDef) {
+        // Check if we have composite row keys (Subject|Resource format) for NON_SUBJECT_VALUE stratifiers
+        if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
+            // Extract resource IDs from composite row keys
+            Set<String> stratumResourceIds = rowKeys.stream()
+                    .filter(key -> key.contains("|"))
+                    .map(key -> key.substring(key.indexOf('|') + 1))
+                    .collect(Collectors.toSet());
 
+            if (!stratumResourceIds.isEmpty()) {
+                // Get all population resource IDs
+                Set<String> populationResourceIds = getPopulationResourceIdSet(fhirContext, groupDef, populationDef);
+
+                // Intersect stratum resource IDs with population resource IDs
+                return stratumResourceIds.stream()
+                        .filter(populationResourceIds::contains)
+                        .toList();
+            }
+        }
+
+        // Fall back to original behavior for VALUE stratifiers or if no composite keys
+        return getResourceIds(fhirContext, subjectIds, groupDef, populationDef);
+    }
+
+    /**
+     * Get all resource IDs from a population as a Set for efficient intersection.
+     *
+     * <p>For MEASUREOBSERVATION populations, the subjectResources contain Set&lt;Map&lt;inputResource, outputValue&gt;&gt;
+     * so we extract the keys (input resources) from those maps.
+     */
+    private static Set<String> getPopulationResourceIdSet(
+            FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef) {
+        final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
         boolean isResourceType = resourceType != null;
-        List<String> resourceIds = new ArrayList<>();
+        Set<String> resourceIds = new HashSet<>();
+
         if (populationDef.getSubjectResources() != null) {
-            for (String subjectId : subjectIds) {
-                Set<Object> resources;
-                if (!populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    resources = populationDef
-                        .getSubjectResources()
-                        .get(FhirResourceUtils.stripAnyResourceQualifier(subjectId));
-                } else {
-                    resources = extractResourceIds(populationDef, subjectId);
-                }
+            for (Set<Object> resources : populationDef.getSubjectResources().values()) {
                 if (resources != null) {
-                    if (isResourceType) {
-                        resourceIds.addAll(resources.stream()
-                            .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
-                            .toList());
+                    // For MEASUREOBSERVATION, resources are Map<inputResource, outputValue>
+                    // We need to extract the keys (input resources)
+                    if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+                        resources.stream()
+                                .filter(Map.class::isInstance)
+                                .map(m -> (Map<?, ?>) m)
+                                .flatMap(m -> m.keySet().stream())
+                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
+                                .filter(id -> id != null)
+                                .forEach(resourceIds::add);
+                    } else if (isResourceType) {
+                        resources.stream()
+                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
+                                .filter(id -> id != null)
+                                .forEach(resourceIds::add);
                     } else {
-                        resourceIds.addAll(resources.stream().map(Object::toString).toList());
+                        resources.stream().map(Object::toString).forEach(resourceIds::add);
                     }
                 }
             }
@@ -497,25 +609,77 @@ public class MeasureMultiSubjectEvaluator {
         return resourceIds;
     }
 
+    /**
+     * Extract resource IDs from the population and subject IDs.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
+    @Nonnull
+    private static List<String> getResourceIds(
+            FhirContext fhirContext, Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
+        final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
+
+        // only ResourceType fhirType should return true here
+        boolean isResourceType = resourceType != null;
+        List<String> resourceIds = new ArrayList<>();
+        if (populationDef.getSubjectResources() != null) {
+            for (String subjectId : subjectIds) {
+                Set<Object> resources;
+                if (!populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
+                    // retrieve criteria results by subject Key
+                    resources = populationDef
+                            .getSubjectResources()
+                            .get(FhirResourceUtils.stripAnyResourceQualifier(subjectId));
+                } else {
+                    // MeasureObservation will store subjectResources as <subjectId,Set<Map<Object,Object>>
+                    // We need the Key from the Set<Map<Key,Value>>
+                    // This can be any FHIRType: Resource, date, integer, string....etc
+                    resources = extractResourceIds(populationDef, subjectId);
+                }
+                if (resources != null) {
+                    if (isResourceType) {
+                        resourceIds.addAll(resources.stream()
+                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds) // get resource id
+                                .toList());
+                    } else {
+                        resourceIds.addAll(
+                                resources.stream().map(Object::toString).toList());
+                    }
+                }
+            }
+        }
+        return resourceIds;
+    }
+
+    /**
+     * Extracts unique FHIR identifiers as Strings from a PopulationDef.
+     * Works for Resource, Reference, IdType, PrimitiveType, String, Number, etc.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static Set<Object> extractResourceIds(PopulationDef populationDef, String subjectId) {
         if (populationDef == null || populationDef.getSubjectResources() == null) {
             return Set.of();
         }
         String[] parts = subjectId.split("/");
-        String id = parts[1];
+
+        String resourceType = parts[0]; // "Patient"
+        String id = parts[1]; // "81230987"
 
         var filtered = populationDef.getSubjectResources().entrySet().stream()
-            .filter(entry -> entry.getKey().equals(id))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .filter(entry -> entry.getKey().equals(id)) // <--- filter on key
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return filtered.values().stream()
-            .flatMap(Set::stream)
-            .filter(Map.class::isInstance)
-            .map(m -> (Map<?, ?>) m)
-            .flatMap(m -> m.keySet().stream())
-            .collect(Collectors.toSet());
+                .flatMap(Set::stream)
+                .filter(Map.class::isInstance) // Keep only Map<?,?>
+                .map(m -> (Map<?, ?>) m) // Cast
+                .flatMap(m -> m.keySet().stream()) // capture Key only, not Qty
+                .collect(Collectors.toSet());
     }
 
+    /**
+     * Get resource ID from a resource object.
+     */
+    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static String getPopulationResourceIds(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();

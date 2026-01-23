@@ -708,14 +708,18 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateStratifiers(
-            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult, GroupDef groupDef) {
+            String subjectId,
+            List<StratifierDef> stratifierDefs,
+            EvaluationResult evaluationResult,
+            GroupDef groupDef) {
         for (StratifierDef stratifierDef : stratifierDefs) {
 
             evaluateStratifier(subjectId, evaluationResult, stratifierDef, groupDef);
         }
     }
 
-    private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
+    private void evaluateStratifier(
+            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
         if (stratifierDef.isComponentStratifier()) {
             addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId, groupDef);
         } else {
@@ -729,33 +733,61 @@ public class MeasureEvaluator {
      * for better observability when stratifier component expressions return null.
      */
     void addStratifierComponentResult(
-            List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId, GroupDef groupDef) {
+            List<StratifierComponentDef> components,
+            EvaluationResult evaluationResult,
+            String subjectId,
+            GroupDef groupDef) {
 
         for (StratifierComponentDef component : components) {
-            if(groupDef.isBooleanBasis()) {
+            if (groupDef.isBooleanBasis()) {
+                // Boolean basis: use subject-level scalar result directly
                 var expressionResult = evaluationResult.get(component.expression());
 
                 if (expressionResult == null || expressionResult.getValue() == null) {
                     logger.warn(
-                        "Stratifier component expression '{}' returned null result for subject '{}'",
-                        component.expression(),
-                        subjectId);
+                            "Stratifier component expression '{}' returned null result for subject '{}'",
+                            component.expression(),
+                            subjectId);
                     continue;
                 }
 
-                component.putResult(subjectId, expressionResult.getValue(),
-                    expressionResult.getEvaluatedResources());
+                component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
             } else {
-                // non-subject value stratifier
-                //EvaluationResult evalResult = new EvaluationResult();
-                for(PopulationDef popDef: groupDef.populations()) {
+                // Non-subject value stratifier
+                // First, try to get function results (stored as <group.population.id>-<component.expressionName>)
+                // If not found, fall back to scalar expression result (the expression is not a function)
+                // Only use initial-population results since it's the superset of all resources
+                boolean foundFunctionResult = false;
+                for (PopulationDef popDef : groupDef.populations()) {
+                    // Only use initial-population for stratifier values - it contains all resources
+                    // Other populations (measure-population, exclusions) are subsets
+                    if (popDef.type() != MeasurePopulationType.INITIALPOPULATION) {
+                        continue;
+                    }
                     // function results are stored as <group.population.id>-<component.expressionName>
                     var expressionResult = evaluationResult.get(popDef.id() + '-' + component.expression());
-                    // add results, similar to CV
-                    component.putResult(subjectId, expressionResult.getValue(),
-                        expressionResult.getEvaluatedResources());
+                    if (expressionResult != null && expressionResult.getValue() != null) {
+                        // Function result found - use it (Map<inputResource, outputValue>)
+                        component.putResult(
+                                subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+                        foundFunctionResult = true;
+                    }
                 }
 
+                // Fallback: if no function results found, use scalar expression result
+                // This handles NON_SUBJECT_VALUE stratifiers with non-function expressions
+                if (!foundFunctionResult) {
+                    var expressionResult = evaluationResult.get(component.expression());
+                    if (expressionResult == null || expressionResult.getValue() == null) {
+                        logger.warn(
+                                "Stratifier component expression '{}' returned null result for subject '{}' (fallback)",
+                                component.expression(),
+                                subjectId);
+                        continue;
+                    }
+                    component.putResult(
+                            subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+                }
             }
         }
     }

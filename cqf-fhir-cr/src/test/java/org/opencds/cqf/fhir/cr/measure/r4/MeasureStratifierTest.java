@@ -24,8 +24,7 @@ class MeasureStratifierTest {
             Measure.given().repositoryFor("CriteriaBasedStratifiersSimple");
     private static final Given GIVEN_CRITERIA_BASED_STRAT_COMPLEX =
             Measure.given().repositoryFor("CriteriaBasedStratifiersComplex");
-    private static final Given GIVEN_SIMPLE =
-        Measure.given().repositoryFor("MeasureTest");
+    private static final Given GIVEN_SIMPLE = Measure.given().repositoryFor("MeasureTest");
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */
@@ -246,9 +245,14 @@ class MeasureStratifierTest {
     }
 
     /**
-     * Ratio Measure with Resource Basis where Stratifier defined by expression that results in two different ages.
-     * Given that Population results are "Encounter" resources, intersection of results is based on subject
-     * related Encounters where their age matches the stratifier criteria results
+     * Ratio Measure with Resource (Encounter) Basis where Stratifier uses stratifier.component[].criteria
+     * with a non-function expression "Age". This is classified as NON_SUBJECT_VALUE stratifier because:
+     * - hasCriteria=false (no stratifier.criteria)
+     * - hasAnyComponentCriteria=true (has stratifier.component[].criteria)
+     * - isBooleanBasis=false (basis is Encounter)
+     *
+     * NON_SUBJECT_VALUE stratifiers MUST use CQL function definitions. The "Age" expression is a scalar,
+     * not a function, so this should produce a validation error.
      */
     @Test
     void ratioResourceValueStratAge() {
@@ -257,150 +261,34 @@ class MeasureStratifierTest {
                 .when()
                 .measureId("RatioResourceStratValue")
                 .evaluate()
-                .reportType("subject-list")
                 .then()
-                .subjectResultsValidation()
-                .firstGroup()
-                .stratifierById("stratifier-2")
-                // This is a value stratifier, which does not pull in the measure populations and
-                // does not use the CQL expression for the code text
-                .hasCodeText("Age")
-                .stratum("35")
-                .population("denominator")
-                .hasCount(6)
-                .hasStratumPopulationSubjectResults()
-                .up()
-                .population("numerator")
-                .hasCount(1)
-                .up()
-                .up()
-                .stratum("38")
-                .population("denominator")
-                .hasCount(5)
-                .up()
-                .population("numerator")
-                .hasCount(1)
-                .up()
-                .up()
-                .up()
-                .up()
-                .report();
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Non-subject value stratifier expression 'Age' must be a CQL function definition")
+                .hasStatus(MeasureReportStatus.ERROR);
     }
 
     /**
-     * Ratio Measure with Resource Basis where Stratifier defined by expression that results in Encounter.status per subject.
-     * Multiple results for a single subject are allowed.
-     * This is a value-based stratifier, but is weird
-     * Note that this is a weird scenario that's not an error, but is not a normal expectation for
-     * a user to set up.
+     * Ratio Measure with Resource (Encounter) Basis where Stratifier is defined using stratifier.criteria
+     * (making it a CRITERIA stratifier), but the expression "Encounter Status" returns status values
+     * (strings) instead of Encounter resources.
+     *
+     * This is an INVALID measure configuration because:
+     * - CRITERIA stratifiers must return resources matching the population basis
+     * - Population basis is Encounter, but "Encounter Status" returns E.status (string values)
+     *
+     * The evaluation should capture the error in a contained OperationOutcome.
      */
     @Test
-    void ratioResourceValueStratDifferentTypeStratNotCriteriaBasedWeirdScenario() {
+    void ratioResourceCriteriaStratifierWithInvalidReturnType() {
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("RatioResourceStratDifferentType")
                 .evaluate()
                 .then()
-                .hasGroupCount(1)
-                .firstGroup()
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(11)
-                .up()
-                .population("denominator")
-                .hasCount(11)
-                .up()
-                .population("numerator")
-                .hasCount(2)
-                .up()
-                .hasMeasureScore(true)
-                .hasScore("0.18181818181818182")
-                .hasStratifierCount(1)
-                .firstStratifier()
-                // This stratifier explicitly does not contain a code on either the stratifier
-                // or the component, so the code is null here:
-                .hasCodeText(null)
-                .hasStratumCount(6)
-                .stratum("triaged")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(0)
-                .up()
-                .hasScore("0.0")
-                .up()
-                .stratum("arrived")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(0)
-                .up()
-                .hasScore("0.0")
-                .up()
-                .stratum("cancelled")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(0)
-                .up()
-                .hasScore("0.0")
-                .up()
-                .stratum("in-progress")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(0)
-                .up()
-                .hasScore("0.0")
-                .up()
-                .stratum("finished")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(1)
-                .up()
-                .population("denominator")
-                .hasCount(1)
-                .up()
-                .population("numerator")
-                .hasCount(1)
-                .up()
-                .hasScore("1.0")
-                .up()
-                // This brings up a weird use case where we have two qualifying values within a
-                // single stratum, which was previously unsupported. This is an indicator of
-                // the nonsensical nature of the scenario:
-                .stratum("in-progress,finished")
-                .hasPopulationCount(3)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("denominator")
-                .hasCount(2)
-                .up()
-                .population("numerator")
-                .hasCount(1)
-                .up()
-                .hasScore("0.5");
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "criteria-based stratifier is invalid for expression: [Encounter Status] due to mismatch between population basis: [Encounter]");
     }
 
     /**
@@ -714,31 +602,47 @@ class MeasureStratifierTest {
     }
 
     /**
-     * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
+     * Resource (Encounter) Basis Measure with multi-component value stratifier.
+     * Components: Age Range Stratifier (function) + Encounter Status Stratifier (function)
+     *
+     * Patient-9 has:
+     * - Encounter 1: status='finished', period 2024-01-01 (age ~36 -> P21Y--P41Y)
+     * - Encounter 2: status='in-progress', period 2024-01-01 (age ~36 -> P21Y--P41Y)
+     *
+     * Expected strata (grouped by component value combinations):
+     * - Stratum 1: P21Y--P41Y + finished -> count=1 (encounter-1)
+     * - Stratum 2: P21Y--P41Y + in-progress -> count=1 (encounter-2)
      */
     @Test
     void cohortResourceValueStrat() {
 
-
         GIVEN_SIMPLE
-            .when()
-            .measureId("CohortResourceAllPopulationsValueStrat")
-            .subject("Patient/patient-9")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .firstStratifier()
-            // This is a value stratifier, which does not pull in the measure populations and
-            // does not use the CQL expression for the code text
-            .hasCodeText("Encounter Age and Status")
-            .hasStratumCount(1)
-            .stratum("P21Y--P41Y")
-            .firstPopulation()
-            .hasCount(2)
-            .up()
-            .up()
-            .up()
-            .up()
-            .report();
+                .when()
+                .measureId("CohortResourceAllPopulationsValueStrat")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Encounter Age and Status")
+                // 2 strata: one for each unique (AgeRange, Status) combination
+                .hasStratumCount(2)
+                // Stratum for "P21Y--P41Y + finished" - identified by unique "finished" status
+                .stratumByComponentValueText("finished")
+                .hasComponentStratifierCount(2) // two components: age range + status
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                // Stratum for "P21Y--P41Y + in-progress" - identified by unique "in-progress" status
+                .stratumByComponentValueText("in-progress")
+                .hasComponentStratifierCount(2) // two components: age range + status
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
     }
 }

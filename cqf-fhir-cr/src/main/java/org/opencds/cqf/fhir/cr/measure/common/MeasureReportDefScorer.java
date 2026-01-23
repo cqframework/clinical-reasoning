@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -464,6 +466,10 @@ public class MeasureReportDefScorer {
      * (e.g., "Patient/patient-1965-female"). This method uses getSubjectsUnqualified() to ensure
      * proper matching between the two ID formats.
      *
+     * <p>For NON_SUBJECT_VALUE stratifiers with resource basis, the stratum contains resource IDs
+     * (e.g., "Encounter/encounter-1") in resourceIdsForSubjectList, and we need to filter the
+     * observation resources by those IDs rather than by patient subjects.
+     *
      * <p>Fixed in Part 1 (integrate-measure-def-scorer-part1-foundation) to prevent 14 test failures
      * in CONTINUOUSVARIABLE measures when old scorers are removed in Part 2.
      *
@@ -478,6 +484,13 @@ public class MeasureReportDefScorer {
             return List.of();
         }
 
+        // For NON_SUBJECT_VALUE stratifiers with resource basis, filter by resource IDs
+        if (stratumPopulationDef.measureStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE
+                && !stratumPopulationDef.isBooleanBasis()
+                && !stratumPopulationDef.resourceIdsForSubjectList().isEmpty()) {
+            return getResultsForStratumByResourceIds(populationDef, stratumPopulationDef);
+        }
+
         // CRITICAL: PopulationDef.subjectResources are keyed on UNQUALIFIED patient IDs
         // Use getSubjectsUnqualified() to match the unqualified keys (already returns a Set)
         Set<String> stratumSubjectsUnqualified = stratumPopulationDef.getSubjectsUnqualified();
@@ -487,6 +500,65 @@ public class MeasureReportDefScorer {
                 .filter(entry -> stratumSubjectsUnqualified.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get results filtered for a NON_SUBJECT_VALUE stratum by resource IDs.
+     * For resource-basis stratifiers, the stratum contains specific resource IDs that should be included.
+     *
+     * <p>For MEASUREOBSERVATION populations, the subjectResources contain Map&lt;inputResource, outputValue&gt;
+     * where we need to filter by the input resource IDs and return the output values (observations).
+     *
+     * @param populationDef the population definition (MEASUREOBSERVATION)
+     * @param stratumPopulationDef the stratum population containing resource IDs
+     * @return collection of resources/observations matching the stratum's resource IDs
+     */
+    private static Collection<Object> getResultsForStratumByResourceIds(
+            PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
+
+        Set<String> stratumResourceIds = Set.copyOf(stratumPopulationDef.resourceIdsForSubjectList());
+
+        // For MEASUREOBSERVATION, subjectResources contains Set<Map<inputResource, outputValue>>
+        // MeasureScoreCalculator.collectQuantities expects Map objects and extracts values from them.
+        // We need to return filtered Maps (not the values directly) so collectQuantities can process them.
+        if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+            return populationDef.getSubjectResources().values().stream()
+                    .flatMap(Collection::stream)
+                    .filter(Map.class::isInstance)
+                    .map(m -> (Map<?, ?>) m)
+                    .map(map -> {
+                        // Filter the map to only include entries matching stratum resource IDs
+                        Map<Object, Object> filteredMap = new java.util.HashMap<>();
+                        for (var entry : map.entrySet()) {
+                            Object key = entry.getKey();
+                            if (key instanceof IBaseResource baseResource) {
+                                String resourceId = baseResource
+                                        .getIdElement()
+                                        .toVersionless()
+                                        .getValue();
+                                if (stratumResourceIds.contains(resourceId)) {
+                                    filteredMap.put(key, entry.getValue());
+                                }
+                            }
+                        }
+                        return filteredMap;
+                    })
+                    .filter(map -> !map.isEmpty()) // Only include non-empty filtered maps
+                    .collect(Collectors.toList());
+        }
+
+        // For non-MEASUREOBSERVATION populations, filter resources directly
+        return populationDef.getSubjectResources().values().stream()
+                .flatMap(Collection::stream)
+                .filter(resource -> {
+                    if (resource instanceof IBaseResource baseResource) {
+                        String resourceId =
+                                baseResource.getIdElement().toVersionless().getValue();
+                        return stratumResourceIds.contains(resourceId);
+                    }
+                    return false;
+                })
                 .collect(Collectors.toList());
     }
 

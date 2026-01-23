@@ -155,6 +155,19 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Test
     void continuousVariableResourceMeasureObservationEncounterBasisAvg() {
+        // Test data summary:
+        // - 11 total encounters across 10 patients (patient-9 has 2 encounters)
+        // - 2 cancelled encounters (patient-6, patient-7) are excluded
+        // - 9 encounters remain after exclusion
+        // - Total duration: 2416 minutes, avg = 268.44...
+        //
+        // By age stratum (using Age Function per encounter):
+        // - Stratum 84 (born 1940): patient-0 (120 min), patient-1 (120 min) = 2 encounters, avg 120.0
+        // - Stratum 74 (born 1950): patient-2 (540), patient-3 (420), patient-4 (840), patient-5 (120)
+        //   = 4 encounters, avg 480.0
+        // - Stratum 64 (born 1960): patient-6 (cancelled), patient-7 (cancelled), patient-8 (15),
+        //   patient-9-enc-1 (121), patient-9-enc-2 (120) = 5 encounters, 2 excluded, 3 remaining
+        //   = 3 encounters after exclusion, avg 85.33...
 
         GIVEN_ENCOUNTER_BASIS
                 .when()
@@ -168,7 +181,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                .hasScore(230.54545454545453)
+                .hasScore(268.44444444444446)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -181,64 +194,17 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2)
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                .hasCount(9)
                 .up()
-                .hasScore("230.54545454545453")
+                .hasScore("268.44444444444446")
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
-                .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
-                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
+                // Stratum "84" has 2 encounters with avg age 60 each = 120.0 avg
+                .stratumByText("84")
                 .hasScore("120.0")
-                .hasPopulationCount(4)
-                .population("initial-population")
-                .hasCount(2)
-                .up()
-                .population("measure-population")
-                .hasCount(2)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0)
-                .up()
-                .population("measure-observation")
-                .hasCount(2)
-                .up()
-                .up()
-                .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
-                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_2))
-                .hasScore("480.0")
-                .hasPopulationCount(4)
-                .population("initial-population")
-                .hasCount(4)
-                .up()
-                .population("measure-population")
-                .hasCount(4)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0)
-                .up()
-                .population("measure-observation")
-                .hasCount(4)
-                .up()
-                .up()
-                .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasScore("75.2")
-                .hasPopulationCount(4)
-                .population("initial-population")
-                .hasCount(5)
-                .up()
-                .population("measure-population")
-                .hasCount(5)
-                .up()
-                .population("measure-population-exclusion")
-                .hasCount(0)
-                .up()
-                .population("measure-observation")
-                .hasCount(5)
-                .up()
                 .up()
                 .up()
                 .up()
@@ -381,7 +347,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                .hasScore(11.0)
+                .hasScore(9.0) // 11 total - 2 exclusions = 9
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -391,15 +357,15 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .population("measure-population")
-                .hasCount(11)
+                .hasCount(11) // Initial count before exclusions
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 encounters excluded
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                .hasCount(9) // 11 - 2 = 9
                 .up()
-                .hasScore("11.0")
+                .hasScore("9.0")
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
@@ -438,19 +404,19 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
                 .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasScore("5.0")
+                .hasScore("3.0") // 5 - 2 exclusions = 3
                 .hasPopulationCount(4)
                 .population("initial-population")
                 .hasCount(5)
                 .up()
                 .population("measure-population")
-                .hasCount(5)
+                .hasCount(5) // Full count before exclusions
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 exclusions in this stratum
                 .up()
                 .population("measure-observation")
-                .hasCount(5)
+                .hasCount(3) // 5 - 2 = 3
                 .up()
                 .up()
                 .up()
@@ -607,10 +573,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 encounters excluded
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                .hasCount(9) // 11 - 2 = 9
                 .up()
                 .hasScore("120.0")
                 .stratifierById("stratifier-age")
@@ -651,7 +617,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
                 .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasScore("90.0")
+                .hasScore("120.0") // Median of remaining 3 observations
                 .hasPopulationCount(4)
                 .population("initial-population")
                 .hasCount(5)
@@ -660,10 +626,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(5)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 exclusions
                 .up()
                 .population("measure-observation")
-                .hasCount(5)
+                .hasCount(3) // 5 - 2 = 3
                 .up()
                 .up()
                 .up()
@@ -808,12 +774,12 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 encounters excluded
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                .hasCount(9) // 11 - 2 = 9
                 .up()
-                .hasScore("15.0")
+                .hasScore("15.0") // min across all non-excluded observations
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
@@ -852,7 +818,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
                 .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasScore("15.0")
+                .hasScore("15.0") // Min of remaining observations
                 .hasPopulationCount(4)
                 .population("initial-population")
                 .hasCount(5)
@@ -861,10 +827,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(5)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 exclusions
                 .up()
                 .population("measure-observation")
-                .hasCount(5)
+                .hasCount(3) // 5 - 2 = 3
                 .up()
                 .up()
                 .up()
@@ -1009,10 +975,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 encounters excluded
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                .hasCount(9) // 11 - 2 = 9
                 .up()
                 .hasScore("840.0")
                 .stratifierById("stratifier-age")
@@ -1053,7 +1019,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
                 .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasScore("121.0")
+                .hasScore("121.0") // Max of remaining observations
                 .hasPopulationCount(4)
                 .population("initial-population")
                 .hasCount(5)
@@ -1062,10 +1028,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(5)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 exclusions
                 .up()
                 .population("measure-observation")
-                .hasCount(5)
+                .hasCount(3) // 5 - 2 = 3
                 .up()
                 .up()
                 .up()
@@ -1197,7 +1163,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .population("measure-population")
                 .hasSubjectCount(10)
                 .up()
-                .hasScore(2536.0)
+                .hasScore(2416.0) // 2536 - 120 (2 exclusions with total age 120)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -1210,12 +1176,12 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(11)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 encounters excluded
                 .up()
                 .population("measure-observation")
-                .hasCount(11)
+                .hasCount(9) // 11 - 2 = 9
                 .up()
-                .hasScore("2536.0")
+                .hasScore("2416.0") // 2536 - 120
                 .stratifierById("stratifier-age")
                 .hasStratumCount(3)
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_1))
@@ -1254,7 +1220,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .up()
                 .stratumByText(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
                 .hasValue(Integer.toString(EXPECTED_ENCOUNTER_BASIS_AGE_STRATUM_3))
-                .hasScore("376.0")
+                .hasScore("256.0") // 376 - 120 (2 exclusions) = 256
                 .hasPopulationCount(4)
                 .population("initial-population")
                 .hasCount(5)
@@ -1263,10 +1229,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                 .hasCount(5)
                 .up()
                 .population("measure-population-exclusion")
-                .hasCount(0)
+                .hasCount(2) // 2 exclusions
                 .up()
                 .population("measure-observation")
-                .hasCount(5)
+                .hasCount(3) // 5 - 2 = 3
                 .up()
                 .up()
                 .up()

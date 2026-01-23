@@ -8,15 +8,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
@@ -24,6 +28,11 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 
@@ -762,5 +771,325 @@ class R4MeasureReportUtilsTest {
                 isGroupImprovementNotation,
                 improvementNotation,
                 populationBasis);
+    }
+
+    // ========================================
+    // Tests for getStratumDefText()
+    // ========================================
+
+    @Test
+    void testGetStratumDefText_EmptyValueDefs_ReturnsNull() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Collections.emptySet(), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertNull(result, "Should return null when valueDefs is empty");
+    }
+
+    @Test
+    void testGetStratumDefText_NonComponent_CodeableConcept_ReturnsText() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
+
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.setText("Age Group 18-64");
+        codeableConcept.addCoding(new Coding("http://example.com", "age-group-1", "18-64"));
+
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(codeableConcept);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertEquals("Age Group 18-64", result, "Should return CodeableConcept text for non-component stratifier");
+    }
+
+    @Test
+    void testGetStratumDefText_NonComponent_CodeableConcept_NoText_ReturnsNull() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
+
+        CodeableConcept codeableConcept = new CodeableConcept();
+        codeableConcept.addCoding(new Coding("http://example.com", "age-group-1", "18-64"));
+        // No text set
+
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(codeableConcept);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertNull(result, "Should return null when CodeableConcept has no text");
+    }
+
+    @Test
+    void testGetStratumDefText_NonComponent_ValueType_IntegerType_ReturnsString() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
+
+        IntegerType intValue = new IntegerType(42);
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(intValue);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertEquals("42", result, "Should return value as string for VALUE type with IntegerType");
+    }
+
+    @Test
+    void testGetStratumDefText_NonComponent_ValueType_StringType_ReturnsString() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Gender"), "GenderExpression", MeasureStratifierType.VALUE);
+
+        StringType stringValue = new StringType("Male");
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(stringValue);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertEquals("Male", result, "Should return value as string for VALUE type with StringType");
+    }
+
+    @Test
+    void testGetStratumDefText_NonComponent_CriteriaType_ReturnsString() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "High Risk"),
+                "HighRiskExpression",
+                MeasureStratifierType.CRITERIA);
+
+        StringType boolValue = new StringType("true");
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(boolValue);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertEquals("true", result, "Should return value as string for CRITERIA type");
+    }
+
+    @Test
+    void testGetStratumDefText_Component_CodeableConcept_ReturnsComponentText() {
+        // Arrange
+        ConceptDef componentCodeDef =
+                new ConceptDef(List.of(new CodeDef("http://example.com", "age-component")), "Age Component");
+        StratifierComponentDef componentDef =
+                new StratifierComponentDef("component-1", componentCodeDef, "AgeComponentExpression");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Age and Gender"),
+                "AgeGenderExpression",
+                MeasureStratifierType.VALUE,
+                List.of(componentDef));
+
+        CodeableConcept codeableConcept1 = new CodeableConcept();
+        codeableConcept1.setText("18-64");
+
+        CodeableConcept codeableConcept2 = new CodeableConcept();
+        codeableConcept2.setText("Male");
+
+        StratumValueWrapper valueWrapper1 = new StratumValueWrapper(codeableConcept1);
+        StratumValueDef valueDef1 = new StratumValueDef(valueWrapper1, componentDef);
+
+        StratumValueWrapper valueWrapper2 = new StratumValueWrapper(codeableConcept2);
+        StratumValueDef valueDef2 = new StratumValueDef(valueWrapper2, null);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertEquals(
+                "Age Component",
+                result,
+                "Should return component code text for component stratifier with CodeableConcept");
+    }
+
+    @Test
+    void testGetStratumDefText_Component_NonCodeableConcept_ReturnsValueAsString() {
+        // Arrange
+        StratifierComponentDef componentDef1 =
+                new StratifierComponentDef("component-1", new ConceptDef(List.of(), "Age"), "AgeExpression");
+        StratifierComponentDef componentDef2 =
+                new StratifierComponentDef("component-2", new ConceptDef(List.of(), "Gender"), "GenderExpression");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Age and Gender"),
+                "AgeGenderExpression",
+                MeasureStratifierType.VALUE,
+                List.of(componentDef1, componentDef2));
+
+        IntegerType intValue = new IntegerType(42);
+        StratumValueWrapper valueWrapper1 = new StratumValueWrapper(intValue);
+        StratumValueDef valueDef1 = new StratumValueDef(valueWrapper1, componentDef1);
+
+        StringType stringValue = new StringType("Male");
+        StratumValueWrapper valueWrapper2 = new StratumValueWrapper(stringValue);
+        StratumValueDef valueDef2 = new StratumValueDef(valueWrapper2, componentDef2);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        // Component with non-CodeableConcept returns immediately
+        assertNotNull(result);
+        assertTrue(
+                result.equals("42") || result.equals("Male"),
+                "Should return value as string for component with non-CodeableConcept");
+    }
+
+    @Test
+    void testGetStratumDefText_Component_MultipleCodeableConcepts_ReturnsLastNonNullText() {
+        // Arrange
+        ConceptDef componentCodeDef1 =
+                new ConceptDef(List.of(new CodeDef("http://example.com", "age-component")), "Age Component");
+        StratifierComponentDef componentDef1 =
+                new StratifierComponentDef("component-1", componentCodeDef1, "AgeExpression");
+
+        ConceptDef componentCodeDef2 =
+                new ConceptDef(List.of(new CodeDef("http://example.com", "gender-component")), "Gender Component");
+        StratifierComponentDef componentDef2 =
+                new StratifierComponentDef("component-2", componentCodeDef2, "GenderExpression");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Age and Gender"),
+                "AgeGenderExpression",
+                MeasureStratifierType.VALUE,
+                List.of(componentDef1, componentDef2));
+
+        CodeableConcept codeableConcept1 = new CodeableConcept();
+        codeableConcept1.setText("18-64");
+
+        CodeableConcept codeableConcept2 = new CodeableConcept();
+        codeableConcept2.setText("Male");
+
+        StratumValueWrapper valueWrapper1 = new StratumValueWrapper(codeableConcept1);
+        StratumValueDef valueDef1 = new StratumValueDef(valueWrapper1, componentDef1);
+
+        StratumValueWrapper valueWrapper2 = new StratumValueWrapper(codeableConcept2);
+        StratumValueDef valueDef2 = new StratumValueDef(valueWrapper2, componentDef2);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        assertNotNull(result);
+        // Assert
+        // Last non-null text should be returned (order depends on Set iteration)
+        assertTrue(
+                result.equals("Age Component") || result.equals("Gender Component"),
+                "Should return component code text from one of the CodeableConcepts");
+    }
+
+    @Test
+    void testGetStratumDefText_Component_CodeableConceptWithNullComponentDef_ReturnsNull() {
+        // Arrange
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
+
+        CodeableConcept codeableConcept1 = new CodeableConcept();
+        codeableConcept1.addCoding(new Coding("http://example.com", "age-1", "18-64"));
+
+        CodeableConcept codeableConcept2 = new CodeableConcept();
+        codeableConcept2.addCoding(new Coding("http://example.com", "gender-male", "Male"));
+
+        StratumValueWrapper valueWrapper1 = new StratumValueWrapper(codeableConcept1);
+        StratumValueDef valueDef1 = new StratumValueDef(valueWrapper1, null); // null componentDef
+
+        StratumValueWrapper valueWrapper2 = new StratumValueWrapper(codeableConcept2);
+        StratumValueDef valueDef2 = new StratumValueDef(valueWrapper2, null); // null componentDef
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertNull(result, "Should return null when component has CodeableConcept but componentDef is null");
+    }
+
+    @Test
+    void testGetStratumDefText_Component_CodeableConceptWithNullCode_ReturnsNull() {
+        // Arrange
+        ConceptDef componentCodeDef1 = new ConceptDef(Collections.emptyList(), null); // null code text
+        StratifierComponentDef componentDef1 =
+                new StratifierComponentDef("component-1", componentCodeDef1, "AgeExpression");
+
+        ConceptDef componentCodeDef2 = new ConceptDef(Collections.emptyList(), null); // null code text
+        StratifierComponentDef componentDef2 =
+                new StratifierComponentDef("component-2", componentCodeDef2, "GenderExpression");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Age and Gender"),
+                "AgeGenderExpression",
+                MeasureStratifierType.VALUE,
+                List.of(componentDef1, componentDef2));
+
+        CodeableConcept codeableConcept1 = new CodeableConcept();
+        codeableConcept1.addCoding(new Coding("http://example.com", "age-1", "18-64"));
+
+        CodeableConcept codeableConcept2 = new CodeableConcept();
+        codeableConcept2.addCoding(new Coding("http://example.com", "gender-male", "Male"));
+
+        StratumValueWrapper valueWrapper1 = new StratumValueWrapper(codeableConcept1);
+        StratumValueDef valueDef1 = new StratumValueDef(valueWrapper1, componentDef1);
+
+        StratumValueWrapper valueWrapper2 = new StratumValueWrapper(codeableConcept2);
+        StratumValueDef valueDef2 = new StratumValueDef(valueWrapper2, componentDef2);
+
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
+
+        // Act
+        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+
+        // Assert
+        assertNull(result, "Should return null when component code text is null");
     }
 }

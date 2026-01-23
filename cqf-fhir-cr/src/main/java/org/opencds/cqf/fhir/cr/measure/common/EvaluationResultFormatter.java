@@ -4,10 +4,14 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -178,5 +182,59 @@ public class EvaluationResultFormatter {
      */
     private static String indent(int level) {
         return INDENT.repeat(Math.max(0, level));
+    }
+
+    public static Object printSubjectResources(PopulationDef populationDef, String subjectId) {
+        if (populationDef == null) {
+            return "{empty}";
+        }
+
+        final Set<Object> resources = populationDef.subjectResources.get(subjectId);
+
+        if (CollectionUtils.isEmpty(resources)) {
+            return subjectId + ": {empty}";
+        }
+
+        final String toString =
+                resources.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
+
+        if (StringUtils.isBlank(toString)) {
+            return subjectId + ": {empty}";
+        }
+
+        return subjectId + ": " + toString;
+    }
+
+    public static String printValues(Collection<Object> values) {
+
+        if (values == null || values.isEmpty()) {
+            return "{empty}";
+        }
+
+        return values.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
+    }
+
+    public static String printValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+
+        if (value instanceof IBaseResource resource) {
+            return resource.getIdElement().getValueAsString();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            final String toString = map.entrySet().stream()
+                    .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
+                    .collect(Collectors.joining(", "));
+
+            if (StringUtils.isBlank(toString)) {
+                return "{empty}";
+            }
+
+            return toString;
+        }
+
+        return value.toString();
     }
 }

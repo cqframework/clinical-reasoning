@@ -95,7 +95,7 @@ public class GroupDef {
      * @return the first PopulationDef of the specified type if it has a non-null ID, or null otherwise
      */
     @Nullable
-    public PopulationDef getFirstWithId(MeasurePopulationType type) {
+    public PopulationDef getFirstWithTypeAndNonNullId(MeasurePopulationType type) {
         return this.getPopulationDefs(type).stream()
                 .findFirst()
                 .filter(pop -> pop.id() != null)
@@ -132,7 +132,7 @@ public class GroupDef {
     public PopulationDef findRatioObservationPopulationDef(
             List<PopulationDef> measureObservationPopulationDefs, MeasurePopulationType targetType) {
 
-        PopulationDef referencedPopulation = this.getFirstWithId(targetType);
+        PopulationDef referencedPopulation = this.getFirstWithTypeAndNonNullId(targetType);
         if (referencedPopulation == null) {
             return null;
         }

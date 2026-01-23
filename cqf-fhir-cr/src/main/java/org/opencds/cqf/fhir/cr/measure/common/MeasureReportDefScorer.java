@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -125,7 +126,7 @@ public class MeasureReportDefScorer {
                 // Special case: RATIO with separate numerator/denominator observations
                 if (measureScoring == MeasureScoring.RATIO
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationGroup(measureUrl, groupDef);
+                    return scoreRatioMeasureObservationGroup(groupDef);
                 }
 
                 // Standard proportion/ratio scoring: (n - nx) / (d - dx - de)
@@ -139,8 +140,17 @@ public class MeasureReportDefScorer {
 
             case CONTINUOUSVARIABLE:
                 // Continuous variable scoring - returns aggregate value
-                PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
-                QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
+                final PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
+
+                if (measureObsPop == null) {
+                    return null;
+                }
+
+                final QuantityDef quantityDef = scoreContinuousVariable(measureUrl, measureObsPop);
+
+                // We want to record the aggregate result for later computation for continuous variable reports
+                measureObsPop.setAggregationResult(quantityDef);
+
                 return quantityDef != null ? quantityDef.value() : null;
 
             case COHORT:
@@ -161,47 +171,36 @@ public class MeasureReportDefScorer {
      * Score a group for RATIO measures with MEASUREOBSERVATION populations.
      * Handles continuous variable ratio scoring where numerator and denominator have separate observations.
      *
-     * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationGroup(String measureUrl, GroupDef groupDef) {
+    private Double scoreRatioMeasureObservationGroup(GroupDef groupDef) {
         // Get all MEASUREOBSERVATION populations
         var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
         // Find Measure Observations for Numerator and Denominator
-        PopulationDef numPopDef =
+        final PopulationDef numeratorPopulation =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.NUMERATOR);
-        PopulationDef denPopDef =
+        final PopulationDef denominatorPopulation =
                 findPopulationDef(groupDef, measureObservationPopulationDefs, MeasurePopulationType.DENOMINATOR);
 
-        if (numPopDef == null || denPopDef == null) {
-            return null;
-        }
-
         // Calculate aggregate quantities for numerator and denominator
-        QuantityDef numeratorAgg = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, PopulationDef::getAllSubjectResources);
-        QuantityDef denominatorAgg = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denPopDef, PopulationDef::getAllSubjectResources);
+        final QuantityDef numeratorAggregate = calculateContinuousVariableAggregateQuantity(
+                numeratorPopulation, PopulationDef::getAllSubjectResources);
+        final QuantityDef denominatorAggregate = calculateContinuousVariableAggregateQuantity(
+                denominatorPopulation, PopulationDef::getAllSubjectResources);
 
-        if (numeratorAgg == null || denominatorAgg == null) {
+        // If there's no numerator or not denominator result, we still want to capture the
+        // other result
+        setAggregateResultIfPopNonNull(numeratorPopulation, numeratorAggregate);
+        setAggregateResultIfPopNonNull(denominatorPopulation, denominatorAggregate);
+
+        if (numeratorAggregate == null || denominatorAggregate == null) {
             return null;
         }
 
-        Double aggregatedResultNumerator = numeratorAgg.value();
-        Double aggregatedResultDenominator = denominatorAgg.value();
-
-        if (aggregatedResultNumerator == null || aggregatedResultDenominator == null) {
-            return null;
-        }
-
-        numPopDef.setAggregationResult(aggregatedResultNumerator);
-        denPopDef.setAggregationResult(aggregatedResultDenominator);
-
-        // Delegate ratio scoring to MeasureScoreCalculator
-        return MeasureScoreCalculator.calculateRatioScore(aggregatedResultNumerator, aggregatedResultDenominator);
+        return MeasureScoreCalculator.calculateRatioScore(numeratorAggregate.value(), denominatorAggregate.value());
     }
 
     /**
@@ -210,8 +209,7 @@ public class MeasureReportDefScorer {
      * returns the aggregate without setting it on a FHIR report.
      */
     private QuantityDef scoreContinuousVariable(String measureUrl, PopulationDef populationDef) {
-        return calculateContinuousVariableAggregateQuantity(
-                measureUrl, populationDef, PopulationDef::getAllSubjectResources);
+        return calculateContinuousVariableAggregateQuantity(populationDef, PopulationDef::getAllSubjectResources);
     }
 
     /**
@@ -270,7 +268,7 @@ public class MeasureReportDefScorer {
                 // Check for special RATIO continuous variable case
                 if (measureScoring.equals(MeasureScoring.RATIO)
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationStratum(measureUrl, groupDef, stratumDef);
+                    return scoreRatioMeasureObservationStratum(measureUrl, stratumDef);
                 } else {
                     return scoreProportionRatioStratum(groupDef, stratumDef);
                 }
@@ -289,12 +287,11 @@ public class MeasureReportDefScorer {
      * Uses pre-computed cache to eliminate redundant lookups during scoring.
      *
      * @param measureUrl the measure URL for error reporting
-     * @param groupDef the group definition
      * @param stratumDef the stratum definition
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationStratum(String measureUrl, GroupDef groupDef, StratumDef stratumDef) {
+    private Double scoreRatioMeasureObservationStratum(String measureUrl, StratumDef stratumDef) {
 
         if (stratumDef == null) {
             return null;
@@ -366,7 +363,7 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate using stratum-filtered resources
         QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
+                measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
 
         return quantityDef != null ? quantityDef.value() : null;
     }
@@ -391,11 +388,11 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate for numerator observations filtered by stratum
         QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+                numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
 
         // Calculate aggregate for denominator observations filtered by stratum
         QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
-                measureUrl, denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+                denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
 
         if (aggregateNumQuantityDef == null || aggregateDenQuantityDef == null) {
             return null;
@@ -424,7 +421,7 @@ public class MeasureReportDefScorer {
     @Nullable
     private PopulationDef findPopulationDef(
             GroupDef groupDef, List<PopulationDef> populationDefs, MeasurePopulationType type) {
-        PopulationDef firstPop = groupDef.getFirstWithId(type);
+        PopulationDef firstPop = groupDef.getFirstWithTypeAndNonNullId(type);
         if (firstPop == null) {
             return null;
         }
@@ -432,7 +429,7 @@ public class MeasureReportDefScorer {
         String criteriaId = firstPop.id();
 
         return populationDefs.stream()
-                .filter(p -> criteriaId.equals(p.getCriteriaReference()))
+                .filter(populationDef -> criteriaId.equals(populationDef.getCriteriaReference()))
                 .findFirst()
                 .orElse(null);
     }
@@ -566,19 +563,15 @@ public class MeasureReportDefScorer {
      * Calculate continuous variable aggregate quantity.
      * Delegates to {@link MeasureScoreCalculator} for the actual aggregation.
      *
-     * @param measureUrl the measure URL for error reporting
      * @param populationDef the population definition containing observation data
      * @param popDefToResources function to extract resources from population def
      * @return aggregated QuantityDef or null if population is null
      */
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
-            String measureUrl,
-            PopulationDef populationDef,
-            Function<PopulationDef, Collection<Object>> popDefToResources) {
+            @Nullable PopulationDef populationDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
 
         if (populationDef == null) {
-            logger.warn("Measure population group has no measure population defined for measure: {}", measureUrl);
             return null;
         }
 
@@ -600,6 +593,12 @@ public class MeasureReportDefScorer {
         // Delegate to MeasureScoreCalculator for collection and aggregation
         var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
         return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
+    }
+
+    private static void setAggregateResultIfPopNonNull(@Nullable PopulationDef populationDef, QuantityDef quantityDef) {
+        Optional.ofNullable(populationDef).ifPresent(nonNullPopulationDef -> {
+            nonNullPopulationDef.setAggregationResult(quantityDef);
+        });
     }
 
     /**

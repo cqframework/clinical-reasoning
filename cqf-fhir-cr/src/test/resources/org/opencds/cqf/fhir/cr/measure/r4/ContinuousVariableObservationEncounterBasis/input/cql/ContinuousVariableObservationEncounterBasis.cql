@@ -16,7 +16,7 @@ context Patient
 define "Initial Population Resource":
     "All Encounters"
 
-define "Measure Population Exclusions Resource":
+define "Measure Population Exclusion Resource":
     "Encounter Cancelled"
 
 define "Measure Population Resource":

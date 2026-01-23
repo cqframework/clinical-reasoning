@@ -196,14 +196,83 @@ public class SelectedMeasureDefPopulation<P>
     }
 
     /**
-     * Assert the population criteria reference (for MEASUREOBSERVATION populations).
+     * Assert the population has no criteria reference.
      *
-     * @param criteriaReference expected criteria reference
+     * @return this SelectedMeasureDefPopulation for chaining
+     */
+    public SelectedMeasureDefPopulation<P> hasNoCriteriaReference() {
+        return hasCriteriaReference(null);
+    }
+
+    /**
+     * Assert the population criteria reference (for MEASUREOBSERVATION populations).
+     * Performs comprehensive validation:
+     * - Verifies the criteria reference matches the expected value
+     * - Validates that the referenced population exists and has type NUMERATOR or DENOMINATOR
+     * - Applies heuristic validation based on population ID naming (e.g., "observation-num" must reference NUMERATOR)
+     *
+     * @param criteriaReference expected criteria reference (population ID), or null for no criteria reference
      * @return this SelectedMeasureDefPopulation for chaining
      */
     public SelectedMeasureDefPopulation<P> hasCriteriaReference(String criteriaReference) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(criteriaReference, value().getCriteriaReference(), "Criteria reference mismatch");
+
+        // If null, no further validation needed
+        if (criteriaReference == null) {
+            return this;
+        }
+
+        // Get the parent group to access all populations
+        if (!(parent instanceof SelectedMeasureDefGroup<?> selectedMeasureDefGroup)) {
+            // Parent might be something else in stratifier context, skip validation
+            return this;
+        }
+
+        // Find the referenced population
+        var referencedPopulation = selectedMeasureDefGroup.value().populations().stream()
+                .filter(p -> criteriaReference.equalsIgnoreCase(p.id()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(
+                referencedPopulation,
+                String.format(
+                        "Criteria reference '%s' does not match any population ID in the group. Available populations: %s",
+                        criteriaReference,
+                        selectedMeasureDefGroup.value().populations().stream()
+                                .map(PopulationDef::id)
+                                .toList()));
+
+        // Validate that the referenced population is NUMERATOR or DENOMINATOR
+        var refType = referencedPopulation.type();
+        assertTrue(
+                refType == MeasurePopulationType.NUMERATOR || refType == MeasurePopulationType.DENOMINATOR,
+                String.format(
+                        "Criteria reference '%s' points to population with type '%s', but must be NUMERATOR or DENOMINATOR",
+                        criteriaReference, refType));
+
+        // Apply heuristic validation based on current population ID
+        final String currentPopId = value().id();
+        if (currentPopId != null) {
+            String lowerCaseId = currentPopId.toLowerCase();
+            if (lowerCaseId.contains("num")) {
+                assertEquals(
+                        MeasurePopulationType.NUMERATOR,
+                        refType,
+                        String.format(
+                                "Population ID '%s' contains 'num' but references '%s' which is type '%s' instead of NUMERATOR",
+                                currentPopId, criteriaReference, refType));
+            } else if (lowerCaseId.contains("den")) {
+                assertEquals(
+                        MeasurePopulationType.DENOMINATOR,
+                        refType,
+                        String.format(
+                                "Population ID '%s' contains 'den' but references '%s' which is type '%s' instead of DENOMINATOR",
+                                currentPopId, criteriaReference, refType));
+            }
+        }
+
         return this;
     }
 
@@ -272,5 +341,10 @@ public class SelectedMeasureDefPopulation<P>
         }
 
         return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T unsafeCast(Object selected) {
+        return (T) selected;
     }
 }

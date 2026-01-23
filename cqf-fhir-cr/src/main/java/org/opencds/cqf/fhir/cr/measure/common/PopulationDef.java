@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class PopulationDef {
@@ -186,6 +187,11 @@ public class PopulationDef {
     @Nullable
     public Double getAggregationResult() {
         return aggregationResult;
+    }
+
+    public void setAggregationResult(@Nullable QuantityDef quantityDefResult) {
+        setAggregationResult(
+                Optional.ofNullable(quantityDefResult).map(QuantityDef::value).orElse(null));
     }
 
     public void setAggregationResult(@Nullable Double aggregationResult) {

@@ -345,7 +345,8 @@ public class MeasureEvaluator {
             if (numeratorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
                         numeratorExclusion.subjectResources, observationNum.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, numeratorExclusion, observationNum);
+                MeasureObservationHandler.removeObservationResourcesInPopulation(
+                        subjectId, numeratorExclusion, observationNum);
             }
             // Den alignment
             var expressionNameDen = getCriteriaExpressionName(observationDen);
@@ -359,7 +360,8 @@ public class MeasureEvaluator {
             if (denominatorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
                         denominatorExclusion.subjectResources, observationDen.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, denominatorExclusion, observationDen);
+                MeasureObservationHandler.removeObservationResourcesInPopulation(
+                        subjectId, denominatorExclusion, observationDen);
             }
         }
     }
@@ -487,7 +489,7 @@ public class MeasureEvaluator {
                 // measure observations also need to make sure they remove measure-population-exclusions
                 if (measurePopulationExclusion != null) {
 
-                    removeObservationResourcesInPopulation(
+                    MeasureObservationHandler.removeObservationResourcesInPopulation(
                             subjectId, measurePopulationExclusion, measurePopulationObservation);
                     logger.info(
                             "1234: AFTER  removeObservationResourcesInPopulation(): {}\nmeasureObservationMap:\n{}",
@@ -770,167 +772,6 @@ public class MeasureEvaluator {
                 it.remove();
             }
         }
-    }
-
-    // LUKETODO:  separate class with tons of unit tests
-    // LUKETODO:  ensure this new test uses SEPARATE INSTANCES OF FHIR RESOURCES in the Map
-    // and the Parameterized call
-    /**
-     * Removes measureObservationDef resources for a subject when their "key" is
-     * found in the corresponding measurePopulationExclusionDef resources for that subject.
-     *
-     * In other words: delete observation results that are ALSO present in the
-     * population resources.
-     */
-    protected void removeObservationResourcesInPopulation(
-            String subjectId,
-            // MeasurePopulationType.MEASUREPOPULATIONEXCLUSION
-            PopulationDef measurePopulationExclusionDef,
-            // MeasurePopulationType.MEASUREOBSERVATION
-            PopulationDef measureObservationDef) {
-
-        if (measureObservationDef == null || measurePopulationExclusionDef == null) {
-            return;
-        }
-
-        // Population keys to match against
-        final Set<Object> measurePopulationExclusionResourcesForSubject =
-                measurePopulationExclusionDef.getResourcesForSubject(subjectId);
-
-        if (CollectionUtils.isEmpty(measurePopulationExclusionResourcesForSubject)) {
-            // nothing to compare against -> nothing to remove
-            return;
-        }
-
-        logger.info(
-                "1234: measurePopulationExclusionResourcesForSubject: {}",
-                printValue(measurePopulationExclusionResourcesForSubject));
-
-        // Work on a copy to avoid concurrent modification issues while removing
-        final HashSetForFhirResourcesAndCqlTypes<Object> measureObservationResourcesForSubject =
-                new HashSetForFhirResourcesAndCqlTypes<>(measureObservationDef.getResourcesForSubject(subjectId));
-
-        logger.info(
-                "1234: PRE measureObservationDef resources: {}",
-                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
-
-        for (Object populationResourceForSubject : measureObservationResourcesForSubject) {
-
-            if (!(populationResourceForSubject instanceof Map<?, ?> measureObservationResourceAsMap)) {
-                continue;
-            }
-
-            // process this single populationResourceForSubject
-            processSingleResource(
-                    measureObservationResourceAsMap,
-                    measurePopulationExclusionResourcesForSubject,
-                    measureObservationDef,
-                    subjectId);
-        }
-
-        logger.info(
-                "1234: POST measureObservationDef resources: {}",
-                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
-    }
-
-    private void processSingleResource(
-            Map<?, ?> measureObservationResourceAsMap,
-            Set<Object> measurePopulationExclusionResourcesForSubject,
-            PopulationDef measureObservationDef,
-            String subjectId) {
-
-        for (Map.Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
-            if (processSingleKey(
-                    measureObservationResourceAsMap,
-                    measurePopulationExclusionResourcesForSubject,
-                    measureObservationDef,
-                    subjectId,
-                    measureObservationResourceMapEntry)) {
-                return;
-            }
-        }
-    }
-
-    private boolean processSingleKey(
-            Map<?, ?> measureObservationResourceAsMap,
-            Set<Object> measurePopulationExclusionResourcesForSubject,
-            PopulationDef measureObservationDef,
-            String subjectId,
-            Entry<?, ?> measureObservationResourceMapEntry) {
-
-        final Object measureObservationResourceMapKey = measureObservationResourceMapEntry.getKey();
-
-        // LUKETODO:  there's a bug here:  it should match
-
-        // If the key is present in the population resources → remove this item
-        logger.info(
-                "1234: Processing\nmeasureObservationResourceMapKey:\n[{}] for subject [{}],\nmeasurePopulationExclusionResourcesForSubject:\n{}",
-                printResource(measureObservationResourceMapKey),
-                subjectId,
-                measurePopulationExclusionResourcesForSubject);
-
-        logger.info(
-                "1234: PRE SINGLE RES:  measureObservationDef resources: {}",
-                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
-
-        final Optional<Object> optMatchingMeasurePopulationExclusionResourcesForSubject =
-                measurePopulationExclusionResourcesForSubject.stream()
-                        // LUKETODO: explain why and try to test for this, specifically:
-                        //                        .filter(entry -> entry.equals(measureObservationResourceMapKey))
-                        // THIS IS CRUCIAL:  We CANNOT call plain equals() here
-                        .filter(entry ->
-                                CqlFhirResourceAndCqlTypeUtils.areObjectsEqual(entry, measureObservationResourceMapKey))
-                        .findAny();
-
-        if (optMatchingMeasurePopulationExclusionResourcesForSubject.isPresent()) {
-
-            var matchingMeasurePopulationExclusionResourcesForSubject =
-                    optMatchingMeasurePopulationExclusionResourcesForSubject.get();
-
-            processResource(
-                    measureObservationResourceAsMap,
-                    measureObservationDef,
-                    subjectId,
-                    measureObservationResourceMapKey,
-                    matchingMeasurePopulationExclusionResourcesForSubject);
-            //            logger.info("1234: removed: {}", printResource(measureObservationResourceMapKey));
-
-            // short-circuits this resource entirely
-            return true;
-        }
-
-        logger.info(
-                "1234: POST NOT FOUND SINGLE RES: measureObservationDef resources: {}",
-                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
-
-        return false;
-    }
-
-    private void processResource(
-            Map<?, ?> measureObservationResourceAsMap,
-            PopulationDef measureObservationDef,
-            String subjectId,
-            Object measureObservationResourceMapKey,
-            Object matchingMeasurePopulationExclusionResourceForSubject) {
-
-        // All the resources for the subject
-        final Set<Object> measureObservationResourcesForSubject =
-                measureObservationDef.getResourcesForSubject(subjectId);
-
-        logger.info(
-                "1234: \nmeasureObservationResourcesForSubject:\n{}\n,\nmeasureObservationResourceAsMap:\n{}\nmeasureObservationResourceMapKey:\n{}",
-                printValues(measureObservationResourcesForSubject),
-                printValue(measureObservationResourceAsMap),
-                printValue(measureObservationResourceMapKey));
-
-        // This is CRUCIAL:  This is a Map<String,Set<Map<? extends IBaseResource, QuantityDef>>
-        // and we must remove only ONE entry corresponding to ONE key in the INNER Map
-        measureObservationDef.removeExcludedMeasureObservationResource(
-                subjectId, matchingMeasurePopulationExclusionResourceForSubject);
-
-        logger.info(
-                "1234: POST FOUND SINGLE RES: measureObservationDef resources: {}",
-                printValues(measureObservationDef.getResourcesForSubject(subjectId)));
     }
 
     private Object printResource(Object key) {

@@ -145,7 +145,7 @@ public class MeasureEvaluationResultHandler {
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
                     final List<EvaluationResult> measureObservationResults =
-                            ContinuousVariableObservationHandler.continuousVariableEvaluation(
+                            MeasureObservationHandler.continuousVariableEvaluation(
                                     context,
                                     measureDefs,
                                     libraryVersionedIdentifier,

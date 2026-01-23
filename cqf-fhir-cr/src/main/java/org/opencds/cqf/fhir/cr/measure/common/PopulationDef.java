@@ -60,31 +60,6 @@ public class PopulationDef {
         this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
-    // LUKETODO: refactor
-    // LUKETODO: move
-    public void removeExcludedMeasureObservationResource(String subjectId, Object measureObservationResourceKey) {
-        if (!hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-            // skip since this is another population type
-            return;
-        }
-
-        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
-
-        // 2. Iterate and mutate the inner Maps
-        resourcesForSubject.forEach(element -> {
-            // LUKETODO:  should we throw an IllegalStateException if it isn't
-            // 3. Pattern match: Is the element a Map that could contain our key?
-            if (element instanceof Map<?, ?> innerMap) {
-                // We remove the key. If it's not there, remove() does nothing.
-                innerMap.remove(measureObservationResourceKey);
-            }
-        });
-
-        //        // 4. Optional: Clean up empty inner maps if they become empty after removal
-        //        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
-
-    }
-
     public MeasurePopulationType type() {
         return this.measurePopulationType;
     }
@@ -131,6 +106,42 @@ public class PopulationDef {
 
     public Set<String> getSubjects() {
         return this.getSubjectResources().keySet();
+    }
+
+    /**
+     * Removes a measure observation resource key from all inner maps for a subject.
+     * <p/>
+     * After removal, any empty inner maps are removed from the subject's resource set.
+     * If the subject's resource set becomes empty, the subject is also removed from the map.
+     * This ensures that subjects with no remaining observations are not counted.
+     *
+     * @param subjectId the subject ID
+     * @param measureObservationResourceKey the resource key to remove
+     */
+    public void removeExcludedMeasureObservationResource(String subjectId, Object measureObservationResourceKey) {
+        if (!hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+            return;
+        }
+
+        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
+        if (resourcesForSubject == null) {
+            return;
+        }
+
+        // Remove the key from all inner maps
+        resourcesForSubject.forEach(element -> {
+            if (element instanceof Map<?, ?> innerMap) {
+                innerMap.remove(measureObservationResourceKey);
+            }
+        });
+
+        // Remove empty inner maps - critical for correct counting
+        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+
+        // If the subject's resource set is now empty, remove the subject from the map entirely
+        if (resourcesForSubject.isEmpty()) {
+            subjectResources.remove(subjectId);
+        }
     }
 
     public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {

@@ -2,8 +2,10 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.report;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -25,8 +27,15 @@ public class SelectedMeasureReportStratifier
         return stratum(MeasureReport.MeasureReportGroupStratifierComponent::getStratumFirstRep);
     }
 
+    public SelectedMeasureReportStratifier hasNoStratum() {
+        assertNull(value());
+        return this;
+    }
+
     public SelectedMeasureReportStratifier hasStratumCount(int stratumCount) {
-        assertEquals(stratumCount, value().getStratum().size());
+        assertNotNull(value());
+        final List<StratifierGroupComponent> stratum = value().getStratum();
+        assertEquals(stratumCount, stratum.size());
         return this;
     }
 

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -23,12 +23,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Capture all logic for measure evaluation for continuous variable scoring.
+ * Captures logic for measure evaluation associated with MEASUREOBSERVATION populations, capturing
+ * both continuous variable and ratio continuous variable measures.
  */
-public class ContinuousVariableObservationHandler {
-    private static final Logger logger = LoggerFactory.getLogger(ContinuousVariableObservationHandler.class);
+public class MeasureObservationHandler {
+    private static final Logger logger = LoggerFactory.getLogger(MeasureObservationHandler.class);
 
-    private ContinuousVariableObservationHandler() {
+    private MeasureObservationHandler() {
         // static class with private constructor
     }
 
@@ -41,7 +42,7 @@ public class ContinuousVariableObservationHandler {
 
         final List<MeasureDef> measureDefsWithMeasureObservations = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
-                .filter(ContinuousVariableObservationHandler::hasMeasureObservation)
+                .filter(MeasureObservationHandler::hasMeasureObservation)
                 .toList();
 
         if (measureDefsWithMeasureObservations.isEmpty()) {
@@ -81,6 +82,54 @@ public class ContinuousVariableObservationHandler {
         }
 
         return finalResults;
+    }
+
+    /**
+     * Removes observation entries from measureObservationDef when their resource keys
+     * match resources in measurePopulationExclusionDef for the given subject.
+     * <p/>
+     * The observation population stores Map&lt;Resource, QuantityDef&gt; entries. This method
+     * removes map entries whose keys match exclusion resources using FHIR resource identity
+     * (resource type + logical ID) rather than object instance equality.
+     *
+     * @param subjectId the subject ID
+     * @param measurePopulationExclusionDef population containing resources to exclude (e.g., cancelled encounters)
+     * @param measureObservationDef population containing observation maps to filter
+     */
+    static void removeObservationResourcesInPopulation(
+            String subjectId, PopulationDef measurePopulationExclusionDef, PopulationDef measureObservationDef) {
+
+        if (measureObservationDef == null || measurePopulationExclusionDef == null) {
+            return;
+        }
+
+        final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
+        if (CollectionUtils.isEmpty(exclusionResources)) {
+            return;
+        }
+
+        final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
+        if (CollectionUtils.isEmpty(observationResources)) {
+            return;
+        }
+
+        logger.debug(
+                "Removing {} exclusion resources from {} observation maps for subject {}",
+                exclusionResources.size(),
+                observationResources.size(),
+                subjectId);
+
+        // Make a copy to avoid ConcurrentModificationException when removeExcludedMeasureObservationResource
+        // removes empty maps from the original set
+        final Set<Object> observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
+
+        // Iterate over observation resources (which are Maps) and remove matching keys
+        for (Object observationResource : observationResourcesCopy) {
+            if (observationResource instanceof Map<?, ?> observationMap) {
+                removeMatchingKeysFromObservationMap(
+                        observationMap, exclusionResources, measureObservationDef, subjectId);
+            }
+        }
     }
 
     /**
@@ -150,7 +199,7 @@ public class ContinuousVariableObservationHandler {
     // Added by Claude Sonnet 4.5 on 2025-12-02
     /**
      * Convert CQL evaluation result to QuantityDef.
-     *
+     * <p/>
      * CQL evaluation can return Number, String, or CQL Quantity - never FHIR Quantities.
      *
      * @param result the CQL evaluation result
@@ -198,10 +247,15 @@ public class ContinuousVariableObservationHandler {
     public static ExpressionResult evaluateObservationCriteria(
             Object resource, String criteriaExpression, boolean isBooleanBasis, CqlEngine context) {
 
-        var ed = Libraries.resolveExpressionRef(
-                criteriaExpression, context.getState().getCurrentLibrary());
+        var currentLibrary = context.getState().getCurrentLibrary();
 
-        if (!(ed instanceof FunctionDef functionDef)) {
+        if (currentLibrary == null) {
+            throw new InternalErrorException("Current library is null.");
+        }
+
+        var expressionDef = Libraries.resolveExpressionRef(criteriaExpression, currentLibrary);
+
+        if (!(expressionDef instanceof FunctionDef functionDef)) {
             throw new InvalidRequestException(
                     "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
         }
@@ -223,7 +277,10 @@ public class ContinuousVariableObservationHandler {
 
                 context.getState().push(variableToPush);
             }
-            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
+            if (expressionDef.getExpression() == null) {
+                throw new InternalErrorException("Current library is null.");
+            }
+            result = context.getEvaluationVisitor().visitExpression(expressionDef.getExpression(), context.getState());
 
         } finally {
             context.getState().popActivationFrame();
@@ -234,6 +291,42 @@ public class ContinuousVariableObservationHandler {
         validateObservationResult(resource, result);
 
         return new ExpressionResult(result, evaluatedResources);
+    }
+
+    /**
+     * Removes keys from an observation map that match exclusion resources.
+     * <p/>
+     * This method uses FHIR resource identity (resource type + logical ID) for matching
+     * rather than object instance equality, since the exclusion resources and observation
+     * map keys may be separate Java object instances representing the same FHIR resource.
+     *
+     * @param observationMap observation map containing Resource -> QuantityDef entries
+     * @param exclusionResources set of resources to exclude
+     * @param measureObservationDef the observation population definition
+     * @param subjectId the subject ID
+     */
+    private static void removeMatchingKeysFromObservationMap(
+            Map<?, ?> observationMap,
+            Set<Object> exclusionResources,
+            PopulationDef measureObservationDef,
+            String subjectId) {
+
+        // Find observation map keys that match any exclusion resource
+        for (Object exclusionResource : exclusionResources) {
+            // Check if this exclusion resource matches any key in the observation map
+            // Must use custom equality that compares FHIR resource identity, not object instance
+            boolean matchFound = observationMap.keySet().stream()
+                    .anyMatch(mapKey -> CqlFhirResourceAndCqlTypeUtils.areObjectsEqual(mapKey, exclusionResource));
+
+            if (matchFound) {
+                logger.debug(
+                        "Removing observation for excluded resource: {}",
+                        EvaluationResultFormatter.formatResource(exclusionResource));
+                // Remove the entry from the inner map using the PopulationDef's removal method
+                // This ensures proper handling of the Map<String, Set<Map<Resource, QuantityDef>>> structure
+                measureObservationDef.removeExcludedMeasureObservationResource(subjectId, exclusionResource);
+            }
+        }
     }
 
     private static Optional<ExpressionResult> tryGetExpressionResult(
@@ -263,7 +356,14 @@ public class ContinuousVariableObservationHandler {
         if (expressionResult.getValue() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult = evaluationResult.get(subjectTypePart).getValue();
+                var expressionResultForSubjectId = evaluationResult.get(subjectTypePart);
+
+                if (expressionResultForSubjectId == null) {
+                    throw new InternalErrorException(
+                            "expression result is null for subject type: %s".formatted(subjectTypePart));
+                }
+
+                Object booleanResult = expressionResultForSubjectId.getValue();
                 // remove evaluated resources
                 return Collections.singletonList(booleanResult);
             } else {
@@ -329,7 +429,6 @@ public class ContinuousVariableObservationHandler {
         context.getState().clearEvaluatedResources();
     }
 
-    @Nonnull
     private static EvaluationResult buildEvaluationResult(
             String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
 

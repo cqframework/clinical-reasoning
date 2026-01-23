@@ -66,7 +66,7 @@ public class EvaluationResultFormatter {
                 sb.append(indent(baseIndent + 1)).append("Evaluated Resources:\n");
                 for (Object resource : expressionResult.getEvaluatedResources()) {
                     sb.append(indent(baseIndent + 2))
-                            .append(formatResourceId(resource))
+                            .append(formatResource(resource))
                             .append("\n");
                 }
             }
@@ -102,8 +102,6 @@ public class EvaluationResultFormatter {
             return "null";
         }
 
-        // LUKETODO:  print results if they're empty, dont' exclude them
-
         // Handle iterables and collections
         if (value instanceof Iterable<?> iterable) {
             String items = StreamSupport.stream(iterable.spliterator(), false)
@@ -135,7 +133,7 @@ public class EvaluationResultFormatter {
 
         // Handle FHIR resources
         if (value instanceof IBaseResource) {
-            return formatResourceId(value);
+            return formatResource(value);
         }
 
         // Handle dates
@@ -150,11 +148,6 @@ public class EvaluationResultFormatter {
             return formatter.format((Date) value);
         }
 
-        // Handle primitives and strings
-        if (isPrimitiveOrString(value)) {
-            return value.toString();
-        }
-
         // Fallback to toString for other types
         return value.toString();
     }
@@ -165,31 +158,16 @@ public class EvaluationResultFormatter {
      * @param resource the resource object
      * @return formatted resource ID string (e.g., "Encounter/patient-4-encounter-1")
      */
-    private static String formatResourceId(Object resource) {
-        if (!(resource instanceof IBaseResource)) {
+    public static String formatResource(Object resource) {
+        if (!(resource instanceof IBaseResource baseResource)) {
             return resource.toString();
         }
 
-        IBaseResource baseResource = (IBaseResource) resource;
         if (baseResource.getIdElement() == null || baseResource.getIdElement().getValue() == null) {
             return "(resource with no ID)";
         }
 
         return baseResource.getIdElement().toUnqualifiedVersionless().getValue();
-    }
-
-    /**
-     * Checks if a value is a primitive type or String.
-     *
-     * @param value the value to check
-     * @return true if primitive or String, false otherwise
-     */
-    private static boolean isPrimitiveOrString(Object value) {
-        return value instanceof String
-                || value instanceof Number
-                || value instanceof Boolean
-                || value instanceof Character
-                || value.getClass().isPrimitive();
     }
 
     /**

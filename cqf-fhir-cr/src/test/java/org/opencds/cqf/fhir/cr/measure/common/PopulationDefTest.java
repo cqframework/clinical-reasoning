@@ -217,4 +217,149 @@ class PopulationDefTest {
         // For MEASUREOBSERVATION, getCount() should count subjects
         assertEquals(3, popDef.getCount(), "MEASUREOBSERVATION should count observation entries");
     }
+
+    /**
+     * Test removeExcludedMeasureObservationResource with boolean basis.
+     * When all entries are removed from a subject's inner map, that subject should not
+     * be counted in getCount().
+     */
+    @Test
+    void testRemoveExcludedMeasureObservationResource_BooleanBasis_RemovesEmptyMaps() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef = new PopulationDef(
+                "pop-obs",
+                null,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "MeasureObservation",
+                booleanBasis,
+                "measure-population",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Create observation maps with encounters as keys
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+        Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
+
+        // Add observations for three subjects
+        Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMap1.put(enc1, new QuantityDef(100.0));
+        popDef.addResource("Patient/1", obsMap1);
+
+        Map<Object, Object> obsMap2 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMap2.put(enc2, new QuantityDef(200.0));
+        popDef.addResource("Patient/2", obsMap2);
+
+        Map<Object, Object> obsMap3 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMap3.put(enc3, new QuantityDef(300.0));
+        popDef.addResource("Patient/3", obsMap3);
+
+        // Initial count should be 3
+        assertEquals(3, popDef.getCount(), "Should have 3 observations before removal");
+        assertEquals(3, popDef.getSubjects().size(), "Should have 3 subjects");
+
+        // Remove enc1 from Patient/1 - this should empty Patient/1's inner map
+        popDef.removeExcludedMeasureObservationResource("Patient/1", enc1);
+
+        // After removal, Patient/1's inner map should be empty and purged
+        // Count should now be 2 (only Patient/2 and Patient/3 remain)
+        assertEquals(2, popDef.getCount(), "Should have 2 observations after removing Patient/1's only entry");
+        assertEquals(2, popDef.getSubjects().size(), "Should have 2 subjects after empty map removal");
+
+        // Patient/1 should no longer be in the subjects
+        assertFalse(popDef.getSubjects().contains("Patient/1"), "Patient/1 should not be counted after removal");
+        assertTrue(popDef.getSubjects().contains("Patient/2"), "Patient/2 should still be counted");
+        assertTrue(popDef.getSubjects().contains("Patient/3"), "Patient/3 should still be counted");
+    }
+
+    /**
+     * Test removeExcludedMeasureObservationResource with encounter basis and multiple entries.
+     * When one entry is removed from a subject's inner map but others remain, the subject
+     * should still be counted.
+     */
+    @Test
+    void testRemoveExcludedMeasureObservationResource_EncounterBasis_PartialRemoval() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef = new PopulationDef(
+                "pop-obs",
+                null,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "MeasureObservation",
+                encounterBasis,
+                "measure-population",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Create observation maps with multiple encounters for one subject
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+        Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
+
+        Map<Object, Object> obsMapSubject1 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMapSubject1.put(enc1, new QuantityDef(100.0));
+        obsMapSubject1.put(enc2, new QuantityDef(200.0));
+        popDef.addResource("Patient/1", obsMapSubject1);
+
+        Map<Object, Object> obsMapSubject2 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMapSubject2.put(enc3, new QuantityDef(300.0));
+        popDef.addResource("Patient/2", obsMapSubject2);
+
+        // Initial: Patient/1 has 2 entries, Patient/2 has 1 entry = 3 total
+        assertEquals(3, popDef.getCount(), "Should have 3 observations before removal");
+
+        // Remove one entry from Patient/1's map (enc1)
+        popDef.removeExcludedMeasureObservationResource("Patient/1", enc1);
+
+        // Patient/1's map should still have 1 entry (enc2), so count should be 2
+        assertEquals(2, popDef.getCount(), "Should have 2 observations after removing one entry");
+        assertEquals(2, popDef.getSubjects().size(), "Should still have 2 subjects");
+
+        // Both subjects should still be present
+        assertTrue(popDef.getSubjects().contains("Patient/1"), "Patient/1 should still be counted");
+        assertTrue(popDef.getSubjects().contains("Patient/2"), "Patient/2 should still be counted");
+    }
+
+    /**
+     * Test removeExcludedMeasureObservationResource removes all entries from subject's map.
+     * This simulates the scenario where all of a subject's observations are excluded.
+     */
+    @Test
+    void testRemoveExcludedMeasureObservationResource_RemovesAllEntries_SubjectNotCounted() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef = new PopulationDef(
+                "pop-obs",
+                null,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "MeasureObservation",
+                encounterBasis,
+                "measure-population",
+                ContinuousVariableObservationAggregateMethod.COUNT,
+                null);
+
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+
+        // Patient/1 has 2 observations
+        Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMap1.put(enc1, new QuantityDef(100.0));
+        obsMap1.put(enc2, new QuantityDef(200.0));
+        popDef.addResource("Patient/1", obsMap1);
+
+        assertEquals(2, popDef.getCount(), "Should have 2 observations initially");
+        assertEquals(1, popDef.getSubjects().size(), "Should have 1 subject");
+
+        // Remove first entry
+        popDef.removeExcludedMeasureObservationResource("Patient/1", enc1);
+        assertEquals(1, popDef.getCount(), "Should have 1 observation after first removal");
+        assertEquals(1, popDef.getSubjects().size(), "Should still have 1 subject");
+
+        // Remove second entry - now the inner map should be empty and purged
+        popDef.removeExcludedMeasureObservationResource("Patient/1", enc2);
+        assertEquals(0, popDef.getCount(), "Should have 0 observations after removing all entries");
+        assertEquals(0, popDef.getSubjects().size(), "Should have 0 subjects after empty map removal");
+
+        assertFalse(
+                popDef.getSubjects().contains("Patient/1"),
+                "Patient/1 should not be counted after all observations removed");
+    }
 }

@@ -362,4 +362,344 @@ class PopulationDefTest {
                 popDef.getSubjects().contains("Patient/1"),
                 "Patient/1 should not be counted after all observations removed");
     }
+
+    /**
+     * Test retainAllSubjects() - keeps only subjects that exist in both populations.
+     */
+    @Test
+    void testRetainAllSubjects_WithCommonSubjects() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        PopulationDef popDef2 =
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+
+        // popDef1 has subjects 1, 2, 3
+        popDef1.addResource("Patient/1", true);
+        popDef1.addResource("Patient/2", true);
+        popDef1.addResource("Patient/3", true);
+
+        // popDef2 has subjects 2, 3, 4
+        popDef2.addResource("Patient/2", true);
+        popDef2.addResource("Patient/3", true);
+        popDef2.addResource("Patient/4", true);
+
+        // Retain only common subjects (2 and 3)
+        popDef1.retainAllSubjects(popDef2);
+
+        assertEquals(2, popDef1.getSubjects().size(), "Should have 2 common subjects");
+        assertFalse(popDef1.getSubjects().contains("Patient/1"), "Patient/1 should be removed");
+        assertTrue(popDef1.getSubjects().contains("Patient/2"), "Patient/2 should be retained");
+        assertTrue(popDef1.getSubjects().contains("Patient/3"), "Patient/3 should be retained");
+        assertFalse(popDef1.getSubjects().contains("Patient/4"), "Patient/4 was not in popDef1");
+    }
+
+    /**
+     * Test retainAllSubjects() - when no subjects are common.
+     */
+    @Test
+    void testRetainAllSubjects_WithNoCommonSubjects() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        PopulationDef popDef2 =
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+
+        // popDef1 has subjects 1, 2
+        popDef1.addResource("Patient/1", true);
+        popDef1.addResource("Patient/2", true);
+
+        // popDef2 has subjects 3, 4
+        popDef2.addResource("Patient/3", true);
+        popDef2.addResource("Patient/4", true);
+
+        // Retain only common subjects (none)
+        popDef1.retainAllSubjects(popDef2);
+
+        assertEquals(0, popDef1.getSubjects().size(), "Should have no subjects after retention");
+    }
+
+    /**
+     * Test retainAllSubjects() - when all subjects are common.
+     */
+    @Test
+    void testRetainAllSubjects_WithAllSubjectsCommon() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        PopulationDef popDef2 =
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+
+        // Both have the same subjects
+        popDef1.addResource("Patient/1", true);
+        popDef1.addResource("Patient/2", true);
+
+        popDef2.addResource("Patient/1", true);
+        popDef2.addResource("Patient/2", true);
+
+        popDef1.retainAllSubjects(popDef2);
+
+        assertEquals(2, popDef1.getSubjects().size(), "Should still have 2 subjects");
+        assertTrue(popDef1.getSubjects().contains("Patient/1"));
+        assertTrue(popDef1.getSubjects().contains("Patient/2"));
+    }
+
+    /**
+     * Test removeAllResources() - removes resources that exist in both populations for a subject.
+     */
+    @Test
+    void testRemoveAllResources_WithCommonResources() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        PopulationDef popDef2 = new PopulationDef(
+                "pop-2",
+                null,
+                MeasurePopulationType.DENOMINATOREXCLUSION,
+                "DenominatorExclusion",
+                encounterBasis,
+                null);
+
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+        Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
+
+        // popDef1 Patient/1 has encounters 1, 2, 3
+        popDef1.addResource("Patient/1", enc1);
+        popDef1.addResource("Patient/1", enc2);
+        popDef1.addResource("Patient/1", enc3);
+
+        // popDef2 Patient/1 has encounters 2, 3 (exclusions)
+        Encounter enc2b = (Encounter) new Encounter().setId("Encounter/2");
+        Encounter enc3b = (Encounter) new Encounter().setId("Encounter/3");
+        popDef2.addResource("Patient/1", enc2b);
+        popDef2.addResource("Patient/1", enc3b);
+
+        // Remove encounters that are in both (2 and 3)
+        popDef1.removeAllResources("Patient/1", popDef2);
+
+        assertEquals(1, popDef1.getResourcesForSubject("Patient/1").size(), "Should have 1 resource remaining");
+        assertTrue(
+                getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1), "Encounter/1 should remain in popDef1");
+    }
+
+    /**
+     * Test removeAllResources() - when no resources are common.
+     */
+    @Test
+    void testRemoveAllResources_WithNoCommonResources() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        PopulationDef popDef2 = new PopulationDef(
+                "pop-2",
+                null,
+                MeasurePopulationType.DENOMINATOREXCLUSION,
+                "DenominatorExclusion",
+                encounterBasis,
+                null);
+
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+
+        // popDef1 Patient/1 has encounter 1
+        popDef1.addResource("Patient/1", enc1);
+
+        // popDef2 Patient/1 has encounter 2
+        popDef2.addResource("Patient/1", enc2);
+
+        // Remove resources that are in both (none)
+        popDef1.removeAllResources("Patient/1", popDef2);
+
+        assertEquals(1, popDef1.getResourcesForSubject("Patient/1").size(), "Should still have 1 resource");
+        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1), "Encounter/1 should remain");
+    }
+
+    /**
+     * Test removeAllResources() - when all resources are common.
+     */
+    @Test
+    void testRemoveAllResources_WithAllResourcesCommon() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        PopulationDef popDef2 = new PopulationDef(
+                "pop-2",
+                null,
+                MeasurePopulationType.DENOMINATOREXCLUSION,
+                "DenominatorExclusion",
+                encounterBasis,
+                null);
+
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+
+        // Both have the same encounters for Patient/1
+        popDef1.addResource("Patient/1", enc1);
+        popDef1.addResource("Patient/1", enc2);
+
+        Encounter enc1b = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2b = (Encounter) new Encounter().setId("Encounter/2");
+        popDef2.addResource("Patient/1", enc1b);
+        popDef2.addResource("Patient/1", enc2b);
+
+        // Remove all common resources
+        popDef1.removeAllResources("Patient/1", popDef2);
+
+        assertEquals(0, popDef1.getResourcesForSubject("Patient/1").size(), "Should have no resources remaining");
+    }
+
+    /**
+     * Test removeAllSubjects() - removes subjects that exist in both populations.
+     */
+    @Test
+    void testRemoveAllSubjects_WithCommonSubjects() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        PopulationDef popDef2 = new PopulationDef(
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+
+        // popDef1 has subjects 1, 2, 3
+        popDef1.addResource("Patient/1", true);
+        popDef1.addResource("Patient/2", true);
+        popDef1.addResource("Patient/3", true);
+
+        // popDef2 has subjects 2, 3 (exclusions)
+        popDef2.addResource("Patient/2", true);
+        popDef2.addResource("Patient/3", true);
+
+        // Remove subjects that are in both (2 and 3)
+        popDef1.removeAllSubjects(popDef2);
+
+        assertEquals(1, popDef1.getSubjects().size(), "Should have 1 subject remaining");
+        assertTrue(popDef1.getSubjects().contains("Patient/1"), "Patient/1 should remain");
+        assertFalse(popDef1.getSubjects().contains("Patient/2"), "Patient/2 should be removed");
+        assertFalse(popDef1.getSubjects().contains("Patient/3"), "Patient/3 should be removed");
+    }
+
+    /**
+     * Test removeAllSubjects() - when no subjects are common.
+     */
+    @Test
+    void testRemoveAllSubjects_WithNoCommonSubjects() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        PopulationDef popDef2 = new PopulationDef(
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+
+        // popDef1 has subjects 1, 2
+        popDef1.addResource("Patient/1", true);
+        popDef1.addResource("Patient/2", true);
+
+        // popDef2 has subjects 3, 4
+        popDef2.addResource("Patient/3", true);
+        popDef2.addResource("Patient/4", true);
+
+        // Remove subjects that are in both (none)
+        popDef1.removeAllSubjects(popDef2);
+
+        assertEquals(2, popDef1.getSubjects().size(), "Should still have 2 subjects");
+        assertTrue(popDef1.getSubjects().contains("Patient/1"));
+        assertTrue(popDef1.getSubjects().contains("Patient/2"));
+    }
+
+    /**
+     * Test removeAllSubjects() - when all subjects are common.
+     */
+    @Test
+    void testRemoveAllSubjects_WithAllSubjectsCommon() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef popDef1 = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        PopulationDef popDef2 = new PopulationDef(
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+
+        // Both have the same subjects
+        popDef1.addResource("Patient/1", true);
+        popDef1.addResource("Patient/2", true);
+
+        popDef2.addResource("Patient/1", true);
+        popDef2.addResource("Patient/2", true);
+
+        // Remove all common subjects
+        popDef1.removeAllSubjects(popDef2);
+
+        assertEquals(0, popDef1.getSubjects().size(), "Should have no subjects remaining");
+    }
+
+    /**
+     * Test getAllSubjectResources() with multiple subjects and resources.
+     */
+    @Test
+    void testGetAllSubjectResources_MultipleSubjectsAndResources() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+        Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
+
+        popDef.addResource("Patient/1", enc1);
+        popDef.addResource("Patient/1", enc2);
+        popDef.addResource("Patient/2", enc3);
+
+        assertEquals(3, popDef.getAllSubjectResources().size(), "Should have 3 total resources");
+    }
+
+    /**
+     * Test addResource() with same value for different subjects.
+     */
+    @Test
+    void testAddResource_SameValueDifferentSubjects() {
+        CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
+        PopulationDef popDef =
+                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+
+        popDef.addResource("Patient/1", "common-value");
+        popDef.addResource("Patient/2", "common-value");
+
+        assertEquals(2, popDef.getSubjects().size(), "Should have 2 subjects");
+        assertEquals(
+                2,
+                popDef.getAllSubjectResources().size(),
+                "Should count both occurrences of same value for different subjects");
+    }
+
+    /**
+     * Test countObservations() with multiple observation maps.
+     */
+    @Test
+    void testCountObservations_WithMultipleMaps() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef popDef = new PopulationDef(
+                "pop-obs",
+                null,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "MeasureObservation",
+                encounterBasis,
+                "measure-population",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
+        Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
+        Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
+
+        // Patient/1 has 2 observations
+        Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMap1.put(enc1, new QuantityDef(100.0));
+        obsMap1.put(enc2, new QuantityDef(200.0));
+        popDef.addResource("Patient/1", obsMap1);
+
+        // Patient/2 has 1 observation
+        Map<Object, Object> obsMap2 = new HashMapForFhirResourcesAndCqlTypes<>();
+        obsMap2.put(enc3, new QuantityDef(300.0));
+        popDef.addResource("Patient/2", obsMap2);
+
+        assertEquals(3, popDef.countObservations(), "Should count all observation entries across all maps");
+        assertEquals(3, popDef.getCount(), "getCount() should match countObservations() for MEASUREOBSERVATION");
+    }
 }

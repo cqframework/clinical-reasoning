@@ -694,4 +694,210 @@ class EvaluationResultFormatterTest {
         assertTrue(result.contains("Expression: \"Observation2\""));
         assertTrue(result.contains("Value: Encounter/encounter-2 -> QuantityDef{value=120.5}"));
     }
+
+    // Tests for printSubjectResources(), printValues(), printValue() methods
+
+    @Test
+    void printValue_withNull_returnsNull() {
+        String result = EvaluationResultFormatter.printValue(null);
+        assertEquals("null", result);
+    }
+
+    @Test
+    void printValue_withString_returnsString() {
+        String result = EvaluationResultFormatter.printValue("test-string");
+        assertEquals("test-string", result);
+    }
+
+    @Test
+    void printValue_withInteger_returnsString() {
+        String result = EvaluationResultFormatter.printValue(42);
+        assertEquals("42", result);
+    }
+
+    @Test
+    void printValue_withBoolean_returnsString() {
+        String result = EvaluationResultFormatter.printValue(true);
+        assertEquals("true", result);
+    }
+
+    @Test
+    void printValue_withResource_returnsResourceIdWithVersion() {
+        Patient patient = new Patient();
+        patient.setId("Patient/patient-123/_history/1");
+
+        String result = EvaluationResultFormatter.printValue(patient);
+        assertEquals("Patient/patient-123/_history/1", result);
+    }
+
+    @Test
+    void printValue_withResourceNoId_returnsNull() {
+        Patient patient = new Patient();
+        String result = EvaluationResultFormatter.printValue(patient);
+        // getValueAsString() on resource with no ID returns null
+        assertEquals(null, result);
+    }
+
+    @Test
+    void printValue_withEmptyMap_returnsEmpty() {
+        Map<String, String> emptyMap = new HashMap<>();
+        String result = EvaluationResultFormatter.printValue(emptyMap);
+        assertEquals("{empty}", result);
+    }
+
+    @Test
+    void printValue_withSimpleMap_returnsFormattedMap() {
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("a", 1);
+        map.put("b", 2);
+
+        String result = EvaluationResultFormatter.printValue(map);
+        assertEquals("a -> 1, b -> 2", result);
+    }
+
+    @Test
+    void printValue_withMapOfResources_returnsResourceIds() {
+        Patient patient1 = new Patient();
+        patient1.setId("Patient/patient-1");
+
+        Encounter encounter = new Encounter();
+        encounter.setId("Encounter/encounter-1");
+
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("patient", patient1);
+        map.put("encounter", encounter);
+
+        String result = EvaluationResultFormatter.printValue(map);
+        assertEquals("patient -> Patient/patient-1, encounter -> Encounter/encounter-1", result);
+    }
+
+    @Test
+    void printValue_withMapContainingNullValue_handlesNull() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("key1", "value1");
+        map.put("key2", null);
+
+        String result = EvaluationResultFormatter.printValue(map);
+        assertEquals("key1 -> value1, key2 -> null", result);
+    }
+
+    @Test
+    void printValue_withMapAllNullValues_returnsEmpty() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("key1", null);
+        map.put("key2", null);
+
+        String result = EvaluationResultFormatter.printValue(map);
+        // toString of "null -> null, null -> null" is not blank, so it returns it
+        assertEquals("key1 -> null, key2 -> null", result);
+    }
+
+    @Test
+    void printValues_withNull_returnsEmpty() {
+        String result = EvaluationResultFormatter.printValues(null);
+        assertEquals("{empty}", result);
+    }
+
+    @Test
+    void printValues_withEmptyCollection_returnsEmpty() {
+        String result = EvaluationResultFormatter.printValues(List.of());
+        assertEquals("{empty}", result);
+    }
+
+    @Test
+    void printValues_withSingleValue_returnsFormattedValue() {
+        String result = EvaluationResultFormatter.printValues(List.of("test"));
+        assertEquals("test", result);
+    }
+
+    @Test
+    void printValues_withMultiplePrimitives_returnsCommaSeparated() {
+        String result = EvaluationResultFormatter.printValues(Arrays.asList(1, 2, 3));
+        assertEquals("1, 2, 3", result);
+    }
+
+    @Test
+    void printValues_withMultipleResources_returnsResourceIds() {
+        Patient patient1 = new Patient();
+        patient1.setId("Patient/patient-1");
+
+        Patient patient2 = new Patient();
+        patient2.setId("Patient/patient-2");
+
+        String result = EvaluationResultFormatter.printValues(Arrays.asList(patient1, patient2));
+        assertEquals("Patient/patient-1, Patient/patient-2", result);
+    }
+
+    @Test
+    void printValues_withNullInCollection_handlesNull() {
+        String result = EvaluationResultFormatter.printValues(Arrays.asList("value1", null, "value2"));
+        assertEquals("value1, null, value2", result);
+    }
+
+    @Test
+    void printSubjectResources_withNullPopulationDef_returnsEmpty() {
+        Object result = EvaluationResultFormatter.printSubjectResources(null, "Patient/1");
+        assertEquals("{empty}", result);
+    }
+
+    @Test
+    void printSubjectResources_withEmptyResources_returnsSubjectIdWithEmpty() {
+        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
+        PopulationDef populationDef = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+
+        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        assertEquals("Patient/1: {empty}", result);
+    }
+
+    @Test
+    void printSubjectResources_withSingleResource_returnsFormatted() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef populationDef = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+
+        Encounter encounter = new Encounter();
+        encounter.setId("Encounter/encounter-1");
+        populationDef.addResource("Patient/1", encounter);
+
+        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        assertEquals("Patient/1: Encounter/encounter-1", result);
+    }
+
+    @Test
+    void printSubjectResources_withMultipleResources_returnsCommaSeparated() {
+        CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
+        PopulationDef populationDef = new PopulationDef(
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+
+        Encounter encounter1 = new Encounter();
+        encounter1.setId("Encounter/encounter-1");
+        Encounter encounter2 = new Encounter();
+        encounter2.setId("Encounter/encounter-2");
+
+        populationDef.addResource("Patient/1", encounter1);
+        populationDef.addResource("Patient/1", encounter2);
+
+        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        String resultStr = result.toString();
+        assertTrue(resultStr.startsWith("Patient/1: "));
+        assertTrue(resultStr.contains("Encounter/encounter-1"));
+        assertTrue(resultStr.contains("Encounter/encounter-2"));
+    }
+
+    @Test
+    void printSubjectResources_withMixedTypes_returnsFormatted() {
+        CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
+        PopulationDef populationDef =
+                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+
+        populationDef.addResource("Patient/1", "value1");
+        populationDef.addResource("Patient/1", "value2");
+
+        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        String resultStr = result.toString();
+        assertTrue(resultStr.startsWith("Patient/1: "));
+        assertTrue(resultStr.contains("value1"));
+        assertTrue(resultStr.contains("value2"));
+    }
 }

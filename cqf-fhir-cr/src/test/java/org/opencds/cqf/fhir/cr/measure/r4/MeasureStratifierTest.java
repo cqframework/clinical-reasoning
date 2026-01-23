@@ -648,34 +648,60 @@ class MeasureStratifierTest {
 
     @Test
     void cohortResourceValueStratNull() {
+        // Tests that stratifier functions returning empty list {} and null are handled gracefully.
+        // For NON_SUBJECT_VALUE stratifiers, each encounter is processed independently.
+        // Patient-9 has 2 encounters, and both Empty Function and Null Function are evaluated per encounter.
+        // The resulting strata group encounters by their component value combinations (empty, null).
+        // Since all encounters produce the same values, we expect 1 stratum with both encounters.
+        var report = GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceAllPopulationsValueStratNull")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .report();
 
-        GIVEN_SIMPLE
-            .when()
-            .measureId("CohortResourceAllPopulationsValueStratNull")
-            .subject("Patient/patient-9")
-            .evaluate()
-            .then()
-            .firstGroup()
-            .firstStratifier()
-            .hasCodeText("Empty and Null")
-            // 2 strata: one for each unique (AgeRange, Status) combination
-            .hasStratumCount(2)
-            // Stratum for "P21Y--P41Y + finished" - identified by unique "finished" status
-            .stratumByComponentValueText("Empty")
-            .hasComponentStratifierCount(2) // two components: age range + status
-            .firstPopulation()
-            .hasCount(1)
-            .up()
-            .up()
-            // Stratum for "P21Y--P41Y + in-progress" - identified by unique "in-progress" status
-            .stratumByComponentValueText("null")
-            .hasComponentStratifierCount(2) // two components: age range + status
-            .firstPopulation()
-            .hasCount(1)
-            .up()
-            .up()
-            .up()
-            .up()
-            .report();
+        // Debug: print stratum count and values
+        var stratifier = report.getGroupFirstRep().getStratifierFirstRep();
+        int stratumCount = stratifier.getStratum().size();
+        StringBuilder debugInfo = new StringBuilder();
+        debugInfo.append("Stratum count: ").append(stratumCount).append("\n");
+        for (var stratum : stratifier.getStratum()) {
+            debugInfo.append("Stratum components:\n");
+            for (var comp : stratum.getComponent()) {
+                debugInfo
+                        .append("  Code: ")
+                        .append(comp.getCode().getText())
+                        .append(", Value: ")
+                        .append(comp.getValue().getText())
+                        .append("\n");
+            }
+            debugInfo
+                    .append("  Population count: ")
+                    .append(stratum.getPopulationFirstRep().getCount())
+                    .append("\n");
+        }
+
+        // Assert expected values - there should be 1 stratum with component values "empty" and "null"
+        assertEquals(1, stratumCount, "Expected 1 stratum but got: " + stratumCount + "\n" + debugInfo);
+
+        var singleStratum = stratifier.getStratum().get(0);
+        assertEquals(2, singleStratum.getComponent().size(), "Expected 2 components");
+
+        // Verify component values
+        var compValues = singleStratum.getComponent().stream()
+                .map(c -> c.getValue().getText())
+                .sorted()
+                .toList();
+        assertEquals(
+                java.util.List.of("empty", "null"),
+                compValues,
+                "Expected component values 'empty' and 'null' but got: " + compValues);
+
+        // Population count should be 2 (one for each encounter)
+        assertEquals(
+                2,
+                singleStratum.getPopulationFirstRep().getCount(),
+                "Expected population count of 2 (for 2 encounters)");
     }
 }

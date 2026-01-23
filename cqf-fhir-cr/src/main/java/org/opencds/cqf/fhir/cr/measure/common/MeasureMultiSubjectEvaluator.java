@@ -338,10 +338,10 @@ public class MeasureMultiSubjectEvaluator {
             return List.of(stratum);
         }
 
-        // Filter out subjects where the stratifier expression returned null
-        // These subjects won't be included in any stratum
+        // Group subjects by their stratifier values
+        // Null values are allowed - they will be grouped into a special "null" stratum
         Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .filter(x -> subjectValues.get(x) != null && subjectValues.get(x).rawValue() != null)
+                .filter(x -> subjectValues.get(x) != null)
                 .collect(Collectors.groupingBy(
                         x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
 
@@ -398,17 +398,12 @@ public class MeasureMultiSubjectEvaluator {
             // Handle non-subject value stratifiers with function results (Map<inputResource, outputValue>)
             if (rawValue instanceof Map<?, ?> functionResults) {
                 for (Map.Entry<?, ?> entry : functionResults.entrySet()) {
-                    // Skip entries where the function returned null - these resources won't be stratified
-                    // This handles cases where a CQL function returns null for certain inputs
-                    if (entry.getValue() == null) {
-                        continue;
-                    }
-
                     // Build composite row key: "Patient/xxx|Resource/yyy"
                     String inputResourceKey = normalizeResourceKey(entry.getKey());
                     String rowKey = qualifiedSubject + "|" + inputResourceKey;
 
                     // The output value becomes the stratum value (what's displayed)
+                    // Null values are allowed - they will be grouped into a special "null" stratum
                     StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(entry.getValue());
                     subjectResultTable.put(rowKey, stratumValueWrapper, componentDef);
                 }
@@ -416,10 +411,7 @@ public class MeasureMultiSubjectEvaluator {
             }
 
             // Standard case: scalar value per subject
-            // Skip null values - subject won't be included in any stratum
-            if (rawValue == null) {
-                return;
-            }
+            // Null values are allowed - they will be grouped into a special "null" stratum
             StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(rawValue);
             subjectResultTable.put(qualifiedSubject, stratumValueWrapper, componentDef);
         }));

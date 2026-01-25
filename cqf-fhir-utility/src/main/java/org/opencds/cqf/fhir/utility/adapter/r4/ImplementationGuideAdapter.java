@@ -2,18 +2,25 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.UrlType;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter implements IImplementationGuideAdapter {
 
@@ -103,5 +110,76 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
         }
 
         return references;
+    }
+
+    @Override
+    public Map<String, ILibraryAdapter> retrieveReferencedLibraries(IRepository repository) {
+        var libraries = new HashMap<String, ILibraryAdapter>();
+
+        // Iterate through all resources in the IG definition
+        for (var dr : getImplementationGuide().getDefinition().getResource()) {
+            if (dr.hasReference() && dr.getReference().hasReference()) {
+                var refElement = dr.getReference().getReferenceElement();
+
+                // Check if this is a Library resource
+                if ("Library".equals(refElement.getResourceType())) {
+                    try {
+                        var library = repository.read(Library.class, refElement);
+                        if (library != null) {
+                            var adapter = getAdapterFactory().createLibrary(library);
+                            libraries.put(adapter.getName(), adapter);
+                        }
+                    } catch (Exception e) {
+                        IAdapter.logger.warn("Unable to read Library resource: {}", refElement.getValue(), e);
+                    }
+                }
+            }
+        }
+
+        return libraries;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
+        // Start with any relatedArtifacts from extensions (handled by base implementation)
+        List<T> relatedArtifacts = new ArrayList<>(super.getRelatedArtifact());
+
+        // Add IG dependencies from dependsOn element
+        for (var dep : getImplementationGuide().getDependsOn()) {
+            if (dep.hasUri()) {
+                var relatedArtifact = new RelatedArtifact();
+                relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                relatedArtifact.setResource(dep.getUri() + (dep.hasVersion() ? "|" + dep.getVersion() : ""));
+                if (dep.hasPackageId()) {
+                    relatedArtifact.setDisplay("ImplementationGuide " + dep.getPackageId()
+                            + (dep.hasVersion() ? ", " + dep.getVersion() : ""));
+                }
+                relatedArtifacts.add((T) relatedArtifact);
+            }
+        }
+
+        // Add resources defined in the IG - these become composed-of dependencies
+        // For resources with canonical URLs, we'll try to infer them
+        for (var dr : getImplementationGuide().getDefinition().getResource()) {
+            if (dr.hasReference() && dr.getReference().hasReference()) {
+                // Skip examples
+                if (dr.hasExampleCanonicalType()
+                        || (dr.hasExampleBooleanType()
+                                && dr.getExampleBooleanType().booleanValue())) {
+                    continue;
+                }
+
+                var refValue = dr.getReference().getReference();
+                var relatedArtifact = new RelatedArtifact();
+                relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
+                // Use the local reference - the recursiveGather will try to resolve it
+                relatedArtifact.setResource(refValue);
+
+                relatedArtifacts.add((T) relatedArtifact);
+            }
+        }
+
+        return relatedArtifacts;
     }
 }

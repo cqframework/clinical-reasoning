@@ -3,18 +3,25 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.MetadataResource;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 
 public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter implements IImplementationGuideAdapter {
 
@@ -110,5 +117,78 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
         }
 
         return references;
+    }
+
+    @Override
+    public Map<String, ILibraryAdapter> retrieveReferencedLibraries(IRepository repository) {
+        var libraries = new HashMap<String, ILibraryAdapter>();
+
+        // Iterate through all resources in the IG packages
+        for (var pkg : getImplementationGuide().getPackage()) {
+            for (var dr : pkg.getResource()) {
+                if (dr.hasSource()) {
+                    var refValue = dr.hasSourceReference()
+                            ? dr.getSourceReference()
+                            : new Reference(dr.getSource().primitiveValue());
+                    var refElement = new IdType(refValue.getReference());
+
+                    // Check if this is a Library resource
+                    if ("Library".equals(refElement.getResourceType())) {
+                        try {
+                            var library = repository.read(Library.class, refElement);
+                            if (library != null) {
+                                var adapter = getAdapterFactory().createLibrary(library);
+                                libraries.put(adapter.getName(), adapter);
+                            }
+                        } catch (Exception e) {
+                            IAdapter.logger.warn("Unable to read Library resource: {}", refElement.getValue(), e);
+                        }
+                    }
+                }
+            }
+        }
+
+        return libraries;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
+        // Start with any relatedArtifacts from extensions (handled by base implementation)
+        List<T> relatedArtifacts = new ArrayList<>(super.getRelatedArtifact());
+
+        // Add IG dependencies from dependency element (DSTU3)
+        for (var dep : getImplementationGuide().getDependency()) {
+            if (dep.hasUri()) {
+                var relatedArtifact = new RelatedArtifact();
+                relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
+                relatedArtifact.setResource(new Reference(dep.getUri()));
+                relatedArtifacts.add((T) relatedArtifact);
+            }
+        }
+
+        // Add resources defined in the IG packages (DSTU3 structure)
+        for (var pkg : getImplementationGuide().getPackage()) {
+            for (var dr : pkg.getResource()) {
+                if (dr.hasSource()) {
+                    // Skip examples
+                    if (dr.hasExample() && dr.getExample()) {
+                        continue;
+                    }
+
+                    var refValue = dr.hasSourceReference()
+                            ? dr.getSourceReference()
+                            : new Reference(dr.getSource().primitiveValue());
+
+                    var relatedArtifact = new RelatedArtifact();
+                    relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
+                    relatedArtifact.setResource(refValue);
+
+                    relatedArtifacts.add((T) relatedArtifact);
+                }
+            }
+        }
+
+        return relatedArtifacts;
     }
 }

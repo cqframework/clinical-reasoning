@@ -71,6 +71,9 @@ public class R4MeasureReportUtils {
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
                 // VALUE-type stratifiers with non-CodeableConcept values
                 stratumText = value.getValueAsString();
+            } else if (MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
+                // NON_SUBJECT_VALUE-type stratifiers with non-CodeableConcept values
+                stratumText = value.getValueAsString();
             } else if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
                 // CRITERIA-type stratifiers with non-CodeableConcept values
                 stratumText = value.getValueAsString();

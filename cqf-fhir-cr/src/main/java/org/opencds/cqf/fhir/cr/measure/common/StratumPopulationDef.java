@@ -46,6 +46,19 @@ public record StratumPopulationDef(
         return populationBasis.code().equals("boolean");
     }
 
+    /**
+     * Returns the resource IDs as an immutable Set for efficient lookup/intersection operations.
+     * <p>
+     * This is useful when you need to check membership or perform set operations
+     * on the resource IDs, rather than iterating through the list.
+     *
+     * @return an immutable Set view of the resource IDs
+     */
+    @Nonnull
+    public Set<String> resourceIdsAsSet() {
+        return Set.copyOf(resourceIdsForSubjectList);
+    }
+
     // Enhanced by Claude Sonnet 4.5 to properly handle count calculation for all stratifier types
     public int getCount() {
         // For criteria stratifiers, use the intersection count

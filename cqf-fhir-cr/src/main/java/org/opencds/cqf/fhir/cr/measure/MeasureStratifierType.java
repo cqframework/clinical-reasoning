@@ -6,7 +6,8 @@ package org.opencds.cqf.fhir.cr.measure;
  */
 public enum MeasureStratifierType {
     CRITERIA("criteria"),
-    VALUE("value");
+    VALUE("value"),
+    NON_SUBJECT_VALUE("non-subject-value");
 
     private final String textValue;
 

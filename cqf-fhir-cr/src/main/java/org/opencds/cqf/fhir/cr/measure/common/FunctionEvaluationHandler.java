@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -515,11 +516,11 @@ public class FunctionEvaluationHandler {
         }
 
         return measureDef.groups().stream()
-                .filter(x -> x.stratifiers() != null)
-                .flatMap(y -> y.stratifiers().stream())
+                .map(GroupDef::stratifiers)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
                 .anyMatch(StratifierDef::isNonSubjectValueStratifier);
     }
-
     /**
      * method used to extract evaluated resources touched by CQL criteria expressions
      * @param context cql engine context

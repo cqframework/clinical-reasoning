@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQF_
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_DEFINITION_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
+import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils.isBooleanPopulationBasis;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -22,7 +23,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
@@ -344,8 +344,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
         checkId(mgsc);
 
-        // How we validate if subject based, Patient context or otherwise
-        boolean isBooleanBasis = populationBasisDef.code().equals(FHIRAllTypes.BOOLEAN.toCode());
+        boolean isBooleanBasis = isBooleanPopulationBasis(populationBasisDef);
         // Components
         var components = new ArrayList<StratifierComponentDef>();
         for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {

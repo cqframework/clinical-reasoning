@@ -519,7 +519,7 @@ public class MeasureReportDefScorer {
     private static Collection<Object> getResultsForStratumByResourceIds(
             PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
 
-        Set<String> stratumResourceIds = Set.copyOf(stratumPopulationDef.resourceIdsForSubjectList());
+        Set<String> stratumResourceIds = stratumPopulationDef.resourceIdsAsSet();
 
         // For MEASUREOBSERVATION, subjectResources contains Set<Map<inputResource, outputValue>>
         // MeasureScoreCalculator.collectQuantities expects Map objects and extracts values from them.

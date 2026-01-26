@@ -602,6 +602,9 @@
                                                 <minimum>0.30</minimum>
                                             </limit>
                                         </limits>
+                                        <excludes>
+                                            <exclude>**/*Provider.class</exclude>
+                                        </excludes>
                                     </rule>
                                 </rules>
                             </configuration>

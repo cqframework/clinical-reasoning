@@ -587,28 +587,28 @@
                                             <limit>
                                                 <counter>INSTRUCTION</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.30</minimum> <!-- 50% coverage -->
+                                                <minimum>0.70</minimum> <!-- 50% coverage -->
                                             </limit>
                                             <!-- Minimum branch coverage -->
                                             <limit>
                                                 <counter>BRANCH</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.30</minimum> <!-- 50% branch coverage -->
+                                                <minimum>0.70</minimum> <!-- 50% branch coverage -->
                                             </limit>
                                             <!-- Minimum line coverage -->
                                             <limit>
                                                 <counter>LINE</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.30</minimum>
+                                                <minimum>0.70</minimum>
                                             </limit>
                                         </limits>
                                         <excludes>
                                             <!-- most providers just pipe thru to a service -->
-                                            <exclude>**/*Provider.class</exclude>
+                                            <exclude>**/*Provider.*</exclude>
                                             <!-- exclude config classes  -->
-                                            <exclude>**/config/*</exclude>
+                                            <exclude>**/config/**/*</exclude>
                                         </excludes>
-                                    </rule>
+                                    </rule>i'm
                                 </rules>
                             </configuration>
                         </execution>

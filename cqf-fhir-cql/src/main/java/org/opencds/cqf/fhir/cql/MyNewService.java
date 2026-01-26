@@ -1,12 +1,11 @@
 package org.opencds.cqf.fhir.cql;
 
-import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import static ca.uhn.fhir.util.ElementUtil.isEmpty;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.List;
-
-import static ca.uhn.fhir.util.ElementUtil.isEmpty;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class MyNewService {
 

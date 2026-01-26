@@ -587,19 +587,19 @@
                                             <limit>
                                                 <counter>INSTRUCTION</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.70</minimum> <!-- 50% coverage -->
+                                                <minimum>0.80</minimum> <!-- 50% coverage -->
                                             </limit>
                                             <!-- Minimum branch coverage -->
                                             <limit>
                                                 <counter>BRANCH</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.70</minimum> <!-- 50% branch coverage -->
+                                                <minimum>0.80</minimum> <!-- 50% branch coverage -->
                                             </limit>
                                             <!-- Minimum line coverage -->
                                             <limit>
                                                 <counter>LINE</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.70</minimum>
+                                                <minimum>0.80</minimum>
                                             </limit>
                                         </limits>
                                     </rule>

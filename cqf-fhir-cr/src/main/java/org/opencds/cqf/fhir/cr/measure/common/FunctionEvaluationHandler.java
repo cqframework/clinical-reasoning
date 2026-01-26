@@ -327,7 +327,12 @@ public class FunctionEvaluationHandler {
                     // key= input parameter to function
                     // value= the output Observation resource containing calculated value
                     functionResults.put(result, functionResult.getValue());
-                    assert functionResult.getEvaluatedResources() != null;
+                    Set<Object> evaluated = functionResult.getEvaluatedResources();
+                    if (evaluated == null) {
+                        throw new IllegalStateException("CQL function '" + stratifierExpression
+                                + "' returned null evaluatedResources for measure: " + url);
+                    }
+                    evaluatedResources.addAll(evaluated);
                     evaluatedResources.addAll(functionResult.getEvaluatedResources());
                 }
                 // add to EvaluationResult

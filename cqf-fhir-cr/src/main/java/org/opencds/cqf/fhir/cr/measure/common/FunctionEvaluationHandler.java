@@ -554,8 +554,7 @@ public class FunctionEvaluationHandler {
         return evaluationResultToReturn;
     }
 
-    @Nonnull
-    private static EvaluationResult addToEvaluationResult(
+    private static void addToEvaluationResult(
             @Nonnull EvaluationResult result,
             @Nonnull String expressionName,
             @Nonnull Map<Object, Object> functionResults,
@@ -563,7 +562,5 @@ public class FunctionEvaluationHandler {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
-
-        return result;
     }
 }

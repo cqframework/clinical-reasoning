@@ -387,12 +387,13 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Extract the subject portion from a row key.
+     * Extract the subject portion from a legacy row key.
      * Handles both "Patient/xxx" and composite "Patient/xxx|Resource/yyy" formats.
+     *
+     * <p>Prefer working with {@link StratifierRowKey} directly when possible.
      */
     private static String extractSubjectFromRowKey(String rowKey) {
-        int pipeIndex = rowKey.indexOf('|');
-        return pipeIndex >= 0 ? rowKey.substring(0, pipeIndex) : rowKey;
+        return StratifierRowKey.fromLegacyString(rowKey).subjectOnlyKey();
     }
 
     private static List<StratumDef> nonComponentStratumPlural(
@@ -622,40 +623,12 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Calculate the intersection between stratifier results and population results for criteria-based stratifiers.
      *
-     * Example:
-     * *population*:
-     *
-     * patient2
-     *     Encounter/enc_in_progress_pat2_1
-     *     Encounter/enc_triaged_pat2_1
-     *     Encounter/enc_planned_pat2_1
-     *     Encounter/enc_in_progress_pat2_2
-     *     Encounter/enc_finished_pat2_1
-     *
-     *  patient1
-     *     Encounter/enc_triaged_pat1_1
-     *     Encounter/enc_planned_pat1_1
-     *     Encounter/enc_in_progress_pat1_1
-     *     Encounter/enc_finished_pat1_1
-     *
-     * *stratifier*:
-     *   patient2
-     *       Encounter/enc_in_progress_pat2_2
-     *       Encounter/enc_in_progress_pat2_1
-     *
-     *   patient1
-     *       Encounter/enc_in_progress_pat1_1
-     *
-     *   patient2:  intersection:   enc_in_progress_pat2_2, enc_in_progress_pat2_1
-     *   patient1:  intersection:   enc_in_progress_pat1_1
-     *
-     *   result:
-     *
-     *   enc_in_progress_pat2_2, enc_in_progress_pat2_1, enc_in_progress_pat1_1
-     *
-     *   count: 3
+     * <p>Intersection rules:
+     * <ul>
+     *   <li>If the stratifier result is {@code Map<inputParam, producedValue>}, intersect using {@code map.keySet()} (the input params)</li>
+     *   <li>Otherwise, intersect using {@link CriteriaResult#valueAsSet()}</li>
+     * </ul>
      */
-    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static Set<Object> calculateCriteriaStratifierIntersection(
             StratifierDef stratifierDef, PopulationDef populationDef) {
 
@@ -665,7 +638,8 @@ public class MeasureMultiSubjectEvaluator {
         // For each subject, we intersect between the population and stratifier results
         for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
             final Set<Object> stratifierResultsPerSubject =
-                    stratifierEntryBySubject.getValue().valueAsSet();
+                    criteriaResultAsIntersectionSet(stratifierEntryBySubject.getValue());
+
             final Set<Object> populationResultsPerSubject =
                     populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
 
@@ -675,6 +649,25 @@ public class MeasureMultiSubjectEvaluator {
 
         // We add up all the results of the intersections here:
         return new HashSetForFhirResourcesAndCqlTypes<>(allPopulationStratumIntersectingResources);
+    }
+
+    /**
+     * Convert a CriteriaResult into the set that should be used for intersection.
+     *
+     * <p>For Map-based results (Map<inputParam, producedValue>), the input parameters (map keys)
+     * are the intersectable items.
+     */
+    private static Set<Object> criteriaResultAsIntersectionSet(CriteriaResult result) {
+        if (result == null) {
+            return Set.of();
+        }
+
+        Object raw = result.rawValue();
+        if (raw instanceof Map<?, ?> m) {
+            return new HashSet<>(m.keySet());
+        }
+
+        return result.valueAsSet();
     }
 
     /**
@@ -743,13 +736,13 @@ public class MeasureMultiSubjectEvaluator {
                                 .filter(Map.class::isInstance)
                                 .map(m -> (Map<?, ?>) m)
                                 .flatMap(m -> m.keySet().stream())
-                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
-                                .filter(Objects::nonNull)
+                                .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                                .filter(java.util.Objects::nonNull)
                                 .forEach(resourceIds::add);
                     } else if (isResourceType) {
                         resources.stream()
-                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
-                                .filter(Objects::nonNull)
+                                .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                                .filter(java.util.Objects::nonNull)
                                 .forEach(resourceIds::add);
                     } else {
                         resources.stream().map(Object::toString).forEach(resourceIds::add);
@@ -758,6 +751,27 @@ public class MeasureMultiSubjectEvaluator {
             }
         }
         return resourceIds;
+    }
+
+    /**
+     * Normalize a population result item (FHIR type) into a stable string key.
+     *
+     * <p>This is used for intersection when the population basis is non-boolean.
+     * For resources, we use the versionless reference (e.g., "Encounter/123").
+     * For non-resource FHIR types and primitives, we fall back to {@code String.valueOf(obj)}.
+     */
+    private static String normalizePopulationKey(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof IBaseResource resource) {
+            if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
+                return resource.getIdElement().toVersionless().getValueAsString();
+            }
+            // If the resource is present but has no id, fall back to toString for best-effort logging/debug.
+            return resource.toString();
+        }
+        return String.valueOf(obj);
     }
 
     /**
@@ -787,9 +801,17 @@ public class MeasureMultiSubjectEvaluator {
                     resources = extractResourceIds(populationDef, subjectId);
                 }
                 if (resources != null) {
-                    if (isResourceType) {
+                    // For MEASUREOBSERVATION, the extracted items are the map keys and may be non-resources.
+                    // Use a normalization that preserves primitives/complex types as stable string keys.
+                    if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
                         resourceIds.addAll(resources.stream()
-                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds) // get resource id
+                                .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                                .filter(java.util.Objects::nonNull)
+                                .toList());
+                    } else if (isResourceType) {
+                        resourceIds.addAll(resources.stream()
+                                .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
+                                .filter(java.util.Objects::nonNull)
                                 .toList());
                     } else {
                         resourceIds.addAll(

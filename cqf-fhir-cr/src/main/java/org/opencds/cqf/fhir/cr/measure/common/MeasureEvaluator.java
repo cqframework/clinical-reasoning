@@ -338,7 +338,8 @@ public class MeasureEvaluator {
             if (numeratorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
                         numeratorExclusion.subjectResources, observationNum.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, numeratorExclusion, observationNum);
+                MeasureObservationHandler.removeObservationResourcesInPopulation(
+                        subjectId, numeratorExclusion, observationNum);
             }
             // Den alignment
             var expressionNameDen = getCriteriaExpressionName(observationDen);
@@ -352,7 +353,8 @@ public class MeasureEvaluator {
             if (denominatorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
                         denominatorExclusion.subjectResources, observationDen.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, denominatorExclusion, observationDen);
+                MeasureObservationHandler.removeObservationResourcesInPopulation(
+                        subjectId, denominatorExclusion, observationDen);
             }
         }
     }
@@ -399,7 +401,6 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
-        measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         // Evaluate Population Expressions
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         if (measurePopulation != null && initialPopulation != null && applyScoring) {
@@ -431,7 +432,8 @@ public class MeasureEvaluator {
                         measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
                 // measure observations also need to make sure they remove measure-population-exclusions
                 if (measurePopulationExclusion != null) {
-                    removeObservationResourcesInPopulation(
+
+                    MeasureObservationHandler.removeObservationResourcesInPopulation(
                             subjectId, measurePopulationExclusion, measurePopulationObservation);
                     removeObservationSubjectResourcesInPopulation(
                             measurePopulationExclusion.subjectResources,
@@ -572,72 +574,6 @@ public class MeasureEvaluator {
             // If no observations remain for this subject, remove the subject entry entirely
             if (obsSet.isEmpty()) {
                 it.remove();
-            }
-        }
-    }
-
-    /**
-     * Removes measureObservationDef resources for a subject when their "key" is
-     * found in the corresponding measurePopulationDef resources for that subject.
-     *
-     * In other words: delete observation results that are ALSO present in the
-     * population resources.
-     */
-    protected void removeObservationResourcesInPopulation(
-            String subjectId,
-            // MeasurePopulationType.MEASUREPOPULATIONEXCLUSION
-            PopulationDef measurePopulationDef,
-            // MeasurePopulationType.MEASUREOBSERVATION
-            PopulationDef measureObservationDef) {
-
-        if (measureObservationDef == null || measurePopulationDef == null) {
-            return;
-        }
-
-        // Population keys to match against
-        final Set<Object> measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
-
-        if (measurePopulationResourcesForSubject == null || measurePopulationResourcesForSubject.isEmpty()) {
-            // nothing to compare against -> nothing to remove
-            return;
-        }
-
-        // Work on a copy to avoid concurrent modification issues while removing
-        HashSetForFhirResourcesAndCqlTypes<Object> observationResources =
-                new HashSetForFhirResourcesAndCqlTypes<>(measureObservationDef.getResourcesForSubject(subjectId));
-
-        for (Object populationResource : observationResources) {
-
-            if (!(populationResource instanceof Map<?, ?> measureObservationResourceAsMap)) {
-                continue;
-            }
-
-            // process this single populationResource
-            processSingleResource(
-                    populationResource,
-                    measureObservationResourceAsMap,
-                    measurePopulationResourcesForSubject,
-                    measureObservationDef,
-                    subjectId);
-        }
-    }
-
-    private void processSingleResource(
-            Object populationResource,
-            Map<?, ?> measureObservationResourceAsMap,
-            Set<Object> measurePopulationResourcesForSubject,
-            PopulationDef measureObservationDef,
-            String subjectId) {
-
-        for (Map.Entry<?, ?> entry : measureObservationResourceAsMap.entrySet()) {
-            Object key = entry.getKey();
-
-            // If the key is present in the population resources → remove this item
-            if (measurePopulationResourcesForSubject.contains(key)) {
-                measureObservationDef.getResourcesForSubject(subjectId).remove(populationResource);
-
-                // short-circuits this resource entirely
-                return;
             }
         }
     }

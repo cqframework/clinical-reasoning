@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -121,7 +123,94 @@ public class MeasureMultiSubjectEvaluator {
             }
         }
     }
-
+    /**
+     * Builds a {@link StratumDef} for a single stratum by combining stratifier values,
+     * subjects, row-level keys, and population definitions.
+     *
+     * <p>This method is the convergence point where:
+     * <ul>
+     *   <li>Component stratifier values ({@code values})</li>
+     *   <li>The subjects that belong to the stratum ({@code subjectIds})</li>
+     *   <li>Row-level alignment keys ({@code rowKeys})</li>
+     *   <li>Population definitions ({@code populationDefs})</li>
+     * </ul>
+     * are combined into a fully populated {@link StratumDef}, including all
+     * {@link StratumPopulationDef} instances.
+     *
+     * <h3>Row Keys</h3>
+     *
+     * <p>{@code rowKeys} represent the atomic units that make up a stratum.
+     * Their meaning depends on the stratifier type:
+     *
+     * <h4>1. Subject-basis stratifiers (CRITERIA or VALUE)</h4>
+     *
+     * <p>Each row corresponds to a single subject.
+     *
+     * <pre>
+     * rowKeys = [
+     *   "Patient/123",
+     *   "Patient/456",
+     *   "Patient/789"
+     * ]
+     * </pre>
+     *
+     * <ul>
+     *   <li>Used for subject-based intersection</li>
+     *   <li>Population counts are subject counts</li>
+     *   <li>{@code subjectIds} and {@code rowKeys} usually contain the same values</li>
+     * </ul>
+     *
+     * <h4>2. NON_SUBJECT_VALUE stratifiers (function results)</h4>
+     *
+     * <p>Each row corresponds to a specific input item for a subject
+     * (e.g. Encounter, Observation, Procedure).
+     *
+     * <pre>
+     * rowKeys = [
+     *   "Patient/123|Encounter/enc-1",
+     *   "Patient/123|Encounter/enc-2",
+     *   "Patient/456|Encounter/enc-9"
+     * ]
+     * </pre>
+     *
+     * <ul>
+     *   <li>The portion before {@code |} is the subject</li>
+     *   <li>The portion after {@code |} is the input resource used by the stratifier function</li>
+     *   <li>Intersection with populations is performed at the resource level</li>
+     *   <li>Population counts are resource counts, not subject counts</li>
+     * </ul>
+     *
+     * <p>In this case:
+     * <ul>
+     *   <li>{@code subjectIds = ["Patient/123", "Patient/456"]}</li>
+     *   <li>{@code rowKeys.size()} may be greater than {@code subjectIds.size()}</li>
+     * </ul>
+     *
+     * <h3>Population Handling</h3>
+     *
+     * <p>For each {@link PopulationDef}, this method:
+     * <ul>
+     *   <li>Builds a {@link StratumPopulationDef}</li>
+     *   <li>Calculates subject or resource intersections as appropriate</li>
+     *   <li>Derives population counts based on the measure population basis</li>
+     * </ul>
+     *
+     * <h3>Measure Observation Optimization</h3>
+     *
+     * <p>If the group contains {@code MEASUREOBSERVATION} populations, this method
+     * pre-computes a {@link MeasureObservationStratumCache} to efficiently link
+     * numerator and denominator observations at the stratum level.
+     *
+     * @param fhirContext     the FHIR context for the evaluation
+     * @param stratifierDef  the stratifier definition that produced this stratum
+     * @param values         the set of stratifier component values defining this stratum
+     * @param subjectIds     the distinct subjects included in this stratum
+     * @param rowKeys        the row-level keys defining atomic stratum membership
+     * @param populationDefs the population definitions for the group
+     * @param groupDef       the group definition containing population basis and settings
+     *
+     * @return a fully constructed {@link StratumDef} with population results and metadata
+     */
     private static StratumDef buildStratumDef(
             FhirContext fhirContext,
             StratifierDef stratifierDef,
@@ -256,7 +345,7 @@ public class MeasureMultiSubjectEvaluator {
             List<PopulationDef> populationDefs,
             GroupDef groupDef) {
 
-        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
+        final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 buildSubjectResultsTable(stratifierDef.components());
 
         // Stratifiers should be of the same basis as population
@@ -386,10 +475,11 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For non-subject value stratifiers, the CQL function returns Map&lt;inputResource, outputValue&gt;.
      * We expand this into multiple rows, one per input resource, using a composite row key.
      */
-    private static Table<String, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
+    private static Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
             List<StratifierComponentDef> componentDefs) {
 
-        final Table<String, StratumValueWrapper, StratifierComponentDef> subjectResultTable = HashBasedTable.create();
+        final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
+                HashBasedTable.create();
 
         componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
             String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subject);
@@ -400,7 +490,7 @@ public class MeasureMultiSubjectEvaluator {
                 for (Map.Entry<?, ?> entry : functionResults.entrySet()) {
                     // Build composite row key: "Patient/xxx|Resource/yyy"
                     String inputResourceKey = normalizeResourceKey(entry.getKey());
-                    String rowKey = qualifiedSubject + "|" + inputResourceKey;
+                    StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, inputResourceKey);
 
                     // The output value becomes the stratum value (what's displayed)
                     // Null values are allowed - they will be grouped into a special "null" stratum
@@ -413,7 +503,8 @@ public class MeasureMultiSubjectEvaluator {
             // Standard case: scalar value per subject
             // Null values are allowed - they will be grouped into a special "null" stratum
             StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(rawValue);
-            subjectResultTable.put(qualifiedSubject, stratumValueWrapper, componentDef);
+            StratifierRowKey rowKey = StratifierRowKey.subjectOnly(qualifiedSubject);
+            subjectResultTable.put(rowKey, stratumValueWrapper, componentDef);
         }));
 
         return subjectResultTable;
@@ -430,47 +521,102 @@ public class MeasureMultiSubjectEvaluator {
         }
         return String.valueOf(obj);
     }
-
+    /**
+     * Groups stratifier results into strata by the full set of component values.
+     *
+     * <h3>Input (normalized stratifier rows)</h3>
+     *
+     * <p>Each row represents a single evaluated unit:
+     * <ul>
+     *   <li>Subject-basis stratifier → one row per subject</li>
+     *   <li>NON_SUBJECT_VALUE stratifier → one row per (subject + input parameter)</li>
+     * </ul>
+     *
+     * <h4>Subject-basis stratifier (scalar values)</h4>
+     *
+     * <pre>
+     * | RowKey (subject) | Stratifier Value | Component |
+     * | ---------------- | ---------------- | --------- |
+     * | Patient/A        | M                | gender    |
+     * | Patient/B        | F                | gender    |
+     * | Patient/C        | M                | gender    |
+     * | Patient/D        | F                | gender    |
+     * | Patient/E        | F                | gender    |
+     * | Patient/A        | white            | race      |
+     * | Patient/B        | hispanic/latino  | race      |
+     * | Patient/C        | hispanic/latino  | race      |
+     * | Patient/D        | black            | race      |
+     * | Patient/E        | black            | race      |
+     * </pre>
+     *
+     * <h4>NON_SUBJECT_VALUE stratifier (function results)</h4>
+     *
+     * <p>Each function returns Map&lt;inputParam, producedValue&gt;.
+     * The input parameter is used for alignment and intersection;
+     * the produced value is what is displayed in the stratum.
+     *
+     * <pre>
+     * | RowKey (subject | input)        | Stratifier Value | Component |
+     * | ------------------------------ | ---------------- | --------- |
+     * | Patient/A | Encounter/1001     | finished         | status    |
+     * | Patient/A | Encounter/1002     | in-progress      | status    |
+     * | Patient/B | Encounter/2001     | finished         | status    |
+     * | Patient/A | Encounter/1001     | P0Y--P21Y        | age-band  |
+     * | Patient/A | Encounter/1002     | P21Y--P41Y       | age-band  |
+     * | Patient/B | Encounter/2001     | P0Y--P21Y        | age-band  |
+     * </pre>
+     *
+     * <h3>Output (grouped into strata)</h3>
+     *
+     * <p>Rows are grouped by their full set of component values.
+     *
+     * <h4>Subject-basis output</h4>
+     *
+     * <pre>
+     * | Stratum Values            | Subjects            |
+     * | ------------------------- | ------------------- |
+     * | { M, white }              | [Patient/A]         |
+     * | { F, hispanic/latino }    | [Patient/B]         |
+     * | { M, hispanic/latino }    | [Patient/C]         |
+     * | { F, black }              | [Patient/D, Patient/E] |
+     * </pre>
+     *
+     * <h4>NON_SUBJECT_VALUE output (row-level strata)</h4>
+     *
+     * <pre>
+     * | Stratum Values                    | Rows                              |
+     * | --------------------------------- | --------------------------------- |
+     * | { finished, P0Y--P21Y }            | [Patient/A|Encounter/1001,
+     * |                                   |  Patient/B|Encounter/2001]        |
+     * | { in-progress, P21Y--P41Y }        | [Patient/A|Encounter/1002]        |
+     * </pre>
+     *
+     * <p>Each output row corresponds to a {@code StratumDef}.
+     * Subject lists are derived from the row keys.
+     */
     private static Map<Set<StratumValueDef>, List<String>> groupSubjectsByValueDefSet(
-            Table<String, StratumValueWrapper, StratifierComponentDef> table) {
-        // input format
-        // | Subject (String) | CriteriaResult (ValueWrapper) | StratifierComponentDef |
-        // | ---------------- | ----------------------------- | ---------------------- |
-        // | subject-a        | M                             | gender                 |
-        // | subject-b        | F                             | gender                 |
-        // | subject-c        | M                             | gender                 |
-        // | subject-d        | F                             | gender                 |
-        // | subject-e        | F                             | gender                 |
-        // | subject-a        | white                         | race                   |
-        // | subject-b        | hispanic/latino               | race                   |
-        // | subject-c        | hispanic/latino               | race                   |
-        // | subject-d        | black                         | race                   |
-        // | subject-e        | black                         | race                   |
+            Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> table) {
 
-        // Step 1: Build Map<Subject, Set<ValueDef>>
-        final Map<String, Set<StratumValueDef>> subjectToValueDefs = new HashMap<>();
+        // Step 1: Build Map<RowKey, Set<ValueDef>>
+        final Map<StratifierRowKey, Set<StratumValueDef>> rowKeyToValueDefs = new HashMap<>();
 
-        for (Table.Cell<String, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
-            subjectToValueDefs
+        for (Table.Cell<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+            rowKeyToValueDefs
                     .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
                     .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
         }
-        // output format:
-        // | Set<ValueDef>           | List<Subjects(String)> |
-        // | ----------------------- | ---------------------- |
-        // | <'M','White>            | [subject-a]            |
-        // | <'F','hispanic/latino'> | [subject-b]            |
-        // | <'M','hispanic/latino'> | [subject-c]            |
-        // | <'F','black'>           | [subject-d, subject-e] |
 
-        // Step 2: Invert to Map<Set<ValueDef>, List<Subject>>
-        return subjectToValueDefs.entrySet().stream()
+        // Step 2: Invert to Map<Set<ValueDef>, List<RowKey>>
+        // We return legacy string keys here because downstream code still expects List<String>
+        // (e.g., to extract subject and inputParam parts).
+        return rowKeyToValueDefs.entrySet().stream()
                 .collect(Collectors.groupingBy(
                         Map.Entry::getValue,
-                        Collector.of(ArrayList::new, (list, e) -> list.add(e.getKey()), (l1, l2) -> {
-                            l1.addAll(l2);
-                            return l1;
-                        })));
+                        Collector.of(
+                                ArrayList::new, (list, e) -> list.add(e.getKey().toLegacyString()), (l1, l2) -> {
+                                    l1.addAll(l2);
+                                    return l1;
+                                })));
     }
 
     /**
@@ -598,12 +744,12 @@ public class MeasureMultiSubjectEvaluator {
                                 .map(m -> (Map<?, ?>) m)
                                 .flatMap(m -> m.keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
-                                .filter(id -> id != null)
+                                .filter(Objects::nonNull)
                                 .forEach(resourceIds::add);
                     } else if (isResourceType) {
                         resources.stream()
                                 .map(MeasureMultiSubjectEvaluator::getPopulationResourceIds)
-                                .filter(id -> id != null)
+                                .filter(Objects::nonNull)
                                 .forEach(resourceIds::add);
                     } else {
                         resources.stream().map(Object::toString).forEach(resourceIds::add);
@@ -690,5 +836,66 @@ public class MeasureMultiSubjectEvaluator {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
         return null;
+    }
+
+    /**
+     * Typed key representing a single stratifier "row".
+     *
+     * <p>For subject-basis stratifiers, inputParamId will be empty.
+     * For non-subject/function-result stratifiers, inputParamId is present and is used
+     * for cross-component alignment and/or intersection logic.</p>
+     *
+     * <p>Examples:
+     * <ul>
+     *   <li>Subject-basis: subject="Patient/123", inputParamId=empty</li>
+     *   <li>Non-subject:  subject="Patient/123", inputParamId="Encounter/1001"</li>
+     * </ul>
+     * </p>
+     */
+    public record StratifierRowKey(String subjectQualified, Optional<String> inputParamId) {
+
+        public StratifierRowKey {
+            Objects.requireNonNull(subjectQualified, "subjectQualified must not be null");
+            Objects.requireNonNull(inputParamId, "inputParamId must not be null");
+        }
+
+        public static StratifierRowKey subjectOnly(String subjectQualified) {
+            return new StratifierRowKey(subjectQualified, Optional.empty());
+        }
+
+        public static StratifierRowKey withInput(String subjectQualified, String inputParamId) {
+            Objects.requireNonNull(inputParamId, "inputParamId must not be null");
+            return new StratifierRowKey(subjectQualified, Optional.of(inputParamId));
+        }
+
+        public boolean hasInputParam() {
+            return inputParamId.isPresent();
+        }
+
+        /**
+         * Convenience for places that still need subject-only lists.
+         */
+        public String subjectOnlyKey() {
+            return subjectQualified;
+        }
+
+        /**
+         * For compatibility (and logging), you can still render to the old format.
+         * Prefer not to store this as the "real" key.
+         */
+        public String toLegacyString() {
+            return inputParamId.map(id -> subjectQualified + "|" + id).orElse(subjectQualified);
+        }
+
+        public static StratifierRowKey fromLegacyString(String rowKey) {
+            Objects.requireNonNull(rowKey, "rowKey must not be null");
+            int idx = rowKey.indexOf('|');
+            if (idx < 0) {
+                return subjectOnly(rowKey);
+            }
+            String subject = rowKey.substring(0, idx);
+            String input = rowKey.substring(idx + 1);
+            return withInput(subject, input);
+        }
     }
 }

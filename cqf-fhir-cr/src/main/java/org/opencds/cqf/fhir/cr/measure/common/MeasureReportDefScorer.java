@@ -477,22 +477,27 @@ public class MeasureReportDefScorer {
     private static Collection<Object> getResultsForStratum(
             PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
 
-        if (stratumPopulationDef == null) {
+        if (stratumPopulationDef == null || populationDef == null || populationDef.getSubjectResources() == null) {
             return List.of();
         }
 
-        // For NON_SUBJECT_VALUE stratifiers with resource basis, filter by resource IDs
+        // For NON_SUBJECT_VALUE stratifiers with non-boolean basis, we must filter by resource IDs.
+        // An empty resourceIdsForSubjectList means "no qualifying resources" for this stratum,
+        // NO "fallback to subject-based stratification".
         if (stratumPopulationDef.measureStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE
-                && !stratumPopulationDef.isBooleanBasis()
-                && !stratumPopulationDef.resourceIdsForSubjectList().isEmpty()) {
+                && !stratumPopulationDef.isBooleanBasis()) {
+
+            if (stratumPopulationDef.resourceIdsForSubjectList() == null
+                    || stratumPopulationDef.resourceIdsForSubjectList().isEmpty()) {
+                return List.of();
+            }
+
             return getResultsForStratumByResourceIds(populationDef, stratumPopulationDef);
         }
 
-        // CRITICAL: PopulationDef.subjectResources are keyed on UNQUALIFIED patient IDs
-        // Use getSubjectsUnqualified() to match the unqualified keys (already returns a Set)
+        // Subject-based stratification (VALUE stratifiers, boolean basis, etc.)
         Set<String> stratumSubjectsUnqualified = stratumPopulationDef.getSubjectsUnqualified();
 
-        // Filter at the subjectResources Map.Entry level (subject ID is the key)
         return populationDef.getSubjectResources().entrySet().stream()
                 .filter(entry -> stratumSubjectsUnqualified.contains(entry.getKey()))
                 .map(Map.Entry::getValue)

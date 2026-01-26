@@ -43,7 +43,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
             set +e # don't immediately exit
-            ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage --fail-neer 2>&1 | tee build.log
+            ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage --fail-never 2>&1 | tee build.log
             
             if grep -q "Rule violated" build.log; then
                 echo ""

@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_DAVINCI_DEQM_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_REFERENCE_EXT_URL;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.time.ZoneId;
@@ -40,14 +42,22 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Then;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Validator;
 import org.opencds.cqf.fhir.utility.r4.ContainedHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SelectedMeasureReport extends Selected<MeasureReport, Then> {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureReport.class);
+
     private final IRepository repository;
+    private final FhirContext fhirContext;
+    private final IParser jsonParser;
 
     public SelectedMeasureReport(MeasureReport report, Then parent, IRepository repository) {
         super(report, parent);
         this.repository = repository;
+        this.fhirContext = repository.fhirContext();
+        this.jsonParser = fhirContext.newJsonParser().setPrettyPrint(true);
     }
 
     // Legacy constructor for backward compatibility (when parent is null/Void)
@@ -567,5 +577,12 @@ public class SelectedMeasureReport extends Selected<MeasureReport, Then> {
 
     public List<Extension> getExtension() {
         return report().getExtension();
+    }
+
+    // Log the JSON corresponding to the report at this point:
+    public SelectedMeasureReport logReportJson() {
+        logger.info(jsonParser.encodeResourceToString(report()));
+
+        return this;
     }
 }

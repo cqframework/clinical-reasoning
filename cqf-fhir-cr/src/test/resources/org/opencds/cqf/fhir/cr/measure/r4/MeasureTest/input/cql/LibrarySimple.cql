@@ -75,6 +75,79 @@ define "always false":
 define "always true":
     true
 
+define "list of boolean":
+    {true, false, true}
+
+define "list of dates":
+  { @2024-01-01, @2024-01-02, @2024-01-03 }
+
+define "PatientRes":
+    [Patient] P
+
+define "list of string":
+    {'test1', 'test2', 'test3'}
+
+define "interval":
+    Interval[@2024-01-01T00:00:00, @2024-12-31T23:59:59]
+
+define "TestIntervalList":
+  {
+    Interval[@2024-01-01T00:00:00, @2024-01-31T23:59:59],
+    Interval[@2024-02-01T00:00:00, @2024-02-29T23:59:59]
+
+  }
+
+define "TestDecimalList":
+  { 1.5, 2.75, 1.0 / 3.0 }
+
+define "TestFloatValue":
+    1.0 / 3.0
+
+define "list of numbers":
+    {31, 88, 11}
+
+define "string":
+    'string test'
+
+define "date":
+    @2026-01-01
+
+define "datetime":
+    @2026-12-30T23:59:59
+
+define "NullExample":
+         null
+
+define "EmptyListExample":
+  { }
+
+define "number":
+         31
+
+define "decimal":
+         31.31
+
+define "test tuple":
+         {
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  }
+
+define "list test tuple":
+         {{
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  },{
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  }}
+
+define "test code":
+    "SDE Sex"
+
 // sde single value
 
 define "SDE Sex":

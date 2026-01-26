@@ -27,6 +27,7 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -167,6 +168,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         Optional<String> bundleType = VisitorHelper.getStringParameter("bundleType", packageParameters);
         List<String> include = VisitorHelper.getStringListParameter("include", packageParameters)
                 .orElseGet(() -> new ArrayList<>());
+        List<String> exclude = VisitorHelper.getStringListParameter("exclude", packageParameters)
+                .orElseGet(() -> new ArrayList<>());
+        List<String> excludePackageId = VisitorHelper.getStringListParameter("excludePackageId", packageParameters)
+                .orElseGet(() -> new ArrayList<>());
         List<String> capability = VisitorHelper.getStringListParameter("capability", packageParameters)
                 .orElseGet(() -> new ArrayList<>());
         List<String> artifactVersion = VisitorHelper.getStringListParameter("artifactVersion", packageParameters)
@@ -189,9 +194,6 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 || endpoint.isPresent()) {
             throw new NotImplementedOperationException(
                     "This repository is not implementing custom Content and endpoints at this time");
-        }
-        if (packageOnly.isPresent()) {
-            throw new NotImplementedOperationException("This repository is not implementing packageOnly at this time");
         }
         if (count.isPresent() && count.get() < 0) {
             throw new InvalidRequestException("'count' must be non-negative");
@@ -228,7 +230,24 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
             var entry = PackageHelper.createEntry(adapter.get(), isPut);
             BundleHelper.addEntry(packagedBundle, entry);
+        } else if (packageOnly.orElse(false)) {
+            // packageOnly=true: Include only the artifact and its owned components (no recursive dependencies)
+            findUnsupportedCapability(adapter, capability);
+            processCanonicals(adapter, versionTuple);
+
+            adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
+                final var componentReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(c);
+                Optional<IKnowledgeArtifactAdapter> maybeComponent =
+                        VisitorHelper.tryGetLatestVersion(componentReference, repository);
+                if (maybeComponent.isPresent()) {
+                    var componentAdapter = maybeComponent.get();
+                    normalizeIdFromCanonical(componentAdapter, false);
+                    addBundleEntry(packagedBundle, isPut, componentAdapter);
+                }
+            });
         } else {
+            // Use array wrapper to allow messages to be updated by recursiveGather
+            var messagesWrapper = new IBaseOperationOutcome[] {messages};
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
             recursiveGather(
                     adapter,
@@ -237,22 +256,26 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     include,
                     versionTuple,
                     terminologyEndpoint.orElse(null),
-                    terminologyServerClient);
+                    terminologyServerClient,
+                    messagesWrapper);
+            messages = messagesWrapper[0]; // Capture any messages created during gathering
             packagedResources.values().stream()
                     .filter(r -> !r.getCanonical().equals(adapter.getCanonical()))
+                    .filter(r -> !shouldExcludeByPackage(r, excludePackageId))
                     .forEach(r -> {
                         // Normalize id based on canonical before adding to the package bundle.
                         // For non-manifest artifacts, we do not surface a warning if normalization fails.
                         normalizeIdFromCanonical(r, false);
                         addBundleEntry(packagedBundle, isPut, r);
                     });
-            var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter);
+            var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter, exclude);
             BundleHelper.setEntry(packagedBundle, included);
         }
         handleValueSets(packagedBundle, terminologyEndpoint);
         applyManifestUsageContextsToValueSets(adapter, packagedBundle);
 
-        if (messages != null) {
+        // Only add messages if there are actual issues
+        if (messages != null && ca.uhn.fhir.util.OperationOutcomeUtil.hasIssues(fhirContext(), messages)) {
             messages.setId("messages");
             getRootSpecificationLibrary(packagedBundle).addCqfMessagesExtension(messages);
         }
@@ -491,11 +514,17 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     @SuppressWarnings("unchecked")
     protected <T extends IBaseBackboneElement> List<T> findUnsupportedInclude(
-            List<T> entries, List<String> include, IKnowledgeArtifactAdapter adapter) {
+            List<T> entries, List<String> include, IKnowledgeArtifactAdapter adapter, List<String> exclude) {
 
         // CRMI: if include is empty or 'all', return as-is (manifest will already be first)
         if (include == null || include.isEmpty() || include.stream().anyMatch("all"::equals)) {
-            return entries;
+            // Even if include is empty, still apply exclude filtering
+            return applyRoleBasedFiltering(entries, include, exclude, adapter);
+        }
+
+        // If include contains ONLY role filters, skip resource type filtering
+        if (hasOnlyRoleFilters(include)) {
+            return applyRoleBasedFiltering(entries, include, exclude, adapter);
         }
 
         // 1) Identify the outcome-manifest Library (the "root" Library that corresponds to adapter)
@@ -535,7 +564,9 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             result.add(manifestEntry);
         }
         result.addAll(getDistinctFilteredEntries(filteredRemainder));
-        return result;
+
+        // 4) Apply role-based filtering
+        return applyRoleBasedFiltering(result, include, exclude, adapter);
     }
 
     // Helper: compare by canonical URL|version to detect the root manifest library for this package
@@ -545,6 +576,217 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var lib = af.createLibrary((IDomainResource) res);
         // equal when both URL and Version match; tolerate null versions if equal by string
         return lib.getUrl().equals(rootAdapter.getUrl()) && lib.getVersion().equals(rootAdapter.getVersion());
+    }
+
+    /**
+     * Applies role-based filtering using crmi-dependencyRole extensions from the manifest.
+     * Implements the CRMI dependency role filtering model.
+     *
+     * @param entries the bundle entries to filter
+     * @param include list of roles to include (e.g., "key", "test")
+     * @param exclude list of roles to exclude (e.g., "example", "test")
+     * @param manifestAdapter the root manifest adapter containing relatedArtifacts with role annotations
+     * @return filtered list of entries
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends IBaseBackboneElement> List<T> applyRoleBasedFiltering(
+            List<T> entries, List<String> include, List<String> exclude, IKnowledgeArtifactAdapter manifestAdapter) {
+
+        // If no role-based filtering is requested, return as-is
+        if ((include == null || include.isEmpty() || !hasRoleFilters(include))
+                && (exclude == null || exclude.isEmpty())) {
+            return entries;
+        }
+
+        List<T> result = new ArrayList<>();
+
+        for (T entry : entries) {
+            var resource = BundleHelper.getEntryResource(fhirVersion(), entry);
+
+            // Always include the manifest itself
+            if (isSameCanonical(resource, manifestAdapter)) {
+                result.add(entry);
+                continue;
+            }
+
+            // Get roles for this dependency from the manifest's relatedArtifacts
+            List<String> roles = getDependencyRoles(resource, manifestAdapter);
+
+            // Apply filtering logic
+            if (shouldIncludeByRole(roles, include, exclude)) {
+                result.add(entry);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Checks if the include list contains any role filters (key, default, example, test).
+     */
+    private boolean hasRoleFilters(List<String> include) {
+        if (include == null) {
+            return false;
+        }
+        return include.stream()
+                .anyMatch(i -> i.equals("key") || i.equals("default") || i.equals("example") || i.equals("test"));
+    }
+
+    /**
+     * Checks if the include list contains ONLY role filters (key, default, example, test).
+     */
+    private boolean hasOnlyRoleFilters(List<String> include) {
+        if (include == null || include.isEmpty()) {
+            return false;
+        }
+        return include.stream()
+                .allMatch(i -> i.equals("key") || i.equals("default") || i.equals("example") || i.equals("test"));
+    }
+
+    /**
+     * Retrieves the dependency roles for a resource from the manifest's relatedArtifacts.
+     *
+     * @param resource the dependency resource
+     * @param manifestAdapter the manifest containing relatedArtifacts
+     * @return list of role codes (e.g., ["key", "default"])
+     */
+    @SuppressWarnings("unchecked")
+    private List<String> getDependencyRoles(IBaseResource resource, IKnowledgeArtifactAdapter manifestAdapter) {
+        List<String> roles = new ArrayList<>();
+
+        try {
+            // Get the canonical URL of the resource
+            var af = IAdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum());
+            var resourceAdapter = af.createKnowledgeArtifactAdapter((IDomainResource) resource);
+            String resourceCanonical = resourceAdapter.getUrl();
+
+            // Get relatedArtifacts directly from the manifest resource
+            var manifestResource = manifestAdapter.get();
+            List<?> relatedArtifacts = null;
+
+            // Extract relatedArtifact elements based on FHIR version
+            if (manifestResource instanceof org.hl7.fhir.r4.model.Library) {
+                relatedArtifacts = ((org.hl7.fhir.r4.model.Library) manifestResource).getRelatedArtifact();
+            } else if (manifestResource instanceof org.hl7.fhir.r5.model.Library) {
+                relatedArtifacts = ((org.hl7.fhir.r5.model.Library) manifestResource).getRelatedArtifact();
+            } else if (manifestResource instanceof org.hl7.fhir.dstu3.model.Library) {
+                relatedArtifacts = ((org.hl7.fhir.dstu3.model.Library) manifestResource).getRelatedArtifact();
+            }
+
+            if (relatedArtifacts != null) {
+                for (Object ra : relatedArtifacts) {
+                    String reference = null;
+                    List<?> extensions = null;
+
+                    // Get reference and extensions based on type
+                    if (ra instanceof org.hl7.fhir.r4.model.RelatedArtifact) {
+                        var r4Ra = (org.hl7.fhir.r4.model.RelatedArtifact) ra;
+                        reference = r4Ra.getResource();
+                        extensions = r4Ra.getExtension();
+                    } else if (ra instanceof org.hl7.fhir.r5.model.RelatedArtifact) {
+                        var r5Ra = (org.hl7.fhir.r5.model.RelatedArtifact) ra;
+                        reference = r5Ra.getResourceElement() != null
+                                ? r5Ra.getResourceElement().getValue()
+                                : null;
+                        extensions = r5Ra.getExtension();
+                    } else if (ra instanceof org.hl7.fhir.dstu3.model.RelatedArtifact) {
+                        var dstu3Ra = (org.hl7.fhir.dstu3.model.RelatedArtifact) ra;
+                        reference =
+                                dstu3Ra.hasResource() ? dstu3Ra.getResource().getReference() : null;
+                        extensions = dstu3Ra.getExtension();
+                    }
+
+                    if (reference != null && canonicalMatches(reference, resourceCanonical)) {
+                        // Extract crmi-dependencyRole extensions
+                        if (extensions != null) {
+                            for (Object ext : extensions) {
+                                String url = null;
+                                Object value = null;
+
+                                if (ext instanceof org.hl7.fhir.r4.model.Extension) {
+                                    url = ((org.hl7.fhir.r4.model.Extension) ext).getUrl();
+                                    value = ((org.hl7.fhir.r4.model.Extension) ext).getValue();
+                                } else if (ext instanceof org.hl7.fhir.r5.model.Extension) {
+                                    url = ((org.hl7.fhir.r5.model.Extension) ext).getUrl();
+                                    value = ((org.hl7.fhir.r5.model.Extension) ext).getValue();
+                                } else if (ext instanceof org.hl7.fhir.dstu3.model.Extension) {
+                                    url = ((org.hl7.fhir.dstu3.model.Extension) ext).getUrl();
+                                    value = ((org.hl7.fhir.dstu3.model.Extension) ext).getValue();
+                                }
+
+                                if (Constants.CRMI_DEPENDENCY_ROLE.equals(url) && value instanceof IPrimitiveType<?>) {
+                                    String role = ((IPrimitiveType<?>) value).getValueAsString();
+                                    if (role != null && !roles.contains(role)) {
+                                        roles.add(role);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // If no roles found, default to "default" role
+            if (roles.isEmpty()) {
+                roles.add("default");
+            }
+        } catch (Exception e) {
+            myLogger.debug("Error getting dependency roles for resource", e);
+            // On error, default to "default" role
+            if (roles.isEmpty()) {
+                roles.add("default");
+            }
+        }
+
+        return roles;
+    }
+
+    /**
+     * Checks if two canonical URLs match (ignoring versions).
+     */
+    private boolean canonicalMatches(String canonical1, String canonical2) {
+        if (canonical1 == null || canonical2 == null) {
+            return false;
+        }
+
+        // Strip version from both
+        String url1 = canonical1.contains("|") ? canonical1.substring(0, canonical1.indexOf('|')) : canonical1;
+        String url2 = canonical2.contains("|") ? canonical2.substring(0, canonical2.indexOf('|')) : canonical2;
+
+        return url1.equals(url2);
+    }
+
+    /**
+     * Determines if a dependency should be included based on its roles and the include/exclude filters.
+     *
+     * @param roles the roles assigned to this dependency
+     * @param include list of roles to include (empty = include all)
+     * @param exclude list of roles to exclude
+     * @return true if the dependency should be included
+     */
+    private boolean shouldIncludeByRole(List<String> roles, List<String> include, List<String> exclude) {
+        // If exclude is specified and this dependency has an excluded role, exclude it
+        if (exclude != null && !exclude.isEmpty()) {
+            for (String role : roles) {
+                if (exclude.contains(role)) {
+                    return false;
+                }
+            }
+        }
+
+        // If include is specified with role filters, only include if it has an included role
+        if (include != null && !include.isEmpty() && hasRoleFilters(include)) {
+            for (String role : roles) {
+                if (include.contains(role)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Default: include
+        return true;
     }
 
     // Extract existing test/example checks into helpers (no behavior change)
@@ -762,6 +1004,61 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static String getCanonicalTail(String url) {
         int idx = url.lastIndexOf('/');
         return idx >= 0 && idx + 1 < url.length() ? url.substring(idx + 1) : url;
+    }
+
+    /**
+     * Determines if an artifact should be excluded based on its package source.
+     * Implements the CRMI safety model: if no package source can be determined, do not exclude.
+     *
+     * @param adapter the artifact adapter
+     * @param excludePackageId list of package IDs to exclude
+     * @return true if the artifact should be excluded, false otherwise
+     */
+    private boolean shouldExcludeByPackage(IKnowledgeArtifactAdapter adapter, List<String> excludePackageId) {
+        if (excludePackageId == null || excludePackageId.isEmpty()) {
+            return false;
+        }
+
+        // Try to get package-source extension directly from the resource
+        String pkgSrc = null;
+        try {
+            var resource = adapter.get();
+            if (resource instanceof IBaseHasExtensions) {
+                var extensions = ((IBaseHasExtensions) resource).getExtension();
+                for (var ext : extensions) {
+                    if (Constants.PACKAGE_SOURCE.equals(ext.getUrl())) {
+                        Object value = ext.getValue();
+                        if (value instanceof IPrimitiveType<?>) {
+                            pkgSrc = ((IPrimitiveType<?>) value).getValueAsString();
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            myLogger.debug("Error getting package-source extension from resource", e);
+        }
+
+        // Fallback to PackageSourceResolver if extension not found directly
+        if (pkgSrc == null) {
+            Optional<String> packageSource = PackageSourceResolver.resolvePackageSource(adapter, repository);
+            if (packageSource.isEmpty()) {
+                // Safety model: if we can't determine the package, don't exclude
+                return false;
+            }
+            pkgSrc = packageSource.get();
+        }
+
+        // Check if this package matches any excluded package ID
+        // Package source format is "packageId" or "packageId#version"
+        for (String excludePkg : excludePackageId) {
+            // Match either exact package ID or package ID with version
+            if (pkgSrc.equals(excludePkg) || pkgSrc.startsWith(excludePkg + "#")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static boolean isFhirIdSafe(String value) {

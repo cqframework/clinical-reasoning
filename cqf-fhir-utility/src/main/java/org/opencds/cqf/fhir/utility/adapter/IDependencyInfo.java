@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 
@@ -36,4 +37,51 @@ public interface IDependencyInfo {
     void setReferencePackageId(String referencePackageId);
 
     <E extends IBaseExtension<?, ?>> List<E> getExtension();
+
+    /**
+     * Returns the list of dependency roles (key, default, example, test) for this dependency.
+     * Multiple roles can apply to the same dependency.
+     *
+     * @return the list of role codes
+     */
+    List<String> getRoles();
+
+    /**
+     * Sets the list of dependency roles for this dependency.
+     *
+     * @param roles the list of role codes
+     */
+    void setRoles(List<String> roles);
+
+    /**
+     * Adds a single role to this dependency.
+     *
+     * @param role the role code to add
+     */
+    void addRole(String role);
+
+    /**
+     * Returns the list of FHIRPath expressions indicating where this dependency was referenced.
+     *
+     * @return the list of FHIRPath expressions
+     */
+    List<String> getFhirPaths();
+
+    /**
+     * Adds a FHIRPath expression indicating where this dependency was referenced.
+     *
+     * @param fhirPath the FHIRPath expression
+     */
+    void addFhirPath(String fhirPath);
+
+    /**
+     * Builds the CRMI dependency extensions (role, package-source, reference-source) for this dependency.
+     *
+     * @param <E> the extension type
+     * @param fhirVersion the FHIR version to build extensions for
+     * @param sourceArtifactUrl the canonical URL of the source artifact (for reference-source extensions)
+     * @return list of extensions representing this dependency's metadata
+     */
+    <E extends IBaseExtension<?, ?>> List<E> buildDependencyExtensions(
+            FhirVersionEnum fhirVersion, String sourceArtifactUrl);
 }

@@ -1,0 +1,97 @@
+{
+  "id": "ContinuousVariableBooleanSupportingEvidence",
+  "resourceType": "Measure",
+  "url": "http://example.com/Measure/ContinuousVariableBooleanSupportingEvidence",
+  "library": [
+    "http://example.com/Library/LibrarySimple"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "boolean"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "continuous-variable"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population Boolean"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode",
+                    "valueCoding": {
+                      "code": "denominator-resource",
+                      "system": "http://example.org/fhir/CodeSystem/example-supporting-evidence-codes",
+                      "display": "Denominator Resource"
+                    }
+                  }
+                ],
+                "description": "Example of supporting evidence that is a Denominator Resource",
+                "language": "text/cql-identifier",
+                "name": "DenominatorResource",
+                "expression": "Denominator Resource"
+              }
+            }
+          ]
+        },
+        {
+          "id": "measure-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "measure-population",
+                "display": "Measure Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Measure Population Boolean"
+          }
+        },
+        {
+          "id": "measure-population-exclusion",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "measure-population-exclusion",
+                "display": "Measure Population Exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Measure Population Exclusion Boolean"
+          }
+        }
+      ]
+    }]
+}

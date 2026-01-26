@@ -53,7 +53,7 @@ class R4MeasureProcessorTest {
         var expressionResult = expressionResults.get("Initial Population");
         assertNotNull(expressionResult);
 
-        var evaluatedResources = expressionResult.evaluatedResources();
+        var evaluatedResources = expressionResult.getEvaluatedResources();
         assertEquals(1, evaluatedResources.size());
     }
 }

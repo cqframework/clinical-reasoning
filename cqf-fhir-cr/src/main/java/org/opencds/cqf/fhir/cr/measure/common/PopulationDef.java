@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class PopulationDef {
@@ -15,12 +17,16 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
     private final CodeDef populationBasis;
+    private final List<SupportingEvidenceDef> supportingEvidenceDefs;
 
     @Nullable
     private final String criteriaReference;
 
     @Nullable
     private final ContinuousVariableObservationAggregateMethod aggregateMethod;
+
+    @Nullable
+    private Double aggregationResult;
 
     protected Set<Object> evaluatedResources;
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
@@ -30,8 +36,9 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
-            CodeDef populationBasis) {
-        this(id, code, measurePopulationType, expression, populationBasis, null, null);
+            CodeDef populationBasis,
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null, supportingEvidenceDefs);
     }
 
     public PopulationDef(
@@ -41,7 +48,8 @@ public class PopulationDef {
             String expression,
             CodeDef populationBasis,
             @Nullable String criteriaReference,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -49,6 +57,7 @@ public class PopulationDef {
         this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
+        this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
     public MeasurePopulationType type() {
@@ -175,6 +184,20 @@ public class PopulationDef {
         return this.aggregateMethod;
     }
 
+    @Nullable
+    public Double getAggregationResult() {
+        return aggregationResult;
+    }
+
+    public void setAggregationResult(@Nullable QuantityDef quantityDefResult) {
+        setAggregationResult(
+                Optional.ofNullable(quantityDefResult).map(QuantityDef::value).orElse(null));
+    }
+
+    public void setAggregationResult(@Nullable Double aggregationResult) {
+        this.aggregationResult = aggregationResult;
+    }
+
     /**
      * Added by Claude Sonnet 4.5 on 2025-12-02
      * Updated by Claude Sonnet 4.5 on 2025-12-08 to use own populationBasis instead of GroupDef parameter.
@@ -204,6 +227,7 @@ public class PopulationDef {
         String codeText = (code != null && code.text() != null) ? code.text() : "null";
         String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
         String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+        String aggResult = (aggregationResult != null) ? aggregationResult.toString() : "null";
 
         return "PopulationDef{"
                 + "id='" + id + '\''
@@ -212,6 +236,11 @@ public class PopulationDef {
                 + ", expression='" + expression + '\''
                 + ", criteriaReference='" + criteriaRef + '\''
                 + ", aggregateMethod=" + aggMethod
+                + ", aggregationResult=" + aggResult
                 + '}';
+    }
+
+    public List<SupportingEvidenceDef> getSupportingEvidenceDefs() {
+        return supportingEvidenceDefs == null ? null : new ArrayList<>(supportingEvidenceDefs);
     }
 }

@@ -170,13 +170,28 @@ class PackageVisitorTests {
         terminologyEndpoint.setAddress("test.com");
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
-        libraryAdapter.accept(packageVisitor, params);
+        var result = (Bundle) libraryAdapter.accept(packageVisitor, params);
 
-        assertTrue(libraryAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
-        assertTrue(libraryAdapter.hasContained());
-        assertTrue(libraryAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
-        var oo = (OperationOutcome) libraryAdapter.getContained().get(0);
-        assertEquals(oo.getIssueFirstRep().getDiagnostics(), expectedError);
+        // Get the Library from the result bundle to check for messages
+        Library bundledLibrary = result.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
+                .map(entry -> (Library) entry.getResource())
+                .filter(lib -> lib.getUrl().equals(library.getUrl()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(bundledLibrary, "Expected Library to be in the packaged bundle");
+        ILibraryAdapter bundledAdapter = new AdapterFactory().createLibrary(bundledLibrary);
+
+        assertTrue(bundledAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL));
+        assertTrue(bundledAdapter.hasContained());
+        assertTrue(bundledAdapter.getContained().stream().allMatch(c -> c instanceof OperationOutcome));
+        var oo = (OperationOutcome) bundledAdapter.getContained().get(0);
+
+        // Check that the expected error exists in the issues (may not be the first issue)
+        boolean foundExpectedError =
+                oo.getIssue().stream().anyMatch(issue -> issue.getDiagnostics().equals(expectedError));
+        assertTrue(foundExpectedError, "Expected to find issue with diagnostics: " + expectedError);
     }
 
     @Test
@@ -1048,6 +1063,339 @@ class PackageVisitorTests {
         verify(vsAdapterMock, times(0)).addUseContext(any());
 
         staticBundleHelper.close();
+    }
+
+    @Test
+    void packageOnly_should_include_only_owned_components() {
+        // Create a library with owned and non-owned dependencies
+        Library library = new Library();
+        library.setId("test-library");
+        library.setUrl("http://example.org/Library/test");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        // Add an owned component (composed-of with artifact-isOwned extension)
+        org.hl7.fhir.r4.model.RelatedArtifact ownedComponent = new org.hl7.fhir.r4.model.RelatedArtifact();
+        ownedComponent.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
+        ownedComponent.setResource("http://example.org/Library/owned-component");
+        ownedComponent.addExtension(
+                "http://hl7.org/fhir/StructureDefinition/artifact-isOwned",
+                new org.hl7.fhir.r4.model.BooleanType(true));
+        library.addRelatedArtifact(ownedComponent);
+
+        // Add a dependency (depends-on, should be excluded with packageOnly)
+        org.hl7.fhir.r4.model.RelatedArtifact dependency = new org.hl7.fhir.r4.model.RelatedArtifact();
+        dependency.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        dependency.setResource("http://example.org/ValueSet/dependency");
+        library.addRelatedArtifact(dependency);
+
+        // Create owned component library
+        Library ownedLib = new Library();
+        ownedLib.setId("owned-component");
+        ownedLib.setUrl("http://example.org/Library/owned-component");
+        ownedLib.setVersion("1.0.0");
+        ownedLib.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        // Create dependency ValueSet
+        ValueSet dependencyVs = new ValueSet();
+        dependencyVs.setId("dependency");
+        dependencyVs.setUrl("http://example.org/ValueSet/dependency");
+        dependencyVs.setVersion("1.0.0");
+        dependencyVs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        repo.create(library);
+        repo.create(ownedLib);
+        repo.create(dependencyVs);
+
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("packageOnly", new org.hl7.fhir.r4.model.BooleanType(true)));
+
+        Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packagedBundle);
+        // Should include: root library + owned component only (not the dependency)
+        assertEquals(2, packagedBundle.getEntry().size());
+
+        // Verify root library is included
+        assertTrue(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof Library
+                        && ((Library) e.getResource()).getUrl().equals("http://example.org/Library/test")));
+
+        // Verify owned component is included
+        assertTrue(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof Library
+                        && ((Library) e.getResource()).getUrl().equals("http://example.org/Library/owned-component")));
+
+        // Verify dependency is NOT included
+        assertFalse(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof ValueSet
+                        && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/dependency")));
+    }
+
+    @Test
+    void excludePackageId_should_exclude_dependencies_from_specified_packages() {
+        // Create a library with dependencies from different packages
+        Library library = new Library();
+        library.setId("test-library");
+        library.setUrl("http://example.org/Library/test");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        org.hl7.fhir.r4.model.RelatedArtifact dep1 = new org.hl7.fhir.r4.model.RelatedArtifact();
+        dep1.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        dep1.setResource("http://hl7.org/fhir/ValueSet/core-vs");
+        library.addRelatedArtifact(dep1);
+
+        org.hl7.fhir.r4.model.RelatedArtifact dep2 = new org.hl7.fhir.r4.model.RelatedArtifact();
+        dep2.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        dep2.setResource("http://example.org/ValueSet/custom-vs");
+        library.addRelatedArtifact(dep2);
+
+        // Create ValueSet from FHIR core with package-source extension
+        ValueSet coreVs = new ValueSet();
+        coreVs.setId("core-vs");
+        coreVs.setUrl("http://hl7.org/fhir/ValueSet/core-vs");
+        coreVs.setVersion("1.0.0");
+        coreVs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        coreVs.addExtension(Constants.PACKAGE_SOURCE, new StringType("hl7.fhir.r4.core#4.0.1"));
+
+        // Create custom ValueSet without package-source (should be included)
+        ValueSet customVs = new ValueSet();
+        customVs.setId("custom-vs");
+        customVs.setUrl("http://example.org/ValueSet/custom-vs");
+        customVs.setVersion("1.0.0");
+        customVs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        repo.create(library);
+        repo.create(coreVs);
+        repo.create(customVs);
+
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("excludePackageId", "hl7.fhir.r4.core"));
+
+        Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packagedBundle);
+
+        // Verify core ValueSet is NOT included
+        assertFalse(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof ValueSet
+                        && ((ValueSet) e.getResource()).getUrl().equals("http://hl7.org/fhir/ValueSet/core-vs")));
+
+        // Verify custom ValueSet IS included (no package-source, so not excluded)
+        assertTrue(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof ValueSet
+                        && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/custom-vs")));
+    }
+
+    @Test
+    void include_key_should_filter_to_key_dependencies_only() {
+        // Create a library with relatedArtifacts annotated with crmi-dependencyRole
+        Library library = new Library();
+        library.setId("test-library");
+        library.setUrl("http://example.org/Library/test");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        // Add key dependency
+        org.hl7.fhir.r4.model.RelatedArtifact keyDep = new org.hl7.fhir.r4.model.RelatedArtifact();
+        keyDep.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        keyDep.setResource("http://example.org/ValueSet/key-vs");
+        keyDep.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r4.model.CodeType("key"));
+        library.addRelatedArtifact(keyDep);
+
+        // Add default dependency
+        org.hl7.fhir.r4.model.RelatedArtifact defaultDep = new org.hl7.fhir.r4.model.RelatedArtifact();
+        defaultDep.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        defaultDep.setResource("http://example.org/ValueSet/default-vs");
+        defaultDep.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r4.model.CodeType("default"));
+        library.addRelatedArtifact(defaultDep);
+
+        // Create ValueSets
+        ValueSet keyVs = new ValueSet();
+        keyVs.setId("key-vs");
+        keyVs.setUrl("http://example.org/ValueSet/key-vs");
+        keyVs.setVersion("1.0.0");
+        keyVs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        ValueSet defaultVs = new ValueSet();
+        defaultVs.setId("default-vs");
+        defaultVs.setUrl("http://example.org/ValueSet/default-vs");
+        defaultVs.setVersion("1.0.0");
+        defaultVs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        repo.create(library);
+        repo.create(keyVs);
+        repo.create(defaultVs);
+
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("include", "key"));
+
+        Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packagedBundle);
+
+        // Verify key ValueSet IS included
+        assertTrue(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof ValueSet
+                        && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/key-vs")));
+
+        // Verify default ValueSet is NOT included
+        assertFalse(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof ValueSet
+                        && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/default-vs")));
+    }
+
+    @Test
+    void exclude_test_should_filter_out_test_dependencies() {
+        // Create a library with test and non-test dependencies
+        Library library = new Library();
+        library.setId("test-library");
+        library.setUrl("http://example.org/Library/test");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        // Add test dependency
+        org.hl7.fhir.r4.model.RelatedArtifact testDep = new org.hl7.fhir.r4.model.RelatedArtifact();
+        testDep.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        testDep.setResource("http://example.org/Library/test-cases");
+        testDep.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r4.model.CodeType("test"));
+        library.addRelatedArtifact(testDep);
+
+        // Add default dependency
+        org.hl7.fhir.r4.model.RelatedArtifact defaultDep = new org.hl7.fhir.r4.model.RelatedArtifact();
+        defaultDep.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        defaultDep.setResource("http://example.org/ValueSet/production-vs");
+        defaultDep.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r4.model.CodeType("default"));
+        library.addRelatedArtifact(defaultDep);
+
+        // Create libraries/valuesets
+        Library testLib = new Library();
+        testLib.setId("test-cases");
+        testLib.setUrl("http://example.org/Library/test-cases");
+        testLib.setVersion("1.0.0");
+        testLib.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        ValueSet productionVs = new ValueSet();
+        productionVs.setId("production-vs");
+        productionVs.setUrl("http://example.org/ValueSet/production-vs");
+        productionVs.setVersion("1.0.0");
+        productionVs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+        repo.create(library);
+        repo.create(testLib);
+        repo.create(productionVs);
+
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = parameters(part("exclude", "test"));
+
+        Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        assertNotNull(packagedBundle);
+
+        // Verify test library is NOT included
+        assertFalse(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof Library
+                        && ((Library) e.getResource()).getUrl().equals("http://example.org/Library/test-cases")));
+
+        // Verify production ValueSet IS included
+        assertTrue(packagedBundle.getEntry().stream()
+                .anyMatch(e -> e.getResource() instanceof ValueSet
+                        && ((ValueSet) e.getResource()).getUrl().equals("http://example.org/ValueSet/production-vs")));
+    }
+
+    @Test
+    void packageOperation_should_report_version_mismatch_and_exclude_resource() {
+        // Create a ValueSet with version "1.0.0"
+        ValueSet valueSet = new ValueSet();
+        valueSet.setId("test-valueset");
+        valueSet.setUrl("http://example.org/fhir/ValueSet/test-valueset");
+        valueSet.setVersion("1.0.0");
+        valueSet.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        valueSet.setName("TestValueSet");
+
+        // Create a Library that depends on version "2.0.0" of the same ValueSet
+        Library library = new Library();
+        library.setId("test-library");
+        library.setUrl("http://example.org/fhir/Library/test-library");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        library.setName("TestLibrary");
+        library.setType(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+                        .setCode("asset-collection")));
+
+        // Add a dependency on the ValueSet with the wrong version (2.0.0 instead of 1.0.0)
+        library.addRelatedArtifact()
+                .setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://example.org/fhir/ValueSet/test-valueset|2.0.0");
+
+        // Store resources in repository
+        repo.create(valueSet);
+        repo.create(library);
+
+        // Run package operation
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+
+        Bundle packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // Verify the bundle was created
+        assertNotNull(packagedBundle);
+
+        // Verify the ValueSet is NOT in the packaged bundle (only the Library should be there)
+        long valueSetCount = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.ValueSet)
+                .count();
+        assertEquals(0, valueSetCount, "Expected ValueSet with wrong version to be excluded from package");
+
+        // Get the Library from the bundle (it has the messages, not the original libraryAdapter)
+        Library bundledLibrary = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
+                .map(entry -> (Library) entry.getResource())
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(bundledLibrary, "Expected Library to be in the packaged bundle");
+
+        // Create an adapter from the bundled library to check for messages
+        ILibraryAdapter bundledAdapter = new AdapterFactory().createLibrary(bundledLibrary);
+
+        // Verify that an error message was added to the OperationOutcome
+        assertTrue(
+                bundledAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL),
+                "Expected manifest adapter to have cqf-messages extension for version mismatch");
+        assertTrue(
+                bundledAdapter.hasContained(),
+                "Expected manifest adapter to contain an OperationOutcome for version mismatch");
+
+        var oo = (OperationOutcome) bundledAdapter.getContained().get(0);
+        String diagnostics = oo.getIssueFirstRep().getDiagnostics();
+
+        assertTrue(
+                diagnostics.contains("Requested version '2.0.0'"),
+                "Expected error message to mention requested version 2.0.0");
+        assertTrue(
+                diagnostics.contains("http://example.org/fhir/ValueSet/test-valueset"),
+                "Expected error message to mention the ValueSet URL");
+        assertTrue(
+                diagnostics.contains("not found in repository"),
+                "Expected error message to indicate version not found");
+        assertTrue(
+                diagnostics.contains("will not be included in package"),
+                "Expected error message to indicate resource exclusion");
+
+        // Verify the error severity is "error"
+        assertEquals(
+                OperationOutcome.IssueSeverity.ERROR,
+                oo.getIssueFirstRep().getSeverity(),
+                "Expected error severity for version mismatch");
     }
 
     /**

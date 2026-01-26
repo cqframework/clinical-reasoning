@@ -2,8 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 
 /**
@@ -140,5 +143,35 @@ public class SelectedMeasureDefStratumPopulation<P>
      */
     public StratumPopulationDef stratumPopulationDef() {
         return value();
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasType(MeasurePopulationType expectedMeasurePopulationType) {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        assertEquals(expectedMeasurePopulationType, value().populationDef().type());
+        return this;
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasNoAggregateMethod() {
+        return hasAggregateMethod(null);
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasAggregateMethodNA() {
+        return hasAggregateMethod(ContinuousVariableObservationAggregateMethod.N_A);
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasAggregateMethod(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        final ContinuousVariableObservationAggregateMethod actualAggregateMethod =
+                value().populationDef().getAggregateMethod();
+
+        if (null == expectedAggregateMethod) {
+            assertNull(actualAggregateMethod, "StratumPopulationDef aggregate method is not null");
+            return this;
+        }
+
+        assertNotNull(actualAggregateMethod, "StratumPopulationDef aggregate method is null");
+        assertEquals(expectedAggregateMethod, actualAggregateMethod, "Stratum population aggregate method mismatch");
+        return this;
     }
 }

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import org.hl7.elm.r1.FunctionDef;
@@ -70,8 +71,8 @@ public class FunctionEvaluationHandler {
                 for (GroupDef groupDef : measureDefWithFunctions.groups()) {
                     finalResults.addAll(
                             evaluateMeasureObservations(context, evaluationResult, subjectTypePart, groupDef));
-                    finalResults.addAll(
-                            evaluateNonSubjectValueStratifiers(context, evaluationResult, subjectTypePart, groupDef));
+                    finalResults.addAll(evaluateNonSubjectValueStratifiers(
+                            context, evaluationResult, subjectTypePart, groupDef, measureDefWithFunctions.url()));
                 }
             }
 
@@ -108,7 +109,11 @@ public class FunctionEvaluationHandler {
     }
 
     private static List<EvaluationResult> evaluateNonSubjectValueStratifiers(
-            CqlEngine context, EvaluationResult evaluationResult, String subjectTypePart, GroupDef groupDef) {
+            CqlEngine context,
+            EvaluationResult evaluationResult,
+            String subjectTypePart,
+            GroupDef groupDef,
+            String url) {
 
         // get function for non-subject value stratifiers and evaluate for each populationDef
         final List<StratifierDef> stratifierDefs = groupDef.stratifiers().stream()
@@ -123,7 +128,8 @@ public class FunctionEvaluationHandler {
 
         for (StratifierDef stratDef : stratifierDefs) {
             // each stratifier (could be multiple defined in component)
-            var result = processNonSubValueStratifiers(context, evaluationResult, subjectTypePart, groupDef, stratDef);
+            var result =
+                    processNonSubValueStratifiers(context, evaluationResult, subjectTypePart, groupDef, stratDef, url);
             results.add(result);
         }
 
@@ -175,7 +181,8 @@ public class FunctionEvaluationHandler {
             return;
         }
 
-        var ed = Libraries.resolveExpressionRef(expression, context.getState().getCurrentLibrary());
+        var ed = Libraries.resolveExpressionRef(
+                expression, Objects.requireNonNull(context.getState().getCurrentLibrary()));
         if (ed instanceof FunctionDef) {
             throw new InvalidRequestException(
                     ("%s stratifier expression '%s' must NOT be a CQL function definition for measure: %s. "
@@ -264,7 +271,8 @@ public class FunctionEvaluationHandler {
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
-            StratifierDef stratifierDef) {
+            StratifierDef stratifierDef,
+            String url) {
 
         EvaluationResult evalResult = new EvaluationResult();
 
@@ -283,10 +291,10 @@ public class FunctionEvaluationHandler {
             if (!isFunction) {
                 // NON_SUBJECT_VALUE stratifiers MUST use CQL function definitions
                 throw new InvalidRequestException(
-                        ("Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not. "
+                        ("Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not. "
                                         + "For non-boolean population basis, stratifier component criteria expressions must be "
                                         + "CQL functions that take a parameter matching the population basis type.")
-                                .formatted(stratifierExpression));
+                                .formatted(url, stratifierExpression));
             }
 
             // Function expression: input parameter data for value stratifier functions

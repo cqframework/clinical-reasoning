@@ -565,6 +565,48 @@
                                 <goal>report-aggregate</goal>
                             </goals>
                         </execution>
+                        <!-- test coverage -->
+                        <execution>
+                            <id>jacoco-check</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <haltOnFailure>false</haltOnFailure>  <!-- to allow all projects be analyzed -->
+                                <rules>
+                                    <rule>
+                                        <element>CLASS</element>
+                                        <limits>
+                                            <!-- Minimum instruction coverage -->
+                                            <limit>
+                                                <counter>INSTRUCTION</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.70</minimum> <!-- 50% coverage -->
+                                            </limit>
+                                            <!-- Minimum branch coverage -->
+                                            <limit>
+                                                <counter>BRANCH</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.70</minimum> <!-- 50% branch coverage -->
+                                            </limit>
+                                            <!-- Minimum line coverage -->
+                                            <limit>
+                                                <counter>LINE</counter>
+                                                <value>COVEREDRATIO</value>
+                                                <minimum>0.70</minimum>
+                                            </limit>
+                                        </limits>
+                                        <excludes>
+                                            <!-- most providers just pipe thru to a service -->
+                                            <exclude>**/*Provider.*</exclude>
+                                            <!-- exclude config classes  -->
+                                            <exclude>**/config/**/*</exclude>
+                                        </excludes>
+                                    </rule>i'm
+                                </rules>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
             </plugins>

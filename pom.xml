@@ -603,7 +603,10 @@
                                             </limit>
                                         </limits>
                                         <excludes>
+                                            <!-- most providers just pipe thru to a service -->
                                             <exclude>**/*Provider.class</exclude>
+                                            <!-- exclude config classes  -->
+                                            <exclude>**/config/*</exclude>
                                         </excludes>
                                     </rule>
                                 </rules>

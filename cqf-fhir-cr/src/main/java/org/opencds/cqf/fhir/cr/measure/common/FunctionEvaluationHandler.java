@@ -276,9 +276,9 @@ public class FunctionEvaluationHandler {
             var stratifierExpression = componentDef.expression();
 
             // Validate that NON_SUBJECT_VALUE stratifier expression is a CQL function
-            var ed = Libraries.resolveExpressionRef(
+            var expressionDefinition = Libraries.resolveExpressionRef(
                     stratifierExpression, context.getState().getCurrentLibrary());
-            boolean isFunction = ed instanceof FunctionDef;
+            boolean isFunction = expressionDefinition instanceof FunctionDef;
 
             if (!isFunction) {
                 // NON_SUBJECT_VALUE stratifiers MUST use CQL function definitions

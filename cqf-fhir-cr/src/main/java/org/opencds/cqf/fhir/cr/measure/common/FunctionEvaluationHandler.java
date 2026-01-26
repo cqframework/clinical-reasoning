@@ -68,29 +68,10 @@ public class FunctionEvaluationHandler {
 
                 // get function for measure-observation from populationDef
                 for (GroupDef groupDef : measureDefWithFunctions.groups()) {
-
-                    // measure observations to evaluate
-                    final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
-                            .filter(populationDef ->
-                                    MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
-                            .toList();
-                    for (PopulationDef populationDef : measureObservationPopulations) {
-                        // each measureObservation is evaluated
-                        var result = processMeasureObservation(
-                                context, evaluationResult, subjectTypePart, groupDef, populationDef);
-
-                        finalResults.add(result);
-                    }
-                    // get function for non-subject value stratifiers and evaluate for each populationDef
-                    final List<StratifierDef> stratifierDefs = groupDef.stratifiers().stream()
-                            .filter(StratifierDef::isNonSubjectValueStratifier)
-                            .toList();
-                    for (StratifierDef stratDef : stratifierDefs) {
-                        // each stratifier (could be multiple defined in component)
-                        var result = processNonSubValueStratifiers(
-                                context, evaluationResult, subjectTypePart, groupDef, stratDef);
-                        finalResults.add(result);
-                    }
+                    finalResults.addAll(
+                            evaluateMeasureObservations(context, evaluationResult, subjectTypePart, groupDef));
+                    finalResults.addAll(
+                            evaluateNonSubjectValueStratifiers(context, evaluationResult, subjectTypePart, groupDef));
                 }
             }
 
@@ -101,6 +82,52 @@ public class FunctionEvaluationHandler {
                 LibraryInitHandler.popLibrary(context);
             }
         }
+    }
+
+    private static List<EvaluationResult> evaluateMeasureObservations(
+            CqlEngine context, EvaluationResult evaluationResult, String subjectTypePart, GroupDef groupDef) {
+
+        // measure observations to evaluate
+        final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
+                .filter(populationDef -> MeasurePopulationType.MEASUREOBSERVATION.equals(populationDef.type()))
+                .toList();
+
+        if (measureObservationPopulations.isEmpty()) {
+            return List.of();
+        }
+
+        final List<EvaluationResult> results = new ArrayList<>();
+
+        for (PopulationDef populationDef : measureObservationPopulations) {
+            // each measureObservation is evaluated
+            var result = processMeasureObservation(context, evaluationResult, subjectTypePart, groupDef, populationDef);
+            results.add(result);
+        }
+
+        return results;
+    }
+
+    private static List<EvaluationResult> evaluateNonSubjectValueStratifiers(
+            CqlEngine context, EvaluationResult evaluationResult, String subjectTypePart, GroupDef groupDef) {
+
+        // get function for non-subject value stratifiers and evaluate for each populationDef
+        final List<StratifierDef> stratifierDefs = groupDef.stratifiers().stream()
+                .filter(StratifierDef::isNonSubjectValueStratifier)
+                .toList();
+
+        if (stratifierDefs.isEmpty()) {
+            return List.of();
+        }
+
+        final List<EvaluationResult> results = new ArrayList<>();
+
+        for (StratifierDef stratDef : stratifierDefs) {
+            // each stratifier (could be multiple defined in component)
+            var result = processNonSubValueStratifiers(context, evaluationResult, subjectTypePart, groupDef, stratDef);
+            results.add(result);
+        }
+
+        return results;
     }
 
     /**

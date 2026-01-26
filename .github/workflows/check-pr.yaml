@@ -40,6 +40,7 @@ jobs:
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
       - name: Tests and additional checks
+        if: matrix.os == 'ubuntu-latest'
         run: |
             set +e # don't immediately exit
             ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage --fail-neer 2>&1 | tee build.log

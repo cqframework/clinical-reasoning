@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 public class StratifierComponentDef {
     private final String id;
@@ -46,32 +47,63 @@ public class StratifierComponentDef {
      */
     @SuppressWarnings("unchecked")
     public void mergeResult(String subject, Object value, Set<Object> evaluatedResources) {
-        var existingResult = this.getResults().get(subject);
+        var existingResult = getResults().get(subject);
 
         if (existingResult == null) {
-            // No existing result, just put the new one
-            this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+            getResults().put(subject, new CriteriaResult(value, evaluatedResources));
             return;
         }
 
-        // Merge Map results (for NON_SUBJECT_VALUE stratifiers with function expressions)
-        if (value instanceof Map && existingResult.rawValue() instanceof Map) {
-            Map<Object, Object> existingMap = (Map<Object, Object>) existingResult.rawValue();
-            Map<Object, Object> newMap = (Map<Object, Object>) value;
+        if (value instanceof Map<?, ?> newMapAny && existingResult.rawValue() instanceof Map<?, ?> existingMapAny) {
+            Map<Object, Object> merged =
+                    getObjectObjectMap(subject, (Map<Object, Object>) newMapAny, (Map<Object, Object>) existingMapAny);
 
-            // Create merged map
-            Map<Object, Object> mergedMap = new HashMap<>(existingMap);
-            mergedMap.putAll(newMap);
+            Set<Object> mergedEvaluated = new HashSet<>();
+            if (existingResult.evaluatedResources() != null)
+                mergedEvaluated.addAll(existingResult.evaluatedResources());
+            if (evaluatedResources != null) mergedEvaluated.addAll(evaluatedResources);
 
-            // Merge evaluated resources
-            Set<Object> mergedEvaluatedResources = new HashSet<>(existingResult.evaluatedResources());
-            mergedEvaluatedResources.addAll(evaluatedResources);
-
-            this.getResults().put(subject, new CriteriaResult(mergedMap, mergedEvaluatedResources));
-        } else {
-            // Non-map values: just overwrite (shouldn't happen for NON_SUBJECT_VALUE stratifiers)
-            this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+            getResults().put(subject, new CriteriaResult(merged, mergedEvaluated));
+            return;
         }
+
+        // Non-map: overwrite (warn of collisions)
+        getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+    }
+
+    private static @NotNull Map<Object, Object> getObjectObjectMap(
+            String subject, Map<Object, Object> newMapAny, Map<Object, Object> existingMapAny) {
+
+        Map<Object, Object> merged = new HashMap<>(existingMapAny);
+
+        for (Map.Entry<Object, Object> e : newMapAny.entrySet()) {
+            Object key = e.getKey();
+            Object newVal = e.getValue();
+
+            merged.merge(key, newVal, (oldVal, incomingVal) -> resolveCollision(subject, key, oldVal, incomingVal));
+        }
+        return merged;
+    }
+
+    private static Object resolveCollision(String subject, Object key, Object existingValue, Object newValue) {
+        if (java.util.Objects.equals(existingValue, newValue)) {
+            return existingValue;
+        }
+
+        // Common policy: prefer non-null
+        if (existingValue == null) return newValue;
+        if (newValue == null) return existingValue;
+
+        // Collisions: deterministic + observable
+        org.slf4j.LoggerFactory.getLogger(StratifierComponentDef.class)
+                .warn(
+                        "mergeResult collision for subject '{}' key='{}': existingValue='{}', newValue='{}'. Keeping existingValue.",
+                        subject,
+                        key,
+                        existingValue,
+                        newValue);
+
+        return existingValue; // or return newValue if you want "last wins"
     }
 
     public Map<String, CriteriaResult> getResults() {

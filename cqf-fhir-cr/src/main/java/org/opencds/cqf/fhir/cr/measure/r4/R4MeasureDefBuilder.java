@@ -388,6 +388,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return sdes;
     }
 
+    @Nullable
     private static MeasureStratifierType getStratifierType(
             String measureUrl,
             MeasureGroupStratifierComponent measureGroupStratifierComponent,

@@ -692,6 +692,7 @@
                                     <exclude>**/ICdsCrService.class</exclude>
                                     <exclude>**/HeaderInjectionInterceptor.class</exclude>
                                     <exclude>**/BundleMappingIterable.class</exclude>
+                                    <exclude>**/StratifierRowKey.class</exclude>
                                 </excludes>
                                 <rules>
                                     <rule>

@@ -75,6 +75,8 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
                 .addHeaders(headers)
                 .create();
 
+        // LUKETODO:  call the parent as much as possible and delete as much as possible
+
         var converter = new SearchConverter();
         converter.convertParameters(searchParameters, fhirContext());
         details.setParameters(converter.myResultParameters);

@@ -5,7 +5,7 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-bom</artifactId>
-  <version>4.2.0-SNAPSHOT</version>
+  <version>4.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FHIR Clinical Reasoning (Bill Of Materials)</name>
   <description>This bom can be used to simplify dependency management when using this project</description>
@@ -13,7 +13,7 @@
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
   </parent>
 
   <dependencyManagement>
@@ -21,37 +21,37 @@
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-test</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-utility</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cql</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr-cli</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr-hapi</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-cr-spring</artifactId>
-        <version>4.2.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

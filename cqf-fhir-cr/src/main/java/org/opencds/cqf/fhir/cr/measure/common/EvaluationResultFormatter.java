@@ -4,10 +4,14 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -39,7 +43,7 @@ public class EvaluationResultFormatter {
         }
 
         Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
-        if (expressionResults == null || expressionResults.isEmpty()) {
+        if (expressionResults.isEmpty()) {
             return indent(baseIndent) + "(no expression results)";
         }
 
@@ -49,9 +53,9 @@ public class EvaluationResultFormatter {
             ExpressionResult expressionResult = entry.getValue();
 
             sb.append(indent(baseIndent))
-                    .append("Expression: ")
+                    .append("Expression: \"")
                     .append(expressionName)
-                    .append("\n");
+                    .append("\"\n");
 
             if (expressionResult == null) {
                 sb.append(indent(baseIndent + 1))
@@ -66,7 +70,7 @@ public class EvaluationResultFormatter {
                 sb.append(indent(baseIndent + 1)).append("Evaluated Resources:\n");
                 for (Object resource : expressionResult.getEvaluatedResources()) {
                     sb.append(indent(baseIndent + 2))
-                            .append(formatResourceId(resource))
+                            .append(formatResource(resource))
                             .append("\n");
                 }
             }
@@ -74,7 +78,7 @@ public class EvaluationResultFormatter {
             // Format value
             Object value = expressionResult.getValue();
             sb.append(indent(baseIndent + 1)).append("Value: ");
-            sb.append(formatValue(value, baseIndent + 2)).append("\n");
+            sb.append(formatValue(value)).append("\n");
         }
 
         return sb.toString();
@@ -88,28 +92,33 @@ public class EvaluationResultFormatter {
      * @return formatted string representation
      */
     public static String formatExpressionValue(Object value) {
-        return formatValue(value, 0);
+        return formatValue(value);
     }
 
     /**
      * Formats a value according to its type: collections, resources, primitives, dates, etc.
      *
      * @param value the value to format
-     * @param indentLevel the indentation level for multi-line values
      * @return formatted string representation
      */
-    private static String formatValue(Object value, int indentLevel) {
+    private static String formatValue(Object value) {
         if (value == null) {
             return "null";
         }
 
         // Handle iterables and collections
-        if (value instanceof Iterable<?>) {
-            Iterable<?> iterable = (Iterable<?>) value;
+        if (value instanceof Iterable<?> iterable) {
             String items = StreamSupport.stream(iterable.spliterator(), false)
-                    .map(item -> formatSingleValue(item))
+                    .map(EvaluationResultFormatter::formatSingleValue)
                     .collect(Collectors.joining(", "));
             return "[" + items + "]";
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            return map.entrySet().stream()
+                    .map(entry -> "%s -> %s"
+                            .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
+                    .collect(Collectors.joining(", "));
         }
 
         return formatSingleValue(value);
@@ -128,7 +137,7 @@ public class EvaluationResultFormatter {
 
         // Handle FHIR resources
         if (value instanceof IBaseResource) {
-            return formatResourceId(value);
+            return formatResource(value);
         }
 
         // Handle dates
@@ -143,11 +152,6 @@ public class EvaluationResultFormatter {
             return formatter.format((Date) value);
         }
 
-        // Handle primitives and strings
-        if (isPrimitiveOrString(value)) {
-            return value.toString();
-        }
-
         // Fallback to toString for other types
         return value.toString();
     }
@@ -158,31 +162,16 @@ public class EvaluationResultFormatter {
      * @param resource the resource object
      * @return formatted resource ID string (e.g., "Encounter/patient-4-encounter-1")
      */
-    private static String formatResourceId(Object resource) {
-        if (!(resource instanceof IBaseResource)) {
+    public static String formatResource(Object resource) {
+        if (!(resource instanceof IBaseResource baseResource)) {
             return resource.toString();
         }
 
-        IBaseResource baseResource = (IBaseResource) resource;
         if (baseResource.getIdElement() == null || baseResource.getIdElement().getValue() == null) {
             return "(resource with no ID)";
         }
 
         return baseResource.getIdElement().toUnqualifiedVersionless().getValue();
-    }
-
-    /**
-     * Checks if a value is a primitive type or String.
-     *
-     * @param value the value to check
-     * @return true if primitive or String, false otherwise
-     */
-    private static boolean isPrimitiveOrString(Object value) {
-        return value instanceof String
-                || value instanceof Number
-                || value instanceof Boolean
-                || value instanceof Character
-                || value.getClass().isPrimitive();
     }
 
     /**
@@ -193,5 +182,59 @@ public class EvaluationResultFormatter {
      */
     private static String indent(int level) {
         return INDENT.repeat(Math.max(0, level));
+    }
+
+    public static Object printSubjectResources(PopulationDef populationDef, String subjectId) {
+        if (populationDef == null) {
+            return "{empty}";
+        }
+
+        final Set<Object> resources = populationDef.getSubjectResources().get(subjectId);
+
+        if (CollectionUtils.isEmpty(resources)) {
+            return subjectId + ": {empty}";
+        }
+
+        final String toString =
+                resources.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
+
+        if (StringUtils.isBlank(toString)) {
+            return subjectId + ": {empty}";
+        }
+
+        return subjectId + ": " + toString;
+    }
+
+    public static String printValues(Collection<Object> values) {
+
+        if (values == null || values.isEmpty()) {
+            return "{empty}";
+        }
+
+        return values.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
+    }
+
+    public static String printValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+
+        if (value instanceof IBaseResource resource) {
+            return resource.getIdElement().getValueAsString();
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            final String toString = map.entrySet().stream()
+                    .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
+                    .collect(Collectors.joining(", "));
+
+            if (StringUtils.isBlank(toString)) {
+                return "{empty}";
+            }
+
+            return toString;
+        }
+
+        return value.toString();
     }
 }

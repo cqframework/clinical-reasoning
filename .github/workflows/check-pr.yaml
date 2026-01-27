@@ -17,6 +17,15 @@ jobs:
           os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: debug token presence
+        run: |
+            if [ -Z "$SONAR_TOKEN" ]; then
+               echo "SONAR_TOKEN is not set"
+            else
+               echo "SONAR_TOKEN is set (length: ${#SONAR_TOKEN})"
+            fi
+        env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - uses: actions/checkout@v4
         with:
             fetch-depth: 0 #shallow clone for better sonarqube analysis

@@ -116,6 +116,18 @@ define "boolean strat has practitioner":
 define "resource strat not finished":
     "Encounter Not Finished"
 
+// Multi-value VALUE stratifier expressions
+// These return lists that should be expanded into multiple strata
+
+define "All Encounter Statuses":
+    [Encounter] E return E.status
+
+define "All Patient Encounters":
+    [Encounter] E
+
+define "Distinct Encounter Statuses":
+    distinct([Encounter] E return E.status)
+
 // main criteria logic
 
 define "All Encounters":

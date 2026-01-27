@@ -18,8 +18,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Aggregates individual subject evaluation results into stratum definitions for measure reporting
@@ -94,7 +92,9 @@ import org.slf4j.LoggerFactory;
  */
 public class MeasureMultiSubjectEvaluator {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);
+    private MeasureMultiSubjectEvaluator() {
+        // static class
+    }
 
     /**
      * Take the accumulated subject-by-subject evaluation results and use it to build StratumDefs
@@ -421,33 +421,19 @@ public class MeasureMultiSubjectEvaluator {
             return List.of(stratum);
         }
 
-        // Group subjects by their stratifier values
-        // Null values are allowed - they will be grouped into a special "null" stratum
-        Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .filter(x -> subjectValues.get(x) != null)
-                .collect(Collectors.groupingBy(
-                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
+        final Map<StratumValueWrapper, List<String>> valueToSubjects = buildValueToSubjectsMapping(subjectValues);
 
+        // Build strata from value-to-subjects mapping
         var stratumMultiple = new ArrayList<StratumDef>();
 
-        // Stratum 1
-        // Value: 'M'--> subjects: subject1
-        // Stratum 2
-        // Value: 'F'--> subjects: subject2
-        // loop through each value key
-        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
-            // patch Patient values with prefix of ResourceType to match with incoming population subjects for stratum
-            // TODO: should match context of CQL, not only Patient
-            var patientsSubjects = stratValue.getValue().stream()
-                    .map(FhirResourceUtils::addPatientQualifier)
-                    .toList();
+        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : valueToSubjects.entrySet()) {
+            var patientsSubjects = stratValue.getValue();
             // For non-component stratifiers, row keys are subject-only keys
             var rowKeys =
                     patientsSubjects.stream().map(StratifierRowKey::subjectOnly).toList();
             // build the stratum for each unique value
             // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
             // multiple criteria
-            // TODO: build out nonComponent stratum method
             Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
             var stratum = buildStratumDef(
                     fhirContext, stratifierDef, stratValues, patientsSubjects, rowKeys, populationDefs, groupDef);
@@ -457,14 +443,50 @@ public class MeasureMultiSubjectEvaluator {
         return stratumMultiple;
     }
 
+    private static Map<StratumValueWrapper, List<String>> buildValueToSubjectsMapping(
+            Map<String, CriteriaResult> subjectValues) {
+
+        // Build value-to-subjects mapping, expanding Iterables so each unique value creates its own stratum.
+        // This allows a subject to appear in multiple strata when the CQL expression returns multiple values
+        // (e.g., a List<Encounter> per patient).
+        Map<StratumValueWrapper, List<String>> valueToSubjects = new HashMap<>();
+
+        for (Entry<String, CriteriaResult> entry : subjectValues.entrySet()) {
+
+            if (entry.getValue() != null) {
+                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(entry.getKey());
+                Object rawValue = entry.getValue().rawValue();
+
+                if (rawValue == null) {
+                    // Handle null as a special stratum value
+                    StratumValueWrapper wrapper = new StratumValueWrapper(null);
+                    valueToSubjects
+                            .computeIfAbsent(wrapper, k -> new ArrayList<>())
+                            .add(qualifiedSubject);
+                } else {
+                    // Expand Iterables (but NOT Maps - they have different semantics for NON_SUBJECT_VALUE)
+                    Iterable<?> valuesToProcess = toExpandedIterable(rawValue);
+
+                    for (Object value : valuesToProcess) {
+                        StratumValueWrapper wrapper = new StratumValueWrapper(value);
+                        valueToSubjects
+                                .computeIfAbsent(wrapper, k -> new ArrayList<>())
+                                .add(qualifiedSubject);
+                    }
+                }
+            }
+        }
+        return valueToSubjects;
+    }
+
     /**
      * Builds a table mapping subjects (or subject|resource pairs) to their stratifier values.
      *
-     * <p>Handles two cases:
+     * <p>Handles three cases:
      * <ul>
-     *   <li><b>Subject-basis (scalar values)</b>: Row key is "Patient/xxx", value is the scalar result</li>
-     *   <li><b>Non-subject value (function results)</b>: Row key is "Patient/xxx|Resource/yyy",
-     *       value is the function output for that resource</li>
+     *   <li><b>Map values (NON_SUBJECT_VALUE)</b>: CQL functions returning Map&lt;inputResource, outputValue&gt;</li>
+     *   <li><b>Iterable values (multi-value)</b>: CQL expressions returning List of values per subject</li>
+     *   <li><b>Scalar values (standard)</b>: Single value per subject</li>
      * </ul>
      *
      * <p>For non-subject value stratifiers, the CQL function returns Map&lt;inputResource, outputValue&gt;.
@@ -476,43 +498,115 @@ public class MeasureMultiSubjectEvaluator {
         final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 HashBasedTable.create();
 
-        componentDefs.forEach(componentDef -> componentDef.getResults().forEach((subject, result) -> {
-            String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subject);
-            Object rawValue = result == null ? null : result.rawValue();
-
-            // Handle non-subject value stratifiers with function results (Map<inputResource, outputValue>)
-            if (rawValue instanceof Map<?, ?> functionResults) {
-                for (Map.Entry<?, ?> entry : functionResults.entrySet()) {
-                    // Build composite row key: "Patient/xxx|Resource/yyy"
-                    String inputResourceKey = normalizeResourceKey(entry.getKey());
-                    StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, inputResourceKey);
-
-                    // The output value becomes the stratum value (what's displayed)
-                    // Null values are allowed - they will be grouped into a special "null" stratum
-                    StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(entry.getValue());
-                    subjectResultTable.put(rowKey, stratumValueWrapper, componentDef);
-                }
-                return;
+        for (StratifierComponentDef componentDef : componentDefs) {
+            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef)) {
+                subjectResultTable.put(
+                        stratumTableRow.stratifierRowKey(), stratumTableRow.stratumValueWrapper(), componentDef);
             }
-
-            // Standard case: scalar value per subject
-            // Null values are allowed - they will be grouped into a special "null" stratum
-            StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(rawValue);
-            StratifierRowKey rowKey = StratifierRowKey.subjectOnly(qualifiedSubject);
-            subjectResultTable.put(rowKey, stratumValueWrapper, componentDef);
-        }));
+        }
 
         return subjectResultTable;
+    }
+
+    private static List<StratumTableRow> mapToListOfTableEntries(StratifierComponentDef componentDef) {
+
+        return componentDef.getResults().entrySet().stream()
+                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue()))
+                .flatMap(Collection::stream)
+                .toList();
+    }
+
+    private record StratumTableRow(StratifierRowKey stratifierRowKey, StratumValueWrapper stratumValueWrapper) {}
+
+    private static List<StratumTableRow> mapToListOfTableEntries(String subjectId, CriteriaResult result) {
+
+        final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+        final Object rawValue = result == null ? null : result.rawValue();
+
+        if (rawValue instanceof Map<?, ?> functionResults) {
+            return addFunctionResultRows(qualifiedSubject, functionResults);
+
+        } else if (rawValue instanceof Iterable<?> iterableValue) {
+            return addIterableValueRows(qualifiedSubject, iterableValue);
+        }
+
+        return List.of(addScalarValueRow(qualifiedSubject, rawValue));
+    }
+
+    /**
+     * Adds rows for non-subject value stratifiers with function results (Map&lt;inputResource, outputValue&gt;).
+     *
+     * <p>For each entry in the map:
+     * <ul>
+     *   <li>Build composite row key: "Patient/xxx|Resource/yyy"</li>
+     *   <li>The output value becomes the stratum value (what's displayed)</li>
+     *   <li>Null values are allowed - they will be grouped into a special "null" stratum</li>
+     * </ul>
+     */
+    private static List<StratumTableRow> addFunctionResultRows(String qualifiedSubject, Map<?, ?> functionResults) {
+
+        return functionResults.entrySet().stream()
+                .map(entry ->
+                        // The output value becomes the stratum value (what's displayed)
+                        // Null values are allowed - they will be grouped into a special "null" stratum
+                        new StratumTableRow(
+                                StratifierRowKey.withInput(
+                                        qualifiedSubject,
+                                        // Build composite row key: "Patient/xxx|Resource/yyy"
+                                        normalizeResourceKey(entry.getKey())),
+                                new StratumValueWrapper(entry.getValue())))
+                .toList();
+    }
+
+    /**
+     * Adds rows for Iterable values (e.g., List&lt;EncounterStatus&gt;) by expanding into multiple
+     * rows.
+     *
+     * <p>Each element in the iterable creates its own row with a composite key, allowing
+     * the subject to appear in multiple strata when the stratifier expression returns multiple
+     * values.
+     *
+     * <p><b>Note:</b> Maps are handled separately and should NOT be expanded as Iterables.
+     *
+     * @return keys and values to add to the subject results table
+     */
+    private static List<StratumTableRow> addIterableValueRows(String qualifiedSubject, Iterable<?> iterableValue) {
+
+        var tableRows = new ArrayList<StratumTableRow>();
+        int index = 0;
+        for (Object value : iterableValue) {
+            // Use value-based key to create unique row per value.
+            // This allows groupSubjectsByValueDefSet to group rows by value, not by subject.
+            String valueKey = normalizeValueKey(value, index);
+            StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, valueKey);
+            StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(value);
+            tableRows.add(new StratumTableRow(rowKey, stratumValueWrapper));
+            index++;
+        }
+
+        return tableRows;
+    }
+
+    /**
+     * Adds a single row for a scalar value per subject (standard case).
+     *
+     * <p>Null values are allowed - they will be grouped into a special "null" stratum.
+     */
+    private static StratumTableRow addScalarValueRow(String qualifiedSubject, Object rawValue) {
+
+        // Null values are allowed - they will be grouped into a special "null" stratum
+
+        return new StratumTableRow(StratifierRowKey.subjectOnly(qualifiedSubject), new StratumValueWrapper(rawValue));
     }
 
     /**
      * Normalize a resource to its ID string for use as a row key component.
      */
     private static String normalizeResourceKey(Object obj) {
-        if (obj instanceof IBaseResource resource) {
-            if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
-                return resource.getIdElement().toVersionless().getValue();
-            }
+        if (obj instanceof IBaseResource resource
+                && resource.getIdElement() != null
+                && !resource.getIdElement().isEmpty()) {
+            return resource.getIdElement().toVersionless().getValue();
         }
         return String.valueOf(obj);
     }
@@ -803,18 +897,59 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
+     * Converts a raw stratifier value into an Iterable for expansion into multiple strata.
+     *
+     * <p>This method handles three cases:
+     * <ul>
+     *   <li><b>Map values</b>: NOT expanded. Maps are used by NON_SUBJECT_VALUE stratifiers
+     *       (function-based) with different semantics - they're handled in buildSubjectResultsTable().</li>
+     *   <li><b>Iterable values</b>: Returned as-is for expansion. Each element becomes its own stratum.</li>
+     *   <li><b>Scalar values</b>: Wrapped in a single-element list.</li>
+     * </ul>
+     *
+     * @param rawValue the raw value from CQL evaluation
+     * @return an Iterable containing the value(s) to process
+     */
+    private static Iterable<?> toExpandedIterable(Object rawValue) {
+        // Maps have special semantics for NON_SUBJECT_VALUE - don't expand
+        if (rawValue instanceof Map<?, ?>) {
+            return List.of(rawValue);
+        }
+
+        if (rawValue instanceof Iterable<?> iterable) {
+            return iterable;
+        }
+
+        return List.of(rawValue);
+    }
+
+    /**
+     * Normalize a value to a string key for use in composite row keys when expanding Iterables.
+     * Uses the index as a fallback for null values to ensure unique keys.
+     */
+    private static String normalizeValueKey(Object value, int index) {
+        if (value == null) {
+            return "null_" + index;
+        }
+        if (value instanceof IBaseResource resource
+                && resource.getIdElement() != null
+                && !resource.getIdElement().isEmpty()) {
+            return resource.getIdElement().toVersionless().getValue();
+        }
+
+        return "value_" + index + "_" + value;
+    }
+
+    /**
      * Extracts unique FHIR identifiers as Strings from a PopulationDef.
      * Works for Resource, Reference, IdType, PrimitiveType, String, Number, etc.
      */
-    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
     private static Set<Object> extractResourceIds(PopulationDef populationDef, String subjectId) {
         if (populationDef == null || populationDef.getSubjectResources() == null) {
             return Set.of();
         }
-        String[] parts = subjectId.split("/");
 
-        String resourceType = parts[0]; // "Patient"
-        String id = parts[1]; // "81230987"
+        String id = subjectId.split("/")[1]; // "81230987"
 
         var filtered = populationDef.getSubjectResources().entrySet().stream()
                 .filter(entry -> entry.getKey().equals(id)) // <--- filter on key
@@ -826,16 +961,5 @@ public class MeasureMultiSubjectEvaluator {
                 .map(m -> (Map<?, ?>) m) // Cast
                 .flatMap(m -> m.keySet().stream()) // capture Key only, not Qty
                 .collect(Collectors.toSet());
-    }
-
-    /**
-     * Get resource ID from a resource object.
-     */
-    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
-    private static String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof IBaseResource resource) {
-            return resource.getIdElement().toVersionless().getValueAsString();
-        }
-        return null;
     }
 }

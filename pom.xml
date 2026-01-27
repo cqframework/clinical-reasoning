@@ -582,7 +582,7 @@
                                 <excludes>
                                     <!-- most providers just pipe thru to a service -->
                                     <exclude>**/*Provider.class</exclude>
-                                    <!-- exclude config classes  -->
+                                    <!-- exclude config classes, exceptions, constants, etc  -->
                                     <exclude>**/config/**/*.class</exclude>
                                     <exclude>**/*Exception.class</exclude>
                                     <exclude>**/Benchmarks.class</exclude>
@@ -590,9 +590,9 @@
                                     <exclude>**/*Constants$*.class</exclude>
                                     <exclude>**/*Settings.class</exclude>
                                     <exclude>**/argument/*Argument.class</exclude>
-                                    <!-- do not check enums -->
+                                    <!-- do not check enums; this requires naming standard -->
                                     <exclude>**/*Type.class</exclude>
-                                    <!-- this is a record; we should exclude all records (end in 'def'?) -->
+                                    <!-- StratifierComponentDef, StratumPopulationDef, etc. Are these all records? -->
                                     <exclude>**/*Def.class</exclude>
                                     <!-- classes that need coverage but don't have it now -->
                                     <exclude>**/ClinicalIntelligenceBundleProviderUtil.class</exclude>

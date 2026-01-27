@@ -31,7 +31,7 @@ jobs:
         with:
             path: ~/.sonar/cache
             key: ${{ runner.os }}-sonar
-            restore-keys: ${ runner.os }}-sonar
+            restore-keys: ${{ runner.os }}-sonar
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'

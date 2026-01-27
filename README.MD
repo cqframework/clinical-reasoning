@@ -10,8 +10,8 @@ See the [docs](https://www.cqframework.org/clinical-reasoning/) for more informa
 
 ## SonarCloud
 
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=cqframework_clinical-reasoning&metric=coverage)](https://sonarclo
-ud.io/dashboard?id=cqframework_clinical-reasoning)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=cqframework_clinical-reasoning&metric=coverage)]
+(https://sonarcloud.io/dashboard?id=cqframework_clinical-reasoning)
 
 ## Getting Help
 

@@ -114,7 +114,7 @@ public class FunctionEvaluationHandler {
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
-            String url) {
+            String measureUrl) {
 
         // get function for non-subject value stratifiers and evaluate for each populationDef
         final List<StratifierDef> stratifierDefs = groupDef.stratifiers().stream()
@@ -129,8 +129,8 @@ public class FunctionEvaluationHandler {
 
         for (StratifierDef stratDef : stratifierDefs) {
             // each stratifier (could be multiple defined in component)
-            var result =
-                    processNonSubValueStratifiers(context, evaluationResult, subjectTypePart, groupDef, stratDef, url);
+            var result = processNonSubValueStratifiers(
+                    context, evaluationResult, subjectTypePart, groupDef, stratDef, measureUrl);
             results.add(result);
         }
 
@@ -234,7 +234,9 @@ public class FunctionEvaluationHandler {
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        final Map<Object, Object> functionResults = new HashMap<>();
+        // VERY IMPORTANT: We need a custom Map to ensure remove by FHIR resource key does not
+        // use object identity (AKA ==)
+        final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
         for (Object result : resultsIter) {
@@ -249,7 +251,7 @@ public class FunctionEvaluationHandler {
             // key= input parameter to function
             // value= the output Observation resource containing calculated value
             functionResults.put(result, quantity);
-            evaluatedResources.addAll(observationResult.getEvaluatedResources());
+            Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::addAll);
         }
 
         return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
@@ -273,7 +275,7 @@ public class FunctionEvaluationHandler {
             String subjectTypePart,
             GroupDef groupDef,
             StratifierDef stratifierDef,
-            String url) {
+            String measureUrl) {
 
         EvaluationResult evalResult = new EvaluationResult();
 
@@ -284,9 +286,14 @@ public class FunctionEvaluationHandler {
             }
             var stratifierExpression = componentDef.expression();
 
+            var currentLibrary = context.getState().getCurrentLibrary();
+
+            if (currentLibrary == null) {
+                throw new InternalErrorException("Current library is null.");
+            }
+
             // Validate that NON_SUBJECT_VALUE stratifier expression is a CQL function
-            var expressionDefinition = Libraries.resolveExpressionRef(
-                    stratifierExpression, context.getState().getCurrentLibrary());
+            var expressionDefinition = Libraries.resolveExpressionRef(stratifierExpression, currentLibrary);
             boolean isFunction = expressionDefinition instanceof FunctionDef;
 
             if (!isFunction) {
@@ -295,7 +302,7 @@ public class FunctionEvaluationHandler {
                         ("Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not. "
                                         + "For non-boolean population basis, stratifier component criteria expressions must be "
                                         + "CQL functions that take a parameter matching the population basis type.")
-                                .formatted(url, stratifierExpression));
+                                .formatted(measureUrl, stratifierExpression));
             }
 
             // Function expression: input parameter data for value stratifier functions
@@ -310,6 +317,10 @@ public class FunctionEvaluationHandler {
                 Optional<ExpressionResult> optExpressionResult =
                         tryGetExpressionResult(popDef.expression(), evaluationResult);
 
+                if (optExpressionResult.isEmpty()) {
+                    throw new InternalErrorException(
+                            "Expression result is missing for measure %s".formatted(measureUrl));
+                }
                 final ExpressionResult expressionResult = optExpressionResult.get();
                 final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
                 // make new expression name for uniquely extracting results
@@ -331,7 +342,7 @@ public class FunctionEvaluationHandler {
                     Set<Object> evaluated = functionResult.getEvaluatedResources();
                     if (evaluated == null) {
                         throw new IllegalStateException("CQL function '" + stratifierExpression
-                                + "' returned null evaluatedResources for measure: " + url);
+                                + "' returned null evaluatedResources for measure: " + measureUrl);
                     }
                     evaluatedResources.addAll(evaluated);
                     evaluatedResources.addAll(functionResult.getEvaluatedResources());
@@ -345,7 +356,7 @@ public class FunctionEvaluationHandler {
 
     /**
      * Convert CQL evaluation result to QuantityDef.
-     *
+     * <p/>
      * CQL evaluation can return Number, String, or CQL Quantity - never FHIR Quantities.
      *
      * @param result the CQL evaluation result
@@ -397,10 +408,15 @@ public class FunctionEvaluationHandler {
             CqlEngine context,
             boolean isMeasureObservation) {
 
-        var ed = Libraries.resolveExpressionRef(
-                criteriaExpression, context.getState().getCurrentLibrary());
+        var currentLibrary = context.getState().getCurrentLibrary();
 
-        if (!(ed instanceof FunctionDef functionDef)) {
+        if (currentLibrary == null) {
+            throw new InternalErrorException("Current library is null.");
+        }
+
+        var expressionDefinition = Libraries.resolveExpressionRef(criteriaExpression, currentLibrary);
+
+        if (!(expressionDefinition instanceof FunctionDef functionDef)) {
             throw new InvalidRequestException(
                     "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
         }
@@ -422,7 +438,12 @@ public class FunctionEvaluationHandler {
 
                 context.getState().push(variableToPush);
             }
-            result = context.getEvaluationVisitor().visitExpression(ed.getExpression(), context.getState());
+            var expressionDefinitionExpression = expressionDefinition.getExpression();
+            if (expressionDefinitionExpression == null) {
+                throw new InternalErrorException("expressionDefinition is null.");
+            }
+            result = context.getEvaluationVisitor()
+                    .visitExpression(expressionDefinition.getExpression(), context.getState());
 
         } finally {
             context.getState().popActivationFrame();
@@ -465,7 +486,15 @@ public class FunctionEvaluationHandler {
         if (expressionResult.getValue() instanceof Boolean) {
             if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult = evaluationResult.get(subjectTypePart).getValue();
+                var expressionResultForSubjectId = evaluationResult.get(subjectTypePart);
+
+                if (expressionResultForSubjectId == null) {
+                    throw new InternalErrorException(
+                            "expression result is null for subject type: %s".formatted(subjectTypePart));
+                }
+
+                Object booleanResult = expressionResultForSubjectId.getValue();
+
                 // remove evaluated resources
                 return Collections.singletonList(booleanResult);
             } else {

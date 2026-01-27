@@ -92,6 +92,10 @@ public class PopulationDef {
         return this.populationBasis.code().equals("boolean");
     }
 
+    public boolean hasPopulationType(MeasurePopulationType populationType) {
+        return populationType == this.measurePopulationType;
+    }
+
     public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
             this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
@@ -102,6 +106,42 @@ public class PopulationDef {
 
     public Set<String> getSubjects() {
         return this.getSubjectResources().keySet();
+    }
+
+    /**
+     * Removes a measure observation resource key from all inner maps for a subject.
+     * <p/>
+     * After removal, any empty inner maps are removed from the subject's resource set.
+     * If the subject's resource set becomes empty, the subject is also removed from the map.
+     * This ensures that subjects with no remaining observations are not counted.
+     *
+     * @param subjectId the subject ID
+     * @param measureObservationResourceKey the resource key to remove
+     */
+    public void removeExcludedMeasureObservationResource(String subjectId, Object measureObservationResourceKey) {
+        if (!hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+            return;
+        }
+
+        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
+        if (resourcesForSubject == null) {
+            return;
+        }
+
+        // Remove the key from all inner maps
+        resourcesForSubject.forEach(element -> {
+            if (element instanceof Map<?, ?> innerMap) {
+                innerMap.remove(measureObservationResourceKey);
+            }
+        });
+
+        // Remove empty inner maps - critical for correct counting
+        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+
+        // If the subject's resource set is now empty, remove the subject from the map entirely
+        if (resourcesForSubject.isEmpty()) {
+            subjectResources.remove(subjectId);
+        }
     }
 
     public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
@@ -199,24 +239,21 @@ public class PopulationDef {
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-02
-     * Updated by Claude Sonnet 4.5 on 2025-12-08 to use own populationBasis instead of GroupDef parameter.
-     * Get the count for this population based on its type and population basis.
-     * This is the single source of truth for population counts.
-     *
-     * @return the count for this population
+     * Compute the count that will be assigned to the MeasureReport population, taking into
+     * account the population basis and population type (ex: MEASUREPOPULATON).
+     * @return The computed count of the report population.
      */
     public int getCount() {
-        // For MEASUREOBSERVATION populations, count the observations
-        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
-            return countObservations();
-        }
-
         // For other population types, use population basis to determine count
         if (isBooleanBasis()) {
             // Boolean basis: count unique subjects
             return getSubjects().size();
         } else {
+            if (hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+                // resources has nested maps containing correct qty of resources
+                // Ratio Cont-Variable Measures have two MeasureObservations
+                return countObservations();
+            }
             // Non-boolean basis: count all resources (including duplicates across subjects)
             return getAllSubjectResources().size();
         }

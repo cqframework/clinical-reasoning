@@ -221,6 +221,60 @@ class PackageSourceResolverTest {
     }
 
     @Test
+    void testExtractIgDependencyVersions_R4() {
+        var fhirContext = FhirContext.forR4Cached();
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        // Create an ImplementationGuide with dependsOn declarations
+        var ig = new ImplementationGuide();
+        ig.setId("test-ig");
+        ig.setPackageId("example.ig");
+        ig.setVersion("1.0.0");
+        ig.setUrl("http://example.org/ImplementationGuide/test");
+
+        // Add dependsOn declarations (package-level dependencies)
+        ig.addDependsOn()
+                .setPackageId("hl7.fhir.us.core")
+                .setUri("http://hl7.org/fhir/us/core/ImplementationGuide/hl7.fhir.us.core")
+                .setVersion("6.1.0");
+
+        ig.addDependsOn()
+                .setPackageId("hl7.fhir.uv.sdc")
+                .setUri("http://hl7.org/fhir/uv/sdc/ImplementationGuide/hl7.fhir.uv.sdc")
+                .setVersion("3.0.0");
+
+        repository.create(ig);
+
+        // Create a test visitor to access the protected method
+        var testVisitor = new org.opencds.cqf.fhir.cr.visitor.DataRequirementsVisitor(
+                repository, org.opencds.cqf.fhir.cql.EvaluationSettings.getDefault());
+
+        var igAdapter = adapterFactory.createImplementationGuide(ig);
+
+        // Use reflection to call the protected method
+        var dependencyVersions = new java.util.HashMap<String, String>();
+        try {
+            var method = testVisitor
+                    .getClass()
+                    .getSuperclass()
+                    .getDeclaredMethod(
+                            "extractIgDependencyVersions",
+                            org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.class);
+            method.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            var result = (java.util.Map<String, String>) method.invoke(testVisitor, igAdapter);
+            dependencyVersions.putAll(result);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        // Verify that dependency versions were extracted
+        assertEquals(2, dependencyVersions.size());
+        assertEquals("6.1.0", dependencyVersions.get("hl7.fhir.us.core"));
+        assertEquals("3.0.0", dependencyVersions.get("hl7.fhir.uv.sdc"));
+    }
+
+    @Test
     @Disabled("Requires complex IG adapter setup - functionality verified via integration tests")
     void testResolvePackageSource_MultipleIGs() {
         var fhirContext = FhirContext.forR4Cached();

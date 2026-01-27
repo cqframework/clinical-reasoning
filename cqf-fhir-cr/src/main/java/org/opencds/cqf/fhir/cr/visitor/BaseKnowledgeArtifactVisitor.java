@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -118,7 +119,9 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple)
             throws PreconditionFailedException {
-        recursiveGather(adapter, gatheredResources, capability, include, versionTuple, null, null, null);
+        Map<String, String> igDependencyVersions = extractIgDependencyVersions(adapter);
+        recursiveGather(
+                adapter, gatheredResources, capability, include, versionTuple, null, null, null, igDependencyVersions);
     }
 
     protected void recursiveGather(
@@ -130,6 +133,30 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             IEndpointAdapter terminologyEndpoint,
             TerminologyServerClient client,
             IBaseOperationOutcome[] messagesWrapper)
+            throws PreconditionFailedException {
+        Map<String, String> igDependencyVersions = extractIgDependencyVersions(adapter);
+        recursiveGather(
+                adapter,
+                gatheredResources,
+                capability,
+                include,
+                versionTuple,
+                terminologyEndpoint,
+                client,
+                messagesWrapper,
+                igDependencyVersions);
+    }
+
+    protected void recursiveGather(
+            IKnowledgeArtifactAdapter adapter,
+            Map<String, IKnowledgeArtifactAdapter> gatheredResources,
+            List<String> capability,
+            List<String> include,
+            ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
+            IEndpointAdapter terminologyEndpoint,
+            TerminologyServerClient client,
+            IBaseOperationOutcome[] messagesWrapper,
+            Map<String, String> igDependencyVersions)
             throws PreconditionFailedException {
         if (adapter == null) {
             return;
@@ -164,10 +191,11 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                                                 .getResourceDefinition(Canonicals.getResourceType(ra.getReference()))
                                                 .newInstance());
                         if (hasUrl) {
-                            return Optional.ofNullable(SearchHelper.searchRepositoryByCanonicalWithPaging(
-                                            repository, ra.getReference()))
-                                    .map(bundle ->
-                                            findResourceMatchingVersion(bundle, ra.getReference(), messagesWrapper))
+                            // Try to resolve version using package source and IG dependencies
+                            String canonical = resolveCanonicalWithIgVersion(ra.getReference(), igDependencyVersions);
+                            return Optional.ofNullable(
+                                            SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical))
+                                    .map(bundle -> findResourceMatchingVersion(bundle, canonical, messagesWrapper))
                                     .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint));
                         }
                         return null;
@@ -182,7 +210,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                             versionTuple,
                             terminologyEndpoint,
                             client,
-                            messagesWrapper));
+                            messagesWrapper,
+                            igDependencyVersions));
         }
     }
 
@@ -292,5 +321,141 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             }
             return firstResource;
         }
+    }
+
+    /**
+     * Extracts dependency version mappings from an ImplementationGuide's dependsOn array.
+     * Maps packageId to version for use in resolving dependency versions.
+     *
+     * @param adapter the artifact adapter (may be an ImplementationGuide or reference one)
+     * @return Map of packageId -> version from IG dependencies
+     */
+    protected Map<String, String> extractIgDependencyVersions(IKnowledgeArtifactAdapter adapter) {
+        Map<String, String> dependencyVersions = new HashMap<>();
+
+        if (adapter == null) {
+            return dependencyVersions;
+        }
+
+        try {
+            var resource = adapter.get();
+
+            // Check if this is an ImplementationGuide
+            if ("ImplementationGuide".equals(resource.fhirType())) {
+                var igAdapter = IAdapterFactory.forFhirVersion(fhirVersion())
+                        .createImplementationGuide((IDomainResource) resource);
+                populateDependencyVersionsFromIg(igAdapter, dependencyVersions);
+            }
+            // TODO: Check if this artifact references an IG via composed-of relationship
+            // and if so, load the IG and extract its dependencies
+        } catch (Exception e) {
+            logger.debug("Error extracting IG dependency versions", e);
+        }
+
+        return dependencyVersions;
+    }
+
+    /**
+     * Populates dependency versions from an ImplementationGuide adapter.
+     * Extracts packageId and version from the IG's dependsOn array.
+     *
+     * @param igAdapter the ImplementationGuide adapter
+     * @param dependencyVersions map to populate with packageId -> version mappings
+     */
+    private void populateDependencyVersionsFromIg(
+            org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter igAdapter,
+            Map<String, String> dependencyVersions) {
+        try {
+            var resource = igAdapter.get();
+
+            // Access dependsOn array based on FHIR version
+            if (resource instanceof org.hl7.fhir.r4.model.ImplementationGuide r4Ig) {
+                for (var dep : r4Ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        dependencyVersions.put(dep.getPackageId(), dep.getVersion());
+                    }
+                }
+            } else if (resource instanceof org.hl7.fhir.r5.model.ImplementationGuide r5Ig) {
+                for (var dep : r5Ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        dependencyVersions.put(dep.getPackageId(), dep.getVersion());
+                    }
+                }
+            } else if (resource instanceof org.hl7.fhir.dstu3.model.ImplementationGuide dstu3Ig) {
+                for (var dep : dstu3Ig.getDependency()) {
+                    // DSTU3 uses dependency instead of dependsOn, with type and uri
+                    if (dep.hasUri()) {
+                        // Extract package info from URI if possible
+                        // DSTU3 doesn't have explicit packageId field
+                        String uri = dep.getUri();
+                        // This is a simplified approach - in DSTU3, package info may not be available
+                        logger.debug("DSTU3 IG dependency found but packageId extraction not fully supported: {}", uri);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Error populating IG dependency versions", e);
+        }
+    }
+
+    /**
+     * Resolves a canonical URL by appending version from IG dependencies if applicable.
+     * If the canonical already has a version, returns it unchanged.
+     * Otherwise, tries to determine which package the dependency belongs to and
+     * appends the version from the IG's dependsOn array.
+     *
+     * @param canonical the canonical URL (may or may not include version)
+     * @param igDependencyVersions map of packageId -> version from IG
+     * @return canonical URL with version appended if resolved, otherwise unchanged
+     */
+    protected String resolveCanonicalWithIgVersion(String canonical, Map<String, String> igDependencyVersions) {
+        if (canonical == null || canonical.isEmpty() || igDependencyVersions.isEmpty()) {
+            return canonical;
+        }
+
+        // If canonical already has a version, don't modify it
+        if (Canonicals.getVersion(canonical) != null) {
+            return canonical;
+        }
+
+        try {
+            // Search for the resource to determine its package source
+            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical);
+            if (bundle == null) {
+                return canonical;
+            }
+
+            var resource = BundleHelper.getEntryResourceFirstRep(bundle);
+            if (resource instanceof IDomainResource domainResource) {
+                var adapter =
+                        IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(domainResource);
+
+                // Use PackageSourceResolver to determine which package this dependency belongs to
+                Optional<String> packageSource = PackageSourceResolver.resolvePackageSource(adapter, repository);
+
+                if (packageSource.isPresent()) {
+                    String packageId = packageSource.get();
+                    // Strip version if present in package source (format: packageId#version)
+                    if (packageId.contains("#")) {
+                        packageId = packageId.substring(0, packageId.indexOf('#'));
+                    }
+
+                    // Look up version from IG dependencies
+                    String version = igDependencyVersions.get(packageId);
+                    if (version != null && !version.isEmpty()) {
+                        logger.debug(
+                                "Resolved version '{}' for '{}' from IG dependency '{}'",
+                                version,
+                                canonical,
+                                packageId);
+                        return canonical + "|" + version;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Error resolving canonical with IG version for: {}", canonical, e);
+        }
+
+        return canonical;
     }
 }

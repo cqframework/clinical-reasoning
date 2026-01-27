@@ -673,7 +673,7 @@ public class MeasureEvaluator {
         populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
         populationBasisValidator.validateStratifiers(measureDef, groupDef, evaluationResult);
 
-        evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
+        evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult, groupDef);
 
         var scoring = groupDef.measureScoring();
         switch (scoring) {
@@ -708,16 +708,20 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateStratifiers(
-            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
+            String subjectId,
+            List<StratifierDef> stratifierDefs,
+            EvaluationResult evaluationResult,
+            GroupDef groupDef) {
         for (StratifierDef stratifierDef : stratifierDefs) {
 
-            evaluateStratifier(subjectId, evaluationResult, stratifierDef);
+            evaluateStratifier(subjectId, evaluationResult, stratifierDef, groupDef);
         }
     }
 
-    private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+    private void evaluateStratifier(
+            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
         if (stratifierDef.isComponentStratifier()) {
-            addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
+            addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId, groupDef);
         } else {
             addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
         }
@@ -729,21 +733,64 @@ public class MeasureEvaluator {
      * for better observability when stratifier component expressions return null.
      */
     void addStratifierComponentResult(
-            List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
+            List<StratifierComponentDef> components,
+            EvaluationResult evaluationResult,
+            String subjectId,
+            GroupDef groupDef) {
 
         for (StratifierComponentDef component : components) {
-            var expressionResult = evaluationResult.get(component.expression());
+            if (groupDef.isBooleanBasis()) {
+                handleBooleanBasisComponent(component, evaluationResult, subjectId);
+            } else {
+                handleNonBooleanBasisComponent(component, evaluationResult, subjectId, groupDef);
+            }
+        }
+    }
 
-            if (expressionResult == null || expressionResult.getValue() == null) {
-                logger.warn(
-                        "Stratifier component expression '{}' returned null result for subject '{}'",
-                        component.expression(),
-                        subjectId);
+    private void handleBooleanBasisComponent(
+            StratifierComponentDef component, EvaluationResult evaluationResult, String subjectId) {
+
+        var expressionResult = evaluationResult.get(component.expression());
+
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            logger.warn(
+                    "Stratifier component expression '{}' returned null result for subject '{}'",
+                    component.expression(),
+                    subjectId);
+            return; // short-circuit
+        }
+
+        component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+    }
+
+    private void handleNonBooleanBasisComponent(
+            StratifierComponentDef component, EvaluationResult evaluationResult, String subjectId, GroupDef groupDef) {
+
+        // First: look for function results on INITIALPOPULATION
+        for (PopulationDef popDef : groupDef.populations()) {
+            if (popDef.type() != MeasurePopulationType.INITIALPOPULATION) {
                 continue;
             }
 
-            component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+            var expressionResult = evaluationResult.get(popDef.id() + "-" + component.expression());
+
+            if (expressionResult != null && expressionResult.getValue() != null) {
+                component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+                return; // short-circuit once function result is found
+            }
         }
+
+        // Fallback: scalar (non-function) expression
+        var fallbackResult = evaluationResult.get(component.expression());
+        if (fallbackResult == null || fallbackResult.getValue() == null) {
+            logger.warn(
+                    "Stratifier component expression '{}' returned null result for subject '{}' (fallback)",
+                    component.expression(),
+                    subjectId);
+            return; // short-circuit
+        }
+
+        component.putResult(subjectId, fallbackResult.getValue(), fallbackResult.getEvaluatedResources());
     }
 
     /**

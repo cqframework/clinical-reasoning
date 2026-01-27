@@ -40,7 +40,7 @@ jobs:
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
       - name: Run tests
-        run: ./mvwn --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
       - name: SonarCloud Analysis
         if: matrix.os == 'ubuntu-latest'
         env:

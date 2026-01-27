@@ -10,7 +10,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
  * Equivalent to the FHIR stratum population.
- * <p/>
+ *
  * This is meant to be the source of truth for all data points regarding stratum populations.
  */
 public record StratumPopulationDef(

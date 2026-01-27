@@ -592,8 +592,8 @@
                                     <exclude>**/argument/*Argument.class</exclude>
                                     <!-- do not check enums -->
                                     <exclude>**/*Type.class</exclude>
-                                    <!-- this is a record; we should exclude all records -->
-                                    <exclude>**/StratumValueDef.class</exclude>
+                                    <!-- this is a record; we should exclude all records (end in 'def'?) -->
+                                    <exclude>**/*Def.class</exclude>
                                     <!-- classes that need coverage but don't have it now -->
                                     <exclude>**/ClinicalIntelligenceBundleProviderUtil.class</exclude>
                                     <exclude>**/ClinicalIntelligenceBundleProviderUtil$*.class</exclude>

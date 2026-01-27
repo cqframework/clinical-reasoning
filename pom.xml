@@ -574,6 +574,121 @@
                             </goals>
                             <configuration>
                                 <haltOnFailure>false</haltOnFailure>  <!-- to allow all projects be analyzed -->
+                                <excludes>
+                                    <!-- most providers just pipe thru to a service -->
+                                    <exclude>**/*Provider.class</exclude>
+                                    <!-- exclude config classes, exceptions, constants, etc  -->
+                                    <exclude>**/config/**/*.class</exclude>
+                                    <exclude>**/*Exception.class</exclude>
+                                    <exclude>**/Benchmarks.class</exclude>
+                                    <exclude>**/*Constants.class</exclude>
+                                    <exclude>**/*Constants$*.class</exclude>
+                                    <exclude>**/*Settings.class</exclude>
+                                    <exclude>**/argument/*Argument.class</exclude>
+                                    <!-- do not check enums; this requires naming standard -->
+                                    <exclude>**/*Type.class</exclude>
+                                    <!-- StratifierComponentDef, StratumPopulationDef, etc. Are these all records? -->
+                                    <exclude>**/*Def.class</exclude>
+                                    <!-- classes that need coverage but don't have it now -->
+                                    <exclude>**/ClinicalIntelligenceBundleProviderUtil.class</exclude>
+                                    <exclude>**/ClinicalIntelligenceBundleProviderUtil$*.class</exclude>
+                                    <exclude>**/R4ResourceIdUtils.class</exclude>
+                                    <exclude>**/CRMIReleaseVersionBehavior.class</exclude>
+                                    <exclude>**/CRMIReleaseVersionBehavior$*.class</exclude>
+                                    <exclude>**/CRMIReleaseExperimentalBehavior.class</exclude>
+                                    <exclude>**/CRMIReleaseExperimentalBehavior$*.class</exclude>
+                                    <exclude>**/TransformProperties.class</exclude>
+                                    <exclude>**/ArtifactAssessment.class</exclude>
+                                    <exclude>**/ArtifactAssessment$*.class</exclude>
+                                    <exclude>**/SearchHelper.class</exclude>
+                                    <exclude>**/PackageHelper.class</exclude>
+                                    <exclude>**/ContainedHelper.class</exclude>
+                                    <exclude>**/MetadataResourceHelper.class</exclude>
+                                    <exclude>**/ArtifactDiffProcessor.class</exclude>
+                                    <exclude>**/ArtifactDiffProcessor$*.class</exclude>
+                                    <exclude>**/DiffCacheResource.class</exclude>
+                                    <exclude>**/Dstu3MeasureService.class</exclude>
+                                    <exclude>**/Dstu3MeasureReportBuilder.class</exclude>
+                                    <exclude>**/Dstu3MeasureReportBuilder$*.class</exclude>
+                                    <exclude>**/Dstu3MeasureProcessor.class</exclude>
+                                    <exclude>**/MedicationRequestResolver.class</exclude>
+                                    <exclude>**/StratumValueWrapper.class</exclude>
+                                    <exclude>**/LibraryInitHandler.class</exclude>
+                                    <exclude>**/LibraryEngine.class</exclude>
+                                    <exclude>**/CqlExecutionProcessor.class</exclude>
+                                    <exclude>**/GraphDefinitionProcessor.class</exclude>
+                                    <exclude>**/ApplyRequest.class</exclude>
+                                    <exclude>**/ApplyRequestBuilder.class</exclude>
+                                    <exclude>**/ResponseBundle.class</exclude>
+                                    <exclude>**/InferManifestParametersVisitor.class</exclude>
+                                    <exclude>**/LibraryVersionSelector.class</exclude>
+                                    <exclude>**/CqlEngineOptions.class</exclude>
+                                    <exclude>**/CodeExtractor.class</exclude>
+                                    <exclude>**/DynamicModelResolver.class</exclude>
+                                    <exclude>**/EngineFactory.class</exclude>
+                                    <exclude>**/R4PackageService.class</exclude>
+                                    <exclude>**/R4DraftService.class</exclude>
+                                    <exclude>**/R4ApproveService.class</exclude>
+                                    <exclude>**/R4InferManifestParametersService.class</exclude>
+                                    <exclude>**/KnowledgeArtifactProcessor.class</exclude>
+                                    <exclude>**/R4ReleaseService.class</exclude>
+                                    <exclude>**/R4InferManifestParametersService.class</exclude>
+                                    <exclude>**/ReleaseProcessor.class</exclude>
+                                    <exclude>**/ImplementationGuideProcessor.class</exclude>
+                                    <exclude>**/ImplementationGuideAdapter.class</exclude>
+                                    <exclude>**/TaskResolver.class</exclude>
+                                    <exclude>**/CommunicationResolver.class</exclude>
+                                    <exclude>**/ServiceRequestResolver.class</exclude>
+                                    <exclude>**/ValueWrapperUtil$*.class</exclude>
+                                    <exclude>**/AdditionalRequestHeadersInterceptor.class</exclude>
+                                    <exclude>**/IQuestionnaireAdapter.class</exclude>
+                                    <exclude>**/AdditionalRequestHeadersInterceptor.class</exclude>
+                                    <exclude>**/IKnowledgeArtifactAdapter.class</exclude>
+                                    <exclude>**/IParametersParameterComponentAdapter.class</exclude>
+                                    <exclude>**/IStructureDefinitionAdapter.class</exclude>
+                                    <exclude>**/BundleIterator.class</exclude>
+                                    <exclude>**/BundleIterable.class</exclude>
+                                    <exclude>**/BundleMappingIterator.class</exclude>
+                                    <exclude>**/StreamIterable.class</exclude>
+                                    <exclude>**/AttachmentAdapter.class</exclude>
+                                    <exclude>**FederatedRepository.class</exclude>
+                                    <exclude>**/ProxyRepository.class</exclude>
+                                    <exclude>**/Repositories.class</exclude>
+                                    <exclude>**/RestRepository.class</exclude>
+                                    <exclude>**/FederatedRepository.class</exclude>
+                                    <exclude>**/ResourceLoader.class</exclude>
+                                    <exclude>**/FhirResourceLoader.class</exclude>
+                                    <exclude>**/OperationParametersParser.class</exclude>
+                                    <exclude>**/FhirVersions.class</exclude>
+                                    <exclude>**/Parameters.class</exclude>
+                                    <exclude>**/VersionUtilities.class</exclude>
+                                    <exclude>**/ValidationProfile.class</exclude>
+                                    <exclude>**/BundleHelper.class</exclude>
+                                    <exclude>**/ResourceValidator.class</exclude>
+                                    <exclude>**/CqfApplicabilityBehavior.class</exclude>
+                                    <exclude>**/ResourceMatcher$*.class</exclude>
+                                    <exclude>**/ResourceMatcher*.class</exclude>
+                                    <exclude>**/BaseResourceBuilder.class</exclude>
+                                    <exclude>**/BaseBackboneElementBuilder.class</exclude>
+                                    <exclude>**/DetectedIssueBuilder.class</exclude>
+                                    <exclude>**/BaseDomainResourceBuilder.class</exclude>
+                                    <exclude>**/CompositionSectionComponentBuilder.class</exclude>
+                                    <exclude>**/CompositionBuilder.class</exclude>
+                                    <exclude>**/BundleBuilder.class</exclude>
+                                    <exclude>**/Eithers.class</exclude>
+                                    <exclude>**/Tries.class</exclude>
+                                    <exclude>**/Searches.class</exclude>
+                                    <exclude>**/IdCreator.class</exclude>
+                                    <exclude>**/ResourceCreator.class</exclude>
+                                    <exclude>**/AttachmentAdapter.class</exclude>
+                                    <exclude>**/ValueSetAdapter.class</exclude>
+                                    <exclude>**/Main.class</exclude>
+                                    <exclude>**/Resources.class</exclude>
+                                    <exclude>**/ICdsCrService.class</exclude>
+                                    <exclude>**/HeaderInjectionInterceptor.class</exclude>
+                                    <exclude>**/BundleMappingIterable.class</exclude>
+                                    <exclude>**/StratifierRowKey.class</exclude>
+                                </excludes>
                                 <rules>
                                     <rule>
                                         <element>CLASS</element>

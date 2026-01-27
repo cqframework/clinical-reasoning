@@ -54,7 +54,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_L }}
         run: ./mvnw --batch-mode --no-transfer-progress org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=cqframework -Dsonar.projectKey=cqframework_clinical-reasoning
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4

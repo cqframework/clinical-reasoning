@@ -141,8 +141,8 @@ public class HashMapForFhirResourcesAndCqlTypes<K, V> extends HashMap<K, V> {
      */
     @Override
     public V getOrDefault(Object key, V defaultValue) {
-        V value = get(key);
-        return value != null ? value : defaultValue;
+        final K matchingKey = FhirResourceAndCqlTypeUtils.findMatchingKey(this, key);
+        return matchingKey != null ? super.get(matchingKey) : defaultValue;
     }
 
     /**

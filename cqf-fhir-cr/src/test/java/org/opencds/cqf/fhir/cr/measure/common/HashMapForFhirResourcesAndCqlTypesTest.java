@@ -259,6 +259,16 @@ class HashMapForFhirResourcesAndCqlTypesTest {
         assertEquals("default", map.getOrDefault(nonExistentEncounter, "default"));
     }
 
+    @Test
+    void getOrDefaultWithExistingKeyAndNullValueReturnsNull() {
+        var map = new HashMapForFhirResourcesAndCqlTypes<Encounter, String>();
+        var encounter1 = createEncounterWithId(ENCOUNTER_ID_1);
+        map.put(encounter1, null);
+
+        var lookupEncounter = createEncounterWithId(ENCOUNTER_ID_1);
+        assertNull(map.getOrDefault(lookupEncounter, "default"));
+    }
+
     // ========== putIfAbsent tests ==========
 
     @Test

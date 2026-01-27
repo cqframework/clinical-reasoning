@@ -238,6 +238,11 @@ public class PopulationDef {
         this.aggregationResult = aggregationResult;
     }
 
+    /**
+     * Compute the count that will be assigned to the MeasureReport population, taking into
+     * account the population basis and population type (ex: MEASUREPOPULATON).
+     * @return The computed count of the report population.
+     */
     public int getCount() {
         // For other population types, use population basis to determine count
         if (isBooleanBasis()) {

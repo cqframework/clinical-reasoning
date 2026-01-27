@@ -189,7 +189,7 @@ public class EvaluationResultFormatter {
             return "{empty}";
         }
 
-        final Set<Object> resources = populationDef.subjectResources.get(subjectId);
+        final Set<Object> resources = populationDef.getSubjectResources().get(subjectId);
 
         if (CollectionUtils.isEmpty(resources)) {
             return subjectId + ": {empty}";

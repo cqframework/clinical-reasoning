@@ -468,6 +468,10 @@ class MeasureStratifierTest {
                 .hasCount(3);
     }
 
+    // LUKETODO:  we have no tests for non-component value-stratifiers
+    // LUKETODO:  is there such a thing?
+    // LUKETODO:  if so, what additional changes are needed?
+
     @Test
     void ratioResourceCriteriaStratComplexSetsDifferentForInitialDenominatorAndNumerator() {
         GIVEN_CRITERIA_BASED_STRAT_COMPLEX

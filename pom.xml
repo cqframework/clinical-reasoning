@@ -46,11 +46,6 @@
 
         <!-- Multi-module aggregation -->
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
-
-        <!-- coverage badge -->
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.build.directory}/site/jacoco/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <licenses>

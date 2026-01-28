@@ -665,10 +665,10 @@ public class MeasureEvaluator {
 
     private void evaluateStratifier(
             String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
-        if (stratifierDef.isComponentStratifier()) {
-            addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId, groupDef);
+        if (stratifierDef.isCriteriaStratifier()) {
+            addCriteriaStratifierResult(subjectId, evaluationResult, stratifierDef);
         } else {
-            addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
+            addNonCriteriaStratifierResult(stratifierDef.components(), evaluationResult, subjectId, groupDef);
         }
     }
 
@@ -677,7 +677,7 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier component expressions return null.
      */
-    void addStratifierComponentResult(
+    void addNonCriteriaStratifierResult(
             List<StratifierComponentDef> components,
             EvaluationResult evaluationResult,
             String subjectId,
@@ -743,8 +743,7 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier expressions return null.
      */
-    void addStratifierNonComponentResult(
-            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+    void addCriteriaStratifierResult(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
         var expressionResult = evaluationResult.get(stratifierDef.expression());
 

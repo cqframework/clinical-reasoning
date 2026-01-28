@@ -111,13 +111,12 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateStratifierPopulationBasisType(
             String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
 
-        // LUKETODO:  switching to isCriteria makes the unit test fail: is that test valid?
-        if (stratifierDef.isComponentStratifier()) {
+        if (stratifierDef.isCriteriaStratifier()) {
+            validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
+        } else {
             for (var component : stratifierDef.components()) {
                 validateExpressionResultType(groupDef, stratifierDef, component.expression(), evaluationResult, url);
             }
-        } else {
-            validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
         }
     }
 

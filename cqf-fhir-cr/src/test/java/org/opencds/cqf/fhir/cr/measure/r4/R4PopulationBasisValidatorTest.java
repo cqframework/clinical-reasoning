@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
@@ -561,7 +562,13 @@ class R4PopulationBasisValidatorTest {
 
     @Nonnull
     private static StratifierDef buildStratifierDef(MeasureStratifierType stratifierType, String expression) {
-        return new StratifierDef(null, null, expression, stratifierType, List.of());
+        final List<StratifierComponentDef> stratifierComponentDefs;
+        if (stratifierType == MeasureStratifierType.VALUE) {
+            stratifierComponentDefs = List.of(new StratifierComponentDef(null, null, expression));
+        } else {
+            stratifierComponentDefs = List.of();
+        }
+        return new StratifierDef(null, null, expression, stratifierType, stratifierComponentDefs);
     }
 
     @Nonnull
@@ -569,19 +576,6 @@ class R4PopulationBasisValidatorTest {
         final EvaluationResult evaluationResult = new EvaluationResult();
         expressionResultMap.forEach((key, value) ->
                 evaluationResult.set(new EvaluationExpressionRef(key), new ExpressionResult(value, Set.of())));
-        return evaluationResult;
-    }
-
-    @Nonnull
-    private static EvaluationResult buildEvaluationResult(Object expressionResult) {
-        final EvaluationResult evaluationResult = new EvaluationResult();
-        evaluationResult.set(
-                new EvaluationExpressionRef(EXPRESSION_INITIALPOPULATION),
-                new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.set(
-                new EvaluationExpressionRef(EXPRESSION_DENOMINATOR), new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.set(
-                new EvaluationExpressionRef(EXPRESSION_NUMERATOR), new ExpressionResult(expressionResult, Set.of()));
         return evaluationResult;
     }
 }

@@ -173,6 +173,15 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
     }
 
+    // LUKETODO:  leverage this
+    private boolean doesBasisMatchResource(Class<?> resourceClass, String groupPopulationBasisCode) {
+        if (resourceClass == Boolean.class && BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
+            return true;
+        }
+
+        return resourceClass.getSimpleName().equals(groupPopulationBasisCode);
+    }
+
     private Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {
         if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
             return Optional.of(Boolean.class);

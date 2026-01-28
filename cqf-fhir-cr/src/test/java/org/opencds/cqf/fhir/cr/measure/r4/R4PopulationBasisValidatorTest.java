@@ -442,6 +442,8 @@ class R4PopulationBasisValidatorTest {
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
 
+    // LUKETODO:  add criteria based tests
+
     @Test
     void mismatchBooleanBasisMultipleEncounterResults() {
 

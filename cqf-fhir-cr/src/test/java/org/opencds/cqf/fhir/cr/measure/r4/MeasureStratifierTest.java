@@ -483,7 +483,6 @@ class MeasureStratifierTest {
                 .then()
                 .firstGroup()
                 .population("initial-population")
-            // LUKETODO:  need to fix the underlying error in the validator
                 .hasCount(2)
                 .up()
                 .hasStratifierCount(1)

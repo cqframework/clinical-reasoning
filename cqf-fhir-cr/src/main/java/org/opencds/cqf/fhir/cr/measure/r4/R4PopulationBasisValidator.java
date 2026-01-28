@@ -144,8 +144,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             }
 
             if (resultClasses.stream()
-                    .map(Class::getSimpleName)
-                    .noneMatch(simpleName -> simpleName.equals(groupPopulationBasisCode))) {
+                    .noneMatch(resultClass -> doesBasisMatchResource(resultClass, groupPopulationBasisCode))) {
 
                 throw new InvalidRequestException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
@@ -173,13 +172,12 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
     }
 
-    // LUKETODO:  leverage this
-    private boolean doesBasisMatchResource(Class<?> resourceClass, String groupPopulationBasisCode) {
-        if (resourceClass == Boolean.class && BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
+    private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {
+        if (resultClass == Boolean.class && BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
             return true;
         }
 
-        return resourceClass.getSimpleName().equals(groupPopulationBasisCode);
+        return resultClass.getSimpleName().equals(groupPopulationBasisCode);
     }
 
     private Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {

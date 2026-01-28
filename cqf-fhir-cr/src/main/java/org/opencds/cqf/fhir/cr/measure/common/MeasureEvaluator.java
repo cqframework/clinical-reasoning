@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// LUKETODO:  sonar warnings
 /**
  * This class implements the core Measure evaluation logic that's defined in the
  * Quality Measure

@@ -42,6 +42,7 @@ public class StratifierDef {
         this.components = components;
     }
 
+    // LUKETODO: can get rid of this check and just expose isCriteria(), etc?
     public boolean isComponentStratifier() {
         return !components.isEmpty();
     }

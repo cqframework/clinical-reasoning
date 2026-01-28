@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -111,17 +112,32 @@ public class MeasureMultiSubjectEvaluator {
             for (StratifierDef stratifierDef : groupDef.stratifiers()) {
                 final List<StratumDef> stratumDefs;
 
-                if (stratifierDef.isComponentStratifier()) {
-                    stratumDefs = componentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
+                if (stratifierDef.isCriteriaStratifier()) {
+                    stratumDefs = buildCriteriaStrata(fhirContext, stratifierDef, groupDef);
                 } else {
-                    stratumDefs =
-                            nonComponentStratumPlural(fhirContext, stratifierDef, groupDef.populations(), groupDef);
+                    stratumDefs = buildNonCriteriaStrata(fhirContext, stratifierDef, groupDef);
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
             }
         }
     }
+
+    private static List<StratumDef> buildCriteriaStrata(
+            FhirContext fhirContext, StratifierDef stratifierDef, GroupDef groupDef) {
+
+        return List.of(buildStratumDef(
+                fhirContext,
+                stratifierDef,
+                // StratumValueDefs seem to be irrelevant for criteria based stratifiers
+                Set.of(),
+                // Patients seems to be irrelevant for criteria based stratifiers
+                List.of(),
+                // Row keys same as patients for non-component criteria stratifiers
+                List.of(),
+                groupDef));
+    }
+
     /**
      * Builds a {@link StratumDef} for a single stratum by combining stratifier values,
      * subjects, row-level keys, and population definitions.
@@ -205,7 +221,6 @@ public class MeasureMultiSubjectEvaluator {
      * @param values         the set of stratifier component values defining this stratum
      * @param subjectIds     the distinct subjects included in this stratum
      * @param rowKeys        the row-level keys defining atomic stratum membership
-     * @param populationDefs the population definitions for the group
      * @param groupDef       the group definition containing population basis and settings
      *
      * @return a fully constructed {@link StratumDef} with population results and metadata
@@ -216,11 +231,10 @@ public class MeasureMultiSubjectEvaluator {
             Set<StratumValueDef> values,
             List<String> subjectIds,
             List<StratifierRowKey> rowKeys,
-            List<PopulationDef> populationDefs,
             GroupDef groupDef) {
 
         // Build all stratum populations
-        List<StratumPopulationDef> stratumPopulations = populationDefs.stream()
+        List<StratumPopulationDef> stratumPopulations = groupDef.populations().stream()
                 .map(popDef ->
                         buildStratumPopulationDef(fhirContext, stratifierDef, popDef, subjectIds, rowKeys, groupDef))
                 .toList();
@@ -338,11 +352,8 @@ public class MeasureMultiSubjectEvaluator {
         return new MeasureObservationStratumCache(numObsStratumPop, denObsStratumPop);
     }
 
-    private static List<StratumDef> componentStratumPlural(
-            FhirContext fhirContext,
-            StratifierDef stratifierDef,
-            List<PopulationDef> populationDefs,
-            GroupDef groupDef) {
+    private static List<StratumDef> buildNonCriteriaStrata(
+            FhirContext fhirContext, StratifierDef stratifierDef, GroupDef groupDef) {
 
         final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 buildSubjectResultsTable(stratifierDef.components());
@@ -380,103 +391,10 @@ public class MeasureMultiSubjectEvaluator {
                     .distinct()
                     .toList();
 
-            var stratumDef =
-                    buildStratumDef(fhirContext, stratifierDef, valueSet, subjects, rowKeys, populationDefs, groupDef);
-
-            stratumDefs.add(stratumDef);
+            stratumDefs.add(buildStratumDef(fhirContext, stratifierDef, valueSet, subjects, rowKeys, groupDef));
         });
 
         return stratumDefs;
-    }
-
-    private static List<StratumDef> nonComponentStratumPlural(
-            FhirContext fhirContext,
-            StratifierDef stratifierDef,
-            List<PopulationDef> populationDefs,
-            GroupDef groupDef) {
-        // standard Stratifier
-        // one criteria expression defined, one set of criteria results
-
-        // standard Stratifier
-        // one criteria expression defined, one set of criteria results
-        final Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
-
-        // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
-        // combinations of results
-        // example: 'gender' expression could produce values of 'M', 'F'
-        // subject1: 'gender'--> 'M'
-        // subject2: 'gender'--> 'F'
-        // stratifier criteria results are: 'M', 'F'
-
-        if (stratifierDef.isCriteriaStratifier()) {
-            // Seems to be irrelevant for criteria based stratifiers
-            var stratValues = Set.<StratumValueDef>of();
-            // Seems to be irrelevant for criteria based stratifiers
-            var patients = List.<String>of();
-            // Row keys same as patients for non-component criteria stratifiers
-            var rowKeys = List.<StratifierRowKey>of();
-
-            var stratum = buildStratumDef(
-                    fhirContext, stratifierDef, stratValues, patients, rowKeys, populationDefs, groupDef);
-            return List.of(stratum);
-        }
-
-        final Map<StratumValueWrapper, List<String>> valueToSubjects = buildValueToSubjectsMapping(subjectValues);
-
-        // Build strata from value-to-subjects mapping
-        var stratumMultiple = new ArrayList<StratumDef>();
-
-        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : valueToSubjects.entrySet()) {
-            var patientsSubjects = stratValue.getValue();
-            // For non-component stratifiers, row keys are subject-only keys
-            var rowKeys =
-                    patientsSubjects.stream().map(StratifierRowKey::subjectOnly).toList();
-            // build the stratum for each unique value
-            // non-component stratifiers will populate a 'null' for componentStratifierDef, since it doesn't have
-            // multiple criteria
-            Set<StratumValueDef> stratValues = Set.of(new StratumValueDef(stratValue.getKey(), null));
-            var stratum = buildStratumDef(
-                    fhirContext, stratifierDef, stratValues, patientsSubjects, rowKeys, populationDefs, groupDef);
-            stratumMultiple.add(stratum);
-        }
-
-        return stratumMultiple;
-    }
-
-    private static Map<StratumValueWrapper, List<String>> buildValueToSubjectsMapping(
-            Map<String, CriteriaResult> subjectValues) {
-
-        // Build value-to-subjects mapping, expanding Iterables so each unique value creates its own stratum.
-        // This allows a subject to appear in multiple strata when the CQL expression returns multiple values
-        // (e.g., a List<Encounter> per patient).
-        Map<StratumValueWrapper, List<String>> valueToSubjects = new HashMap<>();
-
-        for (Entry<String, CriteriaResult> entry : subjectValues.entrySet()) {
-
-            if (entry.getValue() != null) {
-                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(entry.getKey());
-                Object rawValue = entry.getValue().rawValue();
-
-                if (rawValue == null) {
-                    // Handle null as a special stratum value
-                    StratumValueWrapper wrapper = new StratumValueWrapper(null);
-                    valueToSubjects
-                            .computeIfAbsent(wrapper, k -> new ArrayList<>())
-                            .add(qualifiedSubject);
-                } else {
-                    // Expand Iterables (but NOT Maps - they have different semantics for NON_SUBJECT_VALUE)
-                    Iterable<?> valuesToProcess = toExpandedIterable(rawValue);
-
-                    for (Object value : valuesToProcess) {
-                        StratumValueWrapper wrapper = new StratumValueWrapper(value);
-                        valueToSubjects
-                                .computeIfAbsent(wrapper, k -> new ArrayList<>())
-                                .add(qualifiedSubject);
-                    }
-                }
-            }
-        }
-        return valueToSubjects;
     }
 
     /**
@@ -768,7 +686,6 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For VALUE stratifiers (subject-basis scalar values), we fall back to the original behavior
      * of getting all resources for the qualifying subjects.
      */
-    @Nonnull
     private static List<String> getResourceIdsForValueStratifier(
             FhirContext fhirContext,
             StratifierDef stratifierDef,
@@ -796,7 +713,7 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         // Fall back to original behavior for VALUE stratifiers or if no composite keys
-        return getPopulationBasisKeys(fhirContext, subjectIds, groupDef, populationDef);
+        return getPopulationBasisKeys(subjectIds, populationDef);
     }
 
     /**
@@ -862,10 +779,7 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Extract resource IDs from the population and subject IDs.
      */
-    // Moved from R4StratifierBuilder by Claude Sonnet 4.5
-    @Nonnull
-    private static List<String> getPopulationBasisKeys(
-            FhirContext fhirContext, Collection<String> subjectIds, GroupDef groupDef, PopulationDef populationDef) {
+    private static List<String> getPopulationBasisKeys(Collection<String> subjectIds, PopulationDef populationDef) {
 
         List<String> keys = new ArrayList<>();
         if (populationDef.getSubjectResources() == null) return keys;
@@ -897,33 +811,6 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Converts a raw stratifier value into an Iterable for expansion into multiple strata.
-     *
-     * <p>This method handles three cases:
-     * <ul>
-     *   <li><b>Map values</b>: NOT expanded. Maps are used by NON_SUBJECT_VALUE stratifiers
-     *       (function-based) with different semantics - they're handled in buildSubjectResultsTable().</li>
-     *   <li><b>Iterable values</b>: Returned as-is for expansion. Each element becomes its own stratum.</li>
-     *   <li><b>Scalar values</b>: Wrapped in a single-element list.</li>
-     * </ul>
-     *
-     * @param rawValue the raw value from CQL evaluation
-     * @return an Iterable containing the value(s) to process
-     */
-    private static Iterable<?> toExpandedIterable(Object rawValue) {
-        // Maps have special semantics for NON_SUBJECT_VALUE - don't expand
-        if (rawValue instanceof Map<?, ?>) {
-            return List.of(rawValue);
-        }
-
-        if (rawValue instanceof Iterable<?> iterable) {
-            return iterable;
-        }
-
-        return List.of(rawValue);
-    }
-
-    /**
      * Normalize a value to a string key for use in composite row keys when expanding Iterables.
      * Uses the index as a fallback for null values to ensure unique keys.
      */
@@ -949,6 +836,10 @@ public class MeasureMultiSubjectEvaluator {
             return Set.of();
         }
 
+        if (StringUtils.isBlank(subjectId) || !subjectId.contains("/")) {
+            throw new InvalidRequestException("subjectId must contain '/': %s".formatted(subjectId));
+        }
+
         String id = subjectId.split("/")[1]; // "81230987"
 
         var filtered = populationDef.getSubjectResources().entrySet().stream()
@@ -958,8 +849,9 @@ public class MeasureMultiSubjectEvaluator {
         return filtered.values().stream()
                 .flatMap(Set::stream)
                 .filter(Map.class::isInstance) // Keep only Map<?,?>
-                .map(m -> (Map<?, ?>) m) // Cast
-                .flatMap(m -> m.keySet().stream()) // capture Key only, not Qty
+                .map(map -> (Map<?, ?>) map) // Cast
+                .map(Map::keySet)
+                .flatMap(Collection::stream) // capture Key only, not Qty
                 .collect(Collectors.toSet());
     }
 }

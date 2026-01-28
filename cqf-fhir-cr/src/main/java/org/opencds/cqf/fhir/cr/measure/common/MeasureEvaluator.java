@@ -28,7 +28,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// LUKETODO:  sonar warnings
 /**
  * This class implements the core Measure evaluation logic that's defined in the
  * Quality Measure
@@ -544,38 +543,47 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            final Object firstEntryValue = entryValue.iterator().next();
+            removeObservatorySubjectResource(measurePopulation, entryValue, subjectId, it);
+        }
+    }
 
-            if (!(firstEntryValue instanceof Map<?, ?>)) {
-                throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
-            }
+    private void removeObservatorySubjectResource(
+            Map<String, Set<Object>> measurePopulation,
+            Set<?> entryValue,
+            String subjectId,
+            Iterator<Entry<String, Set<Object>>> iterator) {
+        final Object firstEntryValue = entryValue.iterator().next();
 
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
+        if (!(firstEntryValue instanceof Map<?, ?>)) {
+            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
+        }
 
-            // population values for this subject
-            Set<Object> populationValues = measurePopulation.get(subjectId);
+        @SuppressWarnings("unchecked")
+        Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
 
-            // If there is no population for this subject, there is nothing "to remove because it matches",
-            // so leave the observation set as-is.
-            if (populationValues == null || populationValues.isEmpty()) {
-                continue;
-            }
+        // population values for this subject
+        Set<Object> populationValues = measurePopulation.get(subjectId);
 
-            // Remove observations that *do* match population values
-            obsSet.removeIf(obsMap -> {
-                for (Object key : obsMap.keySet()) {
-                    if (populationValues.contains(key)) {
-                        // This observation map is backed by a population resource -> remove it
-                        return true;
-                    }
+        // If there is no population for this subject, there is nothing "to remove because iterator matches",
+        // so leave the observation set as-is.
+        if (populationValues == null || populationValues.isEmpty()) {
+            return;
+        }
+
+        // Remove observations that *do* match population values
+        obsSet.removeIf(obsMap -> {
+            for (Object key : obsMap.keySet()) {
+                if (populationValues.contains(key)) {
+                    // This observation map is backed by a population resource -> remove iterator
+                    return true;
                 }
-                return false;
-            });
-
-            // If no observations remain for this subject, remove the subject entry entirely
-            if (obsSet.isEmpty()) {
-                it.remove();
             }
+            return false;
+        });
+
+        // If no observations remain for this subject, remove the subject entry entirely
+        if (obsSet.isEmpty()) {
+            iterator.remove();
         }
     }
 

@@ -167,6 +167,8 @@ define "Age":
 define function "Age Function"(encounter Encounter):
   AgeInYearsAt(start of encounter.period)
 
+define function "Encounter Status Stratifier"(encounter Encounter):
+  Coalesce(encounter.status.value, 'unknown')
 
 define "Date":
     Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]

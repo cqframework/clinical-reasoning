@@ -53,7 +53,7 @@ public class FunctionEvaluationHandler {
             // MeasureDefs where functions need to evaluate
             final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
                     // if measure contains measure-observation, otherwise short circuit
-                    .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
+                    .filter(measureDef -> hasMeasureObservation(measureDef) || hasNonSubValueStratifier(measureDef))
                     .toList();
 
             if (measureDefsWithFunctions.isEmpty()) {

@@ -376,7 +376,7 @@ class MeasureStratifierTest {
                 .up()
                 .hasStratifierCount(1)
                 .firstStratifier()
-                .hasCodeText("in-progress encounters")
+                .hasCodeText("in-progress encounters resource")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
@@ -460,12 +460,40 @@ class MeasureStratifierTest {
                 .up()
                 .hasStratifierCount(1)
                 .firstStratifier()
-                .hasCodeText("in-progress encounters")
+                .hasCodeText("in-progress encounters resource")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
                 .firstPopulation()
                 .hasCount(3);
+    }
+
+    /*
+    two patients
+    9 total encounters
+    1 encounter for patient 1 in-progress
+    2 encounter for patient 2 in-progress
+     */
+    @Test
+    void cohortCriteriaStratBooleanBasisAllPatientsTwoEncounters() {
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+                .when()
+                .measureId("CriteriaBasedStratifiersBooleanBasisSimple")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+            // LUKETODO:  need to fix the underlying error in the validator
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("bad criteria stratifier")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(0);
     }
 
     @Test

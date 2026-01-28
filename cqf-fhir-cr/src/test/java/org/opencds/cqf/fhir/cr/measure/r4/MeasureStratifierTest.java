@@ -366,7 +366,7 @@ class MeasureStratifierTest {
     void cohortBooleanCriteriaStratSinglePatientSingleEncounter() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
-                .measureId("CriteriaBasedStratifiersSimple")
+                .measureId("CriteriaBasedStratifiersEncounterBasisSimple")
                 .subject("Patient/patient1")
                 .evaluate()
                 .then()
@@ -432,13 +432,13 @@ class MeasureStratifierTest {
     void cohortResourceCriteriaStratSingleBadExpressionForValueInvalid() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
-                .measureId("CriteriaBasedStratifiersSimpleBad")
+                .measureId("CriteriaBasedStratifiersEncounterBasisSimpleBad")
                 .subject("Patient/patient1")
                 .evaluate()
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "criteria-based stratifier is invalid for expression: [bad criteria stratifier] due to mismatch between population basis: [Encounter] and result types: [Boolean] for measure URL: http://example.com/Measure/CriteriaBasedStratifiersSimpleBad");
+                        "criteria-based stratifier is invalid for expression: [bad criteria stratifier] due to mismatch between population basis: [Encounter] and result types: [Boolean] for measure URL: http://example.com/Measure/CriteriaBasedStratifiersEncounterBasisSimpleBad");
     }
 
     /*
@@ -451,7 +451,7 @@ class MeasureStratifierTest {
     void cohortResourceCriteriaStratAllPatientsTwoEncounters() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
-                .measureId("CriteriaBasedStratifiersSimple")
+                .measureId("CriteriaBasedStratifiersEncounterBasisSimple")
                 .evaluate()
                 .then()
                 .firstGroup()

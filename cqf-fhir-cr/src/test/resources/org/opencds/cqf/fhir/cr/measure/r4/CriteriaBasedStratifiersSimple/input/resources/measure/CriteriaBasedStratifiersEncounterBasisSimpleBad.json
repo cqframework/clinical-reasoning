@@ -1,8 +1,8 @@
 {
-  "id": "CriteriaBasedStratifiersSimple",
+  "id": "CriteriaBasedStratifiersEncounterBasisSimpleBad",
   "resourceType": "Measure",
-  "name": "CriteriaBasedStratifiersSimple",
-  "url": "http://example.com/Measure/CriteriaBasedStratifiersSimple",
+  "name": "CriteriaBasedStratifiersEncounterBasisSimpleBad",
+  "url": "http://example.com/Measure/CriteriaBasedStratifiersEncounterBasisSimpleBad",
   "library": [
     "http://example.com/Library/CriteriaBasedStratifiersSimple"
   ],
@@ -37,16 +37,16 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "initial population resource"
+            "expression": "initial population"
           }
         }
       ],
       "stratifier": [
         {
-          "id": "stratifier-1",
+          "id": "stratifier-bad",
           "criteria": {
             "language": "text/cql.identifier",
-            "expression": "in-progress encounters resource"
+            "expression": "bad criteria stratifier"
           }
         }
       ]

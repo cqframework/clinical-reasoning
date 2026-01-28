@@ -1,33 +1,15 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
-import static ca.uhn.fhir.model.valueset.BundleTypeEnum.SEARCHSET;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
-import ca.uhn.fhir.jpa.repository.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Multimap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class is intended as a shim that extends HapiFhirRepository in order to selectively
@@ -38,8 +20,6 @@ import org.slf4j.LoggerFactory;
  * within our more flexible release cadence.
  */
 public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
-
-    private static final Logger ourLog = LoggerFactory.getLogger(ClinicalIntelligenceHapiFhirRepository.class);
 
     private final RequestDetails requestDetails;
     private final RestfulServer restfulServer;
@@ -70,98 +50,6 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             Multimap<String, List<IQueryParameterType>> searchParameters,
             Map<String, String> headers) {
 
-        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
-                .setAction(RestOperationTypeEnum.SEARCH_TYPE)
-                .addHeaders(headers)
-                .create();
-
-        // LUKETODO:  call the parent as much as possible and delete as much as possible
-
-        var converter = new SearchConverter();
-        converter.convertParameters(searchParameters, fhirContext());
-        details.setParameters(converter.myResultParameters);
-
-        details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
-
-        if (details instanceof SystemRequestDetails) {
-            requestDetails.getParameters().entrySet().stream()
-                    .filter(param -> Constants.PARAM_COUNT.equals(param.getKey()))
-                    .map(Entry::getValue)
-                    .forEach(paramValue -> details.addParameter(Constants.PARAM_COUNT, paramValue));
-        }
-
-        var resourceDao = daoRegistry.getResourceDao(resourceType);
-        var bundleProvider = resourceDao.search(converter.mySearchParameterMap, details);
-
-        bundleProvider = sanitizeBundleProvider(bundleProvider);
-
-        return createBundle(details, bundleProvider);
-    }
-
-    protected IBundleProvider sanitizeBundleProvider(IBundleProvider bundleProvider) {
-        return nonNull(bundleProvider) ? bundleProvider : new SimpleBundleProvider();
-    }
-
-    protected Set<Include> extractIncludesFromRequestParameters(Map<String, String[]> parameters) {
-        Set<Include> includes = new HashSet<>();
-
-        String[] reqIncludes = parameters.get(Constants.PARAM_INCLUDE);
-        if (reqIncludes != null) {
-            for (String nextInclude : reqIncludes) {
-                includes.add(new Include(nextInclude));
-            }
-        }
-
-        return includes;
-    }
-
-    protected BundleTypeEnum extractBundleTypeFromRequestParameters(Map<String, String[]> parameters) {
-        BundleTypeEnum bundleType;
-
-        String[] bundleTypeValues = parameters.get(Constants.PARAM_BUNDLETYPE);
-
-        if (isNull(bundleTypeValues)) {
-            return SEARCHSET;
-        }
-
-        bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
-
-        if (isNull(bundleType)) {
-            ourLog.error(
-                    "Could not convert value {} to a BundleTypeEnum.  Defaulting to {}",
-                    bundleTypeValues[0],
-                    bundleType);
-            bundleType = SEARCHSET;
-        }
-
-        return bundleType;
-    }
-
-    private <B extends IBaseBundle> B createBundle(RequestDetails requestDetails, IBundleProvider bundleProvider) {
-
-        Integer count = RestfulServerUtils.extractCountParameter(requestDetails);
-        String linkSelf = RestfulServerUtils.createLinkSelf(requestDetails.getFhirServerBase(), requestDetails);
-
-        Set<Include> includes = extractIncludesFromRequestParameters(requestDetails.getParameters());
-
-        Integer offset = RestfulServerUtils.tryToExtractNamedParameter(requestDetails, Constants.PARAM_PAGINGOFFSET);
-        if (offset == null || offset < 0) {
-            offset = 0;
-        }
-        int start = offset;
-        Integer size = bundleProvider.size();
-        if (size != null) {
-            start = Math.max(0, Math.min(offset, size));
-        }
-
-        BundleTypeEnum bundleType = extractBundleTypeFromRequestParameters(requestDetails.getParameters());
-
-        return unsafeCast(ClinicalIntelligenceBundleProviderUtil.createBundleFromBundleProvider(
-                restfulServer, requestDetails, count, linkSelf, includes, bundleProvider, start, bundleType, null));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T unsafeCast(Object object) {
-        return (T) object;
+        return super.search(bundleType, resourceType, searchParameters, headers);
     }
 }

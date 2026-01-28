@@ -334,6 +334,22 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
+                                        MeasureStratifierType.CRITERIA,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
+                        buildEvaluationResult(Map.of(
+                                EXPRESSION_INITIALPOPULATION,
+                                Boolean.TRUE,
+                                EXPRESSION_DENOMINATOR,
+                                Boolean.TRUE,
+                                EXPRESSION_NUMERATOR,
+                                Boolean.TRUE))),
+                new ValidateStratifierBasisTypeHappyPathParams(
+                        buildGroupDef(
+                                Basis.BOOLEAN,
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildStratifierDefs(
                                         MeasureStratifierType.VALUE,
                                         EXPRESSION_INITIALPOPULATION,
                                         EXPRESSION_DENOMINATOR,
@@ -441,8 +457,6 @@ class R4PopulationBasisValidatorTest {
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
-
-    // LUKETODO:  add criteria based tests
 
     @Test
     void mismatchBooleanBasisMultipleEncounterResults() {

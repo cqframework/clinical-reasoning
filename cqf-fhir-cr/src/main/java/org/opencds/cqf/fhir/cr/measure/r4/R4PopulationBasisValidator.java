@@ -173,6 +173,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     }
 
     private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {
+        // If we don't do this we'll fail with "boolean" vs. "Boolean"
         if (resultClass == Boolean.class && BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
             return true;
         }

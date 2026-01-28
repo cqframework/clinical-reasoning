@@ -1,0 +1,6 @@
+{
+  "resourceType": "Patient",
+  "id": "patient-no-encounters",
+  "gender": "male",
+  "birthDate": "1988-01-11"
+}

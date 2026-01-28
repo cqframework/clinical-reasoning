@@ -1,0 +1,12 @@
+{
+  "resourceType": "Encounter",
+  "id": "patient-0-encounter-2",
+  "status": "finished",
+  "subject": {
+    "reference": "Patient/patient-0"
+  },
+  "period": {
+    "start": "2024-01-02T01:00:00Z",
+    "end": "2024-01-02T03:00:00Z"
+  }
+}

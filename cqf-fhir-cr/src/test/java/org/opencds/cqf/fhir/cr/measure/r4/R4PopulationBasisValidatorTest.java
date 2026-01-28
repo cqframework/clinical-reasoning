@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
@@ -82,7 +83,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 Boolean.TRUE,
@@ -95,7 +99,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
@@ -108,7 +115,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 ENCOUNTER,
@@ -121,7 +131,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
@@ -134,7 +147,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.PROCEDURE,
                                 buildPopulationDefs(Basis.PROCEDURE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 PROCEDURE,
@@ -147,7 +163,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.PROCEDURE,
                                 buildPopulationDefs(Basis.PROCEDURE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(PROCEDURE, PROCEDURE, PROCEDURE),
@@ -173,7 +192,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(ENCOUNTER),
@@ -187,7 +209,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER),
@@ -201,7 +226,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
@@ -215,7 +243,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 Boolean.TRUE,
@@ -229,7 +260,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 Boolean.TRUE,
@@ -243,7 +277,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.PROCEDURE,
                                 buildPopulationDefs(Basis.PROCEDURE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(ENCOUNTER),
@@ -257,7 +294,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(ENCOUNTER),
@@ -271,8 +311,10 @@ class R4PopulationBasisValidatorTest {
     @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("validateGroupBasisTypeErrorPathParams")
     void validateGroupBasisTypeErrorPath(ValidateGroupBasisTypeErrorPathParams testCase) {
+        final GroupDef groupDef = testCase.groupDef();
+        final EvaluationResult evaluationResult = testCase.evaluationResult();
         try {
-            testSubject.validateGroupPopulations(MEASURE_DEF, testCase.groupDef(), testCase.evaluationResult());
+            testSubject.validateGroupPopulations(MEASURE_DEF, groupDef, evaluationResult);
             fail("Expected this test to fail");
         } catch (InvalidRequestException exception) {
             assertEquals(testCase.expectedExceptionMessage(), exception.getMessage());
@@ -293,7 +335,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.CRITERIA,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 Boolean.TRUE,
@@ -306,7 +351,26 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
+                        buildEvaluationResult(Map.of(
+                                EXPRESSION_INITIALPOPULATION,
+                                Boolean.TRUE,
+                                EXPRESSION_DENOMINATOR,
+                                Boolean.TRUE,
+                                EXPRESSION_NUMERATOR,
+                                Boolean.TRUE))),
+                new ValidateStratifierBasisTypeHappyPathParams(
+                        buildGroupDef(
+                                Basis.BOOLEAN,
+                                buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                                buildStratifierDefs(
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
@@ -319,7 +383,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.BOOLEAN,
                                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, new CodeableConcept(), new Range()),
@@ -332,7 +399,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, new CodeableConcept(), new Range()),
@@ -345,7 +415,10 @@ class R4PopulationBasisValidatorTest {
                                 Basis.ENCOUNTER,
                                 buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
                                 buildStratifierDefs(
-                                        EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR)),
+                                        MeasureStratifierType.VALUE,
+                                        EXPRESSION_INITIALPOPULATION,
+                                        EXPRESSION_DENOMINATOR,
+                                        EXPRESSION_NUMERATOR)),
                         buildEvaluationResult(Map.of(
                                 EXPRESSION_INITIALPOPULATION,
                                 List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
@@ -366,7 +439,11 @@ class R4PopulationBasisValidatorTest {
         var expectedGroupDef = buildGroupDef(
                 Basis.BOOLEAN,
                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
+                buildStratifierDefs(
+                        MeasureStratifierType.VALUE,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
 
         var expectedEvaluationResult = buildEvaluationResult(Map.of(
                 EXPRESSION_INITIALPOPULATION,
@@ -388,7 +465,11 @@ class R4PopulationBasisValidatorTest {
         var expectedGroupDef = buildGroupDef(
                 Basis.BOOLEAN,
                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
+                buildStratifierDefs(
+                        MeasureStratifierType.VALUE,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
 
         var expectedEvaluationResult = buildEvaluationResult(Map.of(
                 EXPRESSION_INITIALPOPULATION,
@@ -409,7 +490,11 @@ class R4PopulationBasisValidatorTest {
         var expectedGroupDef = buildGroupDef(
                 Basis.BOOLEAN,
                 buildPopulationDefs(Basis.BOOLEAN, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
-                buildStratifierDefs(EXPRESSION_INITIALPOPULATION, EXPRESSION_DENOMINATOR, EXPRESSION_NUMERATOR));
+                buildStratifierDefs(
+                        MeasureStratifierType.VALUE,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
 
         var expectedEvaluationResult = buildEvaluationResult(Map.of(
                 EXPRESSION_INITIALPOPULATION,
@@ -468,15 +553,22 @@ class R4PopulationBasisValidatorTest {
     }
 
     @Nonnull
-    private static List<StratifierDef> buildStratifierDefs(String... populations) {
+    private static List<StratifierDef> buildStratifierDefs(
+            MeasureStratifierType stratifierType, String... populations) {
         return Arrays.stream(populations)
-                .map(R4PopulationBasisValidatorTest::buildStratifierDef)
+                .map(population -> buildStratifierDef(stratifierType, population))
                 .toList();
     }
 
     @Nonnull
-    private static StratifierDef buildStratifierDef(String expression) {
-        return new StratifierDef(null, null, expression, MeasureStratifierType.VALUE, List.of());
+    private static StratifierDef buildStratifierDef(MeasureStratifierType stratifierType, String expression) {
+        final List<StratifierComponentDef> stratifierComponentDefs;
+        if (stratifierType == MeasureStratifierType.VALUE) {
+            stratifierComponentDefs = List.of(new StratifierComponentDef(null, null, expression));
+        } else {
+            stratifierComponentDefs = List.of();
+        }
+        return new StratifierDef(null, null, expression, stratifierType, stratifierComponentDefs);
     }
 
     @Nonnull
@@ -484,19 +576,6 @@ class R4PopulationBasisValidatorTest {
         final EvaluationResult evaluationResult = new EvaluationResult();
         expressionResultMap.forEach((key, value) ->
                 evaluationResult.set(new EvaluationExpressionRef(key), new ExpressionResult(value, Set.of())));
-        return evaluationResult;
-    }
-
-    @Nonnull
-    private static EvaluationResult buildEvaluationResult(Object expressionResult) {
-        final EvaluationResult evaluationResult = new EvaluationResult();
-        evaluationResult.set(
-                new EvaluationExpressionRef(EXPRESSION_INITIALPOPULATION),
-                new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.set(
-                new EvaluationExpressionRef(EXPRESSION_DENOMINATOR), new ExpressionResult(expressionResult, Set.of()));
-        evaluationResult.set(
-                new EvaluationExpressionRef(EXPRESSION_NUMERATOR), new ExpressionResult(expressionResult, Set.of()));
         return evaluationResult;
     }
 }

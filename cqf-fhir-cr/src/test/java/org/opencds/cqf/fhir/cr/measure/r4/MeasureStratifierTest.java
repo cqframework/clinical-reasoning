@@ -250,7 +250,7 @@ class MeasureStratifierTest {
      * - hasCriteria=false (no stratifier.criteria)
      * - hasAnyComponentCriteria=true (has stratifier.component[].criteria)
      * - isBooleanBasis=false (basis is Encounter)
-     *
+     * <p/>
      * NON_SUBJECT_VALUE stratifiers MUST use CQL function definitions. The "Age" expression is a scalar,
      * not a function, so this should produce a validation error.
      */
@@ -272,11 +272,11 @@ class MeasureStratifierTest {
      * Ratio Measure with Resource (Encounter) Basis where Stratifier is defined using stratifier.criteria
      * (making it a CRITERIA stratifier), but the expression "Encounter Status" returns status values
      * (strings) instead of Encounter resources.
-     *
+     * <p/>
      * This is an INVALID measure configuration because:
      * - CRITERIA stratifiers must return resources matching the population basis
      * - Population basis is Encounter, but "Encounter Status" returns E.status (string values)
-     *
+     * <p/>
      * The evaluation should capture the error in a contained OperationOutcome.
      */
     @Test
@@ -347,13 +347,12 @@ class MeasureStratifierTest {
      */
     @Test
     void cohortBooleanValueStratTwoStratifierCriteriaInvalid() {
+        var when = GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratComponentInvalid")
+                .evaluate();
         try {
-            GIVEN_MEASURE_STRATIFIER_TEST
-                    .when()
-                    .measureId("CohortBooleanStratComponentInvalid")
-                    .evaluate()
-                    .then()
-                    .report();
+            when.then();
             fail("should throw an exception");
         } catch (InvalidRequestException exception) {
             var exceptionMessage = exception.getMessage();
@@ -367,7 +366,7 @@ class MeasureStratifierTest {
     void cohortBooleanCriteriaStratSinglePatientSingleEncounter() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
-                .measureId("CriteriaBasedStratifiersSimple")
+                .measureId("CriteriaBasedStratifiersEncounterBasisSimple")
                 .subject("Patient/patient1")
                 .evaluate()
                 .then()
@@ -377,7 +376,7 @@ class MeasureStratifierTest {
                 .up()
                 .hasStratifierCount(1)
                 .firstStratifier()
-                .hasCodeText("in-progress encounters")
+                .hasCodeText("in-progress encounters resource")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
@@ -433,13 +432,13 @@ class MeasureStratifierTest {
     void cohortResourceCriteriaStratSingleBadExpressionForValueInvalid() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
-                .measureId("CriteriaBasedStratifiersSimpleBad")
+                .measureId("CriteriaBasedStratifiersEncounterBasisSimpleBad")
                 .subject("Patient/patient1")
                 .evaluate()
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "criteria-based stratifier is invalid for expression: [bad criteria stratifier] due to mismatch between population basis: [Encounter] and result types: [Boolean] for measure URL: http://example.com/Measure/CriteriaBasedStratifiersSimpleBad");
+                        "criteria-based stratifier is invalid for expression: [bad criteria stratifier] due to mismatch between population basis: [Encounter] and result types: [Boolean] for measure URL: http://example.com/Measure/CriteriaBasedStratifiersEncounterBasisSimpleBad");
     }
 
     /*
@@ -452,7 +451,7 @@ class MeasureStratifierTest {
     void cohortResourceCriteriaStratAllPatientsTwoEncounters() {
         GIVEN_CRITERIA_BASED_STRAT_SIMPLE
                 .when()
-                .measureId("CriteriaBasedStratifiersSimple")
+                .measureId("CriteriaBasedStratifiersEncounterBasisSimple")
                 .evaluate()
                 .then()
                 .firstGroup()
@@ -461,12 +460,39 @@ class MeasureStratifierTest {
                 .up()
                 .hasStratifierCount(1)
                 .firstStratifier()
-                .hasCodeText("in-progress encounters")
+                .hasCodeText("in-progress encounters resource")
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
                 .firstPopulation()
                 .hasCount(3);
+    }
+
+    /*
+    two patients
+    9 total encounters
+    1 encounter for patient 1 in-progress
+    2 encounter for patient 2 in-progress
+     */
+    @Test
+    void cohortCriteriaStratBooleanBasisAllPatientsTwoEncounters() {
+        GIVEN_CRITERIA_BASED_STRAT_SIMPLE
+                .when()
+                .measureId("CriteriaBasedStratifiersBooleanBasisSimple")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population("initial-population")
+                .hasCount(2)
+                .up()
+                .hasStratifierCount(1)
+                .firstStratifier()
+                .hasCodeText("bad criteria stratifier")
+                .hasStratumCount(1)
+                .firstStratum()
+                .hasPopulationCount(1)
+                .firstPopulation()
+                .hasCount(0);
     }
 
     @Test
@@ -604,11 +630,11 @@ class MeasureStratifierTest {
     /**
      * Resource (Encounter) Basis Measure with multi-component value stratifier.
      * Components: Age Range Stratifier (function) + Encounter Status Stratifier (function)
-     *
+     * <p/>
      * Patient-9 has:
      * - Encounter 1: status='finished', period 2024-01-01 (age ~36 -> P21Y--P41Y)
      * - Encounter 2: status='in-progress', period 2024-01-01 (age ~36 -> P21Y--P41Y)
-     *
+     * <p/>
      * Expected strata (grouped by component value combinations):
      * - Stratum 1: P21Y--P41Y + finished -> count=1 (encounter-1)
      * - Stratum 2: P21Y--P41Y + in-progress -> count=1 (encounter-2)
@@ -703,5 +729,284 @@ class MeasureStratifierTest {
                 2,
                 singleStratum.getPopulationFirstRep().getCount(),
                 "Expected population count of 2 (for 2 encounters)");
+    }
+
+    /**
+     * VALUE stratifier that returns List<EncounterStatus> should expand
+     * into multiple strata. Patient-9 has 2 encounters (finished, in-progress),
+     * so the list expansion should create 2 strata with count=1 each.
+     * <p/>
+     * This tests the multi-value expansion feature in nonComponentStratumPlural().
+     */
+    @Test
+    void cohortBooleanValueStratMultiValueList() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiValueStrat")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("encounter-statuses")
+                .hasStratumCount(2) // One stratum per unique status
+                .stratumByText("finished")
+                .firstPopulation()
+                .hasCount(1) // Patient-9 appears once in "finished"
+                .up()
+                .up()
+                .stratumByText("in-progress")
+                .firstPopulation()
+                .hasCount(1) // Patient-9 appears once in "in-progress"
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    /**
+     * Tests that multiple patients can contribute to the same stratum
+     * when their list values overlap.
+     * <p/>
+     * Setup (based on test data):
+     * - patient-0: [in-progress, finished] (2 encounters)
+     * - patient-1: [in-progress, finished] (2 encounters)
+     * - patient-2: [arrived] (1 encounter)
+     * - patient-3: [arrived] (1 encounter)
+     * - patient-4: [triaged] (1 encounter)
+     * - patient-5: [triaged] (1 encounter)
+     * - patient-6: [cancelled] (1 encounter)
+     * - patient-7: [cancelled] (1 encounter)
+     * - patient-8: [finished] (1 encounter)
+     * - patient-9: [finished, in-progress] (2 encounters)
+     * <p/>
+     * Expected strata:
+     * - "finished": count=4 (patient-0, patient-1, patient-8, patient-9)
+     * - "in-progress": count=3 (patient-0, patient-1, patient-9)
+     * - "arrived": count=2 (patient-2, patient-3)
+     * - "triaged": count=2 (patient-4, patient-5)
+     * - "cancelled": count=2 (patient-6, patient-7)
+     */
+    @Test
+    void cohortBooleanValueStratMultiValueListOverlapping() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiValueStrat")
+                .evaluate() // All patients
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("encounter-statuses")
+                // Should have strata for each unique encounter status across all patients
+                .hasStratumCount(5) // finished, in-progress, arrived, cancelled, triaged
+                .stratumByText("finished")
+                .firstPopulation()
+                .hasCount(4) // patient-0, patient-1, patient-8, patient-9 all have finished encounters
+                .up()
+                .up()
+                .stratumByText("in-progress")
+                .firstPopulation()
+                .hasCount(3) // patient-0, patient-1, patient-9 have in-progress
+                .up()
+                .up()
+                .stratumByText("arrived")
+                .firstPopulation()
+                .hasCount(2) // patient-2, patient-3
+                .up()
+                .up()
+                .stratumByText("arrived")
+                .firstPopulation()
+                .hasCount(2) // patient-2, patient-3
+                .up()
+                .up()
+                .stratumByText("triaged")
+                .firstPopulation()
+                .hasCount(2) // patient-4, patient-5
+                .up()
+                .up()
+                .stratumByText("cancelled")
+                .firstPopulation()
+                .hasCount(2); // patient-7, patient-7
+    }
+
+    /**
+     * Tests that single-element list behaves identically to scalar value.
+     * Patient-2 has only one encounter (status: arrived), so should produce one stratum.
+     */
+    @Test
+    void cohortBooleanValueStratSingleElementList() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiValueStrat")
+                .subject("Patient/patient-2")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("encounter-statuses")
+                .hasStratumCount(1)
+                .stratumByText("arrived")
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    /**
+     * Tests that empty list results in no stratum for that subject.
+     * Patient with no encounters should not contribute to any stratum.
+     */
+    @Test
+    void cohortBooleanValueStratEmptyList() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiValueStrat")
+                .subject("Patient/patient-no-encounters")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasStratumCount(0); // No strata when list is empty
+    }
+
+    /**
+     * Encounter Basis Measure with multi-value VALUE stratifier.
+     * Expression: All Encounter Statuses returns List<EncounterStatus> for each patient.
+     * <p/>
+     * Patient-9 has:
+     * - Encounter 1: status='finished'
+     * - Encounter 2: status='in-progress'
+     * <p/>
+     * Expected strata (one per unique status):
+     * - Stratum 'finished': count=1 (encounter-1)
+     * - Stratum 'in-progress': count=1 (encounter-2)
+     */
+    @Test
+    void cohortEncounterValueStratMultiValueList() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortEncounterMultiValueStrat")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("encounter-statuses")
+                .hasStratumCount(2) // One stratum per unique status
+                .stratumByText("finished")
+                .firstPopulation()
+                .hasCount(1) // Patient-9 appears once in "finished"
+                .up()
+                .up()
+                .stratumByText("in-progress")
+                .firstPopulation()
+                .hasCount(1); // Patient-9 appears once in "in-progress"
+    }
+
+    /**
+     * Tests that multiple encounters can contribute to the same stratum
+     * when their status values overlap.
+     * <p/>
+     * Setup (based on test data encounter statuses):
+     * - patient-0: enc-1 (in-progress), enc-2 (finished)
+     * - patient-1: enc-1 (in-progress), enc-2 (finished)
+     * - patient-2: enc-1 (arrived)
+     * - patient-3: enc-1 (arrived)
+     * - patient-4: enc-1 (triaged)
+     * - patient-5: enc-1 (triaged)
+     * - patient-6: enc-1 (cancelled)
+     * - patient-7: enc-1 (cancelled)
+     * - patient-8: enc-1 (finished)
+     * - patient-9: enc-1 (finished), enc-2 (in-progress)
+     * <p/>
+     * Expected strata (encounter counts, not patient counts):
+     * - "finished": count=4 (patient-0-enc-2, patient-1-enc-2, patient-8-enc-1, patient-9-enc-1)
+     * - "in-progress": count=3 (patient-0-enc-1, patient-1-enc-1, patient-9-enc-2)
+     * - "arrived": count=2 (patient-2-enc-1, patient-3-enc-1)
+     * - "triaged": count=2 (patient-4-enc-1, patient-5-enc-1)
+     * - "cancelled": count=2 (patient-6-enc-1, patient-7-enc-1)
+     */
+    @Test
+    void cohortEncounterValueStratMultiValueListOverlapping() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortEncounterMultiValueStrat")
+                .evaluate() // All patients
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("encounter-statuses")
+                // Should have 5 distinct statuses across all encounters
+                .hasStratumCount(5)
+                .stratumByText("finished")
+                .firstPopulation()
+                .hasCount(4) // 4 finished encounters total
+                .up()
+                .up()
+                .stratumByText("in-progress")
+                .firstPopulation()
+                .hasCount(3) // 3 in-progress encounters
+                .up()
+                .up()
+                .stratumByText("arrived")
+                .firstPopulation()
+                .hasCount(2) // 2 arrived encounters
+                .up()
+                .up()
+                .stratumByText("triaged")
+                .firstPopulation()
+                .hasCount(2) // 2 triaged encounters
+                .up()
+                .up()
+                .stratumByText("cancelled")
+                .firstPopulation()
+                .hasCount(2); // 2 cancelled encounters
+    }
+
+    /**
+     * Tests that single-element list behaves correctly for encounter basis.
+     * Patient-2 has only one encounter (status: arrived), so should produce one stratum.
+     */
+    @Test
+    void cohortEncounterValueStratSingleEncounterSingleStatus() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortEncounterMultiValueStrat")
+                .subject("Patient/patient-2")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("encounter-statuses")
+                .hasStratumCount(1)
+                .stratumByText("arrived")
+                .firstPopulation()
+                .hasCount(1) // patient-2-encounter-1
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
+
+    /**
+     * Tests that patient with no encounters results in no stratum.
+     * Patient with no encounters should not contribute to any stratum.
+     */
+    @Test
+    void cohortEncounterValueStratEmptyList() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortEncounterMultiValueStrat")
+                .subject("Patient/patient-no-encounters")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasStratumCount(0); // No strata when patient has no encounters
     }
 }

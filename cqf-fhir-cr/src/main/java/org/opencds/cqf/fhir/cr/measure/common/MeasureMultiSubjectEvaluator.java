@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -12,11 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -278,13 +275,8 @@ public class MeasureMultiSubjectEvaluator {
             resourceIdsForSubjectList = List.of();
         } else {
             // For resource basis stratifiers, calculate resource IDs based on stratifier type
-            resourceIdsForSubjectList = getResourceIdsForValueStratifier(
-                    fhirContext,
-                    stratifierDef,
-                    rowKeys,
-                    qualifiedSubjectIdsCommonToPopulation,
-                    groupDef,
-                    populationDef);
+            resourceIdsForSubjectList =
+                    getResourceIdsForValueStratifier(fhirContext, stratifierDef, rowKeys, groupDef, populationDef);
         }
 
         return new StratumPopulationDef(
@@ -690,7 +682,6 @@ public class MeasureMultiSubjectEvaluator {
             FhirContext fhirContext,
             StratifierDef stratifierDef,
             List<StratifierRowKey> rowKeys,
-            Collection<String> subjectIds,
             GroupDef groupDef,
             PopulationDef populationDef) {
         // Check if we have composite row keys for NON_SUBJECT_VALUE stratifiers
@@ -712,8 +703,7 @@ public class MeasureMultiSubjectEvaluator {
             }
         }
 
-        // Fall back to original behavior for VALUE stratifiers or if no composite keys
-        return getPopulationBasisKeys(subjectIds, populationDef);
+        return List.of();
     }
 
     /**
@@ -777,40 +767,6 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Extract resource IDs from the population and subject IDs.
-     */
-    private static List<String> getPopulationBasisKeys(Collection<String> subjectIds, PopulationDef populationDef) {
-
-        List<String> keys = new ArrayList<>();
-        if (populationDef.getSubjectResources() == null) return keys;
-
-        for (String subjectId : subjectIds) {
-            Set<Object> results = (populationDef.type() != MeasurePopulationType.MEASUREOBSERVATION)
-                    ? populationDef.getSubjectResources().get(FhirResourceUtils.stripAnyResourceQualifier(subjectId))
-                    : extractResourceIds(populationDef, subjectId);
-
-            if (results == null) continue;
-
-            results.stream()
-                    .map(MeasureMultiSubjectEvaluator::normalizePopulationBasisKey)
-                    .filter(Objects::nonNull)
-                    .forEach(keys::add);
-        }
-
-        return keys;
-    }
-
-    private static String normalizePopulationBasisKey(Object obj) {
-        if (obj == null) return null;
-        if (obj instanceof IBaseResource r
-                && r.getIdElement() != null
-                && !r.getIdElement().isEmpty()) {
-            return r.getIdElement().toVersionless().getValue();
-        }
-        return obj.toString();
-    }
-
-    /**
      * Normalize a value to a string key for use in composite row keys when expanding Iterables.
      * Uses the index as a fallback for null values to ensure unique keys.
      */
@@ -825,33 +781,5 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         return "value_" + index + "_" + value;
-    }
-
-    /**
-     * Extracts unique FHIR identifiers as Strings from a PopulationDef.
-     * Works for Resource, Reference, IdType, PrimitiveType, String, Number, etc.
-     */
-    private static Set<Object> extractResourceIds(PopulationDef populationDef, String subjectId) {
-        if (populationDef == null || populationDef.getSubjectResources() == null) {
-            return Set.of();
-        }
-
-        if (StringUtils.isBlank(subjectId) || !subjectId.contains("/")) {
-            throw new InvalidRequestException("subjectId must contain '/': %s".formatted(subjectId));
-        }
-
-        String id = subjectId.split("/")[1]; // "81230987"
-
-        var filtered = populationDef.getSubjectResources().entrySet().stream()
-                .filter(entry -> entry.getKey().equals(id)) // <--- filter on key
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        return filtered.values().stream()
-                .flatMap(Set::stream)
-                .filter(Map.class::isInstance) // Keep only Map<?,?>
-                .map(map -> (Map<?, ?>) map) // Cast
-                .map(Map::keySet)
-                .flatMap(Collection::stream) // capture Key only, not Qty
-                .collect(Collectors.toSet());
     }
 }

@@ -13,12 +13,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import kotlin.Unit;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.elm.r1.FunctionDef;
+import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
+import org.opencds.cqf.cql.engine.execution.EvaluationFunctionRef;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams.Builder;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
 import org.opencds.cqf.cql.engine.execution.Variable;
@@ -400,8 +407,92 @@ public class FunctionEvaluationHandler {
      * @param context             cql engine context used to evaluate expression
      * @return cql results for subject requested
      */
+    private static ExpressionResult evaluateFunctionCriteria(
+            Object resource,
+            String criteriaExpression,
+            boolean isBooleanBasis,
+            CqlEngine context,
+            boolean isMeasureObservation) {
+
+        final Library currentLibrary = context.getState().getCurrentLibrary();
+
+        if (currentLibrary == null) {
+            throw new InternalErrorException("Current library is null.");
+        }
+
+        final VersionedIdentifier libraryIdentifier = currentLibrary.getIdentifier();
+        if (libraryIdentifier == null) {
+            throw new InternalErrorException("Current library is null.");
+        }
+
+        final Builder paramsBuilder = new EvaluationParams.Builder();
+
+        paramsBuilder.library(libraryIdentifier, builder -> {
+            builder.expressions(
+                buildEvaluationFunctionRef(resource, criteriaExpression, isBooleanBasis));
+            return Unit.INSTANCE;
+        });
+
+        final EvaluationResults evaluationResults = context.evaluate(paramsBuilder.build());
+
+        final Map<VersionedIdentifier, EvaluationResult> results = evaluationResults.getResults();
+        final Collection<EvaluationResult> values = results.values();
+
+        final EvaluationResult next = values.iterator().next();
+
+        final Map<String, ExpressionResult> expressionResults = next.getExpressionResults();
+
+        final ExpressionResult expressionResult = next.get(criteriaExpression);
+
+//        final EvaluationResult evaluationResult = evaluationResults.getOnlyResultOrThrow();
+//
+//        final Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
+//
+//        logger.info("1234:  got EvaluationResult!");
+//        final ExpressionResult expressionResult = evaluationResult.get(criteriaExpression);
+
+//        final Collection<ExpressionResult> expressionResults =
+//            evaluationResult.getExpressionResults().values();
+//
+////        if (CollectionUtils.isEmpty(expressionResults)) {
+////            throw new InvalidRequestException("????");
+////        }
+////        if (expressionResults.size() > 1) {
+////            throw new InvalidRequestException("????");
+////        }
+//
+//        final ExpressionResult expressionResult = expressionResults.iterator().next();
+//
+//        if (isMeasureObservation) {
+//            validateObservationResult(resource, expressionResult);
+//        }
+//
+//        return expressionResult;
+
+        return expressionResult;
+    }
+
+    private static EvaluationFunctionRef buildEvaluationFunctionRef(
+            Object resource, String criteriaExpression, boolean isBooleanBasis) {
+        return new EvaluationFunctionRef(
+            criteriaExpression,
+            null,
+            isBooleanBasis ? List.of() : List.of(resource));
+    }
+
+    /**
+     * method used to evaluate cql expression defined for 'continuous variable' scoring type
+     * measures that have 'measure observation' to calculate This method is called as a second round
+     * of processing given it uses 'measure population' results as input data for function
+     *
+     * @param resource            object that stores results of cql
+     * @param criteriaExpression  expression name to call
+     * @param isBooleanBasis      the type of result created from expression
+     * @param context             cql engine context used to evaluate expression
+     * @return cql results for subject requested
+     */
     @SuppressWarnings({"deprecation", "removal"})
-    public static ExpressionResult evaluateFunctionCriteria(
+    public static ExpressionResult evaluateFunctionCriteriaOLD(
             Object resource,
             String criteriaExpression,
             boolean isBooleanBasis,

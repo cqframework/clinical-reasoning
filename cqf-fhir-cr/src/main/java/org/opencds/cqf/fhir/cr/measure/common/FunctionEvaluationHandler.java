@@ -15,18 +15,15 @@ import java.util.Optional;
 import java.util.Set;
 import kotlin.Unit;
 import org.hl7.elm.r1.FunctionDef;
-import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationFunctionRef;
-import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams.Builder;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
-import org.opencds.cqf.cql.engine.execution.Variable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -270,7 +267,10 @@ public class FunctionEvaluationHandler {
 
         for (Object result : resultsIter) {
             final ExpressionResult observationResult = evaluateMeasureObservationFunction(
-                    context, libraryIdentifier, observationExpression, result, groupDef.isBooleanBasis());
+                context,
+                libraryIdentifier,
+                observationExpression,
+                getFunctionArguments(groupDef, result));
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
@@ -322,7 +322,6 @@ public class FunctionEvaluationHandler {
                 throw new InternalErrorException("Current library is null.");
             }
 
-            // LUKETODO:  is there a better way to do this?
             // Validate that NON_SUBJECT_VALUE stratifier expression is a CQL function
             var expressionDefinition = Libraries.resolveExpressionRef(stratifierExpression, currentLibrary);
             boolean isFunction = expressionDefinition instanceof FunctionDef;
@@ -362,7 +361,10 @@ public class FunctionEvaluationHandler {
 
                 for (Object result : resultsIter) {
                     final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
-                            context, libraryIdentifier, stratifierExpression, result, groupDef.isBooleanBasis());
+                        context,
+                        libraryIdentifier,
+                        stratifierExpression,
+                        getFunctionArguments(groupDef, result));
                     // add function results to existing EvaluationResult under new expression
                     // name
                     // need a way to capture input parameter here too, otherwise we have no way
@@ -420,59 +422,54 @@ public class FunctionEvaluationHandler {
                 + "Expected Number or String.");
     }
 
-    // LUKETODO: javadoc
     private static ExpressionResult evaluateMeasureObservationFunction(
             CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            Object resource,
-            boolean isBooleanBasis) {
-
-        final EvaluationFunctionRef evaluationFunctionRef =
-                buildEvaluationFunctionRef(functionExpression, isBooleanBasis ? List.of() : List.of(resource));
-
-        final Builder paramsBuilder = new Builder().library(libraryIdentifier, builder -> {
-            builder.expressions(evaluationFunctionRef);
-            return Unit.INSTANCE;
-        });
+            List<Object> functionArguments) {
 
         final ExpressionResult expressionResult =
-                executeCqlFunction(cqlEngine, libraryIdentifier, evaluationFunctionRef, paramsBuilder.build());
+                executeCqlFunction(cqlEngine, libraryIdentifier, functionExpression, functionArguments);
 
-        final Object value = expressionResult.getValue();
-
-        validateObservationResult(resource, value);
+        validateObservationResult(functionArguments, expressionResult.getValue());
 
         return expressionResult;
     }
 
-    // LUKETODO: javadoc
     private static ExpressionResult evaluateNonSubValueStratifiersFunction(
             CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            Object resource,
-            boolean isBooleanBasis) {
+            List<Object> functionArguments) {
+
+        return executeCqlFunction(cqlEngine, libraryIdentifier, functionExpression, functionArguments);
+    }
+
+    /**
+     * Execute a CQL function against the new CQL DSL passing in a function expression name and
+     * zero or more arguments.
+     *
+     * @param engine CQL Engine to run function
+     * @param libraryIdentifier Library to run against
+     * @param functionExpression The name of the function expression
+     * @param functionArguments Zero or more arguments to the function
+     * @return ExpressionResults from CQL execution corresponding the function expression
+     */
+    private static ExpressionResult executeCqlFunction(
+            CqlEngine engine,
+            VersionedIdentifier libraryIdentifier,
+            String functionExpression,
+            List<Object> functionArguments) {
 
         final EvaluationFunctionRef evaluationFunctionRef =
-                buildEvaluationFunctionRef(functionExpression, isBooleanBasis ? List.of() : List.of(resource));
+            buildEvaluationFunctionRef(functionExpression, functionArguments);
 
         final Builder paramsBuilder = new Builder().library(libraryIdentifier, builder -> {
             builder.expressions(evaluationFunctionRef);
             return Unit.INSTANCE;
         });
 
-        return executeCqlFunction(cqlEngine, libraryIdentifier, evaluationFunctionRef, paramsBuilder.build());
-    }
-
-    // LUKETODO: javadoc
-    private static ExpressionResult executeCqlFunction(
-            CqlEngine engine,
-            VersionedIdentifier libraryIdentifier,
-            EvaluationFunctionRef evaluationFunctionRef,
-            EvaluationParams evaluationParams) {
-
-        final EvaluationResults evaluationResults = engine.evaluate(evaluationParams);
+        final EvaluationResults evaluationResults = engine.evaluate(paramsBuilder.build());
 
         final EvaluationResult resultForLibrary = evaluationResults.getResultFor(libraryIdentifier);
 
@@ -497,80 +494,7 @@ public class FunctionEvaluationHandler {
 
     private static EvaluationFunctionRef buildEvaluationFunctionRef(
             String criteriaExpression, List<?> functionArguments) {
-        // LUKETODO:  check number of arguments of the function, somehow?
-        //        return new EvaluationFunctionRef(criteriaExpression, null, isBooleanBasis ? List.of() :
-        // List.of(resource));
         return new EvaluationFunctionRef(criteriaExpression, null, functionArguments);
-    }
-
-    /**
-     * method used to evaluate cql expression defined for 'continuous variable' scoring type
-     * measures that have 'measure observation' to calculate This method is called as a second round
-     * of processing given it uses 'measure population' results as input data for function
-     *
-     * @param resource            object that stores results of cql
-     * @param criteriaExpression  expression name to call
-     * @param isBooleanBasis      the type of result created from expression
-     * @param context             cql engine context used to evaluate expression
-     * @return cql results for subject requested
-     */
-    @SuppressWarnings({"deprecation", "removal"})
-    public static ExpressionResult evaluateFunctionCriteriaOLD(
-            Object resource,
-            String criteriaExpression,
-            boolean isBooleanBasis,
-            CqlEngine context,
-            boolean isMeasureObservation) {
-
-        var currentLibrary = context.getState().getCurrentLibrary();
-
-        if (currentLibrary == null) {
-            throw new InternalErrorException("Current library is null.");
-        }
-
-        var expressionDefinition = Libraries.resolveExpressionRef(criteriaExpression, currentLibrary);
-
-        if (!(expressionDefinition instanceof FunctionDef functionDef)) {
-            throw new InvalidRequestException(
-                    "Measure observation %s does not reference a function definition".formatted(criteriaExpression));
-        }
-
-        Object result;
-        context.getState().pushActivationFrame(functionDef, functionDef.getContext());
-        try {
-            if (!isBooleanBasis) {
-                // subject based observations don't have a parameter to pass in
-                final List<OperandDef> operands = functionDef.getOperand();
-
-                if (operands.isEmpty()) {
-                    throw new InternalErrorException(
-                            "Measure observation criteria expression: %s is missing a function parameter matching the population-basis"
-                                    .formatted(criteriaExpression));
-                }
-
-                final Variable variableToPush = new Variable(operands.get(0).getName()).withValue(resource);
-
-                context.getState().push(variableToPush);
-            }
-            var expressionDefinitionExpression = expressionDefinition.getExpression();
-            if (expressionDefinitionExpression == null) {
-                throw new InternalErrorException("expressionDefinition is null.");
-            }
-            result = context.getEvaluationVisitor()
-                    .visitExpression(expressionDefinition.getExpression(), context.getState());
-
-        } finally {
-            context.getState().popActivationFrame();
-        }
-
-        final Set<Object> evaluatedResources = captureEvaluatedResources(context);
-
-        // validates return types
-        if (isMeasureObservation) {
-            validateObservationResult(resource, result);
-        }
-
-        return new ExpressionResult(result, evaluatedResources);
     }
 
     private static Optional<ExpressionResult> tryGetExpressionResult(
@@ -625,13 +549,21 @@ public class FunctionEvaluationHandler {
         }
     }
 
-    private static void validateObservationResult(Object result, Object observationResult) {
+    @Nonnull
+    private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {
+        return groupDef.isBooleanBasis() ? List.of() : List.of(result);
+    }
+
+    private static void validateObservationResult(List<Object> functionArguments, Object observationResult) {
         if (!(observationResult instanceof String
                 || observationResult instanceof Integer
                 || observationResult instanceof Double)) {
             throw new IllegalArgumentException(
-                    "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: "
-                            + result.getClass().getSimpleName());
+                    "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: %s"
+                        .formatted(
+                            functionArguments.size() > 1
+                                ? EvaluationResultFormatter.printValues(functionArguments)
+                                : EvaluationResultFormatter.printValue(functionArguments.get(0))));
         }
     }
 
@@ -663,26 +595,6 @@ public class FunctionEvaluationHandler {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .anyMatch(StratifierDef::isNonSubjectValueStratifier);
-    }
-    /**
-     * method used to extract evaluated resources touched by CQL criteria expressions
-     * @param context cql engine context
-     */
-    private static Set<Object> captureEvaluatedResources(CqlEngine context) {
-        final Set<Object> evaluatedResources;
-        if (context.getState().getEvaluatedResources() != null) {
-            evaluatedResources = context.getState().getEvaluatedResources();
-        } else {
-            evaluatedResources = new HashSet<>();
-        }
-        clearEvaluatedResources(context);
-
-        return evaluatedResources;
-    }
-
-    // reset evaluated resources followed by a context evaluation
-    private static void clearEvaluatedResources(CqlEngine context) {
-        context.getState().clearEvaluatedResources();
     }
 
     @Nonnull

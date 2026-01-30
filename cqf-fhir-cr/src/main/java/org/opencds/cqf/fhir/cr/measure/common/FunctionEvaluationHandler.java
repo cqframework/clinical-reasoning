@@ -464,19 +464,8 @@ public class FunctionEvaluationHandler {
             }
         }
 
-        // LUKETODO:  better pattern for return?
-        ExpressionResult expressionResult;
-        try {
-            expressionResult = executeCqlFunction(cqlEngine, libraryIdentifier, functionExpression, functionArguments);
-
-        } catch (RuntimeException exception) {
-            if (exception.getMessage().contains(DOES_NOT_HAVE_FUNCTION)) {
-                throw new InvalidRequestException(exceptionMessageIfNotFunction, exception);
-            } else {
-                throw new InvalidRequestException(
-                        "CQL Exception while evaluating function: %s".formatted(functionExpression), exception);
-            }
-        }
+        final ExpressionResult expressionResult = executeCqlFunction(
+                cqlEngine, libraryIdentifier, functionExpression, functionArguments, exceptionMessageIfNotFunction);
 
         validateObservationResult(functionArguments, expressionResult.getValue());
 
@@ -490,8 +479,20 @@ public class FunctionEvaluationHandler {
             List<Object> functionArguments,
             String exceptionMessageIfNotFunction) {
 
+        return executeCqlFunction(
+                cqlEngine, libraryIdentifier, functionExpression, functionArguments, exceptionMessageIfNotFunction);
+    }
+
+    private static ExpressionResult executeCqlFunction(
+            CqlEngine cqlEngine,
+            VersionedIdentifier libraryIdentifier,
+            String functionExpression,
+            List<Object> functionArguments,
+            String exceptionMessageIfNotFunction) {
+
         try {
-            return executeCqlFunction(cqlEngine, libraryIdentifier, functionExpression, functionArguments);
+            return tryExecuteCqlFunction(cqlEngine, libraryIdentifier, functionExpression, functionArguments);
+
         } catch (RuntimeException exception) {
             if (exception.getMessage().contains(DOES_NOT_HAVE_FUNCTION)) {
                 throw new InvalidRequestException(exceptionMessageIfNotFunction, exception);
@@ -512,7 +513,7 @@ public class FunctionEvaluationHandler {
      * @param functionArguments Zero or more arguments to the function
      * @return ExpressionResults from CQL execution corresponding the function expression
      */
-    private static ExpressionResult executeCqlFunction(
+    private static ExpressionResult tryExecuteCqlFunction(
             CqlEngine engine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,

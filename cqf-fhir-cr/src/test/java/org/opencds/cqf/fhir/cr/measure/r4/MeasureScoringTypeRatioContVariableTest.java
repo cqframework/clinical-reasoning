@@ -1068,11 +1068,11 @@ class MeasureScoringTypeRatioContVariableTest {
                 .then()
                 .def()
                 .hasError(
-                        "CQL function evaluation failed for population basis: non-boolean and expression: MeasureObservationBoolean")
+                        "CQL function evaluation failed for expression: MeasureObservationBoolean and arguments: Encounter/patient-9-encounter-1")
                 .up()
                 .hasStatus(MeasureReportStatus.ERROR)
                 .hasContainedOperationOutcomeMsg(
-                        "CQL function evaluation failed for population basis: non-boolean and expression: MeasureObservationBoolean")
+                        "CQL function evaluation failed for expression: MeasureObservationBoolean and arguments: Encounter/patient-9-encounter-1")
                 .def()
                 .firstGroup()
                 .hasNullScore()

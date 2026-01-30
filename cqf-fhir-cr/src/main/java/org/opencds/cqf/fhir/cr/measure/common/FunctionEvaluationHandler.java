@@ -269,8 +269,8 @@ public class FunctionEvaluationHandler {
         final Set<Object> evaluatedResources = new HashSet<>();
 
         for (Object result : resultsIter) {
-            final ExpressionResult observationResult = evaluateFunctionCriteria(
-                    result, libraryIdentifier, observationExpression, groupDef.isBooleanBasis(), context, true);
+            final ExpressionResult observationResult = evaluateMeasureObservationFunction(
+                    context, libraryIdentifier, observationExpression, result, groupDef.isBooleanBasis());
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
@@ -361,8 +361,8 @@ public class FunctionEvaluationHandler {
                 final Set<Object> evaluatedResources = new HashSet<>();
 
                 for (Object result : resultsIter) {
-                    final ExpressionResult functionResult = evaluateFunctionCriteria(
-                            result, libraryIdentifier, stratifierExpression, groupDef.isBooleanBasis(), context, false);
+                    final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
+                            context, libraryIdentifier, stratifierExpression, result, groupDef.isBooleanBasis());
                     // add function results to existing EvaluationResult under new expression
                     // name
                     // need a way to capture input parameter here too, otherwise we have no way
@@ -420,98 +420,87 @@ public class FunctionEvaluationHandler {
                 + "Expected Number or String.");
     }
 
-    // LUKETODO:  reconsider the signature entirely
-    /**
-     * method used to evaluate cql expression defined for 'continuous variable' scoring type
-     * measures that have 'measure observation' to calculate This method is called as a second round
-     * of processing given it uses 'measure population' results as input data for function
-     *
-     * @param resource            object that stores results of cql
-     * @param criteriaExpression  expression name to call
-     * @param isBooleanBasis      the type of result created from expression
-     * @param context             cql engine context used to evaluate expression
-     * @return cql results for subject requested
-     */
-    private static ExpressionResult evaluateFunctionCriteria(
-            Object resource,
+    // LUKETODO: javadoc
+    private static ExpressionResult evaluateMeasureObservationFunction(
+            CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
-            String criteriaExpression,
-            boolean isBooleanBasis,
-            CqlEngine context,
-            boolean isMeasureObservation) {
-
-        // LUKETODO: consider passing in the library ID
-
-        logger.info(
-                "1234: resource: {}, criteriaExpression: {}, isBooleanBasis: {}, isMeasureObservation: {}",
-                resource,
-                criteriaExpression,
-                isBooleanBasis,
-                isMeasureObservation);
+            String functionExpression,
+            Object resource,
+            boolean isBooleanBasis) {
 
         final EvaluationFunctionRef evaluationFunctionRef =
-                buildEvaluationFunctionRef(resource, criteriaExpression, isBooleanBasis);
+                buildEvaluationFunctionRef(functionExpression, isBooleanBasis ? List.of() : List.of(resource));
 
-        final Builder paramsBuilder = new Builder();
-
-        paramsBuilder.library(libraryIdentifier, builder -> {
+        final Builder paramsBuilder = new Builder().library(libraryIdentifier, builder -> {
             builder.expressions(evaluationFunctionRef);
             return Unit.INSTANCE;
         });
 
-        final EvaluationParams evaluationParams = paramsBuilder.build();
-
-        final ExpressionResult expressionResult = executeCqlFunction(
-                criteriaExpression,
-                isBooleanBasis,
-                context,
-                libraryIdentifier,
-                evaluationFunctionRef,
-                evaluationParams);
+        final ExpressionResult expressionResult =
+                executeCqlFunction(cqlEngine, libraryIdentifier, evaluationFunctionRef, paramsBuilder.build());
 
         final Object value = expressionResult.getValue();
 
-        if (isMeasureObservation) {
-            validateObservationResult(resource, value);
-        }
+        validateObservationResult(resource, value);
 
         return expressionResult;
     }
 
+    // LUKETODO: javadoc
+    private static ExpressionResult evaluateNonSubValueStratifiersFunction(
+            CqlEngine cqlEngine,
+            VersionedIdentifier libraryIdentifier,
+            String functionExpression,
+            Object resource,
+            boolean isBooleanBasis) {
+
+        final EvaluationFunctionRef evaluationFunctionRef =
+                buildEvaluationFunctionRef(functionExpression, isBooleanBasis ? List.of() : List.of(resource));
+
+        final Builder paramsBuilder = new Builder().library(libraryIdentifier, builder -> {
+            builder.expressions(evaluationFunctionRef);
+            return Unit.INSTANCE;
+        });
+
+        return executeCqlFunction(cqlEngine, libraryIdentifier, evaluationFunctionRef, paramsBuilder.build());
+    }
+
+    // LUKETODO: javadoc
     private static ExpressionResult executeCqlFunction(
-            String criteriaExpression,
-            boolean isBooleanBasis,
-            CqlEngine context,
+            CqlEngine engine,
             VersionedIdentifier libraryIdentifier,
             EvaluationFunctionRef evaluationFunctionRef,
             EvaluationParams evaluationParams) {
 
-        final EvaluationResults evaluationResults = context.evaluate(evaluationParams);
+        final EvaluationResults evaluationResults = engine.evaluate(evaluationParams);
 
         final EvaluationResult resultForLibrary = evaluationResults.getResultFor(libraryIdentifier);
 
         if (resultForLibrary == null) {
-            throw new InternalErrorException(
-                    "CQL function evaluation failed for population basis: %s and expression: %s"
-                            .formatted(isBooleanBasis ? "boolean" : "non-boolean", criteriaExpression));
+            throw new InternalErrorException("CQL function evaluation failed for expression: %s and arguments: %s"
+                    .formatted(
+                            evaluationFunctionRef.getName(),
+                            EvaluationResultFormatter.printValues(evaluationFunctionRef.getArguments())));
         }
 
         final ExpressionResult expressionResult = resultForLibrary.get(evaluationFunctionRef);
 
         if (expressionResult == null) {
-            // LUKETODO:  change error message:
-            throw new InternalErrorException(
-                    "CQL function evaluation failed for population basis: %s and expression: %s"
-                            .formatted(isBooleanBasis ? "boolean" : "non-boolean", criteriaExpression));
+            throw new InternalErrorException("No CQL function results returned for expression: %s and arguments: %s"
+                    .formatted(
+                            evaluationFunctionRef.getName(),
+                            EvaluationResultFormatter.printValues(evaluationFunctionRef.getArguments())));
         }
 
         return expressionResult;
     }
 
     private static EvaluationFunctionRef buildEvaluationFunctionRef(
-            Object resource, String criteriaExpression, boolean isBooleanBasis) {
+            String criteriaExpression, List<?> functionArguments) {
         // LUKETODO:  check number of arguments of the function, somehow?
-        return new EvaluationFunctionRef(criteriaExpression, null, isBooleanBasis ? List.of() : List.of(resource));
+        //        return new EvaluationFunctionRef(criteriaExpression, null, isBooleanBasis ? List.of() :
+        // List.of(resource));
+        return new EvaluationFunctionRef(criteriaExpression, null, functionArguments);
     }
 
     /**

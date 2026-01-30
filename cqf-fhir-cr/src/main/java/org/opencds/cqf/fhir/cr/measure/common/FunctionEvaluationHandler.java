@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Set;
 import kotlin.Unit;
 import org.hl7.elm.r1.FunctionDef;
-import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -41,6 +40,8 @@ public class FunctionEvaluationHandler {
         // static class with private constructor
     }
 
+    // LUKETODO:  get rid of try/catch entirely
+    // LUKETODO:  seems getting rid of this breaks some tests????
     static List<EvaluationResult> cqlFunctionEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
@@ -51,39 +52,7 @@ public class FunctionEvaluationHandler {
         final boolean hasLibraryInitialized = LibraryInitHandler.initLibrary(context, libraryIdentifier);
 
         try {
-            // Validate all stratifier expression types before processing
-            for (MeasureDef measureDef : measureDefs) {
-                for (GroupDef groupDef : measureDef.groups()) {
-                    validateStratifierExpressionTypes(context, measureDef.url(), groupDef);
-                }
-            }
-
-            // MeasureDefs where functions need to evaluate
-            final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
-                    // if measure contains measure-observation, otherwise short circuit
-                    .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
-                    .toList();
-
-            if (measureDefsWithFunctions.isEmpty()) {
-                // Don't need to do anything if there are no functions to process
-                return List.of();
-            }
-
-            final List<EvaluationResult> finalResults = new ArrayList<>();
-
-            // one Library may be linked to multiple Measures
-            for (MeasureDef measureDefWithFunctions : measureDefsWithFunctions) {
-
-                // get function for measure-observation from populationDef
-                for (GroupDef groupDef : measureDefWithFunctions.groups()) {
-                    finalResults.addAll(
-                            evaluateMeasureObservations(context, evaluationResult, subjectTypePart, groupDef));
-                    finalResults.addAll(evaluateNonSubjectValueStratifiers(
-                            context, evaluationResult, subjectTypePart, groupDef, measureDefWithFunctions.url()));
-                }
-            }
-
-            return finalResults;
+            return tryCqlFunctionEvaluation(context, measureDefs, libraryIdentifier, evaluationResult, subjectTypePart);
         } finally {
             // We don't want to pop a non-existent library
             if (hasLibraryInitialized) {
@@ -92,8 +61,59 @@ public class FunctionEvaluationHandler {
         }
     }
 
+    @Nonnull
+    private static List<EvaluationResult> tryCqlFunctionEvaluation(
+            CqlEngine context,
+            List<MeasureDef> measureDefs,
+            VersionedIdentifier libraryIdentifier,
+            EvaluationResult evaluationResult,
+            String subjectTypePart) {
+        // Validate all stratifier expression types before processing
+        for (MeasureDef measureDef : measureDefs) {
+            for (GroupDef groupDef : measureDef.groups()) {
+                validateStratifierExpressionTypes(context, measureDef.url(), groupDef);
+            }
+        }
+
+        // MeasureDefs where functions need to evaluate
+        final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
+                // if measure contains measure-observation, otherwise short circuit
+                .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
+                .toList();
+
+        if (measureDefsWithFunctions.isEmpty()) {
+            // Don't need to do anything if there are no functions to process
+            return List.of();
+        }
+
+        final List<EvaluationResult> finalResults = new ArrayList<>();
+
+        // one Library may be linked to multiple Measures
+        for (MeasureDef measureDefWithFunctions : measureDefsWithFunctions) {
+
+            // get function for measure-observation from populationDef
+            for (GroupDef groupDef : measureDefWithFunctions.groups()) {
+                finalResults.addAll(evaluateMeasureObservations(
+                        context, libraryIdentifier, evaluationResult, subjectTypePart, groupDef));
+                finalResults.addAll(evaluateNonSubjectValueStratifiers(
+                        context,
+                        libraryIdentifier,
+                        evaluationResult,
+                        subjectTypePart,
+                        groupDef,
+                        measureDefWithFunctions.url()));
+            }
+        }
+
+        return finalResults;
+    }
+
     private static List<EvaluationResult> evaluateMeasureObservations(
-            CqlEngine context, EvaluationResult evaluationResult, String subjectTypePart, GroupDef groupDef) {
+            CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
+            EvaluationResult evaluationResult,
+            String subjectTypePart,
+            GroupDef groupDef) {
 
         // measure observations to evaluate
         final List<PopulationDef> measureObservationPopulations = groupDef.populations().stream()
@@ -108,7 +128,8 @@ public class FunctionEvaluationHandler {
 
         for (PopulationDef populationDef : measureObservationPopulations) {
             // each measureObservation is evaluated
-            var result = processMeasureObservation(context, evaluationResult, subjectTypePart, groupDef, populationDef);
+            var result = processMeasureObservation(
+                    context, libraryIdentifier, evaluationResult, subjectTypePart, groupDef, populationDef);
             results.add(result);
         }
 
@@ -117,6 +138,7 @@ public class FunctionEvaluationHandler {
 
     private static List<EvaluationResult> evaluateNonSubjectValueStratifiers(
             CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
@@ -136,7 +158,7 @@ public class FunctionEvaluationHandler {
         for (StratifierDef stratDef : stratifierDefs) {
             // each stratifier (could be multiple defined in component)
             var result = processNonSubValueStratifiers(
-                    context, evaluationResult, subjectTypePart, groupDef, stratDef, measureUrl);
+                    context, libraryIdentifier, evaluationResult, subjectTypePart, groupDef, stratDef, measureUrl);
             results.add(result);
         }
 
@@ -205,6 +227,7 @@ public class FunctionEvaluationHandler {
      */
     private static EvaluationResult processMeasureObservation(
             CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
@@ -246,8 +269,8 @@ public class FunctionEvaluationHandler {
         final Set<Object> evaluatedResources = new HashSet<>();
 
         for (Object result : resultsIter) {
-            final ExpressionResult observationResult =
-                    evaluateFunctionCriteria(result, observationExpression, groupDef.isBooleanBasis(), context, true);
+            final ExpressionResult observationResult = evaluateFunctionCriteria(
+                    result, libraryIdentifier, observationExpression, groupDef.isBooleanBasis(), context, true);
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             // add function results to existing EvaluationResult under new expression
@@ -277,6 +300,7 @@ public class FunctionEvaluationHandler {
      */
     private static EvaluationResult processNonSubValueStratifiers(
             CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart,
             GroupDef groupDef,
@@ -298,6 +322,7 @@ public class FunctionEvaluationHandler {
                 throw new InternalErrorException("Current library is null.");
             }
 
+            // LUKETODO:  is there a better way to do this?
             // Validate that NON_SUBJECT_VALUE stratifier expression is a CQL function
             var expressionDefinition = Libraries.resolveExpressionRef(stratifierExpression, currentLibrary);
             boolean isFunction = expressionDefinition instanceof FunctionDef;
@@ -337,7 +362,7 @@ public class FunctionEvaluationHandler {
 
                 for (Object result : resultsIter) {
                     final ExpressionResult functionResult = evaluateFunctionCriteria(
-                            result, stratifierExpression, groupDef.isBooleanBasis(), context, false);
+                            result, libraryIdentifier, stratifierExpression, groupDef.isBooleanBasis(), context, false);
                     // add function results to existing EvaluationResult under new expression
                     // name
                     // need a way to capture input parameter here too, otherwise we have no way
@@ -409,10 +434,12 @@ public class FunctionEvaluationHandler {
      */
     private static ExpressionResult evaluateFunctionCriteria(
             Object resource,
+            VersionedIdentifier libraryIdentifier,
             String criteriaExpression,
             boolean isBooleanBasis,
             CqlEngine context,
             boolean isMeasureObservation) {
+
         // LUKETODO: consider passing in the library ID
 
         logger.info(
@@ -422,21 +449,10 @@ public class FunctionEvaluationHandler {
                 isBooleanBasis,
                 isMeasureObservation);
 
-        final Library currentLibrary = context.getState().getCurrentLibrary();
-
-        if (currentLibrary == null) {
-            throw new InternalErrorException("Current library is null.");
-        }
-
-        final VersionedIdentifier libraryIdentifier = currentLibrary.getIdentifier();
-        if (libraryIdentifier == null) {
-            throw new InternalErrorException("Current library is null.");
-        }
-
-        final Builder paramsBuilder = new EvaluationParams.Builder();
-
         final EvaluationFunctionRef evaluationFunctionRef =
                 buildEvaluationFunctionRef(resource, criteriaExpression, isBooleanBasis);
+
+        final Builder paramsBuilder = new Builder();
 
         paramsBuilder.library(libraryIdentifier, builder -> {
             builder.expressions(evaluationFunctionRef);
@@ -444,9 +460,34 @@ public class FunctionEvaluationHandler {
         });
 
         final EvaluationParams evaluationParams = paramsBuilder.build();
+
+        final ExpressionResult expressionResult = executeCqlFunction(
+                criteriaExpression,
+                isBooleanBasis,
+                context,
+                libraryIdentifier,
+                evaluationFunctionRef,
+                evaluationParams);
+
+        final Object value = expressionResult.getValue();
+
+        if (isMeasureObservation) {
+            validateObservationResult(resource, value);
+        }
+
+        return expressionResult;
+    }
+
+    private static ExpressionResult executeCqlFunction(
+            String criteriaExpression,
+            boolean isBooleanBasis,
+            CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
+            EvaluationFunctionRef evaluationFunctionRef,
+            EvaluationParams evaluationParams) {
+
         final EvaluationResults evaluationResults = context.evaluate(evaluationParams);
 
-        // LUKETODO: check for null
         final EvaluationResult resultForLibrary = evaluationResults.getResultFor(libraryIdentifier);
 
         if (resultForLibrary == null) {
@@ -455,48 +496,16 @@ public class FunctionEvaluationHandler {
                             .formatted(isBooleanBasis ? "boolean" : "non-boolean", criteriaExpression));
         }
 
-        // LUKETODO: this may be the winner:
-        final ExpressionResult anotherExpressionResult = resultForLibrary.get(evaluationFunctionRef);
-        //
-        //        final Map<VersionedIdentifier, EvaluationResult> results = evaluationResults.getResults();
-        //        final Collection<EvaluationResult> values = results.values();
-        //
-        //        final EvaluationResult next = values.iterator().next();
-        //
-        //        final Map<String, ExpressionResult> expressionResults = next.getExpressionResults();
-        //
-        //        final ExpressionResult expressionResult = next.get(criteriaExpression);
-        //
-        //        final EvaluationResult evaluationResult = evaluationResults.getOnlyResultOrThrow();
-        //
-        //        final Map<String, ExpressionResult> expressionResults2 = evaluationResult.getExpressionResults();
-        //
-        //        logger.info("1234:  got EvaluationResult!");
-        //        final ExpressionResult expressionResult = evaluationResult.get(criteriaExpression);
+        final ExpressionResult expressionResult = resultForLibrary.get(evaluationFunctionRef);
 
-        //        final Collection<ExpressionResult> expressionResults =
-        //            evaluationResult.getExpressionResults().values();
-        //
-        ////        if (CollectionUtils.isEmpty(expressionResults)) {
-        ////            throw new InvalidRequestException("????");
-        ////        }
-        ////        if (expressionResults.size() > 1) {
-        ////            throw new InvalidRequestException("????");
-        ////        }
-        //
-        //        final ExpressionResult expressionResult = expressionResults.iterator().next();
-        //
-         // LUKETODO:  null?
-        final Object value = anotherExpressionResult.getValue();
-
-        if (isMeasureObservation) {
-            validateObservationResult(resource, value);
+        if (expressionResult == null) {
+            // LUKETODO:  change error message:
+            throw new InternalErrorException(
+                    "CQL function evaluation failed for population basis: %s and expression: %s"
+                            .formatted(isBooleanBasis ? "boolean" : "non-boolean", criteriaExpression));
         }
-        //
-        //        return expressionResult;
 
-        //        return expressionResult;
-        return anotherExpressionResult;
+        return expressionResult;
     }
 
     private static EvaluationFunctionRef buildEvaluationFunctionRef(

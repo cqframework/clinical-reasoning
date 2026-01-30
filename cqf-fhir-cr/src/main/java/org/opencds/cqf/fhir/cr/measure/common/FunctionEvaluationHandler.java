@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import kotlin.Unit;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.OperandDef;
@@ -396,6 +395,7 @@ public class FunctionEvaluationHandler {
                 + "Expected Number or String.");
     }
 
+    // LUKETODO:  reconsider the signature entirely
     /**
      * method used to evaluate cql expression defined for 'continuous variable' scoring type
      * measures that have 'measure observation' to calculate This method is called as a second round
@@ -413,6 +413,14 @@ public class FunctionEvaluationHandler {
             boolean isBooleanBasis,
             CqlEngine context,
             boolean isMeasureObservation) {
+        // LUKETODO: consider passing in the library ID
+
+        logger.info(
+                "1234: resource: {}, criteriaExpression: {}, isBooleanBasis: {}, isMeasureObservation: {}",
+                resource,
+                criteriaExpression,
+                isBooleanBasis,
+                isMeasureObservation);
 
         final Library currentLibrary = context.getState().getCurrentLibrary();
 
@@ -427,57 +435,74 @@ public class FunctionEvaluationHandler {
 
         final Builder paramsBuilder = new EvaluationParams.Builder();
 
+        final EvaluationFunctionRef evaluationFunctionRef =
+                buildEvaluationFunctionRef(resource, criteriaExpression, isBooleanBasis);
+
         paramsBuilder.library(libraryIdentifier, builder -> {
-            builder.expressions(
-                buildEvaluationFunctionRef(resource, criteriaExpression, isBooleanBasis));
+            builder.expressions(evaluationFunctionRef);
             return Unit.INSTANCE;
         });
 
-        final EvaluationResults evaluationResults = context.evaluate(paramsBuilder.build());
+        final EvaluationParams evaluationParams = paramsBuilder.build();
+        final EvaluationResults evaluationResults = context.evaluate(evaluationParams);
 
-        final Map<VersionedIdentifier, EvaluationResult> results = evaluationResults.getResults();
-        final Collection<EvaluationResult> values = results.values();
+        // LUKETODO: check for null
+        final EvaluationResult resultForLibrary = evaluationResults.getResultFor(libraryIdentifier);
 
-        final EvaluationResult next = values.iterator().next();
+        if (resultForLibrary == null) {
+            throw new InternalErrorException(
+                    "CQL function evaluation failed for population basis: %s and expression: %s"
+                            .formatted(isBooleanBasis ? "boolean" : "non-boolean", criteriaExpression));
+        }
 
-        final Map<String, ExpressionResult> expressionResults = next.getExpressionResults();
+        // LUKETODO: this may be the winner:
+        final ExpressionResult anotherExpressionResult = resultForLibrary.get(evaluationFunctionRef);
+        //
+        //        final Map<VersionedIdentifier, EvaluationResult> results = evaluationResults.getResults();
+        //        final Collection<EvaluationResult> values = results.values();
+        //
+        //        final EvaluationResult next = values.iterator().next();
+        //
+        //        final Map<String, ExpressionResult> expressionResults = next.getExpressionResults();
+        //
+        //        final ExpressionResult expressionResult = next.get(criteriaExpression);
+        //
+        //        final EvaluationResult evaluationResult = evaluationResults.getOnlyResultOrThrow();
+        //
+        //        final Map<String, ExpressionResult> expressionResults2 = evaluationResult.getExpressionResults();
+        //
+        //        logger.info("1234:  got EvaluationResult!");
+        //        final ExpressionResult expressionResult = evaluationResult.get(criteriaExpression);
 
-        final ExpressionResult expressionResult = next.get(criteriaExpression);
+        //        final Collection<ExpressionResult> expressionResults =
+        //            evaluationResult.getExpressionResults().values();
+        //
+        ////        if (CollectionUtils.isEmpty(expressionResults)) {
+        ////            throw new InvalidRequestException("????");
+        ////        }
+        ////        if (expressionResults.size() > 1) {
+        ////            throw new InvalidRequestException("????");
+        ////        }
+        //
+        //        final ExpressionResult expressionResult = expressionResults.iterator().next();
+        //
+         // LUKETODO:  null?
+        final Object value = anotherExpressionResult.getValue();
 
-//        final EvaluationResult evaluationResult = evaluationResults.getOnlyResultOrThrow();
-//
-//        final Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
-//
-//        logger.info("1234:  got EvaluationResult!");
-//        final ExpressionResult expressionResult = evaluationResult.get(criteriaExpression);
+        if (isMeasureObservation) {
+            validateObservationResult(resource, value);
+        }
+        //
+        //        return expressionResult;
 
-//        final Collection<ExpressionResult> expressionResults =
-//            evaluationResult.getExpressionResults().values();
-//
-////        if (CollectionUtils.isEmpty(expressionResults)) {
-////            throw new InvalidRequestException("????");
-////        }
-////        if (expressionResults.size() > 1) {
-////            throw new InvalidRequestException("????");
-////        }
-//
-//        final ExpressionResult expressionResult = expressionResults.iterator().next();
-//
-//        if (isMeasureObservation) {
-//            validateObservationResult(resource, expressionResult);
-//        }
-//
-//        return expressionResult;
-
-        return expressionResult;
+        //        return expressionResult;
+        return anotherExpressionResult;
     }
 
     private static EvaluationFunctionRef buildEvaluationFunctionRef(
             Object resource, String criteriaExpression, boolean isBooleanBasis) {
-        return new EvaluationFunctionRef(
-            criteriaExpression,
-            null,
-            isBooleanBasis ? List.of() : List.of(resource));
+        // LUKETODO:  check number of arguments of the function, somehow?
+        return new EvaluationFunctionRef(criteriaExpression, null, isBooleanBasis ? List.of() : List.of(resource));
     }
 
     /**

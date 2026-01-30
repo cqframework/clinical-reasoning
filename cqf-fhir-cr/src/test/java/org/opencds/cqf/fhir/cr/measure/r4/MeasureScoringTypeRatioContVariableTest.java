@@ -1068,11 +1068,11 @@ class MeasureScoringTypeRatioContVariableTest {
                 .then()
                 .def()
                 .hasError(
-                        "Measure observation criteria expression: MeasureObservationBoolean is missing a function parameter matching the population-basis")
+                        "CQL function evaluation failed for population basis: non-boolean and expression: MeasureObservationBoolean")
                 .up()
                 .hasStatus(MeasureReportStatus.ERROR)
                 .hasContainedOperationOutcomeMsg(
-                        "Measure observation criteria expression: MeasureObservationBoolean is missing a function parameter matching the population-basis")
+                        "CQL function evaluation failed for population basis: non-boolean and expression: MeasureObservationBoolean")
                 .def()
                 .firstGroup()
                 .hasNullScore()

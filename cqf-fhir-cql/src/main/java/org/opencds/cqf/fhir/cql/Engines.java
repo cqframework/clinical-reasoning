@@ -211,4 +211,13 @@ public class Engines {
         return new CqlFhirParametersConverter(
                 fhirContext, IAdapterFactory.forFhirContext(fhirContext), fhirTypeConverter);
     }
+
+    public static boolean testUncovered(FhirContext fhirContext, String resource) {
+        try {
+            fhirContext.newJsonParser().parseResource(resource);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 }

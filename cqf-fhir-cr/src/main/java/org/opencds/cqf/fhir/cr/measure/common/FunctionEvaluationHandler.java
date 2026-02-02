@@ -64,7 +64,6 @@ public class FunctionEvaluationHandler {
         }
     }
 
-    @Nonnull
     private static List<EvaluationResult> tryCqlFunctionEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
@@ -347,79 +346,78 @@ public class FunctionEvaluationHandler {
     }
 
     private static void processNonSubValueStratifier(
-            CqlEngine context,
-            VersionedIdentifier libraryIdentifier,
-            EvaluationResult evaluationResult,
-            String subjectTypePart,
-            GroupDef groupDef,
-            String measureUrl,
-            StratifierComponentDef componentDef,
-            EvaluationResult evalResult) {
+        CqlEngine context,
+        VersionedIdentifier libraryIdentifier,
+        EvaluationResult evaluationResult,
+        String subjectTypePart,
+        GroupDef groupDef,
+        String measureUrl,
+        StratifierComponentDef componentDef,
+        EvaluationResult evalResult) {
 
         if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
             // We screwed up defining component correctly
             throw new InternalErrorException("StratifierDef component expression is missing.");
         }
         var stratifierExpression = componentDef.expression();
-            final String exceptionMessageIfNotFunction =
-                """
-            Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
-            For non-boolean population basis, stratifier component criteria expressions must be "
-            CQL functions that take a parameter matching the population basis type.
+        final String exceptionMessageIfNotFunction =
             """
-                    .formatted(measureUrl, stratifierExpression);
+                Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
+                For non-boolean population basis, stratifier component criteria expressions must be "
+                CQL functions that take a parameter matching the population basis type.
+                """
+                .formatted(measureUrl, stratifierExpression);
 
-            // Function expression: input parameter data for value stratifier functions
-            // Exclude MEASUREOBSERVATION populations - they have function expressions that aren't in regular results
-            var nonObservationPopulations = groupDef.populations().stream()
-                    .filter(pop -> pop.type() != MeasurePopulationType.MEASUREOBSERVATION)
-                    .toList();
+        // Function expression: input parameter data for value stratifier functions
+        // Exclude MEASUREOBSERVATION populations - they have function expressions that aren't in regular results
+        var nonObservationPopulations = groupDef.populations().stream()
+            .filter(pop -> pop.type() != MeasurePopulationType.MEASUREOBSERVATION)
+            .toList();
 
-            for (PopulationDef popDef : nonObservationPopulations) {
+        for (PopulationDef popDef : nonObservationPopulations) {
 
-                // retrieve group.population results to input into valueStrat function
-                Optional<ExpressionResult> optExpressionResult =
-                        tryGetExpressionResult(popDef.expression(), evaluationResult);
+            // retrieve group.population results to input into valueStrat function
+            Optional<ExpressionResult> optExpressionResult =
+                tryGetExpressionResult(popDef.expression(), evaluationResult);
 
-                if (optExpressionResult.isEmpty()) {
-                    throw new InternalErrorException(
-                            "Expression result is missing for measure %s".formatted(measureUrl));
-                }
-                final ExpressionResult expressionResult = optExpressionResult.get();
-                final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
-                // make new expression name for uniquely extracting results
-                // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
-                var expressionName = popDef.id() + "-" + stratifierExpression;
-                final Map<Object, Object> functionResults = new HashMap<>();
-                final Set<Object> evaluatedResources = new HashSet<>();
-
-                for (Object result : resultsIter) {
-                    final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
-                            context,
-                            libraryIdentifier,
-                            stratifierExpression,
-                            getFunctionArguments(groupDef, result),
-                            exceptionMessageIfNotFunction);
-                    // add function results to existing EvaluationResult under new expression
-                    // name
-                    // need a way to capture input parameter here too, otherwise we have no way
-                    // to connect input objects related to output object
-                    // key= input parameter to function
-                    // value= the output Observation resource containing calculated value
-                    functionResults.put(result, functionResult.getValue());
-                    Set<Object> evaluated = functionResult.getEvaluatedResources();
-                    if (evaluated == null) {
-                        throw new IllegalStateException("CQL function '" + stratifierExpression
-                                + "' returned null evaluatedResources for measure: " + measureUrl);
-                    }
-                    evaluatedResources.addAll(evaluated);
-                    evaluatedResources.addAll(functionResult.getEvaluatedResources());
-                }
-                // add to EvaluationResult
-                addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
+            if (optExpressionResult.isEmpty()) {
+                throw new InternalErrorException(
+                    "Expression result is missing for measure %s".formatted(measureUrl));
             }
+            final ExpressionResult expressionResult = optExpressionResult.get();
+            final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult,
+                subjectTypePart);
+            // make new expression name for uniquely extracting results
+            // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
+            var expressionName = popDef.id() + "-" + stratifierExpression;
+            final Map<Object, Object> functionResults = new HashMap<>();
+            final Set<Object> evaluatedResources = new HashSet<>();
+
+            for (Object result : resultsIter) {
+                final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
+                    context,
+                    libraryIdentifier,
+                    stratifierExpression,
+                    getFunctionArguments(groupDef, result),
+                    exceptionMessageIfNotFunction);
+                // add function results to existing EvaluationResult under new expression
+                // name
+                // need a way to capture input parameter here too, otherwise we have no way
+                // to connect input objects related to output object
+                // key= input parameter to function
+                // value= the output Observation resource containing calculated value
+                functionResults.put(result, functionResult.getValue());
+                Set<Object> evaluated = functionResult.getEvaluatedResources();
+                if (evaluated == null) {
+                    throw new IllegalStateException("CQL function '" + stratifierExpression
+                        + "' returned null evaluatedResources for measure: " + measureUrl);
+                }
+                evaluatedResources.addAll(evaluated);
+                evaluatedResources.addAll(functionResult.getEvaluatedResources());
+            }
+            // add to EvaluationResult
+            addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
         }
-        return evalResult;
     }
 
     /**

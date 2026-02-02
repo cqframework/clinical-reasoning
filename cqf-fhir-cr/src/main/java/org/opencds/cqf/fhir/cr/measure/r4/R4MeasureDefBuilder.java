@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQF_
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_DEFINITION_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
+import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils.isBooleanPopulationBasis;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
@@ -104,7 +105,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Stratifiers
         var stratifiers = group.getStratifier().stream()
-                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc))
+                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc, populationBasisDef))
                 .toList();
 
         return new GroupDef(
@@ -339,9 +340,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc) {
+    private StratifierDef buildStratifierDef(
+            String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
         checkId(mgsc);
 
+        boolean isBooleanBasis = isBooleanPopulationBasis(populationBasisDef);
         // Components
         var components = new ArrayList<StratifierComponentDef>();
         for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
@@ -364,7 +367,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 mgsc.getId(),
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
-                getStratifierType(measureUrl, mgsc),
+                getStratifierType(measureUrl, mgsc, isBooleanBasis),
                 components);
     }
 
@@ -385,10 +388,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return sdes;
     }
 
+    @Nullable
     private static MeasureStratifierType getStratifierType(
-            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+            String measureUrl,
+            MeasureGroupStratifierComponent measureGroupStratifierComponent,
+            boolean isBooleanBasis) {
         if (measureGroupStratifierComponent == null) {
-            return MeasureStratifierType.VALUE;
+            return null;
         }
 
         final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria();
@@ -409,9 +415,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         if (hasCriteria) {
             return MeasureStratifierType.CRITERIA;
+        } else if (hasAnyComponentCriteria && !isBooleanBasis) {
+            return MeasureStratifierType.NON_SUBJECT_VALUE;
+        } else {
+            return MeasureStratifierType.VALUE;
         }
-
-        return MeasureStratifierType.VALUE;
     }
 
     private static void triggerFirstPassValidation(Measure measure) {

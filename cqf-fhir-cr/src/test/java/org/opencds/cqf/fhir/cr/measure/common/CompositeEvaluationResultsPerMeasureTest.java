@@ -128,7 +128,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         assertTrue(result.contains("Measure ID: measure123"));
         assertTrue(result.contains("Measure URL: http://example.com/Measure/test"));
         assertTrue(result.contains("Subject: patient-1"));
-        assertTrue(result.contains("Expression: Initial Population"));
+        assertTrue(result.contains("Expression: \"Initial Population\""));
         assertTrue(result.contains("Evaluated Resources:"));
         assertTrue(result.contains("Patient/patient-1"));
         assertTrue(result.contains("Value: true"));
@@ -197,11 +197,11 @@ class CompositeEvaluationResultsPerMeasureTest {
         assertTrue(result.contains("Measure ID: measure789"));
         assertTrue(result.contains("Measure URL: http://example.com/Measure/combo"));
         assertTrue(result.contains("Subject: patient-2"));
-        assertTrue(result.contains("Expression: Initial Population"));
+        assertTrue(result.contains("Expression: \"Initial Population\""));
         assertTrue(result.contains("Patient/patient-2"));
         assertTrue(result.contains("Encounter/patient-2-encounter-1"));
         assertTrue(result.contains("Value: 5"));
-        assertTrue(result.contains("Expression: Numerator"));
+        assertTrue(result.contains("Expression: \"Numerator\""));
         assertTrue(result.contains("Value: test-string"));
 
         // Check errors section
@@ -238,9 +238,9 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Expression: Date Expression"));
+        assertTrue(result.contains("Expression: \"Date Expression\""));
         assertTrue(result.contains("2024-01-15"));
-        assertTrue(result.contains("Expression: DateTime Expression"));
+        assertTrue(result.contains("Expression: \"DateTime Expression\""));
         assertTrue(result.contains("2024-01-15:14:30:45"));
     }
 
@@ -273,7 +273,7 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Assert
         assertNotNull(result);
-        assertTrue(result.contains("Expression: Patient List"));
+        assertTrue(result.contains("Expression: \"Patient List\""));
         assertTrue(result.contains("Patient/patient-1"));
         assertTrue(result.contains("Patient/patient-2"));
         assertTrue(result.contains("[")); // Collection bracket

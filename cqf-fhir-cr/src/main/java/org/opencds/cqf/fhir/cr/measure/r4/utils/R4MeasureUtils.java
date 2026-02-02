@@ -12,6 +12,7 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
@@ -338,5 +339,18 @@ public class R4MeasureUtils {
         }
         // Common pattern: criteria references use lowercase IDs like "numerator", "denominator"
         return criteriaReference.equalsIgnoreCase(populationType.toCode());
+    }
+
+    /**
+     * Determines whether the population basis is BOOLEAN.
+     *
+     * <p>A BOOLEAN population basis indicates subject-level (boolean) evaluation
+     * rather than resource-based evaluation.
+     *
+     * @param populationBasisDef the population basis definition (must not be null)
+     * @return true if the population basis code is BOOLEAN, false otherwise
+     */
+    public static boolean isBooleanPopulationBasis(CodeDef populationBasisDef) {
+        return populationBasisDef != null && FHIRAllTypes.BOOLEAN.toCode().equals(populationBasisDef.code());
     }
 }

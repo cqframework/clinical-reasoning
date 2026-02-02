@@ -3,18 +3,21 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 
 /**
  * Utility class for extracting data from R4 FHIR MeasureReport resources.
@@ -46,34 +49,58 @@ public class R4MeasureReportUtils {
      * @return text representation of the stratum value, or null if not determinable
      */
     public static String getStratumDefText(StratifierDef stratifierDef, StratumDef stratumDef) {
-        String stratumText = null;
+        var valueDefs = stratumDef.valueDefs();
 
-        for (StratumValueDef valuePair : stratumDef.valueDefs()) {
+        // Early return if no values
+        if (valueDefs.isEmpty()) {
+            return null;
+        }
+
+        // Fast path for non-component stratifiers (single value)
+        if (!stratumDef.isComponent()) {
+            var valuePair = valueDefs.iterator().next();
             var value = valuePair.value();
-            var componentDef = valuePair.def();
 
-            // Handle CodeableConcept values
-            if (value.getValueClass().equals(CodeableConcept.class)) {
-                if (stratumDef.isComponent()) {
-                    // component stratifier: use code text
-                    stratumText = componentDef != null && componentDef.code() != null
-                            ? componentDef.code().text()
-                            : null;
-                } else {
-                    // non-component: extract text from CodeableConcept value
-                    if (value.getValue() instanceof CodeableConcept codeableConcept) {
-                        stratumText = codeableConcept.getText();
-                    }
-                }
-            } else if (stratumDef.isComponent()) {
-                // Component with non-CodeableConcept value: convert to string
-                stratumText = value.getValueAsString();
-            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
+            // Handle CodeableConcept values for non-component
+            if (value.getValueClass().equals(CodeableConcept.class)
+                    && value.getValue() instanceof CodeableConcept codeableConcept) {
+                return codeableConcept.getText();
+            }
+
+            // Handle VALUE or CRITERIA type stratifiers with non-CodeableConcept values
+            var stratifierType = stratifierDef.getStratifierType();
+
+            if (MeasureStratifierType.VALUE == stratifierType) {
                 // VALUE-type stratifiers with non-CodeableConcept values
-                stratumText = value.getValueAsString();
-            } else if (MeasureStratifierType.CRITERIA == stratifierDef.getStratifierType()) {
+                return value.getValueAsString();
+            } else if (MeasureStratifierType.NON_SUBJECT_VALUE == stratifierType) {
+                // NON_SUBJECT_VALUE-type stratifiers with non-CodeableConcept values
+                return value.getValueAsString();
+            } else if (MeasureStratifierType.CRITERIA == stratifierType) {
                 // CRITERIA-type stratifiers with non-CodeableConcept values
-                stratumText = value.getValueAsString();
+                return value.getValueAsString();
+            }
+
+            return null;
+        }
+
+        // Process component stratifiers (multiple values)
+        String stratumText = null;
+        for (var valuePair : valueDefs) {
+            var value = valuePair.value();
+
+            if (value.getValueClass().equals(CodeableConcept.class)) {
+                // component stratifier with CodeableConcept: use code text
+                var componentDef = valuePair.def();
+                var text = componentDef != null && componentDef.code() != null
+                        ? componentDef.code().text()
+                        : null;
+                if (text != null) {
+                    stratumText = text;
+                }
+            } else {
+                // Component with non-CodeableConcept value: convert to string and return immediately
+                return value.getValueAsString();
             }
         }
 
@@ -108,6 +135,27 @@ public class R4MeasureReportUtils {
                 populationDef.getAggregateMethod(),
                 populationDef.getAggregationResult(),
                 populationDef.getCriteriaReference());
+    }
+
+    public static void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+        // if already set on Measure, don't set on groups too
+        if (groupDef.isGroupImprovementNotation()) {
+            if (groupDef.isIncreaseImprovementNotation()) {
+                reportGroup.addExtension(
+                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
+                        new CodeableConcept(new Coding(
+                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE_DISPLAY)));
+            } else {
+                reportGroup.addExtension(
+                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
+                        new CodeableConcept(new Coding(
+                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE,
+                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE_DISPLAY)));
+            }
+        }
     }
 
     /**

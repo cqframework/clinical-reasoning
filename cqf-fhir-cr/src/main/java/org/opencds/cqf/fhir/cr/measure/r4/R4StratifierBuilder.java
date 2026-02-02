@@ -200,9 +200,10 @@ class R4StratifierBuilder {
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
-                // non-component stratifiers only set stratified value, code is set on stratifier object
-                // value being stratified: 'M'
+            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()
+                    || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
+                // non-component stratifiers (single-component or non-component) only set stratified value
+                // value being stratified: 'M', '35', etc.
                 stratum.setValue(expressionResultToCodableConcept(value));
             }
         }

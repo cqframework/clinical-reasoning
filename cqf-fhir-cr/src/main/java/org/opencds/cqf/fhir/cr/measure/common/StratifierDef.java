@@ -50,6 +50,10 @@ public class StratifierDef {
         return MeasureStratifierType.CRITERIA == this.stratifierType;
     }
 
+    public boolean isNonSubjectValueStratifier() {
+        return MeasureStratifierType.NON_SUBJECT_VALUE == this.stratifierType;
+    }
+
     public String expression() {
         return this.expression;
     }

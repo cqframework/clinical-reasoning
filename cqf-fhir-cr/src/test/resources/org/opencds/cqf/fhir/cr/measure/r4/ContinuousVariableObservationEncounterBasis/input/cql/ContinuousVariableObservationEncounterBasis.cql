@@ -16,7 +16,7 @@ context Patient
 define "Initial Population Resource":
     "All Encounters"
 
-define "Measure Population Exclusion Resource":
+define "Measure Population Exclusions Resource":
     "Encounter Cancelled"
 
 define "Measure Population Resource":
@@ -39,5 +39,10 @@ define "Encounter Cancelled":
 
 // For stratifier
 
+// subject value stratifier
 define "Age":
     AgeInYearsAt(start of "Measurement Period")
+// non-subject value stratifier - returns patient age at time of encounter
+// This stratifies by the actual patient's age, producing distinct strata for the test data
+define function "Age Function" (e Encounter):
+    AgeInYearsAt(start of e.period)

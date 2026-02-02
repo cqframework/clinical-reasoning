@@ -153,11 +153,11 @@
             {
               "id": "stratifier-1-comp-1",
               "code": {
-                "text": "Gender"
+                "text": "Age"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Gender Stratification"
+                "expression": "Age Function"
               }
             }
           ]

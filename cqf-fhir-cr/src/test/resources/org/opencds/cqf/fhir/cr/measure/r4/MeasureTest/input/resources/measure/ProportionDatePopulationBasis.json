@@ -92,35 +92,17 @@
         {
           "id": "stratifier-1",
           "code": {
-            "text": "boolean strat not finished"
+            "text": "Age of Period"
           },
           "component": [
             {
               "id": "stratifier-1-comp-1",
               "code": {
-                "text": "boolean strat not finished"
+                "text": "Age of Period"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "boolean strat not finished"
-              }
-            }
-          ]
-        },
-        {
-          "id": "stratifier-2",
-          "code": {
-            "text": "Gender Stratification"
-          },
-          "component": [
-            {
-              "id": "stratifier-2-comp-1",
-              "code": {
-                "text": "Gender Stratification"
-              },
-              "criteria": {
-                "language": "text/cql.identifier",
-                "expression": "Gender Stratification"
+                "expression": "Age of Period"
               }
             }
           ]

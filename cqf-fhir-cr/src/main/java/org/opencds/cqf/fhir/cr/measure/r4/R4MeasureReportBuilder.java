@@ -55,7 +55,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 import org.slf4j.Logger;
@@ -175,7 +174,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportGroup.setId(measureGroup.getId());
         // Measure Level Extension
         addMeasureDescription(reportGroup, measureGroup);
-        addExtensionImprovementNotation(reportGroup, groupDef);
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
 
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
             // Report Population Component
@@ -227,27 +226,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
-        // if already set on Measure, don't set on groups too
-        if (groupDef.isGroupImprovementNotation()) {
-            if (groupDef.isIncreaseImprovementNotation()) {
-                reportGroup.addExtension(
-                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
-                        new CodeableConcept(new Coding(
-                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE_DISPLAY)));
-            } else {
-                reportGroup.addExtension(
-                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
-                        new CodeableConcept(new Coding(
-                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE_DISPLAY)));
-            }
-        }
-    }
-
     private String getPopulationResourceIds(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
@@ -264,19 +242,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
+        reportPopulation.setCount(populationDef.getCount());
 
-        if (groupDef.isBooleanBasis()) {
-            reportPopulation.setCount(populationDef.getSubjects().size());
-        } else {
-            if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-                // resources has nested maps containing correct qty of resources
-                // Ratio Cont-Variable Measures have two MeasureObservations
-                reportPopulation.setCount(populationDef.countObservations());
-            } else {
-                // standard behavior
-                reportPopulation.setCount(populationDef.getAllSubjectResources().size());
-            }
-        }
         // Supporting Evidence
         if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
                 && populationDef.getSupportingEvidenceDefs() != null

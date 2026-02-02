@@ -152,6 +152,10 @@ define "Matching General Practitioner":
 define "Age":
     AgeInYearsAt(start of "Measurement Period")
 
+define function "Age Function"(encounter Encounter):
+  AgeInYearsAt(start of encounter.period)
+
+
 define "Date":
     Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]
 

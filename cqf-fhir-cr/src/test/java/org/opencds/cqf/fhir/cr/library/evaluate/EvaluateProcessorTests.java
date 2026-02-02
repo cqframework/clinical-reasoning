@@ -38,8 +38,8 @@ public class EvaluateProcessorTests {
         var name = "TestLibrary";
         var url = "http://example.org/fhir/Library/TestLibrary";
         var version = "1.0.0";
-        var library = new Library().setName(name).setUrl(url).setVersion(version);
-        library.setId(name);
+        var library = (Library)
+                new Library().setName(name).setUrl(url).setVersion(version).setId(name);
         var expected = newParameters(fhirContextR4, "results");
         var expectedCanonical = String.format("%s|%s", url, version);
         var request = new EvaluateRequest(

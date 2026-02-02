@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import kotlin.Unit;
+import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -213,13 +214,12 @@ public class FunctionEvaluationHandler {
      */
     private static void validateNotFunction(
             CqlEngine context, String measureUrl, String expression, String stratifierType) {
+
         if (expression == null || expression.isBlank()) {
             return;
         }
 
-        var ed = Libraries.resolveExpressionRef(
-                expression, Objects.requireNonNull(context.getState().getCurrentLibrary()));
-        if (ed instanceof FunctionDef) {
+        if (isExpressionFunctionRef(context, expression)) {
             throw new InvalidRequestException(
                     ("%s stratifier expression '%s' must NOT be a CQL function definition for measure: %s. "
                                     + "Only NON_SUBJECT_VALUE stratifiers (non-boolean population basis with component criteria) "
@@ -442,25 +442,21 @@ public class FunctionEvaluationHandler {
             List<Object> functionArguments,
             String exceptionMessageIfNotFunction) {
 
-        // This is gross:  we need to get rid of this:
-        if (cqlEngine.getState().getCurrentLibrary() != null) {
-            var expressionDefinition = Libraries.resolveExpressionRef(
-                    functionExpression, cqlEngine.getState().getCurrentLibrary());
+        final ExpressionDef expressionDef = resolveExpressionRef(cqlEngine, functionExpression);
 
-            if (!(expressionDefinition instanceof FunctionDef functionDef)) {
-                throw new InvalidRequestException("Measure observation %s does not reference a function definition"
-                        .formatted(functionExpression));
-            }
+        if (!(resolveExpressionRef(cqlEngine, functionExpression) instanceof FunctionDef functionDef)) {
+            throw new InvalidRequestException(
+                    "Measure observation %s does not reference a function definition".formatted(functionExpression));
+        }
 
-            if (!isBooleanBasis) {
-                // subject based observations don't have a parameter to pass in
-                final List<OperandDef> operands = functionDef.getOperand();
+        if (!isBooleanBasis) {
+            // subject based observations don't have a parameter to pass in
+            final List<OperandDef> operands = functionDef.getOperand();
 
-                if (operands.isEmpty()) {
-                    throw new InternalErrorException(
-                            "Measure observation criteria expression: %s is missing a function parameter matching the population-basis"
-                                    .formatted(functionExpression));
-                }
+            if (operands.isEmpty()) {
+                throw new InternalErrorException(
+                        "Measure observation criteria expression: %s is missing a function parameter matching the population-basis"
+                                .formatted(functionExpression));
             }
         }
 
@@ -657,5 +653,25 @@ public class FunctionEvaluationHandler {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+    }
+
+    private static boolean isExpressionFunctionRef(CqlEngine cqlEngine, String expressionName) {
+        if (expressionName == null || expressionName.isBlank()) {
+            throw new InvalidRequestException("Expresion name is null or blank");
+        }
+
+        return isExpressionFunctionRef(resolveExpressionRef(cqlEngine, expressionName));
+    }
+
+    private static boolean isExpressionFunctionRef(ExpressionDef expressionDef) {
+        return expressionDef instanceof FunctionDef;
+    }
+
+    /**
+     * This method assumes that the CqlEngine has already been initialized for the given librar(y/ies).
+     */
+    private static ExpressionDef resolveExpressionRef(CqlEngine cqlEngine, String expressionName) {
+        return Libraries.resolveExpressionRef(
+                expressionName, Objects.requireNonNull(cqlEngine.getState().getCurrentLibrary()));
     }
 }

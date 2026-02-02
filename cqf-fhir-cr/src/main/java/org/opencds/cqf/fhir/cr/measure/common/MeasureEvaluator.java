@@ -543,38 +543,51 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            final Object firstEntryValue = entryValue.iterator().next();
+            removeObservatorySubjectResource(measurePopulation, entryValue, subjectId, it);
+        }
+    }
 
-            if (!(firstEntryValue instanceof Map<?, ?>)) {
-                throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
-            }
+    private void removeObservatorySubjectResource(
+            Map<String, Set<Object>> measurePopulation,
+            Set<?> entryValue,
+            String subjectId,
+            Iterator<Entry<String, Set<Object>>> iterator) {
+        if (entryValue.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+        final Object firstEntryValue = entryValue.iterator().next();
 
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
+        if (!(firstEntryValue instanceof Map<?, ?>)) {
+            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
+        }
 
-            // population values for this subject
-            Set<Object> populationValues = measurePopulation.get(subjectId);
+        @SuppressWarnings("unchecked")
+        Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
 
-            // If there is no population for this subject, there is nothing "to remove because it matches",
-            // so leave the observation set as-is.
-            if (populationValues == null || populationValues.isEmpty()) {
-                continue;
-            }
+        // population values for this subject
+        Set<Object> populationValues = measurePopulation.get(subjectId);
 
-            // Remove observations that *do* match population values
-            obsSet.removeIf(obsMap -> {
-                for (Object key : obsMap.keySet()) {
-                    if (populationValues.contains(key)) {
-                        // This observation map is backed by a population resource -> remove it
-                        return true;
-                    }
+        // If there is no population for this subject, there is nothing "to remove because iterator matches",
+        // so leave the observation set as-is.
+        if (populationValues == null || populationValues.isEmpty()) {
+            return;
+        }
+
+        // Remove observations that *do* match population values
+        obsSet.removeIf(obsMap -> {
+            for (Object key : obsMap.keySet()) {
+                if (populationValues.contains(key)) {
+                    // This observation map is backed by a population resource -> remove iterator
+                    return true;
                 }
-                return false;
-            });
-
-            // If no observations remain for this subject, remove the subject entry entirely
-            if (obsSet.isEmpty()) {
-                it.remove();
             }
+            return false;
+        });
+
+        // If no observations remain for this subject, remove the subject entry entirely
+        if (obsSet.isEmpty()) {
+            iterator.remove();
         }
     }
 
@@ -656,10 +669,11 @@ public class MeasureEvaluator {
 
     private void evaluateStratifier(
             String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
-        if (stratifierDef.isComponentStratifier()) {
-            addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId, groupDef);
+        if (stratifierDef.isCriteriaStratifier()) {
+            addCriteriaStratifierResult(subjectId, evaluationResult, stratifierDef);
         } else {
-            addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
+            addValueOrNonSubjectValueStratifierResult(
+                    stratifierDef.components(), evaluationResult, subjectId, groupDef);
         }
     }
 
@@ -668,7 +682,7 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier component expressions return null.
      */
-    void addStratifierComponentResult(
+    void addValueOrNonSubjectValueStratifierResult(
             List<StratifierComponentDef> components,
             EvaluationResult evaluationResult,
             String subjectId,
@@ -734,8 +748,7 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier expressions return null.
      */
-    void addStratifierNonComponentResult(
-            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+    void addCriteriaStratifierResult(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
         var expressionResult = evaluationResult.get(stratifierDef.expression());
 

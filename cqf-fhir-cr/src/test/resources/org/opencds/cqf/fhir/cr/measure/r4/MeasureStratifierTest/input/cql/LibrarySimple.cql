@@ -116,6 +116,18 @@ define "boolean strat has practitioner":
 define "resource strat not finished":
     "Encounter Not Finished"
 
+// Multi-value VALUE stratifier expressions
+// These return lists that should be expanded into multiple strata
+
+define "All Encounter Statuses":
+    [Encounter] E return E.status
+
+define "All Patient Encounters":
+    [Encounter] E
+
+define "Distinct Encounter Statuses":
+    distinct([Encounter] E return E.status)
+
 // main criteria logic
 
 define "All Encounters":
@@ -155,6 +167,8 @@ define "Age":
 define function "Age Function"(encounter Encounter):
   AgeInYearsAt(start of encounter.period)
 
+define function "Encounter Status Stratifier"(encounter Encounter):
+  Coalesce(encounter.status.value, 'unknown')
 
 define "Date":
     Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]

@@ -70,11 +70,11 @@ class R4StratifierBuilder {
         if (stratifierDef.isCriteriaStratifier()) {
             criteriaStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         } else {
-            nonCriteriaStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
+            valueOrNonSubjectValueStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         }
     }
 
-    private static void nonCriteriaStratifier(
+    private static void valueOrNonSubjectValueStratifier(
             R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,

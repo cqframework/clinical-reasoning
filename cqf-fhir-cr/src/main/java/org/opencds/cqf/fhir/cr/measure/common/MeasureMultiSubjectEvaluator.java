@@ -112,7 +112,7 @@ public class MeasureMultiSubjectEvaluator {
                 if (stratifierDef.isCriteriaStratifier()) {
                     stratumDefs = buildCriteriaStrata(fhirContext, stratifierDef, groupDef);
                 } else {
-                    stratumDefs = buildNonCriteriaStrata(fhirContext, stratifierDef, groupDef);
+                    stratumDefs = buildValueOrNonSubjectValueStrata(fhirContext, stratifierDef, groupDef);
                 }
 
                 stratifierDef.addAllStratum(stratumDefs);
@@ -344,7 +344,7 @@ public class MeasureMultiSubjectEvaluator {
         return new MeasureObservationStratumCache(numObsStratumPop, denObsStratumPop);
     }
 
-    private static List<StratumDef> buildNonCriteriaStrata(
+    private static List<StratumDef> buildValueOrNonSubjectValueStrata(
             FhirContext fhirContext, StratifierDef stratifierDef, GroupDef groupDef) {
 
         final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =

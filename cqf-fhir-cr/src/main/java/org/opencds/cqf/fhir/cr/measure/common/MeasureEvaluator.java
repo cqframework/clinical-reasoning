@@ -552,6 +552,10 @@ public class MeasureEvaluator {
             Set<?> entryValue,
             String subjectId,
             Iterator<Entry<String, Set<Object>>> iterator) {
+        if (entryValue.isEmpty()) {
+            // Nothing to do
+            return;
+        }
         final Object firstEntryValue = entryValue.iterator().next();
 
         if (!(firstEntryValue instanceof Map<?, ?>)) {
@@ -668,7 +672,8 @@ public class MeasureEvaluator {
         if (stratifierDef.isCriteriaStratifier()) {
             addCriteriaStratifierResult(subjectId, evaluationResult, stratifierDef);
         } else {
-            addNonCriteriaStratifierResult(stratifierDef.components(), evaluationResult, subjectId, groupDef);
+            addValueOrNonSubjectValueStratifierResult(
+                    stratifierDef.components(), evaluationResult, subjectId, groupDef);
         }
     }
 
@@ -677,7 +682,7 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier component expressions return null.
      */
-    void addNonCriteriaStratifierResult(
+    void addValueOrNonSubjectValueStratifierResult(
             List<StratifierComponentDef> components,
             EvaluationResult evaluationResult,
             String subjectId,

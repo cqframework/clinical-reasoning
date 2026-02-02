@@ -111,12 +111,12 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     private void validateStratifierPopulationBasisType(
             String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
 
-        if (stratifierDef.isComponentStratifier()) {
+        if (stratifierDef.isCriteriaStratifier()) {
+            validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
+        } else {
             for (var component : stratifierDef.components()) {
                 validateExpressionResultType(groupDef, stratifierDef, component.expression(), evaluationResult, url);
             }
-        } else {
-            validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
         }
     }
 
@@ -143,8 +143,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             }
 
             if (resultClasses.stream()
-                    .map(Class::getSimpleName)
-                    .noneMatch(simpleName -> simpleName.equals(groupPopulationBasisCode))) {
+                    .noneMatch(resultClass -> doesBasisMatchResource(resultClass, groupPopulationBasisCode))) {
 
                 throw new InvalidRequestException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
@@ -170,6 +169,15 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                                     prettyClassNames(resultClasses),
                                     prettyClassNames(resultMatchingClasses)));
         }
+    }
+
+    private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {
+        // If we don't do this we'll fail with "boolean" vs. "Boolean"
+        if (resultClass == Boolean.class && BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
+            return true;
+        }
+
+        return resultClass.getSimpleName().equals(groupPopulationBasisCode);
     }
 
     private Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {

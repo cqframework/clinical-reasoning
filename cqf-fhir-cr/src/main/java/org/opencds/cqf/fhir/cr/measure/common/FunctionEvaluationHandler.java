@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Capture all logic for measure evaluation for continuous variable scoring.
  */
+@SuppressWarnings("squid:S1135")
 public class FunctionEvaluationHandler {
     private static final Logger logger = LoggerFactory.getLogger(FunctionEvaluationHandler.class);
     public static final String DOES_NOT_HAVE_FUNCTION = "does not have function";
@@ -80,7 +81,7 @@ public class FunctionEvaluationHandler {
         // MeasureDefs where functions need to evaluate
         final List<MeasureDef> measureDefsWithFunctions = measureDefs.stream()
                 // if measure contains measure-observation, otherwise short circuit
-                .filter(x -> hasMeasureObservation(x) || hasNonSubValueStratifier(x))
+                .filter(measureDef -> hasMeasureObservation(measureDef) || hasNonSubValueStratifier(measureDef))
                 .toList();
 
         if (measureDefsWithFunctions.isEmpty()) {
@@ -192,12 +193,12 @@ public class FunctionEvaluationHandler {
                 validateNotFunction(context, measureUrl, stratifierDef.expression(), "CRITERIA");
             } else if (!stratifierDef.isNonSubjectValueStratifier()) {
                 // VALUE stratifier (boolean basis): must NOT be a function
-                if (stratifierDef.isComponentStratifier()) {
+                if (stratifierDef.isCriteriaStratifier()) {
+                    validateNotFunction(context, measureUrl, stratifierDef.expression(), "VALUE (subject-based)");
+                } else {
                     for (var component : stratifierDef.components()) {
                         validateNotFunction(context, measureUrl, component.expression(), "VALUE (subject-based)");
                     }
-                } else {
-                    validateNotFunction(context, measureUrl, stratifierDef.expression(), "VALUE (subject-based)");
                 }
             }
             // NON_SUBJECT_VALUE stratifier validation happens in processNonSubValueStratifiers
@@ -332,19 +333,41 @@ public class FunctionEvaluationHandler {
         EvaluationResult evalResult = new EvaluationResult();
 
         for (StratifierComponentDef componentDef : stratifierDef.components()) {
-            if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
-                // We screwed up defining component correctly
-                throw new InternalErrorException("StratifierDef component expression is missing.");
-            }
-            var stratifierExpression = componentDef.expression();
+            processNonSubValueStratifier(
+                context,
+                libraryIdentifier,
+                evaluationResult,
+                subjectTypePart,
+                groupDef,
+                measureUrl,
+                componentDef,
+                evalResult);
+        }
+        return evalResult;
+    }
 
+    private static void processNonSubValueStratifier(
+            CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
+            EvaluationResult evaluationResult,
+            String subjectTypePart,
+            GroupDef groupDef,
+            String measureUrl,
+            StratifierComponentDef componentDef,
+            EvaluationResult evalResult) {
+
+        if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
+            // We screwed up defining component correctly
+            throw new InternalErrorException("StratifierDef component expression is missing.");
+        }
+        var stratifierExpression = componentDef.expression();
             final String exceptionMessageIfNotFunction =
-                    """
-                Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
-                For non-boolean population basis, stratifier component criteria expressions must be "
-                CQL functions that take a parameter matching the population basis type.
                 """
-                            .formatted(measureUrl, stratifierExpression);
+            Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
+            For non-boolean population basis, stratifier component criteria expressions must be "
+            CQL functions that take a parameter matching the population basis type.
+            """
+                    .formatted(measureUrl, stratifierExpression);
 
             // Function expression: input parameter data for value stratifier functions
             // Exclude MEASUREOBSERVATION populations - they have function expressions that aren't in regular results

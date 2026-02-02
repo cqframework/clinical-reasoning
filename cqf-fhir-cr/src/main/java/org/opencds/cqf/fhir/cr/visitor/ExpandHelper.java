@@ -30,7 +30,8 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ public class ExpandHelper {
     private static final Logger log = LoggerFactory.getLogger(ExpandHelper.class);
     private final IRepository repository;
     private final IAdapterFactory adapterFactory;
-    private final TerminologyServerClient terminologyServerClient;
+    private final ITerminologyProviderRouter terminologyServerRouter;
     public static final List<String> unsupportedParametersToRemove = List.of(Constants.CANONICAL_VERSION);
 
     // Parameters we care to validate round-trip in the expansion
@@ -50,10 +51,10 @@ public class ExpandHelper {
             "system-version", "used-system-version",
             "valueset-version", "used-valueset-version");
 
-    public ExpandHelper(IRepository repository, TerminologyServerClient server) {
+    public ExpandHelper(IRepository repository, ITerminologyProviderRouter server) {
         this.repository = repository;
         adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
-        terminologyServerClient = server;
+        terminologyServerRouter = server;
     }
 
     private FhirContext fhirContext() {
@@ -91,9 +92,9 @@ public class ExpandHelper {
                 .filter(e -> e.getUrl().equals(Constants.AUTHORITATIVE_SOURCE_URL))
                 .findFirst()
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
-                .map(url -> TerminologyServerClient.getAddressBase(url, fhirContext()))
+                .map(url -> ITerminologyServerClient.getAddressBase(url, fhirContext()))
                 .orElse(null);
-        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
+        // If terminologyEndpoint exists, and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
         // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
         if (terminologyEndpoint.isPresent()
                 && (authoritativeSourceUrl == null
@@ -147,7 +148,7 @@ public class ExpandHelper {
     private void terminologyServerExpand(
             IValueSetAdapter valueSet, IParametersAdapter expansionParameters, IEndpointAdapter terminologyEndpoint) {
         var expandedValueSet = (IValueSetAdapter) adapterFactory.createResource(
-                terminologyServerClient.expand(valueSet, terminologyEndpoint, expansionParameters));
+                terminologyServerRouter.expand(valueSet, terminologyEndpoint, expansionParameters));
         // expansions are only valid for a particular version
         if (!valueSet.hasVersion()) {
             valueSet.setVersion(expandedValueSet.getVersion());
@@ -261,7 +262,7 @@ public class ExpandHelper {
                 .orElseGet(() -> {
                     if (terminologyEndpoint.isPresent()) {
                         try {
-                            return terminologyServerClient
+                            return terminologyServerRouter
                                     .getValueSetResource(terminologyEndpoint.get(), reference)
                                     .map(r -> (IValueSetAdapter) adapterFactory.createResource(r))
                                     .orElse(null);
@@ -286,29 +287,29 @@ public class ExpandHelper {
             IValueSetAdapter includedVS) {
         // update url and version exp params for child expansions
         var childExpParams = (IParametersAdapter) adapterFactory.createResource(expansionParameters.copy());
-        if (childExpParams.hasParameter(TerminologyServerClient.urlParamName)) {
+        if (childExpParams.hasParameter(ITerminologyServerClient.urlParamName)) {
             var newParams = childExpParams.getParameter().stream()
-                    .filter(p -> !p.getName().equals(TerminologyServerClient.urlParamName))
+                    .filter(p -> !p.getName().equals(ITerminologyServerClient.urlParamName))
                     .collect(Collectors.toList());
             if (includedVS.hasUrl()) {
                 newParams.add(adapterFactory.createParametersParameter((IBaseBackboneElement)
                         (fhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3
                                 ? Parameters.newUriPart(
-                                        fhirContext(), TerminologyServerClient.urlParamName, includedVS.getUrl())
+                                        fhirContext(), ITerminologyServerClient.urlParamName, includedVS.getUrl())
                                 : Parameters.newUrlPart(
-                                        fhirContext(), TerminologyServerClient.urlParamName, includedVS.getUrl()))));
+                                        fhirContext(), ITerminologyServerClient.urlParamName, includedVS.getUrl()))));
             }
             childExpParams.setParameter(newParams.stream()
                     .map(IParametersParameterComponentAdapter::get)
                     .toList());
         }
-        if (childExpParams.hasParameter(TerminologyServerClient.versionParamName)) {
+        if (childExpParams.hasParameter(ITerminologyServerClient.versionParamName)) {
             var newParams = childExpParams.getParameter().stream()
-                    .filter(p -> !p.getName().equals(TerminologyServerClient.versionParamName))
+                    .filter(p -> !p.getName().equals(ITerminologyServerClient.versionParamName))
                     .collect(Collectors.toList());
             if (includedVS.hasVersion()) {
                 newParams.add(adapterFactory.createParametersParameter((IBaseBackboneElement) Parameters.newStringPart(
-                        fhirContext(), TerminologyServerClient.versionParamName, includedVS.getVersion())));
+                        fhirContext(), ITerminologyServerClient.versionParamName, includedVS.getVersion())));
             }
             childExpParams.setParameter(newParams.stream()
                     .map(IParametersParameterComponentAdapter::get)

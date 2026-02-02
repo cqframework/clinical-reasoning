@@ -20,7 +20,7 @@ public class TestService {
 			.map(r -> r.getIdElement().getValue())
 			.collect(Collectors.toSet());
 		for (IBaseResource resource : second) {
-			if (!idsOfFirst.contains(resource.getIdElement().getValue()) {
+			if (!idsOfFirst.contains(resource.getIdElement().getValue())) {
 				mixed.add(resource);
 			}
 		}

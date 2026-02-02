@@ -9,6 +9,7 @@ import org.opencds.cqf.fhir.cr.cql.CqlProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiArtifactDiffProcessor;
+import org.opencds.cqf.fhir.cr.hapi.common.HapiCreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ICqlProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFactory;
@@ -71,7 +72,10 @@ public class CrProcessorConfig {
     ILibraryProcessorFactory libraryProcessorFactory(IRepositoryFactory repositoryFactory, CrSettings crSettings) {
         return rd -> {
             var repository = repositoryFactory.create(rd);
-            return new LibraryProcessor(repository, crSettings, List.of(new HapiArtifactDiffProcessor(repository)));
+            return new LibraryProcessor(
+                    repository,
+                    crSettings,
+                    List.of(new HapiArtifactDiffProcessor(repository), new HapiCreateChangelogProcessor(repository)));
         };
     }
 

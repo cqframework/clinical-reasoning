@@ -19,9 +19,11 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
+import org.opencds.cqf.fhir.cr.common.CreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.DeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IArtifactDiffProcessor;
+import org.opencds.cqf.fhir.cr.common.ICreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IDeleteProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
@@ -56,6 +58,7 @@ public class LibraryProcessor {
     protected IWithdrawProcessor withdrawProcessor;
     protected IReviseProcessor reviseProcessor;
     protected IArtifactDiffProcessor artifactDiffProcessor;
+    protected ICreateChangelogProcessor createChangelogProcessor;
 
     protected IRepository repository;
     protected CrSettings crSettings;
@@ -99,6 +102,9 @@ public class LibraryProcessor {
                 }
                 if (p instanceof IArtifactDiffProcessor artifactDiff) {
                     artifactDiffProcessor = artifactDiff;
+                }
+                if (p instanceof ICreateChangelogProcessor createChangelog) {
+                    createChangelogProcessor = createChangelog;
                 }
             });
         }
@@ -284,5 +290,12 @@ public class LibraryProcessor {
                 compareExecutable,
                 null,
                 terminologyEndpoint);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource createChangelog(
+            Either3<C, IIdType, R> sourceLibrary, Either3<C, IIdType, R> targetLibrary, Endpoint terminologyEndpoint) {
+        var processor = createChangelogProcessor != null ? createChangelogProcessor : new CreateChangelogProcessor();
+        return processor.createChangelog(
+                resolveLibrary(sourceLibrary), resolveLibrary(targetLibrary), terminologyEndpoint);
     }
 }

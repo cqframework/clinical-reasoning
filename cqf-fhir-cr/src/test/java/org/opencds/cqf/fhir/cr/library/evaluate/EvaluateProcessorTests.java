@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.library.evaluate;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -55,6 +55,6 @@ public class EvaluateProcessorTests {
                         eq(null),
                         eq(null));
         var actual = fixture.evaluate(request);
-        assertNotNull(actual);
+        assertEquals(expected, actual);
     }
 }

@@ -124,8 +124,9 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      */
     public SelectedMeasureDef<P> hasError(String errorSubstring) {
         assertNotNull(value(), "MeasureDef is null");
-        boolean found = value().errors().stream().anyMatch(error -> error.contains(errorSubstring));
-        assertTrue(found, "No error found containing: " + errorSubstring + ", errors: " + value().errors());
+        var actualErrorMessages = value().errors();
+        var found = actualErrorMessages.stream().anyMatch(error -> error.contains(errorSubstring));
+        assertTrue(found, "Expected error: %s, but instead got: %s".formatted(errorSubstring, actualErrorMessages));
         return this;
     }
 

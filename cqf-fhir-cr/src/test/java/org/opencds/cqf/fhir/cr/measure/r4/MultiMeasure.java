@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
@@ -535,11 +536,21 @@ class MultiMeasure {
             return this;
         }
 
-        public SelectedMeasureReport hasContainedOperationOutcomeMsg(String msg) {
-            assertTrue(report().getContained().stream()
-                    .filter(t -> t.getResourceType().equals(ResourceType.OperationOutcome))
-                    .map(y -> (OperationOutcome) y)
-                    .anyMatch(x -> x.getIssueFirstRep().getDiagnostics().contains(msg)));
+        public SelectedMeasureReport hasContainedOperationOutcomeMsg(String expectedMsg) {
+            assertNotNull(expectedMsg);
+            assertTrue(expectedMsg.length() > 1);
+
+            final List<String> actualDiagnostics = report().getContained().stream()
+                    .filter(OperationOutcome.class::isInstance)
+                    .map(OperationOutcome.class::cast)
+                    .map(OperationOutcome::getIssueFirstRep)
+                    .map(OperationOutcomeIssueComponent::getDiagnostics)
+                    .toList();
+
+            assertTrue(
+                    actualDiagnostics.stream().anyMatch(actualMsg -> actualMsg.contains(expectedMsg)),
+                    "Expected: %n%s was not found in actual:%n%s".formatted(expectedMsg, actualDiagnostics));
+
             return this;
         }
 

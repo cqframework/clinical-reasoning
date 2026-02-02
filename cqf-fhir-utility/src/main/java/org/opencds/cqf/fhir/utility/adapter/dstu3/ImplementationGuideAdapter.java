@@ -182,7 +182,53 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
 
                     var relatedArtifact = new RelatedArtifact();
                     relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
-                    relatedArtifact.setResource(refValue);
+
+                    // Append version to the reference if IG has a version
+                    var resourceRef = new Reference(refValue.getReference());
+                    if (getImplementationGuide().hasVersion()
+                            && !refValue.getReference().contains("|")) {
+                        resourceRef.setReference(refValue.getReference() + "|"
+                                + getImplementationGuide().getVersion());
+                    }
+                    relatedArtifact.setResource(resourceRef);
+
+                    // Add extension to track source package
+                    if (getImplementationGuide().hasUrl()) {
+                        String packageUrl = getImplementationGuide().getUrl();
+                        String packageVersion = getImplementationGuide().hasVersion()
+                                ? getImplementationGuide().getVersion()
+                                : null;
+
+                        // Extract package ID from URL (DSTU3 doesn't have explicit packageId field)
+                        // Extract from URL (last segment after last slash)
+                        String packageId = packageUrl.substring(packageUrl.lastIndexOf('/') + 1);
+
+                        // Create complex extension with packageId (required), version (optional), and uri (optional)
+                        var extension = new org.hl7.fhir.dstu3.model.Extension();
+                        extension.setUrl(org.opencds.cqf.fhir.utility.Constants.PACKAGE_SOURCE);
+
+                        // Add required packageId sub-extension
+                        var packageIdExt = new org.hl7.fhir.dstu3.model.Extension();
+                        packageIdExt.setUrl("packageId");
+                        packageIdExt.setValue(new org.hl7.fhir.dstu3.model.IdType(packageId));
+                        extension.addExtension(packageIdExt);
+
+                        // Add optional version sub-extension
+                        if (packageVersion != null) {
+                            var versionExt = new org.hl7.fhir.dstu3.model.Extension();
+                            versionExt.setUrl("version");
+                            versionExt.setValue(new org.hl7.fhir.dstu3.model.StringType(packageVersion));
+                            extension.addExtension(versionExt);
+                        }
+
+                        // Add optional uri sub-extension
+                        var uriExt = new org.hl7.fhir.dstu3.model.Extension();
+                        uriExt.setUrl("uri");
+                        uriExt.setValue(new org.hl7.fhir.dstu3.model.UriType(packageUrl));
+                        extension.addExtension(uriExt);
+
+                        relatedArtifact.addExtension(extension);
+                    }
 
                     relatedArtifacts.add((T) relatedArtifact);
                 }

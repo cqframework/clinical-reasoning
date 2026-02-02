@@ -33,15 +33,20 @@ public class ImplementationGuideDataRequirementsProvider {
             type = ImplementationGuide.class)
     public IBaseResource getDataRequirements(
             @IdParam IdType id,
+            @OperationParam(name = "implementationGuide") ImplementationGuide implementationGuide,
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
+            @OperationParam(name = "persistDependencies") Boolean persistDependencies,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         StringType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
         return implementationGuideProcessorFactory
                 .create(requestDetails)
-                .dataRequirements(Eithers.for3(canonicalType, id, null), null);
+                .dataRequirements(
+                        Eithers.for3(canonicalType, id, implementationGuide),
+                        null,
+                        Boolean.TRUE.equals(persistDependencies));
     }
 
     @Operation(
@@ -50,15 +55,20 @@ public class ImplementationGuideDataRequirementsProvider {
             type = ImplementationGuide.class)
     public IBaseResource getDataRequirements(
             @OperationParam(name = "id") String id,
+            @OperationParam(name = "implementationGuide") ImplementationGuide implementationGuide,
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
+            @OperationParam(name = "persistDependencies") Boolean persistDependencies,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         IIdType idToUse = getIdType(FhirVersionEnum.R4, "ImplementationGuide", id);
         StringType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
         return implementationGuideProcessorFactory
                 .create(requestDetails)
-                .dataRequirements(Eithers.for3(canonicalType, idToUse, null), null);
+                .dataRequirements(
+                        Eithers.for3(canonicalType, idToUse, implementationGuide),
+                        null,
+                        Boolean.TRUE.equals(persistDependencies));
     }
 }

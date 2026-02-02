@@ -105,10 +105,20 @@ public class ImplementationGuideProcessor {
         return dataRequirements(resolveImplementationGuide(implementationGuide), parameters);
     }
 
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> implementationGuide, IBaseParameters parameters, boolean persistDependencies) {
+        return dataRequirements(resolveImplementationGuide(implementationGuide), parameters, persistDependencies);
+    }
+
     public IBaseResource dataRequirements(IBaseResource implementationGuide, IBaseParameters parameters) {
+        return dataRequirements(implementationGuide, parameters, false);
+    }
+
+    public IBaseResource dataRequirements(
+            IBaseResource implementationGuide, IBaseParameters parameters, boolean persistDependencies) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
                 : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
-        return processor.getDataRequirements(implementationGuide, parameters);
+        return processor.getDataRequirements(implementationGuide, parameters, persistDependencies);
     }
 }

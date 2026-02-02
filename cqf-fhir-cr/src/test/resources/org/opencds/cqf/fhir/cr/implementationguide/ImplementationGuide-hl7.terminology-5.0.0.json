@@ -1,0 +1,14 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "hl7.terminology",
+  "url": "http://terminology.hl7.org/ImplementationGuide/hl7.terminology",
+  "version": "5.0.0",
+  "name": "HL7Terminology",
+  "title": "HL7 Terminology (THO)",
+  "status": "active",
+  "packageId": "hl7.terminology.r4",
+  "fhirVersion": ["4.0.1"],
+  "definition": {
+    "resource": []
+  }
+}

@@ -68,15 +68,14 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
-        terminologyServerClient = new GenericTerminologyServerClient(
-                fhirContext()); // new FederatedTerminologyProviderRouter(fhirContext());
-        this.terminologyServerClientSettings = null;
+        this.terminologyServerClientSettings = TerminologyServerClientSettings.getDefault();
+        terminologyServerClient = new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
     }
 
     public ReleaseVisitor(IRepository repository, ITerminologyServerClient terminologyServerClient) {
         super(repository);
         this.terminologyServerClient = terminologyServerClient;
-        this.terminologyServerClientSettings = null;
+        this.terminologyServerClientSettings = terminologyServerClient.getTerminologyServerClientSettings();
     }
 
     public ReleaseVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {

@@ -180,7 +180,7 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
         var client = this.getClient(url);
         return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
                 .search()
-                .forResource(client.getCodeSystemClass())
+                .forResource(client.getValueSetClass())
                 .where(Searches.byCanonical(url))
                 .execute());
     }

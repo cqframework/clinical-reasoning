@@ -6,12 +6,15 @@ include FHIRHelpers version '4.0.1' called FHIRHelpers
 
 context Patient
 
-define "initial population":
+define "initial population boolean":
+    exists "initial population resource"
+
+define "initial population resource":
     [Encounter]
 
 define "bad criteria stratifier":
-  exists "in-progress encounters"
+  exists "in-progress encounters resource"
 
-define "in-progress encounters":
+define "in-progress encounters resource":
     [Encounter] E
         where E.status='in-progress'

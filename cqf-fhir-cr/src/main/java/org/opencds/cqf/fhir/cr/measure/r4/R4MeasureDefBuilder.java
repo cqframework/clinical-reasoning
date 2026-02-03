@@ -49,6 +49,7 @@ import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils;
 
+@SuppressWarnings("squid:S1135")
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     @Override
@@ -128,19 +129,18 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 .toList();
 
         for (Extension e : ext) {
-            Expression expr = e.getValue() instanceof Expression ? (Expression) e.getValue() : null;
 
-            if (expr == null) {
+            if (!(e.getValue() instanceof Expression expressionValue)) {
                 throw new InvalidRequestException("Extension does not contain valueExpression");
             }
 
             supportingEvidenceDefs.add(new SupportingEvidenceDef(
-                    expr.getExpression(),
+                    expressionValue.getExpression(),
                     EXT_SUPPORTING_EVIDENCE_URL,
-                    expr.getDescription(),
-                    expr.getName(),
-                    expr.getLanguage(),
-                    extractConceptDefFromExpression(expr)));
+                    expressionValue.getDescription(),
+                    expressionValue.getName(),
+                    expressionValue.getLanguage(),
+                    extractConceptDefFromExpression(expressionValue)));
         }
 
         return supportingEvidenceDefs;
@@ -415,7 +415,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         if (hasCriteria) {
             return MeasureStratifierType.CRITERIA;
-        } else if (hasAnyComponentCriteria && !isBooleanBasis) {
+        } else if (!isBooleanBasis) {
             return MeasureStratifierType.NON_SUBJECT_VALUE;
         } else {
             return MeasureStratifierType.VALUE;

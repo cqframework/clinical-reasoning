@@ -1,15 +1,14 @@
 {
-  "id": "CriteriaBasedStratifiersSimpleBad",
+  "id": "CohortBooleanMultiValueStrat",
   "resourceType": "Measure",
-  "name": "CriteriaBasedStratifiersSimpleBad",
-  "url": "http://example.com/Measure/CriteriaBasedStratifiersSimpleBad",
+  "url": "http://example.com/Measure/CohortBooleanMultiValueStrat",
   "library": [
-    "http://example.com/Library/CriteriaBasedStratifiersSimple"
+    "http://example.com/Library/LibrarySimple"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "Encounter"
+      "valueCode": "boolean"
     }
   ],
   "scoring": {
@@ -37,18 +36,30 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "initial population"
+            "expression": "Initial Population Boolean"
           }
         }
       ],
       "stratifier": [
         {
-          "id": "stratifier-bad",
-          "criteria": {
-            "language": "text/cql.identifier",
-            "expression": "bad criteria stratifier"
-          }
+          "id": "stratifier-multi-value",
+          "code": {
+            "text": "encounter-statuses"
+          },
+          "component": [
+            {
+              "id": "stratifier-multi-value-comp-1",
+              "code": {
+                "text": "encounter-statuses"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "All Encounter Statuses"
+              }
+            }
+          ]
         }
       ]
-    }]
+    }
+  ]
 }

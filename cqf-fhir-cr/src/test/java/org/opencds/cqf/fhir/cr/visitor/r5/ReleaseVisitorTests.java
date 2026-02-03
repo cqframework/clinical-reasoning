@@ -58,7 +58,6 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
-import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -515,7 +514,8 @@ class ReleaseVisitorTests {
         var endpoint = createEndpoint(authoritativeSource);
 
         var clientMock = mock(ITerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getLatestValueSetResource(any(IEndpointAdapter.class), any())).thenReturn(Optional.of(latestVSet));
+        when(clientMock.getLatestValueSetResource(any(IEndpointAdapter.class), any()))
+                .thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(

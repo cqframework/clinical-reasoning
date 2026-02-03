@@ -238,13 +238,13 @@ public class GenericTerminologyServerClientClientTest {
         // remove a FHIR type if one was included
         assertEquals(
                 theCorrectBaseServerUrl,
-            ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
+                ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
         // don't break on the actual base url
         assertEquals(theCorrectBaseServerUrl, ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
         // ensure it's forcing https
         assertEquals(
                 theCorrectBaseServerUrl,
-            ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
+                ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
         // remove trailing slashes
         assertEquals(
                 theCorrectBaseServerUrl, ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));

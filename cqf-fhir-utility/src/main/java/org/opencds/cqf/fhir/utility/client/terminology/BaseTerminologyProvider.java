@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Resources;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
 public abstract class BaseTerminologyProvider implements ITerminologyProvider {
     protected final FhirContext fhirContext;
@@ -21,12 +20,12 @@ public abstract class BaseTerminologyProvider implements ITerminologyProvider {
     @Override
     public Class<? extends IBaseResource> getCodeSystemClass() {
         return Resources.getClassForTypeAndVersion(
-            "CodeSystem", fhirContext.getVersion().getVersion());
+                "CodeSystem", fhirContext.getVersion().getVersion());
     }
 
     @Override
     public Class<? extends IBaseResource> getValueSetClass() {
         return Resources.getClassForTypeAndVersion(
-            "ValueSet", fhirContext.getVersion().getVersion());
+                "ValueSet", fhirContext.getVersion().getVersion());
     }
 }

@@ -2,27 +2,26 @@ package org.opencds.cqf.fhir.utility.client.terminology;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import java.util.Optional;
 
 public interface ITerminologyProvider {
 
-    IBaseResource expand(
-        IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters);
+    IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters);
 
     IBaseResource expand(IEndpointAdapter endpoint, IParametersAdapter parameters, FhirVersionEnum fhirVersion);
 
     IBaseResource expand(
-        IEndpointAdapter endpoint,
-        IParametersAdapter parameters,
-        String url,
-        String valueSetVersion,
-        FhirVersionEnum fhirVersion);
+            IEndpointAdapter endpoint,
+            IParametersAdapter parameters,
+            String url,
+            String valueSetVersion,
+            FhirVersionEnum fhirVersion);
 
     IBaseResource expand(IGenericClient fhirClient, String url, IBaseParameters parameters);
 

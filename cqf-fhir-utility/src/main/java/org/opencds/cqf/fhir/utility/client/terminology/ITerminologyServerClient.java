@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.client.terminology;
 
+import static java.util.Objects.requireNonNull;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -8,8 +10,6 @@ import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
-
-import static java.util.Objects.requireNonNull;
 
 public interface ITerminologyServerClient extends ITerminologyProvider {
 
@@ -57,8 +57,8 @@ public interface ITerminologyServerClient extends ITerminologyProvider {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
             case R4 -> new org.hl7.fhir.r4.model.Enumerations.ResourceTypeEnumFactory();
             case R5 -> new org.hl7.fhir.r5.model.Enumerations.ResourceTypeEnumEnumFactory();
-            default -> throw new UnprocessableEntityException("unsupported FHIR version: "
-                + ctx.getVersion().getVersion().toString());
+            default -> throw new UnprocessableEntityException(
+                    "unsupported FHIR version: " + ctx.getVersion().getVersion().toString());
         };
     }
 
@@ -74,5 +74,4 @@ public interface ITerminologyServerClient extends ITerminologyProvider {
     default boolean isCanonicalMatch(String address) {
         return false;
     }
-
 }

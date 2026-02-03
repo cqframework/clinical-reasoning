@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -35,8 +34,8 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
-import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 class ExpandHelperTest {
@@ -147,7 +146,8 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
         var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
-        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
+        verify(client, times(1))
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
         verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         var childExpParams = parametersCaptor.getValue();
         assertNotNull(childExpParams.getParameter(ITerminologyServerClient.urlParamName));
@@ -303,7 +303,8 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
         var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
-        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
+        verify(client, times(1))
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
         var filteredExpansionParams = parametersCaptor.getValue();
         assertEquals(2, filteredExpansionParams.getParameter().size());
         ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
@@ -611,8 +612,10 @@ class ExpandHelperTest {
 
     ITerminologyProviderRouter mockTerminologyServerWithValueSetR4(ValueSet valueSet) {
         var mockClient = mock(FederatedTerminologyProviderRouter.class);
-        when(mockClient.getValueSetResource(any(IEndpointAdapter.class), anyString())).thenReturn(java.util.Optional.of(valueSet));
-        when(mockClient.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any())).thenReturn(valueSet);
+        when(mockClient.getValueSetResource(any(IEndpointAdapter.class), anyString()))
+                .thenReturn(java.util.Optional.of(valueSet));
+        when(mockClient.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenReturn(valueSet);
         return mockClient;
     }
 }

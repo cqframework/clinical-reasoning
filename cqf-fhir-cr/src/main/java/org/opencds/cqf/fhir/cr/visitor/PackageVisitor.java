@@ -49,8 +49,8 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
-import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,8 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     public PackageVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
-        this.terminologyServerRouter = new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerRouter =
+                new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
@@ -94,13 +95,15 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             TerminologyServerClientSettings terminologyServerClientSettings,
             IValueSetExpansionCache cache) {
         super(repository, cache);
-        this.terminologyServerRouter = new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerRouter =
+                new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
-    public PackageVisitor(IRepository repository, ITerminologyProviderRouter terminologyServerRouter, IValueSetExpansionCache cache) {
+    public PackageVisitor(
+            IRepository repository, ITerminologyProviderRouter terminologyServerRouter, IValueSetExpansionCache cache) {
         super(repository, cache);
         if (terminologyServerRouter == null) {
             this.terminologyServerRouter = new FederatedTerminologyProviderRouter(fhirContext());
@@ -258,7 +261,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     include,
                     versionTuple,
                     terminologyEndpoint.orElse(null),
-                terminologyServerRouter,
+                    terminologyServerRouter,
                     messagesWrapper);
             messages = messagesWrapper[0]; // Capture any messages created during gathering
             packagedResources.values().stream()
@@ -337,7 +340,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             var expansionStartTime = new Date().getTime();
             params.setParameter(params.getParameter().stream()
                     .filter(p -> !List.of(
-                            ITerminologyServerClient.urlParamName, ITerminologyServerClient.versionParamName)
+                                    ITerminologyServerClient.urlParamName, ITerminologyServerClient.versionParamName)
                             .contains(p.getName()))
                     .map(IParametersParameterComponentAdapter::get)
                     .toList());

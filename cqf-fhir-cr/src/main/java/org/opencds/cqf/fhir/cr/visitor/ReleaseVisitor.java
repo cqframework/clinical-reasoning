@@ -41,9 +41,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
-import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.GenericTerminologyServerClient;
-import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +68,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
-        terminologyServerClient = new GenericTerminologyServerClient(fhirContext());// new FederatedTerminologyProviderRouter(fhirContext());
+        terminologyServerClient = new GenericTerminologyServerClient(
+                fhirContext()); // new FederatedTerminologyProviderRouter(fhirContext());
         this.terminologyServerClientSettings = null;
     }
 
@@ -82,7 +81,8 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     public ReleaseVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
-        this.terminologyServerClient = new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerClient =
+                new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
         this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
@@ -502,11 +502,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
             // Only add the expansion parameters entry for versionless references
             if (maybeAdapter.isPresent()
-                && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter
-                && this.terminologyServerClientSettings != null) {
+                    && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter
+                    && this.terminologyServerClientSettings != null) {
                 libraryAdapter.ensureExpansionParametersEntry(
-                        maybeAdapter.get(),
-                        this.terminologyServerClientSettings.getCrmiVersion());
+                        maybeAdapter.get(), this.terminologyServerClientSettings.getCrmiVersion());
             }
         }
 

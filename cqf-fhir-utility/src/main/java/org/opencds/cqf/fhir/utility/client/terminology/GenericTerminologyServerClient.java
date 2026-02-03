@@ -19,8 +19,7 @@ import org.opencds.cqf.fhir.utility.client.ExpandRunner;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
-public class GenericTerminologyServerClient extends BaseTerminologyProvider implements
-    ITerminologyServerClient {
+public class GenericTerminologyServerClient extends BaseTerminologyProvider implements ITerminologyServerClient {
     protected final TerminologyServerClientSettings terminologyServerClientSettings;
 
     public GenericTerminologyServerClient(FhirContext fhirContext) {
@@ -31,8 +30,8 @@ public class GenericTerminologyServerClient extends BaseTerminologyProvider impl
             FhirContext fhirContext, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(fhirContext);
         this.terminologyServerClientSettings = terminologyServerClientSettings != null
-            ? terminologyServerClientSettings
-            : TerminologyServerClientSettings.getDefault();
+                ? terminologyServerClientSettings
+                : TerminologyServerClientSettings.getDefault();
     }
 
     @Override
@@ -92,7 +91,7 @@ public class GenericTerminologyServerClient extends BaseTerminologyProvider impl
         var fhirClient = initializeClientWithAuth(endpoint);
 
         return fhirClient.fetchResourceFromUrl(
-            org.hl7.fhir.r4.model.TerminologyCapabilities.class, "/metadata?mode=terminology");
+                org.hl7.fhir.r4.model.TerminologyCapabilities.class, "/metadata?mode=terminology");
     }
 
     @Override
@@ -138,9 +137,9 @@ public class GenericTerminologyServerClient extends BaseTerminologyProvider impl
     @Override
     public java.util.Optional<IDomainResource> getValueSetResource(IEndpointAdapter endpoint, String url) {
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
-            .search()
-            .forResource(getValueSetClass())
-            .where(Searches.byCanonical(url))
-            .execute());
+                .search()
+                .forResource(getValueSetClass())
+                .where(Searches.byCanonical(url))
+                .execute());
     }
 }

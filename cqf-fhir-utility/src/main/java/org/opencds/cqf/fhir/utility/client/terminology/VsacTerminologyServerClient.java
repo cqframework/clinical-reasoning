@@ -8,8 +8,6 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
-import static org.opencds.cqf.fhir.utility.Constants.VSAC_BASE_URL;
-
 public class VsacTerminologyServerClient extends GenericTerminologyServerClient {
 
     public VsacTerminologyServerClient(FhirContext fhirContext) {
@@ -46,6 +44,6 @@ public class VsacTerminologyServerClient extends GenericTerminologyServerClient 
 
     @Override
     public boolean isCanonicalMatch(String address) {
-        return address.startsWith(VSAC_BASE_URL);
+        return address.matches("https*://cts.nlm.nih.gov/fhir.*");
     }
 }

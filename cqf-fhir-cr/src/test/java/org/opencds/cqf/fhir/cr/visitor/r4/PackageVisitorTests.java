@@ -75,8 +75,8 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
@@ -167,7 +167,8 @@ class PackageVisitorTests {
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
-        terminologyEndpoint.setAddress("test.com");
+        terminologyEndpoint.setAddress(Constants.VSAC_BASE_URL);
+
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         var result = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -209,7 +210,7 @@ class PackageVisitorTests {
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
-        terminologyEndpoint.setAddress("test.com");
+        terminologyEndpoint.setAddress(Constants.VSAC_BASE_URL);
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         libraryAdapter.accept(packageVisitor, params);

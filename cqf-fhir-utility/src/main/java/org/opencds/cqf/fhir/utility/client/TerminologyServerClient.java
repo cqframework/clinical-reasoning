@@ -136,19 +136,25 @@ public class TerminologyServerClient {
     }
 
     public java.util.Optional<IDomainResource> getValueSetResource(IEndpointAdapter endpoint, String url) {
-        return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
+        var bundle = initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getValueSetClass())
                 .where(Searches.byCanonical(url))
-                .execute());
+                .execute();
+
+        // If version is specified in canonical URL, find exact match; otherwise find latest
+        return findResourceByVersion(bundle, url);
     }
 
     public java.util.Optional<IDomainResource> getCodeSystemResource(IEndpointAdapter endpoint, String url) {
-        return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
+        var bundle = initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getCodeSystemClass())
                 .where(Searches.byCanonical(url))
-                .execute());
+                .execute();
+
+        // If version is specified in canonical URL, find exact match; otherwise find latest
+        return findResourceByVersion(bundle, url);
     }
 
     public java.util.Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url) {
@@ -158,6 +164,43 @@ public class TerminologyServerClient {
                 .forResource(getValueSetClass())
                 .where(urlParams)
                 .execute());
+    }
+
+    /**
+     * Finds a resource in the bundle matching the version specified in the canonical URL.
+     * If no version is specified, returns the latest version.
+     * If a version is specified but not found, returns empty.
+     *
+     * @param bundle The search result bundle
+     * @param canonical The canonical URL (may include version)
+     * @return Optional containing the matching resource, or empty if not found
+     */
+    private java.util.Optional<IDomainResource> findResourceByVersion(
+            org.hl7.fhir.instance.model.api.IBaseBundle bundle, String canonical) {
+        var parts = Canonicals.getParts(canonical);
+        String requestedVersion = parts.version();
+
+        if (requestedVersion == null) {
+            // No version specified, return latest
+            return IKnowledgeArtifactAdapter.findLatestVersion(bundle);
+        }
+
+        // Version specified, find exact match
+        var resources = org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources(bundle);
+        for (var resource : resources) {
+            if (resource instanceof IDomainResource domainResource) {
+                var adapter = org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.forFhirVersion(
+                                fhirContext.getVersion().getVersion())
+                        .createKnowledgeArtifactAdapter(domainResource);
+
+                if (adapter.hasVersion() && adapter.getVersion().equals(requestedVersion)) {
+                    return java.util.Optional.of(domainResource);
+                }
+            }
+        }
+
+        // Requested version not found
+        return java.util.Optional.empty();
     }
 
     public Class<? extends IBaseResource> getValueSetClass() {

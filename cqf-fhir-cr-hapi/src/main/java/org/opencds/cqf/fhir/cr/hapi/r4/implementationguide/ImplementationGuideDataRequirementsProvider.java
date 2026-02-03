@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.StringType;
@@ -37,7 +38,7 @@ public class ImplementationGuideDataRequirementsProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
-            @OperationParam(name = "persistDependencies") Boolean persistDependencies,
+            @OperationParam(name = "persistDependencies") BooleanType persistDependencies,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         StringType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
@@ -46,7 +47,7 @@ public class ImplementationGuideDataRequirementsProvider {
                 .dataRequirements(
                         Eithers.for3(canonicalType, id, implementationGuide),
                         null,
-                        Boolean.TRUE.equals(persistDependencies));
+                        persistDependencies != null && persistDependencies.getValue());
     }
 
     @Operation(
@@ -59,7 +60,7 @@ public class ImplementationGuideDataRequirementsProvider {
             @OperationParam(name = "canonical") String canonical,
             @OperationParam(name = "url") String url,
             @OperationParam(name = "version") String version,
-            @OperationParam(name = "persistDependencies") Boolean persistDependencies,
+            @OperationParam(name = "persistDependencies") BooleanType persistDependencies,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         IIdType idToUse = getIdType(FhirVersionEnum.R4, "ImplementationGuide", id);
@@ -69,6 +70,6 @@ public class ImplementationGuideDataRequirementsProvider {
                 .dataRequirements(
                         Eithers.for3(canonicalType, idToUse, implementationGuide),
                         null,
-                        Boolean.TRUE.equals(persistDependencies));
+                        persistDependencies != null && persistDependencies.getValue());
     }
 }

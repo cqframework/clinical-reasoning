@@ -246,10 +246,12 @@ public class PublishStrategy {
     }
 
     /**
-     * Creates a batch-type bundle for non-primary resources.
+     * Creates a transaction bundle for batched resources.
+     * Note: Even though this is called "batch" strategy, we still use transaction bundles
+     * to comply with CRMIPublishableBundle profile requirements.
      */
     private IBaseBundle createBatchBundle(List<IBaseResource> resources) {
-        IBaseBundle bundle = BundleHelper.newBundle(fhirContext.getVersion().getVersion(), null, "batch");
+        IBaseBundle bundle = BundleHelper.newBundle(fhirContext.getVersion().getVersion(), null, "transaction");
 
         for (IBaseResource resource : resources) {
             addResourceToBundle(bundle, resource);

@@ -191,8 +191,15 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                                                 .getResourceDefinition(Canonicals.getResourceType(ra.getReference()))
                                                 .newInstance());
                         if (hasUrl) {
+                            String reference = ra.getReference();
+
+                            // Check if this is a short-form FHIR reference (e.g., "ResourceType/id|version")
+                            if (isShortFormReference(reference)) {
+                                return resolveShortFormReference(reference, messagesWrapper);
+                            }
+
                             // Try to resolve version using package source and IG dependencies
-                            String canonical = resolveCanonicalWithIgVersion(ra.getReference(), igDependencyVersions);
+                            String canonical = resolveCanonicalWithIgVersion(reference, igDependencyVersions);
                             return Optional.ofNullable(
                                             SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical))
                                     .map(bundle -> findResourceMatchingVersion(bundle, canonical, messagesWrapper))
@@ -320,6 +327,90 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                         firstAdapter.getVersion());
             }
             return firstResource;
+        }
+    }
+
+    /**
+     * Detects if a reference is a short-form FHIR reference (e.g., "ResourceType/id|version").
+     * Short-form references don't have a base URL (http://, https://, urn:).
+     *
+     * @param reference the reference to check
+     * @return true if this is a short-form reference, false otherwise
+     */
+    private boolean isShortFormReference(String reference) {
+        if (reference == null) {
+            return false;
+        }
+        // Short-form references don't start with http://, https://, or urn:
+        return !reference.startsWith("http://")
+                && !reference.startsWith("https://")
+                && !reference.startsWith("urn:")
+                && reference.contains("/");
+    }
+
+    /**
+     * Resolves a short-form FHIR reference (e.g., "ResourceType/id|version") by reading directly from the repository.
+     *
+     * @param reference the short-form reference to resolve
+     * @param messagesWrapper optional OperationOutcome wrapper for error messages
+     * @return the resolved resource, or null if not found
+     */
+    private IDomainResource resolveShortFormReference(String reference, IBaseOperationOutcome[] messagesWrapper) {
+        try {
+            // Parse the reference: "ResourceType/id|version" or "ResourceType/id"
+            String resourceType = Canonicals.getResourceType(reference);
+            String idPart = Canonicals.getIdPart(reference);
+            String version = Canonicals.getVersion(reference);
+
+            if (resourceType == null || idPart == null) {
+                logger.warn("Unable to parse short-form reference: {}", reference);
+                return null;
+            }
+
+            // Construct the ID to read: "ResourceType/id"
+            String resourceId = resourceType + "/" + idPart;
+
+            logger.debug("Resolving short-form reference: {} (resourceType={}, id={}, version={})",
+                    reference, resourceType, idPart, version);
+
+            // Read the resource from the repository
+            IBaseResource resource = repository.read(
+                    fhirContext().getResourceDefinition(resourceType).getImplementingClass(),
+                    fhirContext().getVersion().newIdType().setValue(resourceId));
+
+            if (resource == null) {
+                logger.warn("Short-form reference not found: {}", reference);
+                return null;
+            }
+
+            // If a version was specified, verify it matches
+            if (version != null && resource instanceof IDomainResource domainResource) {
+                var adapter = IAdapterFactory.forFhirVersion(fhirVersion())
+                        .createKnowledgeArtifactAdapter(domainResource);
+                if (adapter.hasVersion() && !adapter.getVersion().equals(version)) {
+                    String errorMessage = String.format(
+                            "Requested version '%s' for resource '%s' does not match repository version '%s'. "
+                                    + "Resource will not be included in package.",
+                            version, reference, adapter.getVersion());
+                    logger.warn(errorMessage);
+
+                    if (messagesWrapper != null && messagesWrapper[0] == null) {
+                        messagesWrapper[0] = ca.uhn.fhir.util.OperationOutcomeUtil.newInstance(fhirContext());
+                    }
+                    if (messagesWrapper != null) {
+                        ca.uhn.fhir.util.OperationOutcomeUtil.addIssue(
+                                fhirContext(), messagesWrapper[0], "warning", errorMessage, null, "processing");
+                    }
+                    return null;
+                }
+            }
+
+            return (IDomainResource) resource;
+
+        } catch (Exception e) {
+            // Debug level since the resource might not exist or might need canonical URL resolution
+            logger.debug("Unable to resolve short-form reference '{}': {}", reference, e.getMessage());
+            return null;
         }
     }
 

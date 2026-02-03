@@ -30,4 +30,40 @@ public interface ITerminologyProviderRouter extends ITerminologyProvider {
     Optional<IDomainResource> getLatestValueSetResource(List<IEndpointAdapter> endpoints, String url);
 
     TerminologyServerClientSettings getTerminologyServerClientSettings(IEndpointAdapter endpoints);
+
+    // Methods accepting ArtifactEndpointConfiguration for CRMI-compliant routing
+
+    /**
+     * Expands a ValueSet using CRMI artifact endpoint configuration routing.
+     * Endpoints are prioritized based on artifactRoute matching the ValueSet's canonical URL.
+     *
+     * @param valueSet the ValueSet to expand
+     * @param configurations list of artifact endpoint configurations
+     * @param parameters expansion parameters
+     * @return the expanded ValueSet, or null if expansion fails
+     */
+    IBaseResource expandWithConfigurations(
+            IValueSetAdapter valueSet,
+            List<ArtifactEndpointConfiguration> configurations,
+            IParametersAdapter parameters);
+
+    /**
+     * Gets a ValueSet resource using CRMI artifact endpoint configuration routing.
+     *
+     * @param configurations list of artifact endpoint configurations
+     * @param url the canonical URL of the ValueSet
+     * @return the ValueSet if found
+     */
+    Optional<IDomainResource> getValueSetResourceWithConfigurations(
+            List<ArtifactEndpointConfiguration> configurations, String url);
+
+    /**
+     * Gets a CodeSystem resource using CRMI artifact endpoint configuration routing.
+     *
+     * @param configurations list of artifact endpoint configurations
+     * @param url the canonical URL of the CodeSystem
+     * @return the CodeSystem if found
+     */
+    Optional<IDomainResource> getCodeSystemResourceWithConfigurations(
+            List<ArtifactEndpointConfiguration> configurations, String url);
 }

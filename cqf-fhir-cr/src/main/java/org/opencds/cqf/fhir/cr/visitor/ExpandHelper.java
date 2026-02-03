@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
+import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.slf4j.Logger;
@@ -144,6 +145,60 @@ public class ExpandHelper {
             }
         }
         expandedList.add(valueSet.getUrl());
+    }
+
+    /**
+     * Expands a ValueSet using CRMI artifact endpoint configurations for routing.
+     * Falls back to legacy terminologyEndpoint if no configurations match, then to local expansion.
+     *
+     * @param valueSet the ValueSet to expand
+     * @param expansionParameters expansion parameters
+     * @param artifactEndpointConfigurations CRMI endpoint configurations for routing
+     * @param terminologyEndpoint legacy single endpoint (used as fallback)
+     * @param valueSets list of all ValueSets being processed
+     * @param expandedList list of already expanded ValueSet URLs
+     * @param expansionTimestamp timestamp for expansion
+     */
+    public void expandValueSet(
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
+            Optional<IEndpointAdapter> terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
+            List<String> expandedList,
+            Date expansionTimestamp) {
+        // Have we already expanded this ValueSet?
+        if (expandedList.contains(valueSet.getUrl())) {
+            return;
+        }
+        filterOutUnsupportedParameters(expansionParameters);
+
+        // Try CRMI configuration-based routing first if configurations are provided
+        if (artifactEndpointConfigurations != null && !artifactEndpointConfigurations.isEmpty()) {
+            try {
+                var expandedResult = terminologyServerRouter.expandWithConfigurations(
+                        valueSet, artifactEndpointConfigurations, expansionParameters);
+                if (expandedResult != null) {
+                    var expandedValueSet = (IValueSetAdapter) adapterFactory.createResource(expandedResult);
+                    if (!valueSet.hasVersion()) {
+                        valueSet.setVersion(expandedValueSet.getVersion());
+                    }
+                    valueSet.setExpansion(expandedValueSet.getExpansion());
+                    validateExpansionParameters(valueSet, expansionParameters);
+                    expandedList.add(valueSet.getUrl());
+                    return;
+                }
+            } catch (TerminologyServerExpansionException e) {
+                log.warn(
+                        "Failed to expand value set {} using artifact endpoint configurations. Reason: {}. "
+                                + "Will attempt fallback expansion.",
+                        valueSet.getUrl(),
+                        e.getMessage());
+            }
+        }
+
+        // Fall back to legacy single endpoint or local expansion
+        expandValueSet(valueSet, expansionParameters, terminologyEndpoint, valueSets, expandedList, expansionTimestamp);
     }
 
     private void terminologyServerExpand(

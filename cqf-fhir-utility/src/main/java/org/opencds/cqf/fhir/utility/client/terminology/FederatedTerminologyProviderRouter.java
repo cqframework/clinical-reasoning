@@ -192,4 +192,122 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
                 .flatMap(Optional::stream)
                 .findFirst();
     }
+
+    // CRMI ArtifactEndpointConfiguration-based routing methods
+
+    /**
+     * Prioritizes artifact endpoint configurations based on CRMI routing rules:
+     * 1. Configurations where artifactRoute matches the start of canonicalUrl are ranked by match length
+     * 2. Configurations without artifactRoute are included but ranked lower (score = 0)
+     * 3. For equal scores, original order is preserved
+     *
+     * @param configurations list of artifact endpoint configurations
+     * @param canonicalUrl the canonical URL to match against
+     * @return prioritized list of configurations (excludes non-matching configurations)
+     */
+    private List<ArtifactEndpointConfiguration> prioritizeConfigurations(
+            List<ArtifactEndpointConfiguration> configurations, String canonicalUrl) {
+        if (configurations == null || configurations.isEmpty()) {
+            return List.of();
+        }
+
+        // Create scored configurations, preserving original index for stable sorting
+        record ScoredConfig(ArtifactEndpointConfiguration config, int score, int originalIndex) {}
+
+        var scored = new ArrayList<ScoredConfig>();
+        for (int i = 0; i < configurations.size(); i++) {
+            var config = configurations.get(i);
+            int score = config.getMatchScore(canonicalUrl);
+            if (score >= 0) { // -1 means no match, exclude those
+                scored.add(new ScoredConfig(config, score, i));
+            }
+        }
+
+        // Sort by score descending, then by original index for stability
+        return scored.stream()
+                .sorted(Comparator.comparingInt((ScoredConfig s) -> s.score)
+                        .reversed()
+                        .thenComparingInt(s -> s.originalIndex))
+                .map(ScoredConfig::config)
+                .toList();
+    }
+
+    @Override
+    public IBaseResource expandWithConfigurations(
+            IValueSetAdapter valueSet,
+            List<ArtifactEndpointConfiguration> configurations,
+            IParametersAdapter parameters) {
+        if (configurations == null || configurations.isEmpty()) {
+            return null;
+        }
+
+        String valueSetUrl = valueSet.getUrl();
+        var prioritized = prioritizeConfigurations(configurations, valueSetUrl);
+
+        for (var config : prioritized) {
+            try {
+                IEndpointAdapter endpoint = config.getEffectiveEndpoint(fhirContext);
+                if (endpoint != null) {
+                    var result = expand(valueSet, endpoint, parameters);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            } catch (Exception e) {
+                // Log and try next configuration
+                // Swallow exception to try next endpoint in priority order
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Optional<IDomainResource> getValueSetResourceWithConfigurations(
+            List<ArtifactEndpointConfiguration> configurations, String url) {
+        if (configurations == null || configurations.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var prioritized = prioritizeConfigurations(configurations, url);
+
+        for (var config : prioritized) {
+            try {
+                IEndpointAdapter endpoint = config.getEffectiveEndpoint(fhirContext);
+                if (endpoint != null) {
+                    var result = getValueSetResource(endpoint, url);
+                    if (result.isPresent()) {
+                        return result;
+                    }
+                }
+            } catch (Exception e) {
+                // Try next configuration
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<IDomainResource> getCodeSystemResourceWithConfigurations(
+            List<ArtifactEndpointConfiguration> configurations, String url) {
+        if (configurations == null || configurations.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var prioritized = prioritizeConfigurations(configurations, url);
+
+        for (var config : prioritized) {
+            try {
+                IEndpointAdapter endpoint = config.getEffectiveEndpoint(fhirContext);
+                if (endpoint != null) {
+                    var result = getCodeSystemResource(endpoint, url);
+                    if (result.isPresent()) {
+                        return result;
+                    }
+                }
+            } catch (Exception e) {
+                // Try next configuration
+            }
+        }
+        return Optional.empty();
+    }
 }

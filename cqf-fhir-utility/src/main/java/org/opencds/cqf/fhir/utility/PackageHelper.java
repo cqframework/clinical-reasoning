@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.forFhirVersio
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,7 +31,26 @@ public class PackageHelper {
      */
     public static IBaseParameters packageParameters(
             FhirVersionEnum fhirVersion, IBaseResource terminologyEndpoint, boolean isPut) {
-        return packageParameters(fhirVersion, null, null, null, null, terminologyEndpoint, isPut);
+        return packageParameters(fhirVersion, null, terminologyEndpoint, isPut);
+    }
+
+    /**
+     * Returns a FHIR Parameters resource of the specified version containing the supplied parameters with the correct parameter name.
+     * @param fhirVersion the FHIR version to create Parameters for
+     * @param artifactEndpointConfiguration Configuration information to resolve canonical artifacts. Each element
+     *        is a Parameters.ParametersParameterComponent with parts: artifactRoute, endpointUri, endpoint.
+     * @param terminologyEndpoint the FHIR Endpoint resource to use to access terminology (i.e. valuesets, codesystems,
+     *        naming systems, concept maps, and membership testing) referenced by the Resource.
+     * @param isPut the boolean value to determine if the Bundle returned uses PUT or POST request methods.
+     * @return FHIR Parameters resource
+     */
+    public static IBaseParameters packageParameters(
+            FhirVersionEnum fhirVersion,
+            List<IBase> artifactEndpointConfiguration,
+            IBaseResource terminologyEndpoint,
+            boolean isPut) {
+        return packageParameters(
+                fhirVersion, null, null, null, null, artifactEndpointConfiguration, terminologyEndpoint, isPut);
     }
 
     /**
@@ -49,6 +69,32 @@ public class PackageHelper {
             List<String> include,
             IBaseResource terminologyEndpoint,
             boolean isPut) {
+        return packageParameters(fhirVersion, offset, count, bundleType, include, null, terminologyEndpoint, isPut);
+    }
+
+    /**
+     * Returns a FHIR Parameters resource of the specified version containing the supplied parameters with the correct parameter name.
+     * @param fhirVersion the FHIR version to create Parameters for
+     * @param offset Paging support - where to start if a subset is desired.
+     * @param count Paging support - how many resources should be provided in a partial page view.
+     * @param bundleType Determines the type of output Bundle.
+     * @param include Specifies what contents should only be included in the resulting package.
+     * @param artifactEndpointConfiguration Configuration information to resolve canonical artifacts. Each element
+     *        is a Parameters.ParametersParameterComponent with parts: artifactRoute, endpointUri, endpoint.
+     * @param terminologyEndpoint the FHIR Endpoint resource to use to access terminology (i.e. valuesets, codesystems,
+     *        naming systems, concept maps, and membership testing) referenced by the Resource.
+     * @param isPut the boolean value to determine if the Bundle returned uses PUT or POST request methods.
+     * @return FHIR Parameters resource
+     */
+    public static IBaseParameters packageParameters(
+            FhirVersionEnum fhirVersion,
+            IPrimitiveType<Integer> offset,
+            IPrimitiveType<Integer> count,
+            String bundleType,
+            List<String> include,
+            List<IBase> artifactEndpointConfiguration,
+            IBaseResource terminologyEndpoint,
+            boolean isPut) {
         var params = forFhirVersion(fhirVersion)
                 .createParameters((IBaseParameters) newBaseForVersion("Parameters", fhirVersion));
         if (offset != null) {
@@ -63,6 +109,11 @@ public class PackageHelper {
         if (include != null) {
             for (String i : include) {
                 params.addParameter("include", codeTypeForVersion(fhirVersion, i));
+            }
+        }
+        if (artifactEndpointConfiguration != null) {
+            for (IBase config : artifactEndpointConfiguration) {
+                params.addParameter(config);
             }
         }
         if (terminologyEndpoint != null) {

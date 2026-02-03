@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -61,6 +62,8 @@ public class LibraryPackageProvider {
      *                                      It is invalid to request a 'transaction' bundle and use
      *                                      paging. Doing so will result in an error.
      * @param include Specifies what contents should only be included in the resulting package.
+     * @param artifactEndpointConfiguration Configuration information to resolve canonical artifacts.
+     *                                      Contains parts: artifactRoute, endpointUri, endpoint.
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
      * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
@@ -76,12 +79,17 @@ public class LibraryPackageProvider {
             @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
             @OperationParam(name = "bundleType") String bundleType,
             @OperationParam(name = "include") List<CodeType> include,
+            @OperationParam(name = "artifactEndpointConfiguration")
+                    List<Parameters.ParametersParameterComponent> artifactEndpointConfiguration,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
+        List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
+                ? null
+                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.toList());
         var params = packageParameters(
                 fhirVersion,
                 offset,
@@ -93,6 +101,7 @@ public class LibraryPackageProvider {
                                 .distinct()
                                 .map(PrimitiveType::getValueAsString)
                                 .collect(Collectors.toList()),
+                artifactEndpointConfigurationParam,
                 terminologyEndpointParam,
                 usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return libraryProcessorFactory
@@ -110,6 +119,8 @@ public class LibraryPackageProvider {
             @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
             @OperationParam(name = "bundleType") String bundleType,
             @OperationParam(name = "include") List<CodeType> include,
+            @OperationParam(name = "artifactEndpointConfiguration")
+                    List<Parameters.ParametersParameterComponent> artifactEndpointConfiguration,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
@@ -117,6 +128,9 @@ public class LibraryPackageProvider {
         var idToUse = getIdType(fhirVersion, "Library", id);
         var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
+        List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
+                ? null
+                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.toList());
         var params = packageParameters(
                 fhirVersion,
                 offset,
@@ -128,6 +142,7 @@ public class LibraryPackageProvider {
                                 .distinct()
                                 .map(PrimitiveType::getValueAsString)
                                 .collect(Collectors.toList()),
+                artifactEndpointConfigurationParam,
                 terminologyEndpointParam,
                 usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return libraryProcessorFactory

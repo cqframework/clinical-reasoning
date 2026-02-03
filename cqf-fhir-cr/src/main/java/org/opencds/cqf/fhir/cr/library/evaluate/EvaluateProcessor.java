@@ -7,6 +7,7 @@ import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 
+@SuppressWarnings("UnstableApiUsage")
 public class EvaluateProcessor implements IEvaluateProcessor {
     protected IRepository repository;
     protected EvaluationSettings evaluationSettings;
@@ -20,7 +21,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         try {
             return request.getLibraryEngine()
                     .evaluate(
-                            request.getLibraryAdapter().getUrl(),
+                            request.getLibraryAdapter().getCanonical(),
                             request.getSubject(),
                             request.getParameters(),
                             request.getRawParameters(),

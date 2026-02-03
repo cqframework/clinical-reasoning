@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -602,7 +601,6 @@ public class FunctionEvaluationHandler {
         }
     }
 
-    @Nonnull
     private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {
         return groupDef.isBooleanBasis() ? List.of() : List.of(result);
     }
@@ -650,7 +648,6 @@ public class FunctionEvaluationHandler {
                 .anyMatch(StratifierDef::isNonSubjectValueStratifier);
     }
 
-    @Nonnull
     private static EvaluationResult buildEvaluationResult(
             String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
 
@@ -663,10 +660,10 @@ public class FunctionEvaluationHandler {
     }
 
     private static void addToEvaluationResult(
-            @Nonnull EvaluationResult result,
-            @Nonnull String expressionName,
-            @Nonnull Map<Object, Object> functionResults,
-            @Nonnull Set<Object> evaluatedResources) {
+            EvaluationResult result,
+            String expressionName,
+            Map<Object, Object> functionResults,
+            Set<Object> evaluatedResources) {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));

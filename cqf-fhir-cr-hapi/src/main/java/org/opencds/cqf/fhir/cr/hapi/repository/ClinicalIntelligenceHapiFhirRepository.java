@@ -6,9 +6,10 @@ import static java.util.Objects.nonNull;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.jpa.repository.searchparam.SearchParameterMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -19,7 +20,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Multimap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -54,7 +54,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     }
 
     /**
-     * Override {@link HapiFhirRepository#search(Class, Class, Multimap, Map)} to ensure that the
+     * Override {@link HapiFhirRepository#search(Class, Class, IRepositoryRestQueryContributor, Map)} to ensure that the
      * _count {@link RequestDetails} parameter is passed through to the DAO layer instead of
      * dropping it.
      * <p/>
@@ -67,7 +67,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
+            IRepositoryRestQueryContributor queryContributor,
             Map<String, String> headers) {
 
         var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
@@ -75,10 +75,10 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
                 .addHeaders(headers)
                 .create();
 
-        var converter = new SearchConverter();
-        converter.convertParameters(searchParameters);
-        details.setParameters(converter.resultParameters);
+        var searchParameterMap =
+                SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(queryContributor);
 
+        details.setParameters(MultiMapRepositoryRestQueryBuilder.toFlatMap(searchParameterMap));
         details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
 
         if (details instanceof SystemRequestDetails) {
@@ -89,7 +89,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         }
 
         var resourceDao = daoRegistry.getResourceDao(resourceType);
-        var bundleProvider = resourceDao.search(converter.searchParameterMap, details);
+        var bundleProvider = resourceDao.search(searchParameterMap, details);
 
         bundleProvider = sanitizeBundleProvider(bundleProvider);
 

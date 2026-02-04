@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -70,6 +71,57 @@ public class MeasureProcessorUtils {
      */
     @SuppressWarnings({"deprecation", "removal"})
     public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
+        ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
+        if (pd == null) {
+            logger.warn(
+                    "Parameter \"{}\" was not found. Unable to validate type.",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            context.getState()
+                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
+            return;
+        }
+
+        if (measurementPeriod == null && pd.getDefault() == null) {
+            logger.warn(
+                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            return;
+        }
+
+        // Use the default, skip validation
+        if (measurementPeriod == null) {
+            measurementPeriod = (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
+
+            context.getState()
+                    .setParameter(
+                            null,
+                            MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME,
+                            cloneIntervalWithUtc(measurementPeriod));
+            return;
+        }
+
+        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
+        if (intervalTypeSpecifier == null) {
+            logger.debug(
+                    "No ELM type information available. Unable to validate type of \"{}\"",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            context.getState()
+                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
+            return;
+        }
+
+        NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
+        String targetType = pointType.getName().getLocalPart();
+        Interval convertedPeriod = convertInterval(measurementPeriod, targetType, measureUrls);
+
+        context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
+    }
+
+    public void setMeasurementPeriods(
+            Interval measurementPeriod,
+            CqlEngine context,
+            List<String> measureUrls,
+            List<VersionedIdentifier> libraryIdentifiers) {
         ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import java.util.Set;
 import kotlin.Unit;
 import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.FunctionDef;
+import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -51,29 +51,10 @@ public class FunctionEvaluationHandler {
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
             String subjectTypePart) {
-
-        final boolean hasLibraryInitialized = LibraryInitHandler.initLibrary(context, libraryIdentifier);
-
-        try {
-            return tryCqlFunctionEvaluation(context, measureDefs, libraryIdentifier, evaluationResult, subjectTypePart);
-        } finally {
-            // We don't want to pop a non-existent library
-            if (hasLibraryInitialized) {
-                LibraryInitHandler.popLibrary(context);
-            }
-        }
-    }
-
-    private static List<EvaluationResult> tryCqlFunctionEvaluation(
-            CqlEngine context,
-            List<MeasureDef> measureDefs,
-            VersionedIdentifier libraryIdentifier,
-            EvaluationResult evaluationResult,
-            String subjectTypePart) {
         // Validate all stratifier expression types before processing
         for (MeasureDef measureDef : measureDefs) {
             for (GroupDef groupDef : measureDef.groups()) {
-                validateStratifierExpressionTypes(context, measureDef.url(), groupDef);
+                validateStratifierExpressionTypes(context, libraryIdentifier, measureDef.url(), groupDef);
             }
         }
 
@@ -174,29 +155,42 @@ public class FunctionEvaluationHandler {
     }
 
     /**
-     * Validates that stratifier expressions use the correct expression type based on stratifier type:
+     * Validates that stratifier expressions use the correct expression type based on stratifier
+     * type:
      * <ul>
      *   <li>CRITERIA stratifier: must NOT be a CQL function, result must match population-basis</li>
      *   <li>VALUE stratifier (boolean basis): must NOT be a CQL function</li>
      *   <li>NON_SUBJECT_VALUE stratifier: must BE a CQL function with input matching population-basis</li>
      * </ul>
+     *  @param context the CQL engine context
      *
-     * @param context the CQL engine context
      * @param measureUrl the measure URL for error messages
-     * @param groupDef the group definition containing stratifiers
+     * @param groupDef   the group definition containing stratifiers
      */
-    private static void validateStratifierExpressionTypes(CqlEngine context, String measureUrl, GroupDef groupDef) {
+    private static void validateStratifierExpressionTypes(
+            CqlEngine context, VersionedIdentifier libraryIdentifier, String measureUrl, GroupDef groupDef) {
+
         for (StratifierDef stratifierDef : groupDef.stratifiers()) {
             if (stratifierDef.isCriteriaStratifier()) {
                 // CRITERIA stratifier: must NOT be a function
-                validateNotFunction(context, measureUrl, stratifierDef.expression(), "CRITERIA");
+                validateNotFunction(context, libraryIdentifier, measureUrl, stratifierDef.expression(), "CRITERIA");
             } else if (!stratifierDef.isNonSubjectValueStratifier()) {
                 // VALUE stratifier (boolean basis): must NOT be a function
                 if (stratifierDef.isCriteriaStratifier()) {
-                    validateNotFunction(context, measureUrl, stratifierDef.expression(), "VALUE (subject-based)");
+                    validateNotFunction(
+                            context,
+                            libraryIdentifier,
+                            measureUrl,
+                            stratifierDef.expression(),
+                            "VALUE (subject-based)");
                 } else {
                     for (var component : stratifierDef.components()) {
-                        validateNotFunction(context, measureUrl, component.expression(), "VALUE (subject-based)");
+                        validateNotFunction(
+                                context,
+                                libraryIdentifier,
+                                measureUrl,
+                                component.expression(),
+                                "VALUE (subject-based)");
                     }
                 }
             }
@@ -207,19 +201,23 @@ public class FunctionEvaluationHandler {
     /**
      * Validates that an expression is NOT a CQL function definition.
      *
-     * @param context the CQL engine context
-     * @param measureUrl the measure URL for error messages
-     * @param expression the expression name to check
+     * @param context        the CQL engine context
+     * @param measureUrl     the measure URL for error messages
+     * @param expression     the expression name to check
      * @param stratifierType the type of stratifier for error messages
      */
     private static void validateNotFunction(
-            CqlEngine context, String measureUrl, String expression, String stratifierType) {
+            CqlEngine context,
+            VersionedIdentifier libraryIdentifier,
+            String measureUrl,
+            String expression,
+            String stratifierType) {
 
         if (expression == null || expression.isBlank()) {
             return;
         }
 
-        if (isExpressionFunctionRef(context, expression)) {
+        if (isExpressionFunctionRef(context, libraryIdentifier, expression)) {
             throw new InvalidRequestException(
                     ("%s stratifier expression '%s' must NOT be a CQL function definition for measure: %s. "
                                     + "Only NON_SUBJECT_VALUE stratifiers (non-boolean population basis with component criteria) "
@@ -461,9 +459,8 @@ public class FunctionEvaluationHandler {
             List<Object> functionArguments,
             String exceptionMessageIfNotFunction) {
 
-        final ExpressionDef expressionDef = resolveExpressionRef(cqlEngine, functionExpression);
-
-        if (!(resolveExpressionRef(cqlEngine, functionExpression) instanceof FunctionDef functionDef)) {
+        if (!(resolveExpressionRef(cqlEngine, libraryIdentifier, functionExpression)
+                instanceof FunctionDef functionDef)) {
             throw new InvalidRequestException(
                     "Measure observation %s does not reference a function definition".formatted(functionExpression));
         }
@@ -604,7 +601,6 @@ public class FunctionEvaluationHandler {
         }
     }
 
-    @Nonnull
     private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {
         return groupDef.isBooleanBasis() ? List.of() : List.of(result);
     }
@@ -652,7 +648,6 @@ public class FunctionEvaluationHandler {
                 .anyMatch(StratifierDef::isNonSubjectValueStratifier);
     }
 
-    @Nonnull
     private static EvaluationResult buildEvaluationResult(
             String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
 
@@ -665,21 +660,22 @@ public class FunctionEvaluationHandler {
     }
 
     private static void addToEvaluationResult(
-            @Nonnull EvaluationResult result,
-            @Nonnull String expressionName,
-            @Nonnull Map<Object, Object> functionResults,
-            @Nonnull Set<Object> evaluatedResources) {
+            EvaluationResult result,
+            String expressionName,
+            Map<Object, Object> functionResults,
+            Set<Object> evaluatedResources) {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
     }
 
-    private static boolean isExpressionFunctionRef(CqlEngine cqlEngine, String expressionName) {
+    private static boolean isExpressionFunctionRef(
+            CqlEngine cqlEngine, VersionedIdentifier libraryIdentifier, String expressionName) {
         if (expressionName == null || expressionName.isBlank()) {
             throw new InvalidRequestException("Expresion name is null or blank");
         }
 
-        return isExpressionFunctionRef(resolveExpressionRef(cqlEngine, expressionName));
+        return isExpressionFunctionRef(resolveExpressionRef(cqlEngine, libraryIdentifier, expressionName));
     }
 
     private static boolean isExpressionFunctionRef(ExpressionDef expressionDef) {
@@ -689,8 +685,15 @@ public class FunctionEvaluationHandler {
     /**
      * This method assumes that the CqlEngine has already been initialized for the given librar(y/ies).
      */
-    private static ExpressionDef resolveExpressionRef(CqlEngine cqlEngine, String expressionName) {
-        return Libraries.resolveExpressionRef(
-                expressionName, Objects.requireNonNull(cqlEngine.getState().getCurrentLibrary()));
+    private static ExpressionDef resolveExpressionRef(
+            CqlEngine cqlEngine, VersionedIdentifier libraryIdentifier, String expressionName) {
+
+        final Library library = cqlEngine.getEnvironment().resolveLibrary(libraryIdentifier);
+
+        if (library == null) {
+            throw new InvalidRequestException("Could not resolve CQL library: %s".formatted(libraryIdentifier));
+        }
+
+        return Libraries.resolveExpressionRef(expressionName, library);
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
@@ -14,10 +15,6 @@ public class LibraryInitHandler {
 
     private LibraryInitHandler() {
         // static class
-    }
-
-    public static boolean initLibrary(CqlEngine context, VersionedIdentifier libraryIdentifiers) {
-        return !initLibraries(context, List.of(libraryIdentifiers)).isEmpty();
     }
 
     public static void popLibraries(CqlEngine context, List<CompiledLibrary> compiledLibraries) {
@@ -42,8 +39,12 @@ public class LibraryInitHandler {
 
     private static List<CompiledLibrary> getCompiledLibraries(List<VersionedIdentifier> ids, CqlEngine context) {
         try {
-            var resolvedLibraryResults =
-                    context.getEnvironment().getLibraryManager().resolveLibraries(ids);
+            var libraryManager = context.getEnvironment().getLibraryManager();
+
+            if (libraryManager == null) {
+                throw new InvalidRequestException("Library Manager not found for id: %s".formatted(ids));
+            }
+            var resolvedLibraryResults = libraryManager.resolveLibraries(ids);
 
             var allErrors = resolvedLibraryResults.allErrors();
             if (resolvedLibraryResults.hasErrors() || ids.size() > allErrors.size()) {

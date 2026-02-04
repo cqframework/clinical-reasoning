@@ -6,7 +6,6 @@ import static java.util.Objects.nonNull;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
-import ca.uhn.fhir.jpa.repository.SearchConverter;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -37,9 +36,10 @@ import org.slf4j.LoggerFactory;
  * Since hapi-fhir is released quarterly, we want to maintain flexibility to change behaviour
  * within our more flexible release cadence.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ClinicalIntelligenceHapiFhirRepository.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClinicalIntelligenceHapiFhirRepository.class);
 
     private final RequestDetails requestDetails;
     private final RestfulServer restfulServer;
@@ -54,7 +54,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     }
 
     /**
-     * Override {@link HapiFhirRepository#search(Class, Class, Map, Map)} to ensure that the
+     * Override {@link HapiFhirRepository#search(Class, Class, Multimap, Map)} to ensure that the
      * _count {@link RequestDetails} parameter is passed through to the DAO layer instead of
      * dropping it.
      * <p/>
@@ -76,8 +76,8 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
                 .create();
 
         var converter = new SearchConverter();
-        converter.convertParameters(searchParameters, fhirContext());
-        details.setParameters(converter.myResultParameters);
+        converter.convertParameters(searchParameters);
+        details.setParameters(converter.resultParameters);
 
         details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
 
@@ -89,7 +89,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         }
 
         var resourceDao = daoRegistry.getResourceDao(resourceType);
-        var bundleProvider = resourceDao.search(converter.mySearchParameterMap, details);
+        var bundleProvider = resourceDao.search(converter.searchParameterMap, details);
 
         bundleProvider = sanitizeBundleProvider(bundleProvider);
 
@@ -125,7 +125,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
 
         if (isNull(bundleType)) {
-            ourLog.error(
+            logger.error(
                     "Could not convert value {} to a BundleTypeEnum.  Defaulting to {}",
                     bundleTypeValues[0],
                     bundleType);

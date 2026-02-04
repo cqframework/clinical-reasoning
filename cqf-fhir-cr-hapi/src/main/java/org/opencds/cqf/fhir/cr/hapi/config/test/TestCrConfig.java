@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.hapi.config.test;
 
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
+import ca.uhn.fhir.batch2.jobs.bulkmodify.reindex.ReindexProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
@@ -13,6 +15,7 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryInterceptor;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.IJpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
@@ -26,6 +29,7 @@ import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,12 +120,12 @@ public class TestCrConfig {
     @Bean
     public ElmCacheResourceChangeListener elmCacheResourceChangeListener(
             IResourceChangeListenerRegistry resourceChangeListenerRegistry,
+            PartitionSettings partitionSettings,
             DaoRegistry daoRegistry,
             EvaluationSettings evaluationSettings) {
         ElmCacheResourceChangeListener listener =
                 new ElmCacheResourceChangeListener(daoRegistry, evaluationSettings.getLibraryCache());
-        resourceChangeListenerRegistry.registerResourceResourceChangeListener(
-                "Library", SearchParameterMap.newSynchronous(), listener, 1000);
+        registerResourceResourceChangeListener(resourceChangeListenerRegistry, partitionSettings, listener, "Library");
         return listener;
     }
 
@@ -129,13 +133,13 @@ public class TestCrConfig {
     public CodeCacheResourceChangeListener codeCacheResourceChangeListener(
             IResourceChangeListenerRegistry resourceChangeListenerRegistry,
             EvaluationSettings evaluationSettings,
+            PartitionSettings partitionSettings,
             DaoRegistry daoRegistry) {
 
         CodeCacheResourceChangeListener listener =
                 new CodeCacheResourceChangeListener(daoRegistry, evaluationSettings.getValueSetCache());
         // registry
-        resourceChangeListenerRegistry.registerResourceResourceChangeListener(
-                "ValueSet", SearchParameterMap.newSynchronous(), listener, 1000);
+        registerResourceResourceChangeListener(resourceChangeListenerRegistry, partitionSettings, listener, "ValueSet");
 
         return listener;
     }
@@ -144,9 +148,10 @@ public class TestCrConfig {
     public IResourceChangeListenerRegistry resourceChangeListenerRegistry(
             InMemoryResourceMatcher inMemoryResourceMatcher,
             FhirContext fhirContext,
+            PartitionSettings partitionSettings,
             ResourceChangeListenerCacheFactory resourceChangeListenerCacheFactory) {
         return new ResourceChangeListenerRegistryImpl(
-                fhirContext, resourceChangeListenerCacheFactory, inMemoryResourceMatcher);
+                fhirContext, partitionSettings, resourceChangeListenerCacheFactory, inMemoryResourceMatcher);
     }
 
     @Bean
@@ -157,5 +162,29 @@ public class TestCrConfig {
     @Bean
     public ResourceChangeListenerRegistryInterceptor resourceChangeListenerRegistryInterceptor() {
         return new ResourceChangeListenerRegistryInterceptor();
+    }
+
+    @Bean
+    public PartitionSettings partitionSettings() {
+        return new PartitionSettings();
+    }
+
+    private void registerResourceResourceChangeListener(
+            IResourceChangeListenerRegistry resourceChangeListenerRegistry,
+            PartitionSettings partitionSettings,
+            IResourceChangeListener listener,
+            String resourceType) {
+
+        resourceChangeListenerRegistry.registerResourceResourceChangeListener(
+                resourceType,
+                getRequestPartitionId(partitionSettings),
+                SearchParameterMap.newSynchronous(),
+                listener,
+                1000);
+    }
+
+    @Nonnull
+    private RequestPartitionId getRequestPartitionId(PartitionSettings partitionSettings) {
+        return RequestPartitionId.defaultPartition(partitionSettings);
     }
 }

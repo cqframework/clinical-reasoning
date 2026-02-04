@@ -53,6 +53,9 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
 public class TestCrConfig {
+    public static final String LIBRARY_RESOURCE_NAME = "Library";
+    public static final String VALUESET_RESOURCE_NAME = "ValueSet";
+
     @Bean
     public RestfulServer restfulServer(
             IFhirSystemDao<?, ?> fhirSystemDao,
@@ -125,7 +128,8 @@ public class TestCrConfig {
             EvaluationSettings evaluationSettings) {
         ElmCacheResourceChangeListener listener =
                 new ElmCacheResourceChangeListener(daoRegistry, evaluationSettings.getLibraryCache());
-        registerResourceResourceChangeListener(resourceChangeListenerRegistry, partitionSettings, listener, "Library");
+        registerResourceResourceChangeListener(
+                resourceChangeListenerRegistry, partitionSettings, listener, LIBRARY_RESOURCE_NAME);
         return listener;
     }
 
@@ -139,7 +143,8 @@ public class TestCrConfig {
         CodeCacheResourceChangeListener listener =
                 new CodeCacheResourceChangeListener(daoRegistry, evaluationSettings.getValueSetCache());
         // registry
-        registerResourceResourceChangeListener(resourceChangeListenerRegistry, partitionSettings, listener, "ValueSet");
+        registerResourceResourceChangeListener(
+                resourceChangeListenerRegistry, partitionSettings, listener, VALUESET_RESOURCE_NAME);
 
         return listener;
     }

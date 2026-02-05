@@ -50,6 +50,7 @@ public class R4MeasureUtils {
      * @return the MeasureScoring enum value
      * @throws InvalidRequestException if scoring code is invalid
      */
+    @Nullable
     public static MeasureScoring getMeasureScoring(Measure measure) {
         var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
         return getMeasureScoring(measure.getUrl(), scoringCode);

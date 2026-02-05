@@ -14,17 +14,12 @@ import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
-import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
@@ -52,7 +47,8 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Manually set a score on the first group
-        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(0.80);
+        var groupDef = measureDef.groups().get(0);
+        groupDef.setScoreAndAdaptToImprovementNotation(0.80, groupDef.getMeasureOrGroupScoring(measureDef));
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
@@ -77,7 +73,8 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Explicitly set null score (or just don't set it)
-        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(null);
+        var groupDef = measureDef.groups().get(0);
+        groupDef.setScoreAndAdaptToImprovementNotation(null, groupDef.getMeasureOrGroupScoring(measureDef));
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
@@ -98,7 +95,8 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Set negative score
-        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(-1.0);
+        var groupDef = measureDef.groups().get(0);
+        groupDef.setScoreAndAdaptToImprovementNotation(-1.0, groupDef.getMeasureOrGroupScoring(measureDef));
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
@@ -259,100 +257,5 @@ class Dstu3MeasureReportBuilderTest {
         group.addStratifier(stratifier);
 
         return measure;
-    }
-
-    private static MeasureDef buildMeasureDefWithQualifiedStratumIds(String id, String url) {
-        CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
-
-        // Create populations with UNQUALIFIED subject IDs (e.g., "patient-1")
-        ConceptDef numCode = new ConceptDef(
-                List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "numerator")),
-                "numerator");
-        PopulationDef numeratorPop =
-                new PopulationDef("num-1", numCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
-        // Add resources with UNQUALIFIED IDs
-        numeratorPop.addResource("patient-1", true);
-        numeratorPop.addResource("patient-2", true);
-        numeratorPop.addResource("patient-3", true);
-        numeratorPop.addResource("patient-4", true);
-
-        ConceptDef denCode = new ConceptDef(
-                List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "denominator")),
-                "denominator");
-        PopulationDef denominatorPop = new PopulationDef(
-                "den-1", denCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
-        // Add resources with UNQUALIFIED IDs
-        denominatorPop.addResource("patient-1", true);
-        denominatorPop.addResource("patient-2", true);
-        denominatorPop.addResource("patient-3", true);
-        denominatorPop.addResource("patient-4", true);
-        denominatorPop.addResource("patient-5", true);
-
-        // Create stratum populations with QUALIFIED subject IDs (e.g., "Patient/patient-1")
-        StratumPopulationDef stratumNumPop = new StratumPopulationDef(
-                numeratorPop,
-                Set.of(
-                        "Patient/patient-1",
-                        "Patient/patient-2",
-                        "Patient/patient-3",
-                        "Patient/patient-4"), // QUALIFIED IDs
-                Set.of(),
-                List.of(),
-                MeasureStratifierType.VALUE,
-                booleanBasis);
-
-        StratumPopulationDef stratumDenPop = new StratumPopulationDef(
-                denominatorPop,
-                Set.of(
-                        "Patient/patient-1",
-                        "Patient/patient-2",
-                        "Patient/patient-3",
-                        "Patient/patient-4",
-                        "Patient/patient-5"), // QUALIFIED IDs
-                Set.of(),
-                List.of(),
-                MeasureStratifierType.VALUE,
-                booleanBasis);
-
-        // Create stratum with CodeableConcept value (text-based matching)
-        StratifierComponentDef genderComponent = new StratifierComponentDef(
-                "gender-component",
-                new ConceptDef(List.of(new CodeDef("http://hl7.org/fhir/administrative-gender", "female")), "female"),
-                "Gender");
-
-        StratumDef stratum = new StratumDef(
-                List.of(stratumNumPop, stratumDenPop),
-                Set.of(new StratumValueDef(
-                        new StratumValueWrapper(new org.hl7.fhir.dstu3.model.CodeableConcept().setText("female")),
-                        genderComponent)),
-                Set.of(
-                        "Patient/patient-1",
-                        "Patient/patient-2",
-                        "Patient/patient-3",
-                        "Patient/patient-4",
-                        "Patient/patient-5"), // QUALIFIED IDs
-                null); // MeasureObservationStratumCache
-
-        // Create stratifier
-        StratifierDef stratifierDef = new StratifierDef(
-                "gender-stratifier",
-                new ConceptDef(List.of(), "Gender Stratifier"),
-                "Gender",
-                MeasureStratifierType.VALUE);
-        stratifierDef.addAllStratum(List.of(stratum));
-
-        // Create group
-        GroupDef groupDef = new GroupDef(
-                "group-1",
-                new ConceptDef(List.of(), "Test Group"),
-                List.of(stratifierDef),
-                List.of(numeratorPop, denominatorPop),
-                MeasureScoring.PROPORTION,
-                false,
-                new CodeDef("http://terminology.hl7.org/CodeSystem/measure-improvement-notation", "increase"),
-                booleanBasis);
-
-        return new MeasureDef(
-                new org.hl7.fhir.dstu3.model.IdType("Measure", id), url, null, List.of(groupDef), List.of());
     }
 }

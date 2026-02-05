@@ -51,7 +51,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -158,17 +157,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             groupDefSizeDiff = 1;
         }
 
-        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
-            throw new InvalidRequestException(
-                    "The MeasureGroup has a different number of populations defined than the GroupDef for Measure: "
-                            + bc.measure().getUrl());
-        }
-
-        if (measureGroup.getStratifier().size() != (groupDef.stratifiers().size())) {
-            throw new InvalidRequestException(
-                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef for Measure: "
-                            + bc.measure().getUrl());
-        }
+        validateGroup(bc, measureGroup, groupDef, groupDefSizeDiff);
 
         reportGroup.setCode(measureGroup.getCode());
         reportGroup.setId(measureGroup.getId());
@@ -185,28 +174,38 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             buildPopulation(bc, measurePop, reportPop, defPop, groupDef);
         }
 
+        final MeasureScoring groupMeasureScoring = groupDef.measureScoring();
+
+        if (groupMeasureScoring != null) {
+
+            if (bc.measureDef().hasMeasureScoring()) {
+                throw new InternalErrorException("Cannot have both measure and group scoring");
+            }
+
+            reportGroup.addExtension(R4MeasureReportUtils.createGroupScoringExtension(groupMeasureScoring));
+        }
+
         // add extension to group for totalDenominator and totalNumerator
-        if (groupDef.measureScoring().equals(MeasureScoring.PROPORTION)
-                || groupDef.measureScoring().equals(MeasureScoring.RATIO)
-                || groupDef.measureScoring().equals(MeasureScoring.CONTINUOUSVARIABLE)) {
+        if ((groupMeasureScoring == MeasureScoring.PROPORTION
+                        || groupMeasureScoring == MeasureScoring.RATIO
+                        || groupMeasureScoring == MeasureScoring.CONTINUOUSVARIABLE)
+                && bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
 
             // add extension to group for
-            if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
-                var docPopDef = groupDef.findPopulationByType(DATEOFCOMPLIANCE);
-                if (docPopDef != null
-                        && docPopDef.getAllSubjectResources() != null
-                        && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue = docPopDef.getAllSubjectResources().iterator().next();
-                    if (docValue != null) {
-                        assert docValue instanceof Interval;
-                        Interval docInterval = (Interval) docValue;
+            var docPopDef = groupDef.findPopulationByType(DATEOFCOMPLIANCE);
+            if (docPopDef != null
+                    && docPopDef.getAllSubjectResources() != null
+                    && !docPopDef.getAllSubjectResources().isEmpty()) {
+                var docValue = docPopDef.getAllSubjectResources().iterator().next();
+                if (docValue != null) {
+                    assert docValue instanceof Interval;
+                    Interval docInterval = (Interval) docValue;
 
-                        var helper = new R4DateHelper();
-                        reportGroup
-                                .addExtension()
-                                .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                .setValue(helper.buildMeasurementPeriod((docInterval)));
-                    }
+                    var helper = new R4DateHelper();
+                    reportGroup
+                            .addExtension()
+                            .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                            .setValue(helper.buildMeasurementPeriod((docInterval)));
                 }
             }
         }
@@ -216,6 +215,24 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var defStrat = groupDef.stratifiers().get(i);
             R4StratifierBuilder.buildStratifier(
                     bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
+        }
+    }
+
+    private void validateGroup(
+            R4MeasureReportBuilderContext bc,
+            MeasureGroupComponent measureGroup,
+            GroupDef groupDef,
+            int groupDefSizeDiff) {
+        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
+            throw new InvalidRequestException(
+                    "The MeasureGroup has a different number of populations defined than the GroupDef for Measure: "
+                            + bc.measure().getUrl());
+        }
+
+        if (measureGroup.getStratifier().size() != (groupDef.stratifiers().size())) {
+            throw new InvalidRequestException(
+                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef for Measure: "
+                            + bc.measure().getUrl());
         }
     }
 
@@ -290,7 +307,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private ListResource createIdList(String id, Collection<String> ids) {
-        return this.createReferenceList(id, ids.stream().map(Reference::new).collect(Collectors.toList()));
+        return this.createReferenceList(id, ids.stream().map(Reference::new).toList());
     }
 
     private ListResource createReferenceList(String id, Collection<Reference> references) {
@@ -529,13 +546,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private Observation createObservation(R4MeasureReportBuilderContext bc, String id, String populationId) {
         var measure = bc.measure();
         MeasureInfo measureInfo = new MeasureInfo()
-                .withMeasure(
-                        measure.hasUrl()
-                                ? measure.getUrl()
-                                : (measure.hasId()
-                                        ? MeasureInfo.MEASURE_PREFIX
-                                                + measure.getIdElement().getIdPart()
-                                        : ""))
+                .withMeasure(measure.hasUrl() ? measure.getUrl() : getIdStringOrBlank(measure))
                 .withPopulationId(populationId);
 
         Observation obs = new Observation();
@@ -546,12 +557,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obs;
     }
 
-    private Observation createMeasureObservation(R4MeasureReportBuilderContext bc, String id, String observationName) {
-        Observation obs = this.createObservation(bc, id, observationName);
-        CodeableConcept cc = new CodeableConcept();
-        cc.setText(observationName);
-        obs.setCode(cc);
-        return obs;
+    private String getIdStringOrBlank(Measure measure) {
+        return measure.hasId()
+                ? MeasureInfo.MEASURE_PREFIX + measure.getIdElement().getIdPart()
+                : "";
     }
 
     /**
@@ -633,7 +642,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             for (var stratumDef : stratifierDef.getStratum()) {
                 // Find matching report stratum by comparing value strings
                 var reportStratum = reportStratifier.getStratum().stream()
-                        .filter(rs -> matchesStratumValue(rs, stratumDef, stratifierDef))
+                        .filter(rs -> matchesStratumValue(rs, stratumDef))
                         .findFirst()
                         .orElse(null);
 
@@ -659,11 +668,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
      *
      * @param reportStratum the MeasureReport stratum
      * @param stratumDef the StratumDef
-     * @param stratifierDef the parent StratifierDef (for context)
      * @return true if values match
      */
     private boolean matchesStratumValue(
-            MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
-        return R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef);
+            MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+        return R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef);
     }
 }

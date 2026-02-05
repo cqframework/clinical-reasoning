@@ -6,6 +6,7 @@ import java.time.Period;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings("squid:S2699")
@@ -40,7 +41,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasCount(11)
                     .hasNoAggregationResult()
@@ -67,6 +71,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(11)
                     .hasNoAggregationResultsExtensionValue()
@@ -195,7 +200,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasCount(12)
                     .hasNoAggregationResult()
@@ -218,7 +226,9 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     .up()
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
+                    .logReportJson()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(12)
                     .hasNoAggregationResultsExtensionValue()
@@ -266,7 +276,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -288,6 +301,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -387,7 +401,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(10)
                     .up()
@@ -397,6 +414,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(12)
                     .up()
@@ -483,7 +501,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -505,6 +526,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -604,7 +626,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(10)
                     .up()
@@ -614,6 +639,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(12)
                     .up()
@@ -700,7 +726,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(11)
                     .up()
@@ -710,6 +739,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -809,7 +839,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(10)
                     .up()
@@ -819,6 +852,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(12)
                     .up()
@@ -905,7 +939,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(11)
                     .up()
@@ -915,6 +952,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -1014,7 +1052,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(10)
                     .up()
@@ -1024,6 +1065,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(12)
                     .up()
@@ -1110,7 +1152,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(11)
                     .up()
@@ -1120,6 +1165,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(11)
                     .up()
@@ -1219,7 +1265,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("measure-population")
                     .hasSubjectCount(10)
                     .up()
@@ -1229,6 +1278,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
                     .report()
                     .firstGroup()
+                    .hasNoGroupScoringExt()
                     .population("initial-population")
                     .hasCount(12)
                     .up()
@@ -1312,7 +1362,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasNoAggregationResult()
                     .up()
@@ -1386,7 +1439,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasNoAggregationResult()
                     .up()
@@ -1460,7 +1516,10 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing
                     .def()
                     .hasNoErrors()
+                    .hasMeasureScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .firstGroup()
+                    .hasNoGroupLevelScoring()
+                    .hasEffectiveScoring(MeasureScoring.CONTINUOUSVARIABLE)
                     .population("initial-population")
                     .hasNoAggregationResult()
                     .up()

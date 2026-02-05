@@ -99,7 +99,7 @@ class MeasurementPeriodBuilderTests {
         //    "end": "2020-01-16T21:00:00Z"
         //  }
         // test is one hour after resource period
-        var when = GIVEN_REPO
+        GIVEN_REPO
                 .when()
                 .measureId("UberSimple")
                 .periodStart(ZonedDateTime.of(LocalDateTime.of(2020, Month.JANUARY, 16, 22, 0, 0), ZoneOffset.UTC))
@@ -107,9 +107,8 @@ class MeasurementPeriodBuilderTests {
                 .reportType("subject")
                 .subject("Patient/female-1914")
                 .evaluate()
-                .then();
-
-        when.hasReportType("Individual")
+                .then()
+                .hasReportType("Individual")
                 .hasPeriodStart(Date.from(
                         LocalDateTime.of(2020, Month.JANUARY, 16, 22, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasPeriodEnd(Date.from(
@@ -120,7 +119,10 @@ class MeasurementPeriodBuilderTests {
                 .hasCount(1)
                 .up()
                 .population("numerator")
-                .hasCount(0);
+                .hasCount(0)
+                .up()
+                .up()
+                .logReportJson();
     }
 
     @Test

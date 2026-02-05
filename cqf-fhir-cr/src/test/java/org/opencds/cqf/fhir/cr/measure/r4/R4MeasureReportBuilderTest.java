@@ -59,7 +59,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, Set.of(buildInterval())),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 2, 0, true, Set.of(buildInterval())),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -77,7 +77,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_2, MEASURE_URL_2, 2, 0),
-                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true, null),
+                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, null, 2, 0, true, null),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -98,7 +98,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 2, 0, true, nulls),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -116,7 +116,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, true, Set.of()),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 2, 3, true, Set.of()),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -141,7 +141,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, null, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of()),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 2, 3, false, Set.of()),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -164,7 +164,7 @@ class R4MeasureReportBuilderTest {
     void errorMismatchedGroupsSizes_tooMany() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
         final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 2);
-        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of());
+        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 2, 2, true, Set.of());
         final List<String> subjectIds = List.of();
 
         try {
@@ -181,7 +181,7 @@ class R4MeasureReportBuilderTest {
     void errorMismatchedGroupsSizes_tooFew() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
         final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2);
-        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of());
+        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 1, 2, true, Set.of());
         final List<String> subjectIds = List.of();
 
         try {
@@ -201,7 +201,7 @@ class R4MeasureReportBuilderTest {
         try {
             r4MeasureReportBuilder.build(
                     buildMeasure(null, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(new Patient())),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, null, 2, 2, true, Set.of(new Patient())),
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -214,6 +214,7 @@ class R4MeasureReportBuilderTest {
     private static MeasureDef buildMeasureDef(
             String id,
             String url,
+            @Nullable MeasureScoring measureScoring,
             int numGroups,
             int numSdes,
             boolean isKeyResource,
@@ -222,6 +223,7 @@ class R4MeasureReportBuilderTest {
                 new IdType(ResourceType.Measure.name(), id),
                 url,
                 null,
+                measureScoring,
                 IntStream.range(0, numGroups)
                         .mapToObj(num -> buildGroupDef("group_" + num, evaluatedResources))
                         .toList(),
@@ -351,7 +353,7 @@ class R4MeasureReportBuilderTest {
                 null,
                 List.of(buildStratifierDef()),
                 List.of(populationDefNA),
-                MeasureScoring.CONTINUOUSVARIABLE,
+                null,
                 false,
                 null,
                 new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
@@ -360,6 +362,7 @@ class R4MeasureReportBuilderTest {
                 new IdType(ResourceType.Measure.name(), MEASURE_ID_1),
                 MEASURE_URL_1,
                 null,
+                MeasureScoring.CONTINUOUSVARIABLE,
                 List.of(groupDef),
                 List.of());
 

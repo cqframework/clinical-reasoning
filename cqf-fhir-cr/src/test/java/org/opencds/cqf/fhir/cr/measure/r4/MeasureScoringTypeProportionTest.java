@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -29,7 +30,10 @@ class MeasureScoringTypeProportionTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.PROPORTION)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.PROPORTION)
                 .population("initial-population")
                 .hasCount(10)
                 .up()
@@ -54,6 +58,7 @@ class MeasureScoringTypeProportionTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCount(10)
                 .up()
@@ -88,7 +93,10 @@ class MeasureScoringTypeProportionTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.PROPORTION)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.PROPORTION)
                 .population("initial-population")
                 .hasCount(1)
                 .up()
@@ -113,6 +121,7 @@ class MeasureScoringTypeProportionTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCount(1)
                 .up()
@@ -146,7 +155,10 @@ class MeasureScoringTypeProportionTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.PROPORTION)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.PROPORTION)
                 .population("initial-population")
                 .hasCount(11)
                 .up()
@@ -171,6 +183,7 @@ class MeasureScoringTypeProportionTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCount(11)
                 .up()
@@ -217,7 +230,10 @@ class MeasureScoringTypeProportionTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.PROPORTION)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.PROPORTION)
                 .population("initial-population")
                 .hasCount(2)
                 .up()
@@ -242,6 +258,7 @@ class MeasureScoringTypeProportionTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCount(2)
                 .up()
@@ -288,7 +305,10 @@ class MeasureScoringTypeProportionTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasNoMeasureScoring()
                 .firstGroup()
+                .hasGroupLevelScoring(MeasureScoring.PROPORTION)
+                .hasEffectiveScoring(MeasureScoring.PROPORTION)
                 .population("initial-population")
                 .hasCount(10)
                 .up()
@@ -313,6 +333,7 @@ class MeasureScoringTypeProportionTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasGroupScoringExt(MeasureScoring.PROPORTION)
                 .population("initial-population")
                 .hasCount(10)
                 .up()

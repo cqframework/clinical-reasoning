@@ -44,7 +44,7 @@ class R4PopulationBasisValidatorTest {
     private static final String FAKE_MEASURE_URL = "fakeMeasureUrl";
     // Not ENTIRELY realistic since the GroupDefs are ultimately sourced from a MeasureDef, but for this simplistic
     // test, it works
-    private static final MeasureDef MEASURE_DEF = new MeasureDef(null, FAKE_MEASURE_URL, null, null, null);
+    private static final MeasureDef MEASURE_DEF = new MeasureDef(null, FAKE_MEASURE_URL, null, null, null, null);
     private static final String EXPRESSION_INITIALPOPULATION = "InitialPopulation";
     private static final String EXPRESSION_DENOMINATOR = "Denominator";
     private static final String EXPRESSION_NUMERATOR = "Numerator";

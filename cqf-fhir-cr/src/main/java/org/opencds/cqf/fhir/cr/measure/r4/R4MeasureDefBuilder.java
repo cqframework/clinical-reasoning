@@ -57,7 +57,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         checkId(measure);
 
         // scoring
-        var measureScoring = R4MeasureUtils.getMeasureScoring(measure);
+        @Nullable final MeasureScoring measureScoring = R4MeasureUtils.getMeasureScoring(measure);
         // populationBasis
         var measureBasis = getMeasureBasis(measure);
         // improvement Notation
@@ -73,18 +73,30 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         return new MeasureDef(
                 // We don't need either the version of the "Measure" qualifier here
-                measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, getSdeDefs(measure));
+                measure.getIdElement(),
+                measure.getUrl(),
+                measure.getVersion(),
+                measureScoring,
+                groups,
+                getSdeDefs(measure));
     }
 
     private GroupDef buildGroupDef(
             Measure measure,
             MeasureGroupComponent group,
-            MeasureScoring measureScoring,
+            @Nullable MeasureScoring measureScoring,
             CodeDef measureImpNotation,
             CodeDef measureBasis) {
 
         // group Measure Scoring
         var groupScoring = getGroupMeasureScoring(measure, group);
+
+        if (measureScoring != null && groupScoring != null) {
+            throw new InvalidRequestException(
+                    "Scoring should be at the measure level or the group level, but not both for measure: %s"
+                            .formatted(measure.getUrl()));
+        }
+
         // populationBasis
         var groupBasis = getGroupPopulationBasis(group);
         // improvement Notation
@@ -114,7 +126,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(group.getCode()),
                 stratifiers,
                 mergePopulations(populationsWithCriteriaReference, optPopulationDefDateOfCompliance.orElse(null)),
-                R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring),
+                groupScoring,
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
                 populationBasisDef);

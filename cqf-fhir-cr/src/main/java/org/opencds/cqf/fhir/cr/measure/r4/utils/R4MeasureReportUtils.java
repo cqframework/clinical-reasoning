@@ -2,20 +2,22 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
 import jakarta.annotation.Nullable;
 import java.util.Objects;
+import java.util.Set;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 
@@ -44,11 +46,10 @@ public class R4MeasureReportUtils {
      *
      * <p>Based on logic from R4MeasureReportScorer and R4MeasureReportBuilder.
      *
-     * @param stratifierDef the StratifierDef containing type information
      * @param stratumDef the StratumDef containing value information
      * @return text representation of the stratum value, or null if not determinable
      */
-    public static String getStratumDefText(StratifierDef stratifierDef, StratumDef stratumDef) {
+    public static String getStratumDefText(StratumDef stratumDef) {
         var valueDefs = stratumDef.valueDefs();
 
         // Early return if no values
@@ -58,30 +59,7 @@ public class R4MeasureReportUtils {
 
         // Fast path for non-component stratifiers (single value)
         if (!stratumDef.isComponent()) {
-            var valuePair = valueDefs.iterator().next();
-            var value = valuePair.value();
-
-            // Handle CodeableConcept values for non-component
-            if (value.getValueClass().equals(CodeableConcept.class)
-                    && value.getValue() instanceof CodeableConcept codeableConcept) {
-                return codeableConcept.getText();
-            }
-
-            // Handle VALUE or CRITERIA type stratifiers with non-CodeableConcept values
-            var stratifierType = stratifierDef.getStratifierType();
-
-            if (MeasureStratifierType.VALUE == stratifierType) {
-                // VALUE-type stratifiers with non-CodeableConcept values
-                return value.getValueAsString();
-            } else if (MeasureStratifierType.NON_SUBJECT_VALUE == stratifierType) {
-                // NON_SUBJECT_VALUE-type stratifiers with non-CodeableConcept values
-                return value.getValueAsString();
-            } else if (MeasureStratifierType.CRITERIA == stratifierType) {
-                // CRITERIA-type stratifiers with non-CodeableConcept values
-                return value.getValueAsString();
-            }
-
-            return null;
+            return getStratumDefTextNonComponent(valueDefs);
         }
 
         // Process component stratifiers (multiple values)
@@ -107,6 +85,23 @@ public class R4MeasureReportUtils {
         return stratumText;
     }
 
+    @Nullable
+    private static String getStratumDefTextNonComponent(Set<StratumValueDef> valueDefs) {
+        var valuePair = valueDefs.iterator().next();
+        var value = valuePair.value();
+
+        // Handle CodeableConcept values for non-component
+        if (value.getValueClass().equals(CodeableConcept.class)
+                && value.getValue() instanceof CodeableConcept codeableConcept) {
+            return codeableConcept.getText();
+        }
+
+        // VALUE-type stratifiers with non-CodeableConcept values
+        // NON_SUBJECT_VALUE-type stratifiers with non-CodeableConcept values
+        // CRITERIA-type stratifiers with non-CodeableConcept values
+        return value.getValueAsString();
+    }
+
     /**
      * Check if a MeasureReport stratum matches a StratumDef by comparing text representations.
      *
@@ -116,14 +111,13 @@ public class R4MeasureReportUtils {
      *
      * @param reportStratum the MeasureReport StratifierGroupComponent (stratum)
      * @param stratumDef the StratumDef to match against
-     * @param stratifierDef the parent StratifierDef (for context)
      * @return true if the stratum values match, false otherwise
      */
     public static boolean matchesStratumValue(
-            StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
+            StratifierGroupComponent reportStratum, StratumDef stratumDef) {
         // Use the same logic as R4MeasureReportScorer: compare CodeableConcept.text
         String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
-        String defText = getStratumDefText(stratifierDef, stratumDef);
+        String defText = getStratumDefText(stratumDef);
         return Objects.equals(reportText, defText);
     }
 
@@ -185,6 +179,17 @@ public class R4MeasureReportUtils {
             addAggregateMethodInner(measurePopulation, aggregateMethod);
             addAggregationResultInner(measurePopulation, aggregationResult);
         }
+    }
+
+    public static Extension createGroupScoringExtension(MeasureScoring groupMeasureScoring) {
+
+        return new Extension()
+                .setUrl(MeasureConstants.CQFM_SCORING_EXT_URL)
+                .setValue(new CodeableConcept()
+                        .addCoding(new Coding()
+                                .setSystem(MeasureConstants.CQFM_SCORING_SYSTEM_URL)
+                                .setCode(groupMeasureScoring.toCode())
+                                .setDisplay(groupMeasureScoring.getDisplay())));
     }
 
     private static void addAggregateMethodInner(

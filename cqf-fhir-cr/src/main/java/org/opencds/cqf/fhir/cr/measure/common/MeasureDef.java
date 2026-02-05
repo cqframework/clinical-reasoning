@@ -15,18 +15,30 @@ public class MeasureDef {
     private final String url;
 
     private final String version;
+
+    @Nullable
+    private final MeasureScoring measureScoring;
+
     private final List<GroupDef> groups;
     private final List<SdeDef> sdes;
     private final List<String> errors;
 
     public static MeasureDef fromIdAndUrl(IIdType idType, @Nullable String url) {
-        return new MeasureDef(idType, url, null, List.of(), List.of());
+        return new MeasureDef(idType, url, null, null, List.of(), List.of());
     }
 
-    public MeasureDef(IIdType idType, @Nullable String url, String version, List<GroupDef> groups, List<SdeDef> sdes) {
+    public MeasureDef(
+            IIdType idType,
+            @Nullable String url,
+            String version,
+            @Nullable MeasureScoring measureScoring,
+            List<GroupDef> groups,
+            List<SdeDef> sdes) {
+
         this.idType = idType;
         this.url = url;
         this.version = version;
+        this.measureScoring = measureScoring;
         this.groups = groups;
         this.sdes = sdes;
 
@@ -51,6 +63,15 @@ public class MeasureDef {
 
     public String version() {
         return this.version;
+    }
+
+    public boolean hasMeasureScoring() {
+        return this.measureScoring != null;
+    }
+
+    @Nullable
+    public MeasureScoring measureScoring() {
+        return this.measureScoring;
     }
 
     public List<SdeDef> sdes() {
@@ -93,6 +114,7 @@ public class MeasureDef {
                 .add("idType='" + idType.getValueAsString() + "'")
                 .add("url='" + url + "'")
                 .add("version='" + version + "'")
+                .add("measureScoring='" + measureScoring + "'")
                 .add("groups=" + groups.size())
                 .add("sdes=" + sdes.size())
                 .add("errors=" + errors)

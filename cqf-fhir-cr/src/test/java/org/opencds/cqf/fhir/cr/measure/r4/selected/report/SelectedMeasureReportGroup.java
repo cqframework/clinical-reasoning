@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Period;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.MeasureValidationUtils;
@@ -54,6 +56,55 @@ public class SelectedMeasureReportGroup
     public SelectedMeasureReportGroup hasNoImprovementNotationExt() {
         var improvementNotationExt = value().getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
         assertNull(improvementNotationExt);
+        return this;
+    }
+
+    /**
+     * Assert that the group has a cqfm-scoring extension with the specified code.
+     * This extension is present when the group has its own scoring type (i.e., when
+     * the measure does NOT have measure-level scoring).
+     * <p>
+     * Extension URL: http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring
+     *
+     * @param code the expected scoring code (e.g., "proportion", "ratio")
+     * @return this SelectedMeasureReportGroup for chaining
+     */
+    public SelectedMeasureReportGroup hasGroupScoringExt(String code) {
+        var scoringExt = value().getExtensionByUrl(MeasureConstants.CQFM_SCORING_EXT_URL);
+        assertNotNull(scoringExt, "Expected cqfm-scoring extension but none found");
+        var codeConcept = (CodeableConcept) scoringExt.getValue();
+        String actualCode = codeConcept.getCodingFirstRep().getCode();
+        assertTrue(
+                codeConcept.hasCoding(MeasureConstants.CQFM_SCORING_SYSTEM_URL, code),
+                "Expected cqfm-scoring extension code: %s, actual: %s".formatted(code, actualCode));
+        return this;
+    }
+
+    /**
+     * Assert that the group has a cqfm-scoring extension with the specified MeasureScoring type.
+     * This is a convenience method that extracts the code from the enum.
+     *
+     * @param scoring the expected MeasureScoring type
+     * @return this SelectedMeasureReportGroup for chaining
+     */
+    public SelectedMeasureReportGroup hasGroupScoringExt(MeasureScoring scoring) {
+        return hasGroupScoringExt(scoring.toCode());
+    }
+
+    /**
+     * Assert that the group does NOT have a cqfm-scoring extension.
+     * This is the normal case when the measure has measure-level scoring.
+     *
+     * @return this SelectedMeasureReportGroup for chaining
+     */
+    public SelectedMeasureReportGroup hasNoGroupScoringExt() {
+        var scoringExt = value().getExtensionByUrl(MeasureConstants.CQFM_SCORING_EXT_URL);
+        String actualCode = scoringExt != null
+                ? ((CodeableConcept) scoringExt.getValue()).getCodingFirstRep().getCode()
+                : null;
+        assertNull(
+                scoringExt,
+                "Expected no cqfm-scoring extension (null), but found extension with code: %s".formatted(actualCode));
         return this;
     }
 

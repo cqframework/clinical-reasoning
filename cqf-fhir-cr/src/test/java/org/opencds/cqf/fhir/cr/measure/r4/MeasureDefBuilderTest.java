@@ -65,16 +65,20 @@ class MeasureDefBuilderTest {
 
     public MeasureDef measureDefBuilder(
             String group1Basis,
-            String group1Scoring,
+            @Nullable String group1Scoring,
             CodeableConcept group1ImpNotation,
             List<MeasureGroupStratifierComponent> group1Stratifiers,
             String group2Basis,
-            String group2Scoring,
+            @Nullable String group2Scoring,
             CodeableConcept group2ImpNotation,
             List<MeasureGroupStratifierComponent> group2Stratifiers,
             String measureBasis,
-            String measureScoring,
+            @Nullable String measureScoring,
             CodeableConcept measureImpNotation) {
+
+        if (measureScoring != null && group1Scoring != null || group2Scoring != null) {
+            throw new IllegalArgumentException("Cannot have both a measure and group score at the same time");
+        }
 
         R4MeasureDefBuilder defBuilder = new R4MeasureDefBuilder();
         Measure measure = (org.hl7.fhir.r4.model.Measure)
@@ -106,7 +110,7 @@ class MeasureDefBuilderTest {
         var group2 = measure.getGroup().stream()
                 .filter(t -> t.getId().equals("group-2"))
                 .findFirst()
-                .get();
+                .orElse(null);
         if (group2Basis != null) {
             group2.addExtension(new Extension()
                     .setUrl(MeasureConstants.POPULATION_BASIS_URL)
@@ -145,18 +149,23 @@ class MeasureDefBuilderTest {
 
     public void validateMeasureDef(
             MeasureDef measureDef,
+            MeasureScoring measureScoring,
             boolean group1IsBooleanBasis,
             String group1Basis,
             boolean group1IsGroupImpNotation,
             String group1ImpNotationValue,
-            MeasureScoring group1MeasureScoring,
+            MeasureScoring group1DirectMeasureScoring,
+            MeasureScoring group1CombinedMeasureScoring,
             List<StratifierDef> group1Stratifiers,
             boolean group2IsBooleanBasis,
             String group2Basis,
             boolean group2IsGroupImpNotation,
             String group2ImpNotationValue,
-            MeasureScoring group2MeasureScoring,
+            MeasureScoring group2DirectMeasureScoring,
+            MeasureScoring group2CombinedMeasureScoring,
             List<StratifierDef> group2Stratifiers) {
+
+        assertEquals(measureScoring, measureDef.measureScoring());
 
         var groupsById = measureDef.groups().stream().collect(Collectors.toMap(GroupDef::id, entry -> entry));
 
@@ -168,7 +177,8 @@ class MeasureDefBuilderTest {
         assertEquals(group1IsGroupImpNotation, group1.isGroupImprovementNotation());
         assertEquals(group1ImpNotationValue, group1.getImprovementNotation().code());
         // Scoring
-        assertEquals(group1MeasureScoring, group1.measureScoring());
+        assertEquals(group1DirectMeasureScoring, group1.measureScoring());
+        assertEquals(group1CombinedMeasureScoring, group1.getMeasureOrGroupScoring(measureDef));
         validateStratifiers(group1Stratifiers, group1);
 
         var group2 = groupsById.get("group-2");
@@ -180,7 +190,8 @@ class MeasureDefBuilderTest {
         assertEquals(group2IsGroupImpNotation, group2.isGroupImprovementNotation());
         assertEquals(group2ImpNotationValue, group2.getImprovementNotation().code());
         // Scoring
-        assertEquals(group2MeasureScoring, group2.measureScoring());
+        assertEquals(group2DirectMeasureScoring, group2.measureScoring());
+        assertEquals(group2CombinedMeasureScoring, group2.getMeasureOrGroupScoring(measureDef));
         validateStratifiers(group2Stratifiers, group2);
     }
 
@@ -190,16 +201,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                MeasureScoring.RATIO,
                 true,
                 "boolean",
                 false,
                 "decrease",
+                null,
                 MeasureScoring.RATIO,
                 null,
                 true,
                 "boolean",
                 false,
                 "decrease",
+                null,
                 MeasureScoring.RATIO,
                 null);
     }
@@ -207,31 +221,24 @@ class MeasureDefBuilderTest {
     @Test
     void basisMeasureAndGroup() {
         var def = measureDefBuilder(
-                "Encounter",
-                "cohort",
-                increase,
-                null,
-                "Encounter",
-                "cohort",
-                increase,
-                null,
-                "boolean",
-                "ratio",
-                decrease);
+                "Encounter", "cohort", increase, null, "Encounter", "ratio", increase, null, "boolean", null, decrease);
 
         validateMeasureDef(
                 def,
-                false,
-                "Encounter",
-                true,
-                "increase",
-                MeasureScoring.COHORT,
                 null,
                 false,
                 "Encounter",
                 true,
                 "increase",
                 MeasureScoring.COHORT,
+                MeasureScoring.COHORT,
+                null,
+                false,
+                "Encounter",
+                true,
+                "increase",
+                MeasureScoring.RATIO,
+                MeasureScoring.RATIO,
                 null);
     }
 
@@ -242,16 +249,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 false,
                 "Encounter",
                 true,
                 "increase",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null,
                 false,
                 "Encounter",
                 true,
                 "increase",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null);
     }
@@ -263,16 +273,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 false,
                 "Encounter",
                 true,
                 "decrease",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null,
                 true,
                 "boolean",
                 true,
                 "increase",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null);
     }
@@ -283,16 +296,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 true,
                 "boolean",
                 true,
                 "decrease",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null,
                 true,
                 "boolean",
                 true,
                 "increase",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null);
     }
@@ -304,16 +320,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 true,
                 "boolean",
                 true,
                 "decrease",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null,
                 false,
                 "Encounter",
                 true,
                 "increase",
+                MeasureScoring.COHORT,
                 MeasureScoring.COHORT,
                 null);
     }
@@ -342,17 +361,32 @@ class MeasureDefBuilderTest {
             String measureScoring,
             @Nullable String group1Scoring,
             @Nullable String group2Scoring,
-            MeasureScoring expectedGroup1MeasureScoring,
-            MeasureScoring expectedGroup2MeasureScoring) {}
+            MeasureScoring expectedMeasureScoring,
+            MeasureScoring expectedDirectGroup1Scoring,
+            MeasureScoring expectedCombinedGroup1Scoring,
+            MeasureScoring expectedDirectGroup2Scoring,
+            MeasureScoring expectedCombinedGroup2Scoring) {}
 
     private static Stream<ScoringMeasureScoringAndGroupParams> scoringMeasureScoringAndGroupParams() {
         return Stream.of(
                 new ScoringMeasureScoringAndGroupParams(
-                        "cohort", "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION),
+                        "cohort",
+                        null,
+                        null,
+                        MeasureScoring.COHORT,
+                        null,
+                        MeasureScoring.COHORT,
+                        null,
+                        MeasureScoring.COHORT),
                 new ScoringMeasureScoringAndGroupParams(
-                        "cohort", null, null, MeasureScoring.COHORT, MeasureScoring.COHORT),
-                new ScoringMeasureScoringAndGroupParams(
-                        null, "ratio", "proportion", MeasureScoring.RATIO, MeasureScoring.PROPORTION));
+                        null,
+                        "cohort",
+                        "ratio",
+                        null,
+                        MeasureScoring.COHORT,
+                        MeasureScoring.COHORT,
+                        MeasureScoring.RATIO,
+                        MeasureScoring.RATIO));
     }
 
     @ParameterizedTest(name = "{index} => testCase={0}")
@@ -373,17 +407,20 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                testCase.expectedMeasureScoring(),
                 true,
                 "boolean",
                 false,
                 "decrease",
-                testCase.expectedGroup1MeasureScoring(),
+                testCase.expectedDirectGroup1Scoring(),
+                testCase.expectedCombinedGroup1Scoring(),
                 null,
                 true,
                 "boolean",
                 false,
                 "decrease",
-                testCase.expectedGroup2MeasureScoring(),
+                testCase.expectedDirectGroup2Scoring(),
+                testCase.expectedCombinedGroup2Scoring(),
                 null);
     }
 
@@ -430,16 +467,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 true,
                 "boolean",
                 true,
                 "increase",
+                MeasureScoring.RATIO,
                 MeasureScoring.RATIO,
                 null,
                 true,
                 "boolean",
                 true,
                 "increase",
+                MeasureScoring.PROPORTION,
                 MeasureScoring.PROPORTION,
                 null);
     }
@@ -451,16 +491,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 true,
                 "boolean",
                 true,
                 "increase",
+                MeasureScoring.RATIO,
                 MeasureScoring.RATIO,
                 null,
                 true,
                 "boolean",
                 true,
                 "increase",
+                MeasureScoring.PROPORTION,
                 MeasureScoring.PROPORTION,
                 null);
     }
@@ -471,16 +514,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 true,
                 "boolean",
                 false,
                 "increase",
+                MeasureScoring.RATIO,
                 MeasureScoring.RATIO,
                 null,
                 true,
                 "boolean",
                 false,
                 "increase",
+                MeasureScoring.PROPORTION,
                 MeasureScoring.PROPORTION,
                 null);
     }
@@ -541,16 +587,19 @@ class MeasureDefBuilderTest {
 
         validateMeasureDef(
                 def,
+                null,
                 true,
                 "boolean",
                 false,
                 "increase",
+                MeasureScoring.RATIO,
                 MeasureScoring.RATIO,
                 testCase.outputStratifiersGroup1(),
                 true,
                 "boolean",
                 false,
                 "increase",
+                MeasureScoring.PROPORTION,
                 MeasureScoring.PROPORTION,
                 testCase.outputStratifiersGroup2());
     }

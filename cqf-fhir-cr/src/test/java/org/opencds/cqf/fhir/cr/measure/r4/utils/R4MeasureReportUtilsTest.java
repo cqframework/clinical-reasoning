@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
@@ -29,7 +28,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
@@ -114,38 +112,6 @@ class R4MeasureReportUtilsTest {
         assertNotNull(methodExt);
         assertInstanceOf(StringType.class, methodExt.getValue());
         assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
-    }
-
-    @Test
-    void testAddAggregationResultAndMethod_AndCriteriaReference_FromBigDecimal_WithNullValue() {
-        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
-
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
-                population, ContinuousVariableObservationAggregateMethod.SUM, null, "");
-
-        // Assert neither extension is set when value is null
-        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
-        assertNull(resultExt, "No result extension should be added when value is null");
-        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-        assertNull(methodExt, "No method extension should be added when value is null");
-    }
-
-    @Test
-    void testAddAggregationResultAndMethod_AndCriteriaReference_FromBigDecimal_WithZeroValue() {
-        MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
-
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
-                population, ContinuousVariableObservationAggregateMethod.COUNT, 0.0, "");
-
-        // Assert both extensions are set
-        Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
-        assertNotNull(resultExt);
-        // Use compareTo for BigDecimal comparison to ignore scale differences (0 vs 0.0)
-        assertEquals(0, BigDecimal.ZERO.compareTo(((DecimalType) resultExt.getValue()).getValue()));
-
-        Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-        assertNotNull(methodExt);
-        assertEquals("count", ((StringType) methodExt.getValue()).getValue());
     }
 
     @Test
@@ -780,14 +746,11 @@ class R4MeasureReportUtilsTest {
     @Test
     void testGetStratumDefText_EmptyValueDefs_ReturnsNull() {
         // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
-
         StratumDef stratumDef =
                 new StratumDef(Collections.emptyList(), Collections.emptySet(), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertNull(result, "Should return null when valueDefs is empty");
@@ -795,10 +758,6 @@ class R4MeasureReportUtilsTest {
 
     @Test
     void testGetStratumDefText_NonComponent_CodeableConcept_ReturnsText() {
-        // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
-
         CodeableConcept codeableConcept = new CodeableConcept();
         codeableConcept.setText("Age Group 18-64");
         codeableConcept.addCoding(new Coding("http://example.com", "age-group-1", "18-64"));
@@ -810,7 +769,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertEquals("Age Group 18-64", result, "Should return CodeableConcept text for non-component stratifier");
@@ -818,10 +777,6 @@ class R4MeasureReportUtilsTest {
 
     @Test
     void testGetStratumDefText_NonComponent_CodeableConcept_NoText_ReturnsNull() {
-        // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
-
         CodeableConcept codeableConcept = new CodeableConcept();
         codeableConcept.addCoding(new Coding("http://example.com", "age-group-1", "18-64"));
         // No text set
@@ -833,7 +788,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertNull(result, "Should return null when CodeableConcept has no text");
@@ -841,10 +796,6 @@ class R4MeasureReportUtilsTest {
 
     @Test
     void testGetStratumDefText_NonComponent_ValueType_IntegerType_ReturnsString() {
-        // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
-
         IntegerType intValue = new IntegerType(42);
         StratumValueWrapper valueWrapper = new StratumValueWrapper(intValue);
         StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
@@ -853,7 +804,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertEquals("42", result, "Should return value as string for VALUE type with IntegerType");
@@ -862,9 +813,6 @@ class R4MeasureReportUtilsTest {
     @Test
     void testGetStratumDefText_NonComponent_ValueType_StringType_ReturnsString() {
         // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1", new ConceptDef(List.of(), "Gender"), "GenderExpression", MeasureStratifierType.VALUE);
-
         StringType stringValue = new StringType("Male");
         StratumValueWrapper valueWrapper = new StratumValueWrapper(stringValue);
         StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
@@ -873,7 +821,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertEquals("Male", result, "Should return value as string for VALUE type with StringType");
@@ -881,13 +829,6 @@ class R4MeasureReportUtilsTest {
 
     @Test
     void testGetStratumDefText_NonComponent_CriteriaType_ReturnsString() {
-        // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1",
-                new ConceptDef(List.of(), "High Risk"),
-                "HighRiskExpression",
-                MeasureStratifierType.CRITERIA);
-
         StringType boolValue = new StringType("true");
         StratumValueWrapper valueWrapper = new StratumValueWrapper(boolValue);
         StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
@@ -896,7 +837,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertEquals("true", result, "Should return value as string for CRITERIA type");
@@ -909,13 +850,6 @@ class R4MeasureReportUtilsTest {
                 new ConceptDef(List.of(new CodeDef("http://example.com", "age-component")), "Age Component");
         StratifierComponentDef componentDef =
                 new StratifierComponentDef("component-1", componentCodeDef, "AgeComponentExpression");
-
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1",
-                new ConceptDef(List.of(), "Age and Gender"),
-                "AgeGenderExpression",
-                MeasureStratifierType.VALUE,
-                List.of(componentDef));
 
         CodeableConcept codeableConcept1 = new CodeableConcept();
         codeableConcept1.setText("18-64");
@@ -933,7 +867,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertEquals(
@@ -950,13 +884,6 @@ class R4MeasureReportUtilsTest {
         StratifierComponentDef componentDef2 =
                 new StratifierComponentDef("component-2", new ConceptDef(List.of(), "Gender"), "GenderExpression");
 
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1",
-                new ConceptDef(List.of(), "Age and Gender"),
-                "AgeGenderExpression",
-                MeasureStratifierType.VALUE,
-                List.of(componentDef1, componentDef2));
-
         IntegerType intValue = new IntegerType(42);
         StratumValueWrapper valueWrapper1 = new StratumValueWrapper(intValue);
         StratumValueDef valueDef1 = new StratumValueDef(valueWrapper1, componentDef1);
@@ -969,7 +896,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         // Component with non-CodeableConcept returns immediately
@@ -992,13 +919,6 @@ class R4MeasureReportUtilsTest {
         StratifierComponentDef componentDef2 =
                 new StratifierComponentDef("component-2", componentCodeDef2, "GenderExpression");
 
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1",
-                new ConceptDef(List.of(), "Age and Gender"),
-                "AgeGenderExpression",
-                MeasureStratifierType.VALUE,
-                List.of(componentDef1, componentDef2));
-
         CodeableConcept codeableConcept1 = new CodeableConcept();
         codeableConcept1.setText("18-64");
 
@@ -1015,7 +935,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         assertNotNull(result);
         // Assert
@@ -1027,10 +947,6 @@ class R4MeasureReportUtilsTest {
 
     @Test
     void testGetStratumDefText_Component_CodeableConceptWithNullComponentDef_ReturnsNull() {
-        // Arrange
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1", new ConceptDef(List.of(), "Age"), "AgeExpression", MeasureStratifierType.VALUE);
-
         CodeableConcept codeableConcept1 = new CodeableConcept();
         codeableConcept1.addCoding(new Coding("http://example.com", "age-1", "18-64"));
 
@@ -1047,7 +963,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertNull(result, "Should return null when component has CodeableConcept but componentDef is null");
@@ -1063,13 +979,6 @@ class R4MeasureReportUtilsTest {
         ConceptDef componentCodeDef2 = new ConceptDef(Collections.emptyList(), null); // null code text
         StratifierComponentDef componentDef2 =
                 new StratifierComponentDef("component-2", componentCodeDef2, "GenderExpression");
-
-        StratifierDef stratifierDef = new StratifierDef(
-                "stratifier-1",
-                new ConceptDef(List.of(), "Age and Gender"),
-                "AgeGenderExpression",
-                MeasureStratifierType.VALUE,
-                List.of(componentDef1, componentDef2));
 
         CodeableConcept codeableConcept1 = new CodeableConcept();
         codeableConcept1.addCoding(new Coding("http://example.com", "age-1", "18-64"));
@@ -1087,7 +996,7 @@ class R4MeasureReportUtilsTest {
                 new StratumDef(Collections.emptyList(), Set.of(valueDef1, valueDef2), Collections.emptyList(), null);
 
         // Act
-        String result = R4MeasureReportUtils.getStratumDefText(stratifierDef, stratumDef);
+        String result = R4MeasureReportUtils.getStratumDefText(stratumDef);
 
         // Assert
         assertNull(result, "Should return null when component code text is null");

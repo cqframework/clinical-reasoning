@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -21,8 +20,8 @@ import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MeasureProcessorUtils {
-    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorUtils.class);
+public class MeasureProcessorTimeUtils {
+    private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorTimeUtils.class);
 
     /**
      * method used to convert measurement period Interval object into ZonedDateTime
@@ -45,7 +44,7 @@ public class MeasureProcessorUtils {
      * @param context cql engine context
      * @return ParameterDef containing appropriately defined measurementPeriod
      */
-    public ParameterDef getMeasurementPeriodParameterDef(CqlEngine context) {
+    public static ParameterDef getMeasurementPeriodParameterDef(CqlEngine context) {
         org.hl7.elm.r1.Library lib = context.getState().getCurrentLibrary();
 
         if (lib.getParameters() == null
@@ -70,8 +69,8 @@ public class MeasureProcessorUtils {
      * @param context cql engine context used to set measurement period parameter
      */
     @SuppressWarnings({"deprecation", "removal"})
-    public void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
-        ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
+    public static void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
+        ParameterDef pd = getMeasurementPeriodParameterDef(context);
         if (pd == null) {
             logger.warn(
                     "Parameter \"{}\" was not found. Unable to validate type.",
@@ -117,64 +116,13 @@ public class MeasureProcessorUtils {
         context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
 
-    public void setMeasurementPeriods(
-            Interval measurementPeriod,
-            CqlEngine context,
-            List<String> measureUrls,
-            List<VersionedIdentifier> libraryIdentifiers) {
-        ParameterDef pd = this.getMeasurementPeriodParameterDef(context);
-        if (pd == null) {
-            logger.warn(
-                    "Parameter \"{}\" was not found. Unable to validate type.",
-                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            context.getState()
-                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
-            return;
-        }
-
-        if (measurementPeriod == null && pd.getDefault() == null) {
-            logger.warn(
-                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
-                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            return;
-        }
-
-        // Use the default, skip validation
-        if (measurementPeriod == null) {
-            measurementPeriod = (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
-
-            context.getState()
-                    .setParameter(
-                            null,
-                            MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME,
-                            cloneIntervalWithUtc(measurementPeriod));
-            return;
-        }
-
-        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
-        if (intervalTypeSpecifier == null) {
-            logger.debug(
-                    "No ELM type information available. Unable to validate type of \"{}\"",
-                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            context.getState()
-                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
-            return;
-        }
-
-        NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
-        String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measurementPeriod, targetType, measureUrls);
-
-        context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
-    }
-
-    public Interval getMeasurementPeriod(
+    public static Interval getMeasurementPeriod(
             @Nullable ZonedDateTime periodStart, @Nullable ZonedDateTime periodEnd, CqlEngine context) {
 
         return getDefaultMeasurementPeriod(buildMeasurementPeriod(periodStart, periodEnd), context);
     }
 
-    private Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+    private static Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         if (periodStart == null && periodEnd == null) {
             return null;
         }
@@ -230,7 +178,7 @@ public class MeasureProcessorUtils {
         return newDateTime;
     }
 
-    public Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
+    public static Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
         String sourceTypeQualified = interval.getPointType().getTypeName();
         String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
@@ -255,23 +203,12 @@ public class MeasureProcessorUtils {
                                 measureUrls.stream().limit(5).toList()));
     }
 
-    public Date truncateDateTime(DateTime dateTime) {
+    public static Date truncateDateTime(DateTime dateTime) {
         OffsetDateTime odt = dateTime.getDateTime();
         return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
     }
 
-    public MeasureEvalType getEvalType(MeasureEvalType evalType, String reportType, List<String> subjectIds) {
-        if (evalType == null) {
-            evalType = MeasureEvalType.fromCode(reportType)
-                    .orElse(
-                            subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
-                                    ? MeasureEvalType.POPULATION
-                                    : MeasureEvalType.SUBJECT);
-        }
-        return evalType;
-    }
-
-    public Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
+    public static Interval buildMeasurementPeriod(String periodStart, String periodEnd) {
         if (periodStart == null || periodEnd == null) {
             return null;
         } else {

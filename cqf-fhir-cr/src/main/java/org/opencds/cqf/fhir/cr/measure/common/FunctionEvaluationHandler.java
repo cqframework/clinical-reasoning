@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import kotlin.Unit;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.FunctionDef;
 import org.hl7.elm.r1.Library;
@@ -26,6 +27,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +96,75 @@ public class FunctionEvaluationHandler {
         }
 
         return finalResults;
+    }
+
+    /**
+     * Do pre-processing before CQL evaluating the libraries largely centred on setting the correct
+     * measurement period and setting the arg parameters for the libraries.
+     * <p/>
+     * Annoyingly, this involves pushing and popping the libraries off the stack before we do it
+     * all over again in the CQL evaluation.
+     * It's possible to just push the libraries onto the stack and then let the CQL evaluation
+     * evaluate with twice as much libraries in its current stack since only the first set
+     * will be popped during evaluation, but this is more difficult to reason about having
+     * duplicate libraries on the stack that through good fortune before we didn't accidentally
+     * evaluate twice.
+     */
+    public static void preLibraryEvaluationPeriodProcessing(
+            List<VersionedIdentifier> libraryVersionedIdentifiers,
+            List<String> measureUrls,
+            Map<String, Object> parametersMap,
+            CqlEngine context,
+            Interval measurementPeriodParams) {
+
+        var compiledLibraries = LibraryInitHandler.initLibraries(context, libraryVersionedIdentifiers);
+
+        try {
+            tryPreLibraryEvaluationPeriodProcessing(
+                    measureUrls, parametersMap, context, measurementPeriodParams, compiledLibraries);
+        } finally {
+            // Now pop the libraries off the stack, because we'll be adding them back during
+            // CQL library evaluation
+            // If no libraries were initialized, the List of compiledLibraries will be empty
+            // and this will no-op
+            LibraryInitHandler.popLibraries(context, compiledLibraries);
+        }
+    }
+
+    private static void tryPreLibraryEvaluationPeriodProcessing(
+            List<String> measureUrls,
+            Map<String, Object> parametersMap,
+            CqlEngine context,
+            Interval measurementPeriodParams,
+            List<CompiledLibrary> compiledLibraries) {
+
+        // if we comment this out MeasureScorerTest and other tests will fail with NPEs
+        setArgParameters(parametersMap, context, compiledLibraries);
+
+        // set measurement Period from CQL if operation parameters are empty
+        MeasureProcessorTimeUtils.setMeasurementPeriod(measurementPeriodParams, context, measureUrls);
+    }
+
+    /**
+     * Set parameters for included libraries, which may be multiple
+     * Note: this may not be the optimal method (e.g. libraries with the same
+     * parameter name, but different values)
+     * @param parametersMap CQL parameters passed in from operation
+     * @param context CQL engine generated
+     */
+    public static void setArgParameters(
+            Map<String, Object> parametersMap, CqlEngine context, List<CompiledLibrary> libs) {
+        for (CompiledLibrary lib : libs) {
+            context.getState().setParameters(lib.getLibrary(), parametersMap);
+
+            if (lib.getLibrary().getIncludes() != null) {
+                lib.getLibrary()
+                        .getIncludes()
+                        .getDef()
+                        .forEach(includeDef -> parametersMap.forEach((paramKey, paramValue) -> context.getState()
+                                .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
+            }
+        }
     }
 
     private static List<EvaluationResult> evaluateMeasureObservations(

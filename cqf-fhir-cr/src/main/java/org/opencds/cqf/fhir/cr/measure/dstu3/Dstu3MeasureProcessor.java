@@ -30,7 +30,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
@@ -42,7 +42,6 @@ public class Dstu3MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final SubjectProvider subjectProvider;
-    private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
     private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private final MeasureEvaluationResultHandler measureEvaluationResultHandler;
 
@@ -158,7 +157,7 @@ public class Dstu3MeasureProcessor {
 
         checkMeasureLibrary(measure);
 
-        Interval measurementPeriodParams = measureProcessorUtils.buildMeasurementPeriod(periodStart, periodEnd);
+        Interval measurementPeriodParams = MeasureProcessorTimeUtils.buildMeasurementPeriod(periodStart, periodEnd);
 
         // setup MeasureDef
         var measureDef = new Dstu3MeasureDefBuilder().build(measure);
@@ -178,15 +177,15 @@ public class Dstu3MeasureProcessor {
         var measureLibraryIdEngineDetails = buildLibraryIdEngineDetails(measure, parameters, context);
 
         // set measurement Period from CQL if operation parameters are empty
-        measureProcessorUtils.setMeasurementPeriod(
+        MeasureProcessorTimeUtils.setMeasurementPeriod(
                 measurementPeriodParams,
                 context,
                 Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
         // extract measurement Period from CQL to pass to report Builder
         Interval measurementPeriod =
-                MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
+                MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
         // set offset of operation parameter measurement period
-        ZonedDateTime zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(measurementPeriod);
+        ZonedDateTime zonedMeasurementPeriod = MeasureProcessorTimeUtils.getZonedTimeZoneForEval(measurementPeriod);
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = MeasureEvaluationResultHandler.getEvaluationResults(

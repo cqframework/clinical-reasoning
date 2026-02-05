@@ -29,7 +29,6 @@ import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.cli.command.EngineFactory.EngineBundle;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -159,7 +158,7 @@ public class MeasureCommand implements Callable<Integer> {
         evaluationOptions.setApplyScoringSetMembership(applyScoring);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
-        return new R4MeasureProcessor(repository, evaluationOptions, new MeasureProcessorUtils());
+        return new R4MeasureProcessor(repository, evaluationOptions);
     }
 
     private static void writeMeasureReportToFile(String json, String contextValue, Path path) throws IOException {

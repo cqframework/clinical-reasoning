@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,6 +61,17 @@ public enum MeasureEvalType {
             throw new InvalidRequestException("ReportType: %s, is not an accepted EvalType value.".formatted(code));
         }
         return Optional.ofNullable(evalType);
+    }
+
+    public static MeasureEvalType getEvalType(MeasureEvalType evalType, String reportType, List<String> subjectIds) {
+        if (evalType == null) {
+            evalType = MeasureEvalType.fromCode(reportType)
+                    .orElse(
+                            subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
+                                    ? MeasureEvalType.POPULATION
+                                    : MeasureEvalType.SUBJECT);
+        }
+        return evalType;
     }
 
     public String getSystem() {

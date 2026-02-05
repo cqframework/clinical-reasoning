@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.cqframework.cql.cql2elm.CqlIncludeException;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -36,10 +34,10 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
-import org.opencds.cqf.fhir.cr.measure.common.LibraryInitHandler;
+import org.opencds.cqf.fhir.cr.measure.common.FunctionEvaluationHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
@@ -50,19 +48,14 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 public class R4MeasureProcessor {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
-    private final MeasureProcessorUtils measureProcessorUtils;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final MeasureEvaluationResultHandler measureEvaluationResultHandler;
 
-    public R4MeasureProcessor(
-            IRepository repository,
-            MeasureEvaluationOptions measureEvaluationOptions,
-            MeasureProcessorUtils measureProcessorUtils) {
+    public R4MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
 
         this.repository = Objects.requireNonNull(repository);
         this.measureEvaluationOptions =
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
-        this.measureProcessorUtils = measureProcessorUtils;
         this.measureEvaluationResultHandler =
                 new MeasureEvaluationResultHandler(this.measureEvaluationOptions, new R4PopulationBasisValidator());
     }
@@ -177,7 +170,7 @@ public class R4MeasureProcessor {
 
         checkMeasureLibrary(measure);
 
-        MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(null, reportType, subjectIds);
+        MeasureEvalType evaluationType = MeasureEvalType.getEvalType(null, reportType, subjectIds);
         // Measurement Period: operation parameter defined measurement period
         Interval measurementPeriod = buildMeasurementPeriod(periodStart, periodEnd);
 
@@ -229,7 +222,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
-        MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(evalType, reportType, subjectIds);
+        MeasureEvalType evaluationType = MeasureEvalType.getEvalType(evalType, reportType, subjectIds);
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
@@ -239,7 +232,7 @@ public class R4MeasureProcessor {
 
         measureEvaluationResultHandler.processResults(fhirContext, resultForThisMeasure, measureDef, evaluationType);
 
-        var measurementPeriod = measureProcessorUtils.getMeasurementPeriod(periodStart, periodEnd, context);
+        var measurementPeriod = MeasureProcessorTimeUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
         // Build Measure Report with Results
         MeasureReport measureReport = new R4MeasureReportBuilder()
@@ -274,6 +267,7 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
+    // LUKETODO: generate tests for this since this is used downstream
     MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Either3<CanonicalType, IdType, Measure> measure,
             @Nullable ZonedDateTime periodStart,
@@ -295,6 +289,7 @@ public class R4MeasureProcessor {
                 compositeEvaluationResultsPerMeasure);
     }
 
+    // LUKETODO: generate tests for this since this is used downstream
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
             Either3<CanonicalType, IdType, Measure> measureEither,
@@ -312,6 +307,7 @@ public class R4MeasureProcessor {
                 context);
     }
 
+    // LUKETODO: generate tests for this since this is used downstream
     public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
             List<String> subjects,
             IIdType measureId,
@@ -371,8 +367,8 @@ public class R4MeasureProcessor {
         measures.forEach(this::checkMeasureLibrary);
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
-        var zonedMeasurementPeriod = MeasureProcessorUtils.getZonedTimeZoneForEval(
-                MeasureProcessorUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+        var zonedMeasurementPeriod = MeasureProcessorTimeUtils.getZonedTimeZoneForEval(
+                MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
@@ -382,58 +378,23 @@ public class R4MeasureProcessor {
         // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
         var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures);
 
-        preLibraryEvaluationPeriodProcessing(
+        var measureUrls = measures.stream()
+                .map(Measure::getUrl)
+                .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
+                .toList();
+
+        final Map<String, Object> parametersMap = resolveParameterMap(parameters);
+
+        FunctionEvaluationHandler.preLibraryEvaluationPeriodProcessing(
                 multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
-                measures,
-                parameters,
+                measureUrls,
+                parametersMap,
                 context,
                 measurementPeriodParams);
 
         // populate results from Library $evaluate
         return MeasureEvaluationResultHandler.getEvaluationResults(
                 subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
-    }
-
-    /**
-     * Do pre-processing before CQL evaluating the libraries largely centred on setting the correct
-     * measurement period and setting the arg parameters for the libraries.
-     * <p/>
-     * Annoyingly, this involves pushing and popping the libraries off the stack before we do it
-     * all over again in the CQL evaluation.
-     * It's possible to just push the libraries onto the stack and then let the CQL evaluation
-     * evaluate with twice as much libraries in its current stack since only the first set
-     * will be popped during evaluation, but this is more difficult to reason about having
-     * duplicate libraries on the stack that through good fortune before we didn't accidentally
-     * evaluate twice.
-     */
-    private void preLibraryEvaluationPeriodProcessing(
-            List<VersionedIdentifier> libraryVersionedIdentifiers,
-            List<Measure> measures,
-            Parameters parameters,
-            CqlEngine context,
-            Interval measurementPeriodParams) {
-
-        var compiledLibraries = LibraryInitHandler.initLibraries(context, libraryVersionedIdentifiers);
-
-        try {
-            // if we comment this out MeasureScorerTest and other tests will fail with NPEs
-            setArgParameters(parameters, context, compiledLibraries);
-
-            // set measurement Period from CQL if operation parameters are empty
-            measureProcessorUtils.setMeasurementPeriod(
-                    measurementPeriodParams,
-                    context,
-                    measures.stream()
-                            .map(Measure::getUrl)
-                            .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
-                            .toList());
-        } finally {
-            // Now pop the libraries off the stack, because we'll be adding them back during
-            // CQL library evaluation
-            // If no libraries were initialized, the List of compiledLibraries will be empty
-            // and this will no-op
-            LibraryInitHandler.popLibraries(context, compiledLibraries);
-        }
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {
@@ -498,71 +459,10 @@ public class R4MeasureProcessor {
         return VersionedIdentifiers.forUrl(url);
     }
 
-    /**
-     * method used to initialize Library engine for generating CQL results
-     * @param parameters paramaters to seed for evaluation
-     * @param id library versioned identifier
-     * @param context cql engine context
-     * @return initialized library engine
-     */
-    protected LibraryEngine getLibraryEngine(Parameters parameters, VersionedIdentifier id, CqlEngine context) {
-
-        CompiledLibrary lib;
-        try {
-            lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
-        } catch (CqlIncludeException e) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(id.getId()),
-                    e);
-        }
-
-        context.getState().init(lib.getLibrary());
-
-        setArgParameters(parameters, context, lib);
-
-        return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
-    }
-
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new InvalidRequestException(
                     "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
-        }
-    }
-
-    /**
-     * Set parameters for included libraries
-     * Note: this may not be the optimal method (e.g. libraries with the same
-     * parameter name, but different values)
-     * @param parameters CQL parameters passed in from operation
-     * @param context CQL engine generated
-     */
-    protected void setArgParameters(Parameters parameters, CqlEngine context, CompiledLibrary lib) {
-        setArgParameters(parameters, context, List.of(lib));
-    }
-
-    /**
-     * Set parameters for included libraries, which may be multiple
-     * Note: this may not be the optimal method (e.g. libraries with the same
-     * parameter name, but different values)
-     * @param parameters CQL parameters passed in from operation
-     * @param context CQL engine generated
-     */
-    protected void setArgParameters(Parameters parameters, CqlEngine context, List<CompiledLibrary> libs) {
-        if (parameters != null) {
-            Map<String, Object> paramMap = resolveParameterMap(parameters);
-            for (CompiledLibrary lib : libs) {
-                context.getState().setParameters(lib.getLibrary(), paramMap);
-
-                if (lib.getLibrary().getIncludes() != null) {
-                    lib.getLibrary()
-                            .getIncludes()
-                            .getDef()
-                            .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
-                                    .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
-                }
-            }
         }
     }
 
@@ -572,6 +472,10 @@ public class R4MeasureProcessor {
      * @return mapped parameters
      */
     private Map<String, Object> resolveParameterMap(Parameters parameters) {
+        if (parameters == null) {
+            return Map.of();
+        }
+
         Map<String, Object> parameterMap = new HashMap<>();
         R4FhirModelResolver modelResolver = new R4FhirModelResolver();
         parameters.getParameter().forEach(param -> {

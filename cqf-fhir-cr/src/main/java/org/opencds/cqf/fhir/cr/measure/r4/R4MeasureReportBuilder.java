@@ -670,8 +670,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
      * @param stratumDef the StratumDef
      * @return true if values match
      */
-    private boolean matchesStratumValue(
-            MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+    private boolean matchesStratumValue(MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
         return R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef);
     }
 }

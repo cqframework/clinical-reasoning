@@ -113,8 +113,7 @@ public class R4MeasureReportUtils {
      * @param stratumDef the StratumDef to match against
      * @return true if the stratum values match, false otherwise
      */
-    public static boolean matchesStratumValue(
-            StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+    public static boolean matchesStratumValue(StratifierGroupComponent reportStratum, StratumDef stratumDef) {
         // Use the same logic as R4MeasureReportScorer: compare CodeableConcept.text
         String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
         String defText = getStratumDefText(stratumDef);

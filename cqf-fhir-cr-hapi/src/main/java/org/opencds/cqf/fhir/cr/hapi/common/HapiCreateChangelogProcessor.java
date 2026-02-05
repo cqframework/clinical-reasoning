@@ -201,7 +201,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
 
                     // 4) Add a new operation to the ChangeLog
                     page.addOperation(
-                            type, path.orElse(null), newValue.orElse(null), originalValue.orElse(null), changelog);
+                            type, path.orElse(null), newValue.orElse(null), originalValue.orElse(null));
                 }
             }
         }

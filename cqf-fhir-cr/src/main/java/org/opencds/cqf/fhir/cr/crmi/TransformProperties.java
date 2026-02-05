@@ -25,6 +25,7 @@ public class TransformProperties {
     public static final String crmiIsOwned = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
     public static final String vsmCondition = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition";
     public static final String vsmPriority = "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority";
+    public static final String vsmPriorityCode = "priority";
     public static final String CRMI_INTENDED_USAGE_CONTEXT_EXT_URL =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext";
     public static final String authoritativeSourceExtUrl =

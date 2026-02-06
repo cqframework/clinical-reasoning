@@ -19,7 +19,7 @@ public class MeasureConstants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression";
 
     public static final String URL_CODESYSTEM_MEASURE_POPULATION =
-            "http://teminology.hl7.org/CodeSystem/measure-population";
+            "http://terminology.hl7.org/CodeSystem/measure-population";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-populationReference.html
     public static final String EXT_CQFM_AGGREGATE_METHOD_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod";

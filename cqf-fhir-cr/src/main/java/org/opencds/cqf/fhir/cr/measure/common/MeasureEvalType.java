@@ -65,7 +65,7 @@ public enum MeasureEvalType {
 
     public static MeasureEvalType getEvalType(MeasureEvalType evalType, String reportType, List<String> subjectIds) {
         if (evalType == null) {
-            evalType = MeasureEvalType.fromCode(reportType)
+            return MeasureEvalType.fromCode(reportType)
                     .orElse(
                             subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null
                                     ? MeasureEvalType.POPULATION

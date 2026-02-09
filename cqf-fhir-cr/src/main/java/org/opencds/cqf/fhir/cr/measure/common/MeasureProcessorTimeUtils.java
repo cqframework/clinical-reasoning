@@ -86,7 +86,7 @@ public class MeasureProcessorTimeUtils {
         final Object endAsObject = interval.getEnd();
 
         if (startAsObject instanceof DateTime time && endAsObject instanceof DateTime time1) {
-            return new Interval(cloneDateTimeWithUtc(time), true, cloneDateTimeWithUtc(time1), true);
+            return new Interval(convertToUtc(time), true, convertToUtc(time1), true);
         }
 
         // Give up and just return the original Interval
@@ -100,7 +100,7 @@ public class MeasureProcessorTimeUtils {
      * @param dateTime The original dateTime with some offset.
      * @return The original dateTime but converted to UTC with the same local timestamp.
      */
-    private static DateTime cloneDateTimeWithUtc(DateTime dateTime) {
+    private static DateTime convertToUtc(DateTime dateTime) {
         if (dateTime == null || dateTime.getDateTime() == null) {
             return null;
         }

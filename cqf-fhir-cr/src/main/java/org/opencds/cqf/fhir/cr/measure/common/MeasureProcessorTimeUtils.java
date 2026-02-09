@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -7,11 +8,14 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
@@ -38,83 +42,6 @@ public class MeasureProcessorTimeUtils {
                 .map(DateTime::getZoneOffset)
                 .map(zoneOffset -> LocalDateTime.now().atOffset(zoneOffset).toZonedDateTime())
                 .orElse(null);
-    }
-
-    /**
-     * Extract measurement period defined within requested CQL file
-     * @param context cql engine context
-     * @return ParameterDef containing appropriately defined measurementPeriod
-     */
-    public static ParameterDef getMeasurementPeriodParameterDef(CqlEngine context) {
-        Library lib = context.getState().getCurrentLibrary();
-
-        if (lib.getParameters() == null
-                || lib.getParameters().getDef() == null
-                || lib.getParameters().getDef().isEmpty()) {
-            return null;
-        }
-
-        for (ParameterDef pd : lib.getParameters().getDef()) {
-            if (pd.getName().equals(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME)) {
-                return pd;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * method to set measurement period on cql engine context.
-     * Priority is operation parameter defined value, otherwise default CQL value is used
-     * @param measurementPeriod Interval defined by operation parameters to override default CQL value
-     * @param context cql engine context used to set measurement period parameter
-     */
-    @SuppressWarnings({"deprecation", "removal"})
-    public static void setMeasurementPeriod(Interval measurementPeriod, CqlEngine context, List<String> measureUrls) {
-        ParameterDef pd = getMeasurementPeriodParameterDef(context);
-        if (pd == null) {
-            logger.warn(
-                    "Parameter \"{}\" was not found. Unable to validate type.",
-                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            context.getState()
-                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
-            return;
-        }
-
-        if (measurementPeriod == null && pd.getDefault() == null) {
-            logger.warn(
-                    "No default or value supplied for Parameter \"{}\". This may result in incorrect results or errors.",
-                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            return;
-        }
-
-        // Use the default, skip validation
-        if (measurementPeriod == null) {
-            measurementPeriod = (Interval) context.getEvaluationVisitor().visitParameterDef(pd, context.getState());
-
-            context.getState()
-                    .setParameter(
-                            null,
-                            MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME,
-                            cloneIntervalWithUtc(measurementPeriod));
-            return;
-        }
-
-        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
-        if (intervalTypeSpecifier == null) {
-            logger.debug(
-                    "No ELM type information available. Unable to validate type of \"{}\"",
-                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
-            context.getState()
-                    .setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, measurementPeriod);
-            return;
-        }
-
-        NamedTypeSpecifier pointType = (NamedTypeSpecifier) intervalTypeSpecifier.getPointType();
-        String targetType = pointType.getName().getLocalPart();
-        Interval convertedPeriod = convertInterval(measurementPeriod, targetType, measureUrls);
-
-        context.getState().setParameter(null, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, convertedPeriod);
     }
 
     public static Interval getMeasurementPeriod(
@@ -154,7 +81,7 @@ public class MeasureProcessorTimeUtils {
      * @param interval The original interval with some offset.
      * @return The original dateTime but converted to UTC with the same local timestamp.
      */
-    private static Interval cloneIntervalWithUtc(Interval interval) {
+    static Interval cloneIntervalWithUtc(Interval interval) {
         final Object startAsObject = interval.getStart();
         final Object endAsObject = interval.getEnd();
 
@@ -174,19 +101,212 @@ public class MeasureProcessorTimeUtils {
      * @return The original dateTime but converted to UTC with the same local timestamp.
      */
     private static DateTime cloneDateTimeWithUtc(DateTime dateTime) {
+        if (dateTime == null || dateTime.getDateTime() == null) {
+            return null;
+        }
         final DateTime newDateTime = new DateTime(dateTime.getDateTime().withOffsetSameLocal(ZoneOffset.UTC));
         newDateTime.setPrecision(dateTime.getPrecision());
         return newDateTime;
     }
 
+    /**
+     * Resolve the measurement period (user-provided or CQL default) and add it to the parameters map.
+     * <p>
+     * When the user provides a measurement period, it is validated/converted against the CQL library's
+     * parameter type. When no measurement period is provided, the CQL default is resolved from the
+     * library, UTC-cloned, and used instead.
+     *
+     * @param measurementPeriodParams user-provided measurement period (may be null)
+     * @param context CQL engine context
+     * @param libraryIdentifiers library identifiers to resolve against
+     * @param measureUrls measure URLs for error messages
+     * @param parametersMap mutable parameters map to add the measurement period to
+     */
+    public static void resolveMeasurementPeriodIntoParameters(
+            @Nullable Interval measurementPeriodParams,
+            CqlEngine context,
+            List<VersionedIdentifier> libraryIdentifiers,
+            List<String> measureUrls,
+            Map<String, Object> parametersMap) {
+        var firstLibraryId = libraryIdentifiers.get(0);
+
+        if (measurementPeriodParams != null) {
+            // User provided measurement period: validate/convert and add to parameters map
+            var elmLibrary = context.getEnvironment().resolveLibrary(firstLibraryId);
+            if (elmLibrary == null) {
+                throw new InternalErrorException("Could not resolve ELM library for identifier: %s, measure URLs: %s"
+                        .formatted(firstLibraryId.getId(), measureUrls));
+            }
+            var validatedPeriod = validateAndConvertMeasurementPeriod(measurementPeriodParams, elmLibrary, measureUrls);
+            if (validatedPeriod != null) {
+                parametersMap.put(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, validatedPeriod);
+            }
+        } else {
+            resolveDefaultMeasurementPeriodWithLibraryStack(
+                    context, libraryIdentifiers, firstLibraryId, measureUrls, parametersMap);
+        }
+    }
+
+    /**
+     * Resolve the CQL-default measurement period by pushing libraries onto the CQL engine stack,
+     * evaluating the parameter default, UTC-cloning the result, and popping the libraries.
+     * <p/>
+     * <b>Why the push/pop ceremony is required:</b>
+     * <p/>
+     * The CQL engine's {@code visitExpression()} — used internally by {@code visitParameterDef()} to
+     * evaluate a parameter's {@code default} expression — requires {@code state.getCurrentLibrary()}
+     * to be non-null. The library stack is accessed in two places during expression evaluation:
+     * <ol>
+     *   <li>Error handling ({@code EvaluationVisitor.kt}) — building source backtraces on exception</li>
+     *   <li>Coverage reporting ({@code State.kt}) — marking elements as visited</li>
+     * </ol>
+     * If no library is on the stack, these paths throw a {@code NullPointerException}. There is
+     * currently no CQL engine API to evaluate a parameter default without a library on the stack.
+     * <p/>
+     * <b>To remove this workaround:</b> The CQL engine needs a dedicated API such as
+     * {@code CqlEngine.resolveParameterDefault(VersionedIdentifier, String)} that internally
+     * manages the library stack, so callers don't need to push/pop libraries themselves.
+     *
+     * @deprecated This method exists only because the CQL engine lacks a clean API for resolving
+     *     parameter defaults. Replace with {@code CqlEngine.resolveParameterDefault()} once it
+     *     is available in the CQL engine.
+     */
+    @Deprecated(forRemoval = true)
+    private static void resolveDefaultMeasurementPeriodWithLibraryStack(
+            CqlEngine context,
+            List<VersionedIdentifier> libraryIdentifiers,
+            VersionedIdentifier firstLibraryId,
+            List<String> measureUrls,
+            Map<String, Object> parametersMap) {
+        var compiledLibraries = LibraryInitHandler.initLibraries(context, libraryIdentifiers);
+        try {
+            var elmLibrary = compiledLibraries.get(0).getLibrary();
+            if (elmLibrary == null) {
+                throw new InternalErrorException(
+                        "Compiled library has no ELM content for identifier: %s, measure URLs: %s"
+                                .formatted(firstLibraryId.getId(), measureUrls));
+            }
+            var defaultPeriod = resolveAndCloneDefaultMeasurementPeriod(context, elmLibrary);
+            if (defaultPeriod != null) {
+                parametersMap.put(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, defaultPeriod);
+            }
+        } finally {
+            LibraryInitHandler.popLibraries(context, compiledLibraries);
+        }
+    }
+
+    /**
+     * Validate and convert a user-provided measurement period against the CQL library's parameter type.
+     * Does not require CQL engine state — takes the ELM Library directly.
+     *
+     * @param measurementPeriod user-provided measurement period (may be null)
+     * @param elmLibrary the ELM library to check parameter type against
+     * @param measureUrls measure URLs for error messages
+     * @return the validated/converted measurement period, or null if not provided
+     */
+    @Nullable
+    public static Interval validateAndConvertMeasurementPeriod(
+            @Nullable Interval measurementPeriod, Library elmLibrary, List<String> measureUrls) {
+        if (measurementPeriod == null) {
+            return null;
+        }
+
+        ParameterDef pd = findMeasurementPeriodParameterDef(elmLibrary);
+        if (pd == null) {
+            logger.warn(
+                    "Parameter \"{}\" was not found. Unable to validate type.",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            return measurementPeriod;
+        }
+
+        IntervalTypeSpecifier intervalTypeSpecifier = (IntervalTypeSpecifier) pd.getParameterTypeSpecifier();
+        if (intervalTypeSpecifier == null) {
+            logger.debug(
+                    "No ELM type information available. Unable to validate type of \"{}\"",
+                    MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+            return measurementPeriod;
+        }
+
+        if (!(intervalTypeSpecifier.getPointType() instanceof NamedTypeSpecifier pointType)
+                || pointType.getName() == null) {
+            throw new InternalErrorException(
+                    "\"Measurement Period\" parameter has unexpected type specifier for measure URLs: %s"
+                            .formatted(measureUrls));
+        }
+        String targetType = pointType.getName().getLocalPart();
+        return convertInterval(measurementPeriod, targetType, measureUrls);
+    }
+
+    /**
+     * Resolve the CQL default measurement period, UTC-clone it, and return it.
+     * <p/>
+     * Uses the deprecated {@code CqlEngine.getEvaluationVisitor()} because no non-deprecated
+     * CQL API exists for evaluating parameter defaults. When the CQL engine exposes a stable API
+     * for this purpose, replace this method.
+     *
+     * @param context CQL engine with library on the stack
+     * @param elmLibrary the ELM library containing the parameter definition
+     * @return the UTC-cloned default measurement period, or null if no default is defined
+     */
+    @SuppressWarnings({"deprecation", "removal"})
+    @Nullable
+    public static Interval resolveAndCloneDefaultMeasurementPeriod(CqlEngine context, Library elmLibrary) {
+        ParameterDef pd = findMeasurementPeriodParameterDef(elmLibrary);
+        if (pd == null || pd.getDefault() == null) {
+            return null;
+        }
+        var libraryId = Optional.ofNullable(elmLibrary.getIdentifier())
+                .map(VersionedIdentifier::getId)
+                .orElse("unknown");
+        var evaluationVisitor = context.getEvaluationVisitor();
+        var result = evaluationVisitor.visitParameterDef(pd, context.getState());
+        if (!(result instanceof Interval defaultPeriod)) {
+            throw new InternalErrorException(
+                    "\"Measurement Period\" default resolved to %s instead of Interval for library: %s"
+                            .formatted(
+                                    result == null ? "null" : result.getClass().getSimpleName(), libraryId));
+        }
+        return cloneIntervalWithUtc(defaultPeriod);
+    }
+
+    /**
+     * Find the "Measurement Period" parameter definition in a given ELM library.
+     * Does not require CQL engine state.
+     */
+    @Nullable
+    static ParameterDef findMeasurementPeriodParameterDef(Library lib) {
+        if (lib == null
+                || lib.getParameters() == null
+                || lib.getParameters().getDef().isEmpty()) {
+            return null;
+        }
+
+        for (ParameterDef pd : lib.getParameters().getDef()) {
+            if (Objects.equals(pd.getName(), MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME)) {
+                return pd;
+            }
+        }
+
+        return null;
+    }
+
     public static Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
-        String sourceTypeQualified = interval.getPointType().getTypeName();
+        var pointType = interval.getPointType();
+        if (pointType == null) {
+            throw new InternalErrorException(
+                    "Measurement period interval has no point type for measure URLs: %s".formatted(measureUrls));
+        }
+        String sourceTypeQualified = pointType.getTypeName();
         String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
             return interval;
         }
 
         if (sourceType.equals("DateTime") && targetType.equals("Date")) {
+            if (interval.getLow() == null || interval.getHigh() == null) {
+                throw new InternalErrorException(
+                        "Interval has no low or high values for measure URLs: %s".formatted(measureUrls));
+            }
             logger.debug(
                     "A DateTime interval was provided and a Date interval was expected. The DateTime will be truncated.");
             return new Interval(
@@ -206,6 +326,9 @@ public class MeasureProcessorTimeUtils {
 
     public static Date truncateDateTime(DateTime dateTime) {
         OffsetDateTime odt = dateTime.getDateTime();
+        if (odt == null) {
+            throw new InternalErrorException("dateTime was null");
+        }
         return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
     }
 

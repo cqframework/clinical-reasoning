@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.annotations.VisibleForTesting;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import org.cqframework.cql.cql2elm.CqlIncludeException;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
@@ -22,7 +19,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.Engines;
@@ -172,29 +168,37 @@ public class Dstu3MeasureProcessor {
         var context = Engines.forRepository(
                 this.repository, this.measureEvaluationOptions.getEvaluationSettings(), additionalData);
 
-        // Note that we must build the LibraryEngine BEFORE we call
-        // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
-        var measureLibraryIdEngineDetails = buildLibraryIdEngineDetails(measure, parameters, context);
+        var measureLibraryIdEngineDetails = buildLibraryIdEngineDetails(measure);
 
-        // set measurement Period from CQL if operation parameters are empty
-        MeasureProcessorTimeUtils.setMeasurementPeriod(
+        var measureUrls = Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL"));
+
+        // Build parameters map: user params + measurement period
+        final Map<String, Object> parametersMap =
+                parameters != null ? new HashMap<>(resolveParameterMap(parameters)) : new HashMap<>();
+
+        MeasureProcessorTimeUtils.resolveMeasurementPeriodIntoParameters(
                 measurementPeriodParams,
                 context,
-                Optional.ofNullable(measure.getUrl()).map(List::of).orElse(List.of("Unknown Measure URL")));
-        // extract measurement Period from CQL to pass to report Builder
-        Interval measurementPeriod =
-                MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
-        // set offset of operation parameter measurement period
-        ZonedDateTime zonedMeasurementPeriod = MeasureProcessorTimeUtils.getZonedTimeZoneForEval(measurementPeriod);
+                measureLibraryIdEngineDetails.getLibraryIdentifiers(),
+                measureUrls,
+                parametersMap);
+
+        var zonedMeasurementPeriod = MeasureProcessorTimeUtils.getZonedTimeZoneForEval(
+                MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+
         // populate results from Library $evaluate
         if (!subjects.isEmpty()) {
             var results = MeasureEvaluationResultHandler.getEvaluationResults(
-                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails);
+                    subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails, parametersMap);
 
             // Process Criteria Expression Results
             measureEvaluationResultHandler.processResults(
                     fhirContext, results.processMeasureForSuccessOrFailure(measureDef), measureDef, evalType);
         }
+
+        // extract measurement Period from parameters or CQL to pass to report Builder
+        Interval measurementPeriod =
+                MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context);
 
         // Build Measure Report with Results
         MeasureReport measureReport = new Dstu3MeasureReportBuilder()
@@ -203,13 +207,11 @@ public class Dstu3MeasureProcessor {
         return new MeasureDefAndDstu3MeasureReport(measureDef, measureReport);
     }
 
-    // Ideally this would be done in MeasureProcessorUtils, but it's too much work to change for now
-    private MultiLibraryIdMeasureEngineDetails buildLibraryIdEngineDetails(
-            Measure measure, Parameters parameters, CqlEngine context) {
+    private MultiLibraryIdMeasureEngineDetails buildLibraryIdEngineDetails(Measure measure) {
 
         var libraryVersionIdentifier = getLibraryVersionIdentifier(measure);
 
-        final LibraryEngine libraryEngine = getLibraryEngine(parameters, libraryVersionIdentifier, context);
+        final LibraryEngine libraryEngine = getLibraryEngine();
 
         var measureDef = new Dstu3MeasureDefBuilder().build(measure);
 
@@ -226,36 +228,7 @@ public class Dstu3MeasureProcessor {
         };
     }
 
-    protected LibraryEngine getLibraryEngine(Parameters parameters, VersionedIdentifier id, CqlEngine context) {
-
-        CompiledLibrary lib;
-        try {
-            lib = context.getEnvironment().getLibraryManager().resolveLibrary(id);
-        } catch (CqlIncludeException e) {
-            throw new IllegalStateException(
-                    "Unable to load CQL/ELM for library: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(id.getId()),
-                    e);
-        }
-
-        context.getState().init(lib.getLibrary());
-
-        if (parameters != null) {
-            Map<String, Object> paramMap = resolveParameterMap(parameters);
-            context.getState().setParameters(lib.getLibrary(), paramMap);
-            // Set parameters for included libraries
-            // Note: this may not be the optimal method (e.g. libraries with the same
-            // parameter name, but different
-            // values)
-            if (lib.getLibrary().getIncludes() != null) {
-                lib.getLibrary()
-                        .getIncludes()
-                        .getDef()
-                        .forEach(includeDef -> paramMap.forEach((paramKey, paramValue) -> context.getState()
-                                .setParameter(includeDef.getLocalIdentifier(), paramKey, paramValue)));
-            }
-        }
-
+    protected LibraryEngine getLibraryEngine() {
         return new LibraryEngine(repository, this.measureEvaluationOptions.getEvaluationSettings());
     }
 

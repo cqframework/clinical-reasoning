@@ -34,7 +34,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
-import org.opencds.cqf.fhir.cr.measure.common.FunctionEvaluationHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
@@ -374,8 +373,6 @@ public class R4MeasureProcessor {
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
         R4MeasureDefBuilder.triggerFirstPassValidation(measures);
 
-        // Note that we must build the LibraryEngine BEFORE we call
-        // measureProcessorUtils.setMeasurementPeriod(), otherwise, we get an NPE.
         var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures);
 
         var measureUrls = measures.stream()
@@ -383,18 +380,18 @@ public class R4MeasureProcessor {
                 .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                 .toList();
 
-        final Map<String, Object> parametersMap = resolveParameterMap(parameters);
+        final Map<String, Object> parametersMap = new HashMap<>(resolveParameterMap(parameters));
 
-        FunctionEvaluationHandler.preLibraryEvaluationPeriodProcessing(
+        MeasureProcessorTimeUtils.resolveMeasurementPeriodIntoParameters(
+                measurementPeriodParams,
+                context,
                 multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
                 measureUrls,
-                parametersMap,
-                context,
-                measurementPeriodParams);
+                parametersMap);
 
         // populate results from Library $evaluate
         return MeasureEvaluationResultHandler.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails);
+                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails, parametersMap);
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {

@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.elm.r1.IntervalTypeSpecifier;
+import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.NamedTypeSpecifier;
 import org.hl7.elm.r1.ParameterDef;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -45,7 +46,7 @@ public class MeasureProcessorTimeUtils {
      * @return ParameterDef containing appropriately defined measurementPeriod
      */
     public static ParameterDef getMeasurementPeriodParameterDef(CqlEngine context) {
-        org.hl7.elm.r1.Library lib = context.getState().getCurrentLibrary();
+        Library lib = context.getState().getCurrentLibrary();
 
         if (lib.getParameters() == null
                 || lib.getParameters().getDef() == null

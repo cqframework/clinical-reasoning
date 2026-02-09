@@ -760,7 +760,7 @@ public class MeasureMultiSubjectEvaluator {
             PopulationDef populationDef) {
         // Check if we have composite row keys for NON_SUBJECT_VALUE stratifiers
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
-            // Extract resource IDs from row keys that have input parameters
+            // Extract resource IDs from row keys that have input parameters (function-based)
             Set<String> stratumResourceIds = rowKeys.stream()
                     .filter(StratifierRowKey::hasInputParam)
                     .map(key -> key.inputParamId().orElseThrow())
@@ -775,9 +775,58 @@ public class MeasureMultiSubjectEvaluator {
                         .filter(populationResourceIds::contains)
                         .toList();
             }
+
+            // Scalar-only NON_SUBJECT_VALUE stratifier: no function row keys, use subject-level
+            // Get all resources for the subjects in this stratum from the population
+            Set<String> subjectIds =
+                    rowKeys.stream().map(StratifierRowKey::subjectOnlyKey).collect(Collectors.toSet());
+
+            return getResourcesForSubjects(fhirContext, groupDef, populationDef, subjectIds);
         }
 
         return List.of();
+    }
+
+    /**
+     * Gets all resource IDs from a population for a given set of subjects.
+     *
+     * <p>This is used for scalar-only NON_SUBJECT_VALUE stratifiers where we need to count
+     * all resources belonging to subjects in the stratum, not specific resources identified
+     * by function row keys.
+     */
+    private static List<String> getResourcesForSubjects(
+            FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef, Set<String> subjectIds) {
+
+        final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
+        boolean isResourceType = resourceType != null;
+        List<String> resourceIds = new ArrayList<>();
+
+        if (populationDef.getSubjectResources() == null) {
+            return resourceIds;
+        }
+
+        for (var entry : populationDef.getSubjectResources().entrySet()) {
+            String subjectId = entry.getKey();
+            // Check if this subject (with or without qualifier) is in our set
+            String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+            if (!subjectIds.contains(qualifiedSubject) && !subjectIds.contains(subjectId)) {
+                continue;
+            }
+
+            Set<Object> resources = entry.getValue();
+            if (resources != null) {
+                if (isResourceType) {
+                    resources.stream()
+                            .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                            .filter(java.util.Objects::nonNull)
+                            .forEach(resourceIds::add);
+                } else {
+                    resources.stream().map(Object::toString).forEach(resourceIds::add);
+                }
+            }
+        }
+
+        return resourceIds;
     }
 
     /**

@@ -602,19 +602,42 @@ class MeasureStratifierTest {
     }
 
     /**
-     * Resource (Encounter) Basis Measure with multi-component value stratifier.
-     * Components: Age Range Stratifier (function) + Encounter Status Stratifier (function)
-     * <p/>
-     * Patient-9 has:
-     * - Encounter 1: status='finished', period 2024-01-01 (age ~36 -> P21Y--P41Y)
-     * - Encounter 2: status='in-progress', period 2024-01-01 (age ~36 -> P21Y--P41Y)
-     * <p/>
-     * Expected strata (grouped by component value combinations):
-     * - Stratum 1: P21Y--P41Y + finished -> count=1 (encounter-1)
-     * - Stratum 2: P21Y--P41Y + in-progress -> count=1 (encounter-2)
+     * Individual patient test for NON_SUBJECT_VALUE stratifiers with mixed function and scalar components.
+     * Tests evaluation for Patient-9 only (has 2 encounters).
+     *
+     * <p><b>Patient-9 Data:</b>
+     * <pre>
+     * | Gender | BirthDate  | Age@2024 | Age Bracket |
+     * |--------|------------|----------|-------------|
+     * | male   | 1988-01-11 | 35       | 21--41      |
+     *
+     * | Encounter   | Status      | Age Range (at enc period) |
+     * |-------------|-------------|---------------------------|
+     * | enc-1       | finished    | P21Y--P41Y                |
+     * | enc-2       | in-progress | P21Y--P41Y                |
+     * </pre>
+     *
+     * <p><b>Stratifier-1</b> ("Encounter Age and Status"): Mixed function + scalar components
+     * <ul>
+     *   <li>"Age Range Stratifier" (function) - returns 'P21Y--P41Y' for both encounters</li>
+     *   <li>"Encounter Status Stratifier" (function) - returns 'finished' or 'in-progress'</li>
+     *   <li>"Patient Age Bracket" (scalar) - returns '21--41' for patient-9</li>
+     * </ul>
+     * Expected: 2 strata (differentiated by encounter status):
+     * <ul>
+     *   <li>P21Y--P41Y + finished + 21--41: enc-1 (count=1)</li>
+     *   <li>P21Y--P41Y + in-progress + 21--41: enc-2 (count=1)</li>
+     * </ul>
+     *
+     * <p><b>Stratifier-2</b> ("Patient Age and Gender"): Scalar-only components
+     * <ul>
+     *   <li>"Patient Age Bracket" (scalar) - returns '21--41'</li>
+     *   <li>"Gender Stratification" (scalar) - returns 'M'</li>
+     * </ul>
+     * Expected: 1 stratum (21--41 + M) with count=2 (both encounters)
      */
     @Test
-    void cohortResourceValueStrat() {
+    void cohortResourceValueStratIndividual() {
 
         GIVEN_SIMPLE
                 .when()
@@ -623,22 +646,155 @@ class MeasureStratifierTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .firstStratifier()
+                .firstPopulation()
+                .hasCount(2) // Patient-9 has 2 encounters
+                .up()
+                // Stratifier-1: Mixed function + scalar
+                .stratifierById("stratifier-1")
                 .hasCodeText("Encounter Age and Status")
-                // 2 strata: one for each unique (AgeRange, Status) combination
-                .hasStratumCount(2)
-                // Stratum for "P21Y--P41Y + finished + 37" - identified by unique "finished" status
+                .hasStratumCount(2) // 2 strata differentiated by encounter status
+                // Stratum: P21Y--P41Y + finished + 21--41
                 .stratumByComponentValueText("finished")
-                .hasComponentStratifierCount(3) // 3 components: age range + status + patient age
+                .hasComponentStratifierCount(3)
                 .firstPopulation()
                 .hasCount(1)
                 .up()
                 .up()
-                // Stratum for "P21Y--P41Y + in-progress + 37" - identified by unique "in-progress" status
+                // Stratum: P21Y--P41Y + in-progress + 21--41
                 .stratumByComponentValueText("in-progress")
-                .hasComponentStratifierCount(3) // two components: age range + status + patient age
+                .hasComponentStratifierCount(3)
                 .firstPopulation()
-                .hasCount(1);
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                // Stratifier-2: Scalar-only
+                .stratifierById("stratifier-2")
+                .hasCodeText("Patient Age and Gender")
+                .hasStratumCount(1) // 1 stratum: 21--41 + M
+                .firstStratum()
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(2); // Both encounters belong to this stratum
+    }
+
+    /**
+     * Summary mode test for NON_SUBJECT_VALUE stratifiers with mixed function and scalar components.
+     * Tests evaluation across ALL patients (10 patients, 11 encounters total - patient-9 has 2 encounters).
+     *
+     * <p><b>Test Data Summary:</b>
+     * <pre>
+     * | Patient   | Gender | BirthDate   | Age@2024 | Age Bracket | Encounter Status |
+     * |-----------|--------|-------------|----------|-------------|------------------|
+     * | patient-0 | female | 1985-06-16  | 38       | 21--41      | in-progress      |
+     * | patient-1 | male   | 1988-01-11  | 35       | 21--41      | in-progress      |
+     * | patient-2 | female | 1985-06-16  | 38       | 21--41      | arrived          |
+     * | patient-3 | male   | 1988-01-11  | 35       | 21--41      | arrived          |
+     * | patient-4 | female | 1985-06-16  | 38       | 21--41      | triaged          |
+     * | patient-5 | male   | 1988-01-11  | 35       | 21--41      | triaged          |
+     * | patient-6 | female | 1985-06-16  | 38       | 21--41      | cancelled        |
+     * | patient-7 | male   | 1988-01-11  | 35       | 21--41      | cancelled        |
+     * | patient-8 | female | 1985-06-16  | 38       | 21--41      | finished         |
+     * | patient-9 | male   | 1988-01-11  | 35       | 21--41      | finished (enc-1), in-progress (enc-2) |
+     * </pre>
+     *
+     * <p><b>Stratifier-1</b> ("Encounter Age and Status"): Mixed function + scalar components
+     * <ul>
+     *   <li>"Age Range Stratifier" (function) - returns 'P0Y--P21Y', 'P21Y--P41Y', 'P41Y--P9999Y'
+     *       based on patient age at encounter period start. All encounters return 'P21Y--P41Y'.</li>
+     *   <li>"Encounter Status Stratifier" (function) - returns encounter.status.value
+     *       (5 unique: in-progress, arrived, triaged, cancelled, finished)</li>
+     *   <li>"Patient Age Bracket" (scalar) - returns '0--21', '21--41', '>41' based on patient age
+     *       at measurement period start. All patients return '21--41'.</li>
+     * </ul>
+     * Current behavior: 5 strata (grouped by encounter status, since age range and patient age bracket
+     * are the same for all). Each stratum has 3 components.
+     *
+     * <p><b>Stratifier-2</b> ("Patient Age and Gender"): Scalar-only components
+     * <ul>
+     *   <li>"Patient Age Bracket" (scalar) - returns '21--41' for all patients</li>
+     *   <li>"Gender Stratification" (scalar) - returns Code with 'M' or 'F'</li>
+     * </ul>
+     * Expected: 2 strata grouped by unique (Age Bracket, Gender) combinations:
+     * <ul>
+     *   <li>'21--41' + 'M': patients 1,3,5,7,9 = 6 encounters</li>
+     *   <li>'21--41' + 'F': patients 0,2,4,6,8 = 5 encounters</li>
+     * </ul>
+     */
+    @Test
+    void cohortResourceValueStratSummary() {
+
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceAllPopulationsValueStrat")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(11) // Total encounters across all patients
+                .up()
+                // Stratifier-1: Mixed function + scalar (Age Range + Status + Patient Age Bracket)
+                // Components: Age Range Stratifier (function), Encounter Status Stratifier (function),
+                //             Patient Age Bracket (scalar)
+                // All encounters have same age range (P21Y--P41Y) and patient age bracket (21--41),
+                // so strata are differentiated only by encounter status (5 unique values)
+                .stratifierById("stratifier-1")
+                .hasCodeText("Encounter Age and Status")
+                .hasStratumCount(5)
+                // in-progress: patient-0, patient-1, patient-9 enc-2 = 3 encounters
+                .stratumByComponentValueText("in-progress")
+                .hasComponentStratifierCount(3)
+                .firstPopulation()
+                .hasCount(3)
+                .up()
+                .up()
+                // arrived: patient-2, patient-3 = 2 encounters
+                .stratumByComponentValueText("arrived")
+                .hasComponentStratifierCount(3)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .up()
+                // triaged: patient-4, patient-5 = 2 encounters
+                .stratumByComponentValueText("triaged")
+                .hasComponentStratifierCount(3)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .up()
+                // cancelled: patient-6, patient-7 = 2 encounters
+                .stratumByComponentValueText("cancelled")
+                .hasComponentStratifierCount(3)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .up()
+                // finished: patient-8, patient-9 enc-1 = 2 encounters
+                .stratumByComponentValueText("finished")
+                .hasComponentStratifierCount(3)
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .up()
+                .up()
+                // Stratifier-2: Scalar-only (Patient Age Bracket + Gender)
+                // Components: Patient Age Bracket (scalar), Gender Stratification (scalar)
+                // All patients have same age bracket (21--41), so strata differentiated by gender
+                .stratifierById("stratifier-2")
+                .hasCodeText("Patient Age and Gender")
+                .hasStratumCount(2)
+                // Male (M): patients 1,3,5,7,9 = 6 encounters (patient-9 has 2)
+                .stratumByComponentValueText("M")
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(6)
+                .up()
+                .up()
+                // Female (F): patients 0,2,4,6,8 = 5 encounters
+                .stratumByComponentValueText("F")
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(5);
     }
 
     @Test

@@ -358,10 +358,27 @@ public class FunctionEvaluationHandler {
             throw new InternalErrorException("StratifierDef component expression is missing.");
         }
         var stratifierExpression = componentDef.expression();
+
+        // Check if this is a function expression
+        // Per issue #909: Non-subject value stratifiers can now use BOTH:
+        // - CQL functions (for resource-level stratification)
+        // - Scalar expressions (for subject-level stratification)
+        // If it's a scalar expression, skip function processing here;
+        // MeasureEvaluator.handleNonBooleanBasisComponent() will use the fallback path
+        if (!isExpressionFunctionRef(context, libraryIdentifier, stratifierExpression)) {
+            logger.debug(
+                    "Non-subject value stratifier expression '{}' is a scalar expression, "
+                            + "skipping function processing for measure: {}",
+                    stratifierExpression,
+                    measureUrl);
+            return;
+        }
+
+        // This message is kept for safety - should not be reached since we validated above
         final String exceptionMessageIfNotFunction =
                 """
                 Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
-                For non-boolean population basis, stratifier component criteria expressions must be "
+                For non-boolean population basis, stratifier component criteria expressions must be
                 CQL functions that take a parameter matching the population basis type.
                 """
                         .formatted(measureUrl, stratifierExpression);

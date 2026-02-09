@@ -227,8 +227,12 @@ class MeasureStratifierTest {
      * - hasAnyComponentCriteria=true (has stratifier.component[].criteria)
      * - isBooleanBasis=false (basis is Encounter)
      * <p/>
-     * NON_SUBJECT_VALUE stratifiers MUST use CQL function definitions. The "Age" expression is a scalar,
-     * not a function, so this should produce a validation error.
+     * Per issue #909, NON_SUBJECT_VALUE stratifiers can now use BOTH CQL functions (for resource-level
+     * stratification) and scalar expressions (for subject-level stratification like Age, Gender).
+     * The "Age" expression is a scalar that returns the patient's age, which is applied to all
+     * encounters for that patient.
+     * <p/>
+     * Expected behavior: All patients with the same age will be grouped in the same stratum.
      */
     @Test
     void ratioResourceValueStratAge() {
@@ -238,10 +242,14 @@ class MeasureStratifierTest {
                 .measureId("RatioResourceStratValue")
                 .evaluate()
                 .then()
-                .hasContainedOperationOutcome()
-                .hasContainedOperationOutcomeMsg(
-                        "Non-subject value stratifier expression 'Age' must be a CQL function definition")
-                .hasStatus(MeasureReportStatus.ERROR);
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Age")
+                // Patients are stratified by age - the scalar expression applies to all encounters
+                // for each patient. The exact number of strata depends on how many unique ages exist.
+                // Test data has 2 unique ages (35 and 38 based on patient birth dates and measurement period)
+                .hasStratumCount(2);
     }
 
     /**
@@ -619,16 +627,16 @@ class MeasureStratifierTest {
                 .hasCodeText("Encounter Age and Status")
                 // 2 strata: one for each unique (AgeRange, Status) combination
                 .hasStratumCount(2)
-                // Stratum for "P21Y--P41Y + finished" - identified by unique "finished" status
+                // Stratum for "P21Y--P41Y + finished + 37" - identified by unique "finished" status
                 .stratumByComponentValueText("finished")
-                .hasComponentStratifierCount(2) // two components: age range + status
+                .hasComponentStratifierCount(3) // 3 components: age range + status + patient age
                 .firstPopulation()
                 .hasCount(1)
                 .up()
                 .up()
-                // Stratum for "P21Y--P41Y + in-progress" - identified by unique "in-progress" status
+                // Stratum for "P21Y--P41Y + in-progress + 37" - identified by unique "in-progress" status
                 .stratumByComponentValueText("in-progress")
-                .hasComponentStratifierCount(2) // two components: age range + status
+                .hasComponentStratifierCount(3) // two components: age range + status + patient age
                 .firstPopulation()
                 .hasCount(1);
     }

@@ -66,6 +66,16 @@
                 "language": "text/cql.identifier",
                 "expression": "Encounter Status Stratifier"
               }
+            },
+            {
+              "id": "stratifier-comp-3",
+              "code" : {
+                "text": "Patient Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Age"
+              }
             }
           ]
         }

@@ -401,6 +401,10 @@ public class MeasureMultiSubjectEvaluator {
      *
      * <p>For non-subject value stratifiers, the CQL function returns Map&lt;inputResource, outputValue&gt;.
      * We expand this into multiple rows, one per input resource, using a composite row key.
+     *
+     * <p><b>Mixed function/scalar components:</b> When stratifiers mix function components (Map results)
+     * and scalar components, the scalar values are expanded to match the function row keys.
+     * This ensures all components can be properly aligned and grouped together.
      */
     private static Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
             List<StratifierComponentDef> componentDefs) {
@@ -408,8 +412,12 @@ public class MeasureMultiSubjectEvaluator {
         final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 HashBasedTable.create();
 
+        // First pass: Collect all composite row keys (subject|resource) from function components
+        // These are needed to expand scalar components to match function row keys
+        final Map<String, Set<StratifierRowKey>> functionRowKeysBySubject = collectFunctionRowKeys(componentDefs);
+
         for (StratifierComponentDef componentDef : componentDefs) {
-            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef)) {
+            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef, functionRowKeysBySubject)) {
                 subjectResultTable.put(
                         stratumTableRow.stratifierRowKey(), stratumTableRow.stratumValueWrapper(), componentDef);
             }
@@ -418,17 +426,55 @@ public class MeasureMultiSubjectEvaluator {
         return subjectResultTable;
     }
 
-    private static List<StratumTableRow> mapToListOfTableEntries(StratifierComponentDef componentDef) {
+    /**
+     * Collects all composite row keys (subject|resource) from function components.
+     *
+     * <p>This is used to expand scalar components to match the function row keys when
+     * stratifiers mix function and scalar components.
+     *
+     * @return Map from subject (e.g., "Patient/123") to set of composite row keys
+     */
+    private static Map<String, Set<StratifierRowKey>> collectFunctionRowKeys(
+            List<StratifierComponentDef> componentDefs) {
+
+        final Map<String, Set<StratifierRowKey>> functionRowKeysBySubject = new HashMap<>();
+
+        for (StratifierComponentDef componentDef : componentDefs) {
+            for (var entry : componentDef.getResults().entrySet()) {
+                String subjectId = entry.getKey();
+                CriteriaResult result = entry.getValue();
+                Object rawValue = result == null ? null : result.rawValue();
+
+                // Only process function results (Map values)
+                if (rawValue instanceof Map<?, ?> functionResults) {
+                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+                    Set<StratifierRowKey> rowKeys =
+                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+
+                    for (Object key : functionResults.keySet()) {
+                        String normalizedKey = normalizeResourceKey(key);
+                        rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
+                    }
+                }
+            }
+        }
+
+        return functionRowKeysBySubject;
+    }
+
+    private static List<StratumTableRow> mapToListOfTableEntries(
+            StratifierComponentDef componentDef, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
 
         return componentDef.getResults().entrySet().stream()
-                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue()))
+                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue(), functionRowKeysBySubject))
                 .flatMap(Collection::stream)
                 .toList();
     }
 
     private record StratumTableRow(StratifierRowKey stratifierRowKey, StratumValueWrapper stratumValueWrapper) {}
 
-    private static List<StratumTableRow> mapToListOfTableEntries(String subjectId, CriteriaResult result) {
+    private static List<StratumTableRow> mapToListOfTableEntries(
+            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
 
         final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
         final Object rawValue = result == null ? null : result.rawValue();
@@ -440,7 +486,35 @@ public class MeasureMultiSubjectEvaluator {
             return addIterableValueRows(qualifiedSubject, iterableValue);
         }
 
+        // Scalar value: check if we need to expand to match function row keys
+        Set<StratifierRowKey> functionRowKeys = functionRowKeysBySubject.get(qualifiedSubject);
+        if (functionRowKeys != null && !functionRowKeys.isEmpty()) {
+            // Expand scalar to match function row keys for this subject
+            return expandScalarToMatchFunctionRowKeys(functionRowKeys, rawValue);
+        }
+
+        // No function row keys - use simple subject-only row key
         return List.of(addScalarValueRow(qualifiedSubject, rawValue));
+    }
+
+    /**
+     * Expands a scalar value to match the row keys from function components.
+     *
+     * <p>When stratifiers mix function and scalar components, the scalar value applies
+     * to all resources for that subject. This method creates one row per function row key,
+     * all with the same scalar value.
+     *
+     * @param functionRowKeys the row keys from function components for this subject
+     * @param scalarValue the scalar value to expand
+     * @return list of table rows, one per function row key
+     */
+    private static List<StratumTableRow> expandScalarToMatchFunctionRowKeys(
+            Set<StratifierRowKey> functionRowKeys, Object scalarValue) {
+
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(scalarValue);
+        return functionRowKeys.stream()
+                .map(rowKey -> new StratumTableRow(rowKey, valueWrapper))
+                .toList();
     }
 
     /**

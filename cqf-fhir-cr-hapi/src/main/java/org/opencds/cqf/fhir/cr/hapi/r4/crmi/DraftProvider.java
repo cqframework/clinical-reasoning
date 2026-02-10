@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -8,6 +10,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
 
 public class DraftProvider {
@@ -39,7 +42,7 @@ public class DraftProvider {
             canonicalUrl = "http://hl7.org/fhir/uv/crmi/OperationDefinition/crmi-draft")
     @Description(shortDefinition = "$draft", value = "Create a new draft version of the reference artifact.")
     public Bundle draftOperation(
-            @IdParam IdType id, @OperationParam(name = "version") String version, RequestDetails requestDetails) {
-        return r4DraftServiceFactory.create(requestDetails).draft(id, version);
+            @IdParam IdType id, @OperationParam(name = "version") StringType version, RequestDetails requestDetails) {
+        return r4DraftServiceFactory.create(requestDetails).draft(id, getStringValue(version));
     }
 }

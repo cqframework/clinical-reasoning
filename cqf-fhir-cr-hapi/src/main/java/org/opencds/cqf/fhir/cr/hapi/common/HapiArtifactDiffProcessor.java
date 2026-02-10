@@ -71,7 +71,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             Boolean compareComputable,
             Boolean compareExecutable,
             DiffCache cache,
-            Endpoint terminologyEndpoint) {
+            IBaseResource terminologyEndpoint) {
         if (!(sourceResource instanceof MetadataResource theSourceLibrary)) {
             throw new UnprocessableEntityException("Source resource must exist and be a Knowledge Artifact type.");
         }
@@ -109,7 +109,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                 repository.fhirContext(),
                 compareComputable,
                 compareExecutable,
-                terminologyEndpoint);
+                (Endpoint) terminologyEndpoint);
         return libraryDiff;
     }
 

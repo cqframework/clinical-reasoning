@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 class R4MeasureProcessorTest {
@@ -26,8 +25,7 @@ class R4MeasureProcessorTest {
     @Test
     void evaluateMultiMeasureIdsWithCqlEngine() {
         var repository = GIVEN_REPO.getRepository();
-        var r4MeasureProcessor = new R4MeasureProcessor(
-                repository, MeasureEvaluationOptions.defaultOptions(), new MeasureProcessorUtils());
+        var r4MeasureProcessor = new R4MeasureProcessor(repository, MeasureEvaluationOptions.defaultOptions());
 
         var cqlEngine = Engines.forRepository(repository);
 

@@ -2,51 +2,34 @@ package org.opencds.cqf.fhir.cr.hapi.dstu3;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
-import org.hl7.fhir.dstu3.model.BooleanType;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.RequestGroup;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.dstu3.plandefinition.PlanDefinitionApplyProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class PlanDefinitionOperationsProviderIT extends BaseCrDstu3TestServer {
-    @Autowired
-    PlanDefinitionApplyProvider planDefinitionApplyProvider;
-
     @Test
     void testApply() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-data.json");
-        var planDefinition = (PlanDefinition) read(new IdType("PlanDefinition", "hello-world-patient-view"));
+        var id = new IdType("PlanDefinition", "hello-world-patient-view");
+        var planDefinition = (PlanDefinition) read(id);
+        assertNotNull(planDefinition);
 
-        var requestDetails = setupRequestDetails();
         var patientId = "Patient/helloworld-patient-1";
-        var result = (CarePlan) planDefinitionApplyProvider.apply(
-                null,
-                planDefinition,
-                null,
-                null,
-                null,
-                patientId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                new BooleanType(true),
-                null,
-                null,
-                null,
-                null,
-                null,
-                requestDetails);
+        var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(id)
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(CarePlan.class)
+                .execute();
 
         assertNotNull(result);
         assertEquals(patientId, result.getSubject().getReference());

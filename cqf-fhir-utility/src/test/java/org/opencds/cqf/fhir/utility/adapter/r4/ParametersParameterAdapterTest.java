@@ -33,6 +33,7 @@ class ParametersParameterAdapterTest {
     void test() {
         var parameters = new ParametersParameterComponent();
         var adapter = adapterFactory.createParametersParameter(parameters);
+        assertNotNull(adapterFactory.createBase(parameters));
         assertNotNull(adapter);
         assertEquals(parameters, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirContext().getVersion().getVersion());

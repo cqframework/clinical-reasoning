@@ -391,21 +391,69 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Builds a table mapping subjects (or subject|resource pairs) to their stratifier values.
+     * Builds a Guava Table mapping row keys to stratifier component values for grouping into strata.
      *
-     * <p>Handles three cases:
+     * <p>The table structure is: {@code Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef>}
+     * where StratifierRowKey identifies the subject (and optionally resource), StratumValueWrapper holds the
+     * component value, and StratifierComponentDef identifies which component produced the value.
+     *
+     * <h3>Supported Expression Types</h3>
      * <ul>
-     *   <li><b>Map values (NON_SUBJECT_VALUE)</b>: CQL functions returning Map&lt;inputResource, outputValue&gt;</li>
-     *   <li><b>Iterable values (multi-value)</b>: CQL expressions returning List of values per subject</li>
-     *   <li><b>Scalar values (standard)</b>: Single value per subject</li>
+     *   <li><b>Function (Map)</b>: CQL functions returning {@code Map<resource, value>} for NON_SUBJECT_VALUE
+     *       stratifiers. Creates one row per resource with composite key (subject|resource).</li>
+     *   <li><b>Iterable (List)</b>: CQL expressions returning multiple values per subject for multi-value
+     *       stratifiers. Creates one row per value with subject-only key.</li>
+     *   <li><b>Scalar</b>: Single value per subject. Creates one row with subject-only key, OR expands
+     *       to match function row keys when mixed with function components.</li>
      * </ul>
      *
-     * <p>For non-subject value stratifiers, the CQL function returns Map&lt;inputResource, outputValue&gt;.
-     * We expand this into multiple rows, one per input resource, using a composite row key.
+     * <h3>Mixed Function and Scalar Components</h3>
+     * <p>When a stratifier has both function components (per-resource) and scalar components (per-subject),
+     * the scalar values are expanded to match the function row keys. This ensures all components align
+     * for proper grouping.
      *
-     * <p><b>Mixed function/scalar components:</b> When stratifiers mix function components (Map results)
-     * and scalar components, the scalar values are expanded to match the function row keys.
-     * This ensures all components can be properly aligned and grouped together.
+     * <h4>Example: Stratifier with 3 components</h4>
+     * <ul>
+     *   <li>Component 1: "Encounter Status" (function) - returns status per encounter</li>
+     *   <li>Component 2: "Encounter Age" (function) - returns age range per encounter</li>
+     *   <li>Component 3: "Patient Age" (scalar) - returns patient's age bracket</li>
+     * </ul>
+     *
+     * <h4>Input Data</h4>
+     * <pre>
+     * Patient-A has 2 encounters: Enc-1 (finished), Enc-2 (in-progress)
+     * Patient-A age bracket: "21--41"
+     * </pre>
+     *
+     * <h4>Resulting Table Structure</h4>
+     * <pre>
+     * | RowKey              | Component           | Value       |
+     * |---------------------|---------------------|-------------|
+     * | Patient-A|Enc-1     | Encounter Status    | finished    |
+     * | Patient-A|Enc-1     | Encounter Age       | P21Y--P41Y  |
+     * | Patient-A|Enc-1     | Patient Age         | 21--41      |  ← scalar expanded
+     * | Patient-A|Enc-2     | Encounter Status    | in-progress |
+     * | Patient-A|Enc-2     | Encounter Age       | P21Y--P41Y  |
+     * | Patient-A|Enc-2     | Patient Age         | 21--41      |  ← scalar expanded
+     * </pre>
+     *
+     * <p>The scalar "Patient Age" value is expanded to both row keys (Patient-A|Enc-1 and Patient-A|Enc-2)
+     * so that when strata are grouped by unique value combinations, all 3 components are present for each row.
+     *
+     * <h4>Resulting Strata (grouped by value combination)</h4>
+     * <pre>
+     * | Stratum | Components                                           | Count |
+     * |---------|------------------------------------------------------|-------|
+     * | 1       | finished + P21Y--P41Y + 21--41                       | 1     |
+     * | 2       | in-progress + P21Y--P41Y + 21--41                    | 1     |
+     * </pre>
+     *
+     * <h3>Scalar-Only Stratifiers</h3>
+     * <p>When all components are scalar (no function components), row keys remain subject-only.
+     * Population counts are determined by looking up all resources belonging to each subject.
+     *
+     * @param componentDefs the list of stratifier component definitions with their evaluation results
+     * @return a table mapping row keys to component values for grouping
      */
     private static Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
             List<StratifierComponentDef> componentDefs) {

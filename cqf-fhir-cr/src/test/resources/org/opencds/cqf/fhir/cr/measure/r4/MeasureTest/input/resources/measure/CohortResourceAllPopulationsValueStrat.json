@@ -48,7 +48,7 @@
           },
           "component": [
             {
-              "id": "stratifier-comp-1",
+              "id": "stratifier-1-comp-1",
               "code" : {
                 "text": "Encounter Age"
               },
@@ -58,13 +58,51 @@
               }
             },
             {
-              "id": "stratifier-comp-2",
+              "id": "stratifier-1-comp-2",
               "code" : {
                 "text": "Encounter Status"
               },
               "criteria": {
                 "language": "text/cql.identifier",
                 "expression": "Encounter Status Stratifier"
+              }
+            },
+            {
+              "id": "stratifier-1-comp-3",
+              "code" : {
+                "text": "Patient Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Patient Age Bracket"
+              }
+            }
+          ]
+        },
+        {
+          "id": "stratifier-2",
+          "code" : {
+            "text": "Patient Age and Gender"
+          },
+          "component": [
+            {
+              "id": "stratifier-2-comp-1",
+              "code" : {
+                "text": "Patient Age"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Patient Age Bracket"
+              }
+            },
+            {
+              "id": "stratifier-2-comp-2",
+              "code" : {
+                "text": "Patient Gender"
+              },
+              "criteria": {
+                "language": "text/cql.identifier",
+                "expression": "Gender Stratification"
               }
             }
           ]

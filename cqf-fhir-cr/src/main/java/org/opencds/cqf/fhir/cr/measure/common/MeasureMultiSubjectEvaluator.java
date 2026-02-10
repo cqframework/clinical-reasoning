@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -488,7 +489,7 @@ public class MeasureMultiSubjectEvaluator {
 
         // Scalar value: check if we need to expand to match function row keys
         Set<StratifierRowKey> functionRowKeys = functionRowKeysBySubject.get(qualifiedSubject);
-        if (functionRowKeys != null && !functionRowKeys.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(functionRowKeys)) {
             // Expand scalar to match function row keys for this subject
             return expandScalarToMatchFunctionRowKeys(functionRowKeys, rawValue);
         }

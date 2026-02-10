@@ -102,7 +102,8 @@ public class MeasureEvaluationResultHandler {
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
+            Map<String, Object> parametersMap) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -128,7 +129,7 @@ public class MeasureEvaluationResultHandler {
                                 libraryIdentifiers,
                                 subjectId,
                                 null,
-                                null,
+                                parametersMap,
                                 null,
                                 null,
                                 null,

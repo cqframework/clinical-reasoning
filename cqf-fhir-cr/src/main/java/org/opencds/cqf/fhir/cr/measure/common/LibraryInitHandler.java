@@ -77,10 +77,10 @@ public class LibraryInitHandler {
                             .formatted(ids, allErrors));
 
         } catch (CqlIncludeException exception) {
+            var libraryIds = ids.stream().map(VersionedIdentifier::getId).toList();
             throw new IllegalStateException(
-                    "Unable to load CQL/ELM for libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
-                            .formatted(
-                                    ids.stream().map(VersionedIdentifier::getId).toList()),
+                    "Unable to load CQL/ELM for library/libraries: %s. Verify that the Library resource is available in your environment and has CQL/ELM content embedded."
+                            .formatted(libraryIds),
                     exception);
         }
     }

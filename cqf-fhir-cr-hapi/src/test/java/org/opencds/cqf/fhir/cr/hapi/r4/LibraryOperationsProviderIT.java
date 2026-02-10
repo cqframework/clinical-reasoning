@@ -3,6 +3,9 @@ package org.opencds.cqf.fhir.cr.hapi.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
+import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newCodePart;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
@@ -12,7 +15,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.Collections;
 import java.util.List;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -28,13 +30,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryReleaseProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class LibraryOperationsProviderIT extends BaseCrR4TestServer {
-    @Autowired
-    LibraryReleaseProvider libraryReleaseProvider;
-
     @Test
     void testEvaluateLibrary() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
@@ -98,9 +95,18 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
     @Test
     void testRelease() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
-        var requestDetails = setupRequestDetails();
-        var result = libraryReleaseProvider.releaseLibrary(
-                "Library/ASLPDataElements", "1.0.0", new CodeType("default"), null, null, null, null, requestDetails);
+        var libraryId = new IdType("Library", "ASLPDataElements");
+        var parameters = newParameters(
+                getFhirContext(),
+                newStringPart(getFhirContext(), "version", "1.0.0"),
+                newCodePart(getFhirContext(), "versionBehavior", "default"));
+        var result = ourClient
+                .operation()
+                .onInstance(libraryId)
+                .named(CRMI_OPERATION_RELEASE)
+                .withParameters(parameters)
+                .returnResourceType(Bundle.class)
+                .execute();
         assertInstanceOf(Bundle.class, result);
     }
 
@@ -109,7 +115,6 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
     void testManifestRelease() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/uscore-package-bundle.json");
         loadResourceFromPath("org/opencds/cqf/fhir/cr/hapi/r4/Library-Manifest-Partial-Set-FinalDraft-2025.json");
-        var requestDetails = setupRequestDetails();
 
         var terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension("vsacUsername", new StringType("apikey"));
@@ -121,27 +126,32 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         terminologyEndpoint.setPayloadType(Collections.singletonList(
                 new CodeableConcept(new Coding("http://hl7.org/fhir/ValueSet/endpoint-payload-type", "any", null))));
 
-        var result = libraryReleaseProvider.releaseLibrary(
-                "Library/Manifest-Partial-Set-FinalDraft-2025",
-                "1.0.0",
-                new CodeType("force"),
-                new BooleanType(true),
-                null,
-                terminologyEndpoint,
-                null,
-                requestDetails);
+        var libraryId = new IdType("Library", "Manifest-Partial-Set-FinalDraft-2025");
+        var parameters = newParameters(
+                getFhirContext(),
+                newStringPart(getFhirContext(), "version", "1.0.0"),
+                newCodePart(getFhirContext(), "versionBehavior", "force"),
+                newBooleanPart(getFhirContext(), "latestFromTxServer", true),
+                newPart(getFhirContext(), "terminologyEndpoint", terminologyEndpoint));
+        var result = ourClient
+                .operation()
+                .onInstance(libraryId)
+                .named(CRMI_OPERATION_RELEASE)
+                .withParameters(parameters)
+                .returnResourceType(Bundle.class)
+                .execute();
         assertInstanceOf(Bundle.class, result);
 
         var releaseId = new IdType("Library/Manifest-Partial-Set-FinalDraft-2025");
         var resultRelease = read(releaseId);
         assertNotNull(resultRelease);
-        var parameters =
+        var packageParameters =
                 newParameters(getFhirContext(), newPart(getFhirContext(), "terminologyEndpoint", terminologyEndpoint));
         result = ourClient
                 .operation()
                 .onInstance(releaseId)
                 .named(ProviderConstants.CR_OPERATION_PACKAGE)
-                .withParameters(parameters)
+                .withParameters(packageParameters)
                 .returnResourceType(Bundle.class)
                 .execute();
         assertInstanceOf(Bundle.class, result);

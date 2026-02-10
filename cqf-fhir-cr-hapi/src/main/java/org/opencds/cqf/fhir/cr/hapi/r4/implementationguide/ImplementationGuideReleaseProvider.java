@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.implementationguide;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -16,6 +17,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -43,7 +45,7 @@ public class ImplementationGuideReleaseProvider {
     @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
     public IBaseBundle releaseImplementationGuide(
             @IdParam IdType id,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "version") StringType version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
             @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
             @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
@@ -52,7 +54,7 @@ public class ImplementationGuideReleaseProvider {
             RequestDetails requestDetails)
             throws FHIRException {
         var params = getReleaseParameters(
-                version,
+                getStringValue(version),
                 versionBehavior,
                 latestFromTxServer,
                 requireNonExperimental,

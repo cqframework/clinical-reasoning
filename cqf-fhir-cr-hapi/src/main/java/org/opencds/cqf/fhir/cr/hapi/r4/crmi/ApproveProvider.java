@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_APPROVE;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -12,6 +15,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.r4.IApproveServiceFactory;
 
 public class ApproveProvider {
@@ -54,19 +58,19 @@ public class ApproveProvider {
      *          ArtifactAssessment (Basic in R4) resource containing the Approval metadata
      */
     @Operation(
-            name = "$approve",
+            name = CRMI_OPERATION_APPROVE,
             idempotent = true,
             global = true,
             type = MetadataResource.class,
             canonicalUrl = "http://hl7.org/fhir/uv/crmi/OperationDefinition/crmi-approve")
     @Description(
-            shortDefinition = "$approve",
+            shortDefinition = CRMI_OPERATION_APPROVE,
             value = "Apply an approval to an existing artifact, regardless of status.")
     public Bundle approveOperation(
             @IdParam IdType id,
             @OperationParam(name = "approvalDate", typeName = "Date") IPrimitiveType<Date> approvalDate,
-            @OperationParam(name = "artifactAssessmentType") String artifactAssessmentType,
-            @OperationParam(name = "artifactAssessmentSummary") String artifactAssessmentSummary,
+            @OperationParam(name = "artifactAssessmentType") StringType artifactAssessmentType,
+            @OperationParam(name = "artifactAssessmentSummary") StringType artifactAssessmentSummary,
             @OperationParam(name = "artifactAssessmentTarget") CanonicalType artifactAssessmentTarget,
             @OperationParam(name = "artifactAssessmentRelatedArtifact") CanonicalType artifactAssessmentRelatedArtifact,
             @OperationParam(name = "artifactAssessmentAuthor") Reference artifactAssessmentAuthor,
@@ -76,8 +80,8 @@ public class ApproveProvider {
                 .approve(
                         id,
                         approvalDate,
-                        artifactAssessmentType,
-                        artifactAssessmentSummary,
+                        getStringValue(artifactAssessmentType),
+                        getStringValue(artifactAssessmentSummary),
                         artifactAssessmentTarget,
                         artifactAssessmentRelatedArtifact,
                         artifactAssessmentAuthor);

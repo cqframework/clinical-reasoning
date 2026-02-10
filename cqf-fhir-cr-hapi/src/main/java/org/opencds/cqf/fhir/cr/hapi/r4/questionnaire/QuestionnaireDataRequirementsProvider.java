@@ -12,46 +12,43 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class QuestionnaireDataRequirementsProvider {
     private final IQuestionnaireProcessorFactory questionnaireFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public QuestionnaireDataRequirementsProvider(IQuestionnaireProcessorFactory questionnaireFactory) {
         this.questionnaireFactory = questionnaireFactory;
+        fhirVersion = FhirVersionEnum.R4;
+    }
+
+    @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)
+    public IBaseResource getDataRequirements(@IdParam IdType id, RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
+        return questionnaireFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)
     public IBaseResource getDataRequirements(
-            @IdParam IdType id,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "id") StringType id,
+            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
+            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
         return questionnaireFactory
                 .create(requestDetails)
-                .dataRequirements(Eithers.for3(canonicalType, id, null), null);
-    }
-
-    @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)
-    public IBaseResource getDataRequirements(
-            @OperationParam(name = "id") String id,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            RequestDetails requestDetails)
-            throws InternalErrorException, FHIRException {
-        IIdType idToUse = getIdType(FhirVersionEnum.R4, "Questionnaire", id);
-        CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
-        return questionnaireFactory
-                .create(requestDetails)
-                .dataRequirements(Eithers.for3(canonicalType, idToUse, null), null);
+                .dataRequirements(
+                        Eithers.for3(
+                                getCanonicalType(fhirVersion, canonical, url, version),
+                                getIdType(fhirVersion, "Questionnaire", id),
+                                null),
+                        null);
     }
 }

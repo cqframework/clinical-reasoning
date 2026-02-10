@@ -3,8 +3,13 @@ package org.opencds.cqf.fhir.cr.hapi.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newUrlPart;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -18,26 +23,15 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryEvaluateProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryPackageProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryReleaseProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 class LibraryOperationsProviderIT extends BaseCrR4TestServer {
-    @Autowired
-    LibraryEvaluateProvider libraryEvaluateProvider;
-
-    @Autowired
-    LibraryDataRequirementsProvider libraryDataRequirementsProvider;
-
-    @Autowired
-    LibraryPackageProvider libraryPackageProvider;
-
     @Autowired
     LibraryReleaseProvider libraryReleaseProvider;
 
@@ -47,14 +41,26 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-PatientData.json");
 
-        var requestDetails = setupRequestDetails();
         var url = "http://example.org/sdh/dtr/aslp/Library/ASLPDataElements";
         var patientId = "positive";
-        var parameters = new Parameters()
-                .addParameter("Service Request Id", "SleepStudy")
-                .addParameter("Service Request Id", "SleepStudy2");
-        var result = libraryEvaluateProvider.evaluate(
-                url, patientId, null, parameters, new BooleanType(true), null, null, null, null, null, requestDetails);
+        var parameters = newParameters(
+                getFhirContext(),
+                newUrlPart(getFhirContext(), "url", url),
+                newPart(getFhirContext(), Reference.class, "subject", patientId),
+                newPart(
+                        getFhirContext(),
+                        "parameters",
+                        newParameters(
+                                getFhirContext(),
+                                newStringPart(getFhirContext(), "Service Request Id", "SleepStudy"),
+                                newStringPart(getFhirContext(), "Service Request Id", "SleepStudy2"))));
+        var result = ourClient
+                .operation()
+                .onType("Library")
+                .named(ProviderConstants.CR_OPERATION_EVALUATE)
+                .withParameters(parameters)
+                .returnResourceType(Parameters.class)
+                .execute();
 
         assertNotNull(result);
         assertEquals(16, result.getParameter().size());
@@ -64,22 +70,28 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
     void testDataRequirements() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
-        var requestDetails = setupRequestDetails();
-        var result = libraryDataRequirementsProvider.getDataRequirements(
-                "Library/ASLPDataElements", null, null, null, requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("Library", "ASLPDataElements"))
+                .named(ProviderConstants.CR_OPERATION_DATAREQUIREMENTS)
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Library.class)
+                .execute();
         assertInstanceOf(Library.class, result);
-        assertEquals(
-                "module-definition",
-                ((Library) result).getType().getCodingFirstRep().getCode());
+        assertEquals("module-definition", result.getType().getCodingFirstRep().getCode());
     }
 
     @Test
     void testPackage() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
-        var requestDetails = setupRequestDetails();
-        var result = libraryPackageProvider.packageLibrary(
-                "Library/ASLPDataElements", null, null, null, null, null, null, null, null, null, requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("Library", "ASLPDataElements"))
+                .named(ProviderConstants.CR_OPERATION_PACKAGE)
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
         assertInstanceOf(Bundle.class, result);
     }
 
@@ -120,23 +132,18 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
                 requestDetails);
         assertInstanceOf(Bundle.class, result);
 
-        var resultRelease = read(new IdType("Library/Manifest-Partial-Set-FinalDraft-2025"));
-
-        var terminologyEndpointParam = new Parameters.ParametersParameterComponent();
-        terminologyEndpointParam.setName("terminologyEndpoint");
-        terminologyEndpointParam.setResource(terminologyEndpoint);
-        result = libraryPackageProvider.packageLibrary(
-                "Library/Manifest-Partial-Set-FinalDraft-2025",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                terminologyEndpointParam,
-                null,
-                requestDetails);
+        var releaseId = new IdType("Library/Manifest-Partial-Set-FinalDraft-2025");
+        var resultRelease = read(releaseId);
+        assertNotNull(resultRelease);
+        var parameters =
+                newParameters(getFhirContext(), newPart(getFhirContext(), "terminologyEndpoint", terminologyEndpoint));
+        result = ourClient
+                .operation()
+                .onInstance(releaseId)
+                .named(ProviderConstants.CR_OPERATION_PACKAGE)
+                .withParameters(parameters)
+                .returnResourceType(Bundle.class)
+                .execute();
         assertInstanceOf(Bundle.class, result);
     }
 

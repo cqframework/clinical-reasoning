@@ -7,8 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.UrlType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,13 +26,12 @@ class CanonicalHelperTest {
         @DisplayName("Should use 'canonical' parameter when it is provided")
         void getCanonicalType_usesCanonicalWhenProvided() {
             // Arrange
-            String canonical = "http://example.com/canonical/provided";
-            String url = "http://example.com/url";
-            String version = "1.0";
+            var canonical = "http://example.com/canonical/provided";
+            var url = "http://example.com/url";
+            var version = "1.0";
 
             // Act
-            IPrimitiveType<String> result =
-                    CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, canonical, url, version);
 
             // Assert
             assertNotNull(result);
@@ -42,12 +42,12 @@ class CanonicalHelperTest {
         @DisplayName("Should combine 'url' and 'version' when 'canonical' is null")
         void getCanonicalType_usesUrlAndVersionWhenCanonicalIsNull() {
             // Arrange
-            String url = "http://example.com/structuredefinition/patient";
-            String version = "2.1.0";
-            String expected = "http://example.com/structuredefinition/patient|2.1.0";
+            var url = "http://example.com/structuredefinition/patient";
+            var version = "2.1.0";
+            var expected = "http://example.com/structuredefinition/patient|2.1.0";
 
             // Act
-            IPrimitiveType<String> result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, null, url, version);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, null, url, version);
 
             // Assert
             assertNotNull(result);
@@ -58,10 +58,10 @@ class CanonicalHelperTest {
         @DisplayName("Should use only 'url' when 'canonical' and 'version' are null")
         void getCanonicalType_usesUrlOnlyWhenCanonicalAndVersionAreNull() {
             // Arrange
-            String url = "http://example.com/structuredefinition/observation";
+            var url = "http://example.com/structuredefinition/observation";
 
             // Act
-            IPrimitiveType<String> result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, null, url, null);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, null, url, null);
 
             // Assert
             assertNotNull(result);
@@ -72,10 +72,28 @@ class CanonicalHelperTest {
         @DisplayName("Should return null if all inputs resolve to null")
         void getCanonicalType_returnsNullWhenAllInputsAreNull() {
             // Act
-            IPrimitiveType<String> result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, null, null, null);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, (String) null, null, null);
 
             // Assert
             assertNull(result);
+        }
+
+        @Test
+        @DisplayName("Should accept Parameter components as arguments")
+        void getCanonicalType_acceptsParameterComponents() {
+            // Arrange
+            var canonical = "http://example.com/canonical/provided";
+            var url = "http://example.com/url";
+            var version = "1.0";
+            var canonicalParam =
+                    new ParametersParameterComponent().setName("canonical").setValue(new CanonicalType(canonical));
+            var urlParam = new ParametersParameterComponent().setName("url").setValue(new UrlType(url));
+            var versionParam = new StringType(version);
+            // Act
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, canonicalParam, urlParam, versionParam);
+            // Assert
+            assertNotNull(result);
+            assertEquals(canonical, result.getValue());
         }
     }
 
@@ -87,8 +105,7 @@ class CanonicalHelperTest {
         @DisplayName("Should return a DSTU3 StringType for DSTU3 version")
         void newCanonicalType_returnsDstu3StringType() {
             // Act
-            IPrimitiveType<String> result =
-                    CanonicalHelper.getCanonicalType(FhirVersionEnum.DSTU3, "test", "test", null);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.DSTU3, "test", "test", null);
 
             // Assert
             assertNotNull(result);
@@ -100,7 +117,7 @@ class CanonicalHelperTest {
         @DisplayName("Should return an R4 CanonicalType for R4 version")
         void newCanonicalType_returnsR4CanonicalType() {
             // Act
-            IPrimitiveType<String> result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, "test", "test", null);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, "test", "test", null);
 
             // Assert
             assertNotNull(result);
@@ -112,7 +129,7 @@ class CanonicalHelperTest {
         @DisplayName("Should return an R5 CanonicalType for R5 version")
         void newCanonicalType_returnsR5CanonicalType() {
             // Act
-            IPrimitiveType<String> result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R5, "test", "test", null);
+            var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R5, "test", "test", null);
 
             // Assert
             assertNotNull(result);
@@ -127,8 +144,7 @@ class CanonicalHelperTest {
         @DisplayName("Should return null for unsupported FHIR versions")
         void newCanonicalType_returnsNullForUnsupportedVersions(FhirVersionEnum version) {
             // Act
-            IPrimitiveType<String> result =
-                    CanonicalHelper.getCanonicalType(version, "some-canonical", "some-url", "1.0");
+            var result = CanonicalHelper.getCanonicalType(version, "some-canonical", "some-url", "1.0");
 
             // Assert
             assertNull(result);

@@ -55,7 +55,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasurePeriodValidator measurePeriodValidator;
-    private final MeasureProcessorTimeUtils measureProcessorTimeUtils = new MeasureProcessorTimeUtils();
     private final String serverBase;
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureProcessor r4MeasureProcessorStandardRepository;

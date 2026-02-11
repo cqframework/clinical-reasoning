@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
  */
 public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper {
 
+    private PackageHelper() {}
+
     protected static final Logger logger = LoggerFactory.getLogger(PackageHelper.class);
 
     protected static final List<String> PACKABLE_RESOURCES = Arrays.asList(

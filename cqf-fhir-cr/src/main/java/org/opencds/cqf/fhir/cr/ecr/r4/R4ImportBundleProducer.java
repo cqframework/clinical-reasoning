@@ -24,6 +24,8 @@ public class R4ImportBundleProducer {
     private static final Logger myLogger = LoggerFactory.getLogger(R4ImportBundleProducer.class);
     private static final IAdapterFactory adapterFactory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
 
+    private R4ImportBundleProducer() {}
+
     /**
      * Determines whether a given ValueSet is a grouper
      * @param resource

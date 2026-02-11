@@ -392,11 +392,14 @@ public class FunctionEvaluationHandler {
         for (PopulationDef popDef : nonObservationPopulations) {
 
             // retrieve group.population results to input into valueStrat function
+            final String populationExpressionName = popDef.expression();
+
             Optional<ExpressionResult> optExpressionResult =
-                    tryGetExpressionResult(popDef.expression(), evaluationResult);
+                    tryGetExpressionResult(populationExpressionName, evaluationResult);
 
             if (optExpressionResult.isEmpty()) {
-                throw new InternalErrorException("Expression result is missing for measure %s".formatted(measureUrl));
+                throw new InternalErrorException("Expression result: %s is missing for measure %s"
+                        .formatted(populationExpressionName, measureUrl));
             }
             final ExpressionResult expressionResult = optExpressionResult.get();
             final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);

@@ -1580,6 +1580,340 @@ class MeasureReportDefScorerTest {
     }
 
     // ============================================================================
+    // Per-Stratum Aggregation Result Tests (StratumPopulationDef.aggregationResult)
+    // ============================================================================
+
+    @Test
+    void testScoreStratifier_RatioWithObservations_PerStratumAggregationResults() {
+        // Setup: Ratio measure with stratifier by gender
+        // Verify that per-stratum aggregation results are persisted on StratumPopulationDef
+        // Male: num_agg=40 (SUM of 10+15+15), den_agg=20 (SUM of 5+7+8), score=2.0
+        // Female: num_agg=30 (SUM of 10+20), den_agg=10 (SUM of 4+6), score=3.0
+
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+        PopulationDef numeratorPop = createPopulationDef(
+                "num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+        PopulationDef denominatorPop = createPopulationDef(
+                "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+
+        // Numerator MEASUREOBSERVATION with SUM
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                booleanBasis,
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        Map<String, QuantityDef> numObs1 = new HashMap<>();
+        numObs1.put("p1", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p1", numObs1);
+        Map<String, QuantityDef> numObs2 = new HashMap<>();
+        numObs2.put("p2", new QuantityDef(15.0));
+        numeratorMeasureObs.addResource("p2", numObs2);
+        Map<String, QuantityDef> numObs3 = new HashMap<>();
+        numObs3.put("p3", new QuantityDef(15.0));
+        numeratorMeasureObs.addResource("p3", numObs3);
+        Map<String, QuantityDef> numObs4 = new HashMap<>();
+        numObs4.put("p4", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p4", numObs4);
+        Map<String, QuantityDef> numObs5 = new HashMap<>();
+        numObs5.put("p5", new QuantityDef(20.0));
+        numeratorMeasureObs.addResource("p5", numObs5);
+
+        // Denominator MEASUREOBSERVATION with SUM
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                booleanBasis,
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        Map<String, QuantityDef> denObs1 = new HashMap<>();
+        denObs1.put("p1", new QuantityDef(5.0));
+        denominatorMeasureObs.addResource("p1", denObs1);
+        Map<String, QuantityDef> denObs2 = new HashMap<>();
+        denObs2.put("p2", new QuantityDef(7.0));
+        denominatorMeasureObs.addResource("p2", denObs2);
+        Map<String, QuantityDef> denObs3 = new HashMap<>();
+        denObs3.put("p3", new QuantityDef(8.0));
+        denominatorMeasureObs.addResource("p3", denObs3);
+        Map<String, QuantityDef> denObs4 = new HashMap<>();
+        denObs4.put("p4", new QuantityDef(4.0));
+        denominatorMeasureObs.addResource("p4", denObs4);
+        Map<String, QuantityDef> denObs5 = new HashMap<>();
+        denObs5.put("p5", new QuantityDef(6.0));
+        denominatorMeasureObs.addResource("p5", denObs5);
+
+        // Male stratum populations
+        StratumPopulationDef maleNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p1", "p2", "p3"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef maleDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p1", "p2", "p3"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratifierComponentDef genderComponent =
+                new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+        MeasureObservationStratumCache maleCache = new MeasureObservationStratumCache(maleNumObs, maleDenObs);
+
+        StratumDef maleStratum = new StratumDef(
+                List.of(maleNumObs, maleDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of("p1", "p2", "p3"),
+                maleCache);
+
+        // Female stratum populations
+        StratumPopulationDef femaleNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p4", "p5"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef femaleDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p4", "p5"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        MeasureObservationStratumCache femaleCache = new MeasureObservationStratumCache(femaleNumObs, femaleDenObs);
+
+        StratumDef femaleStratum = new StratumDef(
+                List.of(femaleNumObs, femaleDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
+                Set.of("p4", "p5"),
+                femaleCache);
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(maleStratum, femaleStratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("RCV Per-Stratum Aggregation Test"),
+                List.of(stratifierDef),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        // Pre-scoring: no aggregation results
+        assertNull(maleNumObs.getAggregationResult());
+        assertNull(maleDenObs.getAggregationResult());
+        assertNull(femaleNumObs.getAggregationResult());
+        assertNull(femaleDenObs.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-stratum-agg", groupDef);
+
+        // VERIFY: Stratum scores are correct
+        assertEquals(2.0, maleStratum.getScore(), 0.001);
+        assertEquals(3.0, femaleStratum.getScore(), 0.001);
+
+        // VERIFY: Per-stratum aggregation results are persisted on StratumPopulationDef
+        // Male: num_agg=40 (10+15+15), den_agg=20 (5+7+8)
+        assertNotNull(maleNumObs.getAggregationResult(), "Male numerator stratum should have aggregation result");
+        assertEquals(40.0, maleNumObs.getAggregationResult(), 0.001);
+        assertNotNull(maleDenObs.getAggregationResult(), "Male denominator stratum should have aggregation result");
+        assertEquals(20.0, maleDenObs.getAggregationResult(), 0.001);
+
+        // Female: num_agg=30 (10+20), den_agg=10 (4+6)
+        assertNotNull(femaleNumObs.getAggregationResult(), "Female numerator stratum should have aggregation result");
+        assertEquals(30.0, femaleNumObs.getAggregationResult(), 0.001);
+        assertNotNull(femaleDenObs.getAggregationResult(), "Female denominator stratum should have aggregation result");
+        assertEquals(10.0, femaleDenObs.getAggregationResult(), 0.001);
+    }
+
+    @Test
+    void testScoreStratifier_ContinuousVariable_PerStratumAggregationResults() {
+        // Setup: CV measure with stratifier by gender
+        // Male: observations 10, 20, 30 → SUM = 60
+        // Female: observations 5, 15 → SUM = 20
+
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation = createPopulationDef(
+                "ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+        PopulationDef measurePopulation = createPopulationDef(
+                "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
+
+        ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef measureObsPop = new PopulationDef(
+                "msrobs-1",
+                measureObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "expression",
+                booleanBasis,
+                null,
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Male observations: 10, 20, 30
+        Map<String, QuantityDef> obs1 = new HashMap<>();
+        obs1.put("obs-1", new QuantityDef(10.0));
+        measureObsPop.addResource("p1", obs1);
+        Map<String, QuantityDef> obs2 = new HashMap<>();
+        obs2.put("obs-2", new QuantityDef(20.0));
+        measureObsPop.addResource("p2", obs2);
+        Map<String, QuantityDef> obs3 = new HashMap<>();
+        obs3.put("obs-3", new QuantityDef(30.0));
+        measureObsPop.addResource("p3", obs3);
+
+        // Female observations: 5, 15
+        Map<String, QuantityDef> obs4 = new HashMap<>();
+        obs4.put("obs-4", new QuantityDef(5.0));
+        measureObsPop.addResource("p4", obs4);
+        Map<String, QuantityDef> obs5 = new HashMap<>();
+        obs5.put("obs-5", new QuantityDef(15.0));
+        measureObsPop.addResource("p5", obs5);
+
+        // Male stratum
+        StratumPopulationDef maleIpPop = new StratumPopulationDef(
+                initialPopulation,
+                Set.of("p1", "p2", "p3"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef maleMpPop = new StratumPopulationDef(
+                measurePopulation,
+                Set.of("p1", "p2", "p3"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef maleMsrObsPop = new StratumPopulationDef(
+                measureObsPop,
+                Set.of("p1", "p2", "p3"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratifierComponentDef genderComponent =
+                new StratifierComponentDef("gender-component", createTextOnlyConcept("Gender"), "Gender");
+        StratumDef maleStratum = new StratumDef(
+                List.of(maleIpPop, maleMpPop, maleMsrObsPop),
+                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of("p1", "p2", "p3"),
+                null);
+
+        // Female stratum
+        StratumPopulationDef femaleIpPop = new StratumPopulationDef(
+                initialPopulation, Set.of("p4", "p5"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+        StratumPopulationDef femaleMpPop = new StratumPopulationDef(
+                measurePopulation, Set.of("p4", "p5"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+        StratumPopulationDef femaleMsrObsPop = new StratumPopulationDef(
+                measureObsPop, Set.of("p4", "p5"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+
+        StratumDef femaleStratum = new StratumDef(
+                List.of(femaleIpPop, femaleMpPop, femaleMsrObsPop),
+                Set.of(new StratumValueDef(new StratumValueWrapper("female"), genderComponent)),
+                Set.of("p4", "p5"),
+                null);
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "gender-stratifier", createTextOnlyConcept("Gender Stratifier"), "Gender", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(maleStratum, femaleStratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("CV Per-Stratum Aggregation Test"),
+                List.of(stratifierDef),
+                List.of(initialPopulation, measurePopulation, measureObsPop),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        // Pre-scoring: no aggregation results
+        assertNull(maleMsrObsPop.getAggregationResult());
+        assertNull(femaleMsrObsPop.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/cv-stratum-agg", groupDef);
+
+        // VERIFY: Stratum scores
+        assertEquals(60.0, maleStratum.getScore(), 0.001);
+        assertEquals(20.0, femaleStratum.getScore(), 0.001);
+
+        // VERIFY: Per-stratum aggregation results on MEASUREOBSERVATION StratumPopulationDef
+        assertNotNull(maleMsrObsPop.getAggregationResult(), "Male CV stratum should have aggregation result");
+        assertEquals(60.0, maleMsrObsPop.getAggregationResult(), 0.001);
+        assertNotNull(femaleMsrObsPop.getAggregationResult(), "Female CV stratum should have aggregation result");
+        assertEquals(20.0, femaleMsrObsPop.getAggregationResult(), 0.001);
+
+        // VERIFY: Non-observation stratum populations should NOT have aggregation results
+        assertNull(maleIpPop.getAggregationResult());
+        assertNull(maleMpPop.getAggregationResult());
+        assertNull(femaleIpPop.getAggregationResult());
+        assertNull(femaleMpPop.getAggregationResult());
+    }
+
+    @Test
+    void testScoreStratifier_Proportion_NoPerStratumAggregationResults() {
+        // Verify that proportion stratifiers do NOT produce aggregation results on StratumPopulationDef
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
+
+        StratumPopulationDef stratumNumPop = new StratumPopulationDef(
+                numeratorPop, Set.of("p1"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+        StratumPopulationDef stratumDenPop = new StratumPopulationDef(
+                denominatorPop, Set.of("p1", "p2"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+
+        StratifierComponentDef component = new StratifierComponentDef("comp-1", createTextOnlyConcept("Test"), "Test");
+        StratumDef stratum = new StratumDef(
+                List.of(stratumNumPop, stratumDenPop),
+                Set.of(new StratumValueDef(new StratumValueWrapper("value1"), component)),
+                Set.of("p1", "p2"),
+                null);
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "strat-1", createTextOnlyConcept("Test Stratifier"), "Test", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(stratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Proportion - No Aggregation"),
+                List.of(stratifierDef),
+                List.of(numeratorPop, denominatorPop),
+                MeasureScoring.PROPORTION,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        scorer.scoreGroup("http://example.com/Measure/proportion-no-agg", groupDef);
+
+        // VERIFY: Proportion stratum populations should NOT have aggregation results
+        assertNull(stratumNumPop.getAggregationResult());
+        assertNull(stratumDenPop.getAggregationResult());
+
+        // Score should still be set
+        assertEquals(0.5, stratum.getScore(), 0.001);
+    }
+
+    // ============================================================================
     // Helper Methods for Test Data Construction
     // ============================================================================
 

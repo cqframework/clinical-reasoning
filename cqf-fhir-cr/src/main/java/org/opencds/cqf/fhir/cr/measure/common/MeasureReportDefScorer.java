@@ -365,6 +365,11 @@ public class MeasureReportDefScorer {
         QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
                 measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
 
+        // Persist per-stratum aggregation result for downstream aggregation
+        if (quantityDef != null && quantityDef.value() != null) {
+            stratumPopulationDef.setAggregationResult(quantityDef.value());
+        }
+
         return quantityDef != null ? quantityDef.value() : null;
     }
 
@@ -400,6 +405,10 @@ public class MeasureReportDefScorer {
 
         Double num = aggregateNumQuantityDef.value();
         Double den = aggregateDenQuantityDef.value();
+
+        // Persist per-stratum aggregation results for downstream aggregation
+        measureObsNumStratum.setAggregationResult(num);
+        measureObsDenStratum.setAggregationResult(den);
 
         if (num == null || den == null) {
             return null;

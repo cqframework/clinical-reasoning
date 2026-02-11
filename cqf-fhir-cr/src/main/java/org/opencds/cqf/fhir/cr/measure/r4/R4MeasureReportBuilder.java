@@ -649,7 +649,48 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (stratumScore != null) {
                     reportStratum.getMeasureScore().setValue(stratumScore);
                 }
+
+                // Copy per-stratum population aggregation results
+                copyStratumPopulationAggregationResults(reportStratum, stratumDef);
             }
+        }
+    }
+
+    /**
+     * Copy per-stratum aggregation results to stratum population extensions.
+     * This persists the intermediate observation aggregates (numerator/denominator)
+     * that are needed for downstream distributed aggregation.
+     */
+    private void copyStratumPopulationAggregationResults(
+            MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+
+        for (var stratumPopulationDef : stratumDef.stratumPopulations()) {
+            Double aggregationResult = stratumPopulationDef.getAggregationResult();
+            if (aggregationResult == null) {
+                continue;
+            }
+
+            PopulationDef populationDef = stratumPopulationDef.populationDef();
+            if (populationDef == null) {
+                continue;
+            }
+
+            // Find matching report stratum population by ID
+            var reportStratumPopulation = reportStratum.getPopulation().stream()
+                    .filter(rsp ->
+                            populationDef.id() != null && populationDef.id().equals(rsp.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (reportStratumPopulation == null) {
+                continue;
+            }
+
+            R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                    reportStratumPopulation,
+                    populationDef.getAggregateMethod(),
+                    aggregationResult,
+                    populationDef.getCriteriaReference());
         }
     }
 

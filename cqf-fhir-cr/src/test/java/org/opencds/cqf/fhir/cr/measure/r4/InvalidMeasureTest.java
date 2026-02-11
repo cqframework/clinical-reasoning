@@ -37,7 +37,7 @@ class InvalidMeasureTest {
                 .measureId("LibraryMissingContent")
                 .evaluate();
         var e = assertThrows(IllegalStateException.class, when::then);
-        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for libraries"));
+        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for library"));
     }
 
     @Test

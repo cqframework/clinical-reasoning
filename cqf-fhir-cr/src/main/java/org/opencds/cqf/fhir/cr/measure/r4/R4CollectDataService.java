@@ -20,7 +20,6 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorUtils;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -30,7 +29,6 @@ public class R4CollectDataService {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final R4RepositorySubjectProvider subjectProvider;
-    private final MeasureProcessorUtils measureProcessorUtils = new MeasureProcessorUtils();
 
     public R4CollectDataService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         this.repository = repository;
@@ -66,8 +64,7 @@ public class R4CollectDataService {
             String practitioner) {
 
         Parameters parameters = new Parameters();
-        var processor =
-                new R4MeasureProcessor(this.repository, this.measureEvaluationOptions, this.measureProcessorUtils);
+        var processor = new R4MeasureProcessor(this.repository, this.measureEvaluationOptions);
 
         List<String> subjectList = getSubjects(subject, practitioner, subjectProvider);
 

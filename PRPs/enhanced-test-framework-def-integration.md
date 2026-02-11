@@ -150,7 +150,7 @@ MeasureDefAndR4MeasureReport evaluateMeasureCaptureDefs(
         @Nonnull Map<String, EvaluationResult> results) {
 
     checkMeasureLibrary(measure);
-    MeasureEvalType evaluationType = measureProcessorUtils.getEvalType(null, reportType, subjectIds);
+    MeasureEvalType evaluationType = measureProcessorTimeUtils.getEvalType(null, reportType, subjectIds);
     Interval measurementPeriod = buildMeasurementPeriod(periodStart, periodEnd);
 
     // Build MeasureDef

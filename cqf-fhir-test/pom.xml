@@ -5,14 +5,14 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-test</artifactId>
-  <version>4.3.0-SNAPSHOT</version>
+  <version>4.3.1-SNAPSHOT</version>
   <name>FHIR Clinical Reasoning (Test Utilities)</name>
   <description>Utilities to support unit testing clinical reasoning operations</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>4.3.1-SNAPSHOT</version>
   </parent>
 
   <dependencies>

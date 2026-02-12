@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -16,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.springframework.stereotype.Component;
@@ -59,32 +62,31 @@ public class MeasureOperationsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasure(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
-            @OperationParam(name = "reportType") String reportType,
-            @OperationParam(name = "patient") String patient,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
-            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "periodStart") ParametersParameterComponent periodStart,
+            @OperationParam(name = "periodEnd") ParametersParameterComponent periodEnd,
+            @OperationParam(name = "reportType") ParametersParameterComponent reportType,
+            @OperationParam(name = "patient") ParametersParameterComponent patient,
+            @OperationParam(name = "practitioner") ParametersParameterComponent practitioner,
+            @OperationParam(name = "lastReceivedOn") ParametersParameterComponent lastReceivedOn,
+            @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         return dstu3MeasureProcessorFactory
                 .create(requestDetails)
                 .evaluateMeasure(
                         id,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        patient,
-                        practitioner,
-                        lastReceivedOn,
-                        productLine,
+                        getStringValue(fhirVersion, periodStart),
+                        getStringValue(fhirVersion, periodEnd),
+                        getStringValue(fhirVersion, reportType),
+                        getStringOrReferenceValue(fhirVersion, patient),
+                        getStringOrReferenceValue(fhirVersion, practitioner),
+                        getStringValue(fhirVersion, lastReceivedOn),
+                        getStringValue(productLine),
                         additionalData,
                         parameters,
-                        terminologyEndpointParam);
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint));
     }
 }

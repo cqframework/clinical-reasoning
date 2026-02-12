@@ -84,8 +84,8 @@ public record SubjectResourceKey(@Nullable String subjectId, String resourceValu
      * @return a SubjectResourceKey with appropriate subject context
      */
     public static SubjectResourceKey fromRowKey(StratifierRowKey rowKey, boolean isPrimitiveBasis) {
-        String inputParam = rowKey.inputParamId().orElseThrow(
-                () -> new IllegalArgumentException("RowKey must have an inputParamId"));
+        String inputParam = rowKey.inputParamId()
+                .orElseThrow(() -> new IllegalArgumentException("RowKey must have an inputParamId"));
 
         if (isPrimitiveBasis) {
             return of(rowKey.subjectQualified(), inputParam);

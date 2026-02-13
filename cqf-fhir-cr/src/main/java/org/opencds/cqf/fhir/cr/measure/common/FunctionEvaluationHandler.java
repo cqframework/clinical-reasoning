@@ -242,7 +242,8 @@ public class FunctionEvaluationHandler {
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
             throw new InternalErrorException(
-                    "PopulationDef criteria reference is missing for continuous variable observation");
+                    "PopulationDef criteria reference is missing for continuous variable observation for measure: %s"
+                            .formatted(measureUrl));
         }
 
         // get criteria input for results to get (measure-population, numerator, denominator)
@@ -355,7 +356,8 @@ public class FunctionEvaluationHandler {
 
         if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
             // We screwed up defining component correctly
-            throw new InternalErrorException("StratifierDef component expression is missing.");
+            throw new InternalErrorException(
+                    "StratifierDef component expression is missing for measure: %s.".formatted(measureUrl));
         }
         var stratifierExpression = componentDef.expression();
 
@@ -573,7 +575,8 @@ public class FunctionEvaluationHandler {
             String expressionName, EvaluationResult evaluationResult) {
         if (expressionName == null) {
             throw new InternalErrorException(
-                    "PopulationDef criteria reference is missing for continuous variable observation");
+                    "PopulationDef criteria reference: %s is missing for continuous variable observation"
+                            .formatted(expressionName));
         }
 
         if (evaluationResult == null) {

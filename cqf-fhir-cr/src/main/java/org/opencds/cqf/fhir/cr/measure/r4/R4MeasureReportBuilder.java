@@ -33,6 +33,8 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -53,6 +55,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
@@ -662,36 +665,29 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
      * that are needed for downstream distributed aggregation.
      */
     private void copyStratumPopulationAggregationResults(
-            MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+            StratifierGroupComponent reportStratum, StratumDef stratumDef) {
 
-        for (var stratumPopulationDef : stratumDef.stratumPopulations()) {
-            Double aggregationResult = stratumPopulationDef.getAggregationResult();
-            if (aggregationResult == null) {
-                continue;
-            }
-
-            PopulationDef populationDef = stratumPopulationDef.populationDef();
-            if (populationDef == null) {
-                continue;
-            }
-
-            // Find matching report stratum population by ID
-            var reportStratumPopulation = reportStratum.getPopulation().stream()
-                    .filter(rsp ->
-                            populationDef.id() != null && populationDef.id().equals(rsp.getId()))
-                    .findFirst()
-                    .orElse(null);
-
-            if (reportStratumPopulation == null) {
-                continue;
-            }
-
-            R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
-                    reportStratumPopulation,
-                    populationDef.getAggregateMethod(),
-                    aggregationResult,
-                    populationDef.getCriteriaReference());
+        for (StratifierGroupPopulationComponent reportStratumPopulation : reportStratum.getPopulation()) {
+            copySingleStratumPopulationAggregationResult(
+                    reportStratumPopulation, stratumDef.findPopulationById(reportStratumPopulation.getId()));
         }
+    }
+
+    private void copySingleStratumPopulationAggregationResult(
+            StratifierGroupPopulationComponent reportStratumPopulation, StratumPopulationDef stratumPopulationDef) {
+
+        Double aggregationResult = stratumPopulationDef.getAggregationResult();
+
+        PopulationDef populationDef = stratumPopulationDef.populationDef();
+        if (populationDef == null) {
+            return;
+        }
+
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                reportStratumPopulation,
+                populationDef.getAggregateMethod(),
+                aggregationResult,
+                populationDef.getCriteriaReference());
     }
 
     /**
@@ -704,7 +700,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
      * @return true if values match
      */
     private boolean matchesStratumValue(
-            MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
+            StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
         return R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef);
     }
 }

@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -178,6 +180,88 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
     public SelectedMeasureDefGroup<P> hasMeasureScoring(MeasureScoring scoring) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(scoring, value().measureScoring(), "MeasureScoring mismatch");
+        return this;
+    }
+
+    /**
+     * Assert the effective scoring type used to calculate this group's score.
+     * This is the scoring type that was actually used by the scorer - either the
+     * measure's scoring (if defined) or the group's scoring (if measure has none).
+     * <p>
+     * This method requires access to the parent MeasureDef to determine the resolution.
+     *
+     * @param measureDef the parent MeasureDef
+     * @param expectedScoring the expected effective scoring type
+     * @return this SelectedMeasureDefGroup for chaining
+     */
+    public SelectedMeasureDefGroup<P> hasEffectiveScoring(MeasureDef measureDef, MeasureScoring expectedScoring) {
+        assertNotNull(value(), "GroupDef is null");
+        assertNotNull(measureDef, "MeasureDef is null");
+        MeasureScoring effectiveScoring = value().getMeasureOrGroupScoring(measureDef);
+        assertEquals(
+                expectedScoring,
+                effectiveScoring,
+                "Expected effective scoring (measure's or group's): %s, actual: %s"
+                        .formatted(expectedScoring, effectiveScoring));
+        return this;
+    }
+
+    /**
+     * Assert the effective scoring type when the parent is a SelectedMeasureDef.
+     * This is a convenience method that extracts the MeasureDef from the parent.
+     * <p>
+     * Can only be used when the parent is SelectedMeasureDef (i.e., after .def().firstGroup()).
+     *
+     * @param expectedScoring the expected effective scoring type
+     * @return this SelectedMeasureDefGroup for chaining
+     * @throws IllegalStateException if parent is not SelectedMeasureDef
+     */
+    @SuppressWarnings("unchecked")
+    public SelectedMeasureDefGroup<P> hasEffectiveScoring(MeasureScoring expectedScoring) {
+        assertNotNull(value(), "GroupDef is null");
+
+        // Try to get MeasureDef from parent if it's SelectedMeasureDef
+        if (up() instanceof SelectedMeasureDef) {
+            SelectedMeasureDef<?> selectedMeasureDef = (SelectedMeasureDef<?>) up();
+            MeasureDef measureDef = selectedMeasureDef.measureDef();
+            return hasEffectiveScoring(measureDef, expectedScoring);
+        }
+
+        throw new IllegalStateException(
+                "Cannot use hasEffectiveScoring() without MeasureDef parameter when parent is not SelectedMeasureDef. "
+                        + "Use hasEffectiveScoring(MeasureDef, MeasureScoring) instead.");
+    }
+
+    /**
+     * Assert that the group does NOT have its own group-level scoring override.
+     * This means the group uses the measure's scoring type.
+     *
+     * @return this SelectedMeasureDefGroup for chaining
+     */
+    public SelectedMeasureDefGroup<P> hasNoGroupLevelScoring() {
+        assertNotNull(value(), "GroupDef is null");
+        assertFalse(
+                value().hasMeasureScoring(),
+                "Expected no group-level scoring (null), but found: %s".formatted(value().measureScoring()));
+        return this;
+    }
+
+    /**
+     * Assert that the group HAS its own group-level scoring.
+     * This means the measure does NOT have measure-level scoring.
+     *
+     * @param scoring the expected group-level scoring type
+     * @return this SelectedMeasureDefGroup for chaining
+     */
+    public SelectedMeasureDefGroup<P> hasGroupLevelScoring(MeasureScoring scoring) {
+        assertNotNull(value(), "GroupDef is null");
+        assertTrue(
+                value().hasMeasureScoring(),
+                "Expected group-level scoring to be present, but GroupDef.measureScoring is null");
+        assertEquals(
+                scoring,
+                value().measureScoring(),
+                "Expected group-level scoring: %s, actual: %s".formatted(scoring, value().measureScoring()));
         return this;
     }
 

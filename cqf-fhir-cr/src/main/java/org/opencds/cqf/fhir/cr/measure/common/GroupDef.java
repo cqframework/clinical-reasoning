@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,10 @@ public class GroupDef {
     private final ConceptDef code;
     private final List<StratifierDef> stratifiers;
     private final List<PopulationDef> populations;
+
+    @Nullable
     private final MeasureScoring measureScoring;
+
     private final boolean isGroupImpNotation;
     private final CodeDef populationBasis;
     private final CodeDef improvementNotation;
@@ -28,7 +32,7 @@ public class GroupDef {
             ConceptDef code,
             List<StratifierDef> stratifiers,
             List<PopulationDef> populations,
-            MeasureScoring measureScoring,
+            @Nullable MeasureScoring measureScoring,
             boolean isGroupImprovementNotation,
             CodeDef improvementNotation,
             CodeDef populationBasis) {
@@ -149,6 +153,17 @@ public class GroupDef {
         return populations.stream().collect(Collectors.groupingBy(PopulationDef::type));
     }
 
+    public boolean hasMeasureScoring() {
+        return this.measureScoring != null;
+    }
+
+    /**
+     * This method should only be called from production code that builds a MeasureReport group,
+     * setting the scoring extension on that group.
+     *
+     * @return MeasureScoring associated directly with the group, if it exists at all.
+     */
+    @Nullable
     public MeasureScoring measureScoring() {
         return this.measureScoring;
     }
@@ -204,13 +219,27 @@ public class GroupDef {
         return this.score;
     }
 
-    public void setScoreAndAdaptToImprovementNotation(Double originalScore) {
-        if ((MeasureScoring.RATIO == measureScoring && hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
-                || MeasureScoring.PROPORTION == measureScoring) {
+    public void setScoreAndAdaptToImprovementNotation(Double originalScore, MeasureScoring measureOrGroupScoring) {
+        if ((MeasureScoring.RATIO == measureOrGroupScoring
+                        && hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
+                || MeasureScoring.PROPORTION == measureOrGroupScoring) {
             this.score = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
                     originalScore, isIncreaseImprovementNotation());
         } else {
             this.score = originalScore;
         }
+    }
+
+    public MeasureScoring getMeasureOrGroupScoring(MeasureDef measureDef) {
+        if (measureDef.hasMeasureScoring()) {
+            return measureDef.measureScoring();
+        }
+
+        if (hasMeasureScoring()) {
+            return measureScoring();
+        }
+
+        throw new InternalErrorException("Must have scoring either at the measure or group level for measure URL: %s"
+                .formatted(measureDef.url()));
     }
 }

@@ -90,29 +90,27 @@ public class MeasureReportDefScorer {
     public void score(String measureUrl, MeasureDef measureDef) {
         // Def-first iteration: iterate over MeasureDef.groups()
         for (GroupDef groupDef : measureDef.groups()) {
-            scoreGroup(measureUrl, groupDef);
+            scoreGroup(measureDef, groupDef);
         }
     }
 
-    /**
-     * Score a single group including all its stratifiers - MUTATES GroupDef and StratumDef objects.
-     *
-     * @param measureUrl the measure URL for error reporting
-     * @param groupDef the group definition to score (will be mutated with setScore())
-     */
-    public void scoreGroup(String measureUrl, GroupDef groupDef) {
-        MeasureScoring measureScoring = checkMissingScoringType(measureUrl, groupDef.measureScoring());
+    public void scoreGroup(MeasureDef measureDef, GroupDef groupDef) {
+
+        var measureUrl = measureDef.url();
+        var measureOrGroupScoring = groupDef.getMeasureOrGroupScoring(measureDef);
+
+        checkMissingScoringType(measureUrl, measureOrGroupScoring);
 
         // Calculate group-level score
-        Double groupScore = calculateGroupScore(measureUrl, groupDef, measureScoring);
+        Double groupScore = calculateGroupScore(measureUrl, groupDef, measureOrGroupScoring);
 
         // MUTATE: Set score on GroupDef
-        groupDef.setScoreAndAdaptToImprovementNotation(groupScore);
+        groupDef.setScoreAndAdaptToImprovementNotation(groupScore, measureOrGroupScoring);
 
         // Score all stratifiers using Def-first iteration
         // Modified from R4MeasureReportScorer to iterate over Def classes instead of FHIR components
         for (StratifierDef stratifierDef : groupDef.stratifiers()) {
-            scoreStratifier(measureUrl, groupDef, stratifierDef, measureScoring);
+            scoreStratifier(measureUrl, groupDef, stratifierDef, measureOrGroupScoring);
         }
     }
 
@@ -121,8 +119,7 @@ public class MeasureReportDefScorer {
      */
     private Double calculateGroupScore(String measureUrl, GroupDef groupDef, MeasureScoring measureScoring) {
         switch (measureScoring) {
-            case PROPORTION:
-            case RATIO:
+            case PROPORTION, RATIO:
                 // Special case: RATIO with separate numerator/denominator observations
                 if (measureScoring == MeasureScoring.RATIO
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
@@ -263,12 +260,11 @@ public class MeasureReportDefScorer {
             String measureUrl, GroupDef groupDef, StratumDef stratumDef, MeasureScoring measureScoring) {
 
         switch (measureScoring) {
-            case PROPORTION:
-            case RATIO:
+            case PROPORTION, RATIO:
                 // Check for special RATIO continuous variable case
                 if (measureScoring.equals(MeasureScoring.RATIO)
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationStratum(measureUrl, stratumDef);
+                    return scoreRatioMeasureObservationStratum(stratumDef);
                 } else {
                     return scoreProportionRatioStratum(groupDef, stratumDef);
                 }
@@ -286,12 +282,11 @@ public class MeasureReportDefScorer {
      * Handles continuous variable ratio scoring where numerator and denominator have separate observations.
      * Uses pre-computed cache to eliminate redundant lookups during scoring.
      *
-     * @param measureUrl the measure URL for error reporting
      * @param stratumDef the stratum definition
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationStratum(String measureUrl, StratumDef stratumDef) {
+    private Double scoreRatioMeasureObservationStratum(StratumDef stratumDef) {
 
         if (stratumDef == null) {
             return null;
@@ -311,8 +306,7 @@ public class MeasureReportDefScorer {
         PopulationDef numPopDef = stratumPopulationDefNum.populationDef();
         PopulationDef denPopDef = stratumPopulationDefDen.populationDef();
 
-        return scoreRatioContVariableStratum(
-                measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
+        return scoreRatioContVariableStratum(stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
     }
 
     /**
@@ -372,7 +366,6 @@ public class MeasureReportDefScorer {
      * Score ratio continuous variable for a stratum.
      * Copied from R4MeasureReportScorer#scoreRatioContVariableStratum.
      *
-     * @param measureUrl the measure URL for error reporting
      * @param measureObsNumStratum stratum population for numerator measure observation
      * @param measureObsDenStratum stratum population for denominator measure observation
      * @param numPopDef numerator population definition
@@ -380,7 +373,6 @@ public class MeasureReportDefScorer {
      * @return the ratio score or null
      */
     private Double scoreRatioContVariableStratum(
-            String measureUrl,
             StratumPopulationDef measureObsNumStratum,
             StratumPopulationDef measureObsDenStratum,
             PopulationDef numPopDef,
@@ -502,7 +494,7 @@ public class MeasureReportDefScorer {
                 .filter(entry -> stratumSubjectsUnqualified.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -561,7 +553,7 @@ public class MeasureReportDefScorer {
                     }
                     return false;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -601,21 +593,19 @@ public class MeasureReportDefScorer {
     }
 
     private static void setAggregateResultIfPopNonNull(@Nullable PopulationDef populationDef, QuantityDef quantityDef) {
-        Optional.ofNullable(populationDef).ifPresent(nonNullPopulationDef -> {
-            nonNullPopulationDef.setAggregationResult(quantityDef);
-        });
+        Optional.ofNullable(populationDef)
+                .ifPresent(nonNullPopulationDef -> nonNullPopulationDef.setAggregationResult(quantityDef));
     }
 
     /**
      * Validate scoring type is present.
      * Reused from BaseMeasureReportScorer pattern.
      */
-    protected MeasureScoring checkMissingScoringType(String measureUrl, MeasureScoring measureScoring) {
+    private void checkMissingScoringType(String measureUrl, MeasureScoring measureScoring) {
         if (measureScoring == null) {
             throw new InvalidRequestException(
                     "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for measure: "
                             + measureUrl);
         }
-        return measureScoring;
     }
 }

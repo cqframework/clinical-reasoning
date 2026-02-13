@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 /**
  * Fluent assertion API for MeasureDef objects.
@@ -174,6 +175,38 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
     public SelectedMeasureDef<P> hasMeasureVersion(String version) {
         assertNotNull(value(), "MeasureDef is null");
         assertEquals(version, value().version(), "Measure version mismatch");
+        return this;
+    }
+
+    /**
+     * Assert that the measure has a measure-level scoring type.
+     *
+     * @param scoring expected MeasureScoring type at measure level
+     * @return this SelectedMeasureDef for chaining
+     */
+    public SelectedMeasureDef<P> hasMeasureScoring(MeasureScoring scoring) {
+        assertNotNull(value(), "MeasureDef is null");
+        assertTrue(
+                value().hasMeasureScoring(),
+                "Expected measure-level scoring to be present, but MeasureDef.measureScoring is null");
+        assertEquals(
+                scoring,
+                value().measureScoring(),
+                "Expected measure-level scoring: %s, actual: %s".formatted(scoring, value().measureScoring()));
+        return this;
+    }
+
+    /**
+     * Assert that the measure does NOT have measure-level scoring defined.
+     * This means scoring must be defined at the group level.
+     *
+     * @return this SelectedMeasureDef for chaining
+     */
+    public SelectedMeasureDef<P> hasNoMeasureScoring() {
+        assertNotNull(value(), "MeasureDef is null");
+        assertFalse(
+                value().hasMeasureScoring(),
+                "Expected no measure-level scoring (null), but found: %s".formatted(value().measureScoring()));
         return this;
     }
 

@@ -56,7 +56,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     public void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
         groupDef.populations()
                 .forEach(population ->
-                        validateGroupPopulationBasisType(measureDef.url(), groupDef, population, evaluationResult));
+                        validateGroupPopulationBasisType(measureDef, groupDef, population, evaluationResult));
     }
 
     @Override
@@ -67,10 +67,10 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     }
 
     private void validateGroupPopulationBasisType(
-            String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
+            MeasureDef measureDef, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
 
         // PROPORTION
-        var scoring = groupDef.measureScoring();
+        var scoring = groupDef.getMeasureOrGroupScoring(measureDef);
         // Numerator
         var populationExpression = populationDef.expression();
         if (populationExpression == null || populationExpression.isBlank()) {
@@ -101,7 +101,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                                         populationExpression,
                                         scoring,
                                         groupPopulationBasisCode,
-                                        url,
+                                        measureDef.url(),
                                         prettyClassNames(resultClasses),
                                         prettyClassNames(resultMatchingClasses)));
             }

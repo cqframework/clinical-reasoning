@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -53,7 +54,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // scoring
-        MeasureScoring measureScoring =
+        @Nullable
+        final MeasureScoring measureScoring =
                 MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
         // populationBasis
         var measureBasis = getMeasureBasis(measure);
@@ -115,7 +117,8 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
         }
 
-        return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
+        return new MeasureDef(
+                measure.getIdElement(), measure.getUrl(), measure.getVersion(), measureScoring, groups, sdes);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

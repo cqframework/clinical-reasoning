@@ -8,7 +8,9 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
+import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 
 /**
  * Summary of generated Patients and their Encounter durations.
@@ -77,7 +79,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -131,6 +136,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasNoAggregationResultsExtensionValue()
@@ -202,7 +208,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasNoAggregationResult()
@@ -272,6 +281,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasNoAggregationResultsExtensionValue()
@@ -342,7 +352,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -393,6 +406,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -463,7 +477,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -514,6 +531,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -584,7 +602,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -635,6 +656,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -705,7 +727,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -826,7 +851,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasCount(10)
                 .hasNoAggregationResult()
@@ -877,6 +905,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
@@ -947,7 +976,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -999,6 +1031,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -1337,12 +1370,11 @@ class MeasureScoringTypeRatioContVariableTest {
      */
     @Test
     void ratioContinuousVariableBadDenDef() {
-        var expectedException = assertThrows(InvalidRequestException.class, () -> given.when()
+        final When when = given.when()
                 .measureId("RatioContVarResourceSumError2")
                 .subject("Patient/patient-9")
-                .evaluate()
-                .then()
-                .report());
+                .evaluate();
+        var expectedException = assertThrows(InvalidRequestException.class, when::then);
 
         assertTrue(expectedException.getMessage().contains("no matching criteria reference was found for extension"));
     }
@@ -1362,7 +1394,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -1479,6 +1514,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
@@ -1615,7 +1651,10 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()
+                .hasMeasureScoring(MeasureScoring.RATIO)
                 .firstGroup()
+                .hasNoGroupLevelScoring()
+                .hasEffectiveScoring(MeasureScoring.RATIO)
                 .population("initial-population")
                 .hasType(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
@@ -1728,6 +1767,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
+                .hasNoGroupScoringExt()
                 .population("initial-population")
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)

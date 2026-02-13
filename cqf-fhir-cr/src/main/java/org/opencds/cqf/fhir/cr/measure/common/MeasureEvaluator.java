@@ -220,6 +220,7 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateProportion(
+            MeasureScoring measureOrGroupScoring,
             GroupDef groupDef,
             String subjectType,
             String subjectId,
@@ -228,7 +229,7 @@ public class MeasureEvaluator {
             boolean applyScoring) {
         // check populations
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
-                groupDef.populations().stream().map(PopulationDef::type).toList(), groupDef.measureScoring());
+                groupDef.populations().stream().map(PopulationDef::type).toList(), measureOrGroupScoring);
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);
@@ -624,10 +625,18 @@ public class MeasureEvaluator {
 
         evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult, groupDef);
 
-        var scoring = groupDef.measureScoring();
-        switch (scoring) {
+        final MeasureScoring measureOrGroupScoring = groupDef.getMeasureOrGroupScoring(measureDef);
+
+        switch (measureOrGroupScoring) {
             case PROPORTION, RATIO:
-                evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
+                evaluateProportion(
+                        measureOrGroupScoring,
+                        groupDef,
+                        subjectType,
+                        subjectId,
+                        reportType,
+                        evaluationResult,
+                        applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
                 evaluateContinuousVariable(

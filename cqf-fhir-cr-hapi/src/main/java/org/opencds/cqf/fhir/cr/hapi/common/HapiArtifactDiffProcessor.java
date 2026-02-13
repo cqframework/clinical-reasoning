@@ -82,6 +82,10 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         if (sourceResource.getClass() != targetResource.getClass()) {
             throw new UnprocessableEntityException("Source and target resources must be of the same type.");
         }
+        if (!(terminologyEndpoint instanceof Endpoint)) {
+            throw new UnprocessableEntityException(
+                    "The value passed for the terminologyEndpoint argument must be an Endpoint resource");
+        }
 
         // setup
         var patch = new FhirPatch(repository.fhirContext());

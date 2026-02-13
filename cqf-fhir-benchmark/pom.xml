@@ -5,14 +5,14 @@
 
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir-benchmark</artifactId>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>4.3.0</version>
     <name>FHIR Clinical Reasoning (Benchmarks)</name>
     <description>Tests validating performance of FHIR Clinical Reasoning operations</description>
 
     <parent>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.0</version>
     </parent>
 
     <!-- this project contains one file with no content - so let's skip checking it -->
@@ -24,12 +24,12 @@
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-cr</artifactId>
-            <version>4.3.0-SNAPSHOT</version>
+            <version>4.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>
             <artifactId>cqf-fhir-test</artifactId>
-            <version>4.3.0-SNAPSHOT</version>
+            <version>4.3.0</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

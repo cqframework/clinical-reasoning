@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -95,8 +94,7 @@ public class R4ImportBundleProducer {
         }
     }
 
-    public static String ensureHttps(String urlString)
-        throws MalformedURLException, URISyntaxException {
+    public static String ensureHttps(String urlString) throws MalformedURLException, URISyntaxException {
         URL url = URI.create(urlString).toURL();
 
         // Check if the protocol is already HTTPS
@@ -105,14 +103,15 @@ public class R4ImportBundleProducer {
         }
 
         // Construct a new URL with the HTTPS protocol
-        URI httpsUrl = new URI("https", // scheme
-            null, // userinfo
-            url.getHost(), // host
-            url.getPort(), // port
-            url.getFile(), // path
-            null, // query
-            null // fragment
-        );
+        URI httpsUrl = new URI(
+                "https", // scheme
+                null, // userinfo
+                url.getHost(), // host
+                url.getPort(), // port
+                url.getFile(), // path
+                null, // query
+                null // fragment
+                );
         return httpsUrl.toString();
     }
 

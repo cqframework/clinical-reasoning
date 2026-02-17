@@ -15,7 +15,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,7 +71,7 @@ class R4ImportBundleProducerTest {
 
     @Test
     void testEnsureHttpsMalformedUrl() {
-        assertThrows(MalformedURLException.class, () -> R4ImportBundleProducer.ensureHttps("://bad-url"));
+        assertThrows(IllegalArgumentException.class, () -> R4ImportBundleProducer.ensureHttps("://bad-url"));
     }
 
     @Test

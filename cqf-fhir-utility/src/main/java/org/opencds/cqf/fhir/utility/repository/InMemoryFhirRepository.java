@@ -172,12 +172,25 @@ public class InMemoryFhirRepository implements IRepository {
         }
 
         // Apply the rest of the filters
+        var keyset = searchParameters.keySet();
         for (var resource : candidates) {
             boolean include = true;
-            for (var nextEntry : searchParameters.entries()) {
-                var paramName = nextEntry.getKey();
-                if (!this.resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-                    include = false;
+            for (String paramName : keyset) {
+                /*
+                 * each individual entry in a list is 'or'd'.
+                 * All the lists from each
+                 */
+                Collection<List<IQueryParameterType>> values = searchParameters.get(paramName);
+                boolean matches = false;
+                for (List<IQueryParameterType> ors : values) {
+                    matches = this.resourceMatcher.matches(paramName, ors, resource);
+                    if (matches) {
+                        break;
+                    }
+                }
+                include = matches;
+
+                if (!include) {
                     break;
                 }
             }

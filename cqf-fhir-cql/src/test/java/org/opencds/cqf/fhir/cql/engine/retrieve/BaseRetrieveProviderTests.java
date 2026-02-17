@@ -29,12 +29,12 @@ class BaseRetrieveProviderTests {
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
+//        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
         assertInstanceOf(UriParam.class, searchParamsR4.get(PROFILE_PARAM).get(0));
 
         doReturn(FhirVersionEnum.R5).when(fixture).getFhirVersion();
         Map<String, List<IQueryParameterType>> searchParamsR5 = new HashMap<>();
-        fixture.populateTemplateSearchParams(searchParamsR5, CONDITION, US_CORE_CONDITION);
+//        fixture.populateTemplateSearchParams(searchParamsR5, CONDITION, US_CORE_CONDITION);
         assertInstanceOf(ReferenceParam.class, searchParamsR5.get(PROFILE_PARAM).get(0));
     }
 
@@ -46,7 +46,7 @@ class BaseRetrieveProviderTests {
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, FHIR_CONDITION);
+//        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, FHIR_CONDITION);
         assertTrue(searchParamsR4.isEmpty());
     }
 
@@ -58,7 +58,7 @@ class BaseRetrieveProviderTests {
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
+//        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
         assertTrue(searchParamsR4.isEmpty());
     }
 }

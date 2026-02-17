@@ -6,11 +6,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -21,6 +22,18 @@ import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
+
+
+    private class SearchConfig {
+
+        /**
+         * Each element of each list is OR'd
+         * Each
+         */
+        public Multimap<String, List<IQueryParameterType>> searchParams = HashMultimap.create();
+        public Predicate<IBaseResource> filter = x -> true;
+    }
+
     private final IRepository repository;
     private final FhirContext fhirContext;
 
@@ -126,18 +139,14 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
         switch (mode) {
             case FILTER_IN_MEMORY:
             case AUTO: // TODO: offload detection based on CapabilityStatement
-                if (datePath != null) {
-                    throw new UnsupportedOperationException("in-memory dateFilters are not supported");
-                }
-                break;
+//                if (datePath != null) {
+//                    throw new UnsupportedOperationException("in-memory dateFilters are not supported");
+//                }
+//                break;
             case USE_SEARCH_PARAMETERS:
                 populateDateSearchParams(config.searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
+                break;
         }
-    }
-
-    private class SearchConfig {
-        public Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
-        public Predicate<IBaseResource> filter = x -> true;
     }
 
     @Override

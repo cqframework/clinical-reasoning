@@ -9,15 +9,21 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
@@ -26,15 +32,27 @@ import org.cqframework.fhir.utilities.IGContext;
 import org.cqframework.fhir.utilities.LoggerAdapter;
 import org.hl7.cql.model.NamespaceInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.data.SystemDataProvider;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.runtime.DateTime;
+import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -345,6 +363,166 @@ class EnginesTest {
         assertNotNull(Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached()));
     }
 
+    /**
+     * Parameters for the below method.
+     * All created resources must have a SP that identifies
+     * a field that has a date value between 2000-01-01 and 2000-12-31 eod
+     * (ie, in the year 2000).
+     */
+    static List<Arguments> successfulParameters() {
+        // formatter
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        List<Arguments> args = new ArrayList<>();
+
+        // 1 Encounter with location period starting in 2000
+        {
+            Encounter encounter = new Encounter();
+            encounter.addLocation()
+                .setLocation(new Reference("Location/123"))
+                .setPeriod(new Period()
+                    .setStart(createDate(formatter, "2000-11-11"))
+                    .setEnd(createDate(formatter, "2001-02-28")));
+
+            args.add(Arguments.of(encounter, "location-period"));
+        }
+        // 2 Encounter with location period ending in 2000
+        {
+            Encounter encounter = new Encounter();
+            encounter.addLocation()
+                .setLocation(new Reference("Location/123"))
+                .setPeriod(new Period()
+                    .setStart(createDate(formatter, "1999-08-06"))
+                    .setEnd(createDate(formatter, "2000-04-01")));
+
+            args.add(Arguments.of(encounter, "location-period"));
+        }
+        // 3 Encounter with location period around all of period
+        {
+            Encounter encounter = new Encounter();
+            encounter.addLocation()
+                .setLocation(new Reference("Location/123"))
+                .setPeriod(new Period()
+                    .setStart(createDate(formatter, "1999-08-06"))
+                    .setEnd(createDate(formatter, "2001-08-05")));
+
+            args.add(Arguments.of(encounter, "location-period"));
+        }
+        //  Patient with birthDate in period
+        {
+            Patient patient = new Patient();
+            patient.setActive(true);
+            patient.setBirthDate(createDate(formatter, "2000-08-13"));
+
+            args.add(Arguments.of(patient, "birthdate"));
+        }
+        //  Observation with effective datetime value in 2000
+        {
+            Observation obs = new Observation();
+            obs.setValue(new DateTimeType().setValue(
+                createDate(dateTimeFormatter, "2000-03-14 02:59:00")));
+            obs.setStatus(ObservationStatus.CORRECTED);
+
+            args.add(Arguments.of(obs, "value-date"));
+        }
+
+        return args;
+    }
+
+    @ParameterizedTest
+    @MethodSource("successfulParameters")
+    public void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String path) {
+        // setup
+        String resourceType = resource.fhirType();
+
+        RetrieveSettings retrieveSettings = new RetrieveSettings();
+        retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
+
+        EvaluationSettings settings = EvaluationSettings
+            .getDefault().withRetrieveSettings(retrieveSettings);
+
+        var engine = Engines.forRepository(repository, settings);
+        var dataProviders = engine.getEnvironment().getDataProviders();
+        var dataProvider = (FederatedDataProvider)dataProviders.get(Constants.FHIR_MODEL_URI);
+
+        repository.update(resource, Map.of());
+
+        // test
+        var start = new DateTime("2000-01-01T00:00:00", ZoneOffset.UTC);
+        var end = new DateTime("2000-12-31T23:59:59", ZoneOffset.UTC);
+        var dateRange = new Interval(start, true, end, true);
+
+        // Retrieve encounters with period overlapping 2024
+        var results = dataProvider.retrieve(
+            resourceType,   // context
+            null,           // contextPath
+            "pat1",         // contextValue
+            resourceType,   // dataType
+            null,           // templateId
+            null,           // codePath
+            null,           // codes
+            null,           // valueSet
+            path,           // datePath
+            "period.start", // dateLowPath
+            "period.end",   // dateHighPath
+            dateRange       // dateRange
+        );
+
+        // verify
+        assertNotNull(results);
+        List<Object> resources = new ArrayList<>();
+        results.forEach(resources::add);
+        assertEquals(1, resources.size());
+    }
+
+    @Test
+    public void dateFiltering() {
+        // setup
+        RetrieveSettings retrieveSettings = new RetrieveSettings();
+        retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
+
+        EvaluationSettings settings = EvaluationSettings
+            .getDefault().withRetrieveSettings(retrieveSettings);
+
+        var engine = Engines.forRepository(repository, settings);
+        var dataProviders = engine.getEnvironment().getDataProviders();
+        var dataProvider = (FederatedDataProvider)dataProviders.get(Constants.FHIR_MODEL_URI);
+
+        Patient patient = new Patient();
+        patient.setId("Patient/123");
+        patient.setBirthDate(createDate(new SimpleDateFormat("MM/dd/yyyy"), "12/13/2024"));
+        repository.update(patient, Map.of());
+
+        // test
+        // TODO - do ranges and exact values?
+        var start = new DateTime("2024-01-01T00:00:00", ZoneOffset.UTC);
+        var end = new DateTime("2024-12-31T23:59:59", ZoneOffset.UTC);
+        var dateRange = new Interval(start, true, end, true);
+
+        // Retrieve encounters with period overlapping 2024
+        var results = dataProvider.retrieve(
+            "Patient",      // context
+            null, // "subject",      // contextPath
+            "pat1",         // contextValue
+            "Patient",    // dataType
+            null,           // templateId
+            null,           // codePath
+            null,           // codes
+            null,           // valueSet
+            "birthdate",           // datePath
+            "period.start", // dateLowPath
+            "period.end",   // dateHighPath
+            dateRange       // dateRange
+        );
+
+        // verify
+        assertNotNull(results);
+        List<Object> resources = new ArrayList<>();
+        results.forEach(resources::add);
+        assertEquals(1, resources.size());
+    }
+
     private static void assertDataProviders(CqlEngine engine) {
         var dataProviders = engine.getEnvironment().getDataProviders();
 
@@ -401,5 +579,15 @@ class EnginesTest {
     @Nonnull
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
         return Engines.forRepository(repository, settings, bundle);
+    }
+
+
+    private static Date createDate(SimpleDateFormat formatter, String dateStr) {
+        try {
+            return formatter.parse(dateStr);
+        } catch (ParseException ex) {
+            fail(ex);
+            return null;
+        }
     }
 }

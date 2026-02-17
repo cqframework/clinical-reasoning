@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -52,12 +54,14 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private final RetrieveSettings retrieveSettings;
     private final TerminologyProvider terminologyProvider;
     private final SearchParameterResolver resolver;
+    private final FhirContext fhirContext;
 
     protected BaseRetrieveProvider(
             final FhirContext fhirContext,
             final TerminologyProvider terminologyProvider,
             final RetrieveSettings retrieveSettings) {
         requireNonNull(fhirContext, "fhirContext can not be null.");
+        this.fhirContext = fhirContext;
         fhirVersion = fhirContext.getVersion().getVersion();
         this.retrieveSettings = requireNonNull(retrieveSettings, "retrieveSettings can not be null");
         this.terminologyProvider = requireNonNull(terminologyProvider, "terminologyProvider can not be null");
@@ -297,7 +301,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateTemplateSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams, final String dataType, final String templateId) {
+            Multimap<String, List<IQueryParameterType>> searchParams, final String dataType, final String templateId) {
         if (getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF
                 && StringUtils.isNotBlank(templateId)
                 && !templateId.startsWith("http://hl7.org/fhir/StructureDefinition/%s".formatted(dataType))) {
@@ -309,7 +313,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateContextSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams,
+            Multimap<String, List<IQueryParameterType>> searchParams,
             final String dataType,
             final String context,
             final String contextPath,
@@ -332,7 +336,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateTerminologySearchParams(
-            Map<String, List<IQueryParameterType>> searchParams,
+            Multimap<String, List<IQueryParameterType>> searchParams,
             final String dataType,
             final String codePath,
             final Iterable<Code> codes,
@@ -390,13 +394,13 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateDateSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams,
+            Multimap<String, List<IQueryParameterType>> searchParams,
             final String dataType,
-            final String datePath,
+            final String dateParamName,
             final String dateLowPath,
             final String dateHighPath,
             final Interval dateRange) {
-        if (datePath == null && dateHighPath == null && dateRange == null) {
+        if (dateParamName == null && dateHighPath == null && dateRange == null) {
             return;
         }
 
@@ -418,14 +422,40 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                             + dateRange.getStart().getClass().getSimpleName());
         }
 
-        if (StringUtils.isNotBlank(datePath)) {
-            List<IQueryParameterType> dateRangeParam = new ArrayList<>();
-            DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
-            dateRangeParam.add(dateParam);
-            dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
-            dateRangeParam.add(dateParam);
-            var sp = this.resolver.getSearchParameterDefinition(dataType, datePath);
-            searchParams.put(sp.getName(), dateRangeParam);
+        if (StringUtils.isNotBlank(dateParamName)) {
+            var sp = this.resolver.getSearchParameterDefinition(dataType, dateParamName);
+            fhirContext.getResourceDefinition(dataType)
+                .getSearchParam(dateParamName);
+
+            /*
+             * all params in a list are 'OR'd
+             * all lists with the same name are 'AND'd
+             *
+             */
+
+//            DateRangeParam dp = new DateRangeParam();
+//            DateParam low = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
+//            DateParam high = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
+//            dp.setLowerBound(low);
+//            dp.setUpperBound(high);
+//
+//            searchParams.put(sp.getName(), List.of(dp));
+
+            /**
+             *  (date >= start AND date <= end)
+             *
+             *  if target child is a period (not a specific date) (ie, date.start, date.end, not just date)
+             *
+             *  overlapping if...
+             * (date.start <= end && date.start >= start)
+             * OR
+             * (date.end <= end && date.end >= start)
+             */
+            DateParam gte = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
+            DateParam lte = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
+//            var sp = this.resolver.getSearchParameterDefinition(dataType, dateParamName);
+            searchParams.put(sp.getName(), List.of(gte));
+            searchParams.put(sp.getName(), List.of(lte));
         } else if (StringUtils.isNotBlank(dateLowPath)) {
             List<IQueryParameterType> dateRangeParam = new ArrayList<>();
             DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);

@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -196,7 +197,7 @@ public interface ResourceMatcher {
         if (pathResult instanceof IPrimitiveType<?> type1) {
             var result = type1.getValue();
             if (result instanceof Date date) {
-                dateRange = new DateRangeParam(date, date);
+                return isDateMatch(param, date);
             } else {
                 throw new UnsupportedOperationException(
                         "Expected date, found " + pathResult.getClass().getSimpleName());
@@ -209,6 +210,37 @@ public interface ResourceMatcher {
                             + pathResult.getClass().getSimpleName());
         }
         return matchesDateBounds(dateRange, new DateRangeParam(param));
+    }
+
+    default boolean isDateMatch(DateParam param, @Nonnull Date date) {
+        Date compareDate = param.getValue();
+        if (compareDate == null) {
+            return false;
+        }
+
+        switch (param.getPrefix()) {
+            case EQUAL -> {
+                return date.equals(compareDate);
+            }
+            case LESSTHAN -> {
+                return date.before(compareDate);
+            }
+            case GREATERTHAN -> {
+                return date.after(compareDate);
+            }
+            case GREATERTHAN_OR_EQUALS -> {
+                return date.after(compareDate) || date.equals(compareDate);
+            }
+            case LESSTHAN_OR_EQUALS -> {
+                return date.before(compareDate) || date.equals(compareDate);
+            }
+            case NOT_EQUAL -> {
+                return !date.equals(compareDate);
+            }
+            default ->
+                // ends_before, starts_after, approximate - do not work for single date parameters
+                throw new UnsupportedOperationException("Unsupported DateTime comparison operation " + param.getPrefix().getValue());
+        }
     }
 
     default boolean isMatchToken(TokenParam param, IBase pathResult) {

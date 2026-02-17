@@ -39,6 +39,8 @@ public class R4SupportingEvidenceExtension {
     private static final String EXT_CQF_CQL_TYPE = "http://hl7.org/fhir/StructureDefinition/cqf-cqlType";
     private static final String EXT_CQF_IS_EMPTY_LIST = "http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList";
 
+    private R4SupportingEvidenceExtension() {}
+
     /**
      * Produces ONE cqf-supportingEvidence extension PER SupportingEvidenceDef, and adds
      * each to reportPopulation.extension.

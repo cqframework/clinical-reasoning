@@ -26,6 +26,8 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 
 public class KnowledgeArtifactProcessor {
 
+    private KnowledgeArtifactProcessor() {}
+
     public static final String releaseLabelUrl = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
     public static final String releaseDescriptionUrl =
             "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
@@ -123,7 +125,6 @@ public class KnowledgeArtifactProcessor {
                                 priority.setValue(routine);
                             });
         }
-        ;
     }
 
     private static Map<String, ValueSet> populateUrlValueSetMap(List<BundleEntryComponent> bundleEntries) {

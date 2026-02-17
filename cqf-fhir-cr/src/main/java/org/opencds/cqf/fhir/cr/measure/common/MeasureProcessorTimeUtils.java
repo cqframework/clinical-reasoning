@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 public class MeasureProcessorTimeUtils {
     private static final Logger logger = LoggerFactory.getLogger(MeasureProcessorTimeUtils.class);
 
+    private MeasureProcessorTimeUtils() {}
+
     /**
      * method used to convert measurement period Interval object into ZonedDateTime
      * @param interval measurementPeriod interval

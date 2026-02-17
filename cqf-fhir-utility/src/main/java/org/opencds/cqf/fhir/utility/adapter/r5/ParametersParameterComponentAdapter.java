@@ -90,6 +90,11 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
+    public boolean hasPart(String name) {
+        return this.getParametersParameterComponent().hasPart(name);
+    }
+
+    @Override
     public boolean hasResource() {
         return this.getParametersParameterComponent().hasResource();
     }

@@ -27,7 +27,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CpgOperationProviderIT extends BaseCrR4TestServer {
+class CqlOperationProviderIT extends BaseCrR4TestServer {
     @BeforeEach
     void setup() {
         var requestDetails = setupRequestDetails();
@@ -38,7 +38,7 @@ class CpgOperationProviderIT extends BaseCrR4TestServer {
     }
 
     @Test
-    void cpgProviderTest() {
+    void cqlProviderTest() {
         // reuse loaded resources for all tests
         assertTrue(cqlExecutionProviderTestSimpleDate());
         cqlExecutionProviderTestSimpleArithmetic();
@@ -96,77 +96,76 @@ class CpgOperationProviderIT extends BaseCrR4TestServer {
     }
 
     void cqlExecutionProviderTestReferencedLibrary() {
-        // execute cql expression from referenced library on subject
-        Parameters libraryParameter = parameters(
-                canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library|0.0.1"),
-                stringPart("name", "SimpleR4Library"));
         Parameters params = parameters(
                 stringPart("subject", "SimplePatient"),
-                part("library", libraryParameter),
+                part(
+                        "library",
+                        canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library|0.0.1"),
+                        stringPart("name", "SimpleR4Library")),
                 stringPart("expression", "SimpleR4Library.simpleBooleanExpression"));
 
         Parameters results = runCqlExecution(params);
-        assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+        assertInstanceOf(BooleanType.class, results.getParameter("return").getValue());
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
 
     void cqlExecutionProviderTestDataBundle() {
         // execute cql expression from library over data from bundle with no subject
-        Parameters libraryParameter = parameters(
-                canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
-                stringPart("name", "SimpleR4Library"));
         var data = (Bundle) readResource("SimpleDataBundle.json");
         Parameters params = parameters(
-                part("library", libraryParameter),
+                part(
+                        "library",
+                        canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
+                        stringPart("name", "SimpleR4Library")),
                 stringPart("expression", "SimpleR4Library.\"observationRetrieve\""),
                 part("data", data),
                 booleanPart("useServerData", false));
 
         Parameters results = runCqlExecution(params);
-        assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
+        assertInstanceOf(Observation.class, results.getParameter().get(0).getResource());
     }
 
     void cqlExecutionProviderTestDataBundleWithSubject() {
         // execute cql expression from library over data from bundle with subject
-        Parameters libraryParameter = parameters(
-                canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
-                stringPart("name", "SimpleR4Library"));
         var data = (Bundle) readResource("SimpleDataBundle.json");
         Parameters params = parameters(
                 stringPart("subject", "SimplePatient"),
-                part("library", libraryParameter),
+                part(
+                        "library",
+                        canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
+                        stringPart("name", "SimpleR4Library")),
                 stringPart("expression", "SimpleR4Library.\"observationRetrieve\""),
                 part("data", data),
                 booleanPart("useServerData", false));
         Parameters results = runCqlExecution(params);
-        assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
+        assertInstanceOf(Observation.class, results.getParameter().get(0).getResource());
     }
 
     void cqlExecutionProviderTestSimpleParameters() {
-        // execute inline cql date expression with input valuemv
+        // execute inline cql date expression with input value
         Parameters evaluationParams = parameters(datePart("%inputDate", "2019-11-01"));
         Parameters params = parameters(
                 stringPart("expression", "year from %inputDate before 2020"), part("parameters", evaluationParams));
         Parameters results = runCqlExecution(params);
-        assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+        assertInstanceOf(BooleanType.class, results.getParameter("return").getValue());
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
 
     void cqlExecutionProviderTestExpression() {
         // execute cql expression from referenced library
-        Parameters libraryParameter = parameters(
-                canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
-                stringPart("name", "SimpleR4Library"));
         Parameters params = parameters(
                 stringPart("subject", "SimplePatient"),
-                part("library", libraryParameter),
+                part(
+                        "library",
+                        canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
+                        stringPart("name", "SimpleR4Library")),
                 stringPart("expression", "SimpleR4Library.\"Numerator\""));
 
         Parameters results = runCqlExecution(params);
 
         assertFalse(results.isEmpty());
         assertThat(results.getParameter()).hasSize(1);
-        assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+        assertInstanceOf(BooleanType.class, results.getParameter("return").getValue());
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
 

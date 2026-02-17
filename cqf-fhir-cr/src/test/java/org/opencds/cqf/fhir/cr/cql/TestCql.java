@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.library;
+package org.opencds.cqf.fhir.cr.cql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -8,7 +8,6 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
-import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -34,19 +33,15 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
-import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
-import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-public class TestLibrary {
+public class TestCql {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/shared";
 
     private static InputStream open(String asset) {
-        var path = Path.of(getResourcePath(TestLibrary.class) + "/" + CLASS_PATH + "/" + asset);
+        var path = Path.of(getResourcePath(TestCql.class) + "/" + CLASS_PATH + "/" + asset);
         var file = path.toFile();
         try {
             return new FileInputStream(file);
@@ -88,7 +83,7 @@ public class TestLibrary {
             return this;
         }
 
-        public LibraryProcessor buildProcessor(IRepository repository) {
+        public CqlProcessor buildProcessor(IRepository repository) {
             if (repository instanceof IgRepository igRepository) {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
@@ -104,7 +99,7 @@ public class TestLibrary {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
-            return new LibraryProcessor(repository, crSettings);
+            return new CqlProcessor(repository, crSettings);
         }
 
         public When when() {
@@ -115,53 +110,46 @@ public class TestLibrary {
     @SuppressWarnings("UnstableApiUsage")
     public static class When {
         private final IRepository repository;
-        private final LibraryProcessor processor;
+        private final CqlProcessor processor;
         private final IParser jsonParser;
 
-        private String libraryId;
-        private String libraryUrl;
-
-        private String subjectId;
-        private List<String> expression;
+        private String subject;
+        private String expression;
         private boolean useServerData;
         private IRepository dataRepository;
         private IRepository contentRepository;
         private IRepository terminologyRepository;
         private IBaseBundle additionalData;
-        private List<IBaseBackboneElement> prefetchData;
+        private List<? extends IBaseBackboneElement> prefetchData;
         private IIdType additionalDataId;
         private IBaseParameters parameters;
-        private Boolean isPackagePut;
+        private List<? extends IBaseBackboneElement> library;
+        private String cqlContent;
 
-        public When(IRepository repository, LibraryProcessor processor) {
+        public When(IRepository repository, CqlProcessor processor) {
             this.repository = repository;
             this.processor = processor;
             useServerData = true;
             jsonParser = repository.fhirContext().newJsonParser();
         }
 
-        public When libraryId(String id) {
-            libraryId = id;
+        public When subject(String id) {
+            subject = id;
             return this;
         }
 
-        public When libraryUrl(String url) {
-            libraryUrl = url;
-            return this;
-        }
-
-        public When subjectId(String id) {
-            subjectId = id;
-            return this;
-        }
-
-        public When expression(List<String> value) {
+        public When expression(String value) {
             expression = value;
             return this;
         }
 
         public When useServerData(boolean value) {
             useServerData = value;
+            return this;
+        }
+
+        public When cqlContent(String value) {
+            cqlContent = value;
             return this;
         }
 
@@ -217,31 +205,6 @@ public class TestLibrary {
             return this;
         }
 
-        public When isPut(Boolean value) {
-            isPackagePut = value;
-            return this;
-        }
-
-        public GeneratedPackage thenPackage() {
-            if (isPackagePut == null) {
-                return new GeneratedPackage(
-                        processor.packageLibrary(
-                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId))),
-                        repository.fhirContext());
-            } else {
-                return new GeneratedPackage(
-                        processor.packageLibrary(
-                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)),
-                                isPackagePut),
-                        repository.fhirContext());
-            }
-        }
-
-        public DataRequirementsLibrary thenDataRequirements() {
-            return new DataRequirementsLibrary(processor.dataRequirements(
-                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Library", libraryId)), parameters));
-        }
-
         public Evaluation thenEvaluate() {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
@@ -249,25 +212,14 @@ public class TestLibrary {
             return new Evaluation(
                     repository,
                     processor.evaluate(
-                            Eithers.for3(
-                                    libraryUrl == null
-                                            ? null
-                                            : canonicalTypeForVersion(
-                                                    repository
-                                                            .fhirContext()
-                                                            .getVersion()
-                                                            .getVersion(),
-                                                    libraryUrl),
-                                    libraryId == null
-                                            ? null
-                                            : Ids.newId(repository.fhirContext(), "Library", libraryId),
-                                    null),
-                            subjectId,
+                            subject,
                             expression,
                             parameters,
+                            library,
                             useServerData,
                             additionalData,
                             prefetchData,
+                            cqlContent,
                             dataRepository,
                             contentRepository,
                             terminologyRepository));

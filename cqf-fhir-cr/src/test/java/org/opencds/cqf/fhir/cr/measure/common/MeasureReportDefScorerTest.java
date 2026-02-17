@@ -2299,4 +2299,344 @@ class MeasureReportDefScorerTest {
         // VERIFY: COUNT aggregation = 7.0
         assertEquals(7.0, groupDef.getScore(), 0.001);
     }
+
+    // ============================================================================
+    // Partial-Null Stratum Aggregation Result Tests (fix: persist before null check)
+    // ============================================================================
+
+    @Test
+    void testScoreStratifier_RatioWithObservations_PartialNullStratum_NumeratorOnly() {
+        // Setup: RCV measure with a stratum where numerator has observations but denominator does NOT.
+        // This tests the fix: aggregation results are persisted BEFORE the null check,
+        // so the numerator result is saved even when denominator is null.
+        // Stratum: subjects p1, p2
+        // Numerator obs for p1 and p2: SUM = 10+20 = 30
+        // Denominator obs: NONE for p1 or p2
+
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
+
+        // Numerator MEASUREOBSERVATION with observations for p1 and p2
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                booleanBasis,
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        Map<String, QuantityDef> numObs1 = new HashMap<>();
+        numObs1.put("p1", new QuantityDef(10.0));
+        numeratorMeasureObs.addResource("p1", numObs1);
+        Map<String, QuantityDef> numObs2 = new HashMap<>();
+        numObs2.put("p2", new QuantityDef(20.0));
+        numeratorMeasureObs.addResource("p2", numObs2);
+
+        // Denominator MEASUREOBSERVATION with NO observations for p1 or p2
+        // (observations exist for other subjects, e.g. p3, but not in this stratum)
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                booleanBasis,
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Only add denominator obs for p3 (NOT in this stratum)
+        Map<String, QuantityDef> denObs3 = new HashMap<>();
+        denObs3.put("p3", new QuantityDef(50.0));
+        denominatorMeasureObs.addResource("p3", denObs3);
+
+        // Stratum populations: subjects p1, p2
+        StratumPopulationDef stratumNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p1", "p2"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef stratumDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p1", "p2"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratifierComponentDef component =
+                new StratifierComponentDef("test-component", createTextOnlyConcept("Test"), "Test");
+        MeasureObservationStratumCache cache = new MeasureObservationStratumCache(stratumNumObs, stratumDenObs);
+
+        StratumDef stratum = new StratumDef(
+                List.of(stratumNumObs, stratumDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("value1"), component)),
+                Set.of("p1", "p2"),
+                cache);
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "strat-1", createTextOnlyConcept("Test Stratifier"), "Test", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(stratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("RCV Partial Null - Numerator Only"),
+                List.of(stratifierDef),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        // Pre-scoring: no aggregation results
+        assertNull(stratumNumObs.getAggregationResult());
+        assertNull(stratumDenObs.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-num-only", groupDef);
+
+        // VERIFY: Numerator aggregation result IS persisted (even though denominator is null)
+        assertNotNull(
+                stratumNumObs.getAggregationResult(),
+                "Numerator stratum aggregation result should be set even when denominator is null");
+        assertEquals(30.0, stratumNumObs.getAggregationResult(), 0.001);
+
+        // VERIFY: Denominator aggregation result is null (no observations for stratum subjects)
+        assertNull(
+                stratumDenObs.getAggregationResult(),
+                "Denominator stratum aggregation result should be null (no observations for stratum subjects)");
+
+        // VERIFY: Stratum score is null (can't compute ratio without both sides)
+        assertNull(stratum.getScore(), "Stratum score should be null when denominator has no observations");
+    }
+
+    @Test
+    void testScoreStratifier_RatioWithObservations_PartialNullStratum_DenominatorOnly() {
+        // Setup: RCV measure with a stratum where denominator has observations but numerator does NOT.
+        // This tests the fix: aggregation results are persisted BEFORE the null check,
+        // so the denominator result is saved even when numerator is null.
+        // Stratum: subjects p1, p2
+        // Numerator obs: NONE for p1 or p2
+        // Denominator obs for p1 and p2: SUM = 15+25 = 40
+
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
+
+        // Numerator MEASUREOBSERVATION with NO observations for p1 or p2
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                booleanBasis,
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Only add numerator obs for p3 (NOT in this stratum)
+        Map<String, QuantityDef> numObs3 = new HashMap<>();
+        numObs3.put("p3", new QuantityDef(99.0));
+        numeratorMeasureObs.addResource("p3", numObs3);
+
+        // Denominator MEASUREOBSERVATION with observations for p1 and p2
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                booleanBasis,
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        Map<String, QuantityDef> denObs1 = new HashMap<>();
+        denObs1.put("p1", new QuantityDef(15.0));
+        denominatorMeasureObs.addResource("p1", denObs1);
+        Map<String, QuantityDef> denObs2 = new HashMap<>();
+        denObs2.put("p2", new QuantityDef(25.0));
+        denominatorMeasureObs.addResource("p2", denObs2);
+
+        // Stratum populations: subjects p1, p2
+        StratumPopulationDef stratumNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p1", "p2"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef stratumDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p1", "p2"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratifierComponentDef component =
+                new StratifierComponentDef("test-component", createTextOnlyConcept("Test"), "Test");
+        MeasureObservationStratumCache cache = new MeasureObservationStratumCache(stratumNumObs, stratumDenObs);
+
+        StratumDef stratum = new StratumDef(
+                List.of(stratumNumObs, stratumDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("value1"), component)),
+                Set.of("p1", "p2"),
+                cache);
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "strat-1", createTextOnlyConcept("Test Stratifier"), "Test", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(stratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("RCV Partial Null - Denominator Only"),
+                List.of(stratifierDef),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        // Pre-scoring: no aggregation results
+        assertNull(stratumNumObs.getAggregationResult());
+        assertNull(stratumDenObs.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-den-only", groupDef);
+
+        // VERIFY: Numerator aggregation result is null (no observations for stratum subjects)
+        assertNull(
+                stratumNumObs.getAggregationResult(),
+                "Numerator stratum aggregation result should be null (no observations for stratum subjects)");
+
+        // VERIFY: Denominator aggregation result IS persisted (even though numerator is null)
+        assertNotNull(
+                stratumDenObs.getAggregationResult(),
+                "Denominator stratum aggregation result should be set even when numerator is null");
+        assertEquals(40.0, stratumDenObs.getAggregationResult(), 0.001);
+
+        // VERIFY: Stratum score is null (can't compute ratio without both sides)
+        assertNull(stratum.getScore(), "Stratum score should be null when numerator has no observations");
+    }
+
+    @Test
+    void testScoreStratifier_RatioWithObservations_PartialNullStratum_BothNull() {
+        // Setup: RCV measure with a stratum where NEITHER numerator NOR denominator has observations.
+        // Stratum: subjects p1, p2
+        // Numerator obs: NONE for p1 or p2
+        // Denominator obs: NONE for p1 or p2
+
+        CodeDef booleanBasis = createBooleanBasisCode();
+        PopulationDef initialPopulation =
+                createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef numeratorPop =
+                createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2"), booleanBasis);
+        PopulationDef denominatorPop =
+                createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
+
+        // Numerator MEASUREOBSERVATION with NO observations for stratum subjects
+        ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef numeratorMeasureObs = new PopulationDef(
+                "num-obs-1",
+                numObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumeratorExpression",
+                booleanBasis,
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Only add numerator obs for p3 (NOT in stratum)
+        Map<String, QuantityDef> numObs3 = new HashMap<>();
+        numObs3.put("p3", new QuantityDef(99.0));
+        numeratorMeasureObs.addResource("p3", numObs3);
+
+        // Denominator MEASUREOBSERVATION with NO observations for stratum subjects
+        ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
+        PopulationDef denominatorMeasureObs = new PopulationDef(
+                "den-obs-1",
+                denObsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenominatorExpression",
+                booleanBasis,
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                null);
+
+        // Only add denominator obs for p3 (NOT in stratum)
+        Map<String, QuantityDef> denObs3 = new HashMap<>();
+        denObs3.put("p3", new QuantityDef(50.0));
+        denominatorMeasureObs.addResource("p3", denObs3);
+
+        // Stratum populations: subjects p1, p2
+        StratumPopulationDef stratumNumObs = new StratumPopulationDef(
+                numeratorMeasureObs,
+                Set.of("p1", "p2"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+        StratumPopulationDef stratumDenObs = new StratumPopulationDef(
+                denominatorMeasureObs,
+                Set.of("p1", "p2"),
+                Set.of(),
+                List.of(),
+                MeasureStratifierType.VALUE,
+                booleanBasis);
+
+        StratifierComponentDef component =
+                new StratifierComponentDef("test-component", createTextOnlyConcept("Test"), "Test");
+        MeasureObservationStratumCache cache = new MeasureObservationStratumCache(stratumNumObs, stratumDenObs);
+
+        StratumDef stratum = new StratumDef(
+                List.of(stratumNumObs, stratumDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("value1"), component)),
+                Set.of("p1", "p2"),
+                cache);
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "strat-1", createTextOnlyConcept("Test Stratifier"), "Test", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(stratum));
+
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("RCV Partial Null - Both Null"),
+                List.of(stratifierDef),
+                List.of(initialPopulation, numeratorPop, denominatorPop, numeratorMeasureObs, denominatorMeasureObs),
+                MeasureScoring.RATIO,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+
+        // Pre-scoring: no aggregation results
+        assertNull(stratumNumObs.getAggregationResult());
+        assertNull(stratumDenObs.getAggregationResult());
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-both", groupDef);
+
+        // VERIFY: Both aggregation results are null (no observations for stratum subjects)
+        assertNull(
+                stratumNumObs.getAggregationResult(),
+                "Numerator stratum aggregation result should be null (no observations for stratum subjects)");
+        assertNull(
+                stratumDenObs.getAggregationResult(),
+                "Denominator stratum aggregation result should be null (no observations for stratum subjects)");
+
+        // VERIFY: Stratum score is null
+        assertNull(stratum.getScore(), "Stratum score should be null when neither side has observations");
+    }
 }

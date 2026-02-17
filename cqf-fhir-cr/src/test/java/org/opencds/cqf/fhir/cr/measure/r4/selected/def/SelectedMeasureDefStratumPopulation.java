@@ -151,6 +151,40 @@ public class SelectedMeasureDefStratumPopulation<P>
         return this;
     }
 
+    // ==================== Aggregation Result Assertions ====================
+
+    /**
+     * Assert the per-stratum aggregation result value.
+     *
+     * @param expectedAggregationResult expected aggregation result
+     * @return this SelectedMeasureDefStratumPopulation for chaining
+     */
+    public SelectedMeasureDefStratumPopulation<P> hasAggregationResult(Double expectedAggregationResult) {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        final Double aggregationResult = value().getAggregationResult();
+        assertNotNull(
+                aggregationResult,
+                "StratumPopulationDef aggregation result is null, expected: " + expectedAggregationResult);
+        assertEquals(
+                expectedAggregationResult, aggregationResult, 0.001, "Stratum population aggregation result mismatch");
+        return this;
+    }
+
+    /**
+     * Assert that the per-stratum aggregation result is null.
+     *
+     * @return this SelectedMeasureDefStratumPopulation for chaining
+     */
+    public SelectedMeasureDefStratumPopulation<P> hasNoAggregationResult() {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        assertNull(
+                value().getAggregationResult(),
+                "StratumPopulationDef aggregation result should be null but was: " + value().getAggregationResult());
+        return this;
+    }
+
+    // ==================== Aggregate Method Assertions ====================
+
     public SelectedMeasureDefStratumPopulation<P> hasNoAggregateMethod() {
         return hasAggregateMethod(null);
     }

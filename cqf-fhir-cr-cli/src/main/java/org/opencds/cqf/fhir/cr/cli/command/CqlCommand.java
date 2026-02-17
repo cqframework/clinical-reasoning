@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import kotlin.Unit;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams.LibraryParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.EngineFactory.EngineBundle;
@@ -85,13 +86,13 @@ public class CqlCommand implements Callable<Integer> {
                     var contextParameter = new kotlin.Pair<String, Object>(sc.name(), sc.value());
                     var paramBuilder = new EvaluationParams.Builder();
                     paramBuilder.setContextParameter(contextParameter);
-                    if (expressions == null || expressions.isEmpty()) {
-                        paramBuilder.library(identifier, null);
-                    } else {
+                    if (expressions != null && !expressions.isEmpty()) {
                         paramBuilder.library(identifier, builder -> {
                             builder.expressions(expressions);
                             return Unit.INSTANCE;
                         });
+                    } else {
+                        paramBuilder.library(identifier, new LibraryParams.Builder().build());
                     }
 
                     var cqlResult = bundle.engine().evaluate(paramBuilder.build());

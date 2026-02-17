@@ -809,19 +809,28 @@ public class MeasureMultiSubjectEvaluator {
             PopulationDef populationDef) {
         // Check if we have composite row keys for NON_SUBJECT_VALUE stratifiers
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
-            // Extract resource IDs from row keys that have input parameters (function-based)
-            Set<String> stratumResourceIds = rowKeys.stream()
+            final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
+            boolean isResourceType = resourceType != null;
+            boolean isPrimitiveBasis = !isResourceType;
+
+            // Convert row keys to SubjectResourceKey for type-safe comparison
+            // For FHIR resources: uses resource ID only (globally unique)
+            // For primitive types: includes subject context (same value can appear for multiple patients)
+            List<SubjectResourceKey> stratumResourceKeys = rowKeys.stream()
                     .filter(StratifierRowKey::hasInputParam)
-                    .map(key -> key.inputParamId().orElseThrow())
-                    .collect(Collectors.toSet());
+                    .map(key -> SubjectResourceKey.fromRowKey(key, isPrimitiveBasis))
+                    .toList();
 
-            if (!stratumResourceIds.isEmpty()) {
-                // Get all population resource IDs
-                Set<String> populationResourceIds = getPopulationResourceIdSet(fhirContext, groupDef, populationDef);
+            if (!stratumResourceKeys.isEmpty()) {
+                // Get all population resource keys using the same SubjectResourceKey type
+                Set<SubjectResourceKey> populationResourceKeys =
+                        getPopulationResourceKeySet(fhirContext, groupDef, populationDef);
 
-                // Intersect stratum resource IDs with population resource IDs
-                return stratumResourceIds.stream()
-                        .filter(populationResourceIds::contains)
+                // Intersect stratum resource keys with population resource keys
+                // The record's natural equality handles the comparison correctly
+                return stratumResourceKeys.stream()
+                        .filter(populationResourceKeys::contains)
+                        .map(SubjectResourceKey::resourceValue)
                         .toList();
             }
 
@@ -879,42 +888,61 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Get all resource IDs from a population as a Set for efficient intersection.
+     * Get resource keys from a population as a Set of {@link SubjectResourceKey} for efficient intersection.
+     *
+     * <p>For FHIR resource types (like Encounter), returns keys with only the resource ID since they
+     * are globally unique. For primitive types (like Date), returns keys with both subject and value
+     * to preserve subject-specific results where the same value can legitimately appear for multiple subjects.
+     *
+     * <p><strong>IMPORTANT:</strong> PopulationDef.subjectResources are keyed on UNQUALIFIED patient IDs
+     * (e.g., "patient1"), but StratifierRowKey uses QUALIFIED IDs (e.g., "Patient/patient1").
+     * For primitive types, this method qualifies the subject ID to ensure proper matching.
      *
      * <p>For MEASUREOBSERVATION populations, the subjectResources contain Set&lt;Map&lt;inputResource, outputValue&gt;&gt;
      * so we extract the keys (input resources) from those maps.
      */
-    private static Set<String> getPopulationResourceIdSet(
+    private static Set<SubjectResourceKey> getPopulationResourceKeySet(
             FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef) {
         final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
         boolean isResourceType = resourceType != null;
-        Set<String> resourceIds = new HashSet<>();
+        Set<SubjectResourceKey> resourceKeys = new HashSet<>();
 
         if (populationDef.getSubjectResources() != null) {
-            for (Set<Object> resources : populationDef.getSubjectResources().values()) {
+            for (var entry : populationDef.getSubjectResources().entrySet()) {
+                String subjectId = entry.getKey();
+                // Qualify the subject ID to match the format used in StratifierRowKey (only needed for primitive types)
+                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+                Set<Object> resources = entry.getValue();
                 if (resources != null) {
                     // For MEASUREOBSERVATION, resources are Map<inputResource, outputValue>
                     // We need to extract the keys (input resources)
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+                        // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
                                 .filter(Map.class::isInstance)
                                 .map(m -> (Map<?, ?>) m)
                                 .flatMap(m -> m.keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)
-                                .forEach(resourceIds::add);
+                                .map(SubjectResourceKey::resourceOnly)
+                                .forEach(resourceKeys::add);
                     } else if (isResourceType) {
+                        // FHIR resource types have globally unique IDs - no subject qualification needed
                         resources.stream()
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)
-                                .forEach(resourceIds::add);
+                                .map(SubjectResourceKey::resourceOnly)
+                                .forEach(resourceKeys::add);
                     } else {
-                        resources.stream().map(Object::toString).forEach(resourceIds::add);
+                        // Primitive types (like Date) - include subject context to preserve duplicates
+                        resources.stream()
+                                .map(obj -> SubjectResourceKey.of(qualifiedSubject, obj.toString()))
+                                .forEach(resourceKeys::add);
                     }
                 }
             }
         }
-        return resourceIds;
+        return resourceKeys;
     }
 
     /**

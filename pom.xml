@@ -12,7 +12,6 @@
     <description>FHIR Clinical Reasoning Implementations</description>
     <url>https://github.com/cqframework/clinical-reasoning/tree/master</url>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

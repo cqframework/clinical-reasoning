@@ -8,6 +8,9 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 
 public class R4MeasureScoringTypePopulations {
+
+    private R4MeasureScoringTypePopulations() {}
+
     public enum PROPORTION_ALLOWED {
         INITIALPOPULATION(MeasurePopulationType.INITIALPOPULATION),
         DENOMINATOR(MeasurePopulationType.DENOMINATOR),

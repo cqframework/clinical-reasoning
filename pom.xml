@@ -36,6 +36,10 @@
         <sonar.projectKey>cqframework_clinical-reasoning</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
+        <!-- sonarqube use java 17 (we build with 21 in build.yml) -->
+        <sonar.java.source>17</sonar.java.source>
+        <sonar.java.target>17</sonar.java.target>
+
         <!-- Coverage settings for jacoco -->
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>

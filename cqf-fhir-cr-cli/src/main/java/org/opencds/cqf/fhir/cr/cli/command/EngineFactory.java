@@ -17,6 +17,9 @@ import org.opencds.cqf.fhir.cr.cli.argument.CqlCommandArgument;
  * Shared pipeline building blocks for CLI commands.
  */
 public class EngineFactory {
+
+    private EngineFactory() {}
+
     public record EngineBundle(
             FhirContext fhirContext,
             EvaluationSettings evaluationSettings,

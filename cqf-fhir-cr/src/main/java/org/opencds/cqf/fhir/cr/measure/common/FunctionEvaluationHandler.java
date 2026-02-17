@@ -551,7 +551,8 @@ public class FunctionEvaluationHandler {
         final EvaluationFunctionRef evaluationFunctionRef =
                 buildEvaluationFunctionRef(functionExpression, functionArguments);
 
-        final Builder paramsBuilder = new Builder().library(libraryIdentifier, builder -> {
+        final Builder paramsBuilder = new Builder();
+        paramsBuilder.library(libraryIdentifier, builder -> {
             builder.expressions(evaluationFunctionRef);
             return Unit.INSTANCE;
         });

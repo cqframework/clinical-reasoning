@@ -18,12 +18,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0 #shallow clone for better sonarqube analysis
       - uses: actions/cache@v4
         with:
           path: ~/.fhir
           key: ${{ runner.os }}-fhir-${{ hashFiles('**/*.*') }}
           restore-keys: |
             ${{ runner.os }}-fhir-
+      - uses: actions/cache@v4
+        if: matrix.os == 'ubuntu-latest'
+        with:
+            path: ~/.sonar/cache
+            key: ${{ runner.os }}-sonar
+            restore-keys: ${{ runner.os }}-sonar
       - uses: actions/setup-java@v4
         with:
             distribution: 'temurin'
@@ -31,16 +39,17 @@ jobs:
             cache: 'maven'
       - name: Compile
         run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
-      - name: Tests and additional checks
+      - name: Run tests
         run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+      - name: SonarCloud Analysis
+        if: matrix.os == 'ubuntu-latest'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            SONAR_TOKEN: ${{ secrets.SONAR_QUBE_022026 }}
+        run: ./mvnw --batch-mode --no-transfer-progress sonar:sonar -Dsonar.organization=cqframework -Dsonar.projectKey=cqframework_clinical-reasoning -Dsonar.token=$SONAR_TOKEN
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
           report_paths: "**/target/surefire-reports/TEST-*.xml"
           job_name: "Check PR"
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

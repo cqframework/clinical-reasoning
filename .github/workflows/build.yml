@@ -43,10 +43,6 @@ jobs:
         with:
           report_paths: "**/target/surefire-reports/TEST-*.xml"
           job_name: "Build"
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x

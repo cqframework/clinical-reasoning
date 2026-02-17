@@ -212,7 +212,7 @@ public class R4MeasureProcessor {
     public R4MeasureProcessor(
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasureProcessorUtils measureProcessorUtils) {
+            MeasureProcessorUtils measureProcessorTimeUtils) {
         // ...
         this.measureEvaluationResultHandler =
                 new MeasureEvaluationResultHandler(

@@ -144,57 +144,40 @@ public class MeasureProcessorTimeUtils {
                 parametersMap.put(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, validatedPeriod);
             }
         } else {
-            resolveDefaultMeasurementPeriodWithLibraryStack(
-                    context, libraryIdentifiers, firstLibraryId, measureUrls, parametersMap);
+            resolveDefaultMeasurementPeriod(context, firstLibraryId, parametersMap);
         }
     }
 
     /**
-     * Resolve the CQL-default measurement period by pushing libraries onto the CQL engine stack,
-     * evaluating the parameter default, UTC-cloning the result, and popping the libraries.
-     * <p/>
-     * <b>Why the push/pop ceremony is required:</b>
-     * <p/>
-     * The CQL engine's {@code visitExpression()} — used internally by {@code visitParameterDef()} to
-     * evaluate a parameter's {@code default} expression — requires {@code state.getCurrentLibrary()}
-     * to be non-null. The library stack is accessed in two places during expression evaluation:
-     * <ol>
-     *   <li>Error handling ({@code EvaluationVisitor.kt}) — building source backtraces on exception</li>
-     *   <li>Coverage reporting ({@code State.kt}) — marking elements as visited</li>
-     * </ol>
-     * If no library is on the stack, these paths throw a {@code NullPointerException}. There is
-     * currently no CQL engine API to evaluate a parameter default without a library on the stack.
-     * <p/>
-     * <b>To remove this workaround:</b> The CQL engine needs a dedicated API such as
-     * {@code CqlEngine.resolveParameterDefault(VersionedIdentifier, String)} that internally
-     * manages the library stack, so callers don't need to push/pop libraries themselves.
+     * Resolve the CQL-default measurement period using the CQL engine's
+     * {@code resolveParameterDefault()} API, UTC-clone it, and add it to the parameters map.
      *
-     * @deprecated This method exists only because the CQL engine lacks a clean API for resolving
-     *     parameter defaults. Replace with {@code CqlEngine.resolveParameterDefault()} once it
-     *     is available in the CQL engine.
+     * @param context CQL engine context
+     * @param firstLibraryId the first library identifier to resolve the parameter against
+     * @param parametersMap mutable parameters map to add the measurement period to
      */
-    @Deprecated(forRemoval = true)
-    private static void resolveDefaultMeasurementPeriodWithLibraryStack(
-            CqlEngine context,
-            List<VersionedIdentifier> libraryIdentifiers,
-            VersionedIdentifier firstLibraryId,
-            List<String> measureUrls,
-            Map<String, Object> parametersMap) {
-        var compiledLibraries = LibraryInitHandler.initLibraries(context, libraryIdentifiers);
-        try {
-            var elmLibrary = compiledLibraries.get(0).getLibrary();
-            if (elmLibrary == null) {
-                throw new InternalErrorException(
-                        "Compiled library has no ELM content for identifier: %s, measure URLs: %s"
-                                .formatted(firstLibraryId.getId(), measureUrls));
-            }
-            var defaultPeriod = resolveAndCloneDefaultMeasurementPeriod(context, elmLibrary);
-            if (defaultPeriod != null) {
-                parametersMap.put(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, defaultPeriod);
-            }
-        } finally {
-            LibraryInitHandler.popLibraries(context, compiledLibraries);
+    private static void resolveDefaultMeasurementPeriod(
+            CqlEngine context, VersionedIdentifier firstLibraryId, Map<String, Object> parametersMap) {
+        // Pre-check: resolve the ELM library and verify the Measurement Period parameter exists.
+        // If the library can't be resolved (e.g., missing CQL/ELM content), the exception propagates.
+        var elmLibrary = context.getEnvironment().resolveLibrary(firstLibraryId);
+        if (elmLibrary == null || findMeasurementPeriodParameterDef(elmLibrary) == null) {
+            return;
         }
+
+        var result =
+                context.resolveParameterDefault(firstLibraryId, MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME);
+        if (result == null) {
+            return;
+        }
+
+        if (!(result instanceof Interval defaultPeriod)) {
+            throw new InternalErrorException(
+                    "\"Measurement Period\" default resolved to %s instead of Interval for library: %s"
+                            .formatted(result.getClass().getSimpleName(), firstLibraryId.getId()));
+        }
+
+        parametersMap.put(MeasureConstants.MEASUREMENT_PERIOD_PARAMETER_NAME, cloneIntervalWithUtc(defaultPeriod));
     }
 
     /**
@@ -237,38 +220,6 @@ public class MeasureProcessorTimeUtils {
         }
         String targetType = pointType.getName().getLocalPart();
         return convertInterval(measurementPeriod, targetType, measureUrls);
-    }
-
-    /**
-     * Resolve the CQL default measurement period, UTC-clone it, and return it.
-     * <p/>
-     * Uses the deprecated {@code CqlEngine.getEvaluationVisitor()} because no non-deprecated
-     * CQL API exists for evaluating parameter defaults. When the CQL engine exposes a stable API
-     * for this purpose, replace this method.
-     *
-     * @param context CQL engine with library on the stack
-     * @param elmLibrary the ELM library containing the parameter definition
-     * @return the UTC-cloned default measurement period, or null if no default is defined
-     */
-    @SuppressWarnings({"deprecation", "removal"})
-    @Nullable
-    public static Interval resolveAndCloneDefaultMeasurementPeriod(CqlEngine context, Library elmLibrary) {
-        ParameterDef pd = findMeasurementPeriodParameterDef(elmLibrary);
-        if (pd == null || pd.getDefault() == null) {
-            return null;
-        }
-        var libraryId = Optional.ofNullable(elmLibrary.getIdentifier())
-                .map(VersionedIdentifier::getId)
-                .orElse("unknown");
-        var evaluationVisitor = context.getEvaluationVisitor();
-        var result = evaluationVisitor.visitParameterDef(pd, context.getState());
-        if (!(result instanceof Interval defaultPeriod)) {
-            throw new InternalErrorException(
-                    "\"Measurement Period\" default resolved to %s instead of Interval for library: %s"
-                            .formatted(
-                                    result == null ? "null" : result.getClass().getSimpleName(), libraryId));
-        }
-        return cloneIntervalWithUtc(defaultPeriod);
     }
 
     /**

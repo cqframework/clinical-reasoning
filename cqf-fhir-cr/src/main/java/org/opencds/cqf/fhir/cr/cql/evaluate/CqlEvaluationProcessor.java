@@ -40,8 +40,8 @@ public class CqlEvaluationProcessor implements ICqlEvaluationProcessor {
                                 request.getSubject(),
                                 request.getReferencedLibraries(),
                                 request.getData(),
-                                null,
-                                null);
+                                request.getContextVariable(),
+                                request.getResourceVariable());
             }
 
             var engine = Engines.forRepository(repository, evaluationSettings, null);

@@ -45,9 +45,8 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
             LibraryEngine libraryEngine,
             ModelResolver modelResolver) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
+        fhirVersion = libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         this.libraryEngine = libraryEngine;
-        fhirVersion =
-                this.libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         this.subjectId = subjectId;
         if (expression == null && content == null) {
             throw new IllegalArgumentException(
@@ -87,7 +86,7 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
     }
 
     public String getSubject() {
-        return subjectId == null ? null : subjectId.getValue();
+        return getSubjectId() == null ? null : getSubjectId().getValue();
     }
 
     @Override
@@ -136,7 +135,7 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, String> resolveIncludedLibraries(List<? extends IBaseBackboneElement> includedLibraries) {
+    protected Map<String, String> resolveIncludedLibraries(List<? extends IBaseBackboneElement> includedLibraries) {
         if (includedLibraries != null && !includedLibraries.isEmpty()) {
             Map<String, String> libraries = new HashMap<>();
             includedLibraries.stream()

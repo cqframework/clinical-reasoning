@@ -23,7 +23,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
@@ -72,7 +72,7 @@ public class LibraryPackageProvider {
             @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
             @OperationParam(name = "bundleType") StringType bundleType,
             @OperationParam(name = "include") List<CodeType> include,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
@@ -128,14 +128,14 @@ public class LibraryPackageProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
     public IBaseBundle packageLibrary(
             @OperationParam(name = "id") StringType id,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
             @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
             @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
             @OperationParam(name = "bundleType") StringType bundleType,
             @OperationParam(name = "include") List<CodeType> include,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {

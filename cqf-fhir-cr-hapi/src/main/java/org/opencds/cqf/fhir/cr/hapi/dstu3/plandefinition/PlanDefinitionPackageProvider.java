@@ -20,6 +20,7 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -73,8 +74,8 @@ public class PlanDefinitionPackageProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
     public IBaseBundle packagePlanDefinition(
             @OperationParam(name = "id") StringType id,
-            @OperationParam(name = "canonical") ParametersParameterComponent canonical,
-            @OperationParam(name = "url") ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "uri") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,

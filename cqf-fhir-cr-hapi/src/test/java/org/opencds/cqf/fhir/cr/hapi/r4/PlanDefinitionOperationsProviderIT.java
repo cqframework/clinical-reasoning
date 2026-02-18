@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
@@ -47,7 +46,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
                 getFhirContext(),
                 newUrlPart(getFhirContext(), "url", url),
                 newStringPart(getFhirContext(), "version", version),
-                newPart(getFhirContext(), Reference.class, "subject", patientID),
+                newStringPart(getFhirContext(), "subject", patientID),
                 newPart(
                         getFhirContext(),
                         "parameters",

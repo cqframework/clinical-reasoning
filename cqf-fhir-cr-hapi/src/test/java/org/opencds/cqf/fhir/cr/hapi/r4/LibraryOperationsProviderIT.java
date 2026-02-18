@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -43,7 +42,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         var parameters = newParameters(
                 getFhirContext(),
                 newUrlPart(getFhirContext(), "url", url),
-                newPart(getFhirContext(), Reference.class, "subject", patientId),
+                newStringPart(getFhirContext(), "subject", patientId),
                 newPart(
                         getFhirContext(),
                         "parameters",

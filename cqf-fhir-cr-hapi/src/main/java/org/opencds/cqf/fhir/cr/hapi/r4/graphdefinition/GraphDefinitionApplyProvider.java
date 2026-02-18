@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -14,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -83,10 +84,10 @@ public class GraphDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = GraphDefinition.class)
     public IBaseResource apply(
             @IdParam IdType id,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
-            @OperationParam(name = "encounter") Parameters.ParametersParameterComponent encounter,
-            @OperationParam(name = "practitioner") Parameters.ParametersParameterComponent practitioner,
-            @OperationParam(name = "organization") Parameters.ParametersParameterComponent organization,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "encounter") StringType encounter,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "organization") StringType organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -96,9 +97,9 @@ public class GraphDefinitionApplyProvider {
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
             @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "periodStart") StringType periodStart,
             @OperationParam(name = "periodEnd") StringType periodEnd,
             RequestDetails requestDetails)
@@ -107,10 +108,10 @@ public class GraphDefinitionApplyProvider {
         var applyRequestBuilder = graphDefinitionApplyRequestBuilderFactory
                 .createApplyRequestBuilder(requestDetails)
                 .withGraphDefinitionId(id)
-                .withSubject(getStringOrReferenceValue(fhirVersion, subject))
-                .withEncounter(getStringOrReferenceValue(fhirVersion, encounter))
-                .withPractitioner(getStringOrReferenceValue(fhirVersion, practitioner))
-                .withOrganization(getStringOrReferenceValue(fhirVersion, organization))
+                .withSubject(getStringValue(subject))
+                .withEncounter(getStringValue(encounter))
+                .withPractitioner(getStringValue(practitioner))
+                .withOrganization(getStringValue(organization))
                 .withUserType(userType)
                 .withUserLanguage(userLanguage)
                 .withUserTaskContext(userTaskContext)
@@ -179,13 +180,13 @@ public class GraphDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = GraphDefinition.class)
     public IBaseResource apply(
             @OperationParam(name = "graphDefinition") GraphDefinition graphDefinition,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
-            @OperationParam(name = "encounter") Parameters.ParametersParameterComponent encounter,
-            @OperationParam(name = "practitioner") Parameters.ParametersParameterComponent practitioner,
-            @OperationParam(name = "organization") Parameters.ParametersParameterComponent organization,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "encounter") StringType encounter,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "organization") StringType organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -194,10 +195,10 @@ public class GraphDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "periodStart") StringType periodStart,
             @OperationParam(name = "periodEnd") StringType periodEnd,
             RequestDetails requestDetails)
@@ -207,10 +208,10 @@ public class GraphDefinitionApplyProvider {
                 .createApplyRequestBuilder(requestDetails)
                 .withCanonicalType(getCanonicalType(fhirVersion, canonical, url, version))
                 .withGraphDefinition(graphDefinition)
-                .withSubject(getStringOrReferenceValue(fhirVersion, subject))
-                .withEncounter(getStringOrReferenceValue(fhirVersion, encounter))
-                .withPractitioner(getStringOrReferenceValue(fhirVersion, practitioner))
-                .withOrganization(getStringOrReferenceValue(fhirVersion, organization))
+                .withSubject(getStringValue(subject))
+                .withEncounter(getStringValue(encounter))
+                .withPractitioner(getStringValue(practitioner))
+                .withOrganization(getStringValue(organization))
                 .withUserType(userType)
                 .withUserLanguage(userLanguage)
                 .withUserTaskContext(userTaskContext)

@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.hapi.r4.plandefinition;
 
 import static ca.uhn.fhir.rest.annotation.OperationParam.MAX_UNLIMITED;
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -15,15 +15,18 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.stereotype.Component;
 
@@ -75,10 +78,10 @@ public class PlanDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
     public IBaseResource apply(
             @IdParam IdType id,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
-            @OperationParam(name = "encounter") Parameters.ParametersParameterComponent encounter,
-            @OperationParam(name = "practitioner") Parameters.ParametersParameterComponent practitioner,
-            @OperationParam(name = "organization") Parameters.ParametersParameterComponent organization,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "encounter") StringType encounter,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "organization") StringType organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -87,20 +90,20 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return planDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
                         Eithers.forMiddle3(id),
-                        getStringOrReferenceValue(fhirVersion, subject),
-                        getStringOrReferenceValue(fhirVersion, encounter),
-                        getStringOrReferenceValue(fhirVersion, practitioner),
-                        getStringOrReferenceValue(fhirVersion, organization),
+                        getStringValue(subject),
+                        getStringValue(encounter),
+                        getStringValue(practitioner),
+                        getStringValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -155,13 +158,13 @@ public class PlanDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_APPLY, idempotent = true, type = PlanDefinition.class)
     public IBaseResource apply(
             @OperationParam(name = "planDefinition") PlanDefinition planDefinition,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
-            @OperationParam(name = "encounter") Parameters.ParametersParameterComponent encounter,
-            @OperationParam(name = "practitioner") Parameters.ParametersParameterComponent practitioner,
-            @OperationParam(name = "organization") Parameters.ParametersParameterComponent organization,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "encounter") StringType encounter,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "organization") StringType organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -170,20 +173,20 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return planDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(getCanonicalType(fhirVersion, canonical, url, version), null, planDefinition),
-                        getStringOrReferenceValue(fhirVersion, subject),
-                        getStringOrReferenceValue(fhirVersion, encounter),
-                        getStringOrReferenceValue(fhirVersion, practitioner),
-                        getStringOrReferenceValue(fhirVersion, organization),
+                        getStringValue(subject),
+                        getStringValue(encounter),
+                        getStringValue(practitioner),
+                        getStringValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -235,11 +238,10 @@ public class PlanDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_R5_APPLY, idempotent = true, type = PlanDefinition.class)
     public IBaseResource applyR5(
             @IdParam IdType id,
-            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED)
-                    List<Parameters.ParametersParameterComponent> subject,
-            @OperationParam(name = "encounter") Parameters.ParametersParameterComponent encounter,
-            @OperationParam(name = "practitioner") Parameters.ParametersParameterComponent practitioner,
-            @OperationParam(name = "organization") Parameters.ParametersParameterComponent organization,
+            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<StringType> subject,
+            @OperationParam(name = "encounter") StringType encounter,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "organization") StringType organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -248,22 +250,20 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return planDefinitionProcessorFactory
                 .create(requestDetails)
                 .applyR5(
                         Eithers.forMiddle3(id),
-                        subject.stream()
-                                .map(s -> getStringOrReferenceValue(fhirVersion, s))
-                                .toList(),
-                        getStringOrReferenceValue(fhirVersion, encounter),
-                        getStringOrReferenceValue(fhirVersion, practitioner),
-                        getStringOrReferenceValue(fhirVersion, organization),
+                        subject.stream().map(ParameterHelper::getStringValue).toList(),
+                        getStringValue(encounter),
+                        getStringValue(practitioner),
+                        getStringValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,
@@ -318,14 +318,13 @@ public class PlanDefinitionApplyProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_R5_APPLY, idempotent = true, type = PlanDefinition.class)
     public IBaseResource applyR5(
             @OperationParam(name = "planDefinition") PlanDefinition planDefinition,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
-            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED)
-                    List<Parameters.ParametersParameterComponent> subject,
-            @OperationParam(name = "encounter") Parameters.ParametersParameterComponent encounter,
-            @OperationParam(name = "practitioner") Parameters.ParametersParameterComponent practitioner,
-            @OperationParam(name = "organization") Parameters.ParametersParameterComponent organization,
+            @OperationParam(name = "subject", min = 1, max = MAX_UNLIMITED) List<StringType> subject,
+            @OperationParam(name = "encounter") StringType encounter,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "organization") StringType organization,
             @OperationParam(name = "userType") CodeableConcept userType,
             @OperationParam(name = "userLanguage") CodeableConcept userLanguage,
             @OperationParam(name = "userTaskContext") CodeableConcept userTaskContext,
@@ -334,22 +333,20 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters.ParametersParameterComponent> prefetchData,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return planDefinitionProcessorFactory
                 .create(requestDetails)
                 .applyR5(
                         Eithers.for3(getCanonicalType(fhirVersion, canonical, url, version), null, planDefinition),
-                        subject.stream()
-                                .map(s -> getStringOrReferenceValue(fhirVersion, s))
-                                .toList(),
-                        getStringOrReferenceValue(fhirVersion, encounter),
-                        getStringOrReferenceValue(fhirVersion, practitioner),
-                        getStringOrReferenceValue(fhirVersion, organization),
+                        subject.stream().map(ParameterHelper::getStringValue).toList(),
+                        getStringValue(encounter),
+                        getStringValue(practitioner),
+                        getStringValue(organization),
                         userType,
                         userLanguage,
                         userTaskContext,

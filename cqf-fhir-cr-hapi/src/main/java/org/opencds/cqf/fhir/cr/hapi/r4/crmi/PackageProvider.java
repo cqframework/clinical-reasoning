@@ -1,5 +1,10 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_PACKAGE;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -14,14 +19,18 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
 
 public class PackageProvider {
 
     private final IPackageServiceFactory r4PackageServiceFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public PackageProvider(IPackageServiceFactory r4PackageServiceFactory) {
         this.r4PackageServiceFactory = r4PackageServiceFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     // TODO: missing parameters from CRMI operation definition:
@@ -211,42 +220,48 @@ public class PackageProvider {
      *          For example, a measure repository SHALL include all the required library resources,
      *          but would not necessarily have the ValueSet resources referenced by the measure.
      */
-    @Operation(name = "$package", idempotent = true, global = true, type = MetadataResource.class)
-    @Description(shortDefinition = "$package", value = "Package an artifact and components / dependencies")
+    @Operation(name = CRMI_OPERATION_PACKAGE, idempotent = true, global = true, type = MetadataResource.class)
+    @Description(shortDefinition = CRMI_OPERATION_PACKAGE, value = "Package an artifact and components / dependencies")
     public Bundle packageOperation(
             @IdParam IdType id,
             // TODO: $package - should capability be CodeType?
-            @OperationParam(name = "capability") List<String> capability,
+            @OperationParam(name = "capability") List<StringType> capability,
             @OperationParam(name = "artifactVersion") List<CanonicalType> artifactVersion,
             @OperationParam(name = "checkArtifactVersion") List<CanonicalType> checkArtifactVersion,
             @OperationParam(name = "forceArtifactVersion") List<CanonicalType> forceArtifactVersion,
             @OperationParam(name = "manifest") CanonicalType manifest,
             @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
             @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
-            @OperationParam(name = "bundleType") String bundleType,
+            @OperationParam(name = "bundleType") StringType bundleType,
             // TODO: $package - should include be CodeType?
-            @OperationParam(name = "include") List<String> include,
+            @OperationParam(name = "include") List<StringType> include,
             @OperationParam(name = "packageOnly", typeName = "Boolean") IPrimitiveType<Boolean> packageOnly,
             @OperationParam(name = "artifactEndpointConfiguration")
                     Parameters.ParametersParameterComponent artifactEndpointConfiguration,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws FHIRException {
         return r4PackageServiceFactory
                 .create(requestDetails)
                 .packageOperation(
                         id,
-                        capability,
+                        capability == null
+                                ? null
+                                : capability.stream()
+                                        .map(PrimitiveType::getValue)
+                                        .toList(),
                         artifactVersion,
                         checkArtifactVersion,
                         forceArtifactVersion,
-                        include,
+                        include == null
+                                ? null
+                                : include.stream().map(PrimitiveType::getValue).toList(),
                         manifest,
                         offset,
                         count,
-                        bundleType,
+                        getStringValue(bundleType),
                         packageOnly,
                         artifactEndpointConfiguration,
-                        terminologyEndpoint);
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint));
     }
 }

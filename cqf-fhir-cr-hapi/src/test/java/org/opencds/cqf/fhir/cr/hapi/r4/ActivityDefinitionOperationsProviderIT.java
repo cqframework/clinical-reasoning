@@ -1,48 +1,33 @@
 package org.opencds.cqf.fhir.cr.hapi.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 
-import org.hl7.fhir.r4.model.BooleanType;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.r4.activitydefinition.ActivityDefinitionApplyProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class ActivityDefinitionOperationsProviderIT extends BaseCrR4TestServer {
-
-    @Autowired
-    ActivityDefinitionApplyProvider activityDefinitionApplyProvider;
-
     @Test
     void testActivityDefinitionApply() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-ActivityDefinitionTest.json");
-        var requestDetails = setupRequestDetails();
-        var result = activityDefinitionApplyProvider.apply(
-                new IdType("activityDefinition-test"),
-                null,
-                null,
-                null,
-                null,
-                "patient-1",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                new BooleanType(true),
-                null,
-                null,
-                null,
-                null,
-                requestDetails);
+        var patientId = "patient-1";
+        var parameters =
+                newParameters(getFhirContext(), newPart(getFhirContext(), Reference.class, "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("ActivityDefinition", "activityDefinition-test"))
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(MedicationRequest.class)
+                .execute();
         assertInstanceOf(MedicationRequest.class, result);
-        MedicationRequest request = (MedicationRequest) result;
-        assertTrue(request.getDoNotPerform());
+        assertTrue(result.getDoNotPerform());
+        assertEquals(String.format("Patient/%s", patientId), result.getSubject().getReference());
     }
 }

@@ -13,6 +13,7 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -78,6 +79,8 @@ public class AdapterFactory implements IAdapterFactory {
             return createPlanDefinitionAction(action);
         } else if (element instanceof RequestGroupActionComponent requestAction) {
             return createRequestAction(requestAction);
+        } else if (element instanceof ParametersParameterComponent parametersParameterComponent) {
+            return createParametersParameter(parametersParameterComponent);
         } else {
             throw new UnprocessableEntityException(
                     String.format("Unable to create an adapter for type: %s", element.fhirType()));

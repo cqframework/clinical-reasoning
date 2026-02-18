@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -10,12 +13,15 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -38,49 +44,54 @@ public class LibraryReleaseProvider {
      * @param requestDetails     the {@link RequestDetails RequestDetails}
      * @return A transaction bundle result of the updated resources
      */
-    @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
-    @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
+    @Operation(name = CRMI_OPERATION_RELEASE, idempotent = true, global = true, type = Library.class)
+    @Description(shortDefinition = CRMI_OPERATION_RELEASE, value = "Release an existing draft artifact")
     public IBaseBundle releaseLibrary(
             @IdParam IdType id,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "version") StringType version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
             @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
             @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "releaseLabel") String releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        var params = getReleaseParameters(
-                version,
-                versionBehavior,
-                latestFromTxServer,
-                requireNonExperimental,
-                terminologyEndpoint,
-                releaseLabel);
-        return libraryProcessorFactory.create(requestDetails).releaseLibrary(Eithers.for3(null, id, null), params);
+        return libraryProcessorFactory
+                .create(requestDetails)
+                .releaseLibrary(
+                        Eithers.forMiddle3(id),
+                        getReleaseParameters(
+                                getStringValue(version),
+                                versionBehavior,
+                                latestFromTxServer,
+                                requireNonExperimental,
+                                getEndpoint(fhirVersion, terminologyEndpoint),
+                                releaseLabel));
     }
 
-    @Operation(name = "$release", idempotent = true, global = true, type = Library.class)
-    @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
+    @Operation(name = CRMI_OPERATION_RELEASE, idempotent = true, global = true, type = Library.class)
+    @Description(shortDefinition = CRMI_OPERATION_RELEASE, value = "Release an existing draft artifact")
     public IBaseBundle releaseLibrary(
-            @OperationParam(name = "id") String id,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "id") StringType id,
+            @OperationParam(name = "version") StringType version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
             @OperationParam(name = "latestFromTxServer") BooleanType latestFromTxServer,
             @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "releaseLabel") String releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        var idToUse = (IdType) getIdType(fhirVersion, "Library", id);
-        var params = getReleaseParameters(
-                version,
-                versionBehavior,
-                latestFromTxServer,
-                requireNonExperimental,
-                terminologyEndpoint,
-                releaseLabel);
-        return libraryProcessorFactory.create(requestDetails).releaseLibrary(Eithers.for3(null, idToUse, null), params);
+        return libraryProcessorFactory
+                .create(requestDetails)
+                .releaseLibrary(
+                        Eithers.forMiddle3(getIdType(fhirVersion, "Library", id)),
+                        getReleaseParameters(
+                                getStringValue(version),
+                                versionBehavior,
+                                latestFromTxServer,
+                                requireNonExperimental,
+                                getEndpoint(fhirVersion, terminologyEndpoint),
+                                releaseLabel));
     }
 
     private static Parameters getReleaseParameters(
@@ -88,7 +99,7 @@ public class LibraryReleaseProvider {
             CodeType versionBehavior,
             BooleanType latestFromTxServer,
             CodeType requireNonExperimental,
-            Endpoint terminologyEndpoint,
+            IBaseResource terminologyEndpoint,
             String releaseLabel) {
         var params = new Parameters();
         if (version != null) {
@@ -106,8 +117,8 @@ public class LibraryReleaseProvider {
         if (releaseLabel != null) {
             params.addParameter("releaseLabel", releaseLabel);
         }
-        if (terminologyEndpoint != null) {
-            params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        if (terminologyEndpoint instanceof Endpoint endpoint) {
+            params.addParameter().setName("terminologyEndpoint").setResource(endpoint);
         }
         return params;
     }

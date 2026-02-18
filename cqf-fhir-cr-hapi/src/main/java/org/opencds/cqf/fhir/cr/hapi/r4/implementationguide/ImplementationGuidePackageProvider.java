@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -36,6 +37,32 @@ public class ImplementationGuidePackageProvider {
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
      *
      * @param id the id of the Resource.
+     * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
+     * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
+     * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
+     * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
+     */
+    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ImplementationGuide.class)
+    public IBaseBundle packageImplementationGuide(
+            @IdParam IdType id,
+            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "usePut") BooleanType usePut,
+            RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
+        return implementationGuideProcessorFactory
+                .create(requestDetails)
+                .packageImplementationGuide(
+                        Eithers.forMiddle3(id),
+                        packageParameters(
+                                fhirVersion,
+                                getEndpoint(fhirVersion, terminologyEndpoint),
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+    }
+
+    /**
+     * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * @param id the id of the Resource.
      * @param canonical the canonical identifier for the Resource (optionally version-specific).
      * @param url canonical URL of the Resource when invoked at the resource type level. This is exclusive with the id and canonical parameters.
      * @param version version of the Resource when invoked at the resource type level. This is exclusive with the id and canonical parameters.
@@ -46,40 +73,24 @@ public class ImplementationGuidePackageProvider {
      */
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ImplementationGuide.class)
     public IBaseBundle packageImplementationGuide(
-            @IdParam IdType id,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "id") StringType id,
+            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
+            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "version") StringType version,
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
-        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
-        var params = packageParameters(
-                fhirVersion, terminologyEndpointParam, usePut == null ? Boolean.FALSE : usePut.booleanValue());
         return implementationGuideProcessorFactory
                 .create(requestDetails)
-                .packageImplementationGuide(Eithers.for3(canonicalType, id, null), params);
-    }
-
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ImplementationGuide.class)
-    public IBaseBundle packageImplementationGuide(
-            @OperationParam(name = "id") String id,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "usePut") BooleanType usePut,
-            RequestDetails requestDetails)
-            throws InternalErrorException, FHIRException {
-        var idToUse = getIdType(fhirVersion, "Library", id);
-        var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
-        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
-        var params = packageParameters(
-                fhirVersion, terminologyEndpointParam, usePut == null ? Boolean.FALSE : usePut.booleanValue());
-        return implementationGuideProcessorFactory
-                .create(requestDetails)
-                .packageImplementationGuide(Eithers.for3(canonicalType, idToUse, null), params);
+                .packageImplementationGuide(
+                        Eithers.for3(
+                                getCanonicalType(fhirVersion, canonical, url, version),
+                                getIdType(fhirVersion, "Library", id),
+                                null),
+                        packageParameters(
+                                fhirVersion,
+                                getEndpoint(fhirVersion, terminologyEndpoint),
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
     }
 }

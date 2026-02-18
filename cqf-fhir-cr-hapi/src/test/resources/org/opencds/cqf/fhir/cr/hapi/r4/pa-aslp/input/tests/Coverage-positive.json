@@ -1,6 +1,6 @@
 {
     "resourceType": "Coverage",
-    "id": "Coverage-positive",
+    "id": "positive",
     "meta": {
         "profile": [
             "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/profile-coverage"

@@ -15,7 +15,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +38,6 @@ import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.cr.ecr.FhirResourceExistsException;
@@ -50,9 +48,6 @@ class R4ImportBundleProducerTest {
     private IRepository repository;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final IParser jsonParser = fhirContext.newJsonParser();
-
-    @Mock
-    private TransformProperties transformProperties; // Your DAO to mock
 
     @BeforeEach
     public void setUp() {
@@ -76,7 +71,7 @@ class R4ImportBundleProducerTest {
 
     @Test
     void testEnsureHttpsMalformedUrl() {
-        assertThrows(MalformedURLException.class, () -> R4ImportBundleProducer.ensureHttps("://bad-url"));
+        assertThrows(IllegalArgumentException.class, () -> R4ImportBundleProducer.ensureHttps("://bad-url"));
     }
 
     @Test

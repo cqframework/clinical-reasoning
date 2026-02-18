@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.hapi.r4.cpg;
+package org.opencds.cqf.fhir.cr.hapi.r4.cql;
 
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 

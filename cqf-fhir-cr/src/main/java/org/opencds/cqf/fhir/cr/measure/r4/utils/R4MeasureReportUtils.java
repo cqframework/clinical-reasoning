@@ -5,9 +5,11 @@ import java.util.Objects;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
@@ -173,51 +175,69 @@ public class R4MeasureReportUtils {
             @Nullable Double aggregationResult,
             @Nullable String criteriaReference) {
 
+        addAggregationResultMethodAndCriteriaRefInner(
+                measurePopulation, aggregateMethod, aggregationResult, criteriaReference);
+    }
+
+    /**
+     * Add aggregation result, method, and criteria reference extensions to a stratum population.
+     * Mirrors the group-level population overload for use with stratifier strata.
+     */
+    public static void addAggregationResultMethodAndCriteriaRef(
+            StratifierGroupPopulationComponent stratumPopulation,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable Double aggregationResult,
+            @Nullable String criteriaReference) {
+
+        addAggregationResultMethodAndCriteriaRefInner(
+                stratumPopulation, aggregateMethod, aggregationResult, criteriaReference);
+    }
+
+    private static void addAggregationResultMethodAndCriteriaRefInner(
+            Element element,
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable Double aggregationResult,
+            @Nullable String criteriaReference) {
+
         // We always copy the criteriaReference, even if there are no results
         if (criteriaReference != null) {
-            addCriteriaReferenceInner(measurePopulation, criteriaReference);
+            addCriteriaReferenceInner(element, criteriaReference);
         }
 
         if (aggregateMethod != null
                 && ContinuousVariableObservationAggregateMethod.N_A != aggregateMethod
                 && aggregationResult != null) {
 
-            addAggregateMethodInner(measurePopulation, aggregateMethod);
-            addAggregationResultInner(measurePopulation, aggregationResult);
+            addAggregateMethodInner(element, aggregateMethod);
+            addAggregationResultInner(element, aggregationResult);
         }
     }
 
     private static void addAggregateMethodInner(
-            MeasureReportGroupPopulationComponent measurePopulation,
-            ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            Element element, ContinuousVariableObservationAggregateMethod aggregateMethod) {
 
         addExtensionValueInner(
-                measurePopulation,
-                MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL,
-                new StringType(aggregateMethod.getText()));
+                element, MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL, new StringType(aggregateMethod.getText()));
     }
 
-    private static void addAggregationResultInner(
-            MeasureReportGroupPopulationComponent measurePopulation, double aggregationResult) {
+    private static void addAggregationResultInner(Element element, double aggregationResult) {
 
         addExtensionValueInner(
-                measurePopulation, MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(aggregationResult));
+                element, MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(aggregationResult));
     }
 
-    private static void addCriteriaReferenceInner(
-            MeasureReportGroupPopulationComponent measurePopulation, String criteriaReference) {
+    private static void addCriteriaReferenceInner(Element element, String criteriaReference) {
 
         addExtensionValueInner(
-                measurePopulation, MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE, new StringType(criteriaReference));
+                element, MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE, new StringType(criteriaReference));
     }
 
-    private static void addExtensionValueInner(
-            MeasureReportGroupPopulationComponent measurePopulation, String extensionUrl, Type extensionValue) {
+    private static void addExtensionValueInner(Element element, String extensionUrl, Type extensionValue) {
 
-        if (measurePopulation.hasExtension(extensionUrl)) {
-            measurePopulation.getExtensionByUrl(extensionUrl).setValue(extensionValue);
+        if (element.hasExtension(extensionUrl)) {
+            element.getExtensionByUrl(extensionUrl).setValue(extensionValue);
         } else {
-            measurePopulation.addExtension(extensionUrl, extensionValue);
+            element.addExtension(extensionUrl, extensionValue);
         }
     }
 }

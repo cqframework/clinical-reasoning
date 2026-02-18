@@ -5,31 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
-import java.util.Arrays;
-import org.hl7.fhir.r4.model.BooleanType;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnaireDataRequirementsProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePackageProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnairePopulateProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class QuestionnaireOperationsProviderIT extends BaseCrR4TestServer {
-    @Autowired
-    QuestionnairePopulateProvider questionnairePopulateProvider;
-
-    @Autowired
-    QuestionnairePackageProvider questionnairePackageProvider;
-
-    @Autowired
-    QuestionnaireDataRequirementsProvider questionnaireDataRequirementsProvider;
-
     @Test
     void testPopulate() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
@@ -38,45 +27,35 @@ class QuestionnaireOperationsProviderIT extends BaseCrR4TestServer {
         var requestDetails = setupRequestDetails();
         var fhirContextR4 = requestDetails.getFhirContext();
         var subject = "positive";
-        var context = Arrays.asList(
-                (ParametersParameterComponent) newPart(
+        var parameters = newParameters(
+                getFhirContext(),
+                newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "patient"),
                         newPart(fhirContextR4, "Reference", "content", "Patient/%s".formatted(subject))),
-                (ParametersParameterComponent) newPart(
+                newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "ServiceRequest"),
                         newPart(fhirContextR4, "Reference", "content", "ServiceRequest/SleepStudy")),
-                (ParametersParameterComponent) newPart(
+                newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "ServiceRequest"),
                         newPart(fhirContextR4, "Reference", "content", "ServiceRequest/SleepStudy2")),
-                (ParametersParameterComponent) newPart(
+                newPart(
                         fhirContextR4,
                         "context",
                         newStringPart(fhirContextR4, "name", "Coverage"),
                         newPart(fhirContextR4, "Reference", "content", "Coverage/Coverage-positive")));
-        var result = questionnairePopulateProvider.populate(
-                new IdType("Questionnaire", "ASLPA1"),
-                null,
-                null,
-                null,
-                null,
-                null,
-                context,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("Questionnaire", "ASLPA1"))
+                .named(ProviderConstants.CR_OPERATION_POPULATE)
+                .withParameters(parameters)
+                .returnResourceType(QuestionnaireResponse.class)
+                .execute();
 
         assertNotNull(result);
         assertEquals("Patient/" + subject, result.getSubject().getReference());
@@ -86,15 +65,13 @@ class QuestionnaireOperationsProviderIT extends BaseCrR4TestServer {
     @Test
     void testQuestionnairePackage() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-QuestionnairePackage.json");
-        var requestDetails = setupRequestDetails();
-        var result = questionnairePackageProvider.packageQuestionnaire(
-                "",
-                "http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1",
-                null,
-                null,
-                null,
-                new BooleanType("true"),
-                requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("Questionnaire", "ASLPA1"))
+                .named(ProviderConstants.CR_OPERATION_PACKAGE)
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
 
         assertNotNull(result);
         assertThat(result.getEntry()).hasSize(11);
@@ -106,12 +83,14 @@ class QuestionnaireOperationsProviderIT extends BaseCrR4TestServer {
     @Test
     void testDataRequirements() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-QuestionnairePackage.json");
-        var requestDetails = setupRequestDetails();
-        var result = questionnaireDataRequirementsProvider.getDataRequirements(
-                "Questionnaire/ASLPA1", null, null, null, requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("Questionnaire", "ASLPA1"))
+                .named(ProviderConstants.CR_OPERATION_DATAREQUIREMENTS)
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Library.class)
+                .execute();
         assertInstanceOf(Library.class, result);
-        assertEquals(
-                "module-definition",
-                ((Library) result).getType().getCodingFirstRep().getCode());
+        assertEquals("module-definition", result.getType().getCodingFirstRep().getCode());
     }
 }

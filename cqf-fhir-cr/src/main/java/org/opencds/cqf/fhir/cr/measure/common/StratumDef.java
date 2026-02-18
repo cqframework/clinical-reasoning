@@ -82,6 +82,13 @@ public class StratumDef {
         return stratumPop != null ? stratumPop.getCount() : 0;
     }
 
+    public StratumPopulationDef findPopulationById(String populationId) {
+        return this.stratumPopulations.stream()
+                .filter(stratumPopulation -> populationId.equals(stratumPopulation.id()))
+                .findFirst()
+                .orElse(null);
+    }
+
     /**
      * Added by Claude Sonnet 4.5 on 2025-12-03
      * Get the computed score for this stratum.

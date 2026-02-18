@@ -242,7 +242,8 @@ public class FunctionEvaluationHandler {
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
             throw new InternalErrorException(
-                    "PopulationDef criteria reference is missing for continuous variable observation");
+                    "PopulationDef criteria reference is missing for continuous variable observation for measure: %s"
+                            .formatted(measureUrl));
         }
 
         // get criteria input for results to get (measure-population, numerator, denominator)
@@ -355,7 +356,8 @@ public class FunctionEvaluationHandler {
 
         if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
             // We screwed up defining component correctly
-            throw new InternalErrorException("StratifierDef component expression is missing.");
+            throw new InternalErrorException(
+                    "StratifierDef component expression is missing for measure: %s.".formatted(measureUrl));
         }
         var stratifierExpression = componentDef.expression();
 
@@ -392,11 +394,14 @@ public class FunctionEvaluationHandler {
         for (PopulationDef popDef : nonObservationPopulations) {
 
             // retrieve group.population results to input into valueStrat function
+            final String populationExpressionName = popDef.expression();
+
             Optional<ExpressionResult> optExpressionResult =
-                    tryGetExpressionResult(popDef.expression(), evaluationResult);
+                    tryGetExpressionResult(populationExpressionName, evaluationResult);
 
             if (optExpressionResult.isEmpty()) {
-                throw new InternalErrorException("Expression result is missing for measure %s".formatted(measureUrl));
+                throw new InternalErrorException("Expression result: %s is missing for measure %s"
+                        .formatted(populationExpressionName, measureUrl));
             }
             final ExpressionResult expressionResult = optExpressionResult.get();
             final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
@@ -571,7 +576,8 @@ public class FunctionEvaluationHandler {
             String expressionName, EvaluationResult evaluationResult) {
         if (expressionName == null) {
             throw new InternalErrorException(
-                    "PopulationDef criteria reference is missing for continuous variable observation");
+                    "PopulationDef criteria reference: %s is missing for continuous variable observation"
+                            .formatted(expressionName));
         }
 
         if (evaluationResult == null) {

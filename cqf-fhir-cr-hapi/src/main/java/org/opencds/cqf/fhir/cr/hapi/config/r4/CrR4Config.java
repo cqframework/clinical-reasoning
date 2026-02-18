@@ -30,7 +30,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
-import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.cql.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;

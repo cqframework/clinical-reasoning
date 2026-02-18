@@ -23,6 +23,14 @@
         <property name="fileNamePattern" value="module\-info\.java$" />
     </module>
 
+    <!-- for suppression of rules; to use, surround code to exclude with comments: -->
+    <!-- CHECKSTYLE.OFF: RuleToDisable   AND   CHECKSTYLE.ON: RuleToDisable -->
+    <module name="SuppressWithPlainTextCommentFilter">
+        <property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)" />
+        <property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)" />
+    </module>
+
+    <!-- for default checks, see https://checkstyle.sourceforge.io/checks.html -->
     <module name="TreeWalker">
         <!-- Make the @SuppressWarnings annotations available to Checkstyle -->
 		<module name="SuppressWarningsHolder" />
@@ -54,5 +62,14 @@
                 value="Member ''{0}'' should be named with camelCase and without prefixes." />
         </module>
         <module name="NoFinalizer" />
+        <!-- no dangling ; -->
+        <module name="EmptyStatement"/>
+        <!-- util and constant classes have no public constructors -->
+        <module name="HideUtilityClassConstructor"/>
+        <!-- do not allow imports from some packages -->
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="org.jetbrains.annotations" />
+        </module>
+
     </module>
 </module>

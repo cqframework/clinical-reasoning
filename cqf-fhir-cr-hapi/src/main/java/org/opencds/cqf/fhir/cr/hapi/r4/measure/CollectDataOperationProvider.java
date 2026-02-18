@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -14,7 +13,6 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;

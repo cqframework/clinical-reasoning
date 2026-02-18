@@ -30,6 +30,7 @@ public class MeasureReportConstants {
             Date.valueOf("2022-07-20"); // issue without local date?
     public static final String SDE_SYSTEM_URL = "http://terminology.hl7.org/CodeSystem/measure-data-usage";
     public static final String SDE_USAGE_CODE = "supplemental-data";
+    public static final String RISK_ADJUSTMENT_USAGE_CODE = "risk-adjustment-factor";
     public static final String SDE_REFERENCE_EXT_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
     public static final String SDE_DAVINCI_DEQM_EXT_URL =

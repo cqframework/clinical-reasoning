@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
@@ -75,12 +76,12 @@ public class MeasureOperationsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasure(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") ParametersParameterComponent periodStart,
-            @OperationParam(name = "periodEnd") ParametersParameterComponent periodEnd,
-            @OperationParam(name = "reportType") ParametersParameterComponent reportType,
-            @OperationParam(name = "subject") ParametersParameterComponent subject,
-            @OperationParam(name = "practitioner") ParametersParameterComponent practitioner,
-            @OperationParam(name = "lastReceivedOn") ParametersParameterComponent lastReceivedOn,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "reportType") StringType reportType,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "lastReceivedOn") StringType lastReceivedOn,
             @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
             @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
@@ -93,20 +94,18 @@ public class MeasureOperationsProvider {
                 .create(requestDetails)
                 .evaluate(
                         Eithers.forMiddle3(id),
-                        stringTimePeriodHandler.getStartZonedDateTime(
-                                getStringValue(fhirVersion, periodStart), requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(
-                                getStringValue(fhirVersion, periodEnd), requestDetails),
-                        getStringValue(fhirVersion, reportType),
-                        getStringOrReferenceValue(fhirVersion, subject),
-                        getStringValue(fhirVersion, lastReceivedOn),
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(reportType),
+                        getStringValue(subject),
+                        getStringValue(lastReceivedOn),
                         (Endpoint) getEndpoint(fhirVersion, contentEndpoint),
                         (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint),
                         (Endpoint) getEndpoint(fhirVersion, dataEndpoint),
                         additionalData,
                         parameters,
                         getStringValue(productLine),
-                        getStringOrReferenceValue(fhirVersion, practitioner));
+                        getStringValue(practitioner));
     }
 
     /**
@@ -142,12 +141,12 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "measureUrl") List<StringType> measureUrl,
             @OperationParam(name = "measureIdentifier") List<StringType> measureIdentifier,
             @OperationParam(name = "measure") List<StringType> measure,
-            @OperationParam(name = "periodStart") ParametersParameterComponent periodStart,
-            @OperationParam(name = "periodEnd") ParametersParameterComponent periodEnd,
-            @OperationParam(name = "reportType") ParametersParameterComponent reportType,
-            @OperationParam(name = "subject") ParametersParameterComponent subject,
-            @OperationParam(name = "practitioner") ParametersParameterComponent practitioner,
-            @OperationParam(name = "lastReceivedOn") ParametersParameterComponent lastReceivedOn,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "reportType") StringType reportType,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "lastReceivedOn") StringType lastReceivedOn,
             @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
             @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
@@ -171,12 +170,10 @@ public class MeasureOperationsProvider {
                                 : measureIdentifier.stream()
                                         .map(ParameterHelper::getStringValue)
                                         .toList(), // List<Identifier>
-                        stringTimePeriodHandler.getStartZonedDateTime(
-                                getStringValue(fhirVersion, periodStart), requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(
-                                getStringValue(fhirVersion, periodEnd), requestDetails),
-                        getStringValue(fhirVersion, reportType),
-                        getStringOrReferenceValue(fhirVersion, subject),
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(reportType),
+                        getStringValue(subject),
                         (Endpoint) getEndpoint(fhirVersion, contentEndpoint),
                         (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint),
                         (Endpoint) getEndpoint(fhirVersion, dataEndpoint),

@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -41,11 +42,11 @@ public class DataRequirementsOperationProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Measure.class)
     public Library dataRequirements(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") ParametersParameterComponent periodStart,
-            @OperationParam(name = "periodEnd") ParametersParameterComponent periodEnd,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
             RequestDetails requestDetails) {
         return r4DataRequirementsServiceFactory
                 .create(requestDetails)
-                .dataRequirements(id, getStringValue(fhirVersion, periodStart), getStringValue(fhirVersion, periodEnd));
+                .dataRequirements(id, getStringValue(periodStart), getStringValue(periodEnd));
     }
 }

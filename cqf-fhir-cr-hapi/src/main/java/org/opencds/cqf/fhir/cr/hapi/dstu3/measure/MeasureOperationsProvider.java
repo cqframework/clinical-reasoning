@@ -12,6 +12,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Measure;
@@ -62,12 +65,12 @@ public class MeasureOperationsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasure(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") ParametersParameterComponent periodStart,
-            @OperationParam(name = "periodEnd") ParametersParameterComponent periodEnd,
-            @OperationParam(name = "reportType") ParametersParameterComponent reportType,
-            @OperationParam(name = "patient") ParametersParameterComponent patient,
-            @OperationParam(name = "practitioner") ParametersParameterComponent practitioner,
-            @OperationParam(name = "lastReceivedOn") ParametersParameterComponent lastReceivedOn,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "reportType") CodeType reportType,
+            @OperationParam(name = "patient") StringType patient,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "lastReceivedOn") DateTimeType lastReceivedOn,
             @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
@@ -78,12 +81,12 @@ public class MeasureOperationsProvider {
                 .create(requestDetails)
                 .evaluateMeasure(
                         id,
-                        getStringValue(fhirVersion, periodStart),
-                        getStringValue(fhirVersion, periodEnd),
-                        getStringValue(fhirVersion, reportType),
-                        getStringOrReferenceValue(fhirVersion, patient),
-                        getStringOrReferenceValue(fhirVersion, practitioner),
-                        getStringValue(fhirVersion, lastReceivedOn),
+                        getStringValue(periodStart),
+                        getStringValue(periodEnd),
+                        getStringValue(reportType),
+                        getStringValue(patient),
+                        getStringValue(practitioner),
+                        getStringValue(lastReceivedOn),
                         getStringValue(productLine),
                         additionalData,
                         parameters,

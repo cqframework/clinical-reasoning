@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
@@ -84,9 +85,9 @@ public class CareGapsOperationProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
     public Parameters careGapsReport(
             RequestDetails requestDetails,
-            @OperationParam(name = "periodStart") ParametersParameterComponent periodStart,
-            @OperationParam(name = "periodEnd") ParametersParameterComponent periodEnd,
-            @OperationParam(name = "subject") ParametersParameterComponent subject,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "subject") StringType subject,
             @OperationParam(name = "status") List<StringType> status,
             @OperationParam(name = "measureId") List<StringType> measureId,
             @OperationParam(name = "measureIdentifier") List<StringType> measureIdentifier,
@@ -96,11 +97,9 @@ public class CareGapsOperationProvider {
         return r4CareGapsProcessorFactory
                 .create(requestDetails)
                 .getCareGapsReport(
-                        stringTimePeriodHandler.getStartZonedDateTime(
-                                getStringValue(fhirVersion, periodStart), requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(
-                                getStringValue(fhirVersion, periodEnd), requestDetails),
-                        getStringOrReferenceValue(fhirVersion, subject),
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(subject),
                         status == null
                                 ? null
                                 : status.stream()

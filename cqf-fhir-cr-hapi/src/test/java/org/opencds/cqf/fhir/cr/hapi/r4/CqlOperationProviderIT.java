@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.canonicalPart;
@@ -42,14 +41,13 @@ class CqlOperationProviderIT extends BaseCrR4TestServer {
         // reuse loaded resources for all tests
         assertTrue(cqlExecutionProviderTestSimpleDate());
         cqlExecutionProviderTestSimpleArithmetic();
-        evaluateLibraryProviderTestLibraryWithSubject();
-        evaluateLibraryProviderTestSimpleExpression();
         cqlExecutionProviderTestReferencedLibrary();
         cqlExecutionProviderTestDataBundle();
         cqlExecutionProviderTestDataBundleWithSubject();
         cqlExecutionProviderTestSimpleParameters();
         cqlExecutionProviderTestExpression();
         cqlExecutionProviderTestErrorExpression();
+        cqlExecutionProviderTestGet();
     }
 
     private Boolean cqlExecutionProviderTestSimpleDate() {
@@ -65,34 +63,6 @@ class CqlOperationProviderIT extends BaseCrR4TestServer {
         Parameters results = runCqlExecution(params);
         assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
         assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
-    }
-
-    void evaluateLibraryProviderTestLibraryWithSubject() {
-        // evaluate library resource for a subject
-        var params = new Parameters();
-        params.addParameter("subject", new StringType("Patient/SimplePatient"));
-
-        Parameters report = runEvaluateLibrary(params, "SimpleR4Library");
-
-        assertNotNull(report);
-        assertTrue(report.hasParameter("Initial Population"));
-        assertTrue(((BooleanType) report.getParameter("Initial Population").getValue()).booleanValue());
-        assertTrue(report.hasParameter("Numerator"));
-        assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
-        assertTrue(report.hasParameter("Denominator"));
-        assertTrue(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue());
-    }
-
-    void evaluateLibraryProviderTestSimpleExpression() {
-        // evaluate expression for subject from specified library resource
-        var params = new Parameters();
-        params.addParameter("subject", new StringType("Patient/SimplePatient"));
-        params.addParameter("expression", "Numerator");
-
-        Parameters report = runEvaluateLibrary(params, "SimpleR4Library");
-        assertNotNull(report);
-        assertTrue(report.hasParameter("Numerator"));
-        assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
     }
 
     void cqlExecutionProviderTestReferencedLibrary() {
@@ -154,7 +124,7 @@ class CqlOperationProviderIT extends BaseCrR4TestServer {
     void cqlExecutionProviderTestExpression() {
         // execute cql expression from referenced library
         Parameters params = parameters(
-                stringPart("subject", "SimplePatient"),
+                stringPart("subject", "Patient/SimplePatient"),
                 part(
                         "library",
                         canonicalPart("url", ourClient.getServerBase() + "/Library/SimpleR4Library"),
@@ -193,13 +163,16 @@ class CqlOperationProviderIT extends BaseCrR4TestServer {
                 .execute();
     }
 
-    public Parameters runEvaluateLibrary(Parameters parameters, String libraryId) {
-
-        return ourClient
+    void cqlExecutionProviderTestGet() {
+        var params = parameters(stringPart("subject", "SimplePatient"), stringPart("expression", "5 * 5"));
+        var results = ourClient
                 .operation()
-                .onInstance("Library/" + libraryId)
-                .named(ProviderConstants.CR_OPERATION_EVALUATE)
-                .withParameters(parameters)
+                .onServer()
+                .named(ProviderConstants.CR_OPERATION_CQL)
+                .withParameters(params)
+                .useHttpGet()
                 .execute();
+        assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
+        assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
     }
 }

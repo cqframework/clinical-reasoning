@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.cql;
 
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -114,7 +113,7 @@ public class CqlExecutionOperationProvider {
             example = "$cql?expression=5*5")
     public IBaseParameters evaluate(
             RequestDetails requestDetails,
-            @OperationParam(name = "subject", max = 1) ParametersParameterComponent subject,
+            @OperationParam(name = "subject", max = 1) StringType subject,
             @OperationParam(name = "expression", max = 1) StringType expression,
             @OperationParam(name = "parameters", max = 1) Parameters parameters,
             @OperationParam(name = "library") List<ParametersParameterComponent> library,
@@ -128,7 +127,7 @@ public class CqlExecutionOperationProvider {
         return cqlProcessorFactory
                 .create(requestDetails)
                 .evaluate(
-                        getStringOrReferenceValue(fhirVersion, subject),
+                        getStringValue(subject),
                         getStringValue(expression),
                         parameters,
                         library,

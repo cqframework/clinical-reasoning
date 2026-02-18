@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.hapi.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
 import static org.opencds.cqf.fhir.utility.Parameters.newBooleanPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newCodePart;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.Collections;
 import java.util.List;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -26,6 +28,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -108,6 +111,56 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
 
         assertNotNull(result);
         assertEquals(16, result.getParameter().size());
+    }
+
+    @Test
+    void testSimpleLibraryEvaluate() {
+        var requestDetails = setupRequestDetails();
+        loadResource(Library.class, "SimpleR4Library.json", requestDetails);
+        loadResource(Patient.class, "SimplePatient.json", requestDetails);
+        evaluateLibraryProviderTestLibraryWithSubject();
+        evaluateLibraryProviderTestSimpleExpression();
+    }
+
+    void evaluateLibraryProviderTestLibraryWithSubject() {
+        // evaluate library resource for a subject
+        var params = new Parameters();
+        params.addParameter("subject", new StringType("Patient/SimplePatient"));
+
+        var report = ourClient
+                .operation()
+                .onInstance("Library/SimpleR4Library")
+                .named(ProviderConstants.CR_OPERATION_EVALUATE)
+                .withParameters(params)
+                .useHttpGet()
+                .execute();
+
+        assertNotNull(report);
+        assertTrue(report.hasParameter("Initial Population"));
+        assertTrue(((BooleanType) report.getParameter("Initial Population").getValue()).booleanValue());
+        assertTrue(report.hasParameter("Numerator"));
+        assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
+        assertTrue(report.hasParameter("Denominator"));
+        assertTrue(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue());
+    }
+
+    void evaluateLibraryProviderTestSimpleExpression() {
+        // evaluate expression for subject from specified library resource
+        var params = new Parameters();
+        params.addParameter("subject", new StringType("Patient/SimplePatient"));
+        params.addParameter("expression", "Numerator");
+
+        var report = ourClient
+                .operation()
+                .onInstance("Library/SimpleR4Library")
+                .named(ProviderConstants.CR_OPERATION_EVALUATE)
+                .withParameters(params)
+                .useHttpGet()
+                .execute();
+
+        assertNotNull(report);
+        assertTrue(report.hasParameter("Numerator"));
+        assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
     }
 
     @Test

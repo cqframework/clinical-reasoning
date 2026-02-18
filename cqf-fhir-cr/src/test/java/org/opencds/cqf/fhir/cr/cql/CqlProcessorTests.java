@@ -17,7 +17,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class CqlEvaluationServiceTest {
+class CqlProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
 
     @Test

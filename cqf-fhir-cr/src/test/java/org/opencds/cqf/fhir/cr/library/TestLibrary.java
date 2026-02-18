@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
@@ -208,7 +209,14 @@ public class TestLibrary {
 
         public When prefetchData(String name, String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
-            prefetchData = List.of((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            if (!(data instanceof IBaseBundle)) {
+                throw new IllegalArgumentException("prefetch data asset must be a Bundle");
+            }
+            prefetchData = List.of((IBaseBackboneElement) newPart(
+                    repository.fhirContext(),
+                    "prefetchData",
+                    newStringPart(repository.fhirContext(), "key", name),
+                    newPart(repository.fhirContext(), "data", data)));
             return this;
         }
 

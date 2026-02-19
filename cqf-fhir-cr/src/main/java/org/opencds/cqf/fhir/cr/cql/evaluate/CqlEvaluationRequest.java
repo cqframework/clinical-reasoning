@@ -49,6 +49,8 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
         fhirVersion = libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         this.libraryEngine = libraryEngine;
         this.subjectId = subjectId;
+        // We require either an expression or content.  If content is set expression will be used if present,
+        // otherwise all expressions defined in 'content' will be evaluated.
         if (expression == null && content == null) {
             throw new IllegalArgumentException(
                     "The $cql operation requires the expression parameter and/or content parameter to exist");

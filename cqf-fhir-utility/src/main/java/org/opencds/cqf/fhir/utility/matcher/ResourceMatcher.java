@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
@@ -67,15 +69,15 @@ public interface ResourceMatcher {
         }
     }
 
-    public IFhirPath getEngine();
+    IFhirPath getEngine();
 
-    public FhirContext getContext();
+    FhirContext getContext();
 
-    public Map<SPPathKey, IParsedExpression> getPathCache();
+    Map<SPPathKey, IParsedExpression> getPathCache();
 
-    public void addCustomParameter(RuntimeSearchParam searchParam);
+    void addCustomParameter(RuntimeSearchParam searchParam);
 
-    public Map<String, RuntimeSearchParam> getCustomParameters();
+    Map<String, RuntimeSearchParam> getCustomParameters();
 
     // The list here is an OR list. Meaning, if any element matches it's a match
     default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {
@@ -212,7 +214,7 @@ public interface ResourceMatcher {
              * This is because the
              */
             return isMatchDate(searchEnd, new DateTimeDt(resourceStart.getValue()))
-                && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
+                    && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
         } else {
             throw new NotImplementedException("Composite matching not implemented for search params of type "
                     + composite.getLeftValue().getClass().getSimpleName());
@@ -231,7 +233,16 @@ public interface ResourceMatcher {
 
     default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {
         if (pathResult instanceof IBaseReference reference1) {
-            return reference1.getReferenceElement().getValue().equals(((ReferenceParam) param).getValue());
+            String refVal = null;
+            if (reference1.getReferenceElement() != null
+                    && !isEmpty(reference1.getReferenceElement().getValue())) {
+                refVal = reference1.getReferenceElement().getValue();
+            } else if (reference1.getResource() != null) {
+                refVal = reference1.getResource().getIdElement().getValue();
+            } else {
+                throw new UnsupportedOperationException("No reference found");
+            }
+            return refVal.equals(((ReferenceParam) param).getValue());
         } else if (pathResult instanceof IPrimitiveType<?> type1) {
             return type1.getValueAsString().equals(((ReferenceParam) param).getValue());
         } else if (pathResult instanceof Iterable<?> iterable) {
@@ -263,14 +274,11 @@ public interface ResourceMatcher {
                 throw new UnsupportedOperationException(
                         "Expected date, found " + pathResult.getClass().getSimpleName());
             }
-        } else if (pathResult instanceof ICompositeType type) {
-            dateRange = getDateRange(type);
         } else {
             throw new UnsupportedOperationException(
                     "Expected element of type date, dateTime, instant, Timing or Period, found "
                             + pathResult.getClass().getSimpleName());
         }
-        return matchesDateBounds(dateRange, new DateRangeParam(param));
     }
 
     default boolean isDateMatch(DateParam param, @Nonnull Date date) {
@@ -300,7 +308,9 @@ public interface ResourceMatcher {
             }
             default -> {
                 // ends_before, starts_after, approximate - do not work for single date parameters
-                String msg = String.format("Unsupported DateTime comparison operation %s", param.getPrefix().getValue());
+                String msg = String.format(
+                        "Unsupported DateTime comparison operation %s",
+                        param.getPrefix().getValue());
                 throw new UnsupportedOperationException(msg);
             }
         }
@@ -362,29 +372,45 @@ public interface ResourceMatcher {
                 + pathResult.getClass().getSimpleName());
     }
 
-    default boolean matchesDateBounds(DateRangeParam resourceRange, DateRangeParam paramRange) {
-
-        Date resourceLowerBound = resourceRange.getLowerBoundAsInstant();
-        Date resourceUpperBound = resourceRange.getUpperBoundAsInstant();
-        Date paramLowerBound = paramRange.getLowerBoundAsInstant();
-        Date paramUpperBound = paramRange.getUpperBoundAsInstant();
-        if (paramLowerBound == null && paramUpperBound == null) {
-            return false;
-        } else {
-            boolean result = true;
-            if (paramLowerBound != null) {
-                result &= resourceLowerBound.after(paramLowerBound) || resourceLowerBound.equals(paramLowerBound);
-                result &= resourceUpperBound.after(paramLowerBound) || resourceUpperBound.equals(paramLowerBound);
-            }
-
-            if (paramUpperBound != null) {
-                result &= resourceLowerBound.before(paramUpperBound) || resourceLowerBound.equals(paramUpperBound);
-                result &= resourceUpperBound.before(paramUpperBound) || resourceUpperBound.equals(paramUpperBound);
-            }
-
-            return result;
-        }
-    }
+    /**
+     * True if resourceRange overlaps
+     * resourceRange (r):  |rs-----------|re
+     * paramRange (s):              |ss-----------|se
+     */
+    //    default boolean matchesDateBounds(DateRangeParam resourceRange, DateRangeParam paramRange) {
+    //
+    //        Date resourceLowerBound = resourceRange.getLowerBoundAsInstant();
+    //        Date resourceUpperBound = resourceRange.getUpperBoundAsInstant();
+    //        Date paramLowerBound = paramRange.getLowerBoundAsInstant();
+    //        Date paramUpperBound = paramRange.getUpperBoundAsInstant();
+    //        if (paramLowerBound == null && paramUpperBound == null) {
+    //            return false;
+    //        } else if (paramLowerBound != null && paramUpperBound != null) {
+    //            /*
+    //
+    //             *
+    //             * these are overlapping if:
+    //             * * resourceStart <= searchEnd && searchStart <= resourceEnd
+    //             */
+    //            return (resourceLowerBound.before(paramUpperBound) || resourceLowerBound.equals(paramUpperBound))
+    //                && (paramLowerBound.before(resourceUpperBound) || paramLowerBound.equals(resourceUpperBound));
+    //        } else {
+    //            boolean result = true;
+    //            if (paramLowerBound != null) {
+    //                result &= resourceLowerBound.after(paramLowerBound) || resourceLowerBound.equals(paramLowerBound);
+    //                result &= resourceUpperBound.after(paramLowerBound) || resourceUpperBound.equals(paramLowerBound);
+    //            }
+    //
+    //            if (paramUpperBound != null) {
+    //                result &= resourceLowerBound.before(paramUpperBound) ||
+    // resourceLowerBound.equals(paramUpperBound);
+    //                result &= resourceUpperBound.before(paramUpperBound) ||
+    // resourceUpperBound.equals(paramUpperBound);
+    //            }
+    //
+    //            return result;
+    //        }
+    //    }
 
     DateRangeParam getDateRange(ICompositeType type);
 

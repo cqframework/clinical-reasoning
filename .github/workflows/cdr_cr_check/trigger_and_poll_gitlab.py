@@ -7,7 +7,7 @@ import logging
 
 complete_statuses = ["failed", "success", "canceled"]
 trigger_token = os.getenv("TRIGGER_TOKEN")
-project_api_read_token = os.getenv("GITLAB_READ_API_TOKEN_V2")
+project_api_read_token = os.getenv("READ_API_TOKEN")
 current_clinical_reasoning_branch = os.getenv("CLINICAL_REASONING_BRANCH")
 target_cdr_cr_branch = os.getenv("CDR_CR_BRANCH")
 

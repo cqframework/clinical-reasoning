@@ -617,7 +617,6 @@
                                     <exclude>**/Dstu3MeasureProcessor.class</exclude>
                                     <exclude>**/MedicationRequestResolver.class</exclude>
                                     <exclude>**/StratumValueWrapper.class</exclude>
-                                    <exclude>**/LibraryInitHandler.class</exclude>
                                     <exclude>**/LibraryEngine.class</exclude>
                                     <exclude>**/CqlExecutionProcessor.class</exclude>
                                     <exclude>**/GraphDefinitionProcessor.class</exclude>

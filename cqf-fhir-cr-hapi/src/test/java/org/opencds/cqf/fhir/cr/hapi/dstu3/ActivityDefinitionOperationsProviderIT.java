@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 class ActivityDefinitionOperationsProviderIT extends BaseCrDstu3TestServer {
     @Test
-    void testActivityDefinitionApply() {
+    void testActivityDefinitionApplyWithPOST() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/Bundle-ActivityDefinitionTest.json");
         var patientId = "patient-1";
         var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
@@ -23,6 +23,24 @@ class ActivityDefinitionOperationsProviderIT extends BaseCrDstu3TestServer {
                 .named(ProviderConstants.CR_OPERATION_APPLY)
                 .withParameters(parameters)
                 .returnResourceType(ProcedureRequest.class)
+                .execute();
+        assertInstanceOf(ProcedureRequest.class, result);
+        assertTrue(result.getDoNotPerform());
+        assertEquals(String.format("Patient/%s", patientId), result.getSubject().getReference());
+    }
+
+    @Test
+    void testActivityDefinitionApplyWithGET() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/Bundle-ActivityDefinitionTest.json");
+        var patientId = "patient-1";
+        var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("ActivityDefinition", "activityDefinition-test"))
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(ProcedureRequest.class)
+                .useHttpGet()
                 .execute();
         assertInstanceOf(ProcedureRequest.class, result);
         assertTrue(result.getDoNotPerform());

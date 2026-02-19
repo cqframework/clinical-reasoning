@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class LibraryOperationsProviderIT extends BaseCrDstu3TestServer {
     @Test
-    void testEvaluateLibrary() {
+    void testEvaluateLibraryWithPOST() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-data.json");
 
@@ -28,6 +28,30 @@ class LibraryOperationsProviderIT extends BaseCrDstu3TestServer {
                 .named(ProviderConstants.CR_OPERATION_EVALUATE)
                 .withParameters(parameters)
                 .returnResourceType(Parameters.class)
+                .execute();
+
+        assertNotNull(result);
+        assertEquals(8, result.getParameter().size());
+    }
+
+    @Test
+    void testEvaluateLibraryWithGET() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-view-bundle.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/dstu3/hello-world/hello-world-patient-data.json");
+
+        var url = "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld";
+        var patientId = "Patient/helloworld-patient-1";
+        var parameters = newParameters(
+                getFhirContext(),
+                newUriPart(getFhirContext(), "url", url),
+                newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onType("Library")
+                .named(ProviderConstants.CR_OPERATION_EVALUATE)
+                .withParameters(parameters)
+                .returnResourceType(Parameters.class)
+                .useHttpGet()
                 .execute();
 
         assertNotNull(result);

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.cql.evaluate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
@@ -14,6 +13,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Bundle;
@@ -82,7 +82,7 @@ class CqlEvaluationRequestTests {
     void testResolveIncludedLibraries() {
         var request = mock(CqlEvaluationRequest.class, CALLS_REAL_METHODS);
         doReturn(FhirVersionEnum.R4).when(request).getFhirVersion();
-        assertNull(request.resolveIncludedLibraries(null));
+        assertEquals(Collections.emptyMap(), request.resolveIncludedLibraries(null));
         var actual = request.resolveIncludedLibraries(getLibraries(FhirContext.forR4Cached()));
         assertEquals(2, actual.size());
     }

@@ -16,7 +16,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -39,9 +38,6 @@ class CqlEvaluationProcessorTests {
     @Mock
     private IRepository repository;
 
-    @Mock
-    private LibraryEngine libraryEngine;
-
     @Spy
     private final CqlEvaluationProcessor fixture = new CqlEvaluationProcessor(repository, evaluationSettings);
 
@@ -52,7 +48,7 @@ class CqlEvaluationProcessorTests {
 
     @Test
     void testResolvesStringContentLibraryIdentifier() {
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        doReturn(fhirContextR4).when(repository).fhirContext();
         var engine = Engines.forRepository(repository, evaluationSettings, null);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var actual = fixture.resolveLibraryIdentifier(content, null, libraryManager);
@@ -62,7 +58,7 @@ class CqlEvaluationProcessorTests {
 
     @Test
     void testResolvesLibraryIdentifier() {
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        doReturn(fhirContextR4).when(repository).fhirContext();
         var engine = Engines.forRepository(repository, evaluationSettings, null);
         var libraryManager = engine.getEnvironment().getLibraryManager();
         var version = "1.0.0";

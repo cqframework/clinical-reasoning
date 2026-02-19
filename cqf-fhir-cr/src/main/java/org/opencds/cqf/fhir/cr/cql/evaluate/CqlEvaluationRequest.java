@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +156,6 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
                     });
             return libraries;
         }
-        return null;
+        return Collections.emptyMap();
     }
 }

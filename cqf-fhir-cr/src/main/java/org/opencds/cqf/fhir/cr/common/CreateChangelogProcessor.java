@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.jetbrains.annotations.Nullable;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
 import org.opencds.cqf.fhir.cr.common.CreateChangelogProcessor.ChangeLog.ValueSetChild.Code;
 import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
@@ -299,7 +298,6 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             return page;
         }
 
-        @Nullable
         private static LibraryChild getLibraryChild(Library library) {
             return library == null
                     ? null
@@ -335,7 +333,6 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             return page;
         }
 
-        @Nullable
         private static PlanDefinitionChild getPlanDefinitionChild(PlanDefinition resource) {
             return resource == null
                     ? null
@@ -998,7 +995,6 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
-            @Nullable
             private static String getCodeToCheck(Object newValue, Object originalValue) {
                 String codeToCheck = null;
                 if (newValue instanceof IPrimitiveType || originalValue instanceof IPrimitiveType) {

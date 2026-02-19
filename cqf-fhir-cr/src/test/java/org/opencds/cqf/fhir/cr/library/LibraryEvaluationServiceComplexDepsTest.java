@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.cpg.r4;
+package org.opencds.cqf.fhir.cr.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -6,32 +6,35 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.cr.library.TestLibrary.given;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("squid:S1135")
 class LibraryEvaluationServiceComplexDepsTest {
+    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
 
     @Test
     void singleLibraryTest_1A() {
-
-        var params = parameters(stringPart("subject", "Patient/patient1"));
-        var libId = new IdType("Library", "Level1A");
-        var when = Library.given()
-                .repositoryFor("libraryevalcomplexdeps")
+        var params = newParameters(fhirContextR4, newStringPart(fhirContextR4, "subject", "Patient/patient1"));
+        var libId = "Level1A";
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryevalcomplexdeps")
                 .when()
-                .id(libId)
+                .libraryId(libId)
                 .parameters(params)
-                .evaluateLibrary();
-        var report = when.then().parameters();
+                .thenEvaluate()
+                .hasResults(21)
+                .result;
+        assertInstanceOf(Parameters.class, result);
 
+        var report = (Parameters) result;
         assertNotNull(report);
         assertTrue(report.hasParameter("Initial Population"));
         assertTrue(report.hasParameter("Numerator"));
@@ -120,16 +123,18 @@ class LibraryEvaluationServiceComplexDepsTest {
 
     @Test
     void singleLibraryTest_1B() {
-        var params = parameters(stringPart("subject", "Patient/patient1"));
-        var libId = new IdType("Library", "Level1B");
-        var when = Library.given()
-                .repositoryFor("libraryevalcomplexdeps")
+        var params = newParameters(fhirContextR4, newStringPart(fhirContextR4, "subject", "Patient/patient1"));
+        var libId = "Level1B";
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryevalcomplexdeps")
                 .when()
-                .id(libId)
+                .libraryId(libId)
                 .parameters(params)
-                .evaluateLibrary();
-        var report = when.then().parameters();
+                .thenEvaluate()
+                .hasResults(14)
+                .result;
+        assertInstanceOf(Parameters.class, result);
 
+        var report = (Parameters) result;
         assertNotNull(report);
         assertTrue(report.hasParameter("Initial Population"));
         assertTrue(report.hasParameter("Numerator"));

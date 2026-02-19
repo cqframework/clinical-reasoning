@@ -1,12 +1,19 @@
-package org.opencds.cqf.fhir.cr.cpg.r4;
+package org.opencds.cqf.fhir.cr.cql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.cr.cql.TestCql.given;
+import static org.opencds.cqf.fhir.cr.library.TestLibrary.CLASS_PATH;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
+import ca.uhn.fhir.context.FhirContext;
+import java.nio.file.Path;
+import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -14,8 +21,34 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationProcessor;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
-class CqlEvaluationServiceTest {
+class CqlProcessorTests {
+    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
+
+    @Test
+    void defaultSettings() {
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var processor = new CqlProcessor(repository);
+        assertNotNull(processor.settings());
+    }
+
+    @Test
+    void processor() {
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var processor = new CqlProcessor(
+                repository,
+                CrSettings.getDefault(),
+                List.of(new CqlEvaluationProcessor(repository, EvaluationSettings.getDefault())));
+
+        assertNotNull(processor.settings());
+    }
+
     @Test
     void libraryEvaluationService_inlineAsthma() {
         var content =
@@ -38,15 +71,14 @@ class CqlEvaluationServiceTest {
         define "Has Asthma Diagnosis":
           exists("Asthma Diagnosis")
         """;
-        var when = Library.given()
-                .repositoryFor("libraryeval")
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryeval")
                 .when()
                 .subject("Patient/SimplePatient")
-                .content(content)
-                .evaluateCql();
-        var results = when.then().parameters();
-        assertTrue(results.hasParameter());
-        assertEquals(3, results.getParameter().size());
+                .cqlContent(content)
+                .thenEvaluate()
+                .hasResults(3)
+                .result;
+        assertInstanceOf(Parameters.class, result);
     }
 
     @Test
@@ -72,15 +104,14 @@ class CqlEvaluationServiceTest {
         define "Has Asthma Diagnosis":
           exists("Asthma Diagnosis")
         """;
-        var when = Library.given()
-                .repositoryFor("libraryevalcomplexdeps")
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryevalcomplexdeps")
                 .when()
                 .subject("Patient/SimplePatient")
-                .content(content)
-                .evaluateCql();
-        var results = when.then().parameters();
-        assertTrue(results.hasParameter());
-        assertEquals(3, results.getParameter().size());
+                .cqlContent(content)
+                .thenEvaluate()
+                .hasResults(3)
+                .result;
+        assertInstanceOf(Parameters.class, result);
     }
 
     @Test
@@ -107,43 +138,47 @@ class CqlEvaluationServiceTest {
 
         define "Numerator": "Denominator"
         """;
-        var when = Library.given()
-                .repositoryFor("libraryeval")
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryeval")
                 .when()
                 .subject("Patient/SimplePatient")
                 .expression("Numerator")
-                .content(content)
-                .evaluateCql();
-        var results = when.then().parameters();
-        assertFalse(results.isEmpty());
-        assertEquals(1, results.getParameter().size());
+                .cqlContent(content)
+                .thenEvaluate()
+                .hasResults(1)
+                .result;
+        assertInstanceOf(Parameters.class, result);
+        var results = (Parameters) result;
         assertInstanceOf(BooleanType.class, results.getParameter("Numerator").getValue());
         assertTrue(((BooleanType) results.getParameter("Numerator").getValue()).booleanValue());
     }
 
     @Test
     void libraryEvaluationService_arithmetic() {
-        var when = Library.given()
-                .repositoryFor("libraryeval")
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryeval")
                 .when()
                 .expression("5*5")
-                .evaluateCql();
-        var results = when.then().parameters();
+                .thenEvaluate()
+                .hasResults(1)
+                .result;
+        assertInstanceOf(Parameters.class, result);
+        var results = (Parameters) result;
         assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
         assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
     }
 
     @Test
     void libraryEvaluationService_paramsAndExpression() {
-        Parameters evaluationParams = parameters(datePart("%inputDate", "2019-11-01"));
-        var when = Library.given()
-                .repositoryFor("libraryeval")
+        var evaluationParams = parameters(datePart("%inputDate", "2019-11-01"));
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryeval")
                 .when()
                 .subject("Patient/SimplePatient")
                 .parameters(evaluationParams)
                 .expression("year from %inputDate before 2020")
-                .evaluateCql();
-        var results = when.then().parameters();
+                .thenEvaluate()
+                .hasResults(1)
+                .result;
+        assertInstanceOf(Parameters.class, result);
+        var results = (Parameters) result;
         assertInstanceOf(BooleanType.class, results.getParameter("return").getValue());
         assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
     }
@@ -151,12 +186,14 @@ class CqlEvaluationServiceTest {
     @Test
     void libraryEvaluationService_IntegerInterval() {
         var expression = "Interval[1,5]";
-        var when = Library.given()
-                .repositoryFor("libraryeval")
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryeval")
                 .when()
                 .expression(expression)
-                .evaluateCql();
-        var report = when.then().parameters();
+                .thenEvaluate()
+                .hasResults(1)
+                .result;
+        assertInstanceOf(Parameters.class, result);
+        var report = (Parameters) result;
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("return", report.getParameterFirstRep().getName());
@@ -169,12 +206,14 @@ class CqlEvaluationServiceTest {
     void libraryEvaluationService_Error() {
         var expression =
                 "Message('Return Value If Not Error', true, 'Example Failure Code', 'Error', 'This is an error message')";
-        var when = Library.given()
-                .repositoryFor("libraryeval")
+        var result = given().repositoryFor(fhirContextR4, "r4/libraryeval")
                 .when()
                 .expression(expression)
-                .evaluateCql();
-        var report = when.then().parameters();
+                .thenEvaluate()
+                .hasResults(1)
+                .result;
+        assertInstanceOf(Parameters.class, result);
+        var report = (Parameters) result;
         assertTrue(report.hasParameter());
         assertTrue(report.getParameterFirstRep().hasName());
         assertEquals("evaluation error", report.getParameterFirstRep().getName());
@@ -185,6 +224,6 @@ class CqlEvaluationServiceTest {
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
         assertEquals(
                 "Example Failure Code: This is an error message",
-                issue.getDetails().getText().replaceAll("[\\r\\n]", ""));
+                issue.getDiagnostics().replaceAll("[\\r\\n]", ""));
     }
 }

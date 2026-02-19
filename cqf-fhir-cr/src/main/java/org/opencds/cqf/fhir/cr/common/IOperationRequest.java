@@ -24,6 +24,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 /**
  * This interface exposes common functionality across Operations
  */
+@SuppressWarnings("UnstableApiUsage")
 public interface IOperationRequest {
     String getOperationName();
 

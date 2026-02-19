@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.elm.executing.EqualEvaluator;
 import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
@@ -143,7 +144,7 @@ class CqlFhirParametersConverterTests {
 
         assertEquals(expected.get("Product Line"), actual.get("Product Line"));
 
-        assertTrue(((Interval) expected.get("Measurement Period")).equal(actual.get("Measurement Period")));
+        assertTrue(EqualEvaluator.equal(expected.get("Measurement Period"), actual.get("Measurement Period")));
     }
 
     @Test

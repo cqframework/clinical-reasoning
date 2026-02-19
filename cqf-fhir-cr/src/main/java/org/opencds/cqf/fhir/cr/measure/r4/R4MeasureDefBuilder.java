@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQF_EXPRESSION_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_DEFINITION_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RISK_ADJUSTMENT_USAGE_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils.isBooleanPopulationBasis;
 
@@ -444,11 +445,15 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     private static void checkSDEUsage(
             Measure measure, MeasureSupplementalDataComponent measureSupplementalDataComponent) {
         var hasUsage = measureSupplementalDataComponent.getUsage().stream()
-                .filter(t -> t.getCodingFirstRep().getCode().equals(SDE_USAGE_CODE))
+                .filter(t -> {
+                    String code = t.getCodingFirstRep().getCode();
+                    return SDE_USAGE_CODE.equals(code) || RISK_ADJUSTMENT_USAGE_CODE.equals(code);
+                })
                 .toList();
         if (CollectionUtils.isEmpty(hasUsage)) {
-            throw new InvalidRequestException("SupplementalDataComponent usage is missing code: %s for Measure: %s"
-                    .formatted(SDE_USAGE_CODE, measure.getUrl()));
+            throw new InvalidRequestException(
+                    "SupplementalDataComponent usage is missing code: %s or %s for Measure: %s"
+                            .formatted(SDE_USAGE_CODE, RISK_ADJUSTMENT_USAGE_CODE, measure.getUrl()));
         }
     }
 

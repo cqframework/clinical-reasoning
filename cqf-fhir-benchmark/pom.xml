@@ -15,6 +15,11 @@
         <version>4.4.0-SNAPSHOT</version>
     </parent>
 
+    <!-- this project contains one file with no content - so let's skip checking it -->
+    <properties>
+        <jacoco.skip>true</jacoco.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.opencds.cqf.fhir</groupId>

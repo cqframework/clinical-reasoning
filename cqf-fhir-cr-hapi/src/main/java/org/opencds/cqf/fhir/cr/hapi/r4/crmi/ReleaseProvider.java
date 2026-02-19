@@ -1,5 +1,10 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -12,14 +17,18 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 
 public class ReleaseProvider {
 
     private final IReleaseServiceFactory r4ReleaseServiceFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public ReleaseProvider(IReleaseServiceFactory r4ReleaseServiceFactory) {
         this.r4ReleaseServiceFactory = r4ReleaseServiceFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     // TODO: This operation appears to be missing parameters defined in the CRMI specification:
@@ -72,28 +81,28 @@ public class ReleaseProvider {
      * @param requestDetails        The {@link RequestDetails RequestDetails}
      * @return  The Bundle result containing the released resource(s)
      */
-    @Operation(name = "$release", idempotent = true, global = true, type = MetadataResource.class)
-    @Description(shortDefinition = "$release", value = "Release an existing draft artifact")
+    @Operation(name = CRMI_OPERATION_RELEASE, idempotent = true, global = true, type = MetadataResource.class)
+    @Description(shortDefinition = CRMI_OPERATION_RELEASE, value = "Release an existing draft artifact")
     public Bundle releaseOperation(
             @IdParam IdType id,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "version") StringType version,
             @OperationParam(name = "versionBehavior") CodeType versionBehavior,
             @OperationParam(name = "latestFromTxServer", typeName = "Boolean")
                     IPrimitiveType<Boolean> latestFromTxServer,
             @OperationParam(name = "requireNonExperimental") CodeType requireNonExperimental,
-            @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint,
-            @OperationParam(name = "releaseLabel") String releaseLabel,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "releaseLabel") StringType releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
         return r4ReleaseServiceFactory
                 .create(requestDetails)
                 .release(
                         id,
-                        version,
+                        getStringValue(version),
                         versionBehavior,
                         latestFromTxServer,
                         requireNonExperimental,
-                        terminologyEndpoint,
-                        releaseLabel);
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint),
+                        getStringValue(releaseLabel));
     }
 }

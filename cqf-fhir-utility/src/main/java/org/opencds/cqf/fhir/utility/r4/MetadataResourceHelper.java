@@ -12,6 +12,8 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 
 public class MetadataResourceHelper {
+    private MetadataResourceHelper() {}
+
     public static void forEachMetadataResource(
             List<BundleEntryComponent> entries,
             Consumer<org.hl7.fhir.r4.model.MetadataResource> callback,

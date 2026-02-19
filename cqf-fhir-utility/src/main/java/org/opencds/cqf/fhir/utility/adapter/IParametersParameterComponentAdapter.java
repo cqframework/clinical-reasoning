@@ -24,6 +24,8 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
 
     boolean hasPart();
 
+    boolean hasPart(String name);
+
     boolean hasResource();
 
     IBaseResource getResource();

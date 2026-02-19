@@ -33,6 +33,7 @@ class ParametersParameterAdapterTest {
     void test() {
         var parameters = new ParametersParameterComponent();
         var adapter = adapterFactory.createParametersParameter(parameters);
+        assertNotNull(adapterFactory.createBase(parameters));
         assertNotNull(adapter);
         assertEquals(parameters, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirContext().getVersion().getVersion());
@@ -75,9 +76,10 @@ class ParametersParameterAdapterTest {
         assertEquals(4, adapter.getPart().size());
         adapter.setPart(null);
         assertFalse(adapter.hasPart());
+        assertFalse(adapter.hasPart("test"));
         adapter.setPart(
                 List.of(new ParametersParameterComponent().setName("test").setValue(new IntegerType(1))));
-        assertTrue(adapter.hasPart());
+        assertTrue(adapter.hasPart("test"));
     }
 
     @Test

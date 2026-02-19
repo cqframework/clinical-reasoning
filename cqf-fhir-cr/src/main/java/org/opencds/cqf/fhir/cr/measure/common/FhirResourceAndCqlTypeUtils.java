@@ -4,6 +4,7 @@ import jakarta.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.elm.executing.EqualEvaluator;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 
 /**
@@ -60,7 +61,7 @@ public class FhirResourceAndCqlTypeUtils {
 
         // We're relying on all CqlTypes to implement equal() properly
         // Note this is equal(), not Object.equals()
-        return Boolean.TRUE.equals(cqlDate1.equal(cqlDate2));
+        return Boolean.TRUE.equals(EqualEvaluator.equal(cqlDate1, cqlDate2));
     }
 
     public static IBaseResource castToResourceIfApplicable(Object obj) {

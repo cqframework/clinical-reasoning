@@ -8,6 +8,11 @@ This project provides a Java-based, FHIR-enabled clinical reasoning components.
 
 See the [docs](https://www.cqframework.org/clinical-reasoning/) for more information.
 
+## SonarCloud
+
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=cqframework_clinical-reasoning&metric=coverage)]
+(https://sonarcloud.io/dashboard?id=cqframework_clinical-reasoning)
+
 ## Getting Help
 
 Bugs and feature requests can be filed with [Github Issues](https://github.com/cqframework/clinical-reasoning/issues).

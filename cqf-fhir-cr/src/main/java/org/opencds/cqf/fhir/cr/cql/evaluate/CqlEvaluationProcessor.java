@@ -83,7 +83,10 @@ public class CqlEvaluationProcessor implements ICqlEvaluationProcessor {
                                     translatedLibrary.getIdentifier() == null
                                             ? null
                                             : translatedLibrary.getIdentifier().getId())
-                            .withVersion(translatedLibrary.getIdentifier().getVersion());
+                            .withVersion(
+                                    translatedLibrary.getIdentifier() == null
+                                            ? null
+                                            : translatedLibrary.getIdentifier().getVersion());
         } else if (library == null) {
             return null;
         } else {

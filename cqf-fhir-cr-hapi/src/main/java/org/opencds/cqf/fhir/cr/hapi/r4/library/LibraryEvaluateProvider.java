@@ -185,7 +185,10 @@ public class LibraryEvaluateProvider {
      *                            prefetchData parameter (i.e. either provide all
      *                            data as a single bundle, or provide data using
      *                            multiple bundles with prefetch descriptions)
-     * @param prefetchData        ***Not Yet Implemented***
+     * @param prefetchData        Data to be made available to the library evaluation, organized as
+     *                            prefetch response bundles. Each prefetchData parameter specifies
+     *                            either the name of the prefetchKey it is satisfying,
+     *                            a DataRequirement describing the prefetch, or both.
      * @param dataEndpoint        The FHIR {@link Endpoint} Endpoint resource or url to use to access data
      *                            referenced by retrieve operations in the library.
      *                            If provided, this endpoint is used after the data

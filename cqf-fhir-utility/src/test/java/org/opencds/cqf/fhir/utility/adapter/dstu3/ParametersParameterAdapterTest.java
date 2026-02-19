@@ -76,9 +76,10 @@ class ParametersParameterAdapterTest {
         assertEquals(4, adapter.getPart().size());
         adapter.setPart(null);
         assertFalse(adapter.hasPart());
+        assertFalse(adapter.hasPart("test"));
         adapter.setPart(
                 List.of(new ParametersParameterComponent().setName("test").setValue(new IntegerType(1))));
-        assertTrue(adapter.hasPart());
+        assertTrue(adapter.hasPart("test"));
     }
 
     @Test

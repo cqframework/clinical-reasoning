@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.UrlType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -85,9 +84,8 @@ class CanonicalHelperTest {
             var canonical = "http://example.com/canonical/provided";
             var url = "http://example.com/url";
             var version = "1.0";
-            var canonicalParam =
-                    new ParametersParameterComponent().setName("canonical").setValue(new CanonicalType(canonical));
-            var urlParam = new ParametersParameterComponent().setName("url").setValue(new UrlType(url));
+            var canonicalParam = new CanonicalType(canonical);
+            var urlParam = new UrlType(url);
             var versionParam = new StringType(version);
             // Act
             var result = CanonicalHelper.getCanonicalType(FhirVersionEnum.R4, canonicalParam, urlParam, versionParam);

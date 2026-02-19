@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.newCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -21,6 +20,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -109,8 +109,8 @@ public class LibraryEvaluateProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Library.class)
     public Parameters evaluate(
             @IdParam IdType id,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "expression") List<String> expression,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "expression") List<StringType> expression,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
@@ -126,8 +126,12 @@ public class LibraryEvaluateProvider {
                 .create(requestDetails)
                 .evaluate(
                         Eithers.forMiddle3(id),
-                        subject,
-                        expression,
+                        getStringValue(subject),
+                        expression == null
+                                ? null
+                                : expression.stream()
+                                        .map(PrimitiveType::getValue)
+                                        .toList(),
                         parameters,
                         useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
                         data,
@@ -219,8 +223,8 @@ public class LibraryEvaluateProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Library.class)
     public Parameters evaluate(
             @OperationParam(name = "library") Library library,
-            @OperationParam(name = "url") ParametersParameterComponent url,
-            @OperationParam(name = "subject") ParametersParameterComponent subject,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
+            @OperationParam(name = "subject") StringType subject,
             @OperationParam(name = "expression") List<StringType> expression,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
@@ -233,8 +237,8 @@ public class LibraryEvaluateProvider {
         return (Parameters) libraryProcessorFactory
                 .create(requestDetails)
                 .evaluate(
-                        Eithers.for3(newCanonicalType(fhirVersion, getStringValue(fhirVersion, url)), null, library),
-                        getStringOrReferenceValue(fhirVersion, subject),
+                        Eithers.for3(newCanonicalType(fhirVersion, getStringValue(url)), null, library),
+                        getStringValue(subject),
                         expression == null
                                 ? null
                                 : expression.stream()

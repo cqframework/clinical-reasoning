@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.newCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -12,6 +11,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -109,7 +109,7 @@ public class LibraryEvaluateProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Library.class)
     public Parameters evaluate(
             @IdParam IdType id,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
+            @OperationParam(name = "subject") StringType subject,
             @OperationParam(name = "expression") List<StringType> expression,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
@@ -123,7 +123,7 @@ public class LibraryEvaluateProvider {
                 .create(requestDetails)
                 .evaluate(
                         Eithers.forMiddle3(id),
-                        getStringOrReferenceValue(fhirVersion, subject),
+                        getStringValue(subject),
                         expression == null
                                 ? null
                                 : expression.stream()
@@ -220,8 +220,8 @@ public class LibraryEvaluateProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Library.class)
     public Parameters evaluate(
             @OperationParam(name = "library") Library library,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
+            @OperationParam(name = "subject") StringType subject,
             @OperationParam(name = "expression") List<StringType> expression,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
@@ -234,8 +234,8 @@ public class LibraryEvaluateProvider {
         return (Parameters) libraryProcessorFactory
                 .create(requestDetails)
                 .evaluate(
-                        Eithers.for3(newCanonicalType(fhirVersion, getStringValue(fhirVersion, url)), null, library),
-                        getStringOrReferenceValue(fhirVersion, subject),
+                        Eithers.for3(newCanonicalType(fhirVersion, getStringValue(url)), null, library),
+                        getStringValue(subject),
                         expression == null
                                 ? null
                                 : expression.stream()

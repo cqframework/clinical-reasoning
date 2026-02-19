@@ -11,11 +11,12 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
@@ -42,7 +43,7 @@ public class ValueSetPackageProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ValueSet.class)
     public Bundle packageValueSet(
             @IdParam IdType id,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
         return (Bundle) valueSetProcessorFactory
@@ -70,10 +71,10 @@ public class ValueSetPackageProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = ValueSet.class)
     public Bundle packageValueSet(
             @OperationParam(name = "id") StringType id,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
         return (Bundle) valueSetProcessorFactory

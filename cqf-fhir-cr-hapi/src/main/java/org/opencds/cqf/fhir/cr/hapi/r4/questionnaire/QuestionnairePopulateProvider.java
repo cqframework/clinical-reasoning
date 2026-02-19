@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.StringType;
@@ -64,20 +65,20 @@ public class QuestionnairePopulateProvider {
      *                               autopopulated HAPI.
      * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
+    @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, type = Questionnaire.class)
     public QuestionnaireResponse populate(
             @IdParam IdType id,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
-            @OperationParam(name = "context") List<Parameters.ParametersParameterComponent> context,
+            @OperationParam(name = "subject") ParametersParameterComponent subject,
+            @OperationParam(name = "context") List<ParametersParameterComponent> context,
             @OperationParam(name = "launchContext") Extension launchContext,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "local") BooleanType local,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
             @OperationParam(name = "bundle") Bundle bundle,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return (QuestionnaireResponse) questionnaireProcessorFactory
@@ -120,23 +121,23 @@ public class QuestionnairePopulateProvider {
      *                               autopopulated HAPI.
      * @return The partially (or fully)-populated set of answers for the specified Questionnaire.
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, idempotent = true, type = Questionnaire.class)
+    @Operation(name = ProviderConstants.CR_OPERATION_POPULATE, type = Questionnaire.class)
     public QuestionnaireResponse populate(
-            @OperationParam(name = "questionnaire") Parameters.ParametersParameterComponent questionnaire,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "questionnaire") ParametersParameterComponent questionnaire,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
-            @OperationParam(name = "subject") Parameters.ParametersParameterComponent subject,
-            @OperationParam(name = "context") List<Parameters.ParametersParameterComponent> context,
+            @OperationParam(name = "subject") ParametersParameterComponent subject,
+            @OperationParam(name = "context") List<ParametersParameterComponent> context,
             @OperationParam(name = "launchContext") Extension launchContext,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "local") BooleanType local,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
             @OperationParam(name = "bundle") Bundle bundle,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         return (QuestionnaireResponse) questionnaireProcessorFactory
@@ -167,17 +168,17 @@ public class QuestionnairePopulateProvider {
 
     @SuppressWarnings("unchecked")
     private <C extends IPrimitiveType<String>, R extends IBaseResource> Either3<C, IIdType, R> getQuestionnaireMonad(
-            Parameters.ParametersParameterComponent questionnaireParam,
-            Parameters.ParametersParameterComponent canonical,
-            Parameters.ParametersParameterComponent url,
+            ParametersParameterComponent questionnaireParam,
+            IPrimitiveType<String> canonical,
+            IPrimitiveType<String> url,
             StringType version) {
         var paramValue = questionnaireParam == null ? null : questionnaireParam.getValue();
         var uriValue = paramValue instanceof IPrimitiveType<?> primitiveType ? primitiveType.getValueAsString() : null;
         var referenceValue = paramValue instanceof IBaseReference reference
                 ? reference.getReferenceElement().getValueAsString()
                 : null;
-        var urlToUse = referenceValue == null ? getStringValue(fhirVersion, url) : referenceValue;
-        var canonicalToUse = uriValue == null ? getStringValue(fhirVersion, canonical) : uriValue;
+        var urlToUse = referenceValue == null ? getStringValue(url) : referenceValue;
+        var canonicalToUse = uriValue == null ? getStringValue(canonical) : uriValue;
         var questionnaire = (R)
                 (questionnaireParam != null && questionnaireParam.hasResource()
                         ? questionnaireParam.getResource()

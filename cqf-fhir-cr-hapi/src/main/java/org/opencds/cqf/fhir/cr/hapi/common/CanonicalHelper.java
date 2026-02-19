@@ -3,8 +3,6 @@ package org.opencds.cqf.fhir.cr.hapi.common;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public class CanonicalHelper {
@@ -13,14 +11,10 @@ public class CanonicalHelper {
 
     public static <C extends IPrimitiveType<String>> C getCanonicalType(
             FhirVersionEnum fhirVersion,
-            IBaseBackboneElement canonical,
-            IBaseBackboneElement url,
-            IBaseDatatype version) {
-        return getCanonicalType(
-                fhirVersion,
-                getStringValue(fhirVersion, canonical),
-                getStringValue(fhirVersion, url),
-                getStringValue(version));
+            IPrimitiveType<String> canonical,
+            IPrimitiveType<String> url,
+            IPrimitiveType<String> version) {
+        return getCanonicalType(fhirVersion, getStringValue(canonical), getStringValue(url), getStringValue(version));
     }
 
     public static <C extends IPrimitiveType<String>> C getCanonicalType(

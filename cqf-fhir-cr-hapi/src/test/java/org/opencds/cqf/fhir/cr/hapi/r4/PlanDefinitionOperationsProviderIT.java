@@ -21,12 +21,67 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RequestGroup;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
 
 class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
+    @Test
+    void testApplyWithPOST() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-view-bundle.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-data.json");
+        var id = new IdType("PlanDefinition", "hello-world-patient-view");
+        var planDefinition = (PlanDefinition) read(id);
+        assertNotNull(planDefinition);
+
+        var patientId = "Patient/helloworld-patient-1";
+        var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(id)
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(CarePlan.class)
+                .execute();
+
+        assertNotNull(result);
+        assertEquals(patientId, result.getSubject().getReference());
+        assertEquals(1, result.getContained().size());
+        var requestGroup = (RequestGroup) result.getContained().get(0);
+        assertEquals(1, requestGroup.getAction().size());
+        var action = requestGroup.getAction().get(0);
+        assertEquals("Hello World!", action.getTitle());
+    }
+
+    @Test
+    void testApplyWithGET() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-view-bundle.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-data.json");
+        var id = new IdType("PlanDefinition", "hello-world-patient-view");
+        var planDefinition = (PlanDefinition) read(id);
+        assertNotNull(planDefinition);
+
+        var patientId = "Patient/helloworld-patient-1";
+        var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(id)
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(CarePlan.class)
+                .useHttpGet()
+                .execute();
+
+        assertNotNull(result);
+        assertEquals(patientId, result.getSubject().getReference());
+        assertEquals(1, result.getContained().size());
+        var requestGroup = (RequestGroup) result.getContained().get(0);
+        assertEquals(1, requestGroup.getAction().size());
+        var action = requestGroup.getAction().get(0);
+        assertEquals("Hello World!", action.getTitle());
+    }
+
     @Test
     void testGenerateQuestionnaire() {
         // This test is duplicating test data from the cr-test package.  Ideally it should be reusing the test resources
@@ -47,7 +102,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
                 getFhirContext(),
                 newUrlPart(getFhirContext(), "url", url),
                 newStringPart(getFhirContext(), "version", version),
-                newPart(getFhirContext(), Reference.class, "subject", patientID),
+                newStringPart(getFhirContext(), "subject", patientID),
                 newPart(
                         getFhirContext(),
                         "parameters",

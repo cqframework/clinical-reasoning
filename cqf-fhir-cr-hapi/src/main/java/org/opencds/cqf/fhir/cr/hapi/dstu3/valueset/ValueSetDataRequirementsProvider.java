@@ -11,11 +11,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
@@ -37,8 +37,8 @@ public class ValueSetDataRequirementsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = ValueSet.class)
     public IBaseResource getDataRequirements(
             @OperationParam(name = "id") StringType id,
-            @OperationParam(name = "canonical") ParametersParameterComponent canonical,
-            @OperationParam(name = "url") ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "uri") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {

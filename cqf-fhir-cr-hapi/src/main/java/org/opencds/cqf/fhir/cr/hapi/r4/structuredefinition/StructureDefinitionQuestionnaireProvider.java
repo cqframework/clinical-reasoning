@@ -9,10 +9,11 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -49,8 +50,8 @@ public class StructureDefinitionQuestionnaireProvider {
             @IdParam IdType id,
             @OperationParam(name = "supportedOnly") BooleanType supportedOnly,
             @OperationParam(name = "requiredOnly") BooleanType requiredOnly,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
         return (Questionnaire) questionnaireProcessorFactory
                 .create(requestDetails)
@@ -84,13 +85,13 @@ public class StructureDefinitionQuestionnaireProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE, idempotent = true, type = StructureDefinition.class)
     public Questionnaire questionnaire(
             @OperationParam(name = "profile") StructureDefinition profile,
-            @OperationParam(name = "canonical") Parameters.ParametersParameterComponent canonical,
-            @OperationParam(name = "url") Parameters.ParametersParameterComponent url,
+            @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
             @OperationParam(name = "version") StringType version,
             @OperationParam(name = "supportedOnly") BooleanType supportedOnly,
             @OperationParam(name = "requiredOnly") BooleanType requiredOnly,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
         return (Questionnaire) questionnaireProcessorFactory
                 .create(requestDetails)

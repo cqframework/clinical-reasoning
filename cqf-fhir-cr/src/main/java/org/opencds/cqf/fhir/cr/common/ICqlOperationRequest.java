@@ -53,7 +53,7 @@ public interface ICqlOperationRequest extends IOperationRequest {
         var factory = getAdapterFactory();
         prefetchData.stream()
                 .map(factory::createParametersParameter)
-                .map(p -> p.getPartValues("data"))
+                .flatMap(p -> p.getPartValues("data").stream())
                 .filter(IBaseBundle.class::isInstance)
                 .flatMap(b -> BundleHelper.getEntryResources((IBaseBundle) b).stream())
                 .forEach(r -> BundleHelper.addEntry(data, BundleHelper.newEntryWithResource(r)));

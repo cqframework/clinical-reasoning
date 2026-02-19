@@ -23,7 +23,6 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
 
-
     private class SearchConfig {
 
         /**
@@ -31,6 +30,7 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
          * Each
          */
         public Multimap<String, List<IQueryParameterType>> searchParams = HashMultimap.create();
+
         public Predicate<IBaseResource> filter = x -> true;
     }
 

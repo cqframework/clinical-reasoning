@@ -380,22 +380,24 @@ class EnginesTest {
         // 1 Encounter with period entirely after daterange
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setLocation(new Reference("Location/123"))
-                .setPeriod(new Period()
-                    .setStart(createDate(formatter, "2001-08-06"))
-                    .setEnd(createDate(formatter, "2002-08-05")));
+            encounter
+                    .addLocation()
+                    .setLocation(new Reference("Location/123"))
+                    .setPeriod(new Period()
+                            .setStart(createDate(formatter, "2001-08-06"))
+                            .setEnd(createDate(formatter, "2002-08-05")));
 
             args.add(Arguments.of(encounter, "location-period"));
         }
         // 2 Encounter with period entirely before daterange
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setLocation(new Reference("Location/123"))
-                .setPeriod(new Period()
-                    .setStart(createDate(formatter, "1998-08-06"))
-                    .setEnd(createDate(formatter, "1999-08-05")));
+            encounter
+                    .addLocation()
+                    .setLocation(new Reference("Location/123"))
+                    .setPeriod(new Period()
+                            .setStart(createDate(formatter, "1998-08-06"))
+                            .setEnd(createDate(formatter, "1999-08-05")));
 
             args.add(Arguments.of(encounter, "location-period"));
         }
@@ -418,8 +420,7 @@ class EnginesTest {
         // 5 Observation with valueDateTime before range
         {
             Observation obs = new Observation();
-            obs.setValue(new DateTimeType().setValue(
-                createDate(dateTimeFormatter, "1999-03-14 02:59:00")));
+            obs.setValue(new DateTimeType().setValue(createDate(dateTimeFormatter, "1999-03-14 02:59:00")));
             obs.setStatus(ObservationStatus.CORRECTED);
 
             args.add(Arguments.of(obs, "value-date"));
@@ -427,8 +428,7 @@ class EnginesTest {
         // 6 Observation with valueDateTime after range
         {
             Observation obs = new Observation();
-            obs.setValue(new DateTimeType().setValue(
-                createDate(dateTimeFormatter, "2001-03-14 02:59:00")));
+            obs.setValue(new DateTimeType().setValue(createDate(dateTimeFormatter, "2001-03-14 02:59:00")));
             obs.setStatus(ObservationStatus.CORRECTED);
 
             args.add(Arguments.of(obs, "value-date"));
@@ -452,33 +452,36 @@ class EnginesTest {
         // 1 Encounter with location period starting in 2000
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setLocation(new Reference("Location/123"))
-                .setPeriod(new Period()
-                    .setStart(createDate(formatter, "2000-11-11"))
-                    .setEnd(createDate(formatter, "2001-02-28")));
+            encounter
+                    .addLocation()
+                    .setLocation(new Reference("Location/123"))
+                    .setPeriod(new Period()
+                            .setStart(createDate(formatter, "2000-11-11"))
+                            .setEnd(createDate(formatter, "2001-02-28")));
 
             args.add(Arguments.of(encounter, "location-period"));
         }
         // 2 Encounter with location period ending in 2000
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setLocation(new Reference("Location/123"))
-                .setPeriod(new Period()
-                    .setStart(createDate(formatter, "1999-08-06"))
-                    .setEnd(createDate(formatter, "2000-04-01")));
+            encounter
+                    .addLocation()
+                    .setLocation(new Reference("Location/123"))
+                    .setPeriod(new Period()
+                            .setStart(createDate(formatter, "1999-08-06"))
+                            .setEnd(createDate(formatter, "2000-04-01")));
 
             args.add(Arguments.of(encounter, "location-period"));
         }
         // 3 Encounter with location period around all of period
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setLocation(new Reference("Location/123"))
-                .setPeriod(new Period()
-                    .setStart(createDate(formatter, "1999-08-06"))
-                    .setEnd(createDate(formatter, "2001-08-05")));
+            encounter
+                    .addLocation()
+                    .setLocation(new Reference("Location/123"))
+                    .setPeriod(new Period()
+                            .setStart(createDate(formatter, "1999-08-06"))
+                            .setEnd(createDate(formatter, "2001-08-05")));
 
             args.add(Arguments.of(encounter, "location-period"));
         }
@@ -493,8 +496,7 @@ class EnginesTest {
         //  Observation with effective datetime value in 2000
         {
             Observation obs = new Observation();
-            obs.setValue(new DateTimeType().setValue(
-                createDate(dateTimeFormatter, "2000-03-14 02:59:00")));
+            obs.setValue(new DateTimeType().setValue(createDate(dateTimeFormatter, "2000-03-14 02:59:00")));
             obs.setStatus(ObservationStatus.CORRECTED);
 
             args.add(Arguments.of(obs, "value-date"));
@@ -520,8 +522,7 @@ class EnginesTest {
     @MethodSource("failureParameters")
     public void retrieve_withValidDatesOutOfRange_failToRetrieve(IBaseResource resource, String spName) {
         // setup
-        IParser parser = repository.fhirContext()
-            .newJsonParser();
+        IParser parser = repository.fhirContext().newJsonParser();
 
         // test
         var results = retrieveResourcesWithin2000BySPName(resource, spName);
@@ -530,9 +531,14 @@ class EnginesTest {
         assertNotNull(results);
         List<Object> resources = new ArrayList<>();
         results.forEach(resources::add);
-        assertTrue(resources.isEmpty(), String.join("\n", resources.stream().map(r -> (IBaseResource)r).map(
-            parser::encodeToString).collect(
-            Collectors.toSet())));
+        assertTrue(
+                resources.isEmpty(),
+                String.join(
+                        "\n",
+                        resources.stream()
+                                .map(r -> (IBaseResource) r)
+                                .map(parser::encodeToString)
+                                .collect(Collectors.toSet())));
     }
 
     private Iterable<Object> retrieveResourcesWithin2000BySPName(IBaseResource resource, String spName) {
@@ -542,12 +548,11 @@ class EnginesTest {
         RetrieveSettings retrieveSettings = new RetrieveSettings();
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
 
-        EvaluationSettings settings = EvaluationSettings
-            .getDefault().withRetrieveSettings(retrieveSettings);
+        EvaluationSettings settings = EvaluationSettings.getDefault().withRetrieveSettings(retrieveSettings);
 
         var engine = Engines.forRepository(repository, settings);
         var dataProviders = engine.getEnvironment().getDataProviders();
-        var dataProvider = (FederatedDataProvider)dataProviders.get(Constants.FHIR_MODEL_URI);
+        var dataProvider = (FederatedDataProvider) dataProviders.get(Constants.FHIR_MODEL_URI);
 
         repository.update(resource, Map.of());
 
@@ -558,19 +563,19 @@ class EnginesTest {
 
         // Retrieve resources with period overlapping 2000
         var results = dataProvider.retrieve(
-            resourceType,   // context
-            null,           // contextPath
-            "pat1",         // contextValue
-            resourceType,   // dataType
-            null,           // templateId
-            null,           // codePath
-            null,           // codes
-            null,           // valueSet
-            spName,         // datePath - but it's actually the name of the sp
-            "period.start", // dateLowPath
-            "period.end",   // dateHighPath
-            dateRange       // dateRange
-        );
+                resourceType, // context
+                null, // contextPath
+                "pat1", // contextValue
+                resourceType, // dataType
+                null, // templateId
+                null, // codePath
+                null, // codes
+                null, // valueSet
+                spName, // datePath - but it's actually the name of the sp
+                "period.start", // dateLowPath
+                "period.end", // dateHighPath
+                dateRange // dateRange
+                );
 
         return results;
     }
@@ -581,12 +586,11 @@ class EnginesTest {
         RetrieveSettings retrieveSettings = new RetrieveSettings();
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);
 
-        EvaluationSettings settings = EvaluationSettings
-            .getDefault().withRetrieveSettings(retrieveSettings);
+        EvaluationSettings settings = EvaluationSettings.getDefault().withRetrieveSettings(retrieveSettings);
 
         var engine = Engines.forRepository(repository, settings);
         var dataProviders = engine.getEnvironment().getDataProviders();
-        var dataProvider = (FederatedDataProvider)dataProviders.get(Constants.FHIR_MODEL_URI);
+        var dataProvider = (FederatedDataProvider) dataProviders.get(Constants.FHIR_MODEL_URI);
 
         Patient patient = new Patient();
         patient.setId("Patient/123");
@@ -601,19 +605,19 @@ class EnginesTest {
 
         // Retrieve encounters with period overlapping 2024
         var results = dataProvider.retrieve(
-            "Patient",      // context
-            null, // "subject",      // contextPath
-            "pat1",         // contextValue
-            "Patient",    // dataType
-            null,           // templateId
-            null,           // codePath
-            null,           // codes
-            null,           // valueSet
-            "birthdate",           // datePath
-            "period.start", // dateLowPath
-            "period.end",   // dateHighPath
-            dateRange       // dateRange
-        );
+                "Patient", // context
+                null, // "subject",      // contextPath
+                "pat1", // contextValue
+                "Patient", // dataType
+                null, // templateId
+                null, // codePath
+                null, // codes
+                null, // valueSet
+                "birthdate", // datePath
+                "period.start", // dateLowPath
+                "period.end", // dateHighPath
+                dateRange // dateRange
+                );
 
         // verify
         assertNotNull(results);
@@ -679,7 +683,6 @@ class EnginesTest {
     private CqlEngine getEngine(EvaluationSettings settings, IBaseBundle bundle) {
         return Engines.forRepository(repository, settings, bundle);
     }
-
 
     private static Date createDate(SimpleDateFormat formatter, String dateStr) {
         try {

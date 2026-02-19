@@ -8,9 +8,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import java.util.HashMap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
@@ -28,14 +28,24 @@ class BaseRetrieveProviderTests {
         doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
-        Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-//        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
-        assertInstanceOf(UriParam.class, searchParamsR4.get(PROFILE_PARAM).get(0));
+        Multimap<String, List<IQueryParameterType>> searchParamsR4 = HashMultimap.create();
+        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
+        assertInstanceOf(
+                UriParam.class,
+                searchParamsR4.get(PROFILE_PARAM).stream()
+                        .findFirst()
+                        .orElseThrow()
+                        .get(0));
 
         doReturn(FhirVersionEnum.R5).when(fixture).getFhirVersion();
-        Map<String, List<IQueryParameterType>> searchParamsR5 = new HashMap<>();
-//        fixture.populateTemplateSearchParams(searchParamsR5, CONDITION, US_CORE_CONDITION);
-        assertInstanceOf(ReferenceParam.class, searchParamsR5.get(PROFILE_PARAM).get(0));
+        Multimap<String, List<IQueryParameterType>> searchParamsR5 = HashMultimap.create();
+        fixture.populateTemplateSearchParams(searchParamsR5, CONDITION, US_CORE_CONDITION);
+        assertInstanceOf(
+                ReferenceParam.class,
+                searchParamsR5.get(PROFILE_PARAM).stream()
+                        .findFirst()
+                        .orElseThrow()
+                        .get(0));
     }
 
     @Test
@@ -45,8 +55,8 @@ class BaseRetrieveProviderTests {
         doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
-        Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-//        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, FHIR_CONDITION);
+        Multimap<String, List<IQueryParameterType>> searchParamsR4 = HashMultimap.create();
+        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, FHIR_CONDITION);
         assertTrue(searchParamsR4.isEmpty());
     }
 
@@ -57,8 +67,8 @@ class BaseRetrieveProviderTests {
         doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
         doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
-        Map<String, List<IQueryParameterType>> searchParamsR4 = new HashMap<>();
-//        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
+        Multimap<String, List<IQueryParameterType>> searchParamsR4 = HashMultimap.create();
+        fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
         assertTrue(searchParamsR4.isEmpty());
     }
 }

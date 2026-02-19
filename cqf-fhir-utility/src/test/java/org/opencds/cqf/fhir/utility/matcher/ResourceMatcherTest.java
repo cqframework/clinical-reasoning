@@ -25,7 +25,6 @@ public class ResourceMatcherTest {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
     private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-
     // TODO - we should combine the various resource matchers into 1
     // and/or use a factory to produce them (we never mix fhir versions anyways)
     private ResourceMatcherR4 resourceMatcher;
@@ -43,121 +42,109 @@ public class ResourceMatcherTest {
         // 1 encounter with date range entirely within search bounds
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("2000-02-01");
             Date end = createDate("2000-11-11");
             List<IQueryParameterType> params = new ArrayList<>();
             // start <= v <= end || start <= v <= end
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end),
-                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)));
 
             args.add(Arguments.of("location-period", params, encounter, true));
         }
         // 2 encounter with date range overlapping and after
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("2000-11-11");
             Date end = createDate("2001-11-11");
             List<IQueryParameterType> params = new ArrayList<>();
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end),
-                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)));
 
             args.add(Arguments.of("location-period", params, encounter, true));
         }
         // 3 encounter with date range overlapping and before
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("1999-11-11");
             Date end = createDate("2000-11-11");
             List<IQueryParameterType> params = new ArrayList<>();
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end),
-                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)));
 
             args.add(Arguments.of("location-period", params, encounter, true));
         }
         // 4 encounter with date range entirely overlapping (and extending on both sides)
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("1999-11-11");
             Date end = createDate("2001-01-01");
             List<IQueryParameterType> params = new ArrayList<>();
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end),
-                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)));
 
             args.add(Arguments.of("location-period", params, encounter, true));
         }
         // 5 encounter with date range entirely before
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("1999-01-01");
             Date end = createDate("1999-11-11");
             List<IQueryParameterType> params = new ArrayList<>();
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end),
-                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)));
 
             args.add(Arguments.of("location-period", params, encounter, false));
         }
         // 6 encounter with date range entirely after
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("2001-01-01");
             Date end = createDate("2001-11-11");
             List<IQueryParameterType> params = new ArrayList<>();
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start),
-                    new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)));
 
             args.add(Arguments.of("location-period", params, encounter, false));
         }
@@ -165,21 +152,19 @@ public class ResourceMatcherTest {
         //      but with the composite params flipped for robust-ness
         {
             Encounter encounter = new Encounter();
-            encounter.addLocation()
-                .setPeriod(new Period()
-                    .setStart(createDate("2000-01-01 00:00:00"))
-                    .setEnd(createDate("2000-12-31 23:59:59")));
+            encounter
+                    .addLocation()
+                    .setPeriod(new Period()
+                            .setStart(createDate("2000-01-01 00:00:00"))
+                            .setEnd(createDate("2000-12-31 23:59:59")));
 
             Date start = createDate("2000-02-01");
             Date end = createDate("2000-11-11");
             List<IQueryParameterType> params = new ArrayList<>();
             // start <= v <= end || start <= v <= end
-            params.add(
-                new CompositeParam<>(
+            params.add(new CompositeParam<>(
                     new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start),
-                    new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)
-                )
-            );
+                    new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)));
 
             args.add(Arguments.of("location-period", params, encounter, true));
         }
@@ -189,13 +174,10 @@ public class ResourceMatcherTest {
 
     @ParameterizedTest
     @MethodSource("coverageParameters")
-    public void matches_dateParamCoverage_worksAsExpected(String spName, List<IQueryParameterType> params, IBaseResource resource, boolean expectedMatch) {
+    public void matches_dateParamCoverage_worksAsExpected(
+            String spName, List<IQueryParameterType> params, IBaseResource resource, boolean expectedMatch) {
         // test
-        boolean matches = resourceMatcher.matches(
-            spName,
-            params,
-            resource
-        );
+        boolean matches = resourceMatcher.matches(spName, params, resource);
 
         // verify
         assertEquals(expectedMatch, matches);

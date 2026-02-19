@@ -159,7 +159,7 @@ public interface ResourceMatcher {
             match = isMatchUri(uri, r);
         } else if (param instanceof StringParam string) {
             match = isMatchString(string, r);
-        } else if (param instanceof CompositeParam<?,?> cp) {
+        } else if (param instanceof CompositeParam<?, ?> cp) {
             return isCompositeMatch(cp, r);
         } else {
             throw new NotImplementedException("Resource matching not implemented for search params of type "
@@ -207,10 +207,10 @@ public interface ResourceMatcher {
              * * resourceStart <= searchEnd && searchStart <= resourceEnd
              */
             return isMatchDate(resourceStart, new DateTimeDt(searchEnd.getValue()))
-                && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
+                    && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
         } else {
             throw new NotImplementedException("Composite matching not implemented for search params of type "
-                + composite.getLeftValue().getClass().getSimpleName());
+                    + composite.getLeftValue().getClass().getSimpleName());
         }
     }
 
@@ -294,8 +294,9 @@ public interface ResourceMatcher {
                 return !date.equals(compareDate);
             }
             default ->
-                // ends_before, starts_after, approximate - do not work for single date parameters
-                throw new UnsupportedOperationException("Unsupported DateTime comparison operation " + param.getPrefix().getValue());
+            // ends_before, starts_after, approximate - do not work for single date parameters
+            throw new UnsupportedOperationException("Unsupported DateTime comparison operation "
+                    + param.getPrefix().getValue());
         }
     }
 

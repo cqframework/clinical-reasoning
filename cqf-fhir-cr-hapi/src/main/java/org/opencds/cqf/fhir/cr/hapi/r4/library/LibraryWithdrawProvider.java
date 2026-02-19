@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
+import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_WITHDRAW;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -33,11 +35,9 @@ public class LibraryWithdrawProvider {
      *                        artifact (e.g. it is defined explicitly in the server's resources)
      * @return A transaction {@link Bundle Bundle} result of the withdrawn resources
      */
-    @Operation(name = "$withdraw", idempotent = true, global = true, type = Library.class)
-    @Description(shortDefinition = "$withdraw", value = "Withdraw an existing draft artifact")
+    @Operation(name = CRMI_OPERATION_WITHDRAW, idempotent = true, global = true, type = Library.class)
+    @Description(shortDefinition = CRMI_OPERATION_WITHDRAW, value = "Withdraw an existing draft artifact")
     public IBaseBundle withdrawOperation(@IdParam IdType id, RequestDetails requestDetails) throws FHIRException {
-        return libraryProcessorFactory
-                .create(requestDetails)
-                .withdrawLibrary(Eithers.for3(null, id, null), new Parameters());
+        return libraryProcessorFactory.create(requestDetails).withdrawLibrary(Eithers.forMiddle3(id), new Parameters());
     }
 }

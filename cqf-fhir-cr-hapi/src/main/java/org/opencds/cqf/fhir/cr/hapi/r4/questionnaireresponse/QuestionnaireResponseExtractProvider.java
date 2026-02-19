@@ -31,7 +31,7 @@ public class QuestionnaireResponseExtractProvider {
      * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
      *
      * @param id                    The id of the QuestionnaireResponse to extract data from.
-     * @param questionnaireResponse The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level.
+     * @param questionnaire         The Questionnaire associated with the QuestionnaireResponse. Used if the server might not have access to the Questionnaire
      * @param parameters            Any input parameters defined in libraries referenced by the Questionnaire.
      * @param data                  Data to be made available during CQL evaluation.
      * @param requestDetails        The details (such as tenant) of this request. Usually
@@ -41,7 +41,6 @@ public class QuestionnaireResponseExtractProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
     public IBaseBundle extract(
             @IdParam IdType id,
-            @OperationParam(name = "questionnaire-response") QuestionnaireResponse questionnaireResponse,
             @OperationParam(name = "questionnaire") Questionnaire questionnaire,
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "useServerData") BooleanType useServerData,
@@ -51,13 +50,26 @@ public class QuestionnaireResponseExtractProvider {
         return questionnaireResponseProcessorFactory
                 .create(requestDetails)
                 .extract(
-                        Eithers.for2(id, questionnaireResponse),
+                        Eithers.forLeft(id),
                         questionnaire == null ? null : Eithers.forRight(questionnaire),
                         parameters,
                         data,
                         useServerData == null ? Boolean.TRUE : useServerData.booleanValue());
     }
 
+    /**
+     * Implements the <a href="http://build.fhir.org/ig/HL7/sdc/OperationDefinition-QuestionnaireResponse-extract.html">$extract</a>
+     * operation found in the
+     * <a href="http://build.fhir.org/ig/HL7/sdc/index.html">Structured Data Capture (SDC) IG</a>.
+     *
+     * @param questionnaireResponse The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level.
+     * @param questionnaire         The Questionnaire associated with the QuestionnaireResponse. Used if the server might not have access to the Questionnaire
+     * @param parameters            Any input parameters defined in libraries referenced by the Questionnaire.
+     * @param data                  Data to be made available during CQL evaluation.
+     * @param requestDetails        The details (such as tenant) of this request. Usually
+     *                                 autopopulated HAPI.
+     * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
+     */
     @Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
     public IBaseBundle extract(
             @OperationParam(name = "questionnaire-response") QuestionnaireResponse questionnaireResponse,

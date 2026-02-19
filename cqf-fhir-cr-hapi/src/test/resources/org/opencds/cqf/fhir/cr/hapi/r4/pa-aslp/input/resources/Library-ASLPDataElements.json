@@ -60,63 +60,28 @@
   ],
   "parameter": [
     {
-      "name": "Device Request",
-      "use": "in",
-      "min": 0,
-      "max": "*",
-      "type": "DeviceRequest"
-    },
-    {
-      "name": "Device Request Id",
-      "use": "in",
-      "min": 0,
-      "max": "*",
-      "type": "string"
-    },
-    {
-      "name": "Medication Request",
-      "use": "in",
-      "min": 0,
-      "max": "*",
-      "type": "MedicationRequest"
-    },
-    {
-      "name": "Medication Request Id",
-      "use": "in",
-      "min": 0,
-      "max": "*",
-      "type": "string"
-    },
-    {
-      "name": "Nutrition Order",
-      "use": "in",
-      "min": 0,
-      "max": "*",
-      "type": "NutritionOrder"
-    },
-    {
-      "name": "Nutrition Order Id",
-      "use": "in",
-      "min": 0,
-      "max": "*",
-      "type": "string"
-    },
-    {
-      "name": "Service Request",
+      "name": "ServiceRequest",
       "use": "in",
       "min": 0,
       "max": "*",
       "type": "ServiceRequest"
     },
     {
-      "name": "Service Request Id",
+      "name": "ServiceRequestId",
       "use": "in",
       "min": 0,
       "max": "*",
       "type": "string"
     },
     {
-      "name": "Coverage Id",
+      "name": "Coverage",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "type": "Coverage"
+    },
+    {
+      "name": "CoverageId",
       "use": "in",
       "min": 0,
       "max": "*",

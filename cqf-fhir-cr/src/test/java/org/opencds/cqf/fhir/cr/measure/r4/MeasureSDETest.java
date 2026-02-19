@@ -139,7 +139,33 @@ class MeasureSDETest {
             assertTrue(
                     e.getMessage()
                             .contains(
-                                    "SupplementalDataComponent usage is missing code: supplemental-data for Measure: http://example.com/Measure/CohortBooleanSDEMissingUsage"));
+                                    "SupplementalDataComponent usage is missing code: supplemental-data or risk-adjustment-factor for Measure: http://example.com/Measure/CohortBooleanSDEMissingUsage"));
         }
+    }
+
+    /**
+     * Individual MeasureReport
+     * Single Value SDE with risk-adjustment-factor usage code
+     * Verifies that risk-adjustment-factor usage code is accepted
+     * and behaves identically to supplemental-data
+     */
+    @Test
+    void cohortBooleanSDERiskAdjustmentFactorIndividualResult() {
+
+        given.when()
+                .measureId("CohortBooleanSDERiskAdjustmentFactor")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedResourceCount(1)
+                .containedObservationsHaveMatchingExtension()
+                .containedByValue("M")
+                .observationHasExtensionUrl()
+                .observationHasSDECoding()
+                .up()
+                .extension("sde-patient-sex")
+                .extensionHasSDEUrl()
+                .up()
+                .report();
     }
 }

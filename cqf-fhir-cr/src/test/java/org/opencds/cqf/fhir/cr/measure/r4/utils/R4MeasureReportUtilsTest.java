@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
@@ -242,6 +243,112 @@ class R4MeasureReportUtilsTest {
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
         assertEquals("max", ((StringType) methodExt.getValue()).getValue());
+    }
+
+    // ========================================
+    // Tests for addAggregationResultMethodAndCriteriaRef - StratifierGroupPopulationComponent overload
+    // ========================================
+
+    @Test
+    void testAddAggregationResultMethodAndCriteriaRef_StratumPopulation_WithAllValues() {
+        var stratumPopulation = new MeasureReport.StratifierGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                stratumPopulation, ContinuousVariableObservationAggregateMethod.SUM, 42.5, "numerator");
+
+        // Assert aggregation result
+        Extension resultExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        assertInstanceOf(DecimalType.class, resultExt.getValue());
+        assertEquals(42.5, ((DecimalType) resultExt.getValue()).getValue().doubleValue());
+
+        // Assert aggregate method
+        Extension methodExt = stratumPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertInstanceOf(StringType.class, methodExt.getValue());
+        assertEquals("sum", ((StringType) methodExt.getValue()).getValue());
+
+        // Assert criteria reference
+        Extension criteriaRefExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt);
+        assertEquals("numerator", ((StringType) criteriaRefExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultMethodAndCriteriaRef_StratumPopulation_WithNullAggregationResult() {
+        var stratumPopulation = new MeasureReport.StratifierGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                stratumPopulation, ContinuousVariableObservationAggregateMethod.AVG, null, "denominator");
+
+        // No result or method extensions when aggregation result is null
+        assertNull(stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT));
+        assertNull(stratumPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL));
+
+        // Criteria reference should still be set
+        Extension criteriaRefExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt);
+        assertEquals("denominator", ((StringType) criteriaRefExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultMethodAndCriteriaRef_StratumPopulation_WithN_AMethod() {
+        var stratumPopulation = new MeasureReport.StratifierGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                stratumPopulation, ContinuousVariableObservationAggregateMethod.N_A, 99.0, "numerator");
+
+        // No result or method extensions when method is N_A
+        assertNull(stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT));
+        assertNull(stratumPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL));
+
+        // Criteria reference should still be set
+        Extension criteriaRefExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt);
+        assertEquals("numerator", ((StringType) criteriaRefExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultMethodAndCriteriaRef_StratumPopulation_UpdatesExistingExtensions() {
+        var stratumPopulation = new MeasureReport.StratifierGroupPopulationComponent();
+
+        // Add initial values
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                stratumPopulation, ContinuousVariableObservationAggregateMethod.SUM, 10.0, "numerator");
+
+        // Update with new values
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                stratumPopulation, ContinuousVariableObservationAggregateMethod.AVG, 25.0, "denominator");
+
+        // Assert extensions are updated, not duplicated
+        assertEquals(3, stratumPopulation.getExtension().size(), "Should have exactly 3 extensions (not duplicated)");
+
+        Extension resultExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(resultExt);
+        assertEquals(25.0, ((DecimalType) resultExt.getValue()).getValue().doubleValue());
+
+        Extension methodExt = stratumPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(methodExt);
+        assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
+
+        Extension criteriaRefExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(criteriaRefExt);
+        assertEquals("denominator", ((StringType) criteriaRefExt.getValue()).getValue());
+    }
+
+    @Test
+    void testAddAggregationResultMethodAndCriteriaRef_StratumPopulation_NullCriteriaReference() {
+        var stratumPopulation = new MeasureReport.StratifierGroupPopulationComponent();
+
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                stratumPopulation, ContinuousVariableObservationAggregateMethod.SUM, 50.0, null);
+
+        // Result and method should be set
+        assertNotNull(stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT));
+        assertNotNull(stratumPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL));
+
+        // Criteria reference should NOT be set when null
+        assertNull(stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE));
     }
 
     // ========================================

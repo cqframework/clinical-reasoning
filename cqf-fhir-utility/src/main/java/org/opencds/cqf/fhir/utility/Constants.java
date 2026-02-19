@@ -144,6 +144,15 @@ public class Constants {
     public static final String CRMI_VERSION_1 = "1.0.0";
     public static final String CRMI_VERSION_2 = "2.0.0";
 
+    public static final String CRMI_OPERATION_APPROVE = "$approve";
+    public static final String CRMI_OPERATION_ARTIFACT_DIFF = "$artifact-diff";
+    public static final String CRMI_OPERATION_DELETE = "$delete";
+    public static final String CRMI_OPERATION_PACKAGE = "$package";
+    public static final String CRMI_OPERATION_RELEASE = "$release";
+    public static final String CRMI_OPERATION_RETIRE = "$retire";
+    public static final String CRMI_OPERATION_REVISE = "$revise";
+    public static final String CRMI_OPERATION_WITHDRAW = "$withdraw";
+
     public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";
     public static final String SDC_QUESTIONNAIRE_HIDDEN =

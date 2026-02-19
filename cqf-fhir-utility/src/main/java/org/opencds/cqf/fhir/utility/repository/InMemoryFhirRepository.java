@@ -184,7 +184,8 @@ public class InMemoryFhirRepository implements IRepository {
                 boolean matches = false;
                 for (List<IQueryParameterType> ors : values) {
                     matches = this.resourceMatcher.matches(paramName, ors, resource);
-                    if (matches) {
+                    if (!matches) {
+                        // break if no match, since each list is 'anded' with each other
                         break;
                     }
                 }

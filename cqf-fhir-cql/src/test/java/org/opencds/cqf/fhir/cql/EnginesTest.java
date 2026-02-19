@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
 import java.text.ParseException;
@@ -24,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
@@ -364,7 +366,78 @@ class EnginesTest {
     }
 
     /**
-     * Parameters for the below method.
+     * All created resources must have an SP that identifies
+     * a field that *does not have* a date value between 2000-01-01 and 2000-12-31 eod
+     * (ie, in the year 2000).
+     */
+    static List<Arguments> failureParameters() {
+        // formatter
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        List<Arguments> args = new ArrayList<>();
+
+        // 1 Encounter with period entirely after daterange
+        {
+            Encounter encounter = new Encounter();
+            encounter.addLocation()
+                .setLocation(new Reference("Location/123"))
+                .setPeriod(new Period()
+                    .setStart(createDate(formatter, "2001-08-06"))
+                    .setEnd(createDate(formatter, "2002-08-05")));
+
+            args.add(Arguments.of(encounter, "location-period"));
+        }
+        // 2 Encounter with period entirely before daterange
+        {
+            Encounter encounter = new Encounter();
+            encounter.addLocation()
+                .setLocation(new Reference("Location/123"))
+                .setPeriod(new Period()
+                    .setStart(createDate(formatter, "1998-08-06"))
+                    .setEnd(createDate(formatter, "1999-08-05")));
+
+            args.add(Arguments.of(encounter, "location-period"));
+        }
+        // 3 Patient with birthday before
+        {
+            Patient patient = new Patient();
+            patient.setActive(true);
+            patient.setBirthDate(createDate(formatter, "1999-03-14"));
+
+            args.add(Arguments.of(patient, "birthdate"));
+        }
+        // 4 Patient with birthday after
+        {
+            Patient patient = new Patient();
+            patient.setActive(true);
+            patient.setBirthDate(createDate(formatter, "2001-03-14"));
+
+            args.add(Arguments.of(patient, "birthdate"));
+        }
+        // 5 Observation with valueDateTime before range
+        {
+            Observation obs = new Observation();
+            obs.setValue(new DateTimeType().setValue(
+                createDate(dateTimeFormatter, "1999-03-14 02:59:00")));
+            obs.setStatus(ObservationStatus.CORRECTED);
+
+            args.add(Arguments.of(obs, "value-date"));
+        }
+        // 6 Observation with valueDateTime after range
+        {
+            Observation obs = new Observation();
+            obs.setValue(new DateTimeType().setValue(
+                createDate(dateTimeFormatter, "2001-03-14 02:59:00")));
+            obs.setStatus(ObservationStatus.CORRECTED);
+
+            args.add(Arguments.of(obs, "value-date"));
+        }
+
+        return args;
+    }
+
+    /**
      * All created resources must have a SP that identifies
      * a field that has a date value between 2000-01-01 and 2000-12-31 eod
      * (ie, in the year 2000).
@@ -432,7 +505,37 @@ class EnginesTest {
 
     @ParameterizedTest
     @MethodSource("successfulParameters")
-    public void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String path) {
+    public void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String spName) {
+        // test
+        var results = retrieveResourcesWithin2000BySPName(resource, spName);
+
+        // verify
+        assertNotNull(results);
+        List<Object> resources = new ArrayList<>();
+        results.forEach(resources::add);
+        assertEquals(1, resources.size());
+    }
+
+    @ParameterizedTest
+    @MethodSource("failureParameters")
+    public void retrieve_withValidDatesOutOfRange_failToRetrieve(IBaseResource resource, String spName) {
+        // setup
+        IParser parser = repository.fhirContext()
+            .newJsonParser();
+
+        // test
+        var results = retrieveResourcesWithin2000BySPName(resource, spName);
+
+        // verify
+        assertNotNull(results);
+        List<Object> resources = new ArrayList<>();
+        results.forEach(resources::add);
+        assertTrue(resources.isEmpty(), String.join("\n", resources.stream().map(r -> (IBaseResource)r).map(
+            parser::encodeToString).collect(
+            Collectors.toSet())));
+    }
+
+    private Iterable<Object> retrieveResourcesWithin2000BySPName(IBaseResource resource, String spName) {
         // setup
         String resourceType = resource.fhirType();
 
@@ -453,7 +556,7 @@ class EnginesTest {
         var end = new DateTime("2000-12-31T23:59:59", ZoneOffset.UTC);
         var dateRange = new Interval(start, true, end, true);
 
-        // Retrieve encounters with period overlapping 2024
+        // Retrieve resources with period overlapping 2000
         var results = dataProvider.retrieve(
             resourceType,   // context
             null,           // contextPath
@@ -463,17 +566,13 @@ class EnginesTest {
             null,           // codePath
             null,           // codes
             null,           // valueSet
-            path,           // datePath
+            spName,         // datePath - but it's actually the name of the sp
             "period.start", // dateLowPath
             "period.end",   // dateHighPath
             dateRange       // dateRange
         );
 
-        // verify
-        assertNotNull(results);
-        List<Object> resources = new ArrayList<>();
-        results.forEach(resources::add);
-        assertEquals(1, resources.size());
+        return results;
     }
 
     @Test

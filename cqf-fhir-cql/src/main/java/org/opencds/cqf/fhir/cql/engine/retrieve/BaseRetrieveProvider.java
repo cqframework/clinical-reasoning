@@ -8,8 +8,8 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -17,14 +17,13 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.ExtensionUtil;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -424,38 +423,12 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
         if (StringUtils.isNotBlank(dateParamName)) {
             var sp = this.resolver.getSearchParameterDefinition(dataType, dateParamName);
-            fhirContext.getResourceDefinition(dataType)
-                .getSearchParam(dateParamName);
 
-            /*
-             * all params in a list are 'OR'd
-             * all lists with the same name are 'AND'd
-             *
-             */
-
-//            DateRangeParam dp = new DateRangeParam();
-//            DateParam low = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
-//            DateParam high = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
-//            dp.setLowerBound(low);
-//            dp.setUpperBound(high);
-//
-//            searchParams.put(sp.getName(), List.of(dp));
-
-            /**
-             *  (date >= start AND date <= end)
-             *
-             *  if target child is a period (not a specific date) (ie, date.start, date.end, not just date)
-             *
-             *  overlapping if...
-             * (date.start <= end && date.start >= start)
-             * OR
-             * (date.end <= end && date.end >= start)
-             */
+            // a date range is a search && condition - so we'll use a composite
             DateParam gte = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
             DateParam lte = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
-//            var sp = this.resolver.getSearchParameterDefinition(dataType, dateParamName);
-            searchParams.put(sp.getName(), List.of(gte));
-            searchParams.put(sp.getName(), List.of(lte));
+
+            searchParams.put(sp.getName(), List.of(new CompositeParam<>(gte, lte)));
         } else if (StringUtils.isNotBlank(dateLowPath)) {
             List<IQueryParameterType> dateRangeParam = new ArrayList<>();
             DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);

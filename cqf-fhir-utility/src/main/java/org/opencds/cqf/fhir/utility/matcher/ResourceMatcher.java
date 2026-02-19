@@ -205,9 +205,14 @@ public interface ResourceMatcher {
              *
              * these are overlapping if:
              * * resourceStart <= searchEnd && searchStart <= resourceEnd
+             *
+             * NB: we write it here as:
+             * searchEnd >= resourceStart && searchStart <= resourceEnd
+             *
+             * This is because the
              */
-            return isMatchDate(resourceStart, new DateTimeDt(searchEnd.getValue()))
-                    && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
+            return isMatchDate(searchEnd, new DateTimeDt(resourceStart.getValue()))
+                && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
         } else {
             throw new NotImplementedException("Composite matching not implemented for search params of type "
                     + composite.getLeftValue().getClass().getSimpleName());
@@ -293,10 +298,11 @@ public interface ResourceMatcher {
             case NOT_EQUAL -> {
                 return !date.equals(compareDate);
             }
-            default ->
-            // ends_before, starts_after, approximate - do not work for single date parameters
-            throw new UnsupportedOperationException("Unsupported DateTime comparison operation "
-                    + param.getPrefix().getValue());
+            default -> {
+                // ends_before, starts_after, approximate - do not work for single date parameters
+                String msg = String.format("Unsupported DateTime comparison operation %s", param.getPrefix().getValue());
+                throw new UnsupportedOperationException(msg);
+            }
         }
     }
 

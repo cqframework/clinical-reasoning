@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.cql.evaluate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
@@ -81,6 +82,7 @@ class CqlEvaluationRequestTests {
     void testResolveIncludedLibraries() {
         var request = mock(CqlEvaluationRequest.class, CALLS_REAL_METHODS);
         doReturn(FhirVersionEnum.R4).when(request).getFhirVersion();
+        assertNull(request.resolveIncludedLibraries(null));
         var actual = request.resolveIncludedLibraries(getLibraries(FhirContext.forR4Cached()));
         assertEquals(2, actual.size());
     }

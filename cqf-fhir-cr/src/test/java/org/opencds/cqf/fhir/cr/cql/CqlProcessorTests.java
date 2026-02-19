@@ -3,12 +3,17 @@ package org.opencds.cqf.fhir.cr.cql;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.cql.TestCql.given;
+import static org.opencds.cqf.fhir.cr.library.TestLibrary.CLASS_PATH;
+import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.nio.file.Path;
+import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -16,9 +21,33 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationProcessor;
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class CqlProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
+
+    @Test
+    void defaultSettings() {
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var processor = new CqlProcessor(repository);
+        assertNotNull(processor.settings());
+    }
+
+    @Test
+    void processor() {
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var processor = new CqlProcessor(
+                repository,
+                CrSettings.getDefault(),
+                List.of(new CqlEvaluationProcessor(repository, EvaluationSettings.getDefault())));
+
+        assertNotNull(processor.settings());
+    }
 
     @Test
     void libraryEvaluationService_inlineAsthma() {

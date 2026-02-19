@@ -33,12 +33,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
 import org.opencds.cqf.fhir.cr.common.CreateChangelogProcessor.ChangeLog;
@@ -66,7 +66,8 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
     }
 
     @Override
-    public IBaseResource createChangelog(IBaseResource source, IBaseResource target, Endpoint terminologyEndpoint) {
+    public IBaseResource createChangelog(
+            IBaseResource source, IBaseResource target, IBaseResource terminologyEndpoint) {
 
         // 1) Use package to get a pair of bundles
         ExecutorService service = Executors.newCachedThreadPool();
@@ -74,7 +75,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         Bundle sourceBundle;
         Bundle targetBundle;
         Parameters params = new Parameters();
-        params.addParameter().setName("terminologyEndpoint").setResource(terminologyEndpoint);
+        params.addParameter().setName("terminologyEndpoint").setResource((Resource) terminologyEndpoint);
         try {
             packages = service.invokeAll(Arrays.asList(
                     () -> packageProcessor.packageResource(source, params),
@@ -200,8 +201,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
                     }
 
                     // 4) Add a new operation to the ChangeLog
-                    page.addOperation(
-                            type, path.orElse(null), newValue.orElse(null), originalValue.orElse(null));
+                    page.addOperation(type, path.orElse(null), newValue.orElse(null), originalValue.orElse(null));
                 }
             }
         }

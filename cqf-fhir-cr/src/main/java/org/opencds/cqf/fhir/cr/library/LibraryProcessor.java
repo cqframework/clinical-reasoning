@@ -293,7 +293,9 @@ public class LibraryProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource createChangelog(
-            Either3<C, IIdType, R> sourceLibrary, Either3<C, IIdType, R> targetLibrary, Endpoint terminologyEndpoint) {
+            Either3<C, IIdType, R> sourceLibrary,
+            Either3<C, IIdType, R> targetLibrary,
+            IBaseResource terminologyEndpoint) {
         var processor = createChangelogProcessor != null ? createChangelogProcessor : new CreateChangelogProcessor();
         return processor.createChangelog(
                 resolveLibrary(sourceLibrary), resolveLibrary(targetLibrary), terminologyEndpoint);

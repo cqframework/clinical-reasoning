@@ -15,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
@@ -45,7 +44,8 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
     }
 
     @Override
-    public IBaseResource createChangelog(IBaseResource source, IBaseResource target, Endpoint terminologyEndpoint) {
+    public IBaseResource createChangelog(
+            IBaseResource source, IBaseResource target, IBaseResource terminologyEndpoint) {
         logger.info("Unable to perform $create-changelog outside of HAPI context");
         return new Parameters();
     }
@@ -90,8 +90,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             // Map< [Code], [Object with code, version, system, etc.] >
             Map<String, Code> codeMap = new HashMap<>();
             // Map< [URL], Map <[Version], [Object with name, version, and other metadata] >>
-            Map<String, Map<String, ValueSetChild.Leaf>> leafMetadataMap =
-                    new HashMap<>();
+            Map<String, Map<String, ValueSetChild.Leaf>> leafMetadataMap = new HashMap<>();
             updateCodeMapAndLeafMetadataMap(codeMap, leafMetadataMap, sourceResource, cache);
             updateCodeMapAndLeafMetadataMap(codeMap, leafMetadataMap, targetResource, cache);
             var oldData = sourceResource == null
@@ -157,14 +156,17 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             }
         }
 
-        private void handleValueSetInclude(Map<String, Code> codeMap,
-            Map<String, Map<String, ValueSetChild.Leaf>> leafMap, ValueSet valueSet,
-            DiffCache cache, ValueSetChild.Leaf leafData) {
+        private void handleValueSetInclude(
+                Map<String, Code> codeMap,
+                Map<String, Map<String, ValueSetChild.Leaf>> leafMap,
+                ValueSet valueSet,
+                DiffCache cache,
+                ValueSetChild.Leaf leafData) {
             valueSet.getCompose().getInclude().forEach(concept -> {
                 if (concept.hasConcept()) {
                     updateLeafData(concept.getSystem(), leafData);
                     mapConceptSetToCodeMap(
-                        codeMap,
+                            codeMap,
                             concept,
                             Canonicals.getIdPart(valueSet.getUrl()),
                             valueSet.getName(),
@@ -184,18 +186,17 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             });
         }
 
-        private void handleValueSetContains(Map<String, Code> codeMap, ValueSet valueSet,
-            ValueSetChild.Leaf leafData) {
+        private void handleValueSetContains(Map<String, Code> codeMap, ValueSet valueSet, ValueSetChild.Leaf leafData) {
             valueSet.getExpansion().getContains().forEach(cnt -> {
                 if (!codeMap.containsKey(cnt.getCode())) {
                     updateLeafData(cnt.getSystem(), leafData);
                     mapExpansionContainsToCodeMap(
-                        codeMap,
-                        cnt,
-                        Canonicals.getIdPart(valueSet.getUrl()),
-                        valueSet.getName(),
-                        valueSet.getTitle(),
-                        valueSet.getUrl());
+                            codeMap,
+                            cnt,
+                            Canonicals.getIdPart(valueSet.getUrl()),
+                            valueSet.getName(),
+                            valueSet.getTitle(),
+                            valueSet.getUrl());
                 }
             });
         }
@@ -204,11 +205,9 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             var codeSystemName = Code.getCodeSystemName(system);
             var codeSystemOid = Code.getCodeSystemOid(system);
             var doesOidExistInList = leafData.codeSystems.stream()
-                    .anyMatch(nameAndOid ->
-                            nameAndOid.oid != null && nameAndOid.oid.equals(codeSystemOid));
+                    .anyMatch(nameAndOid -> nameAndOid.oid != null && nameAndOid.oid.equals(codeSystemOid));
             if (!doesOidExistInList) {
-                leafData.codeSystems.add(
-                        new ValueSetChild.Leaf.NameAndOid(codeSystemName, codeSystemOid));
+                leafData.codeSystems.add(new ValueSetChild.Leaf.NameAndOid(codeSystemName, codeSystemOid));
             }
         }
 
@@ -388,30 +387,25 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 if (manifestNewData != null) {
                     for (final var page : this.pages) {
                         if (page.oldData instanceof ValueSetChild) {
-                            updateConditionsAndPriorities(manifestOldData,
-                                (ValueSetChild) page.oldData);
+                            updateConditionsAndPriorities(manifestOldData, (ValueSetChild) page.oldData);
                         }
                         if (page.newData instanceof ValueSetChild) {
-                            updateConditionsAndPriorities(manifestNewData,
-                                (ValueSetChild) page.newData);
+                            updateConditionsAndPriorities(manifestNewData, (ValueSetChild) page.newData);
                         }
                     }
                 }
             }
         }
 
-        private void updateConditionsAndPriorities(LibraryChild manifestData,
-            ValueSetChild pageData) {
+        private void updateConditionsAndPriorities(LibraryChild manifestData, ValueSetChild pageData) {
             for (final var ra : manifestData.relatedArtifacts) {
-                pageData
-                    .leafValueSets.stream()
-                    .filter(leafValueSet -> leafValueSet.memberOid != null
-                        && leafValueSet.memberOid.equals(
-                        Canonicals.getIdPart(ra.getValue())))
-                    .forEach(leafValueSet -> {
-                        updateConditions(ra, leafValueSet);
-                        updatePriorities(ra, leafValueSet);
-                    });
+                pageData.leafValueSets.stream()
+                        .filter(leafValueSet -> leafValueSet.memberOid != null
+                                && leafValueSet.memberOid.equals(Canonicals.getIdPart(ra.getValue())))
+                        .forEach(leafValueSet -> {
+                            updateConditions(ra, leafValueSet);
+                            updatePriorities(ra, leafValueSet);
+                        });
             }
         }
 
@@ -473,8 +467,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
-            public void addOperation(
-                    String type, String path, Object currentValue, Object originalValue) {
+            public void addOperation(String type, String path, Object currentValue, Object originalValue) {
                 if (type != null) {
                     switch (type) {
                         case REPLACE -> addReplaceOperation(type, path, currentValue, originalValue);
@@ -489,24 +482,21 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
-            void addInsertOperation(
-                    String type, String path, Object currentValue) {
+            void addInsertOperation(String type, String path, Object currentValue) {
                 if (!type.equals(INSERT)) {
                     throw new UnprocessableEntityException(WRONG_TYPE);
                 }
                 this.newData.addOperation(type, path, currentValue, null);
             }
 
-            void addDeleteOperation(
-                    String type, String path, Object originalValue) {
+            void addDeleteOperation(String type, String path, Object originalValue) {
                 if (!type.equals(DELETE)) {
                     throw new UnprocessableEntityException(WRONG_TYPE);
                 }
                 this.oldData.addOperation(type, path, null, originalValue);
             }
 
-            void addReplaceOperation(
-                    String type, String path, Object currentValue, Object originalValue) {
+            void addReplaceOperation(String type, String path, Object currentValue, Object originalValue) {
                 if (!type.equals(REPLACE)) {
                     throw new UnprocessableEntityException(WRONG_TYPE);
                 }
@@ -646,8 +636,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 this.resourceType = resourceType;
             }
 
-            public void addOperation(
-                    String type, String path, Object currentValue, Object originalValue) {
+            public void addOperation(String type, String path, Object currentValue, Object originalValue) {
                 if (type != null) {
                     var newOp = new Operation(type, path, currentValue, originalValue);
                     if (path.equals("id")) {
@@ -827,8 +816,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                     copy.status = this.status;
                     copy.codeSystems =
                             this.codeSystems.stream().map(NameAndOid::copy).collect(Collectors.toList());
-                    copy.conditions =
-                            this.conditions.stream().map(Code::copy).collect(Collectors.toList());
+                    copy.conditions = this.conditions.stream().map(Code::copy).collect(Collectors.toList());
                     copy.priority = new ValueAndOperation();
                     copy.priority.value = this.priority.value;
                     copy.priority.operation = this.priority.operation;
@@ -921,8 +909,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             }
 
             @Override
-            public void addOperation(
-                    String type, String path, Object newValue, Object originalValue) {
+            public void addOperation(String type, String path, Object newValue, Object originalValue) {
                 if (type != null) {
                     super.addOperation(type, path, newValue, originalValue);
                     var operation = new Operation(type, path, newValue, originalValue);
@@ -938,8 +925,8 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
-            private void addOperationHandleCompose(String type, String path, Object newValue, Object originalValue,
-                Operation operation) {
+            private void addOperationHandleCompose(
+                    String type, String path, Object newValue, Object originalValue, Operation operation) {
                 // if the valuesets changed
                 List<String> urlsToCheck = List.of();
                 // default to the original operation for use with primitive types
@@ -950,34 +937,26 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                         && ((IPrimitiveType<String>) originalValue).hasValue()) {
                     urlsToCheck = List.of(((IPrimitiveType<String>) originalValue).getValue());
                 } else if (newValue instanceof ValueSet.ValueSetComposeComponent newVSCC
-                        && newVSCC
-                                .getIncludeFirstRep()
-                                .hasValueSet()) {
-                    urlsToCheck = newVSCC
-                            .getInclude().stream()
-                                    .filter(ConceptSetComponent::hasValueSet)
-                                    .flatMap(include -> include.getValueSet().stream())
-                                    .filter(PrimitiveType::hasValue)
-                                    .map(PrimitiveType::getValue)
-                                    .toList();
+                        && newVSCC.getIncludeFirstRep().hasValueSet()) {
+                    urlsToCheck = newVSCC.getInclude().stream()
+                            .filter(ConceptSetComponent::hasValueSet)
+                            .flatMap(include -> include.getValueSet().stream())
+                            .filter(PrimitiveType::hasValue)
+                            .map(PrimitiveType::getValue)
+                            .toList();
                     updatedOperations = urlsToCheck.stream()
-                            .map(url -> new Operation(
-                                type, path, url, type.equals(REPLACE) ? originalValue : null))
+                            .map(url -> new Operation(type, path, url, type.equals(REPLACE) ? originalValue : null))
                             .toList();
                 } else if (originalValue instanceof ValueSet.ValueSetComposeComponent originalVSCC
-                        && originalVSCC
-                                .getIncludeFirstRep()
-                                .hasValueSet()) {
-                    urlsToCheck = originalVSCC
-                            .getInclude().stream()
-                                    .filter(ConceptSetComponent::hasValueSet)
-                                    .flatMap(include -> include.getValueSet().stream())
-                                    .filter(PrimitiveType::hasValue)
-                                    .map(PrimitiveType::getValue)
-                                    .toList();
+                        && originalVSCC.getIncludeFirstRep().hasValueSet()) {
+                    urlsToCheck = originalVSCC.getInclude().stream()
+                            .filter(ConceptSetComponent::hasValueSet)
+                            .flatMap(include -> include.getValueSet().stream())
+                            .filter(PrimitiveType::hasValue)
+                            .map(PrimitiveType::getValue)
+                            .toList();
                     updatedOperations = urlsToCheck.stream()
-                            .map(url ->
-                                    new Operation(type, path, type.equals(REPLACE) ? newValue : null, url))
+                            .map(url -> new Operation(type, path, type.equals(REPLACE) ? newValue : null, url))
                             .toList();
                 }
                 handleUrlsToCheck(urlsToCheck, updatedOperations);
@@ -996,8 +975,8 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
-            private void addOperationHandleExpansion(String type, String path, Object newValue, Object originalValue,
-                Operation operation) {
+            private void addOperationHandleExpansion(
+                    String type, String path, Object newValue, Object originalValue, Operation operation) {
                 if (path.contains("expansion.contains[")) {
                     // if the codes themselves changed
                     String codeToCheck = getCodeToCheck(newValue, originalValue);
@@ -1035,24 +1014,15 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             private void addOperationHandleUseContext(Object newValue, Object originalValue, Operation operation) {
                 String priorityToCheck = null;
                 if (newValue instanceof UsageContext newUseContext
-                        && newUseContext
-                                .getCode()
-                                .getSystem()
-                                .equals(TransformProperties.usPHUsageContextType)
+                        && newUseContext.getCode().getSystem().equals(TransformProperties.usPHUsageContextType)
                         && newUseContext.getCode().getCode().equals(TransformProperties.vsmPriorityCode)) {
                     priorityToCheck = newUseContext
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
                             .getCode();
                 } else if (originalValue instanceof UsageContext originalUseContext
-                        && originalUseContext
-                                .getCode()
-                                .getSystem()
-                                .equals(TransformProperties.usPHUsageContextType)
-                        && originalUseContext
-                                .getCode()
-                                .getCode()
-                                .equals(TransformProperties.vsmPriorityCode)) {
+                        && originalUseContext.getCode().getSystem().equals(TransformProperties.usPHUsageContextType)
+                        && originalUseContext.getCode().getCode().equals(TransformProperties.vsmPriorityCode)) {
                     priorityToCheck = originalUseContext
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
@@ -1071,13 +1041,10 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                             .filter(code -> code.code.equals(codeNotNull))
                             .findAny()
                             .ifPresentOrElse(
-                                    code ->
-                                        code.setOperation(operation)
-                                    ,
+                                    code -> code.setOperation(operation),
                                     () ->
-                                        // drop unmatched operations in the base operations list
-                                        this.operations.add(operation)
-                                    );
+                                            // drop unmatched operations in the base operations list
+                                            this.operations.add(operation));
                 }
             }
         }
@@ -1190,35 +1157,34 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
 
             private void tryAddPriorityOperation(
                     Extension maybePriority, RelatedArtifactUrlWithOperation target, Operation newOperation) {
-                if (maybePriority.getUrl().equals(TransformProperties.vsmPriority) && (target.priority.value != null
-                            && target.priority
-                                    .value
-                                    .getCodingFirstRep()
-                                    .getSystem()
-                                    .equals(((CodeableConcept) maybePriority.getValue())
-                                            .getCodingFirstRep()
-                                            .getSystem())
-                            && target.priority
-                                    .value
-                                    .getCodingFirstRep()
-                                    .getCode()
-                                    .equals(((CodeableConcept) maybePriority.getValue())
-                                            .getCodingFirstRep()
-                                            .getCode()))) {
-                        // priority will always be replace because:
-                        // insert = an extension exists where it did not before, which is a replacement from "routine"
-                        // to "emergent"
-                        // delete = an extension does not exist where it did before, which is a replacement from
-                        // "emergent" to "routine"
-                        newOperation.type = REPLACE;
-                        target.priority.operation = newOperation;
-
+                if (maybePriority.getUrl().equals(TransformProperties.vsmPriority)
+                        && (target.priority.value != null
+                                && target.priority
+                                        .value
+                                        .getCodingFirstRep()
+                                        .getSystem()
+                                        .equals(((CodeableConcept) maybePriority.getValue())
+                                                .getCodingFirstRep()
+                                                .getSystem())
+                                && target.priority
+                                        .value
+                                        .getCodingFirstRep()
+                                        .getCode()
+                                        .equals(((CodeableConcept) maybePriority.getValue())
+                                                .getCodingFirstRep()
+                                                .getCode()))) {
+                    // priority will always be replace because:
+                    // insert = an extension exists where it did not before, which is a replacement from "routine"
+                    // to "emergent"
+                    // delete = an extension does not exist where it did before, which is a replacement from
+                    // "emergent" to "routine"
+                    newOperation.type = REPLACE;
+                    target.priority.operation = newOperation;
                 }
             }
 
             @Override
-            public void addOperation(
-                    String type, String path, Object currentValue, Object originalValue) {
+            public void addOperation(String type, String path, Object currentValue, Object originalValue) {
                 if (type != null) {
                     super.addOperation(type, path, currentValue, originalValue);
                     var newOperation = new Operation(type, path, currentValue, originalValue);
@@ -1236,16 +1202,15 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
-            private void addOperationHandleRelatedArtifacts(String path, Object currentValue, Object originalValue, Operation newOperation) {
+            private void addOperationHandleRelatedArtifacts(
+                    String path, Object currentValue, Object originalValue, Operation newOperation) {
                 Optional<RelatedArtifactUrlWithOperation> operationTarget = Optional.empty();
                 if (currentValue instanceof RelatedArtifact currentRelatedArtifact) {
                     operationTarget = getRelatedArtifactFromUrl(currentRelatedArtifact.getResource());
                 } else if (originalValue instanceof RelatedArtifact originalRelatedArtifact) {
-                    operationTarget =
-                            getRelatedArtifactFromUrl(originalRelatedArtifact.getResource());
+                    operationTarget = getRelatedArtifactFromUrl(originalRelatedArtifact.getResource());
                 } else if (path.contains("[")) {
-                    var matcher = Pattern.compile("relatedArtifact\\[(\\d+)]")
-                            .matcher(path);
+                    var matcher = Pattern.compile("relatedArtifact\\[(\\d+)]").matcher(path);
                     if (matcher.find()) {
                         var relatedArtifactIndex = Integer.parseInt(matcher.group(1));
                         operationTarget = Optional.of(this.relatedArtifacts.get(relatedArtifactIndex));
@@ -1253,29 +1218,22 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
                 if (operationTarget.isPresent()) {
                     if (path.contains("xtension[")) {
-                        var matcher =
-                                Pattern.compile("xtension\\[(\\d+)]").matcher(path);
+                        var matcher = Pattern.compile("xtension\\[(\\d+)]").matcher(path);
                         if (matcher.find()) {
                             var extension = operationTarget
                                     .get()
                                     .fullRelatedArtifact
                                     .getExtension()
                                     .get(Integer.parseInt(matcher.group(1)));
-                            tryAddConditionOperation(extension, operationTarget.orElse(null),
-                                newOperation);
-                            tryAddPriorityOperation(extension, operationTarget.orElse(null),
-                                newOperation);
+                            tryAddConditionOperation(extension, operationTarget.orElse(null), newOperation);
+                            tryAddPriorityOperation(extension, operationTarget.orElse(null), newOperation);
                         }
                     } else if (currentValue instanceof Extension currentExtension) {
-                        tryAddConditionOperation(
-                            currentExtension, operationTarget.orElse(null), newOperation);
-                        tryAddPriorityOperation(
-                            currentExtension, operationTarget.orElse(null), newOperation);
+                        tryAddConditionOperation(currentExtension, operationTarget.orElse(null), newOperation);
+                        tryAddPriorityOperation(currentExtension, operationTarget.orElse(null), newOperation);
                     } else if (originalValue instanceof Extension originalExtension) {
-                        tryAddConditionOperation(
-                            originalExtension, operationTarget.orElse(null), newOperation);
-                        tryAddPriorityOperation(
-                            originalExtension, operationTarget.orElse(null), newOperation);
+                        tryAddConditionOperation(originalExtension, operationTarget.orElse(null), newOperation);
+                        tryAddPriorityOperation(originalExtension, operationTarget.orElse(null), newOperation);
                     } else {
                         operationTarget.get().setOperation(newOperation);
                     }

@@ -1,13 +1,20 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ResourceType;
 
 /**
  * This is an exact copy of the RequestDetailsCloner from hapi-fhir, which is package-private, so
@@ -17,22 +24,61 @@ class ClinicalIntelligenceRequestDetailsCloner {
 
     private ClinicalIntelligenceRequestDetailsCloner() {}
 
-    static DetailsBuilder startWith(RequestDetails details) {
-        RequestDetails newDetails;
-        if (details instanceof ServletRequestDetails servletDetails) {
+    static <T extends IBaseResource> DetailsBuilder startWith(
+            RequestDetails origRequestDetails, FhirContext fhirContext, Class<T> resourceType) {
+        final RequestDetails newDetails;
+
+        final boolean isPartitionableResource = isPartitionableResource(fhirContext, resourceType);
+
+        if (origRequestDetails instanceof ServletRequestDetails servletDetails) {
             newDetails = new ServletRequestDetails(servletDetails);
+        } else if (origRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
+            final SystemRequestDetails clonedSystemRequestDetails = new SystemRequestDetails(origRequestDetails);
+            if (isPartitionableResource) {
+                clonedSystemRequestDetails.setRequestPartitionId(systemRequestDetails.getRequestPartitionId());
+            }
+            newDetails = clonedSystemRequestDetails;
         } else {
-            newDetails = new SystemRequestDetails(details);
+            throw new InvalidRequestException("Unsupported request origRequestDetails type: %s"
+                    .formatted(origRequestDetails.getClass().getName()));
+        }
+        if (isPartitionableResource) {
+            newDetails.setTenantId(origRequestDetails.getTenantId());
         }
         newDetails.setRequestType(RequestTypeEnum.POST);
         newDetails.setOperation(null);
         newDetails.setResource(null);
-        newDetails.setParameters(new HashMap<>(details.getParameters()));
+        newDetails.setParameters(new HashMap<>(origRequestDetails.getParameters()));
         newDetails.setResourceName(null);
         newDetails.setCompartmentName(null);
-        newDetails.setResponse(details.getResponse());
+        newDetails.setResponse(origRequestDetails.getResponse());
 
         return new DetailsBuilder(newDetails);
+    }
+
+    // LUKETODO: this logic is maintained in BaseRequestPartitionHelperSvc#isResourcePartitionable
+    private static <T extends IBaseResource> boolean isPartitionableResource(
+            FhirContext fhirContext, Class<T> resourceType) {
+        final Set<String> nonPartitionableResourceTypes = Stream.of(
+                        ResourceType.Library,
+                        ResourceType.ValueSet,
+                        ResourceType.StructureMap,
+                        ResourceType.StructureDefinition,
+                        ResourceType.Questionnaire,
+                        ResourceType.NamingSystem,
+                        ResourceType.CompartmentDefinition,
+                        ResourceType.SearchParameter,
+                        ResourceType.ConceptMap,
+                        ResourceType.OperationDefinition,
+                        ResourceType.CodeSystem)
+                .map(Enum::name)
+                .collect(Collectors.toUnmodifiableSet());
+
+        final String resourceTypeString = fhirContext.getResourceType(resourceType);
+
+        final boolean isResourceNonPartitionable = nonPartitionableResourceTypes.contains(resourceTypeString);
+
+        return !isResourceNonPartitionable;
     }
 
     static class DetailsBuilder {

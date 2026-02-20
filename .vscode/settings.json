@@ -142,15 +142,15 @@
         "**/archetype-resources/**",
         "**/META-INF/maven/**"
     ],
+    "java.gradle.buildServer.enabled": "off",
     "editor.detectIndentation": false,
     "editor.foldingImportsByDefault": true,
     "editor.tabSize": 4,
     "java.diagnostic.filter": [
       "**/generated-sources/**",
-      "**/generated-test-sources/**",
+      "**/generated-test-sources/**"
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.gradle.buildServer.enabled": "off",
     "java.dependency.packagePresentation": "hierarchical",
     "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
     "java.compile.nullAnalysis.mode": "automatic",
@@ -169,10 +169,6 @@
         "cSpell.fixSpellingWithRenameProvider": true,
         "cSpell.advanced.feature.useReferenceProviderWithRename": true,
         "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
-    },
-    "sonarlint.connectedMode.project": {
-        "connectionId": "cqframework",
-        "projectKey": "cqframework_clinical-reasoning"
     },
     "java.debug.settings.onBuildFailureProceed": true
 }

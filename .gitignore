@@ -45,6 +45,9 @@ htmlReport/
 .tool-versions
 mise.toml
 
+# Local development overrides
+local.properties
+
 # Other
 .cursorignore
 .worktrees

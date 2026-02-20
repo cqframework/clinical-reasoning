@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.sonarqube)
     jacoco
+    id("cqf.ci-conventions")
 }
 
 sonar {

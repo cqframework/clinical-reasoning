@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -24,13 +25,16 @@ class ClinicalIntelligenceRequestDetailsCloner {
     private ClinicalIntelligenceRequestDetailsCloner() {}
 
     static <T extends IBaseResource> DetailsBuilder startWith(
-            RequestDetails origRequestDetails, Class<T> resourceType) {
+            RequestDetails origRequestDetails, FhirContext fhirContext, Class<T> resourceType) {
         final RequestDetails newDetails;
+
+        final boolean isPartitionableResource = isPartitionableResource(fhirContext, resourceType);
+
         if (origRequestDetails instanceof ServletRequestDetails servletDetails) {
             newDetails = new ServletRequestDetails(servletDetails);
         } else if (origRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
             final SystemRequestDetails clonedSystemRequestDetails = new SystemRequestDetails(origRequestDetails);
-            if (isPartitionableResource(resourceType)) {
+            if (isPartitionableResource) {
                 clonedSystemRequestDetails.setRequestPartitionId(systemRequestDetails.getRequestPartitionId());
             }
             newDetails = clonedSystemRequestDetails;
@@ -38,7 +42,7 @@ class ClinicalIntelligenceRequestDetailsCloner {
             throw new InvalidRequestException("Unsupported request origRequestDetails type: %s"
                     .formatted(origRequestDetails.getClass().getName()));
         }
-        if (isPartitionableResource(resourceType)) {
+        if (isPartitionableResource) {
             newDetails.setTenantId(origRequestDetails.getTenantId());
         }
         newDetails.setRequestType(RequestTypeEnum.POST);
@@ -53,10 +57,8 @@ class ClinicalIntelligenceRequestDetailsCloner {
     }
 
     // LUKETODO: this logic is maintained in BaseRequestPartitionHelperSvc#isResourcePartitionable
-    private static <T extends IBaseResource> boolean isPartitionableResource(Class<T> resourceType) {
-        final String requestResourceName = resourceType.getName();
-
-        // LUKETODO:  Measure isn't in here??? WTF?
+    private static <T extends IBaseResource> boolean isPartitionableResource(
+            FhirContext fhirContext, Class<T> resourceType) {
         final Set<String> nonPartitionableResourceTypes = Stream.of(
                         ResourceType.Library,
                         ResourceType.ValueSet,
@@ -72,7 +74,9 @@ class ClinicalIntelligenceRequestDetailsCloner {
                 .map(Enum::name)
                 .collect(Collectors.toUnmodifiableSet());
 
-        final boolean isResourceNonPartitionable = nonPartitionableResourceTypes.contains(requestResourceName);
+        final String resourceTypeString = fhirContext.getResourceType(resourceType);
+
+        final boolean isResourceNonPartitionable = nonPartitionableResourceTypes.contains(resourceTypeString);
 
         return !isResourceNonPartitionable;
     }

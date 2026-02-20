@@ -57,7 +57,8 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     public <T extends IBaseResource, I extends IIdType> T read(
             Class<T> resourceType, I id, Map<String, String> headers) {
 
-        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails, resourceType)
+        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(
+                        requestDetails, daoRegistry.getFhirContext(), resourceType)
                 .setAction(RestOperationTypeEnum.READ)
                 .addHeaders(headers)
                 .create();
@@ -81,7 +82,8 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             IRepositoryRestQueryContributor queryContributor,
             Map<String, String> headers) {
 
-        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails, resourceType)
+        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(
+                        requestDetails, daoRegistry.getFhirContext(), resourceType)
                 .setAction(RestOperationTypeEnum.SEARCH_TYPE)
                 .addHeaders(headers)
                 .create();

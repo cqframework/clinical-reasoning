@@ -674,18 +674,62 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             }
 
             public static class Code {
-                public String id;
-                public String system;
-                public String code;
-                public String version;
-                public String display;
-                public String memberOid;
-                public String codeSystemOid;
-                public String codeSystemName;
-                public String parentValueSetName;
-                public String parentValueSetTitle;
-                public String parentValueSetUrl;
-                public Operation operation;
+                private final String id;
+                private final String system;
+                private final String code;
+                private final String version;
+                private final String display;
+                private final String memberOid;
+                private String codeSystemOid;
+                private String codeSystemName;
+                private final String parentValueSetName;
+                private final String parentValueSetTitle;
+                private final String parentValueSetUrl;
+                private Operation operation;
+
+                public String getId() {
+                    return id;
+                }
+
+                public String getSystem() {
+                    return system;
+                }
+
+                public String getCode() {
+                    return code;
+                }
+
+                public String getVersion() {
+                    return version;
+                }
+
+                public String getDisplay() {
+                    return display;
+                }
+
+                public String getMemberOid() {
+                    return memberOid;
+                }
+
+                public String getCodeSystemOid() {
+                    return codeSystemOid;
+                }
+
+                public String getCodeSystemName() {
+                    return codeSystemName;
+                }
+
+                public String getParentValueSetName() {
+                    return parentValueSetName;
+                }
+
+                public String getParentValueSetTitle() {
+                    return parentValueSetTitle;
+                }
+
+                public String getParentValueSetUrl() {
+                    return parentValueSetUrl;
+                }
 
                 Code(
                         String id,

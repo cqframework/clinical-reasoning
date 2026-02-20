@@ -1058,16 +1058,36 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
         }
 
         public static class RelatedArtifactUrlWithOperation extends ValueAndOperation {
-            public RelatedArtifact fullRelatedArtifact;
-            public List<codeableConceptWithOperation> conditions = new ArrayList<>();
-            public codeableConceptWithOperation priority = new codeableConceptWithOperation(null);
+            private final RelatedArtifact fullRelatedArtifact;
+            private List<CodeableConceptWithOperation> conditions = new ArrayList<>();
+            private final CodeableConceptWithOperation priority = new CodeableConceptWithOperation(null);
 
-            public static class codeableConceptWithOperation {
-                public CodeableConcept value;
-                public Operation operation;
+            public RelatedArtifact getFullRelatedArtifact() {
+                return fullRelatedArtifact;
+            }
 
-                codeableConceptWithOperation(CodeableConcept e) {
+            public List<CodeableConceptWithOperation> getConditions() {
+                return conditions;
+            }
+
+            public CodeableConceptWithOperation getPriority() {
+                return priority;
+            }
+
+            public static class CodeableConceptWithOperation {
+                private CodeableConcept value;
+                private Operation operation;
+
+                CodeableConceptWithOperation(CodeableConcept e) {
                     this.value = e;
+                }
+
+                public CodeableConcept getValue() {
+                    return value;
+                }
+
+                public Operation getOperation() {
+                    return operation;
                 }
             }
 
@@ -1075,7 +1095,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 if (relatedArtifact != null) {
                     this.setValue(relatedArtifact.getResource());
                     this.conditions = relatedArtifact.getExtensionsByUrl(TransformProperties.vsmCondition).stream()
-                            .map(e -> new codeableConceptWithOperation((CodeableConcept) e.getValue()))
+                            .map(e -> new CodeableConceptWithOperation((CodeableConcept) e.getValue()))
                             .toList();
                     var priorities = relatedArtifact.getExtensionsByUrl(TransformProperties.vsmPriority).stream()
                             .map(e -> (CodeableConcept) e.getValue())

@@ -676,7 +676,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             public static class Code {
                 private final String id;
                 private final String system;
-                private final String code;
+                private final String codeValue;
                 private final String version;
                 private final String display;
                 private final String memberOid;
@@ -695,8 +695,8 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                     return system;
                 }
 
-                public String getCode() {
-                    return code;
+                public String getCodeValue() {
+                    return codeValue;
                 }
 
                 public String getVersion() {
@@ -748,7 +748,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                         this.codeSystemOid = getCodeSystemOid(system);
                         this.codeSystemName = getCodeSystemName(system);
                     }
-                    this.code = code;
+                    this.codeValue = code;
                     this.version = version;
                     this.display = display;
                     this.memberOid = memberOid;
@@ -762,7 +762,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                     return new Code(
                             this.id,
                             this.system,
-                            this.code,
+                            this.codeValue,
                             this.version,
                             this.display,
                             this.memberOid,
@@ -917,7 +917,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                                     : coding.getDisplay();
                     final var maybeExisting = this.conditions.stream()
                             .filter(code ->
-                                    code.system.equals(coding.getSystem()) && code.code.equals(coding.getCode()))
+                                    code.system.equals(coding.getSystem()) && code.codeValue.equals(coding.getCode()))
                             .findAny();
                     if (maybeExisting.isEmpty()) {
                         final var newCondition = new ValueSetChild.Code(
@@ -1121,8 +1121,8 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 if (codeToCheck != null) {
                     final String codeNotNull = codeToCheck;
                     this.codes.stream()
-                            .filter(code -> code.code != null)
-                            .filter(code -> code.code.equals(codeNotNull))
+                            .filter(code -> code.codeValue != null)
+                            .filter(code -> code.codeValue.equals(codeNotNull))
                             .findAny()
                             .ifPresentOrElse(
                                     code -> code.setOperation(operation),

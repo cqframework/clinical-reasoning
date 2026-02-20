@@ -38,7 +38,6 @@ jobs:
             java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - name: Resolve linked builds
-        if: matrix.os == 'ubuntu-latest'
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

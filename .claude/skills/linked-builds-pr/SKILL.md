@@ -107,6 +107,68 @@ After all upstream PRs are created:
    🤖 Generated with [Claude Code](https://claude.com/claude-code)
    ```
 
+### Step 5: Back-Annotate Upstream PRs
+
+After the downstream PR is created, go back and update each upstream PR to indicate it blocks
+a downstream build. This creates bidirectional awareness so reviewers of the upstream PR
+know there's a downstream PR waiting on it.
+
+For each upstream PR that was created (or already existed) in Steps 3-4:
+
+1. **Read the current PR body**:
+   ```bash
+   gh pr view <number> --json body --jq '.body' --repo <org/repo>
+   ```
+
+2. **Append or update the `## Linked Builds` section** in the upstream PR body. If a
+   `## Linked Builds` section already exists, add to it. Otherwise, insert one before the
+   test plan or footer:
+
+   ```bash
+   gh pr edit <number> --repo <org/repo> --body "$(cat <<'EOF'
+   <existing body content>
+
+   ## Linked Builds
+   Blocks: cqframework/clinical-reasoning#downstream-branch (PR #123)
+   EOF
+   )"
+   ```
+
+3. **Also leave a PR comment** linking to the downstream PR for visibility in the timeline:
+   ```bash
+   gh pr comment <number> --repo <org/repo> --body "Downstream PR: <downstream-pr-url>
+   This PR is referenced via \`Depends-On:\` and will be built as a composite build in CI."
+   ```
+
+#### `Blocks:` Format
+
+```
+Blocks: <org/repo>#<branch> (PR #<number>)
+```
+
+- Mirror of `Depends-On:` but in the opposite direction
+- Include the PR number in parentheses for easy navigation
+- One `Blocks:` line per downstream repo
+- The `Blocks:` directive is informational only — it is not parsed by CI (yet)
+
+#### Updating Existing Entries
+
+If the upstream PR body already has a `## Linked Builds` section:
+- Check if the downstream repo is already listed
+- If listed with a different branch or PR number, update it
+- If not listed, append a new `Blocks:` line
+- Never remove existing entries for other repos
+
+#### Symmetry: Both Directions Use `## Linked Builds`
+
+Both upstream and downstream PRs use the same `## Linked Builds` section header, but with
+different directives:
+
+- **Downstream PR** (this repo): `Depends-On: org/repo#branch` — parsed by CI
+- **Upstream PR** (linked repo): `Blocks: org/repo#branch (PR #N)` — informational
+
+This keeps linked build metadata in one consistent section regardless of direction.
+
 ### Important: `Depends-On:` Format
 
 The `Depends-On:` directive is parsed by the `resolveLinkedBuilds` Gradle task with this regex:

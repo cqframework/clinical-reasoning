@@ -28,7 +28,7 @@ object LinkedBuildRegistry {
         propertyKey = "cql.engine.path",
         buildRoot = "Src/java",
         substitutions = buildMap {
-            // Modules where artifact name matches project name
+            // Kotlin/JVM modules — artifact name matches project name
             for (name in listOf("engine", "engine-fhir", "ucum", "elm-fhir", "cqf-fhir", "cqf-fhir-npm", "quick")) {
                 put("org.cqframework:$name", ":$name")
             }

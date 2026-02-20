@@ -97,9 +97,14 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         var sourceResource = cache.getSourceResourceForUrl(((MetadataResource) source).getUrl());
         if (targetResource.isPresent() && sourceResource.isPresent()) {
             var targetAdapter = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
-                .createKnowledgeArtifactAdapter(targetResource.get().resource);
+                    .createKnowledgeArtifactAdapter(targetResource.get().resource);
             var diffParameters = hapiArtifactDiffProcessor.getArtifactDiff(
-                sourceResource.get().resource, targetResource.get().resource, true, true, cache, terminologyEndpoint);
+                    sourceResource.get().resource,
+                    targetResource.get().resource,
+                    true,
+                    true,
+                    cache,
+                    terminologyEndpoint);
             var manifestUrl = targetAdapter.getUrl();
             var changelog = new ChangeLog(manifestUrl);
             processChanges(((Parameters) diffParameters).getParameter(), changelog, cache, manifestUrl);
@@ -122,7 +127,8 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         return null;
     }
 
-    private DiffCache populateCache(IBaseResource source, Bundle sourceBundle, IBaseResource target, Bundle targetBundle) {
+    private DiffCache populateCache(
+            IBaseResource source, Bundle sourceBundle, IBaseResource target, Bundle targetBundle) {
         var cache = new DiffCache();
         for (final var entry : sourceBundle.getEntry()) {
             if (entry.hasResource() && entry.getResource() instanceof MetadataResource metadataResource) {
@@ -159,14 +165,18 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         var resourceType = Canonicals.getResourceType(url);
         // Check if the resource pair was already processed
         var wasPageAlreadyProcessed = changelog.getPage(url).isPresent();
-        if (!wasPageAlreadyProcessed && cache.getSourceResourceForUrl(url).isPresent() && cache.getTargetResourceForUrl(url).isPresent()) {
-            final MetadataResource sourceResource = cache.getSourceResourceForUrl(url).get().resource;
-            final MetadataResource targetResource = cache.getTargetResourceForUrl(url).get().resource;
+        if (!wasPageAlreadyProcessed
+                && cache.getSourceResourceForUrl(url).isPresent()
+                && cache.getTargetResourceForUrl(url).isPresent()) {
+            final MetadataResource sourceResource =
+                    cache.getSourceResourceForUrl(url).get().resource;
+            final MetadataResource targetResource =
+                    cache.getTargetResourceForUrl(url).get().resource;
             if (resourceType != null) {
                 // don't generate changeLog pages for non-grouper ValueSets
                 if (resourceType.equals("ValueSet")
-                    && ((sourceResource != null && !KnowledgeArtifactProcessor.isGrouper(sourceResource))
-                    || (targetResource != null && !KnowledgeArtifactProcessor.isGrouper(targetResource)))) {
+                        && ((sourceResource != null && !KnowledgeArtifactProcessor.isGrouper(sourceResource))
+                                || (targetResource != null && !KnowledgeArtifactProcessor.isGrouper(targetResource)))) {
                     return;
                 }
                 // 2) Generate a page for each resource pair based on ResourceType
@@ -174,7 +184,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
                     case "ValueSet" -> changelog.addPage((ValueSet) sourceResource, (ValueSet) targetResource, cache);
                     case "Library" -> changelog.addPage((Library) sourceResource, (Library) targetResource);
                     case "PlanDefinition" -> changelog.addPage(
-                        (PlanDefinition) sourceResource, (PlanDefinition) targetResource);
+                            (PlanDefinition) sourceResource, (PlanDefinition) targetResource);
                     default -> changelog.addPage(sourceResource, targetResource, url);
                 });
                 // 3) Process each change
@@ -185,20 +195,23 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         }
     }
 
-    private void processChange(ChangeLog changelog, DiffCache cache,
-        ParametersParameterComponent change, MetadataResource sourceResource,
-        ChangeLog.Page<?> page) {
+    private void processChange(
+            ChangeLog changelog,
+            DiffCache cache,
+            ParametersParameterComponent change,
+            MetadataResource sourceResource,
+            ChangeLog.Page<?> page) {
         if (change.hasName()
-            && !change.getName().equals("operation")
-            && change.hasResource()
-            && change.getResource() instanceof Parameters parameters) {
+                && !change.getName().equals("operation")
+                && change.hasResource()
+                && change.getResource() instanceof Parameters parameters) {
             // Nested Parameters objects get recursively processed
             processChanges(parameters.getParameter(), changelog, cache, change.getName());
         } else if (change.getName().equals("operation")) {
             // 1) For each operation get the relevant parameters
             var type = getStringParameter(change, "type")
-                .orElseThrow(() -> new UnprocessableEntityException(
-                    "Type must be provided when adding an operation to the ChangeLog"));
+                    .orElseThrow(() -> new UnprocessableEntityException(
+                            "Type must be provided when adding an operation to the ChangeLog"));
             var newValue = getParameter(change, "value");
             var path = getPathParameterNoBase(change);
             var originalValue = getParameter(change, "previousValue").map(o -> (Object) o);
@@ -207,8 +220,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             // Parameters object
             try {
                 if (originalValue.isEmpty() && !type.equals("insert") && sourceResource != null && path.isPresent()) {
-                    originalValue =
-                        Optional.of((new BeanWrapperImpl(sourceResource).getPropertyValue(path.get())));
+                    originalValue = Optional.of((new BeanWrapperImpl(sourceResource).getPropertyValue(path.get())));
                 }
             } catch (Exception e) {
                 throw new InternalErrorException("Could not process path: " + path + ": " + e.getMessage());

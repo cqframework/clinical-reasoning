@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -27,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -34,6 +36,8 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -249,7 +253,7 @@ public class TestCql {
         final IBaseParameters result;
         final IParser jsonParser;
         final ModelResolver modelResolver;
-        final List<IBaseResource> parameter;
+        final List<IParametersParameterComponentAdapter> parameter;
 
         @SuppressWarnings("unchecked")
         public Evaluation(IRepository repository, IBaseParameters result) {
@@ -258,7 +262,14 @@ public class TestCql {
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
-            parameter = ((List<IBaseResource>) modelResolver.resolvePath(result, "parameter"));
+            var adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
+            var rawParameter = modelResolver.resolvePath(result, "parameter");
+            if (rawParameter instanceof List<?>) {
+                parameter = ((List<IBase>) rawParameter)
+                        .stream().map(adapterFactory::createParametersParameter).toList();
+            } else {
+                parameter = Collections.emptyList();
+            }
         }
 
         public Evaluation hasResults(Integer count) {
@@ -271,9 +282,9 @@ public class TestCql {
             return this;
         }
 
-        public Evaluation resultHasValue(Integer index, IBase value) {
-            var actual = parameter.get(index);
-            assertEquals(value, actual);
+        public Evaluation resultHasValue(Integer index, IPrimitiveType<?> value) {
+            var actual = ((IPrimitiveType<?>) parameter.get(index).getValue());
+            assertEquals(value.getValueAsString(), actual.getValueAsString());
             return this;
         }
     }

@@ -27,7 +27,30 @@ import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationProcessor;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class CqlProcessorTests {
+    private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
+    private final String simpleContentDstu3 =
+            """
+        library simpleTest
+
+        using FHIR version '3.0.1'
+
+        context Patient
+
+        define Test:
+            5*5
+        """;
+    private final String simpleContentR4 =
+            """
+        library simpleTest
+
+        using FHIR version '4.0.1'
+
+        context Patient
+
+        define Test:
+            5*5
+        """;
 
     @Test
     void defaultSettings() {
@@ -47,6 +70,32 @@ class CqlProcessorTests {
                 List.of(new CqlEvaluationProcessor(repository, EvaluationSettings.getDefault())));
 
         assertNotNull(processor.settings());
+    }
+
+    @Test
+    void testDstu3() {
+        var result = given().repositoryFor(fhirContextDstu3, "dstu3")
+                .when()
+                .subject("Patient/SimplePatient")
+                .cqlContent(simpleContentDstu3)
+                .thenEvaluate()
+                .hasResults(2)
+                .resultHasValue(1, new org.hl7.fhir.dstu3.model.IntegerType(25))
+                .result;
+        assertInstanceOf(org.hl7.fhir.dstu3.model.Parameters.class, result);
+    }
+
+    @Test
+    void testR4() {
+        var result = given().repositoryFor(fhirContextR4, "r4")
+                .when()
+                .subject("Patient/SimplePatient")
+                .cqlContent(simpleContentDstu3)
+                .thenEvaluate()
+                .hasResults(2)
+                .resultHasValue(1, new IntegerType(25))
+                .result;
+        assertInstanceOf(Parameters.class, result);
     }
 
     @Test

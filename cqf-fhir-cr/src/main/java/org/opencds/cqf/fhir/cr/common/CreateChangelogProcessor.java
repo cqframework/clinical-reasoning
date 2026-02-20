@@ -774,19 +774,63 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             }
 
             public static class Leaf {
-                public String memberOid;
-                public String name;
-                public String title;
-                public String url;
-                public List<NameAndOid> codeSystems = new ArrayList<NameAndOid>();
-                public String status;
-                public List<Code> conditions = new ArrayList<Code>();
-                public ValueAndOperation priority = new ValueAndOperation();
-                public Operation operation;
+                private final String memberOid;
+                private final String name;
+                private final String title;
+                private final String url;
+                private List<NameAndOid> codeSystems = new ArrayList<>();
+                private String status;
+                private List<Code> conditions = new ArrayList<>();
+                private ValueAndOperation priority = new ValueAndOperation();
+                private Operation operation;
+
+                public String getMemberOid() {
+                    return memberOid;
+                }
+
+                public String getName() {
+                    return name;
+                }
+
+                public String getTitle() {
+                    return title;
+                }
+
+                public String getUrl() {
+                    return url;
+                }
+
+                public List<NameAndOid> getCodeSystems() {
+                    return codeSystems;
+                }
+
+                public String getStatus() {
+                    return status;
+                }
+
+                public List<Code> getConditions() {
+                    return conditions;
+                }
+
+                public ValueAndOperation getPriority() {
+                    return priority;
+                }
+
+                public Operation getOperation() {
+                    return operation;
+                }
 
                 public static class NameAndOid {
-                    public String name;
-                    public String oid;
+                    private final String name;
+                    private final String oid;
+
+                    public String getName() {
+                        return name;
+                    }
+
+                    public String getOid() {
+                        return oid;
+                    }
 
                     NameAndOid(String name, String oid) {
                         this.name = name;

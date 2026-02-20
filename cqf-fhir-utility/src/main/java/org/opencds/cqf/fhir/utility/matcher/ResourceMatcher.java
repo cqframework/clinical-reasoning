@@ -1,10 +1,14 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -12,6 +16,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
+import jakarta.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -64,15 +69,15 @@ public interface ResourceMatcher {
         }
     }
 
-    public IFhirPath getEngine();
+    IFhirPath getEngine();
 
-    public FhirContext getContext();
+    FhirContext getContext();
 
-    public Map<SPPathKey, IParsedExpression> getPathCache();
+    Map<SPPathKey, IParsedExpression> getPathCache();
 
-    public void addCustomParameter(RuntimeSearchParam searchParam);
+    void addCustomParameter(RuntimeSearchParam searchParam);
 
-    public Map<String, RuntimeSearchParam> getCustomParameters();
+    Map<String, RuntimeSearchParam> getCustomParameters();
 
     // The list here is an OR list. Meaning, if any element matches it's a match
     default boolean matches(String name, List<IQueryParameterType> params, IBaseResource resource) {
@@ -121,32 +126,7 @@ public interface ResourceMatcher {
 
         for (IQueryParameterType param : params) {
             for (var r : pathResult) {
-                if (param instanceof ReferenceParam) {
-                    match = isMatchReference(param, r);
-                } else if (param instanceof DateParam date) {
-                    match = isMatchDate(date, r);
-                } else if (param instanceof TokenParam token) {
-                    // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of
-                    // the value of the system property
-                    // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and
-                    // the value of [system] matches the system property of the Identifier or Coding
-                    // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
-                    // Coding/Identifier has no system property
-                    // [parameter]=[system]|: any element where the value of [system] matches the system property of the
-                    // Identifier or Coding
-                    match = applyModifiers(isMatchToken(token, r), token);
-                    if (!match) {
-                        var codes = getCodes(r);
-                        match = isMatchCoding(token, r, codes);
-                    }
-                } else if (param instanceof UriParam uri) {
-                    match = isMatchUri(uri, r);
-                } else if (param instanceof StringParam string) {
-                    match = isMatchString(string, r);
-                } else {
-                    throw new NotImplementedException("Resource matching not implemented for search params of type "
-                            + param.getClass().getSimpleName());
-                }
+                match = isParamMatchAtPath(param, r);
 
                 if (match) {
                     return true;
@@ -155,6 +135,90 @@ public interface ResourceMatcher {
         }
 
         return false;
+    }
+
+    private boolean isParamMatchAtPath(IQueryParameterType param, IBase r) {
+        boolean match;
+        if (param instanceof ReferenceParam) {
+            match = isMatchReference(param, r);
+        } else if (param instanceof DateParam date) {
+            match = isMatchDate(date, r);
+        } else if (param instanceof TokenParam token) {
+            // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of
+            // the value of the system property
+            // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and
+            // the value of [system] matches the system property of the Identifier or Coding
+            // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
+            // Coding/Identifier has no system property
+            // [parameter]=[system]|: any element where the value of [system] matches the system property of the
+            // Identifier or Coding
+            match = applyModifiers(isMatchToken(token, r), token);
+            if (!match) {
+                var codes = getCodes(r);
+                match = isMatchCoding(token, r, codes);
+            }
+        } else if (param instanceof UriParam uri) {
+            match = isMatchUri(uri, r);
+        } else if (param instanceof StringParam string) {
+            match = isMatchString(string, r);
+        } else if (param instanceof CompositeParam<?, ?> cp) {
+            return isCompositeMatch(cp, r);
+        } else {
+            throw new NotImplementedException("Resource matching not implemented for search params of type "
+                    + param.getClass().getSimpleName());
+        }
+        return match;
+    }
+
+    private boolean isCompositeMatch(CompositeParam<?, ?> composite, IBase r) {
+        if (!(r instanceof ICompositeType type)) {
+            /*
+             * Composites are AND'd
+             * r is likely a primitive (ie, single DateParam object).
+             * But even if it's "something else", the isMatchDate method should handle it
+             */
+            return isParamMatchAtPath(composite.getLeftValue(), r) && isParamMatchAtPath(composite.getRightValue(), r);
+        }
+
+        // DateRange and NumberRange do not share a lot of commonality
+        // so we have to handle them like special cases here
+        if (composite.getLeftValue() instanceof DateParam) {
+            // search bounds
+            DateParam searchStart = (DateParam) composite.getLeftValue();
+            DateParam searchEnd = (DateParam) composite.getRightValue();
+            if (searchStart.getValue().after(searchEnd.getValue())) {
+                // in case order is mixed
+                searchStart = searchEnd;
+                searchEnd = (DateParam) composite.getLeftValue();
+            }
+
+            var rangeParam = getDateRange(type);
+            // these values we can assume are in order since we created them
+            DateParam resourceStart = rangeParam.getLowerBound();
+            DateParam resourceEnd = rangeParam.getUpperBound();
+
+            /*
+             * we have 2 ranges:
+             * The Resource's period (rl -> ru)
+             * The search's period (sl -> su)
+             *
+             * resource (r):  |rs-----------|re
+             * search (s):              |ss-----------|se
+             *
+             * these are overlapping if:
+             * * resourceStart <= searchEnd && searchStart <= resourceEnd
+             *
+             * NB: we write it here as:
+             * searchEnd >= resourceStart && searchStart <= resourceEnd
+             *
+             * This is because the
+             */
+            return isMatchDate(searchEnd, new DateTimeDt(resourceStart.getValue()))
+                    && isMatchDate(searchStart, new DateTimeDt(resourceEnd.getValue()));
+        } else {
+            throw new NotImplementedException("Composite matching not implemented for search params of type "
+                    + composite.getLeftValue().getClass().getSimpleName());
+        }
     }
 
     private static boolean applyModifiers(boolean input, TokenParam token) {
@@ -169,7 +233,16 @@ public interface ResourceMatcher {
 
     default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {
         if (pathResult instanceof IBaseReference reference1) {
-            return reference1.getReferenceElement().getValue().equals(((ReferenceParam) param).getValue());
+            String refVal = null;
+            if (reference1.getReferenceElement() != null
+                    && !isEmpty(reference1.getReferenceElement().getValue())) {
+                refVal = reference1.getReferenceElement().getValue();
+            } else if (reference1.getResource() != null) {
+                refVal = reference1.getResource().getIdElement().getValue();
+            } else {
+                throw new UnsupportedOperationException("No reference found");
+            }
+            return refVal.equals(((ReferenceParam) param).getValue());
         } else if (pathResult instanceof IPrimitiveType<?> type1) {
             return type1.getValueAsString().equals(((ReferenceParam) param).getValue());
         } else if (pathResult instanceof Iterable<?> iterable) {
@@ -196,19 +269,51 @@ public interface ResourceMatcher {
         if (pathResult instanceof IPrimitiveType<?> type1) {
             var result = type1.getValue();
             if (result instanceof Date date) {
-                dateRange = new DateRangeParam(date, date);
+                return isDateMatch(param, date);
             } else {
                 throw new UnsupportedOperationException(
                         "Expected date, found " + pathResult.getClass().getSimpleName());
             }
-        } else if (pathResult instanceof ICompositeType type) {
-            dateRange = getDateRange(type);
         } else {
             throw new UnsupportedOperationException(
                     "Expected element of type date, dateTime, instant, Timing or Period, found "
                             + pathResult.getClass().getSimpleName());
         }
-        return matchesDateBounds(dateRange, new DateRangeParam(param));
+    }
+
+    default boolean isDateMatch(DateParam param, @Nonnull Date date) {
+        Date compareDate = param.getValue();
+        if (compareDate == null) {
+            return false;
+        }
+
+        switch (param.getPrefix()) {
+            case EQUAL -> {
+                return date.equals(compareDate);
+            }
+            case LESSTHAN -> {
+                return date.before(compareDate);
+            }
+            case GREATERTHAN -> {
+                return date.after(compareDate);
+            }
+            case GREATERTHAN_OR_EQUALS -> {
+                return date.after(compareDate) || date.equals(compareDate);
+            }
+            case LESSTHAN_OR_EQUALS -> {
+                return date.before(compareDate) || date.equals(compareDate);
+            }
+            case NOT_EQUAL -> {
+                return !date.equals(compareDate);
+            }
+            default -> {
+                // ends_before, starts_after, approximate - do not work for single date parameters
+                String msg = String.format(
+                        "Unsupported DateTime comparison operation %s",
+                        param.getPrefix().getValue());
+                throw new UnsupportedOperationException(msg);
+            }
+        }
     }
 
     default boolean isMatchToken(TokenParam param, IBase pathResult) {
@@ -265,29 +370,6 @@ public interface ResourceMatcher {
         }
         throw new UnsupportedOperationException("Expected element of type string, found "
                 + pathResult.getClass().getSimpleName());
-    }
-
-    default boolean matchesDateBounds(DateRangeParam resourceRange, DateRangeParam paramRange) {
-        Date resourceLowerBound = resourceRange.getLowerBoundAsInstant();
-        Date resourceUpperBound = resourceRange.getUpperBoundAsInstant();
-        Date paramLowerBound = paramRange.getLowerBoundAsInstant();
-        Date paramUpperBound = paramRange.getUpperBoundAsInstant();
-        if (paramLowerBound == null && paramUpperBound == null) {
-            return false;
-        } else {
-            boolean result = true;
-            if (paramLowerBound != null) {
-                result &= resourceLowerBound.after(paramLowerBound) || resourceLowerBound.equals(paramLowerBound);
-                result &= resourceUpperBound.after(paramLowerBound) || resourceUpperBound.equals(paramLowerBound);
-            }
-
-            if (paramUpperBound != null) {
-                result &= resourceLowerBound.before(paramUpperBound) || resourceLowerBound.equals(paramUpperBound);
-                result &= resourceUpperBound.before(paramUpperBound) || resourceUpperBound.equals(paramUpperBound);
-            }
-
-            return result;
-        }
     }
 
     DateRangeParam getDateRange(ICompositeType type);

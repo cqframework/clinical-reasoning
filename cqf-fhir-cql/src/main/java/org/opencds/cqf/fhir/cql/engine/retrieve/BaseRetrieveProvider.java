@@ -8,6 +8,7 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -16,11 +17,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.ExtensionUtil;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
@@ -52,12 +53,14 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private final RetrieveSettings retrieveSettings;
     private final TerminologyProvider terminologyProvider;
     private final SearchParameterResolver resolver;
+    private final FhirContext fhirContext;
 
     protected BaseRetrieveProvider(
             final FhirContext fhirContext,
             final TerminologyProvider terminologyProvider,
             final RetrieveSettings retrieveSettings) {
         requireNonNull(fhirContext, "fhirContext can not be null.");
+        this.fhirContext = fhirContext;
         fhirVersion = fhirContext.getVersion().getVersion();
         this.retrieveSettings = requireNonNull(retrieveSettings, "retrieveSettings can not be null");
         this.terminologyProvider = requireNonNull(terminologyProvider, "terminologyProvider can not be null");
@@ -297,7 +300,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateTemplateSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams, final String dataType, final String templateId) {
+            Multimap<String, List<IQueryParameterType>> searchParams, final String dataType, final String templateId) {
         if (getRetrieveSettings().getProfileMode() != PROFILE_MODE.OFF
                 && StringUtils.isNotBlank(templateId)
                 && !templateId.startsWith("http://hl7.org/fhir/StructureDefinition/%s".formatted(dataType))) {
@@ -309,7 +312,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateContextSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams,
+            Multimap<String, List<IQueryParameterType>> searchParams,
             final String dataType,
             final String context,
             final String contextPath,
@@ -332,7 +335,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateTerminologySearchParams(
-            Map<String, List<IQueryParameterType>> searchParams,
+            Multimap<String, List<IQueryParameterType>> searchParams,
             final String dataType,
             final String codePath,
             final Iterable<Code> codes,
@@ -390,13 +393,13 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     }
 
     public void populateDateSearchParams(
-            Map<String, List<IQueryParameterType>> searchParams,
+            Multimap<String, List<IQueryParameterType>> searchParams,
             final String dataType,
-            final String datePath,
+            final String dateParamName,
             final String dateLowPath,
             final String dateHighPath,
             final Interval dateRange) {
-        if (datePath == null && dateHighPath == null && dateRange == null) {
+        if (dateParamName == null && dateHighPath == null && dateRange == null) {
             return;
         }
 
@@ -418,14 +421,14 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                             + dateRange.getStart().getClass().getSimpleName());
         }
 
-        if (StringUtils.isNotBlank(datePath)) {
-            List<IQueryParameterType> dateRangeParam = new ArrayList<>();
-            DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
-            dateRangeParam.add(dateParam);
-            dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
-            dateRangeParam.add(dateParam);
-            var sp = this.resolver.getSearchParameterDefinition(dataType, datePath);
-            searchParams.put(sp.getName(), dateRangeParam);
+        if (StringUtils.isNotBlank(dateParamName)) {
+            var sp = this.resolver.getSearchParameterDefinition(dataType, dateParamName);
+
+            // a date range is a search && condition - so we'll use a composite
+            DateParam gte = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
+            DateParam lte = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
+
+            searchParams.put(sp.getName(), List.of(new CompositeParam<>(gte, lte)));
         } else if (StringUtils.isNotBlank(dateLowPath)) {
             List<IQueryParameterType> dateRangeParam = new ArrayList<>();
             DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);

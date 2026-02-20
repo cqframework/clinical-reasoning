@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -31,6 +32,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
 
     record RequestDetailsVariant(String label, RequestDetails requestDetails) {
         @Override
+        @Nonnull
         public String toString() {
             return label;
         }
@@ -175,8 +177,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
                         "R4 Patient", FhirContext.forR4Cached(), org.hl7.fhir.r4.model.Patient.class, true),
                 new PartitionableResourceVariant(
                         "R4 Observation", FhirContext.forR4Cached(), org.hl7.fhir.r4.model.Observation.class, true),
-                new PartitionableResourceVariant(
-                        "R4 Measure", FhirContext.forR4Cached(), org.hl7.fhir.r4.model.Measure.class, true),
+                new PartitionableResourceVariant("R4 Measure", FhirContext.forR4Cached(), Measure.class, true),
                 new PartitionableResourceVariant(
                         "R4 Encounter", FhirContext.forR4Cached(), org.hl7.fhir.r4.model.Encounter.class, true),
                 // R4 non-partitionable resources (all 11 types)

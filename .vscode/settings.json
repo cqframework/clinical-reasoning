@@ -131,6 +131,17 @@
         "**/.settings": true,
         "**/.factorypath": true
     },
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/bin/**": true,
+        "**/.gradle/**": true
+    },
+    "java.import.exclusions": [
+        "**/node_modules/**",
+        "**/.metadata/**",
+        "**/archetype-resources/**",
+        "**/META-INF/maven/**"
+    ],
     "editor.detectIndentation": false,
     "editor.foldingImportsByDefault": true,
     "editor.tabSize": 4,
@@ -139,6 +150,7 @@
       "**/generated-test-sources/**",
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
+    "java.gradle.buildServer.enabled": "off",
     "java.dependency.packagePresentation": "hierarchical",
     "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
     "java.compile.nullAnalysis.mode": "automatic",

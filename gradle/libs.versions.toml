@@ -1,0 +1,98 @@
+[versions]
+hapi = "8.6.0"
+cql = "4.3.0"
+junit = "5.10.2"
+slf4j = "2.0.4"
+spring-security = "6.4.12"
+spring-boot = "3.4.11"
+picocli = "4.6.1"
+jmh = "1.36"
+jakarta-annotation = "2.1.1"
+commons-compress = "1.26.0"
+commons-codec = "1.17.2"
+mockito = "5.5.0"
+hamcrest = "1.3"
+jsonassert = "1.5.1"
+equalsverifier = "3.15.6"
+reflections = "0.10.2"
+slf4j-test = "3.0.1"
+
+sonarqube = "7.2.2.6593"
+
+[libraries]
+# BOMs (used by convention plugins)
+hapi-fhir-bom = { module = "ca.uhn.hapi.fhir:hapi-fhir-bom", version.ref = "hapi" }
+cql-bom = { module = "org.cqframework:cql-bom", version.ref = "cql" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+
+# HAPI FHIR (BOM-managed except where noted)
+hapi-fhir-base = { module = "ca.uhn.hapi.fhir:hapi-fhir-base" }
+hapi-fhir-client = { module = "ca.uhn.hapi.fhir:hapi-fhir-client" }
+hapi-fhir-structures-dstu3 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3" }
+hapi-fhir-structures-r4 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r4" }
+hapi-fhir-structures-r4b = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r4b" }
+hapi-fhir-structures-r5 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r5" }
+hapi-fhir-structures-dstu2x1 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1" }
+hapi-fhir-validation = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation" }
+hapi-fhir-validation-resources-dstu3 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3" }
+hapi-fhir-validation-resources-r4 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4" }
+hapi-fhir-validation-resources-r4b = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4b" }
+hapi-fhir-validation-resources-r5 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r5" }
+hapi-fhir-caching-caffeine = { module = "ca.uhn.hapi.fhir:hapi-fhir-caching-caffeine", version.ref = "hapi" }
+hapi-fhir-converter = { module = "ca.uhn.hapi.fhir:hapi-fhir-converter" }
+hapi-fhir-jpaserver-base = { module = "ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base" }
+hapi-fhir-storage = { module = "ca.uhn.hapi.fhir:hapi-fhir-storage" }
+hapi-fhir-server-cds-hooks = { module = "ca.uhn.hapi.fhir:hapi-fhir-server-cds-hooks" }
+hapi-fhir-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-test-utilities" }
+hapi-fhir-storage-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-storage-test-utilities" }
+hapi-fhir-jpaserver-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-jpaserver-test-utilities" }
+
+# CQL Engine (BOM-managed)
+cql-engine = { module = "org.cqframework:engine" }
+cql-engine-fhir = { module = "org.cqframework:engine-fhir" }
+cql-to-elm-jvm = { module = "org.cqframework:cql-to-elm-jvm" }
+cql-ucum = { module = "org.cqframework:ucum" }
+cql-elm-fhir = { module = "org.cqframework:elm-fhir" }
+cql-cqf-fhir = { module = "org.cqframework:cqf-fhir" }
+cql-cqf-fhir-npm = { module = "org.cqframework:cqf-fhir-npm" }
+cql-quick = { module = "org.cqframework:quick" }
+
+# Jakarta
+jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
+jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api" }
+
+# Spring
+spring-context = { module = "org.springframework:spring-context" }
+spring-test = { module = "org.springframework:spring-test" }
+spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "spring-security" }
+
+# Logging
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+slf4j-test = { module = "com.github.valfirst:slf4j-test", version.ref = "slf4j-test" }
+
+# CLI
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+
+# Commons
+commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
+commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+
+# Testing
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+hamcrest-all = { module = "org.hamcrest:hamcrest-all", version.ref = "hamcrest" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+jsonassert = { module = "org.skyscreamer:jsonassert", version.ref = "jsonassert" }
+equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version.ref = "equalsverifier" }
+reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+
+# JMH
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
+
+[plugins]
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

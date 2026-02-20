@@ -1,0 +1,19 @@
+[versions]
+# Gradle plugins (used in build.gradle.kts dependencies)
+spotless = "8.2.1"
+errorprone-gradle = "5.0.0"
+animalsniffer = "2.0.1"
+buildconfig = "6.0.7"
+
+# Tool versions (exposed to convention plugins via buildconfig)
+checkstyle = "12.2.0"
+error-prone-core = "2.42.0"
+jacoco = "0.8.13"
+palantir-format = "2.50.0"
+gummy-bears = "0.12.0"
+
+[plugins]
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-gradle" }
+animalsniffer = { id = "ru.vyarus.animalsniffer", version.ref = "animalsniffer" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }

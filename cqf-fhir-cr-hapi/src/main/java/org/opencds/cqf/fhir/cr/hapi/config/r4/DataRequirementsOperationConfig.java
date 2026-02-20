@@ -2,10 +2,13 @@ package org.opencds.cqf.fhir.cr.hapi.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
+import org.opencds.cqf.fhir.cr.crmi.R4PublishService;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
@@ -13,7 +16,10 @@ import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
+import org.opencds.cqf.fhir.cr.hapi.r4.IPublishServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PublishProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionDataRequirementsProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.implementationguide.ImplementationGuideDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.library.LibraryDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaire.QuestionnaireDataRequirementsProvider;
@@ -55,6 +61,22 @@ public class DataRequirementsOperationConfig {
         return new GraphDefinitionDataRequirementsProvider(graphDefinitionProcessorFactory);
     }
 
+    @Bean
+    ImplementationGuideDataRequirementsProvider r4ImplementationGuideDataRequirementsProvider(
+            IImplementationGuideProcessorFactory implementationGuideProcessorFactory) {
+        return new ImplementationGuideDataRequirementsProvider(implementationGuideProcessorFactory);
+    }
+
+    @Bean
+    IPublishServiceFactory publishServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4PublishService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    PublishProvider r4PublishProvider(IPublishServiceFactory r4PublishServiceFactory) {
+        return new PublishProvider(r4PublishServiceFactory);
+    }
+
     @Bean(name = "dataRequirementsOperationLoader")
     public ProviderLoader dataRequirementsOperationLoader(
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
@@ -67,7 +89,9 @@ public class DataRequirementsOperationConfig {
                                 PlanDefinitionDataRequirementsProvider.class,
                                 QuestionnaireDataRequirementsProvider.class,
                                 ValueSetDataRequirementsProvider.class,
-                                GraphDefinitionDataRequirementsProvider.class)));
+                                GraphDefinitionDataRequirementsProvider.class,
+                                ImplementationGuideDataRequirementsProvider.class,
+                                PublishProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

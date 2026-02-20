@@ -1,0 +1,17 @@
+{
+  "resourceType": "ValueSet",
+  "id": "questionnaire-item-control",
+  "url": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+  "version": "1.0.0",
+  "name": "QuestionnaireItemUIControlCodes",
+  "title": "Questionnaire Item UI Control Codes",
+  "status": "active",
+  "description": "Starter set of UI control codes for questionnaire items.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/questionnaire-item-control"
+      }
+    ]
+  }
+}

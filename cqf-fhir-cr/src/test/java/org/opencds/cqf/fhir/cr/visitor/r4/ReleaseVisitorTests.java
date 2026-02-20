@@ -63,7 +63,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.r4.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
@@ -276,7 +276,7 @@ class ReleaseVisitorTests {
                 part("versionBehavior", new CodeType("default")),
                 part("terminologyEndpoint", (Endpoint) endpoint.get()));
 
-        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        var clientMock = mock(ITerminologyServerClient.class, new ReturnsDeepStubs());
         var terminologyCapabilities = new TerminologyCapabilities();
         var codeSystemComponent = new TerminologyCapabilitiesCodeSystemComponent();
         codeSystemComponent.setUri("http://terminology.hl7.org/CodeSystem/observation-category");
@@ -537,8 +537,9 @@ class ReleaseVisitorTests {
 
         var endpoint = createEndpoint(authoritativeSource);
 
-        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getLatestValueSetResource(any(), any())).thenReturn(Optional.of(latestVSet));
+        var clientMock = mock(ITerminologyServerClient.class, new ReturnsDeepStubs());
+        when(clientMock.getLatestValueSetResource(any(IEndpointAdapter.class), any()))
+                .thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(

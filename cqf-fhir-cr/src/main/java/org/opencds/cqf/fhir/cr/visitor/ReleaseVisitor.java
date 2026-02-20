@@ -40,8 +40,9 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.terminology.GenericTerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,22 +58,31 @@ import org.slf4j.LoggerFactory;
 public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
-    protected final TerminologyServerClient terminologyServerClient;
+    protected final ITerminologyServerClient terminologyServerClient;
     private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
+
+    // Hold on to terminology sever settings.
+    // TerminologyProviderRouters don't keep a reference to the settings, those are for individual clients.
+    // In the future allow for the ability to have unique settings for each client type.
+    private TerminologyServerClientSettings terminologyServerClientSettings;
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
-        terminologyServerClient = new TerminologyServerClient(fhirContext());
+        this.terminologyServerClientSettings = TerminologyServerClientSettings.getDefault();
+        terminologyServerClient = new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
     }
 
-    public ReleaseVisitor(IRepository repository, TerminologyServerClient terminologyServerClient) {
+    public ReleaseVisitor(IRepository repository, ITerminologyServerClient terminologyServerClient) {
         super(repository);
         this.terminologyServerClient = terminologyServerClient;
+        this.terminologyServerClientSettings = terminologyServerClient.getTerminologyServerClientSettings();
     }
 
     public ReleaseVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
-        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerClient =
+                new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     @SuppressWarnings("unchecked")
@@ -490,12 +500,11 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
 
             // Only add the expansion parameters entry for versionless references
-            if (maybeAdapter.isPresent() && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter) {
+            if (maybeAdapter.isPresent()
+                    && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter
+                    && this.terminologyServerClientSettings != null) {
                 libraryAdapter.ensureExpansionParametersEntry(
-                        maybeAdapter.get(),
-                        terminologyServerClient
-                                .getTerminologyServerClientSettings()
-                                .getCrmiVersion());
+                        maybeAdapter.get(), this.terminologyServerClientSettings.getCrmiVersion());
             }
         }
 

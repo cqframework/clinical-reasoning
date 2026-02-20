@@ -49,8 +49,10 @@ import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
+import org.opencds.cqf.fhir.utility.client.terminology.GenericTerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 
-public class TerminologyServerClientTest {
+public class GenericTerminologyServerClientClientTest {
     private static final String VALUE_SET = "ValueSet";
     private static final String EXPAND_OPERATION = "$expand";
     private static final String url = "www.test.com";
@@ -58,8 +60,8 @@ public class TerminologyServerClientTest {
     private static final String authoritativeSource = "www.source.com/ValueSet";
     private static final String username = "username";
     private static final String password = "password";
-    private static final String urlParamName = TerminologyServerClient.urlParamName;
-    private static final String versionParamName = TerminologyServerClient.versionParamName;
+    private static final String urlParamName = ITerminologyServerClient.urlParamName;
+    private static final String versionParamName = ITerminologyServerClient.versionParamName;
 
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
@@ -78,7 +80,7 @@ public class TerminologyServerClientTest {
                 new org.hl7.fhir.r4.model.Extension(Constants.APIKEY, new org.hl7.fhir.r4.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r4.model.Parameters.class);
 
-        var client = spy(new TerminologyServerClient(fhirContextR4));
+        var client = spy(new GenericTerminologyServerClient(fhirContextR4));
         doReturn(valueSet.get()).when(client).expand(any(IGenericClient.class), any(), capt.capture());
         var parameters = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
         client.expand(valueSet, endpoint, parameters);
@@ -128,7 +130,7 @@ public class TerminologyServerClientTest {
                 new org.hl7.fhir.r5.model.Extension(Constants.APIKEY, new org.hl7.fhir.r5.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.r5.model.Parameters.class);
 
-        var client = spy(new TerminologyServerClient(fhirContextR5));
+        var client = spy(new GenericTerminologyServerClient(fhirContextR5));
         doReturn(valueSet.get()).when(client).expand(any(IGenericClient.class), any(), capt.capture());
         var parameters = factory.createParameters(new org.hl7.fhir.r5.model.Parameters());
         client.expand(valueSet, endpoint, parameters);
@@ -179,7 +181,7 @@ public class TerminologyServerClientTest {
                 Constants.APIKEY, new org.hl7.fhir.dstu3.model.StringType(password)));
         var capt = ArgumentCaptor.forClass(org.hl7.fhir.dstu3.model.Parameters.class);
 
-        var client = spy(new TerminologyServerClient(fhirContextDstu3));
+        var client = spy(new GenericTerminologyServerClient(fhirContextDstu3));
         doReturn(valueSet.get()).when(client).expand(any(IGenericClient.class), any(), capt.capture());
         var parameters = factory.createParameters(new org.hl7.fhir.dstu3.model.Parameters());
         client.expand(valueSet, endpoint, parameters);
@@ -232,20 +234,20 @@ public class TerminologyServerClientTest {
         // remove the FHIR type and the ID if included
         assertEquals(
                 theCorrectBaseServerUrl,
-                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
+                ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet/1", ctx));
         // remove a FHIR type if one was included
         assertEquals(
                 theCorrectBaseServerUrl,
-                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
+                ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/ValueSet", ctx));
         // don't break on the actual base url
-        assertEquals(theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
+        assertEquals(theCorrectBaseServerUrl, ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl, ctx));
         // ensure it's forcing https
         assertEquals(
                 theCorrectBaseServerUrl,
-                TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
+                ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl.replace("https", "http"), ctx));
         // remove trailing slashes
         assertEquals(
-                theCorrectBaseServerUrl, TerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
+                theCorrectBaseServerUrl, ITerminologyServerClient.getAddressBase(theCorrectBaseServerUrl + "/", ctx));
     }
 
     @Test
@@ -294,14 +296,14 @@ public class TerminologyServerClientTest {
                 .thenReturn(leaf);
         // Important part - successful response on 3rd attempt to expand
 
-        var client = spy(new TerminologyServerClient(fhirContextR4));
+        var client = spy(new GenericTerminologyServerClient(fhirContextR4));
         doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
 
         var actual =
                 (org.hl7.fhir.r4.model.ValueSet) client.expand(valueSetAdapter, endpointAdapter, parametersAdapter);
 
         assertEquals(3, actual.getExpansion().getContains().size());
-        verify(client, never()).getValueSetResource(any(), any());
+        verify(client, never()).getValueSetResource(any(IEndpointAdapter.class), anyString());
         verify(fhirClient, atLeast(3)).operation();
     }
 
@@ -340,19 +342,19 @@ public class TerminologyServerClientTest {
                 .thenThrow(new UnprocessableEntityException())
                 .thenThrow(new UnprocessableEntityException());
 
-        var client = spy(new TerminologyServerClient(fhirContextR4));
+        var client = spy(new GenericTerminologyServerClient(fhirContextR4));
         doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
         assertThrows(
                 TerminologyServerExpansionException.class,
                 () -> client.expand(valueSetAdapter, endpointAdapter, parametersAdapter));
-        verify(client, never()).getValueSetResource(any(), any());
+        verify(client, never()).getValueSetResource(any(IEndpointAdapter.class), anyString());
         verify(fhirClient, atLeast(2)).operation();
     }
 
     @SuppressWarnings("unchecked")
     @Test
     void getValueSetResource_found() {
-        var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
+        var txServerClient = spy(new GenericTerminologyServerClient(fhirContextR4));
 
         IEndpointAdapter endpoint = mock(IEndpointAdapter.class);
         IGenericClient client = mock(IGenericClient.class);
@@ -404,7 +406,7 @@ public class TerminologyServerClientTest {
     @Test
     void getCodeSystemClass_returnsR4ValueSet() {
         // Arrange
-        var txServerClient = new TerminologyServerClient(fhirContextR4);
+        var txServerClient = new GenericTerminologyServerClient(fhirContextR4);
 
         // Act
         var returnedClass = txServerClient.getValueSetClass();
@@ -417,7 +419,7 @@ public class TerminologyServerClientTest {
     @Test
     void getCodeSystemClass_returnsR4CodeSystem() {
         // Arrange
-        var txServerClient = new TerminologyServerClient(fhirContextR4);
+        var txServerClient = new GenericTerminologyServerClient(fhirContextR4);
 
         // Act
         var returnedClass = txServerClient.getCodeSystemClass();
@@ -430,7 +432,7 @@ public class TerminologyServerClientTest {
     @SuppressWarnings("unchecked")
     @Test
     void getCodeSystemResource_found() {
-        var txServerClient = spy(new TerminologyServerClient(fhirContextR4));
+        var txServerClient = spy(new GenericTerminologyServerClient(fhirContextR4));
 
         IEndpointAdapter endpoint = mock(IEndpointAdapter.class);
         IGenericClient client = mock(IGenericClient.class);
@@ -533,7 +535,7 @@ public class TerminologyServerClientTest {
         var settings = TerminologyServerClientSettings.getDefault();
         settings.setExpansionsPerPage(1);
 
-        var client = spy(new TerminologyServerClient(fhirContextR4, settings));
+        var client = spy(new GenericTerminologyServerClient(fhirContextR4, settings));
         doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
 
         var actual = (ValueSet) client.expand(valueSetAdapter, endpointAdapter, parametersAdapter);

@@ -1,0 +1,22 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "hl7.fhir.uv.extensions",
+  "url": "http://hl7.org/fhir/extensions/ImplementationGuide/hl7.fhir.uv.extensions",
+  "version": "1.0.0",
+  "name": "HL7FHIRUVExtensions",
+  "title": "HL7 FHIR UV Extensions Pack",
+  "status": "active",
+  "packageId": "hl7.fhir.uv.extensions.r4",
+  "fhirVersion": ["4.0.1"],
+  "definition": {
+    "resource": [
+      {
+        "reference": {
+          "reference": "ValueSet/questionnaire-item-control"
+        },
+        "name": "Questionnaire Item UI Control Codes",
+        "exampleBoolean": false
+      }
+    ]
+  }
+}

@@ -134,7 +134,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
         private Optional<String> getPriority(ValueSet valueSet) {
             return valueSet.getUseContext().stream()
                     .filter(uc -> uc.getCode().getSystem().equals(TransformProperties.usPHUsageContextType)
-                            && uc.getCode().getCode().equals(TransformProperties.vsmPriorityCode))
+                            && uc.getCode().getCode().equals(TransformProperties.VSM_PRIORITY_CODE))
                     .findAny()
                     .map(uc -> uc.getValueCodeableConcept().getCodingFirstRep().getCode());
         }
@@ -1011,14 +1011,14 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 String priorityToCheck = null;
                 if (newValue instanceof UsageContext newUseContext
                         && newUseContext.getCode().getSystem().equals(TransformProperties.usPHUsageContextType)
-                        && newUseContext.getCode().getCode().equals(TransformProperties.vsmPriorityCode)) {
+                        && newUseContext.getCode().getCode().equals(TransformProperties.VSM_PRIORITY_CODE)) {
                     priorityToCheck = newUseContext
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
                             .getCode();
                 } else if (originalValue instanceof UsageContext originalUseContext
                         && originalUseContext.getCode().getSystem().equals(TransformProperties.usPHUsageContextType)
-                        && originalUseContext.getCode().getCode().equals(TransformProperties.vsmPriorityCode)) {
+                        && originalUseContext.getCode().getCode().equals(TransformProperties.VSM_PRIORITY_CODE)) {
                     priorityToCheck = originalUseContext
                             .getValueCodeableConcept()
                             .getCodingFirstRep()
@@ -1094,10 +1094,10 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
         }
 
         public static class LibraryChild extends PageBase {
-            public ValueAndOperation purpose = new ValueAndOperation();
-            public ValueAndOperation effectiveStart = new ValueAndOperation();
-            public ValueAndOperation releaseDate = new ValueAndOperation();
-            public List<RelatedArtifactUrlWithOperation> relatedArtifacts = new ArrayList<>();
+            private final ValueAndOperation purpose = new ValueAndOperation();
+            private final ValueAndOperation effectiveStart = new ValueAndOperation();
+            private final ValueAndOperation releaseDate = new ValueAndOperation();
+            private final List<RelatedArtifactUrlWithOperation> relatedArtifacts = new ArrayList<>();
 
             LibraryChild(
                     String name,
@@ -1122,6 +1122,22 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 if (!relatedArtifacts.isEmpty()) {
                     relatedArtifacts.forEach(ra -> this.relatedArtifacts.add(new RelatedArtifactUrlWithOperation(ra)));
                 }
+            }
+
+            public ValueAndOperation getPurpose() {
+                return purpose;
+            }
+
+            public ValueAndOperation getEffectiveStart() {
+                return effectiveStart;
+            }
+
+            public ValueAndOperation getReleaseDate() {
+                return releaseDate;
+            }
+
+            public List<RelatedArtifactUrlWithOperation> getRelatedArtifacts() {
+                return relatedArtifacts;
             }
 
             private Optional<RelatedArtifactUrlWithOperation> getRelatedArtifactFromUrl(String target) {

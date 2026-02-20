@@ -52,14 +52,12 @@ import org.springframework.beans.BeanWrapperImpl;
 @SuppressWarnings("UnstableApiUsage")
 public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
 
-    private final IRepository repository;
     private final FhirVersionEnum fhirVersion;
     private final PackageProcessor packageProcessor;
 
     private final HapiArtifactDiffProcessor hapiArtifactDiffProcessor;
 
     public HapiCreateChangelogProcessor(IRepository repository) {
-        this.repository = repository;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         this.packageProcessor = new PackageProcessor(repository);
         this.hapiArtifactDiffProcessor = new HapiArtifactDiffProcessor(repository);
@@ -85,18 +83,52 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             service.shutdownNow();
         } catch (InterruptedException | ExecutionException e) {
             service.shutdownNow();
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             throw new UnprocessableEntityException(e.getMessage());
         }
 
         // 2) Fill the cache with the bundle contents
+        var cache = populateCache(source, sourceBundle, target, targetBundle);
+
+        // 3) Use cached resources to create diff and changelog
+        var targetResource = cache.getTargetResourceForUrl(((MetadataResource) target).getUrl());
+        var sourceResource = cache.getSourceResourceForUrl(((MetadataResource) source).getUrl());
+        if (targetResource.isPresent() && sourceResource.isPresent()) {
+            var targetAdapter = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
+                .createKnowledgeArtifactAdapter(targetResource.get().resource);
+            var diffParameters = hapiArtifactDiffProcessor.getArtifactDiff(
+                sourceResource.get().resource, targetResource.get().resource, true, true, cache, terminologyEndpoint);
+            var manifestUrl = targetAdapter.getUrl();
+            var changelog = new ChangeLog(manifestUrl);
+            processChanges(((Parameters) diffParameters).getParameter(), changelog, cache, manifestUrl);
+
+            // 4) Handle the Conditions and Priorities which are in RelatedArtifact changes
+            changelog.handleRelatedArtifacts();
+
+            // 5) Generate the output JSON
+            var bin = new Binary();
+            var mapper = createSerializer();
+            try {
+                bin.setContent(mapper.writeValueAsString(changelog).getBytes(StandardCharsets.UTF_8));
+            } catch (JsonProcessingException e) {
+                throw new UnprocessableEntityException(e.getMessage());
+            }
+
+            return bin;
+        }
+
+        return null;
+    }
+
+    private DiffCache populateCache(IBaseResource source, Bundle sourceBundle, IBaseResource target, Bundle targetBundle) {
         var cache = new DiffCache();
-        Optional<Library> sourceResource = Optional.empty();
-        Optional<Library> targetResource = Optional.empty();
         for (final var entry : sourceBundle.getEntry()) {
             if (entry.hasResource() && entry.getResource() instanceof MetadataResource metadataResource) {
                 cache.addSource(metadataResource.getUrl() + "|" + metadataResource.getVersion(), metadataResource);
                 if (metadataResource.getIdPart().equals(source.getIdElement().getIdPart())) {
-                    sourceResource = Optional.of((Library) metadataResource);
+                    cache.addSource(metadataResource.getUrl(), metadataResource);
                 }
             }
         }
@@ -104,33 +136,11 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             if (entry.hasResource() && entry.getResource() instanceof MetadataResource metadataResource) {
                 cache.addTarget(metadataResource.getUrl() + "|" + metadataResource.getVersion(), metadataResource);
                 if (metadataResource.getIdPart().equals(target.getIdElement().getIdPart())) {
-                    targetResource = Optional.of((Library) metadataResource);
+                    cache.addTarget(metadataResource.getUrl(), metadataResource);
                 }
             }
         }
-
-        // 3) Use cached resources to create diff and changelog
-        var targetAdapter = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
-                .createKnowledgeArtifactAdapter(targetResource.orElse(null));
-        var diffParameters = hapiArtifactDiffProcessor.getArtifactDiff(
-                sourceResource.orElse(null), targetResource.orElse(null), true, true, cache, terminologyEndpoint);
-        var manifestUrl = targetAdapter.getUrl();
-        var changelog = new ChangeLog(manifestUrl);
-        processChanges(((Parameters) diffParameters).getParameter(), changelog, cache, manifestUrl);
-
-        // 4) Handle the Conditions and Priorities which are in RelatedArtifact changes
-        changelog.handleRelatedArtifacts();
-
-        // 5) Generate the output JSON
-        var bin = new Binary();
-        var mapper = createSerializer();
-        try {
-            bin.setContent(mapper.writeValueAsString(changelog).getBytes(StandardCharsets.UTF_8));
-        } catch (JsonProcessingException e) {
-            throw new UnprocessableEntityException(e.getMessage());
-        }
-
-        return bin;
+        return cache;
     }
 
     private ObjectMapper createSerializer() {
@@ -146,64 +156,66 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
     private void processChanges(
             List<Parameters.ParametersParameterComponent> changes, ChangeLog changelog, DiffCache cache, String url) {
         // 1) Get the source and target resources so we can pull additional info as necessary
-        var resources = cache.getResourcesForUrl(url);
         var resourceType = Canonicals.getResourceType(url);
         // Check if the resource pair was already processed
         var wasPageAlreadyProcessed = changelog.getPage(url).isPresent();
-        if (!resources.isEmpty() && !wasPageAlreadyProcessed) {
-            final MetadataResource sourceResource = resources.get(0).isSource
-                    ? resources.get(0).resource
-                    : (resources.size() > 1 ? resources.get(1).resource : null);
-            final MetadataResource targetResource = resources.get(0).isSource
-                    ? (resources.size() > 1 ? resources.get(1).resource : null)
-                    : resources.get(0).resource;
-            // don't generate changeLog pages for non-grouper ValueSets
-            if (resourceType.equals("ValueSet")
+        if (!wasPageAlreadyProcessed && cache.getSourceResourceForUrl(url).isPresent() && cache.getTargetResourceForUrl(url).isPresent()) {
+            final MetadataResource sourceResource = cache.getSourceResourceForUrl(url).get().resource;
+            final MetadataResource targetResource = cache.getTargetResourceForUrl(url).get().resource;
+            if (resourceType != null) {
+                // don't generate changeLog pages for non-grouper ValueSets
+                if (resourceType.equals("ValueSet")
                     && ((sourceResource != null && !KnowledgeArtifactProcessor.isGrouper(sourceResource))
-                            || (targetResource != null && !KnowledgeArtifactProcessor.isGrouper(targetResource)))) {
-                return;
-            }
-            // 2) Generate a page for each resource pair based on ResourceType
-            var page = changelog.getPage(url).orElseGet(() -> switch (resourceType) {
-                case "ValueSet" -> changelog.addPage((ValueSet) sourceResource, (ValueSet) targetResource, cache);
-                case "Library" -> changelog.addPage((Library) sourceResource, (Library) targetResource);
-                case "PlanDefinition" -> changelog.addPage(
+                    || (targetResource != null && !KnowledgeArtifactProcessor.isGrouper(targetResource)))) {
+                    return;
+                }
+                // 2) Generate a page for each resource pair based on ResourceType
+                var page = changelog.getPage(url).orElseGet(() -> switch (resourceType) {
+                    case "ValueSet" -> changelog.addPage((ValueSet) sourceResource, (ValueSet) targetResource, cache);
+                    case "Library" -> changelog.addPage((Library) sourceResource, (Library) targetResource);
+                    case "PlanDefinition" -> changelog.addPage(
                         (PlanDefinition) sourceResource, (PlanDefinition) targetResource);
-                default -> changelog.addPage(sourceResource, targetResource, url);
-            });
-            for (var change : changes) {
-                if (change.hasName()
-                        && !change.getName().equals("operation")
-                        && change.hasResource()
-                        && change.getResource() instanceof Parameters parameters) {
-                    // Nested Parameters objects get recursively processed
-                    processChanges(parameters.getParameter(), changelog, cache, change.getName());
-                } else if (change.getName().equals("operation")) {
-                    // 3) For each operation get the relevant parameters
-                    var type = getStringParameter(change, "type")
-                            .orElseThrow(() -> new UnprocessableEntityException(
-                                    "Type must be provided when adding an operation to the ChangeLog"));
-                    var newValue = getParameter(change, "value");
-                    var path = getPathParameterNoBase(change);
-                    var originalValue = getParameter(change, "previousValue").map(o -> (Object) o);
-                    // try to extract the original value from the
-                    // source object if not present in the Diff
-                    // Parameters object
-                    try {
-                        if (originalValue.isEmpty() && !type.equals("insert")) {
-                            originalValue =
-                                    Optional.of((new BeanWrapperImpl(sourceResource).getPropertyValue(path.get())));
-                        }
-                    } catch (Exception e) {
-                        // TODO: handle exception
-                        // var message = e.getMessage();
-                        throw new InternalErrorException("Could not process path: " + path + ": " + e.getMessage());
-                    }
-
-                    // 4) Add a new operation to the ChangeLog
-                    page.addOperation(type, path.orElse(null), newValue.orElse(null), originalValue.orElse(null));
+                    default -> changelog.addPage(sourceResource, targetResource, url);
+                });
+                // 3) Process each change
+                for (var change : changes) {
+                    processChange(changelog, cache, change, sourceResource, page);
                 }
             }
+        }
+    }
+
+    private void processChange(ChangeLog changelog, DiffCache cache,
+        ParametersParameterComponent change, MetadataResource sourceResource,
+        ChangeLog.Page<?> page) {
+        if (change.hasName()
+            && !change.getName().equals("operation")
+            && change.hasResource()
+            && change.getResource() instanceof Parameters parameters) {
+            // Nested Parameters objects get recursively processed
+            processChanges(parameters.getParameter(), changelog, cache, change.getName());
+        } else if (change.getName().equals("operation")) {
+            // 1) For each operation get the relevant parameters
+            var type = getStringParameter(change, "type")
+                .orElseThrow(() -> new UnprocessableEntityException(
+                    "Type must be provided when adding an operation to the ChangeLog"));
+            var newValue = getParameter(change, "value");
+            var path = getPathParameterNoBase(change);
+            var originalValue = getParameter(change, "previousValue").map(o -> (Object) o);
+            // try to extract the original value from the
+            // source object if not present in the Diff
+            // Parameters object
+            try {
+                if (originalValue.isEmpty() && !type.equals("insert") && sourceResource != null && path.isPresent()) {
+                    originalValue =
+                        Optional.of((new BeanWrapperImpl(sourceResource).getPropertyValue(path.get())));
+                }
+            } catch (Exception e) {
+                throw new InternalErrorException("Could not process path: " + path + ": " + e.getMessage());
+            }
+
+            // 2) Add a new operation to the ChangeLog
+            page.addOperation(type, path.orElse(null), newValue.orElse(null), originalValue.orElse(null));
         }
     }
 

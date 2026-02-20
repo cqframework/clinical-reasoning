@@ -372,46 +372,6 @@ public interface ResourceMatcher {
                 + pathResult.getClass().getSimpleName());
     }
 
-    /**
-     * True if resourceRange overlaps
-     * resourceRange (r):  |rs-----------|re
-     * paramRange (s):              |ss-----------|se
-     */
-    //    default boolean matchesDateBounds(DateRangeParam resourceRange, DateRangeParam paramRange) {
-    //
-    //        Date resourceLowerBound = resourceRange.getLowerBoundAsInstant();
-    //        Date resourceUpperBound = resourceRange.getUpperBoundAsInstant();
-    //        Date paramLowerBound = paramRange.getLowerBoundAsInstant();
-    //        Date paramUpperBound = paramRange.getUpperBoundAsInstant();
-    //        if (paramLowerBound == null && paramUpperBound == null) {
-    //            return false;
-    //        } else if (paramLowerBound != null && paramUpperBound != null) {
-    //            /*
-    //
-    //             *
-    //             * these are overlapping if:
-    //             * * resourceStart <= searchEnd && searchStart <= resourceEnd
-    //             */
-    //            return (resourceLowerBound.before(paramUpperBound) || resourceLowerBound.equals(paramUpperBound))
-    //                && (paramLowerBound.before(resourceUpperBound) || paramLowerBound.equals(resourceUpperBound));
-    //        } else {
-    //            boolean result = true;
-    //            if (paramLowerBound != null) {
-    //                result &= resourceLowerBound.after(paramLowerBound) || resourceLowerBound.equals(paramLowerBound);
-    //                result &= resourceUpperBound.after(paramLowerBound) || resourceUpperBound.equals(paramLowerBound);
-    //            }
-    //
-    //            if (paramUpperBound != null) {
-    //                result &= resourceLowerBound.before(paramUpperBound) ||
-    // resourceLowerBound.equals(paramUpperBound);
-    //                result &= resourceUpperBound.before(paramUpperBound) ||
-    // resourceUpperBound.equals(paramUpperBound);
-    //            }
-    //
-    //            return result;
-    //        }
-    //    }
-
     DateRangeParam getDateRange(ICompositeType type);
 
     List<TokenParam> getCodes(IBase codeElement);

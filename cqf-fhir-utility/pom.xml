@@ -5,14 +5,14 @@
 
   <groupId>org.opencds.cqf.fhir</groupId>
   <artifactId>cqf-fhir-utility</artifactId>
-  <version>4.4.0-SNAPSHOT</version>
+  <version>4.4.0</version>
   <name>FHIR Clinical Reasoning (Utilities)</name>
   <description>Utilities to help develop clinical reasoning operations</description>
 
   <parent>
     <groupId>org.opencds.cqf.fhir</groupId>
     <artifactId>cqf-fhir</artifactId>
-    <version>4.4.0-SNAPSHOT</version>
+    <version>4.4.0</version>
   </parent>
 
   <dependencies>
@@ -94,7 +94,7 @@
       <dependency>
         <groupId>org.opencds.cqf.fhir</groupId>
         <artifactId>cqf-fhir-test</artifactId>
-        <version>4.4.0-SNAPSHOT</version>
+        <version>4.4.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>

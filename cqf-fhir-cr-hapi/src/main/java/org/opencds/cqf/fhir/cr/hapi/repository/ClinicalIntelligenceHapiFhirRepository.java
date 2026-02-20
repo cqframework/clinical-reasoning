@@ -5,12 +5,15 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
 import ca.uhn.fhir.jpa.repository.searchparam.SearchParameterMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -23,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -109,6 +113,48 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return createBundle(details, bundleProvider);
     }
 
+    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
+        return this.daoRegistry
+                .getResourceDao(resource)
+                .create(resource, cloneWithAction(resource, headers, RestOperationTypeEnum.CREATE));
+    }
+
+    public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
+        final DaoMethodOutcome update = daoRegistry
+                .getResourceDao(resource)
+                .update(resource, cloneWithAction(resource, headers, RestOperationTypeEnum.UPDATE));
+        boolean created = update.getCreated() != null && update.getCreated();
+        if (created) {
+            update.setResponseStatusCode(201);
+        } else {
+            update.setResponseStatusCode(200);
+        }
+
+        return update;
+    }
+
+    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
+            I id, P patchParameters, Map<String, String> headers) {
+        return this.daoRegistry
+                .getResourceDao(id.getResourceType())
+                .patch(
+                        id,
+                        null,
+                        PatchTypeEnum.FHIR_PATCH_JSON,
+                        null,
+                        patchParameters,
+                        cloneWithAction(patchParameters, headers, RestOperationTypeEnum.PATCH));
+    }
+
+    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
+            Class<T> resourceType, I id, Map<String, String> headers) {
+        return this.daoRegistry
+                .getResourceDao(resourceType)
+                .delete(id, cloneWithAction(resourceType, headers, RestOperationTypeEnum.DELETE));
+    }
+
+    // N.B. We don't support request details cloning for link
+
     protected IBundleProvider sanitizeBundleProvider(IBundleProvider bundleProvider) {
         return nonNull(bundleProvider) ? bundleProvider : new SimpleBundleProvider();
     }
@@ -146,6 +192,21 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         }
 
         return bundleType;
+    }
+
+    private <T extends IBaseResource> RequestDetails cloneWithAction(
+            T resource, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
+        return cloneWithAction(resource.getClass(), headers, operationTypeEnum);
+    }
+
+    private <T extends IBaseResource> RequestDetails cloneWithAction(
+            Class<T> resourceType, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
+
+        return ClinicalIntelligenceRequestDetailsCloner.startWith(
+                        requestDetails, daoRegistry.getFhirContext(), resourceType)
+                .setAction(operationTypeEnum)
+                .addHeaders(headers)
+                .create();
     }
 
     private <B extends IBaseBundle> B createBundle(RequestDetails requestDetails, IBundleProvider bundleProvider) {

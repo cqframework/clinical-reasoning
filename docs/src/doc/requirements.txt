@@ -1,2 +1,2 @@
 mkdocs-material == 9.6.2
-pillow == 11.3.0
+pillow == 12.1.1

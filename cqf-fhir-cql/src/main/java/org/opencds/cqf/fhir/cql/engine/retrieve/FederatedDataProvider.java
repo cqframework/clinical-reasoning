@@ -17,6 +17,22 @@ public class FederatedDataProvider extends CompositeDataProvider {
         this.retrieveProviders = retrieveProviders;
     }
 
+    /**
+     *
+     * @param context - resource type
+     * @param contextPath -
+     * @param contextValue - id
+     * @param dataType - resource type
+     * @param templateId
+     * @param codePath
+     * @param codes
+     * @param valueSet
+     * @param datePath - the SP name to use
+     * @param dateLowPath - high path (period.start)
+     * @param dateHighPath - low path (period.end)
+     * @param dateRange - date range to search within
+     * @return
+     */
     @Override
     public Iterable<Object> retrieve(
             String context,

@@ -22,10 +22,10 @@
 
         <junit.version>5.10.2</junit.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <cql.version>4.3.0</cql.version>
+        <cql.version>4.4.0</cql.version>
         <jmh.version>1.36</jmh.version>
         <spring.version>6.2.12</spring.version>
-        <hapi.version>8.6.0</hapi.version>
+        <hapi.version>8.8.0</hapi.version>
         <picocli.version>4.6.1</picocli.version>
         <guava.version>33.2.1-jre</guava.version>
         <error-prone.version>2.35.1</error-prone.version>

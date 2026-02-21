@@ -1,6 +1,6 @@
 [versions]
-hapi = "8.6.0"
-cql = "4.3.0"
+hapi = "8.8.0"
+cql = "4.4.0"
 junit = "5.10.2"
 slf4j = "2.0.4"
 spring-security = "6.4.12"

@@ -56,6 +56,25 @@ This is the CQF Clinical Reasoning on FHIR for Java repository, which provides J
 # Checkstyle runs automatically as part of the build
 ```
 
+### Linked Builds (Cross-Repo Development)
+
+To build against a local checkout of a dependency (e.g., CQL Engine) instead of Maven Central:
+
+```bash
+# Copy the template and set paths to your local checkouts
+cp local.properties.example local.properties
+
+# Edit local.properties — uncomment and set the path:
+# cql.engine.path=../clinical_quality_language/Src/java
+
+# Build as normal — the settings plugin detects local.properties and includes the linked build
+./gradlew build
+```
+
+Available linked builds are listed in `local.properties.example`. The registry is defined in `build-logic/src/main/kotlin/cqf/LinkedBuild.kt`.
+
+In CI, the `resolveLinkedBuilds` task parses `Depends-On: org/repo#branch` directives from PR descriptions to automatically clone and link upstream repos.
+
 ### Other Useful Commands
 ```bash
 # Generate Javadocs

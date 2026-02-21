@@ -21,6 +21,10 @@ The implementers are active on the official FHIR [Zulip chat for CQL](https://ch
 
 Inquires for commercial support can be directed to [info@alphora.com](info@alphora.com).
 
+## Developer Guide
+
+See [AGENTS.md](AGENTS.md) for build commands, linked builds setup, and project architecture.
+
 ## Related Projects
 
 [Clinical Quality Language](https://github.com/cqframework/clinical_quality_language) - Tooling in support of the CQL specification, including the CQL compiler and runtime used in this project.

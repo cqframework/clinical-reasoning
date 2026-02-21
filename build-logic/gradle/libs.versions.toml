@@ -8,8 +8,8 @@ buildconfig = "6.0.7"
 # Tool versions (exposed to convention plugins via buildconfig)
 checkstyle = "12.2.0"
 error-prone-core = "2.42.0"
-jacoco = "0.8.13"
-palantir-format = "2.50.0"
+jacoco = "0.8.14"
+palantir-format = "2.88.0"
 gummy-bears = "0.12.0"
 
 [plugins]

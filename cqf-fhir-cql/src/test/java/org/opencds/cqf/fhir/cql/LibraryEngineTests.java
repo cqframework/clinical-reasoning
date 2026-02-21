@@ -123,8 +123,7 @@ class LibraryEngineTests {
         assertEquals("I am a test", ((StringType) result.get(0)).getValue());
     }
 
-    String libraryCql =
-            """
+    String libraryCql = """
             library MyLibrary version '1.0.0'
 
             using FHIR version '4.0.1'

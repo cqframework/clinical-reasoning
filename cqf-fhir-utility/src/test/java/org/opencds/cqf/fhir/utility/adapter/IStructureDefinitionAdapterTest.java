@@ -19,8 +19,7 @@ public interface IStructureDefinitionAdapterTest<T extends IBaseResource> extend
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String TEMPLATE =
-            """
+    String TEMPLATE = """
         {
             "resourceType": "StructureDefinition",
             "url": "http://canonical.com/sd-url",
@@ -80,8 +79,7 @@ public interface IStructureDefinitionAdapterTest<T extends IBaseResource> extend
     default void getRelatedArtifact_noRelevantExtension_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str =
-                """
+        String str = """
         {
             "resourceType": "StructureDefinition",
             "url": "http://canonical.com/sd-url",
@@ -97,8 +95,7 @@ public interface IStructureDefinitionAdapterTest<T extends IBaseResource> extend
                 }
             ]
         }
-        """
-                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T structuredDef = parser.parseResource(structureDefinitionClass(), str);
         IStructureDefinitionAdapter adapter = getAdapterFactory().createStructureDefinition(structuredDef);

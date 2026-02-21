@@ -169,12 +169,18 @@ public class PackageSourceResolver {
         Map<String, String> emptyHeaders = Collections.emptyMap();
 
         return switch (fhirVersion) {
-            case DSTU3 -> SearchHelper.searchRepositoryWithPaging(
-                    repository, org.hl7.fhir.dstu3.model.ImplementationGuide.class, emptySearchParams, emptyHeaders);
-            case R4 -> SearchHelper.searchRepositoryWithPaging(
-                    repository, org.hl7.fhir.r4.model.ImplementationGuide.class, emptySearchParams, emptyHeaders);
-            case R5 -> SearchHelper.searchRepositoryWithPaging(
-                    repository, org.hl7.fhir.r5.model.ImplementationGuide.class, emptySearchParams, emptyHeaders);
+            case DSTU3 ->
+                SearchHelper.searchRepositoryWithPaging(
+                        repository,
+                        org.hl7.fhir.dstu3.model.ImplementationGuide.class,
+                        emptySearchParams,
+                        emptyHeaders);
+            case R4 ->
+                SearchHelper.searchRepositoryWithPaging(
+                        repository, org.hl7.fhir.r4.model.ImplementationGuide.class, emptySearchParams, emptyHeaders);
+            case R5 ->
+                SearchHelper.searchRepositoryWithPaging(
+                        repository, org.hl7.fhir.r5.model.ImplementationGuide.class, emptySearchParams, emptyHeaders);
             default -> null;
         };
     }

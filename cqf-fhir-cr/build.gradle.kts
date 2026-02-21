@@ -19,7 +19,7 @@ dependencies {
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.reflections)
-    testImplementation(libs.hamcrest.all)
+    testImplementation(libs.hamcrest)
     testImplementation(libs.slf4j.test)
 }
 

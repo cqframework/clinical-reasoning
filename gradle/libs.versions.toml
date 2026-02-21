@@ -1,21 +1,21 @@
 [versions]
 hapi = "8.8.0"
 cql = "4.4.0"
-junit = "5.10.2"
-slf4j = "2.0.4"
-spring-security = "6.4.12"
+junit = "5.14.3"
+slf4j = "2.0.17"
+spring-security = "6.4.13"
 spring-boot = "3.4.11"
-picocli = "4.6.1"
-jmh = "1.36"
+picocli = "4.7.7"
+jmh = "1.37"
 jakarta-annotation = "2.1.1"
-commons-compress = "1.26.0"
-commons-codec = "1.17.2"
-mockito = "5.5.0"
-hamcrest = "1.3"
-jsonassert = "1.5.1"
-equalsverifier = "3.15.6"
+commons-compress = "1.28.0"
+commons-codec = "1.21.0"
+mockito = "5.21.0"
+hamcrest = "3.0"
+jsonassert = "1.5.3"
+equalsverifier = "4.3.1"
 reflections = "0.10.2"
-slf4j-test = "3.0.1"
+slf4j-test = "3.0.3"
 
 sonarqube = "7.2.2.6593"
 
@@ -82,7 +82,7 @@ commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons
 # Testing
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-hamcrest-all = { module = "org.hamcrest:hamcrest-all", version.ref = "hamcrest" }
+hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 jsonassert = { module = "org.skyscreamer:jsonassert", version.ref = "jsonassert" }

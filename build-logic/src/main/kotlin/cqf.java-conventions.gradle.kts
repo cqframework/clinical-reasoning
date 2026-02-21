@@ -36,7 +36,7 @@ dependencies {
 
     testImplementation(lib("junit-jupiter"))
     testRuntimeOnly(lib("junit-platform-launcher"))
-    testImplementation(lib("hamcrest-all"))
+    testImplementation(lib("hamcrest"))
     testImplementation(lib("mockito-core"))
     testImplementation(lib("equalsverifier"))
 

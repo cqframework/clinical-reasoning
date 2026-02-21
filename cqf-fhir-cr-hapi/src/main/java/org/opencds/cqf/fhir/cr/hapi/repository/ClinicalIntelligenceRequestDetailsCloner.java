@@ -1,19 +1,15 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.ResourceType;
 
 /**
  * This is an exact copy of the RequestDetailsCloner from hapi-fhir, which is package-private, so
@@ -21,63 +17,37 @@ import org.hl7.fhir.r4.model.ResourceType;
  */
 class ClinicalIntelligenceRequestDetailsCloner {
 
-    // Note: These are R4 resource types, so might need to be eventually update for R5,R6,etc
-    private static final Set<ResourceType> NON_PARTITIONABLE_RESOURCE_TYPES = Set.of(
-            ResourceType.Library,
-            ResourceType.ValueSet,
-            ResourceType.StructureMap,
-            ResourceType.StructureDefinition,
-            ResourceType.Questionnaire,
-            ResourceType.NamingSystem,
-            ResourceType.CompartmentDefinition,
-            ResourceType.SearchParameter,
-            ResourceType.ConceptMap,
-            ResourceType.OperationDefinition,
-            ResourceType.CodeSystem);
-
-    private static final Set<String> NON_PARTITIONABLE_RESOURCE_TYPE_STRINGS =
-            NON_PARTITIONABLE_RESOURCE_TYPES.stream().map(Enum::name).collect(Collectors.toUnmodifiableSet());
-
     private ClinicalIntelligenceRequestDetailsCloner() {}
 
-    static <T extends IBaseResource> DetailsBuilder startWith(
-            RequestDetails origRequestDetails, FhirContext fhirContext, Class<T> resourceType) {
+    static <T extends IBaseResource> DetailsBuilder startWith(RequestDetails origRequestDetails) {
         final RequestDetails newDetails;
-
-        final boolean isPartitionableResource = isPartitionableResource(fhirContext, resourceType);
 
         if (origRequestDetails instanceof ServletRequestDetails servletDetails) {
             newDetails = new ServletRequestDetails(servletDetails);
         } else if (origRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
-            final SystemRequestDetails clonedSystemRequestDetails = new SystemRequestDetails(origRequestDetails);
-            if (isPartitionableResource) {
-                clonedSystemRequestDetails.setRequestPartitionId(systemRequestDetails.getRequestPartitionId());
-            }
-            newDetails = clonedSystemRequestDetails;
+            newDetails = new SystemRequestDetails(systemRequestDetails);
         } else {
             throw new InvalidRequestException("Unsupported request origRequestDetails type: %s"
                     .formatted(origRequestDetails.getClass().getName()));
         }
-        if (isPartitionableResource) {
-            newDetails.setTenantId(origRequestDetails.getTenantId());
+
+        IRestfulResponse response = origRequestDetails.getResponse();
+
+        // we need IRestfulResponse because RestfulServer uses it during extended operation processing.
+        if (response == null && origRequestDetails instanceof SystemRequestDetails systemDetails) {
+            response = new SystemRestfulResponse(systemDetails);
         }
-        newDetails.setRequestType(RequestTypeEnum.POST);
-        newDetails.setOperation(null);
-        newDetails.setResource(null);
-        newDetails.setParameters(new HashMap<>(origRequestDetails.getParameters()));
-        newDetails.setResourceName(null);
-        newDetails.setCompartmentName(null);
-        newDetails.setResponse(origRequestDetails.getResponse());
+        newDetails.setResponse(response);
+
+        // LUKETODO:  verify all of these:
+        //        newDetails.setRequestType(RequestTypeEnum.POST);
+        //        newDetails.setOperation(null);
+        //        newDetails.setResource(null);
+        //        newDetails.setParameters(new HashMap<>(origRequestDetails.getParameters()));
+        //        newDetails.setResourceName(null);
+        //        newDetails.setCompartmentName(null);
 
         return new DetailsBuilder(newDetails);
-    }
-
-    // note that parallel logic is maintained in hapi-fhir BaseRequestPartitionHelperSvc#isResourcePartitionable
-    private static <T extends IBaseResource> boolean isPartitionableResource(
-            FhirContext fhirContext, Class<T> resourceType) {
-        final String resourceTypeString = fhirContext.getResourceType(resourceType);
-
-        return !NON_PARTITIONABLE_RESOURCE_TYPE_STRINGS.contains(resourceTypeString);
     }
 
     static class DetailsBuilder {

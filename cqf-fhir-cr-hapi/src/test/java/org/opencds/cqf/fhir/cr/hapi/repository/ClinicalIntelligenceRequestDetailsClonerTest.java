@@ -21,11 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Measure;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+// LUKETODO:  figure out tests we need to keep:
 class ClinicalIntelligenceRequestDetailsClonerTest {
 
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
@@ -53,8 +53,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
     @ParameterizedTest
     @MethodSource("requestDetailsVariants")
     void startWith_SetsRequestTypeToPost(RequestDetailsVariant variant) {
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        variant.requestDetails(), FHIR_CONTEXT, Measure.class)
+        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
                 .create();
 
         assertEquals(RequestTypeEnum.POST, result.getRequestType());
@@ -63,8 +62,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
     @ParameterizedTest
     @MethodSource("requestDetailsVariants")
     void startWith_ResetsOperationResourceAndNames(RequestDetailsVariant variant) {
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        variant.requestDetails(), FHIR_CONTEXT, Measure.class)
+        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
                 .create();
 
         assertNull(result.getOperation());
@@ -78,8 +76,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
     void startWith_PreservesTenantId(RequestDetailsVariant variant) {
         variant.requestDetails().setTenantId("test-tenant");
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        variant.requestDetails(), FHIR_CONTEXT, Measure.class)
+        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
                 .create();
 
         assertEquals("test-tenant", result.getTenantId());
@@ -91,8 +88,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         IRestfulResponse expectedResponse = new SystemRestfulResponse(null);
         variant.requestDetails().setResponse(expectedResponse);
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        variant.requestDetails(), FHIR_CONTEXT, Measure.class)
+        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
                 .create();
 
         assertEquals(expectedResponse, result.getResponse());
@@ -105,8 +101,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         originalParams.put("param1", new String[] {"value1", "value2"});
         variant.requestDetails().setParameters(originalParams);
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        variant.requestDetails(), FHIR_CONTEXT, Measure.class)
+        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
                 .create();
 
         assertNotSame(originalParams, result.getParameters());
@@ -116,8 +111,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
     @ParameterizedTest
     @MethodSource("requestDetailsVariants")
     void startWith_PreservesRequestDetailsType(RequestDetailsVariant variant) {
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        variant.requestDetails(), FHIR_CONTEXT, Measure.class)
+        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
                 .create();
 
         assertInstanceOf(variant.requestDetails().getClass(), result);
@@ -130,8 +124,8 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         system.setParameters(new HashMap<>());
         system.setRequestPartitionId(partitionId);
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(system, FHIR_CONTEXT, Measure.class)
-                .create();
+        RequestDetails result =
+                ClinicalIntelligenceRequestDetailsCloner.startWith(system).create();
 
         assertInstanceOf(SystemRequestDetails.class, result);
         assertEquals(partitionId, ((SystemRequestDetails) result).getRequestPartitionId());
@@ -142,8 +136,8 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         var system = new SystemRequestDetails();
         system.setParameters(new HashMap<>());
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(system, FHIR_CONTEXT, Measure.class)
-                .create();
+        RequestDetails result =
+                ClinicalIntelligenceRequestDetailsCloner.startWith(system).create();
 
         assertInstanceOf(SystemRequestDetails.class, result);
         assertNull(((SystemRequestDetails) result).getRequestPartitionId());
@@ -155,8 +149,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         RequestDetails unsupported = mock(RequestDetails.class);
 
         assertThrows(
-                InvalidRequestException.class,
-                () -> ClinicalIntelligenceRequestDetailsCloner.startWith(unsupported, FHIR_CONTEXT, Measure.class));
+                InvalidRequestException.class, () -> ClinicalIntelligenceRequestDetailsCloner.startWith(unsupported));
     }
 
     record PartitionableResourceVariant(
@@ -260,9 +253,8 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         system.setParameters(new HashMap<>());
         system.setRequestPartitionId(partitionId);
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        system, variant.fhirContext(), variant.resourceType())
-                .create();
+        RequestDetails result =
+                ClinicalIntelligenceRequestDetailsCloner.startWith(system).create();
 
         assertInstanceOf(SystemRequestDetails.class, result);
         if (variant.expectedPartitionable()) {
@@ -274,17 +266,15 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
 
     @ParameterizedTest
     @MethodSource("partitionableResourceVariants")
-    void startWith_SystemRequestDetails_PreservesTenantIdRegardlessOfPartitionability(
-            PartitionableResourceVariant variant) {
+    void startWith_SystemRequestDetails_PreservesTenantIdRegardlessOfPartitionability() {
         // Tenant ID is always preserved for SystemRequestDetails because the
         // constructor copies it, regardless of whether the resource is partitionable
         var system = new SystemRequestDetails();
         system.setParameters(new HashMap<>());
         system.setTenantId("test-tenant");
 
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        system, variant.fhirContext(), variant.resourceType())
-                .create();
+        RequestDetails result =
+                ClinicalIntelligenceRequestDetailsCloner.startWith(system).create();
 
         assertEquals("test-tenant", result.getTenantId());
     }

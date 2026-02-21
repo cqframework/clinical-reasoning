@@ -61,9 +61,9 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     public <T extends IBaseResource, I extends IIdType> T read(
             Class<T> resourceType, I id, Map<String, String> headers) {
 
-        return (T) this.daoRegistry
+        return this.daoRegistry
                 .getResourceDao(resourceType)
-                .read(id, cloneWithAction(resourceType, headers, RestOperationTypeEnum.READ));
+                .read(id, cloneWithAction(headers, RestOperationTypeEnum.READ));
     }
 
     /**
@@ -83,7 +83,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             IRepositoryRestQueryContributor queryContributor,
             Map<String, String> headers) {
 
-        var details = cloneWithAction(resourceType, headers, RestOperationTypeEnum.SEARCH_TYPE);
+        var details = cloneWithAction(headers, RestOperationTypeEnum.SEARCH_TYPE);
 
         var searchParameterMap =
                 SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(queryContributor);
@@ -143,7 +143,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             Class<T> resourceType, I id, Map<String, String> headers) {
         return this.daoRegistry
                 .getResourceDao(resourceType)
-                .delete(id, cloneWithAction(resourceType, headers, RestOperationTypeEnum.DELETE));
+                .delete(id, cloneWithAction(headers, RestOperationTypeEnum.DELETE));
     }
 
     // N.B. We don't support request details cloning for link
@@ -189,14 +189,13 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
 
     private <T extends IBaseResource> RequestDetails cloneWithAction(
             T resource, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
-        return cloneWithAction(resource.getClass(), headers, operationTypeEnum);
+        return cloneWithAction(headers, operationTypeEnum);
     }
 
     private <T extends IBaseResource> RequestDetails cloneWithAction(
-            Class<T> resourceType, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
+            Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
 
-        return ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        requestDetails, daoRegistry.getFhirContext(), resourceType)
+        return ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
                 .setAction(operationTypeEnum)
                 .addHeaders(headers)
                 .create();

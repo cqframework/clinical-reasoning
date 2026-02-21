@@ -275,14 +275,12 @@ public class FunctionEvaluationHandler {
         final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
-        final String exceptionMessageIfNotFunction =
-                """
+        final String exceptionMessageIfNotFunction = """
             Measure: '%s', MeasureObservation population expression '%s' must be a CQL function
             definition, but it is not. For non-boolean population basis, stratifier component
             criteria expressions must be "
             CQL functions that take a parameter matching the population basis type.
-            """
-                        .formatted(measureUrl, observationExpression);
+            """.formatted(measureUrl, observationExpression);
 
         for (Object result : resultsIter) {
             final ExpressionResult observationResult = evaluateMeasureObservationFunction(
@@ -377,13 +375,11 @@ public class FunctionEvaluationHandler {
         }
 
         // This message is kept for safety - should not be reached since we validated above
-        final String exceptionMessageIfNotFunction =
-                """
+        final String exceptionMessageIfNotFunction = """
                 Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
                 For non-boolean population basis, stratifier component criteria expressions must be
                 CQL functions that take a parameter matching the population basis type.
-                """
-                        .formatted(measureUrl, stratifierExpression);
+                """.formatted(measureUrl, stratifierExpression);
 
         // Function expression: input parameter data for value stratifier functions
         // Exclude MEASUREOBSERVATION populations - they have function expressions that aren't in regular results

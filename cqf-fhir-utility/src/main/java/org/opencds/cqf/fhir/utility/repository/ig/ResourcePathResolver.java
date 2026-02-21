@@ -191,10 +191,11 @@ class ResourcePathResolver {
         var typeName = resourceType.getSimpleName().toLowerCase();
         return switch (conventions.filenameMode()) {
             case ID_ONLY -> path -> hasKnownExtension(path);
-            case TYPE_AND_ID -> path -> {
-                var name = path.getFileName().toString().toLowerCase();
-                return name.startsWith(typeName + "-") && hasKnownExtension(path);
-            };
+            case TYPE_AND_ID ->
+                path -> {
+                    var name = path.getFileName().toString().toLowerCase();
+                    return name.startsWith(typeName + "-") && hasKnownExtension(path);
+                };
         };
     }
 

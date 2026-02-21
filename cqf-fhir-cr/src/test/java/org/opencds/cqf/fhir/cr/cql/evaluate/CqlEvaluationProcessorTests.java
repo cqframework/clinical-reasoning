@@ -23,8 +23,7 @@ class CqlEvaluationProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final EvaluationSettings evaluationSettings = EvaluationSettings.getDefault();
     private final String simpleLibraryName = "simpleTest";
-    private final String content =
-            """
+    private final String content = """
             library simpleTest
 
             using FHIR version '4.0.1'

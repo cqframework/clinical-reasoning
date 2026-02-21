@@ -155,7 +155,8 @@ public class ExpandRunner implements Runnable {
                         HttpStatus.SC_BAD_GATEWAY,
                         HttpStatus.SC_SERVICE_UNAVAILABLE,
                         HttpStatus.SC_GATEWAY_TIMEOUT -> true;
-                default -> false;};
+                default -> false;
+            };
         }
         return isTransient;
     }

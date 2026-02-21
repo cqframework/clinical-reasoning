@@ -109,8 +109,9 @@ public interface IResourceLoader extends IDaoRegistryUser {
                 switch (encoding.toLowerCase()) {
                     case "json" -> getFhirContext().newJsonParser();
                     case "xml" -> getFhirContext().newXmlParser();
-                    default -> throw new IllegalArgumentException(
-                            "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
+                    default ->
+                        throw new IllegalArgumentException(
+                                "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
                 };
 
         return parser.parseResource(resourceString);

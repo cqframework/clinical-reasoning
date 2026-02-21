@@ -110,14 +110,16 @@ class DynamicValueProcessorTests {
     private List<IBase> withExpressionResults(FhirVersionEnum fhirVersion) {
         return switch (fhirVersion) {
             case DSTU3 -> List.of(new org.hl7.fhir.dstu3.model.StringType("string type value"));
-            case R4 -> List.of(
-                    new org.hl7.fhir.r4.model.StringType("string type value"),
-                    new org.hl7.fhir.r4.model.BooleanType(true),
-                    new org.hl7.fhir.r4.model.IntegerType(3));
-            case R5 -> List.of(
-                    new org.hl7.fhir.r5.model.StringType("string type value"),
-                    new org.hl7.fhir.r5.model.BooleanType(true),
-                    new org.hl7.fhir.r5.model.IntegerType(3));
+            case R4 ->
+                List.of(
+                        new org.hl7.fhir.r4.model.StringType("string type value"),
+                        new org.hl7.fhir.r4.model.BooleanType(true),
+                        new org.hl7.fhir.r4.model.IntegerType(3));
+            case R5 ->
+                List.of(
+                        new org.hl7.fhir.r5.model.StringType("string type value"),
+                        new org.hl7.fhir.r5.model.BooleanType(true),
+                        new org.hl7.fhir.r5.model.IntegerType(3));
             default -> null;
         };
     }

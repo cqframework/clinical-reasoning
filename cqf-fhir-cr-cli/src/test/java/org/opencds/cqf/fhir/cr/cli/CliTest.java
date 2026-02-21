@@ -565,14 +565,12 @@ class CliTest {
         var subjectId1 = "Patient/123";
         var subjectId2 = "Patient/456";
 
-        var expectedTxtResult123 =
-                """
+        var expectedTxtResult123 = """
                 Encounters=[Encounter(id=ABC)]
                 Patient=Patient(id=123)
                 """;
 
-        var expectedTxtResult456 =
-                """
+        var expectedTxtResult456 = """
                 Encounters=[Encounter(id=DEF)]
                 Patient=Patient(id=456)
                 """;

@@ -82,12 +82,15 @@ public class RequestHelpers {
         }
         var userLanguage =
                 switch (fhirVersion) {
-                    case DSTU3 -> new org.hl7.fhir.dstu3.model.CodeableConcept(
-                            new org.hl7.fhir.dstu3.model.Coding("test", "test", "test"));
-                    case R4 -> new org.hl7.fhir.r4.model.CodeableConcept(
-                            new org.hl7.fhir.r4.model.Coding("test", "test", "test"));
-                    case R5 -> new org.hl7.fhir.r5.model.CodeableConcept(
-                            new org.hl7.fhir.r5.model.Coding("test", "test", "test"));
+                    case DSTU3 ->
+                        new org.hl7.fhir.dstu3.model.CodeableConcept(
+                                new org.hl7.fhir.dstu3.model.Coding("test", "test", "test"));
+                    case R4 ->
+                        new org.hl7.fhir.r4.model.CodeableConcept(
+                                new org.hl7.fhir.r4.model.Coding("test", "test", "test"));
+                    case R5 ->
+                        new org.hl7.fhir.r5.model.CodeableConcept(
+                                new org.hl7.fhir.r5.model.Coding("test", "test", "test"));
                     default -> null;
                 };
         return new org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest(

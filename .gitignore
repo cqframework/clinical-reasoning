@@ -1,19 +1,37 @@
-target
-test-output
-bin/
-htmlReport/
+# Gradle
+build/
+.gradle/
 
+# Maven
+target/
+.m2
+.flattened-pom.xml
+pom.xml.versionsBackup
+
+# Test output
+test-output
+
+# IDE - Eclipse
+bin/
 .classpath
 .project
 .settings
-.flattened-pom.xml
 .factorypath
+.apt_generated
+
+# IDE - IntelliJ
+.ideaTests
+*.iml
+.idea/
+
+# IDE - VS Code
+.vscode/
+
+# OS
 .DS_Store
-.cursorignore
-.m2
+*DS_Store
 
-pom.xml.versionsBackup
-
+# Logs and dumps
 *.log*
 Snap.*
 core.*
@@ -22,18 +40,12 @@ heapdump.*
 javacore.*
 jitdump.*
 .attach_*
+htmlReport/
 
-.idea
-*.iml
-
-.apt_generated
-
-*DS_Store
-
-.worktrees
-
-# asdf-vm specific files
+# Tool version managers
 .tool-versions
-
-# mise-vm specific files
 mise.toml
+
+# Other
+.cursorignore
+.worktrees

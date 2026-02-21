@@ -2,7 +2,7 @@ name: Check PR
 on:
     pull_request:
       types: [opened, reopened, synchronize]
-  
+
 permissions:
     checks: write
 
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  maven:
+  gradle:
     strategy:
         matrix:
           os: [ubuntu-latest, windows-latest]
@@ -36,20 +36,20 @@ jobs:
         with:
             distribution: 'temurin'
             java-version: '21'
-            cache: 'maven'
+      - uses: gradle/actions/setup-gradle@v4
       - name: Compile
-        run: ./mvnw --batch-mode --no-transfer-progress --update-snapshots -T 4 package -DskipTests=true
+        run: ./gradlew assemble
       - name: Run tests
-        run: ./mvnw --batch-mode --no-transfer-progress -T 4 verify -Ppackage
+        run: ./gradlew build
       - name: SonarCloud Analysis
         if: matrix.os == 'ubuntu-latest'
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             SONAR_TOKEN: ${{ secrets.SONAR_QUBE_022026 }}
-        run: ./mvnw --batch-mode --no-transfer-progress sonar:sonar -Dsonar.organization=cqframework -Dsonar.projectKey=cqframework_clinical-reasoning -Dsonar.token=$SONAR_TOKEN
+        run: ./gradlew sonar -Dsonar.token=$SONAR_TOKEN
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
-          report_paths: "**/target/surefire-reports/TEST-*.xml"
+          report_paths: "**/build/test-results/test/TEST-*.xml"
           job_name: "Check PR"

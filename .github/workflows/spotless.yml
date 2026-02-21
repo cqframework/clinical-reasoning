@@ -15,8 +15,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - name: spotless:check
-        run: ./mvnw spotless:check
+      - uses: gradle/actions/setup-gradle@v4
+      - name: spotlessCheck
+        run: ./gradlew spotlessCheck
       - uses: mshick/add-pr-comment@v2
         if: always()
         with:
@@ -25,4 +26,4 @@ jobs:
           message-failure: |
             **This Pull Request has failed the formatting check**
 
-            Please run `mvnw spotless:apply` or `mvnw clean install -DskipTests` to fix the formatting issues.
+            Please run `./gradlew spotlessApply` to fix the formatting issues.

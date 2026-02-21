@@ -33,17 +33,17 @@ public class Dstu3ResolverFactory implements IRequestResolverFactory {
                 : activityDefinition.getKind().toCode();
         var resourceType = ResourceType.fromCode(kind);
         switch (resourceType) {
-                /* Communication is not included in the list of RequestResourceTypes */
+            /* Communication is not included in the list of RequestResourceTypes */
             case Communication:
                 return new CommunicationResolver(activityDefinition);
             case CommunicationRequest:
                 return new CommunicationRequestResolver(activityDefinition);
-                /* DiagnosticReport is not included in the list of RequestResourceTypes */
+            /* DiagnosticReport is not included in the list of RequestResourceTypes */
             case DiagnosticReport:
                 return new DiagnosticReportResolver(activityDefinition);
             case MedicationRequest:
                 return new MedicationRequestResolver(activityDefinition);
-                /* Procedure is not included in the list of RequestResourceTypes */
+            /* Procedure is not included in the list of RequestResourceTypes */
             case Procedure:
                 return new ProcedureResolver(activityDefinition);
             case ProcedureRequest:

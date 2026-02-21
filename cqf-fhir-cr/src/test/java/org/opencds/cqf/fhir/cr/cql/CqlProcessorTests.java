@@ -29,8 +29,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 class CqlProcessorTests {
     private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
-    private final String simpleContentDstu3 =
-            """
+    private final String simpleContentDstu3 = """
         library simpleTest
 
         using FHIR version '3.0.1'
@@ -40,8 +39,7 @@ class CqlProcessorTests {
         define Test:
             5*5
         """;
-    private final String simpleContentR4 =
-            """
+    private final String simpleContentR4 = """
         library simpleTest
 
         using FHIR version '4.0.1'
@@ -100,8 +98,7 @@ class CqlProcessorTests {
 
     @Test
     void libraryEvaluationService_inlineAsthma() {
-        var content =
-                """
+        var content = """
         library asthmatest version '1.0.0'
 
         using FHIR version '4.0.1'
@@ -133,8 +130,7 @@ class CqlProcessorTests {
     @Test
     @DisplayName("Test that the content is evaluated when the repository does not contain the source CQL")
     void libraryEvaluationService_inlineAsthma_contentOnlySource() {
-        var content =
-                """
+        var content = """
         library asthmatest version '1.0.0'
 
         using FHIR version '4.0.1'
@@ -165,8 +161,7 @@ class CqlProcessorTests {
 
     @Test
     void libraryEvaluationService_contentAndExpression() {
-        var content =
-                """
+        var content = """
         library SimpleR4Library
 
         using FHIR version '4.0.1'

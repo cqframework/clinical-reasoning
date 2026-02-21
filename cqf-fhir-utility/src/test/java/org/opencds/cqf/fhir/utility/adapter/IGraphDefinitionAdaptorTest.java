@@ -21,8 +21,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> extends IB
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String VALID_GRAPH_DEF_JSON_TEMPLATE =
-            """
+    String VALID_GRAPH_DEF_JSON_TEMPLATE = """
             {
                 "resourceType": "GraphDefinition",
                 "meta": [{
@@ -92,8 +91,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> extends IB
         // setup
         String ref = "http://example.com/canonical";
         IParser parser = fhirContext().newJsonParser();
-        String graphDefStr = String.format(
-                """
+        String graphDefStr = String.format("""
                 {
                     "resourceType": "GraphDefinition",
                     "meta": [{
@@ -115,8 +113,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> extends IB
                         }
                     ]
                 }
-                """,
-                toRelatedArtifactCanonicalReference(ref));
+                """, toRelatedArtifactCanonicalReference(ref));
         log.info(graphDefStr);
         T graphDefinition = parser.parseResource(graphDefinitionClass(), graphDefStr);
 
@@ -133,8 +130,7 @@ public interface IGraphDefinitionAdaptorTest<T extends IBaseResource> extends IB
     @Test
     default void getDependencies_noRelatedArtifact_processesButReturnsNothing() {
         // setup
-        String graphDefStr =
-                """
+        String graphDefStr = """
                 {
                    "resourceType": "GraphDefinition",
                    "meta": [{

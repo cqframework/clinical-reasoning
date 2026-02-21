@@ -215,12 +215,14 @@ public class MeasureScoreCalculator {
 
             case MIN -> cleanList.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
 
-            case AVG -> cleanList.stream()
-                    .reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .divide(BigDecimal.valueOf(cleanList.size()), DIVISION_PRECISION);
+            case AVG ->
+                cleanList.stream()
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .divide(BigDecimal.valueOf(cleanList.size()), DIVISION_PRECISION);
 
-            case N_A -> throw new InvalidRequestException(
-                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
+            case N_A ->
+                throw new InvalidRequestException(
+                        "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
         };
     }
 

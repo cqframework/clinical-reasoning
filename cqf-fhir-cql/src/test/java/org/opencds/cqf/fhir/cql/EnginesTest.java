@@ -17,6 +17,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.BundleBuilder;
 import jakarta.annotation.Nonnull;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneOffset;
@@ -291,8 +292,8 @@ class EnginesTest {
 
     @Test
     void npmProcessor() {
-        var resourceDirectory = ResourceDirectoryResolver.getResourceDirectory();
-        var ini = resourceDirectory.resolve("org/opencds/cqf/fhir/cql/npm/ig.ini");
+        var resourceDirectory = org.opencds.cqf.fhir.test.Resources.getResourcePath(getClass());
+        var ini = Path.of(resourceDirectory).resolve("org/opencds/cqf/fhir/cql/npm/ig.ini");
 
         var igContext = new IGContext(new LoggerAdapter(log));
         igContext.initializeFromIni(ini.toString());

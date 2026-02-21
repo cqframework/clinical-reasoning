@@ -126,12 +126,15 @@ public class DependencyInfo implements IDependencyInfo {
     private <E extends IBaseExtension<?, ?>> E buildDependencyRoleExtension(
             FhirVersionEnum fhirVersion, String roleCode) {
         return switch (fhirVersion) {
-            case DSTU3 -> (E) new org.hl7.fhir.dstu3.model.Extension(
-                    Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.dstu3.model.CodeType(roleCode));
-            case R4 -> (E) new org.hl7.fhir.r4.model.Extension(
-                    Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r4.model.CodeType(roleCode));
-            case R5 -> (E) new org.hl7.fhir.r5.model.Extension(
-                    Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r5.model.CodeType(roleCode));
+            case DSTU3 ->
+                (E) new org.hl7.fhir.dstu3.model.Extension(
+                        Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.dstu3.model.CodeType(roleCode));
+            case R4 ->
+                (E) new org.hl7.fhir.r4.model.Extension(
+                        Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r4.model.CodeType(roleCode));
+            case R5 ->
+                (E) new org.hl7.fhir.r5.model.Extension(
+                        Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r5.model.CodeType(roleCode));
             default -> null;
         };
     }
@@ -140,12 +143,15 @@ public class DependencyInfo implements IDependencyInfo {
     private <E extends IBaseExtension<?, ?>> E buildPackageSourceExtension(
             FhirVersionEnum fhirVersion, String packageSource) {
         return switch (fhirVersion) {
-            case DSTU3 -> (E) new org.hl7.fhir.dstu3.model.Extension(
-                    Constants.PACKAGE_SOURCE, new org.hl7.fhir.dstu3.model.StringType(packageSource));
-            case R4 -> (E) new org.hl7.fhir.r4.model.Extension(
-                    Constants.PACKAGE_SOURCE, new org.hl7.fhir.r4.model.StringType(packageSource));
-            case R5 -> (E) new org.hl7.fhir.r5.model.Extension(
-                    Constants.PACKAGE_SOURCE, new org.hl7.fhir.r5.model.StringType(packageSource));
+            case DSTU3 ->
+                (E) new org.hl7.fhir.dstu3.model.Extension(
+                        Constants.PACKAGE_SOURCE, new org.hl7.fhir.dstu3.model.StringType(packageSource));
+            case R4 ->
+                (E) new org.hl7.fhir.r4.model.Extension(
+                        Constants.PACKAGE_SOURCE, new org.hl7.fhir.r4.model.StringType(packageSource));
+            case R5 ->
+                (E) new org.hl7.fhir.r5.model.Extension(
+                        Constants.PACKAGE_SOURCE, new org.hl7.fhir.r5.model.StringType(packageSource));
             default -> null;
         };
     }

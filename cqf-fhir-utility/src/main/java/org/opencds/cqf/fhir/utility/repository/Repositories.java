@@ -27,8 +27,9 @@ public class Repositories {
             case DSTU3 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.dstu3.model.Endpoint) endpoint);
             case R4 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r4.model.Endpoint) endpoint);
             case R5 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r5.model.Endpoint) endpoint);
-            default -> throw new IllegalArgumentException(
-                    "unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
+            default ->
+                throw new IllegalArgumentException(
+                        "unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
         };
     }
 
@@ -73,8 +74,9 @@ public class Repositories {
             case DSTU3 -> new ResourceMatcherDSTU3();
             case R4 -> new ResourceMatcherR4();
             case R5 -> new ResourceMatcherR5();
-            default -> throw new NotImplementedException("Resource matching is not implemented for FHIR version: %s"
-                    .formatted(fhirVersion.getFhirVersionString()));
+            default ->
+                throw new NotImplementedException("Resource matching is not implemented for FHIR version: %s"
+                        .formatted(fhirVersion.getFhirVersionString()));
         };
     }
 }

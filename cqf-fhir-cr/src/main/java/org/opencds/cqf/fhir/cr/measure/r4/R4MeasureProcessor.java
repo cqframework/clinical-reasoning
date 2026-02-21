@@ -425,8 +425,9 @@ public class R4MeasureProcessor {
             case SUBJECT -> MeasureReportType.INDIVIDUAL;
             case SUBJECTLIST -> MeasureReportType.SUBJECTLIST;
             case POPULATION -> MeasureReportType.SUMMARY;
-            default -> throw new InvalidRequestException("Unsupported MeasureEvalType: %s for Measure: %s"
-                    .formatted(measureEvalType.toCode(), measure.getUrl()));
+            default ->
+                throw new InvalidRequestException("Unsupported MeasureEvalType: %s for Measure: %s"
+                        .formatted(measureEvalType.toCode(), measure.getUrl()));
         };
     }
 

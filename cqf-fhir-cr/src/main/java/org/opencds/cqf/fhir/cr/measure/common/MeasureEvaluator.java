@@ -67,16 +67,34 @@ public class MeasureEvaluator {
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
         return switch (measureEvalType) {
-            case PATIENT, SUBJECT -> this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
-            case SUBJECTLIST -> this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.SUBJECTLIST, evaluationResult, applyScoring);
+            case PATIENT, SUBJECT ->
+                this.evaluateSubject(
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        MeasureReportType.INDIVIDUAL,
+                        evaluationResult,
+                        applyScoring);
+            case SUBJECTLIST ->
+                this.evaluateSubject(
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        MeasureReportType.SUBJECTLIST,
+                        evaluationResult,
+                        applyScoring);
             case PATIENTLIST ->
-            // DSTU3 Only
-            this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.PATIENTLIST, evaluationResult, applyScoring);
-            case POPULATION -> this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
+                // DSTU3 Only
+                this.evaluateSubject(
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        MeasureReportType.PATIENTLIST,
+                        evaluationResult,
+                        applyScoring);
+            case POPULATION ->
+                this.evaluateSubject(
+                        measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
         };
     }
 

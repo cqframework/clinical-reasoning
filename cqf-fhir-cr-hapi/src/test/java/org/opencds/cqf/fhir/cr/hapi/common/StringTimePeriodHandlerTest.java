@@ -23,10 +23,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 class StringTimePeriodHandlerTest {
 
     record GetStartZonedDateTimeHappyPathParams(
-            @Nullable String timezone, @Nullable String theInputPeriodStart, @Nullable ZonedDateTime expectedResult) {}
+            @Nullable String timezone,
+            @Nullable String theInputPeriodStart,
+            @Nullable ZonedDateTime expectedResult) {}
 
     record GetEndZonedDateTimeHappyPathParams(
-            @Nullable String timezone, @Nullable String theInputPeriodEnd, @Nullable ZonedDateTime expectedResult) {}
+            @Nullable String timezone,
+            @Nullable String theInputPeriodEnd,
+            @Nullable ZonedDateTime expectedResult) {}
 
     record ErrorParams(
             @Nullable String timezone, @Nullable String theInputPeriod, InvalidRequestException expectedResult) {}

@@ -54,7 +54,7 @@ public class R4ResolverFactory implements IRequestResolverFactory {
                 return new CarePlanResolver(activityDefinition);
             case Claim:
                 return new ClaimResolver(activityDefinition);
-                /* Communication is not included in the list of RequestResourceTypes */
+            /* Communication is not included in the list of RequestResourceTypes */
             case Communication:
                 return new CommunicationResolver(activityDefinition);
             case CommunicationRequest:
@@ -63,7 +63,7 @@ public class R4ResolverFactory implements IRequestResolverFactory {
                 return new ContractResolver(activityDefinition);
             case DeviceRequest:
                 return new DeviceRequestResolver(activityDefinition);
-                /* DiagnosticReport is not included in the list of RequestResourceTypes */
+            /* DiagnosticReport is not included in the list of RequestResourceTypes */
             case DiagnosticReport:
                 return new DiagnosticReportResolver(activityDefinition);
             case EnrollmentRequest:
@@ -74,7 +74,7 @@ public class R4ResolverFactory implements IRequestResolverFactory {
                 return new MedicationRequestResolver(activityDefinition);
             case NutritionOrder:
                 return new NutritionOrderResolver(activityDefinition);
-                /* Procedure is not included in the list of RequestResourceTypes */
+            /* Procedure is not included in the list of RequestResourceTypes */
             case Procedure:
                 return new ProcedureResolver(activityDefinition);
             case RequestGroup:

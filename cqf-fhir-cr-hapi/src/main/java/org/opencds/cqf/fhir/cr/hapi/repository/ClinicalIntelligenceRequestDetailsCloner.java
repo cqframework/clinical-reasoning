@@ -39,14 +39,6 @@ class ClinicalIntelligenceRequestDetailsCloner {
         }
         newDetails.setResponse(response);
 
-        // LUKETODO:  verify all of these:
-        //        newDetails.setRequestType(RequestTypeEnum.POST);
-        //        newDetails.setOperation(null);
-        //        newDetails.setResource(null);
-        //        newDetails.setParameters(new HashMap<>(origRequestDetails.getParameters()));
-        //        newDetails.setResourceName(null);
-        //        newDetails.setCompartmentName(null);
-
         return new DetailsBuilder(newDetails);
     }
 

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -25,10 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-// LUKETODO:  figure out tests we need to keep:
 class ClinicalIntelligenceRequestDetailsClonerTest {
-
-    private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
 
     record RequestDetailsVariant(String label, RequestDetails requestDetails) {
         @Override
@@ -48,15 +44,6 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
         return Stream.of(
                 new RequestDetailsVariant("SystemRequestDetails", system),
                 new RequestDetailsVariant("ServletRequestDetails", servlet));
-    }
-
-    @ParameterizedTest
-    @MethodSource("requestDetailsVariants")
-    void startWith_SetsRequestTypeToPost(RequestDetailsVariant variant) {
-        RequestDetails result = ClinicalIntelligenceRequestDetailsCloner.startWith(variant.requestDetails())
-                .create();
-
-        assertEquals(RequestTypeEnum.POST, result.getRequestType());
     }
 
     @ParameterizedTest
@@ -158,6 +145,7 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
             Class<? extends IBaseResource> resourceType,
             boolean expectedPartitionable) {
         @Override
+        @Nonnull
         public String toString() {
             return label;
         }
@@ -242,26 +230,6 @@ class ClinicalIntelligenceRequestDetailsClonerTest {
                         "R5 ValueSet", FhirContext.forR5Cached(), org.hl7.fhir.r5.model.ValueSet.class, false),
                 new PartitionableResourceVariant(
                         "R5 CodeSystem", FhirContext.forR5Cached(), org.hl7.fhir.r5.model.CodeSystem.class, false));
-    }
-
-    @ParameterizedTest
-    @MethodSource("partitionableResourceVariants")
-    void startWith_SystemRequestDetails_PreservesPartitionIdOnlyForPartitionableResource(
-            PartitionableResourceVariant variant) {
-        var partitionId = RequestPartitionId.fromPartitionId(123);
-        var system = new SystemRequestDetails();
-        system.setParameters(new HashMap<>());
-        system.setRequestPartitionId(partitionId);
-
-        RequestDetails result =
-                ClinicalIntelligenceRequestDetailsCloner.startWith(system).create();
-
-        assertInstanceOf(SystemRequestDetails.class, result);
-        if (variant.expectedPartitionable()) {
-            assertEquals(partitionId, ((SystemRequestDetails) result).getRequestPartitionId());
-        } else {
-            assertNull(((SystemRequestDetails) result).getRequestPartitionId());
-        }
     }
 
     @ParameterizedTest

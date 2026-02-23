@@ -27,6 +27,9 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
     private static final Logger logger = LoggerFactory.getLogger(InferManifestParametersVisitor.class);
     private static final String CRMI_RESOURCE_TYPE_EXTENSION =
             "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-resourceType";
+    private static final String CQF_RESOURCE_TYPE_EXTENSION =
+            "http://hl7.org/fhir/StructureDefinition/cqf-resourceType";
+    private static final String DISPLAY_EXTENSION = "http://hl7.org/fhir/StructureDefinition/display";
 
     public InferManifestParametersVisitor(IRepository repository) {
         super(repository);
@@ -189,6 +192,9 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return;
         }
 
+        // Extract display from relatedArtifact
+        String display = extractDisplay(relatedArtifact, library);
+
         switch (resourceType) {
             case "CodeSystem":
                 parameters
@@ -197,18 +203,31 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .setValue(new org.hl7.fhir.dstu3.model.StringType(canonical));
                 break;
             case "ValueSet":
-                parameters
+                var valueSetParam = parameters
                         .addParameter()
                         .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.dstu3.model.StringType(canonical));
+                        .setValue(new org.hl7.fhir.dstu3.model.UriType(canonical));
+                // Add cqf-resourceType extension
+                valueSetParam.addExtension(
+                        CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
+                // Add display extension if present
+                if (display != null && !display.isEmpty()) {
+                    valueSetParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.dstu3.model.StringType(display));
+                }
                 break;
             default:
-                parameters
+                var param = parameters
                         .addParameter()
                         .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.dstu3.model.StringType(canonical))
-                        .addExtension(
-                                CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
+                        .setValue(new org.hl7.fhir.dstu3.model.UriType(canonical));
+                // Add crmi-resourceType extension (existing)
+                param.addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
+                // Add cqf-resourceType extension
+                param.addExtension(CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
+                // Add display extension if present
+                if (display != null && !display.isEmpty()) {
+                    param.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.dstu3.model.StringType(display));
+                }
                 break;
         }
     }
@@ -225,6 +244,9 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return;
         }
 
+        // Extract display from relatedArtifact
+        String display = extractDisplay(relatedArtifact, library);
+
         switch (resourceType) {
             case "CodeSystem":
                 parameters
@@ -233,17 +255,31 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .setValue(new org.hl7.fhir.r4.model.StringType(canonical));
                 break;
             case "ValueSet":
-                parameters
+                var valueSetParam = parameters
                         .addParameter()
                         .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.r4.model.StringType(canonical));
+                        .setValue(new org.hl7.fhir.r4.model.CanonicalType(canonical));
+                // Add cqf-resourceType extension
+                valueSetParam.addExtension(
+                        CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
+                // Add display extension if present
+                if (display != null && !display.isEmpty()) {
+                    valueSetParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r4.model.StringType(display));
+                }
                 break;
             default:
-                parameters
+                var param = parameters
                         .addParameter()
                         .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.r4.model.StringType(canonical))
-                        .addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
+                        .setValue(new org.hl7.fhir.r4.model.CanonicalType(canonical));
+                // Add crmi-resourceType extension (existing)
+                param.addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
+                // Add cqf-resourceType extension
+                param.addExtension(CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
+                // Add display extension if present
+                if (display != null && !display.isEmpty()) {
+                    param.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r4.model.StringType(display));
+                }
                 break;
         }
     }
@@ -260,6 +296,9 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return;
         }
 
+        // Extract display from relatedArtifact
+        String display = extractDisplay(relatedArtifact, library);
+
         switch (resourceType) {
             case "CodeSystem":
                 parameters
@@ -268,17 +307,31 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .setValue(new org.hl7.fhir.r5.model.StringType(canonical));
                 break;
             case "ValueSet":
-                parameters
+                var valueSetParam = parameters
                         .addParameter()
                         .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.r5.model.StringType(canonical));
+                        .setValue(new org.hl7.fhir.r5.model.CanonicalType(canonical));
+                // Add cqf-resourceType extension
+                valueSetParam.addExtension(
+                        CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
+                // Add display extension if present
+                if (display != null && !display.isEmpty()) {
+                    valueSetParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r5.model.StringType(display));
+                }
                 break;
             default:
-                parameters
+                var param = parameters
                         .addParameter()
                         .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.r5.model.StringType(canonical))
-                        .addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
+                        .setValue(new org.hl7.fhir.r5.model.CanonicalType(canonical));
+                // Add crmi-resourceType extension (existing)
+                param.addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
+                // Add cqf-resourceType extension
+                param.addExtension(CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
+                // Add display extension if present
+                if (display != null && !display.isEmpty()) {
+                    param.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r5.model.StringType(display));
+                }
                 break;
         }
     }
@@ -290,6 +343,16 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return primitive.getValueAsString();
         } else if (resourcePath instanceof org.hl7.fhir.dstu3.model.Reference dstu3Ref) {
             return dstu3Ref.getReference();
+        }
+
+        return null;
+    }
+
+    private String extractDisplay(ICompositeType relatedArtifact, ILibraryAdapter library) {
+        var displayPath = library.resolvePath(relatedArtifact, "display");
+
+        if (displayPath instanceof IPrimitiveType<?> primitive) {
+            return primitive.getValueAsString();
         }
 
         return null;

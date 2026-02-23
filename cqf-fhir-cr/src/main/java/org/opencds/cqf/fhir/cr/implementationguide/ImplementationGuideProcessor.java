@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
@@ -28,6 +30,7 @@ public class ImplementationGuideProcessor {
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
     protected IReleaseProcessor releaseProcessor;
+    protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IRepository repository;
     protected CrSettings crSettings;
 
@@ -52,6 +55,9 @@ public class ImplementationGuideProcessor {
                 }
                 if (p instanceof IReleaseProcessor release) {
                     releaseProcessor = release;
+                }
+                if (p instanceof IDataRequirementsProcessor dataReq) {
+                    dataRequirementsProcessor = dataReq;
                 }
             });
         }
@@ -92,5 +98,27 @@ public class ImplementationGuideProcessor {
                 ? releaseProcessor
                 : new ReleaseProcessor(repository, crSettings.getTerminologyServerClientSettings());
         return processor.releaseResource(implementationGuide, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> implementationGuide, IBaseParameters parameters) {
+        return dataRequirements(resolveImplementationGuide(implementationGuide), parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> implementationGuide, IBaseParameters parameters, boolean persistDependencies) {
+        return dataRequirements(resolveImplementationGuide(implementationGuide), parameters, persistDependencies);
+    }
+
+    public IBaseResource dataRequirements(IBaseResource implementationGuide, IBaseParameters parameters) {
+        return dataRequirements(implementationGuide, parameters, false);
+    }
+
+    public IBaseResource dataRequirements(
+            IBaseResource implementationGuide, IBaseParameters parameters, boolean persistDependencies) {
+        var processor = dataRequirementsProcessor != null
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
+        return processor.getDataRequirements(implementationGuide, parameters, persistDependencies);
     }
 }

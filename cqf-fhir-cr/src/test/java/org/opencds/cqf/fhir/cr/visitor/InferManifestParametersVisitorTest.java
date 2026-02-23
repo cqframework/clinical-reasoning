@@ -301,6 +301,55 @@ class InferManifestParametersVisitorTest {
     }
 
     @Test
+    void inferManifestParameters_ValueSetWithDisplay_CreatesExtensions() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        // Create module-definition Library with ValueSet dependency with display
+        var moduleDefinition = new Library();
+        moduleDefinition.setUrl("http://example.org/Library/module-def");
+        moduleDefinition.setVersion("1.0.0");
+        moduleDefinition.setName("ModuleDef");
+        moduleDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+        var typeCC = new org.hl7.fhir.r4.model.CodeableConcept();
+        typeCC.addCoding()
+                .setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+                .setCode("module-definition");
+        moduleDefinition.setType(typeCC);
+
+        // Add ValueSet dependency WITH display
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1")
+                .setDisplay("Administrative Gender");
+
+        // Run $infer-manifest-parameters
+        var visitor = new InferManifestParametersVisitor(repository);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (Library) visitor.visit(adapter, null);
+
+        // Verify Parameters
+        var parameters = (Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        var param = parameters.getParameter().get(0);
+        assertEquals("canonicalVersion", param.getName());
+        assertEquals(
+                "http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1",
+                param.getValue().primitiveValue());
+
+        // Verify cqf-resourceType extension is present
+        var cqfResourceTypeExt = param.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-resourceType");
+        assertNotNull(cqfResourceTypeExt, "cqf-resourceType extension should be present");
+        assertEquals("ValueSet", ((CodeType) cqfResourceTypeExt.getValue()).getCode());
+
+        // Verify display extension is present
+        var displayExt = param.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/display");
+        assertNotNull(displayExt, "display extension should be present");
+        assertEquals("Administrative Gender", displayExt.getValue().primitiveValue());
+    }
+
+    @Test
     void inferManifestParameters_RelatedArtifactWithoutResource_SkipsParameter() {
         var repository = new InMemoryFhirRepository(fhirContext);
 

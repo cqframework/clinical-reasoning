@@ -85,7 +85,7 @@ public class ExpandRunner implements Runnable {
             expansionAttempt++;
             if (expansionAttempt <= terminologyServerClientSettings.getMaxRetryCount()) {
                 logger.info("Expansion attempt: {} for ValueSet: {}", expansionAttempt, valueSetUrl);
-                var id = Canonicals.getResourceType(valueSetUrl) + "/" + Canonicals.getIdPart(valueSetUrl);
+                var id = buildResourceIdForExpand(valueSetUrl);
                 expandedValueSet = fhirClient
                         .operation()
                         .onInstance(id)
@@ -142,6 +142,31 @@ public class ExpandRunner implements Runnable {
             } else {
                 scheduler.shutdown();
             }
+        }
+    }
+
+    /**
+     * Builds the resource ID for the $expand operation.
+     * VSAC requires a non-standard syntax where the version is appended to the ID with a dash
+     * instead of using the pipe separator (e.g., "ValueSet/id-version" instead of "ValueSet/id|version").
+     *
+     * @param canonicalUrl The canonical URL which may include a version (e.g., "url|version")
+     * @return The resource ID formatted for the $expand operation
+     */
+    private String buildResourceIdForExpand(String canonicalUrl) {
+        String resourceType = Canonicals.getResourceType(canonicalUrl);
+        String idPart = Canonicals.getIdPart(canonicalUrl);
+        String version = Canonicals.getVersion(canonicalUrl);
+
+        // Check if this is a VSAC URL by looking for cts.nlm.nih.gov
+        boolean isVsac = canonicalUrl != null && canonicalUrl.contains("cts.nlm.nih.gov");
+
+        if (version != null && isVsac) {
+            // VSAC requires version appended with dash: "ValueSet/id-version"
+            return resourceType + "/" + idPart + "-" + version;
+        } else {
+            // Standard format: "ValueSet/id"
+            return resourceType + "/" + idPart;
         }
     }
 

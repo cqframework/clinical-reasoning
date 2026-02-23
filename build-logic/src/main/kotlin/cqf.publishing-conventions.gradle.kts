@@ -17,6 +17,8 @@ tasks.withType<Javadoc>().configureEach {
     }
 }
 
+val isSnapshot = version.toString().endsWith("SNAPSHOT")
+
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
@@ -53,7 +55,7 @@ publishing {
             name = "central"
             val releasesRepoUrl = uri("https://central.sonatype.com/repository/maven-releases/")
             val snapshotsRepoUrl = uri("https://central.sonatype.com/repository/maven-snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+            url = if (isSnapshot) snapshotsRepoUrl else releasesRepoUrl
             credentials {
                 username = providers.environmentVariable("MAVEN_USERNAME").orNull
                 password = providers.environmentVariable("MAVEN_PASSWORD").orNull
@@ -63,6 +65,6 @@ publishing {
 }
 
 signing {
-    isRequired = !version.toString().endsWith("SNAPSHOT")
+    isRequired = !isSnapshot
     sign(publishing.publications["mavenJava"])
 }

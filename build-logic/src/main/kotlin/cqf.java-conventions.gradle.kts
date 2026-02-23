@@ -102,13 +102,15 @@ tasks.register<Test>("integrationTest") {
     shouldRunAfter(tasks.named("test"))
 }
 
+val projectName = project.name
+val projectVersion = project.version
 tasks.withType<Jar>().configureEach {
     manifest {
         attributes(
-            "Implementation-Title" to project.name,
-            "Implementation-Version" to project.version,
-            "Specification-Title" to project.name,
-            "Specification-Version" to project.version
+            "Implementation-Title" to projectName,
+            "Implementation-Version" to projectVersion,
+            "Specification-Title" to projectName,
+            "Specification-Version" to projectVersion
         )
     }
 }

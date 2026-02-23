@@ -52,6 +52,7 @@ publishing {
 val generateBuildProperties by tasks.registering {
     val outputDir = layout.buildDirectory.dir("generated-sources/properties")
     val propsFile = outputDir.map { it.file("org/opencds/cqf/fhir/cqf-fhir-cr-build.properties") }
+    val projectVersion = project.version.toString()
 
     outputs.dir(outputDir)
 
@@ -76,10 +77,11 @@ val generateBuildProperties by tasks.registering {
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX")
         )
 
+        val timestampRegex = Regex("clinicalreasoning\\.timestamp=.*\\n")
         val content = buildString {
             appendLine("clinicalreasoning.buildnumber=$gitCommit")
             appendLine("clinicalreasoning.timestamp=$timestamp")
-            appendLine("clinicalreasoning.version=${project.version}")
+            appendLine("clinicalreasoning.version=$projectVersion")
             appendLine("scmBranch=$gitBranch")
         }
 
@@ -89,8 +91,7 @@ val generateBuildProperties by tasks.registering {
         file.parentFile.mkdirs()
         if (file.exists()) {
             val existing = file.readText()
-            val stripTimestamp = { s: String -> s.replace(Regex("clinicalreasoning\\.timestamp=.*\\n"), "") }
-            if (stripTimestamp(existing) == stripTimestamp(content)) {
+            if (existing.replace(timestampRegex, "") == content.replace(timestampRegex, "")) {
                 return@doLast
             }
         }

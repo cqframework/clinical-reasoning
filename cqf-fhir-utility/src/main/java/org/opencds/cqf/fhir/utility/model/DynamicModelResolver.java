@@ -291,8 +291,9 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.Extension(url);
             case R4 -> new org.hl7.fhir.r4.model.Extension(url);
             case R5 -> new org.hl7.fhir.r5.model.Extension(url);
-            default -> throw new IllegalStateException(
-                    "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
+            default ->
+                throw new IllegalStateException(
+                        "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
         };
     }
 

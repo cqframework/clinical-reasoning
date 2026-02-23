@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
@@ -19,17 +19,8 @@ class ClinicalIntelligenceRequestDetailsCloner {
 
     private ClinicalIntelligenceRequestDetailsCloner() {}
 
-    static <T extends IBaseResource> DetailsBuilder startWith(RequestDetails origRequestDetails) {
-        final RequestDetails newDetails;
-
-        if (origRequestDetails instanceof ServletRequestDetails servletDetails) {
-            newDetails = new ServletRequestDetails(servletDetails);
-        } else if (origRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
-            newDetails = new SystemRequestDetails(systemRequestDetails);
-        } else {
-            throw new InvalidRequestException("Unsupported request origRequestDetails type: %s"
-                    .formatted(origRequestDetails.getClass().getName()));
-        }
+    static DetailsBuilder startWith(RequestDetails origRequestDetails) {
+        final RequestDetails newDetails = getRequestDetails(origRequestDetails);
 
         IRestfulResponse response = origRequestDetails.getResponse();
 
@@ -40,6 +31,21 @@ class ClinicalIntelligenceRequestDetailsCloner {
         newDetails.setResponse(response);
 
         return new DetailsBuilder(newDetails);
+    }
+
+    @Nonnull
+    private static RequestDetails getRequestDetails(RequestDetails origRequestDetails) {
+        final RequestDetails newDetails;
+
+        if (origRequestDetails instanceof ServletRequestDetails servletDetails) {
+            newDetails = new ServletRequestDetails(servletDetails);
+        } else if (origRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
+            newDetails = new SystemRequestDetails(systemRequestDetails);
+        } else {
+            throw new InvalidRequestException("Unsupported request origRequestDetails type: %s"
+                    .formatted(origRequestDetails.getClass().getName()));
+        }
+        return newDetails;
     }
 
     static class DetailsBuilder {

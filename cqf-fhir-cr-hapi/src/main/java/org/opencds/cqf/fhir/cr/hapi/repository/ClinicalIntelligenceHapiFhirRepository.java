@@ -106,16 +106,18 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return createBundle(details, bundleProvider);
     }
 
+    @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
         return this.daoRegistry
                 .getResourceDao(resource)
-                .create(resource, cloneWithAction(resource, headers, RestOperationTypeEnum.CREATE));
+                .create(resource, cloneWithAction(headers, RestOperationTypeEnum.CREATE));
     }
 
+    @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         final DaoMethodOutcome update = daoRegistry
                 .getResourceDao(resource)
-                .update(resource, cloneWithAction(resource, headers, RestOperationTypeEnum.UPDATE));
+                .update(resource, cloneWithAction(headers, RestOperationTypeEnum.UPDATE));
         boolean created = update.getCreated() != null && update.getCreated();
         if (created) {
             update.setResponseStatusCode(201);
@@ -126,6 +128,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return update;
     }
 
+    @Override
     public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
             I id, P patchParameters, Map<String, String> headers) {
         return this.daoRegistry
@@ -136,9 +139,10 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
                         PatchTypeEnum.FHIR_PATCH_JSON,
                         (String) null,
                         patchParameters,
-                        cloneWithAction(patchParameters, headers, RestOperationTypeEnum.PATCH));
+                        cloneWithAction(headers, RestOperationTypeEnum.PATCH));
     }
 
+    @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
         return this.daoRegistry
@@ -187,13 +191,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return bundleType;
     }
 
-    private <T extends IBaseResource> RequestDetails cloneWithAction(
-            T resource, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
-        return cloneWithAction(headers, operationTypeEnum);
-    }
-
-    private <T extends IBaseResource> RequestDetails cloneWithAction(
-            Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
+    private RequestDetails cloneWithAction(Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
 
         return ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
                 .setAction(operationTypeEnum)

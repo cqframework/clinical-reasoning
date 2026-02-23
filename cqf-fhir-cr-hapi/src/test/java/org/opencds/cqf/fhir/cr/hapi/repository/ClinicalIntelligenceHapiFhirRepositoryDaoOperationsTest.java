@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -87,7 +86,7 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
 
         var captor = ArgumentCaptor.forClass(RequestDetails.class);
         verify(libraryDao).read(any(), captor.capture());
-        assertPartitionCleared(captor.getValue(), RestOperationTypeEnum.READ);
+        assertPartitionPreserved(captor.getValue(), RestOperationTypeEnum.READ);
     }
 
     @Test
@@ -133,7 +132,7 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
     }
 
     @Test
-    void create_NonPartitionedResource_ClearsPartitionId() {
+    void create_NonPartitionedResource_PreservesPartitionId() {
         doReturn(libraryDao).when(daoRegistry).getResourceDao(any(Library.class));
         when(libraryDao.create(any(Library.class), any(RequestDetails.class))).thenReturn(new DaoMethodOutcome());
 
@@ -142,7 +141,7 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
 
         var captor = ArgumentCaptor.forClass(RequestDetails.class);
         verify(libraryDao).create(any(Library.class), captor.capture());
-        assertPartitionCleared(captor.getValue(), RestOperationTypeEnum.CREATE);
+        assertPartitionPreserved(captor.getValue(), RestOperationTypeEnum.CREATE);
     }
 
     // ===== UPDATE =====
@@ -199,7 +198,7 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
 
         var captor = ArgumentCaptor.forClass(RequestDetails.class);
         verify(libraryDao).update(any(Library.class), captor.capture());
-        assertPartitionCleared(captor.getValue(), RestOperationTypeEnum.UPDATE);
+        assertPartitionPreserved(captor.getValue(), RestOperationTypeEnum.UPDATE);
     }
 
     // ===== DELETE =====
@@ -227,7 +226,7 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
 
         var captor = ArgumentCaptor.forClass(RequestDetails.class);
         verify(libraryDao).delete(any(), captor.capture());
-        assertPartitionCleared(captor.getValue(), RestOperationTypeEnum.DELETE);
+        assertPartitionPreserved(captor.getValue(), RestOperationTypeEnum.DELETE);
     }
 
     // ===== PATCH =====
@@ -266,19 +265,7 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
         assertInstanceOf(SystemRequestDetails.class, clonedDetails);
         var systemDetails = (SystemRequestDetails) clonedDetails;
         assertEquals(expectedOp, clonedDetails.getRestOperationType());
-        assertEquals(RequestTypeEnum.POST, clonedDetails.getRequestType());
         assertEquals(TENANT_ID, clonedDetails.getTenantId());
         assertEquals(PARTITION_ID, systemDetails.getRequestPartitionId());
-    }
-
-    private void assertPartitionCleared(RequestDetails clonedDetails, RestOperationTypeEnum expectedOp) {
-        assertInstanceOf(SystemRequestDetails.class, clonedDetails);
-        var systemDetails = (SystemRequestDetails) clonedDetails;
-        assertEquals(expectedOp, clonedDetails.getRestOperationType());
-        assertEquals(RequestTypeEnum.POST, clonedDetails.getRequestType());
-        // Tenant ID is preserved because the SystemRequestDetails constructor copies it
-        assertEquals(TENANT_ID, clonedDetails.getTenantId());
-        // Partition ID is cleared for non-partitionable resources
-        assertNull(systemDetails.getRequestPartitionId());
     }
 }

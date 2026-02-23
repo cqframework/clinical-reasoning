@@ -30,7 +30,8 @@ class DynamicModelResolverTest {
         var communicationRequest = new CommunicationRequest();
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 
-        var path = "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+        var path =
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
         var value = new StringType("en");
 
         resolver.setNestedValue(communicationRequest, path, value, def);
@@ -55,12 +56,14 @@ class DynamicModelResolverTest {
 
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 
-        var path = "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+        var path =
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
         var value = new StringType("en");
 
         resolver.setNestedValue(communicationRequest, path, value, def);
 
-        var contentString = (StringType) communicationRequest.getPayloadFirstRep().getContent();
+        var contentString =
+                (StringType) communicationRequest.getPayloadFirstRep().getContent();
         assertNotNull(contentString);
         assertEquals("Hello", contentString.getValue());
 
@@ -83,7 +86,8 @@ class DynamicModelResolverTest {
 
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 
-        var path = "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+        var path =
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
         var value = new StringType("en");
 
         resolver.setNestedValue(communicationRequest, path, value, def);
@@ -104,12 +108,14 @@ class DynamicModelResolverTest {
 
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 
-        var path = "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString";
+        var path =
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString";
         var value = new StringType("Hej");
 
         resolver.setNestedValue(communicationRequest, path, value, def);
 
-        var contentString = (StringType) communicationRequest.getPayloadFirstRep().getContent();
+        var contentString =
+                (StringType) communicationRequest.getPayloadFirstRep().getContent();
         var translationExt = contentString.getExtensionByUrl(TRANSLATION_EXT_URL);
         assertNotNull(translationExt);
 
@@ -128,19 +134,20 @@ class DynamicModelResolverTest {
 
         // Set lang
         resolver.setNestedValue(
-            communicationRequest,
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode",
-            new StringType("da"),
-            def);
+                communicationRequest,
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode",
+                new StringType("da"),
+                def);
 
         // Set content
         resolver.setNestedValue(
-            communicationRequest,
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString",
-            new StringType("Hej"),
-            def);
+                communicationRequest,
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString",
+                new StringType("Hej"),
+                def);
 
-        var contentString = (StringType) communicationRequest.getPayloadFirstRep().getContent();
+        var contentString =
+                (StringType) communicationRequest.getPayloadFirstRep().getContent();
         var translationExt = contentString.getExtensionByUrl(TRANSLATION_EXT_URL);
         assertNotNull(translationExt);
 
@@ -166,7 +173,8 @@ class DynamicModelResolverTest {
         RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 
         // Add a second translation at index [1]
-        var path = "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[1].extension('lang').valueCode";
+        var path =
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[1].extension('lang').valueCode";
         var value = new StringType("de");
 
         resolver.setNestedValue(communicationRequest, path, value, def);

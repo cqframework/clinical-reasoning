@@ -5,10 +5,10 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -37,8 +37,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     private static final String PRIMITIVE = "IPrimitiveType";
     private static final String URI = "UriType";
 
-    private static final Pattern EXTENSION_PATTERN =
-        Pattern.compile("extension\\('([^']+)'\\)(\\[(\\d+)\\])?");
+    private static final Pattern EXTENSION_PATTERN = Pattern.compile("extension\\('([^']+)'\\)(\\[(\\d+)\\])?");
 
     private record ExtensionInfo(String url, int index) {}
 
@@ -214,18 +213,16 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
                 if (targetDef != null) {
                     var targetValues = targetDef.getAccessor().getValues(target);
                     var targetValue = (targetValues.size() >= index + 1 && !isLast)
-                        ? getTargetValueFromList(sliceName, index, targetValues)
-                        : getTargetValue(target, value, isLast, targetPath, targetDef);
+                            ? getTargetValueFromList(sliceName, index, targetValues)
+                            : getTargetValue(target, value, isLast, targetPath, targetDef);
                     target = targetValue == null ? target : targetValue;
                     if (!isLast) {
                         var nextDef = fhirContext.getElementDefinition(target.getClass());
-                        if(nextDef instanceof BaseRuntimeElementCompositeDefinition<?>)
-                            def = nextDef;
-                        else if (nextDef instanceof RuntimePrimitiveDatatypeDefinition)
-                            def = nextDef;
+                        if (nextDef instanceof BaseRuntimeElementCompositeDefinition<?>) def = nextDef;
+                        else if (nextDef instanceof RuntimePrimitiveDatatypeDefinition) def = nextDef;
                         else
                             throw new UnknownType("Unable to resolve the runtime definition for %s"
-                                .formatted(target.getClass().getName()));
+                                    .formatted(target.getClass().getName()));
                     }
                 }
             }
@@ -248,7 +245,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
                 current.append(c);
             }
         }
-        if (!current.isEmpty()) {
+        if (current.length() > 0) {
             segments.add(current.toString());
         }
         return segments;
@@ -272,11 +269,11 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     private IBase resolveOrCreateExtension(IBase target, ExtensionInfo info) {
         if (!(target instanceof IBaseHasExtensions hasExtensions)) {
             throw new IllegalArgumentException(
-                "Target does not support extensions: " + target.getClass().getName());
+                    "Target does not support extensions: " + target.getClass().getName());
         }
         var matching = hasExtensions.getExtension().stream()
-            .filter(ext -> info.url().equals(ext.getUrl()))
-            .toList();
+                .filter(ext -> info.url().equals(ext.getUrl()))
+                .toList();
         if (matching.size() > info.index()) {
             return (IBase) matching.get(info.index());
         }
@@ -295,7 +292,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             case R4 -> new org.hl7.fhir.r4.model.Extension(url);
             case R5 -> new org.hl7.fhir.r5.model.Extension(url);
             default -> throw new IllegalStateException(
-                "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
+                    "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
         };
     }
 

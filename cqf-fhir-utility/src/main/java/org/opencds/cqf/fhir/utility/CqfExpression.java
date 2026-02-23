@@ -36,8 +36,8 @@ public class CqfExpression {
         model = model.substring(0, model.indexOf(".")).toUpperCase();
         var version = FhirVersionEnum.forVersionString(model);
         return switch (version) {
-            case DSTU3 -> new CqfExpression(
-                    "text/cql-expression", extension.getValue().toString(), referencedLibraries);
+            case DSTU3 ->
+                new CqfExpression("text/cql-expression", extension.getValue().toString(), referencedLibraries);
             case R4 -> CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), referencedLibraries);
             case R5 -> CqfExpression.of((org.hl7.fhir.r5.model.Expression) extension.getValue(), referencedLibraries);
             default -> null;
@@ -201,16 +201,18 @@ public class CqfExpression {
 
     public ICompositeType toExpressionType(FhirVersionEnum fhirVersion) {
         return switch (fhirVersion) {
-            case R4 -> new org.hl7.fhir.r4.model.Expression()
-                    .setLanguage(language)
-                    .setExpression(expression)
-                    .setReference(libraryUrl)
-                    .setName(name);
-            case R5 -> new org.hl7.fhir.r5.model.Expression()
-                    .setLanguage(language)
-                    .setExpression(expression)
-                    .setReference(libraryUrl)
-                    .setName(name);
+            case R4 ->
+                new org.hl7.fhir.r4.model.Expression()
+                        .setLanguage(language)
+                        .setExpression(expression)
+                        .setReference(libraryUrl)
+                        .setName(name);
+            case R5 ->
+                new org.hl7.fhir.r5.model.Expression()
+                        .setLanguage(language)
+                        .setExpression(expression)
+                        .setReference(libraryUrl)
+                        .setName(name);
             default -> null;
         };
     }

@@ -11,58 +11,61 @@ This is the CQF Clinical Reasoning on FHIR for Java repository, which provides J
 ### Building the Project
 ```bash
 # Full build with tests
-./mvnw clean install
+./gradlew build
 
 # Build without tests
-./mvnw install -DskipTests
+./gradlew assemble
 
-# Package only (default goal)
-./mvnw package
+# Compile only
+./gradlew compileJava
 
-# Parallel build (faster)
-./mvnw install -T 4
+# Parallel build (enabled by default via gradle.properties)
+./gradlew build
 ```
 
 ### Running Tests
 ```bash
 # Run all tests
-./mvnw test
+./gradlew test
 
 # Run tests in a specific module
-./mvnw test -pl cqf-fhir-cr
+./gradlew :cqf-fhir-cr:test
 
 # Run a single test class
-./mvnw test -Dtest=ClassName
+./gradlew :MODULE:test --tests ClassName
 
 # Run a single test method
-./mvnw test -Dtest=ClassName#methodName
+./gradlew :MODULE:test --tests "ClassName.methodName"
 
 # Run integration tests
-./mvnw verify
+./gradlew integrationTest
 
 # Skip tests
-./mvnw install -DskipTests
+./gradlew assemble
 ```
 
 ### Code Formatting and Quality
 ```bash
 # Check code formatting (runs in CI on PRs)
-./mvnw spotless:check
+./gradlew spotlessCheck
 
 # Apply code formatting fixes
-./mvnw spotless:apply
+./gradlew spotlessApply
 
-# This project uses Palantir Java Format (configured in pom.xml)
-# Checkstyle runs automatically during validate phase
+# This project uses Palantir Java Format (configured in buildSrc convention plugins)
+# Checkstyle runs automatically as part of the build
 ```
 
 ### Other Useful Commands
 ```bash
 # Generate Javadocs
-./mvnw javadoc:javadoc
+./gradlew javadoc
 
-# Run benchmarks (cqf-fhir-benchmark module)
-cd cqf-fhir-benchmark && mvn clean install && java -jar target/benchmarks.jar
+# Build CLI fat JAR
+./gradlew :cqf-fhir-cr-cli:bootJar
+
+# Publish to local Maven repository
+./gradlew publishToMavenLocal
 
 # Build documentation locally (requires Python 3 and MkDocs)
 cd docs/src/doc
@@ -72,7 +75,7 @@ mkdocs serve  # Browse at http://127.0.0.1:8000/
 
 ## Architecture and Module Structure
 
-This is a multi-module Maven project with the following key modules:
+This is a multi-module Gradle project (Kotlin DSL) with the following key modules:
 
 ### Core Modules
 
@@ -109,6 +112,17 @@ This is a multi-module Maven project with the following key modules:
 - **cqf-fhir-benchmark**: JMH benchmarking suite
 - **docs**: MkDocs-based documentation website (www.cqframework.org/clinical-reasoning)
 
+## Gradle Build Structure
+
+- **`buildSrc/`**: Convention plugins for shared build configuration
+  - `cqf.java-conventions.gradle.kts`: Java 17 toolchain, BOMs, Error Prone, Checkstyle, test config
+  - `cqf.spotless-conventions.gradle.kts`: Palantir Java Format
+  - `cqf.jacoco-conventions.gradle.kts`: JaCoCo coverage with 70% thresholds
+  - `cqf.animal-sniffer-conventions.gradle.kts`: Android API 34 compliance
+  - `cqf.publishing-conventions.gradle.kts`: Maven Central publishing with signing
+- **`gradle/libs.versions.toml`**: Version catalog for all dependencies
+- **`gradle.properties`**: Version properties and JVM args for Error Prone
+
 ## Key Architectural Patterns
 
 ### Adapter Pattern
@@ -132,12 +146,12 @@ The Repository API abstracts data access, allowing clinical reasoning operations
 - **Indentation**: 4 spaces
 - **Naming**: camelCase without prefixes (m, s, my, our, the are forbidden)
 - **Abstract Classes**: Must be named with "Base" or "Abstract" prefix
-- **Error Prone**: Enabled as annotation processor with warnings disabled (-XepDisableAllWarnings)
-- **Checkstyle**: Runs during validate phase with custom config (config/checkstyle.xml)
+- **Error Prone**: Enabled with all checks disabled (-XepDisableAllWarnings)
+- **Checkstyle**: Runs during build with custom config (config/checkstyle.xml)
 - **Animal Sniffer**: Enforces Android API 34 compliance
 
 ### Formatting Before Committing
-Always run `./mvnw spotless:apply` before committing to ensure code formatting compliance. The CI will fail PRs that don't pass `spotless:check`.
+Always run `./gradlew spotlessApply` before committing to ensure code formatting compliance. The CI will fail PRs that don't pass `spotlessCheck`.
 
 ## FHIR Version Support
 
@@ -199,8 +213,8 @@ Tests use def/report dual structure to verify both internal state and FHIR outpu
 ```
 
 **Migration Notes (Old Scorer Removal):**
-- ❌ Old pattern: `measureReportScorer.score()` called in builders
-- ✅ New pattern: `copyScoresFromDef()` copies pre-computed scores from Def objects
+- Old pattern: `measureReportScorer.score()` called in builders
+- New pattern: `copyScoresFromDef()` copies pre-computed scores from Def objects
 - The old R4/Dstu3 scorer fields and calls were removed from builders in Phase 2 (2025-12-16)
 - `Dstu3MeasureReportScorer` class deleted (2025-12-16) - no longer needed after MeasureReportDefScorer integration
 - `R4MeasureReportScorer` retained for external callers only - internal usage deprecated
@@ -208,12 +222,12 @@ Tests use def/report dual structure to verify both internal state and FHIR outpu
 
 ## Dependencies
 
-Key dependencies (versions in parent pom.xml properties):
-- HAPI FHIR: ${hapi.version} (currently 8.6.0)
-- CQL Engine: ${cql.version} (currently 4.1.0)
-- Spring: ${spring.version} (currently 6.2.12)
-- JUnit: ${junit.version} (currently 5.10.2)
-- Guava: ${guava.version} (currently 33.2.1-jre)
+Key dependencies (versions in `gradle/libs.versions.toml`):
+- HAPI FHIR: 8.6.0
+- CQL Engine: 4.3.0
+- Spring: 6.2.12
+- JUnit: 5.10.2
+- Guava: 33.2.1-jre
 
 Snapshots are pulled from: https://central.sonatype.com/repository/maven-snapshots/
 
@@ -223,24 +237,23 @@ Snapshots are pulled from: https://central.sonatype.com/repository/maven-snapsho
 - **Feature Branches**: Create from `master` with descriptive names
 - **PR Requirements**:
   - Must pass CI build
-  - Must pass spotless:check formatting
+  - Must pass spotlessCheck formatting
   - Must pass checkstyle validation
   - Delete feature branches after merging
 - **Commits**: Treated as snapshot builds, versions use -SNAPSHOT suffix
 
 ## Release and Publishing
 
-- **Profiles**: `package` profile for snapshot publishing, `release` profile for releases
-- **Publishing**: Uses central-publishing-maven-plugin to Maven Central
+- **Publishing**: Uses `maven-publish` plugin to Sonatype Central
 - **Excluded Artifacts**: cqf-fhir-benchmark and docs are not published
-- **Signing**: GPG signing required for releases (maven-gpg-plugin)
-- **Versioning**: Release enforcer plugin prevents SNAPSHOT dependencies in releases
+- **Signing**: GPG signing required for releases (only when version is not SNAPSHOT)
+- **BOM**: `cqf-fhir-bom` provides dependency management for all published modules
 
 ## Documentation
 
 - Main documentation site: www.cqframework.org/clinical-reasoning
 - Documentation source: docs/src/doc (MkDocs Material)
-- API documentation: Generated via maven-javadoc-plugin
+- API documentation: Generated via Javadoc task
 - Key docs: operations.md, developer-guide.md, cql.md
 
 ## Related Projects

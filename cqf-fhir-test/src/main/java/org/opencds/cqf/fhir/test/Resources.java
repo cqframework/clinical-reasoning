@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
@@ -14,6 +15,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
 
 /**
@@ -26,16 +28,46 @@ public class Resources {
     }
 
     /**
-     * This method returns the real, on-disk path of the resource directory for the given class.
+     * This method returns the real, on-disk path of the test resources root for the given class.
+     * It searches the classpath for a resources output directory, which is separate from
+     * the compiled classes directory in Gradle's standard layout.
+     *
      * @param clazz the class to use to find the resource directory for
-     * @return
+     * @return the absolute path to the classpath root containing resources for this class
      */
     public static String getResourcePath(Class<?> clazz) {
-        return new File(clazz.getProtectionDomain()
+        String codeSourcePath = new File(clazz.getProtectionDomain()
                         .getCodeSource()
                         .getLocation()
                         .getPath())
                 .getAbsolutePath();
+
+        // Walk up the package hierarchy to find the resources classpath root.
+        // The classloader may return multiple entries (classes dirs, resources dirs,
+        // dependency jars). We specifically look for a root path containing "resources"
+        // to distinguish it from compiled classes directories.
+        try {
+            String[] parts = clazz.getPackageName().split("\\.");
+            for (int depth = parts.length; depth > 0; depth--) {
+                String probe = String.join("/", java.util.Arrays.copyOf(parts, depth));
+                Enumeration<URL> urls = clazz.getClassLoader().getResources(probe);
+                while (urls.hasMoreElements()) {
+                    URL url = urls.nextElement();
+                    if ("file".equals(url.getProtocol())) {
+                        String fullPath = new File(url.toURI()).getAbsolutePath();
+                        String root = fullPath.substring(0, fullPath.length() - probe.length() - 1);
+                        // Prefer the resources directory over any classes directory
+                        if (root.contains("resources")) {
+                            return root;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Fall through to code source
+        }
+
+        return codeSourcePath;
     }
 
     /**
@@ -69,7 +101,7 @@ public class Resources {
      */
     public static void copyFromJar(final Class<?> clazz, final String sourcePackage, final Path target)
             throws URISyntaxException, IOException {
-        URI resource = clazz.getResource(sourcePackage).toURI();
+        URI resource = resolveResourceDir(clazz, sourcePackage);
         try (var pathReference = PathReference.getPath(resource)) {
             final Path jarPath = pathReference.getPath();
             Files.walkFileTree(jarPath, new SimpleFileVisitor<Path>() {
@@ -97,6 +129,47 @@ public class Resources {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
         String rawFQN = stElements[level + 1].toString().split("\\(")[0];
         return Class.forName(rawFQN.substring(0, rawFQN.lastIndexOf('.')));
+    }
+
+    /**
+     * Resolves a resource directory URI, preferring the resources classpath entry over
+     * the classes entry. This handles Gradle's split output directories where class files
+     * and resource files live in separate directory trees.
+     */
+    private static URI resolveResourceDir(Class<?> clazz, String sourcePackage) throws URISyntaxException, IOException {
+        URL standard = clazz.getResource(sourcePackage);
+        if (standard == null) {
+            throw new IllegalArgumentException("Resource not found: " + sourcePackage);
+        }
+
+        URI standardUri = standard.toURI();
+
+        // If not a file URI or already in a resources directory, use as-is
+        if (!"file".equals(standardUri.getScheme()) || standardUri.getPath().contains("/resources/")) {
+            return standardUri;
+        }
+
+        // Compute the full resource path to search for via the classloader
+        String resourcePath;
+        if (sourcePackage.startsWith("/")) {
+            resourcePath = sourcePackage.substring(1);
+        } else if (sourcePackage.isEmpty()) {
+            resourcePath = clazz.getPackageName().replace('.', '/');
+        } else {
+            resourcePath = clazz.getPackageName().replace('.', '/') + "/" + sourcePackage;
+        }
+
+        // Search all classpath entries for this path, preferring the resources directory
+        Enumeration<URL> urls = clazz.getClassLoader().getResources(resourcePath.isEmpty() ? "" : resourcePath);
+        while (urls.hasMoreElements()) {
+            URL url = urls.nextElement();
+            if ("file".equals(url.getProtocol()) && url.getPath().contains("/resources/")) {
+                return url.toURI();
+            }
+        }
+
+        // Fall back to standard resolution
+        return standardUri;
     }
 
     static class PathReference implements AutoCloseable {

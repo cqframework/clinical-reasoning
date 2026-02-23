@@ -115,18 +115,20 @@ class PopulateProcessorTests {
 
     private List<IQuestionnaireResponseItemComponentAdapter> getExpectedResponses(PopulateRequest request) {
         return switch (request.getFhirVersion()) {
-            case R4 -> Stream.of(
-                            new QuestionnaireResponseItemComponent(),
-                            new QuestionnaireResponseItemComponent(),
-                            new QuestionnaireResponseItemComponent())
-                    .map(i -> request.getAdapterFactory().createQuestionnaireResponseItem(i))
-                    .toList();
-            case R5 -> Stream.of(
-                            new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                            new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                            new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent())
-                    .map(i -> request.getAdapterFactory().createQuestionnaireResponseItem(i))
-                    .toList();
+            case R4 ->
+                Stream.of(
+                                new QuestionnaireResponseItemComponent(),
+                                new QuestionnaireResponseItemComponent(),
+                                new QuestionnaireResponseItemComponent())
+                        .map(i -> request.getAdapterFactory().createQuestionnaireResponseItem(i))
+                        .toList();
+            case R5 ->
+                Stream.of(
+                                new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
+                                new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
+                                new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent())
+                        .map(i -> request.getAdapterFactory().createQuestionnaireResponseItem(i))
+                        .toList();
             default -> List.of();
         };
     }

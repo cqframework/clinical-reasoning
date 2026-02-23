@@ -34,6 +34,9 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/* There are a number of getters that are detected as unused, but they are invoked during the
+changelog process and their removal affects the operation outcome. */
+@SuppressWarnings("unused")
 public class CreateChangelogProcessor implements ICreateChangelogProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(CreateChangelogProcessor.class);
@@ -49,8 +52,9 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
         return new Parameters();
     }
 
+    @SuppressWarnings("rawtypes")
     public static class ChangeLog {
-        private List<Page<?>> pages;
+        private List<Page> pages;
         private String manifestUrl;
         public static final String URLS_DONT_MATCH = "URLs don't match";
         public static final String WRONG_TYPE = "wrong type";
@@ -63,11 +67,11 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             this.manifestUrl = url;
         }
 
-        public List<Page<?>> getPages() {
+        public List<Page> getPages() {
             return pages;
         }
 
-        public void setPages(List<Page<?>> pages) {
+        public void setPages(List<Page> pages) {
             this.pages = pages;
         }
 
@@ -369,7 +373,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             return page;
         }
 
-        public Optional<Page<? extends PageBase>> getPage(String url) {
+        public Optional<Page> getPage(String url) {
             return this.pages.stream()
                     .filter(p -> p.url != null && p.url.equals(url))
                     .findAny();
@@ -383,11 +387,11 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 var manifestNewData = (LibraryChild) specLibrary.newData;
                 if (manifestNewData != null) {
                     for (final var page : this.pages) {
-                        if (page.oldData instanceof ValueSetChild) {
-                            updateConditionsAndPriorities(manifestOldData, (ValueSetChild) page.oldData);
+                        if (page.oldData instanceof ValueSetChild oldValueSet) {
+                            updateConditionsAndPriorities(manifestOldData, oldValueSet);
                         }
-                        if (page.newData instanceof ValueSetChild) {
-                            updateConditionsAndPriorities(manifestNewData, (ValueSetChild) page.newData);
+                        if (page.newData instanceof ValueSetChild newValueSet) {
+                            updateConditionsAndPriorities(manifestNewData, newValueSet);
                         }
                     }
                 }
@@ -731,6 +735,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                     return parentValueSetUrl;
                 }
 
+                @SuppressWarnings("java:S107")
                 Code(
                         String id,
                         String system,
@@ -939,6 +944,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
+            @SuppressWarnings("java:S107")
             ValueSetChild(
                     String title,
                     String id,
@@ -1010,6 +1016,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
+            @SuppressWarnings("unchecked")
             private void addOperationHandleCompose(
                     String type, String path, Object newValue, Object originalValue, Operation operation) {
                 // if the valuesets changed
@@ -1083,14 +1090,15 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                 }
             }
 
+            @SuppressWarnings("unchecked")
             private static String getCodeToCheck(Object newValue, Object originalValue) {
                 String codeToCheck = null;
                 if (newValue instanceof IPrimitiveType || originalValue instanceof IPrimitiveType) {
                     codeToCheck = newValue instanceof IPrimitiveType
                             ? ((IPrimitiveType<String>) newValue).getValue()
                             : ((IPrimitiveType<String>) originalValue).getValue();
-                } else if (originalValue instanceof ValueSet.ValueSetExpansionContainsComponent) {
-                    codeToCheck = ((ValueSet.ValueSetExpansionContainsComponent) originalValue).getCode();
+                } else if (originalValue instanceof ValueSet.ValueSetExpansionContainsComponent originalVSECC) {
+                    codeToCheck = originalVSECC.getCode();
                 }
                 return codeToCheck;
             }
@@ -1207,6 +1215,7 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
             private final ValueAndOperation releaseDate = new ValueAndOperation();
             private final List<RelatedArtifactUrlWithOperation> relatedArtifacts = new ArrayList<>();
 
+            @SuppressWarnings("java:S107")
             LibraryChild(
                     String name,
                     String purpose,

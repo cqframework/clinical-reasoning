@@ -13,6 +13,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
+import org.opencds.cqf.fhir.cr.common.IDataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.common.IReleaseProcessor;
@@ -28,6 +30,7 @@ public class ImplementationGuideProcessor {
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
     protected IReleaseProcessor releaseProcessor;
+    protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IRepository repository;
     protected CrSettings crSettings;
 
@@ -52,6 +55,9 @@ public class ImplementationGuideProcessor {
                 }
                 if (p instanceof IReleaseProcessor release) {
                     releaseProcessor = release;
+                }
+                if (p instanceof IDataRequirementsProcessor dataReq) {
+                    dataRequirementsProcessor = dataReq;
                 }
             });
         }
@@ -80,6 +86,18 @@ public class ImplementationGuideProcessor {
     public IBaseBundle packageImplementationGuide(IBaseResource implementationGuide, IBaseParameters parameters) {
         var processor = packageProcessor != null ? packageProcessor : new PackageProcessor(repository, crSettings);
         return processor.packageResource(implementationGuide, parameters);
+    }
+
+    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
+            Either3<C, IIdType, R> implementationGuide, IBaseParameters parameters) {
+        return dataRequirements(resolveImplementationGuide(implementationGuide), parameters);
+    }
+
+    public IBaseResource dataRequirements(IBaseResource implementationGuide, IBaseParameters parameters) {
+        var processor = dataRequirementsProcessor != null
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
+        return processor.getDataRequirements(implementationGuide, parameters);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseImplementationGuide(

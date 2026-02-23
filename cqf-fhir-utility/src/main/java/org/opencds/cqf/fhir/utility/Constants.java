@@ -146,6 +146,7 @@ public class Constants {
 
     public static final String CRMI_OPERATION_APPROVE = "$approve";
     public static final String CRMI_OPERATION_ARTIFACT_DIFF = "$artifact-diff";
+    public static final String CRMI_OPERATION_DATA_REQUIREMENTS = "$data-requirements";
     public static final String CRMI_OPERATION_DELETE = "$delete";
     public static final String CRMI_OPERATION_PACKAGE = "$package";
     public static final String CRMI_OPERATION_RELEASE = "$release";

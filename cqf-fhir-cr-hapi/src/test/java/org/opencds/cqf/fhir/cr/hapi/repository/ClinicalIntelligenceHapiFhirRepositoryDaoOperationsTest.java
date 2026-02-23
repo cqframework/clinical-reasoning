@@ -268,14 +268,4 @@ class ClinicalIntelligenceHapiFhirRepositoryDaoOperationsTest {
         assertEquals(TENANT_ID, clonedDetails.getTenantId());
         assertEquals(PARTITION_ID, systemDetails.getRequestPartitionId());
     }
-
-    private void assertPartitionCleared(RequestDetails clonedDetails, RestOperationTypeEnum expectedOp) {
-        assertInstanceOf(SystemRequestDetails.class, clonedDetails);
-        var systemDetails = (SystemRequestDetails) clonedDetails;
-        assertEquals(expectedOp, clonedDetails.getRestOperationType());
-        // Tenant ID is preserved because the SystemRequestDetails constructor copies it
-        assertEquals(TENANT_ID, clonedDetails.getTenantId());
-        // Partition ID is cleared for non-partitionable resources
-        assertNull(systemDetails.getRequestPartitionId());
-    }
 }

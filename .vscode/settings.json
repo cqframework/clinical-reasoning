@@ -151,6 +151,7 @@
       "**/generated-test-sources/**"
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
+    "java.gradle.buildServer.enabled": "off",
     "java.dependency.packagePresentation": "hierarchical",
     "java.jdt.ls.vmargs": "-Xmx32G -XX:+UseG1GC -XX:+UseStringDeduplication",
     "java.compile.nullAnalysis.mode": "automatic",

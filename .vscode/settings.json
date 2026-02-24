@@ -171,5 +171,9 @@
         "cSpell.advanced.feature.useReferenceProviderWithRename": true,
         "cSpell.advanced.feature.useReferenceProviderRemove": "/^#+\\s/"
     },
+    "sonarlint.connectedMode.project": {
+      "connectionId": "cqframework",
+      "projectKey": "cqframework_clinical-reasoning"
+    },
     "java.debug.settings.onBuildFailureProceed": true
 }

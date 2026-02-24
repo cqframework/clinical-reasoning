@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.opencds.cqf.fhir.cr.common.IInputParameterResolver.createResolver;
+import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ACTIVITY_DEFINITION;
 import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_DATA;
@@ -44,6 +45,7 @@ import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
 
 public class ApplyRequest implements ICpgRequest {
     private static final String ACTIVITY_DEFINITION = "ActivityDefinition";
@@ -68,6 +70,7 @@ public class ApplyRequest implements ICpgRequest {
     private final Collection<IBaseResource> extractedResources;
     private IBaseOperationOutcome operationOutcome;
     private IQuestionnaireAdapter questionnaireAdapter;
+    private IQuestionnaireResponseAdapter questionnaireResponseAdapter;
     private Boolean containResources;
     private Set<String> questionnaireDefinitions;
     // actionId is used to ensure all actions have an Id so they can be mapped
@@ -105,10 +108,10 @@ public class ApplyRequest implements ICpgRequest {
         this.setting = setting;
         this.settingContext = settingContext;
         this.parameters = parameters;
+        if (data == null) {
+            data = newBundle(fhirVersion);
+        }
         if (prefetchData != null && !prefetchData.isEmpty()) {
-            if (data == null) {
-                data = newBundle(fhirVersion);
-            }
             resolvePrefetchData(data, prefetchData);
         }
         this.data = data;
@@ -149,6 +152,7 @@ public class ApplyRequest implements ICpgRequest {
                         modelResolver,
                         inputParameterResolver)
                 .setQuestionnaire(getQuestionnaireAdapter())
+                .setQuestionnaireResponse(getQuestionnaireResponseAdapter())
                 .setContainResources(containResources);
     }
 
@@ -232,7 +236,14 @@ public class ApplyRequest implements ICpgRequest {
             }
         });
         return new PopulateRequest(
-                questionnaireAdapter.get(), subjectId, context, null, data, libraryEngine, modelResolver);
+                questionnaireAdapter.get(),
+                getQuestionnaireResponse(),
+                subjectId,
+                context,
+                null,
+                data,
+                libraryEngine,
+                modelResolver);
     }
 
     public IBaseResource getPlanDefinition() {
@@ -371,6 +382,28 @@ public class ApplyRequest implements ICpgRequest {
         questionnaireAdapter = questionnaire;
         questionnaireDefinitions = questionnaireAdapter == null ? null : questionnaireAdapter.getAllItemDefinitions();
         return this;
+    }
+
+    public ApplyRequest setQuestionnaireResponse(IQuestionnaireResponseAdapter questionnaireResponse) {
+        questionnaireResponseAdapter = questionnaireResponse;
+        return this;
+    }
+
+    public IBaseResource getQuestionnaireResponse() {
+        return questionnaireResponseAdapter == null ? null : questionnaireResponseAdapter.get();
+    }
+
+    public IQuestionnaireResponseAdapter getQuestionnaireResponseAdapter() {
+        return questionnaireResponseAdapter;
+    }
+
+    public List<IQuestionnaireResponseAdapter> getQuestionnaireResponses() {
+        return data == null
+                ? new ArrayList<>()
+                : getEntryResources(data).stream()
+                        .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
+                        .map(qr -> getAdapterFactory().createQuestionnaireResponse(qr))
+                        .toList();
     }
 
     public ApplyRequest setData(IBaseBundle bundle) {

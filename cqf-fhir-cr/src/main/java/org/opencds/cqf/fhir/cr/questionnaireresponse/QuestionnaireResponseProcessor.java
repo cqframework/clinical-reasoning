@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.cr.questionnaire.Helpers.QUESTIONNAIRE;
+import static org.opencds.cqf.fhir.cr.questionnaire.Helpers.getQuestionnaireFromContained;
 import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -12,7 +14,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
@@ -22,6 +23,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either;
 import org.slf4j.Logger;
@@ -30,11 +32,11 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("UnstableApiUsage")
 public class QuestionnaireResponseProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProcessor.class);
-    protected static final String QUESTIONNAIRE = "Questionnaire";
     protected final ResourceResolver questionnaireResponseResolver;
     protected final ResourceResolver questionnaireResolver;
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
+    protected final IAdapterFactory adapterFactory;
     protected IRepository repository;
     protected CrSettings crSettings;
     protected IExtractProcessor extractProcessor;
@@ -55,6 +57,7 @@ public class QuestionnaireResponseProcessor {
         this.questionnaireResolver = new ResourceResolver(QUESTIONNAIRE, this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
+        adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
                 if (p instanceof IExtractProcessor extract) {
@@ -72,30 +75,22 @@ public class QuestionnaireResponseProcessor {
         return questionnaireResponseResolver.resolve(questionnaireResponse);
     }
 
-    @SuppressWarnings("unchecked")
     protected <R extends IBaseResource> IBaseResource resolveQuestionnaire(
             IBaseResource questionnaireResponse, Either<IIdType, R> questionnaireId) {
         if (questionnaireId != null) {
             return questionnaireResolver.resolve(questionnaireId);
         } else {
             try {
-                IPrimitiveType<String> canonical;
-                if (questionnaireResponse.getStructureFhirVersionEnum().equals(FhirVersionEnum.DSTU3)) {
-                    var pathResult = modelResolver.resolvePath(questionnaireResponse, "questionnaire");
-                    canonical = pathResult == null ? null : ((IBaseReference) pathResult).getReferenceElement();
-                } else {
-                    canonical =
-                            (IPrimitiveType<String>) modelResolver.resolvePath(questionnaireResponse, "questionnaire");
-                }
-                if (canonical == null) {
+                var responseAdapter = adapterFactory.createQuestionnaireResponse(questionnaireResponse);
+                if (!responseAdapter.hasQuestionnaire()) {
                     return null;
                 }
                 IBaseResource questionnaire = null;
-                questionnaire = getQuestionnaireFromContained(questionnaireResponse, canonical, questionnaire);
+                questionnaire = getQuestionnaireFromContained(responseAdapter);
                 if (questionnaire == null) {
                     questionnaire = SearchHelper.searchRepositoryByCanonical(
                             repository,
-                            canonical,
+                            responseAdapter.getQuestionnaireCanonical(),
                             repository
                                     .fhirContext()
                                     .getResourceDefinition(QUESTIONNAIRE)
@@ -107,26 +102,6 @@ public class QuestionnaireResponseProcessor {
                 return null;
             }
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private IBaseResource getQuestionnaireFromContained(
-            IBaseResource questionnaireResponse, IPrimitiveType<String> canonical, IBaseResource questionnaire) {
-        var contained = (List<IBaseResource>) modelResolver.resolvePath(questionnaireResponse, "contained");
-        if (contained != null && !contained.isEmpty()) {
-            questionnaire = contained.stream()
-                    .filter(r -> r.fhirType().equals(QUESTIONNAIRE)
-                            && canonical
-                                    .getValueAsString()
-                                    .equals(getContainedId(r.getIdElement().getIdPart())))
-                    .findFirst()
-                    .orElse(null);
-        }
-        return questionnaire;
-    }
-
-    private String getContainedId(String id) {
-        return id.startsWith("#") ? id : "#" + id;
     }
 
     public <R extends IBaseResource> IBaseBundle extract(Either<IIdType, R> resource) {

@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
+import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache.DiffCacheResource;
 import org.opencds.cqf.fhir.cr.common.CreateChangelogProcessor.ChangeLog;
 import org.opencds.cqf.fhir.cr.common.ICreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
@@ -166,13 +167,17 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         // Check if the resource pair was already processed
         var wasPageAlreadyProcessed = changelog.getPage(url).isPresent();
         if (!wasPageAlreadyProcessed
-                && cache.getSourceResourceForUrl(url).isPresent()
-                && cache.getTargetResourceForUrl(url).isPresent()) {
-            final MetadataResource sourceResource =
-                    cache.getSourceResourceForUrl(url).get().resource;
-            final MetadataResource targetResource =
-                    cache.getTargetResourceForUrl(url).get().resource;
+                && (cache.getSourceResourceForUrl(url).isPresent()
+                        || cache.getTargetResourceForUrl(url).isPresent())) {
+            final Optional<DiffCacheResource> sourceCacheResource = cache.getSourceResourceForUrl(url);
+            final Optional<DiffCacheResource> targetCacheResource = cache.getTargetResourceForUrl(url);
             if (resourceType != null) {
+                MetadataResource sourceResource = sourceCacheResource
+                        .map(diffCacheResource -> diffCacheResource.resource)
+                        .orElse(null);
+                MetadataResource targetResource = targetCacheResource
+                        .map(diffCacheResource -> diffCacheResource.resource)
+                        .orElse(null);
                 // don't generate changeLog pages for non-grouper ValueSets
                 if (resourceType.equals("ValueSet")
                         && ((sourceResource != null && !KnowledgeArtifactProcessor.isGrouper(sourceResource))

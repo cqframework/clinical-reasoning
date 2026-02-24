@@ -53,6 +53,10 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         get().setId(id);
     }
 
+    default boolean hasName() {
+        return StringUtils.isNotBlank(getName());
+    }
+
     default String getName() {
         return resolvePathString(get(), "name");
     }

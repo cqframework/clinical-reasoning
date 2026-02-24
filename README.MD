@@ -8,6 +8,44 @@ This project provides a Java-based, FHIR-enabled clinical reasoning components.
 
 See the [docs](https://www.cqframework.org/clinical-reasoning/) for more information.
 
+## Building
+
+This project uses [Gradle](https://gradle.org/) with the Kotlin DSL. Java 17 is required.
+
+```bash
+# Build the project (tests included)
+./gradlew build
+
+# Build without running tests
+./gradlew assemble
+
+# Run tests for a specific module
+./gradlew :cqf-fhir-cr:test
+
+# Run a single test class
+./gradlew :cqf-fhir-cr:test --tests "ClassName"
+
+# Check code formatting (CI enforces this)
+./gradlew spotlessCheck
+
+# Auto-fix code formatting
+./gradlew spotlessApply
+```
+
+### Dependency Versions
+
+All dependency versions are managed in [`gradle/libs.versions.toml`](gradle/libs.versions.toml) (the Gradle [version catalog](https://docs.gradle.org/current/userguide/version_catalogs.html)). To upgrade a dependency, edit the version in that file and rebuild. Build infrastructure plugin versions are in `build-logic/gradle/libs.versions.toml`.
+
+### Upgrading the Gradle Wrapper
+
+The `gradlew` script and `gradle/wrapper/` files are the [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html), which ensures everyone uses the same Gradle version. To upgrade:
+
+```bash
+./gradlew wrapper --gradle-version <new-version>
+```
+
+This updates `gradlew`, `gradlew.bat`, and the wrapper JAR/properties. Commit all changed files.
+
 ## SonarCloud
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=cqframework_clinical-reasoning&metric=coverage)]
@@ -20,6 +58,10 @@ Bugs and feature requests can be filed with [Github Issues](https://github.com/c
 The implementers are active on the official FHIR [Zulip chat for CQL](https://chat.fhir.org/#narrow/stream/179220-cql).
 
 Inquires for commercial support can be directed to [info@alphora.com](info@alphora.com).
+
+## Developer Guide
+
+See [AGENTS.md](AGENTS.md) for build commands, linked builds setup, and project architecture.
 
 ## Related Projects
 

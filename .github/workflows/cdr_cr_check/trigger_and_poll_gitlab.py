@@ -16,7 +16,7 @@ if not trigger_token:
     sys.exit(1)
 
 if not project_api_read_token :
-    print("CDR-CR failed to run because READ_API_TOKEN was not set or has insufficient permissions")
+    print("CDR-CR failed to run because READ_API_TOKEN (GITLAB_READ_API_TOKEN) was not set or has insufficient permissions")
     sys.exit(1)
 
 # Enable logging

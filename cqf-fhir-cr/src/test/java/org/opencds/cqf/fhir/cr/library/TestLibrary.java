@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -113,6 +113,7 @@ public class TestLibrary {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class When {
         private final IRepository repository;
         private final LibraryProcessor processor;
@@ -208,7 +209,14 @@ public class TestLibrary {
 
         public When prefetchData(String name, String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
-            prefetchData = Arrays.asList((IBaseBackboneElement) newPart(repository.fhirContext(), name, data));
+            if (!(data instanceof IBaseBundle)) {
+                throw new IllegalArgumentException("prefetch data asset must be a Bundle");
+            }
+            prefetchData = List.of((IBaseBackboneElement) newPart(
+                    repository.fhirContext(),
+                    "prefetchData",
+                    newStringPart(repository.fhirContext(), "key", name),
+                    newPart(repository.fhirContext(), "data", data)));
             return this;
         }
 
@@ -274,6 +282,7 @@ public class TestLibrary {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Evaluation {
         final IRepository repository;
         final IBaseParameters result;

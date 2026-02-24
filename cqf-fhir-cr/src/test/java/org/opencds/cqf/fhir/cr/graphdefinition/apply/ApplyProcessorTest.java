@@ -289,8 +289,9 @@ public class ApplyProcessorTest {
     private String getVersionPath() {
         return switch (getFhirVersion()) {
             case R4 -> "r4";
-            default -> throw new IllegalArgumentException(
-                    "Unsupported FHIR version: " + getFhirVersion().getFhirVersionString());
+            default ->
+                throw new IllegalArgumentException(
+                        "Unsupported FHIR version: " + getFhirVersion().getFhirVersionString());
         };
     }
 

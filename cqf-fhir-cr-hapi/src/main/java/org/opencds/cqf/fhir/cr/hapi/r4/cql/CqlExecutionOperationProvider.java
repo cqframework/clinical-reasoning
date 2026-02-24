@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.cql;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -9,20 +10,23 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.hapi.common.ICqlProcessorFactory;
 
 @SuppressWarnings("java:S107")
 public class CqlExecutionOperationProvider {
 
-    private final ICqlExecutionServiceFactory cqlExecutionServiceFactory;
+    private final ICqlProcessorFactory cqlProcessorFactory;
     private final FhirVersionEnum fhirVersion;
 
-    public CqlExecutionOperationProvider(ICqlExecutionServiceFactory cqlExecutionServiceFactory) {
-        this.cqlExecutionServiceFactory = cqlExecutionServiceFactory;
+    public CqlExecutionOperationProvider(ICqlProcessorFactory cqlProcessorFactory) {
+        this.cqlProcessorFactory = cqlProcessorFactory;
         fhirVersion = FhirVersionEnum.R4;
     }
 
@@ -72,7 +76,10 @@ public class CqlExecutionOperationProvider {
      *                            prefetchData parameter (i.e. either provide all
      *                            data as a single bundle, or provide data using
      *                            multiple bundles with prefetch descriptions).
-     * @param prefetchData        ***Not Yet Implemented***
+     * @param prefetchData        Data to be made available to the library evaluation, organized as
+     *                            prefetch response bundles. Each prefetchData parameter specifies
+     *                            either the name of the prefetchKey it is satisfying,
+     *                            a DataRequirement describing the prefetch, or both.
      * @param dataEndpoint        The FHIR {@link Endpoint} Endpoint resource or url to use to access data
      *                            referenced by retrieve operations in the library.
      *                            If provided, this endpoint is used after the data
@@ -103,40 +110,36 @@ public class CqlExecutionOperationProvider {
      */
     @Operation(name = ProviderConstants.CR_OPERATION_CQL, idempotent = true)
     @Description(
-            shortDefinition = "$cql",
+            shortDefinition = ProviderConstants.CR_OPERATION_CQL,
             value =
                     "Evaluates a CQL expression and returns the results as a Parameters resource. Defined: http://build.fhir.org/ig/HL7/cqf-recommendations/OperationDefinition-cpg-cql.html",
             example = "$cql?expression=5*5")
-    public Parameters evaluate(
+    public IBaseParameters evaluate(
             RequestDetails requestDetails,
-            @OperationParam(name = "subject", max = 1) String subject,
-            @OperationParam(name = "expression", max = 1) String expression,
+            @OperationParam(name = "subject", max = 1) StringType subject,
+            @OperationParam(name = "expression", max = 1) StringType expression,
             @OperationParam(name = "parameters", max = 1) Parameters parameters,
-            @OperationParam(name = "library") List<Parameters> library,
+            @OperationParam(name = "library") List<ParametersParameterComponent> library,
             @OperationParam(name = "useServerData", max = 1) BooleanType useServerData,
             @OperationParam(name = "data", max = 1) Bundle data,
-            @OperationParam(name = "prefetchData") List<Parameters> prefetchData,
-            @OperationParam(name = "dataEndpoint", max = 1) Parameters.ParametersParameterComponent dataEndpoint,
-            @OperationParam(name = "contentEndpoint", max = 1) Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint", max = 1)
-                    Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "content", max = 1) String content) {
-        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
-        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        return cqlExecutionServiceFactory
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint", max = 1) ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint", max = 1) ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint", max = 1) ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "content", max = 1) StringType content) {
+        return cqlProcessorFactory
                 .create(requestDetails)
                 .evaluate(
-                        subject,
-                        expression,
+                        getStringValue(subject),
+                        getStringValue(expression),
                         parameters,
                         library,
-                        useServerData,
+                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
                         data,
                         prefetchData,
-                        dataEndpointParam,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        content);
+                        getStringValue(content),
+                        getEndpoint(fhirVersion, dataEndpoint),
+                        getEndpoint(fhirVersion, contentEndpoint),
+                        getEndpoint(fhirVersion, terminologyEndpoint));
     }
 }

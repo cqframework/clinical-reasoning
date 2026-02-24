@@ -91,7 +91,7 @@ class SearchHelperTest {
     IRepository mockRepositoryWithValueSetR4(org.hl7.fhir.r4.model.ValueSet valueSet) {
         var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
-        org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
+        var bundle = new org.hl7.fhir.r4.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
         when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
@@ -100,7 +100,7 @@ class SearchHelperTest {
     IRepository mockRepositoryWithValueSetR5(org.hl7.fhir.r5.model.ValueSet valueSet) {
         var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR5Cached());
-        org.hl7.fhir.r5.model.Bundle bundle = new org.hl7.fhir.r5.model.Bundle();
+        var bundle = new org.hl7.fhir.r5.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
         when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
@@ -109,9 +109,123 @@ class SearchHelperTest {
     IRepository mockRepositoryWithValueSetDstu3(org.hl7.fhir.dstu3.model.ValueSet valueSet) {
         var mockRepository = mock(IRepository.class);
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forDstu3Cached());
-        org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
+        var bundle = new org.hl7.fhir.dstu3.model.Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
         when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
+    }
+
+    @Test
+    void readRepository() {
+        var patient = new org.hl7.fhir.r4.model.Patient();
+        patient.setId("Patient/123");
+        when(r4mockRepository.read(any(), any())).thenReturn(patient);
+        var result = SearchHelper.readRepository(r4mockRepository, new org.hl7.fhir.r4.model.IdType("Patient/123"));
+        assertEquals("Patient/123", result.getIdElement().getValue());
+    }
+
+    @Test
+    void getResourceClass() {
+        var result = SearchHelper.getResourceClass(r4mockRepository, "Patient");
+        assertEquals(org.hl7.fhir.r4.model.Patient.class, result);
+    }
+
+    @Test
+    void searchRepositoryByCanonicalR4() {
+        var vs = new org.hl7.fhir.r4.model.ValueSet();
+        vs.setId("test-vs");
+        vs.setUrl("http://example.org/ValueSet/test");
+        var bundle = new org.hl7.fhir.r4.model.Bundle();
+        bundle.addEntry().setResource(vs);
+        // searchRepositoryByCanonical calls the 3-arg search (no headers)
+        when(r4mockRepository.search(any(), any(), any(java.util.Map.class))).thenReturn(bundle);
+        var canonical = new org.hl7.fhir.r4.model.CanonicalType("http://example.org/ValueSet/test");
+        var result = SearchHelper.searchRepositoryByCanonical(r4mockRepository, canonical);
+        assertEquals("test-vs", result.getIdElement().getIdPart());
+    }
+
+    private IRepository fullMockR4() {
+        var repo = mock(IRepository.class);
+        when(repo.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var bundle = new org.hl7.fhir.r4.model.Bundle();
+        bundle.addEntry().setResource(new org.hl7.fhir.r4.model.ValueSet().setId("vs1"));
+        when(repo.search(any(), any(), any(Multimap.class), any())).thenReturn(bundle);
+        when(repo.search(any(), any(), any(java.util.Map.class), any())).thenReturn(bundle);
+        when(repo.search(any(), any(), any(java.util.Map.class))).thenReturn(bundle);
+        return repo;
+    }
+
+    private IRepository fullMockDstu3() {
+        var repo = mock(IRepository.class);
+        when(repo.fhirContext()).thenReturn(FhirContext.forDstu3Cached());
+        var bundle = new org.hl7.fhir.dstu3.model.Bundle();
+        bundle.addEntry().setResource(new org.hl7.fhir.dstu3.model.ValueSet().setId("vs1"));
+        when(repo.search(any(), any(), any(Multimap.class), any())).thenReturn(bundle);
+        return repo;
+    }
+
+    private IRepository fullMockR5() {
+        var repo = mock(IRepository.class);
+        when(repo.fhirContext()).thenReturn(FhirContext.forR5Cached());
+        var bundle = new org.hl7.fhir.r5.model.Bundle();
+        bundle.addEntry().setResource(new org.hl7.fhir.r5.model.ValueSet().setId("vs1"));
+        when(repo.search(any(), any(), any(Multimap.class), any())).thenReturn(bundle);
+        return repo;
+    }
+
+    @Test
+    void searchRepositoryByCanonicalWithPagingR4() {
+        var repo = fullMockR4();
+        var canonical = new org.hl7.fhir.r4.model.CanonicalType("http://example.org/ValueSet/test|1.0");
+        var result = SearchHelper.searchRepositoryByCanonicalWithPaging(repo, canonical);
+        assertEquals(1, BundleHelper.getEntryResources(result).size());
+    }
+
+    @Test
+    void searchRepositoryByCanonicalWithPagingString() {
+        var repo = fullMockR4();
+        var result = SearchHelper.searchRepositoryByCanonicalWithPaging(repo, "http://example.org/ValueSet/test");
+        assertEquals(1, BundleHelper.getEntryResources(result).size());
+    }
+
+    @Test
+    void searchRepositoryByCanonicalWithPagingWithParams() {
+        var repo = fullMockR4();
+        var result = SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
+                repo, "http://example.org/ValueSet/test|1.0", java.util.Collections.emptyMap());
+        assertEquals(1, BundleHelper.getEntryResources(result).size());
+    }
+
+    @Test
+    void searchRepositoryWithPagingR4() {
+        var repo = fullMockR4();
+        var result = SearchHelper.searchRepositoryWithPaging(
+                repo,
+                org.hl7.fhir.r4.model.ValueSet.class,
+                java.util.Collections.emptyMap(),
+                java.util.Collections.emptyMap());
+        assertEquals(1, BundleHelper.getEntryResources(result).size());
+    }
+
+    @Test
+    void searchRepositoryWithPagingDstu3() {
+        var repo = fullMockDstu3();
+        var result = SearchHelper.searchRepositoryWithPaging(
+                repo,
+                org.hl7.fhir.dstu3.model.ValueSet.class,
+                java.util.Collections.emptyMap(),
+                java.util.Collections.emptyMap());
+        assertEquals(1, BundleHelper.getEntryResources(result).size());
+    }
+
+    @Test
+    void searchRepositoryWithPagingR5() {
+        var repo = fullMockR5();
+        var result = SearchHelper.searchRepositoryWithPaging(
+                repo,
+                org.hl7.fhir.r5.model.ValueSet.class,
+                java.util.Collections.emptyMap(),
+                java.util.Collections.emptyMap());
+        assertEquals(1, BundleHelper.getEntryResources(result).size());
     }
 }

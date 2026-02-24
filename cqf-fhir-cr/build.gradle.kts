@@ -40,10 +40,12 @@ artifacts {
 }
 
 // Add test JAR to publishing
-publishing {
-    publications {
-        named<MavenPublication>("mavenJava") {
-            artifact(testJar)
+afterEvaluate {
+    publishing {
+        publications {
+            named<MavenPublication>("maven") {
+                artifact(testJar)
+            }
         }
     }
 }

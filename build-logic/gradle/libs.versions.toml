@@ -4,6 +4,7 @@ spotless = "8.2.1"
 errorprone-gradle = "5.0.0"
 animalsniffer = "2.0.1"
 buildconfig = "6.0.7"
+vanniktech-publish = "0.36.0"
 
 # Tool versions (exposed to convention plugins via buildconfig)
 checkstyle = "12.2.0"
@@ -17,3 +18,4 @@ spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-gradle" }
 animalsniffer = { id = "ru.vyarus.animalsniffer", version.ref = "animalsniffer" }
 buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
+vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }

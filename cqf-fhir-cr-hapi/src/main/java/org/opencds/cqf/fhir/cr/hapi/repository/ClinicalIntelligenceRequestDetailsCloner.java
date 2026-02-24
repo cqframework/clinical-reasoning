@@ -1,12 +1,14 @@
 package org.opencds.cqf.fhir.cr.hapi.repository;
 
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRestfulResponse;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 /**
@@ -17,22 +19,33 @@ class ClinicalIntelligenceRequestDetailsCloner {
 
     private ClinicalIntelligenceRequestDetailsCloner() {}
 
-    static DetailsBuilder startWith(RequestDetails details) {
-        RequestDetails newDetails;
-        if (details instanceof ServletRequestDetails servletDetails) {
-            newDetails = new ServletRequestDetails(servletDetails);
-        } else {
-            newDetails = new SystemRequestDetails(details);
+    static DetailsBuilder startWith(RequestDetails origRequestDetails) {
+        final RequestDetails newDetails = getRequestDetails(origRequestDetails);
+
+        IRestfulResponse response = origRequestDetails.getResponse();
+
+        // we need IRestfulResponse because RestfulServer uses it during extended operation processing.
+        if (response == null && origRequestDetails instanceof SystemRequestDetails systemDetails) {
+            response = new SystemRestfulResponse(systemDetails);
         }
-        newDetails.setRequestType(RequestTypeEnum.POST);
-        newDetails.setOperation(null);
-        newDetails.setResource(null);
-        newDetails.setParameters(new HashMap<>(details.getParameters()));
-        newDetails.setResourceName(null);
-        newDetails.setCompartmentName(null);
-        newDetails.setResponse(details.getResponse());
+        newDetails.setResponse(response);
 
         return new DetailsBuilder(newDetails);
+    }
+
+    @Nonnull
+    private static RequestDetails getRequestDetails(RequestDetails origRequestDetails) {
+        final RequestDetails newDetails;
+
+        if (origRequestDetails instanceof ServletRequestDetails servletDetails) {
+            newDetails = new ServletRequestDetails(servletDetails);
+        } else if (origRequestDetails instanceof SystemRequestDetails systemRequestDetails) {
+            newDetails = new SystemRequestDetails(systemRequestDetails);
+        } else {
+            throw new InvalidRequestException("Unsupported request origRequestDetails type: %s"
+                    .formatted(origRequestDetails.getClass().getName()));
+        }
+        return newDetails;
     }
 
     static class DetailsBuilder {

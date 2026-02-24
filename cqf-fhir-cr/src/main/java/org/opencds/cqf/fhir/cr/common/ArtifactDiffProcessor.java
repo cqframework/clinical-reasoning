@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -29,7 +28,7 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
             Boolean compareComputable,
             Boolean compareExecutable,
             DiffCache cache,
-            Endpoint terminologyEndpoint) {
+            IBaseResource terminologyEndpoint) {
         logger.info("Unable to perform $artifact-diff outside of HAPI context");
         return new Parameters();
     }

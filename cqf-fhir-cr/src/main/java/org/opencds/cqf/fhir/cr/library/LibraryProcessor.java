@@ -15,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
@@ -276,7 +275,7 @@ public class LibraryProcessor {
             Either3<C, IIdType, R> targetLibrary,
             Boolean compareComputable,
             Boolean compareExecutable,
-            Endpoint terminologyEndpoint) {
+            IBaseResource terminologyEndpoint) {
         var processor = artifactDiffProcessor != null ? artifactDiffProcessor : new ArtifactDiffProcessor();
         return processor.getArtifactDiff(
                 resolveLibrary(sourceLibrary),

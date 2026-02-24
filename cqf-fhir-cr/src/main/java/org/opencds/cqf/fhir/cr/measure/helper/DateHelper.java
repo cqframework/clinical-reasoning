@@ -21,6 +21,8 @@ import org.opencds.cqf.cql.engine.runtime.Precision;
  * datetime, it's used. If not the timezone of the local system is used.
  */
 public class DateHelper {
+    private DateHelper() {}
+
     public static DateTime resolveRequestDate(String date, boolean start) {
         // ISO Instance Format
         if (date.contains("Z")) {

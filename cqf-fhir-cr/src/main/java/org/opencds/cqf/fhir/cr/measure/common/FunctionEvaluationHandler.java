@@ -242,7 +242,8 @@ public class FunctionEvaluationHandler {
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
             throw new InternalErrorException(
-                    "PopulationDef criteria reference is missing for continuous variable observation");
+                    "PopulationDef criteria reference is missing for continuous variable observation for measure: %s"
+                            .formatted(measureUrl));
         }
 
         // get criteria input for results to get (measure-population, numerator, denominator)
@@ -274,14 +275,12 @@ public class FunctionEvaluationHandler {
         final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
-        final String exceptionMessageIfNotFunction =
-                """
+        final String exceptionMessageIfNotFunction = """
             Measure: '%s', MeasureObservation population expression '%s' must be a CQL function
             definition, but it is not. For non-boolean population basis, stratifier component
             criteria expressions must be "
             CQL functions that take a parameter matching the population basis type.
-            """
-                        .formatted(measureUrl, observationExpression);
+            """.formatted(measureUrl, observationExpression);
 
         for (Object result : resultsIter) {
             final ExpressionResult observationResult = evaluateMeasureObservationFunction(
@@ -355,7 +354,8 @@ public class FunctionEvaluationHandler {
 
         if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
             // We screwed up defining component correctly
-            throw new InternalErrorException("StratifierDef component expression is missing.");
+            throw new InternalErrorException(
+                    "StratifierDef component expression is missing for measure: %s.".formatted(measureUrl));
         }
         var stratifierExpression = componentDef.expression();
 
@@ -375,13 +375,11 @@ public class FunctionEvaluationHandler {
         }
 
         // This message is kept for safety - should not be reached since we validated above
-        final String exceptionMessageIfNotFunction =
-                """
+        final String exceptionMessageIfNotFunction = """
                 Measure: '%s', Non-subject value stratifier expression '%s' must be a CQL function definition, but it is not.
                 For non-boolean population basis, stratifier component criteria expressions must be
                 CQL functions that take a parameter matching the population basis type.
-                """
-                        .formatted(measureUrl, stratifierExpression);
+                """.formatted(measureUrl, stratifierExpression);
 
         // Function expression: input parameter data for value stratifier functions
         // Exclude MEASUREOBSERVATION populations - they have function expressions that aren't in regular results
@@ -392,11 +390,14 @@ public class FunctionEvaluationHandler {
         for (PopulationDef popDef : nonObservationPopulations) {
 
             // retrieve group.population results to input into valueStrat function
+            final String populationExpressionName = popDef.expression();
+
             Optional<ExpressionResult> optExpressionResult =
-                    tryGetExpressionResult(popDef.expression(), evaluationResult);
+                    tryGetExpressionResult(populationExpressionName, evaluationResult);
 
             if (optExpressionResult.isEmpty()) {
-                throw new InternalErrorException("Expression result is missing for measure %s".formatted(measureUrl));
+                throw new InternalErrorException("Expression result: %s is missing for measure %s"
+                        .formatted(populationExpressionName, measureUrl));
             }
             final ExpressionResult expressionResult = optExpressionResult.get();
             final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
@@ -551,7 +552,8 @@ public class FunctionEvaluationHandler {
         final EvaluationFunctionRef evaluationFunctionRef =
                 buildEvaluationFunctionRef(functionExpression, functionArguments);
 
-        final Builder paramsBuilder = new Builder().library(libraryIdentifier, builder -> {
+        final Builder paramsBuilder = new Builder();
+        paramsBuilder.library(libraryIdentifier, builder -> {
             builder.expressions(evaluationFunctionRef);
             return Unit.INSTANCE;
         });
@@ -570,7 +572,8 @@ public class FunctionEvaluationHandler {
             String expressionName, EvaluationResult evaluationResult) {
         if (expressionName == null) {
             throw new InternalErrorException(
-                    "PopulationDef criteria reference is missing for continuous variable observation");
+                    "PopulationDef criteria reference: %s is missing for continuous variable observation"
+                            .formatted(expressionName));
         }
 
         if (evaluationResult == null) {

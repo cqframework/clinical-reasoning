@@ -36,27 +36,30 @@ public interface ICdsCrService {
                 ? ProviderConstants.CR_OPERATION_R5_APPLY
                 : ProviderConstants.CR_OPERATION_APPLY;
         return switch (getFhirVersion()) {
-            case DSTU3 -> getRepository()
-                    .invoke(
-                            org.hl7.fhir.dstu3.model.PlanDefinition.class,
-                            operationName,
-                            params,
-                            org.hl7.fhir.dstu3.model.CarePlan.class,
-                            Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
-            case R4 -> getRepository()
-                    .invoke(
-                            org.hl7.fhir.r4.model.PlanDefinition.class,
-                            operationName,
-                            params,
-                            org.hl7.fhir.r4.model.Parameters.class,
-                            Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
-            case R5 -> getRepository()
-                    .invoke(
-                            org.hl7.fhir.r5.model.PlanDefinition.class,
-                            operationName,
-                            params,
-                            org.hl7.fhir.r5.model.Parameters.class,
-                            Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
+            case DSTU3 ->
+                getRepository()
+                        .invoke(
+                                org.hl7.fhir.dstu3.model.PlanDefinition.class,
+                                operationName,
+                                params,
+                                org.hl7.fhir.dstu3.model.CarePlan.class,
+                                Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
+            case R4 ->
+                getRepository()
+                        .invoke(
+                                org.hl7.fhir.r4.model.PlanDefinition.class,
+                                operationName,
+                                params,
+                                org.hl7.fhir.r4.model.Parameters.class,
+                                Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
+            case R5 ->
+                getRepository()
+                        .invoke(
+                                org.hl7.fhir.r5.model.PlanDefinition.class,
+                                operationName,
+                                params,
+                                org.hl7.fhir.r5.model.Parameters.class,
+                                Collections.singletonMap(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON));
             default -> null;
         };
     }

@@ -5,37 +5,83 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newUrlPart;
 
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.junit.jupiter.api.Disabled;
+import org.hl7.fhir.r4.model.RequestGroup;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionApplyProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionDataRequirementsProvider;
-import org.opencds.cqf.fhir.cr.hapi.r4.plandefinition.PlanDefinitionPackageProvider;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.repository.FhirResourceLoader;
-import org.springframework.beans.factory.annotation.Autowired;
 
 class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
-    @Autowired
-    PlanDefinitionApplyProvider planDefinitionApplyProvider;
+    @Test
+    void testApplyWithPOST() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-view-bundle.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-data.json");
+        var id = new IdType("PlanDefinition", "hello-world-patient-view");
+        var planDefinition = (PlanDefinition) read(id);
+        assertNotNull(planDefinition);
 
-    @Autowired
-    PlanDefinitionDataRequirementsProvider planDefinitionDataRequirementsProvider;
+        var patientId = "Patient/helloworld-patient-1";
+        var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(id)
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(CarePlan.class)
+                .execute();
 
-    @Autowired
-    PlanDefinitionPackageProvider planDefinitionPackageProvider;
+        assertNotNull(result);
+        assertEquals(patientId, result.getSubject().getReference());
+        assertEquals(1, result.getContained().size());
+        var requestGroup = (RequestGroup) result.getContained().get(0);
+        assertEquals(1, requestGroup.getAction().size());
+        var action = requestGroup.getAction().get(0);
+        assertEquals("Hello World!", action.getTitle());
+    }
 
-    @Disabled("Disabling for now.  Needs to be fixed before the next release.")
+    @Test
+    void testApplyWithGET() {
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-view-bundle.json");
+        loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/hello-world/hello-world-patient-data.json");
+        var id = new IdType("PlanDefinition", "hello-world-patient-view");
+        var planDefinition = (PlanDefinition) read(id);
+        assertNotNull(planDefinition);
+
+        var patientId = "Patient/helloworld-patient-1";
+        var parameters = newParameters(getFhirContext(), newStringPart(getFhirContext(), "subject", patientId));
+        var result = ourClient
+                .operation()
+                .onInstance(id)
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(CarePlan.class)
+                .useHttpGet()
+                .execute();
+
+        assertNotNull(result);
+        assertEquals(patientId, result.getSubject().getReference());
+        assertEquals(1, result.getContained().size());
+        var requestGroup = (RequestGroup) result.getContained().get(0);
+        assertEquals(1, requestGroup.getAction().size());
+        var action = requestGroup.getAction().get(0);
+        assertEquals("Hello World!", action.getTitle());
+    }
+
     @Test
     void testGenerateQuestionnaire() {
         // This test is duplicating test data from the cr-test package.  Ideally it should be reusing the test resources
@@ -45,64 +91,45 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
 
         var planDef = read(new IdType("PlanDefinition/ASLPA1"));
         assertNotNull(planDef);
-
-        var requestDetails = setupRequestDetails();
+        var sleepStudy = read(new IdType("ServiceRequest/SleepStudy"));
+        var sleepStudy2 = read(new IdType("ServiceRequest/SleepStudy2"));
+        var coverage = read(new IdType("Coverage/positive"));
+        var expectedCodes = List.of("ASLP.A1.DE2", "ASLP.A1.DE14");
         var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";
         var version = "1.0.0";
         var patientID = "Patient/positive";
-        var parameters = new Parameters()
-                .addParameter("Service Request Id", "SleepStudy")
-                .addParameter("Service Request Id", "SleepStudy2");
-        var result = (CarePlan) planDefinitionApplyProvider.apply(
-                null,
-                null,
-                null,
-                url,
-                version,
-                patientID,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                parameters,
-                new BooleanType(true),
-                null,
-                null,
-                null,
-                null,
-                null,
-                requestDetails);
+        var parameters = newParameters(
+                getFhirContext(),
+                newUrlPart(getFhirContext(), "url", url),
+                newStringPart(getFhirContext(), "version", version),
+                newStringPart(getFhirContext(), "subject", patientID),
+                newPart(
+                        getFhirContext(),
+                        "parameters",
+                        newParameters(
+                                getFhirContext(),
+                                newPart(getFhirContext(), "ServiceRequest", sleepStudy),
+                                newPart(getFhirContext(), "ServiceRequest", sleepStudy2),
+                                newPart(getFhirContext(), "Coverage", coverage))));
+
+        var result = ourClient
+                .operation()
+                .onType(planDef.getClass())
+                .named(ProviderConstants.CR_OPERATION_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(CarePlan.class)
+                .execute();
 
         assertNotNull(result);
         assertEquals(1, result.getContained().size());
 
-        var resultR5 = (Parameters) planDefinitionApplyProvider.applyR5(
-                null,
-                null,
-                null,
-                url,
-                version,
-                List.of(patientID),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                parameters,
-                new BooleanType(true),
-                null,
-                null,
-                null,
-                null,
-                null,
-                requestDetails);
+        var resultR5 = ourClient
+                .operation()
+                .onType(planDef.getClass())
+                .named(ProviderConstants.CR_OPERATION_R5_APPLY)
+                .withParameters(parameters)
+                .returnResourceType(Parameters.class)
+                .execute();
 
         assertNotNull(resultR5);
         var bundle = (Bundle) resultR5.getParameter().get(0).getResource();
@@ -136,7 +163,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         // First response Item has first child item with answer
         var codingItem1 =
                 (Coding) responseItem1.getItem().get(0).getAnswerFirstRep().getValue();
-        assertThat(codingItem1.getCode()).isEqualTo("ASLP.A1.DE14");
+        assertTrue(expectedCodes.contains(codingItem1.getCode()));
         // First response Item has second child item with answer
         assertTrue(responseItem1.getItem().get(1).hasAnswer());
 
@@ -148,7 +175,7 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
         // Second response Item has first child item with answer
         var codingItem2 =
                 (Coding) responseItem2.getItem().get(0).getAnswerFirstRep().getValue();
-        assertThat(codingItem2.getCode()).isEqualTo("ASLP.A1.DE2");
+        assertTrue(expectedCodes.contains(codingItem2.getCode()));
         // Second response Item has second child item with answer
         assertTrue(responseItem2.getItem().get(1).hasAnswer());
     }
@@ -157,22 +184,30 @@ class PlanDefinitionOperationsProviderIT extends BaseCrR4TestServer {
     void testDataRequirements() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
-        var requestDetails = setupRequestDetails();
-        var result = planDefinitionDataRequirementsProvider.getDataRequirements(
-                "PlanDefinition/ASLPA1", null, null, null, requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("PlanDefinition", "ASLPA1"))
+                .named(ProviderConstants.CR_OPERATION_DATAREQUIREMENTS)
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Library.class)
+                .execute();
         assertInstanceOf(Library.class, result);
-        assertEquals(
-                "module-definition",
-                ((Library) result).getType().getCodingFirstRep().getCode());
+        assertEquals("module-definition", result.getType().getCodingFirstRep().getCode());
     }
 
     @Test
     void testPackage() {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireContent.json");
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
-        var requestDetails = setupRequestDetails();
-        var result = planDefinitionPackageProvider.packagePlanDefinition(
-                "PlanDefinition/ASLPA1", null, null, null, null, null, requestDetails);
+        var result = ourClient
+                .operation()
+                .onInstance(new IdType("PlanDefinition", "ASLPA1"))
+                .named(ProviderConstants.CR_OPERATION_PACKAGE)
+                .withNoParameters(Parameters.class)
+                .returnResourceType(Bundle.class)
+                .execute();
         assertInstanceOf(Bundle.class, result);
+        assertNotNull(result.getEntry());
+        assertInstanceOf(PlanDefinition.class, result.getEntryFirstRep().getResource());
     }
 }

@@ -22,8 +22,7 @@ public interface IImplementationGuideAdapterTest<T extends IBaseResource> extend
 
     // packageId is a required field for R4 and R5, but not dstu3
     // so we do not include it
-    String TEMPLATE =
-            """
+    String TEMPLATE = """
         {
             "resourceType": "ImplementationGuide",
             "url": "http://canonical.com/ig-url",
@@ -89,8 +88,7 @@ public interface IImplementationGuideAdapterTest<T extends IBaseResource> extend
     default void getRelatedArtifact_noValidExtensions_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str =
-                """
+        String str = """
          {
             "resourceType": "ImplementationGuide",
             "url": "http://canonical.com/ig-url",
@@ -107,11 +105,9 @@ public interface IImplementationGuideAdapterTest<T extends IBaseResource> extend
                 }
             ]
         }
-        """
-                        .replaceAll(
-                                FHIR_VERSION,
-                                fhirContext().getVersion().getVersion().getFhirVersionString())
-                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """.replaceAll(
+                        FHIR_VERSION, fhirContext().getVersion().getVersion().getFhirVersionString())
+                .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T ig = parser.parseResource(implementationGuideClass(), str);
 

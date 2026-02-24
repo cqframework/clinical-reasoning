@@ -140,8 +140,9 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                 yield adapterFactory.createLibrary(versionConvertor4050.convertResource(r5Library));
             }
             case R5 -> adapterFactory.createLibrary(r5Library);
-            default -> throw new IllegalArgumentException(
-                    "FHIR version %s is not supported.".formatted(fhirVersion().getFhirVersionString()));
+            default ->
+                throw new IllegalArgumentException("FHIR version %s is not supported."
+                        .formatted(fhirVersion().getFhirVersionString()));
         };
     }
 

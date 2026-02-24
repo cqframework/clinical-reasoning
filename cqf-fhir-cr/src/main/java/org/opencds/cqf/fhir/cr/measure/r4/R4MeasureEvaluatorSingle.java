@@ -12,8 +12,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 /**
- * Interface for {@link R4MeasureService} and any other concrete classes that implement the same
- * signature.
+ * Interface to capture measure evaluation on a single measure.
  */
 public interface R4MeasureEvaluatorSingle {
 

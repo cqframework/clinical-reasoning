@@ -102,7 +102,8 @@ public class MeasureEvaluationResultHandler {
             List<String> subjectIds,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
-            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails) {
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
+            Map<String, Object> parametersMap) {
 
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
@@ -128,7 +129,7 @@ public class MeasureEvaluationResultHandler {
                                 libraryIdentifiers,
                                 subjectId,
                                 null,
-                                null,
+                                parametersMap,
                                 null,
                                 null,
                                 null,
@@ -144,15 +145,16 @@ public class MeasureEvaluationResultHandler {
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    final List<EvaluationResult> measureObservationResults =
-                            ContinuousVariableObservationHandler.continuousVariableEvaluation(
+                    // function evaluation
+                    final List<EvaluationResult> functionEvaluationResults =
+                            FunctionEvaluationHandler.cqlFunctionEvaluation(
                                     context,
                                     measureDefs,
                                     libraryVersionedIdentifier,
                                     evaluationResult,
                                     subjectTypePart);
 
-                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, measureObservationResults);
+                    resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, functionEvaluationResults);
 
                     Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
                             .ifPresent(exception -> {

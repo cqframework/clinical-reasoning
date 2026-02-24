@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
@@ -1081,5 +1083,22 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportStatus(MeasureReportStatus.ERROR)
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg("Patient/female-1988-2");
+    }
+
+    @Test
+    void MultiMeasure_ThrowsErrorWithDuplicatePopulationIds() {
+        var givenInvalidRepo = MultiMeasure.given().repositoryFor("InvalidMeasure");
+
+        var when = givenInvalidRepo
+                .when()
+                .measureId("DuplicatePopulationIds")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate();
+
+        var e = assertThrows(InvalidRequestException.class, when::then);
+        assertTrue(e.getMessage().contains("Duplicate population ID"));
+        assertTrue(e.getMessage().contains("initial-population"));
     }
 }

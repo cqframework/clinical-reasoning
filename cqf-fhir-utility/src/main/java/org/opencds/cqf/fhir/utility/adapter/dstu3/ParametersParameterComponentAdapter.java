@@ -87,6 +87,16 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
+    public boolean hasPart(String name) {
+        for (var part : getPart()) {
+            if (name.equals(part.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public boolean hasResource() {
         return this.parametersParameterComponent.hasResource();
     }

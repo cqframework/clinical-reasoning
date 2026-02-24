@@ -1,11 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL_TYPES_SYSTEM_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import jakarta.annotation.Nullable;
@@ -59,24 +57,6 @@ public interface MeasureDefBuilder<MeasureT> {
     }
 
     /**
-     * Determines the scoring definition for a measure group.
-     * Validates that at least one scoring is specified and returns the group-level scoring if present,
-     * otherwise the measure-level scoring.
-     */
-    // Moved from R4MeasureDefBuilder by Claude Sonnet 4.5 - version-agnostic validation
-    default MeasureScoring getScoringDef(
-            String measureUrl, MeasureScoring measureScoring, MeasureScoring groupScoring) {
-        if (groupScoring == null && measureScoring == null) {
-            throw new InvalidRequestException(
-                    "MeasureScoring must be specified on Group or Measure for Measure: " + measureUrl);
-        }
-        if (groupScoring != null) {
-            return groupScoring;
-        }
-        return measureScoring;
-    }
-
-    /**
      * Determines the population basis definition.
      * Returns the group-level basis if present, otherwise the measure-level basis,
      * or defaults to "boolean" if neither is specified.
@@ -114,42 +94,5 @@ public interface MeasureDefBuilder<MeasureT> {
             return code;
         }
         return codeDefault;
-    }
-
-    /**
-     * Validates a measure scoring code and returns the corresponding MeasureScoring enum.
-     * This is version-agnostic validation logic.
-     */
-    // Moved from R4MeasureDefBuilder by Claude Sonnet 4.5 - version-agnostic validation
-    default MeasureScoring getMeasureScoring(String measureUrl, @Nullable String scoringCode) {
-        if (scoringCode != null) {
-            var code = MeasureScoring.fromCode(scoringCode);
-            if (code == null) {
-                throw new InvalidRequestException(
-                        "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
-                                .formatted(scoringCode, measureUrl));
-            } else {
-                return code;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Validates an improvement notation code against the expected system and valid codes.
-     * This is version-agnostic validation logic.
-     */
-    // Moved from R4MeasureDefBuilder by Claude Sonnet 4.5 - version-agnostic validation
-    default void validateImprovementNotationCode(String measureUrl, CodeDef improvementNotation) {
-        var code = improvementNotation.code();
-        var system = improvementNotation.system();
-        boolean hasValidSystem = system.equals(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM);
-        boolean hasValidCode =
-                IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code) || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
-        if (!hasValidCode || !hasValidSystem) {
-            throw new InvalidRequestException(
-                    "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure: %s"
-                            .formatted(system, code, measureUrl));
-        }
     }
 }

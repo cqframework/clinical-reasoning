@@ -125,7 +125,7 @@
           }
         },
         {
-          "id": "observation-num",
+          "id": "observation-den",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
             "valueCode": "sum"

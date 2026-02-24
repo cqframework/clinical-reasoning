@@ -15,7 +15,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -47,6 +47,7 @@ public class Measure {
     public static class Given {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
+        private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
         private final R4MeasureServiceUtils measureServiceUtils;
 
@@ -62,6 +63,8 @@ public class Measure {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
 
@@ -81,19 +84,19 @@ public class Measure {
             return this;
         }
 
-        private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
+        private R4MultiMeasureService buildMultiMeasureService() {
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public When when() {
-            return new When(buildMeasureService());
+            return new When(buildMultiMeasureService());
         }
     }
 
     public static class When {
-        private final R4MeasureService service;
+        private final R4MultiMeasureService service;
 
-        When(R4MeasureService service) {
+        When(R4MultiMeasureService service) {
             this.service = service;
         }
 

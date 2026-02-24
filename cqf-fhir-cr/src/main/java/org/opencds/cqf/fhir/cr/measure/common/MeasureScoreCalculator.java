@@ -2,6 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -36,10 +39,11 @@ import java.util.Objects;
  * (e.g., {@code ScoringResult}) that include intermediate calculation data for extensions.
  *
  * @see MeasureReportDefScorer
- * @see org.opencds.cqf.fhir.cr.measure.r4.R4MeasureReportScorer
  * @since 2025-12-16
  */
 public class MeasureScoreCalculator {
+
+    public static final MathContext DIVISION_PRECISION = new MathContext(17, RoundingMode.HALF_UP);
 
     // Private constructor - utility class should not be instantiated
     private MeasureScoreCalculator() {
@@ -122,7 +126,12 @@ public class MeasureScoreCalculator {
      * @param denominatorAggregate Aggregated denominator observation value
      * @return The calculated score, or {@code null} if denominator is 0, or {@code 0.0} if numerator is 0
      */
-    public static Double calculateRatioScore(double numeratorAggregate, double denominatorAggregate) {
+    @Nullable
+    public static Double calculateRatioScore(Double numeratorAggregate, Double denominatorAggregate) {
+        if (numeratorAggregate == null || denominatorAggregate == null) {
+            return null;
+        }
+
         // Handle zero or null denominator
         if (denominatorAggregate == 0.0) {
             return null;
@@ -164,60 +173,56 @@ public class MeasureScoreCalculator {
             return null;
         }
 
-        if (ContinuousVariableObservationAggregateMethod.N_A == method) {
-            throw new InvalidRequestException(
-                    "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
+        final List<BigDecimal> bigDecimals = quantities.stream()
+                .filter(Objects::nonNull)
+                .map(QuantityDef::value)
+                .filter(Objects::nonNull)
+                .map(BigDecimal::valueOf)
+                .toList();
+
+        final QuantityDef quantityDef =
+                QuantityDef.fromBigDecimal(aggregateContinuousVariableBigDecimal(bigDecimals, method));
+
+        if (quantityDef.value() == null) {
+            return null;
         }
 
-        // Enhanced switch with early returns - short-circuit logic
+        return quantityDef;
+    }
+
+    public static BigDecimal aggregateContinuousVariableBigDecimal(
+            List<BigDecimal> quantities, ContinuousVariableObservationAggregateMethod method) {
+
+        if (quantities == null || quantities.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        // Filter out nulls to avoid NullPointerException during stream processing
+        var cleanList = quantities.stream().filter(Objects::nonNull).toList();
+
+        if (cleanList.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
         return switch (method) {
-            case COUNT -> new QuantityDef((double) quantities.size());
-            case MEDIAN -> {
-                List<Double> sorted = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .sorted()
-                        .toList();
-                int n = sorted.size();
-                double result = (n % 2 == 1) ? sorted.get(n / 2) : (sorted.get(n / 2 - 1) + sorted.get(n / 2)) / 2.0;
-                yield new QuantityDef(result);
-            }
-            case SUM -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .sum();
-                yield new QuantityDef(result);
-            }
-            case MAX -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .max()
-                        .orElse(Double.NaN);
-                yield new QuantityDef(result);
-            }
-            case MIN -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .min()
-                        .orElse(Double.NaN);
-                yield new QuantityDef(result);
-            }
-            case AVG -> {
-                double result = quantities.stream()
-                        .map(QuantityDef::value)
-                        .filter(Objects::nonNull)
-                        .mapToDouble(value -> value)
-                        .average()
-                        .orElse(Double.NaN);
-                yield new QuantityDef(result);
-            }
-            default -> throw new IllegalArgumentException("Unsupported aggregation method: " + method);
+            case COUNT -> BigDecimal.valueOf(cleanList.size());
+
+            case MEDIAN -> calculateMedian(cleanList);
+
+            case SUM -> cleanList.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            case MAX -> cleanList.stream().max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+
+            case MIN -> cleanList.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+
+            case AVG ->
+                cleanList.stream()
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .divide(BigDecimal.valueOf(cleanList.size()), DIVISION_PRECISION);
+
+            case N_A ->
+                throw new InvalidRequestException(
+                        "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
         };
     }
 
@@ -252,6 +257,19 @@ public class MeasureScoreCalculator {
                 .filter(QuantityDef.class::isInstance)
                 .map(QuantityDef.class::cast)
                 .toList();
+    }
+
+    private static BigDecimal calculateMedian(List<BigDecimal> list) {
+        List<BigDecimal> sorted = list.stream().sorted().toList();
+
+        int size = sorted.size();
+        if (size % 2 != 0) {
+            return sorted.get(size / 2);
+        } else {
+            BigDecimal mid1 = sorted.get(size / 2 - 1);
+            BigDecimal mid2 = sorted.get(size / 2);
+            return mid1.add(mid2).divide(BigDecimal.valueOf(2), DIVISION_PRECISION);
+        }
     }
 
     /**

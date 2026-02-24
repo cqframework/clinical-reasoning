@@ -6,8 +6,6 @@ import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
-import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cr.cpg.r4.R4CqlExecutionService;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
@@ -20,7 +18,6 @@ import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
 import org.opencds.cqf.fhir.cr.hapi.r4.IApproveServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
-import org.opencds.cqf.fhir.cr.hapi.r4.ICqlExecutionServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IERSDV2ImportServiceFactory;
@@ -30,7 +27,6 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
-import org.opencds.cqf.fhir.cr.hapi.r4.cpg.CqlExecutionOperationProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
@@ -47,7 +43,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -60,6 +55,8 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({
     RepositoryConfig.class,
+    CqlOperationConfig.class,
+    EvaluateOperationConfig.class,
     ReleaseOperationConfig.class,
     DeleteOperationConfig.class,
     RetireOperationConfig.class,
@@ -74,7 +71,12 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
+        // We are effectively returning an R4MeasureEvaluatorSingle her
+        return requestDetails -> new R4MultiMeasureService(
+                repositoryFactory.create(requestDetails),
+                evaluationOptions,
+                requestDetails.getFhirServerBase(),
+                measurePeriodValidator);
     }
 
     @Bean
@@ -89,18 +91,6 @@ public class CrR4Config {
     @Bean
     ISubmitDataProcessorFactory r4SubmitDataProcessorFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new R4SubmitDataService(repositoryFactory.create(rd));
-    }
-
-    @Bean
-    ICqlExecutionServiceFactory r4CqlExecutionServiceFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
-        return rd -> new R4CqlExecutionService(repositoryFactory.create(rd), evaluationSettings);
-    }
-
-    @Bean
-    CqlExecutionOperationProvider r4CqlExecutionOperationProvider(
-            ICqlExecutionServiceFactory cqlExecutionServiceFactory) {
-        return new CqlExecutionOperationProvider(cqlExecutionServiceFactory);
     }
 
     @Bean
@@ -230,7 +220,6 @@ public class CrR4Config {
                                 MeasureOperationsProvider.class,
                                 SubmitDataProvider.class,
                                 CareGapsOperationProvider.class,
-                                CqlExecutionOperationProvider.class,
                                 CollectDataOperationProvider.class,
                                 DataRequirementsOperationProvider.class,
                                 DraftProvider.class,

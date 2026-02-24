@@ -19,7 +19,7 @@ public class MeasureConstants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-care-gap-date-of-compliance-expression";
 
     public static final String URL_CODESYSTEM_MEASURE_POPULATION =
-            "http://teminology.hl7.org/CodeSystem/measure-population";
+            "http://terminology.hl7.org/CodeSystem/measure-population";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-populationReference.html
     public static final String EXT_CQFM_AGGREGATE_METHOD_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod";
@@ -30,7 +30,8 @@ public class MeasureConstants {
     // http://build.fhir.org/ig/HL7/davinci-deqm/StructureDefinition-extension-supplementalData.html
     public static final String EXT_SDE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
-
+    public static final String EXT_SUPPORTING_EVIDENCE_DEFINITION_URL =
+            "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition";
     // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-criteriaReference.html
     public static final String EXT_CRITERIA_REFERENCE_URL =
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";
@@ -51,4 +52,5 @@ public class MeasureConstants {
     // Capture the numerator or denominator aggregation result in the population
     public static final String EXT_AGGREGATION_METHOD_RESULT =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/extension-aggregationMethodResult";
+    public static final String EXT_CQF_EXPRESSION_CODE = "http://hl7.org/fhir/StructureDefinition/cqf-expressionCode";
 }

@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -23,7 +22,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -35,6 +33,8 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
@@ -53,12 +53,13 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
-import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
-import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,7 +177,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportGroup.setId(measureGroup.getId());
         // Measure Level Extension
         addMeasureDescription(reportGroup, measureGroup);
-        addExtensionImprovementNotation(reportGroup, groupDef);
+        R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
 
         for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
             // Report Population Component
@@ -228,27 +229,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
-        // if already set on Measure, don't set on groups too
-        if (groupDef.isGroupImprovementNotation()) {
-            if (groupDef.isIncreaseImprovementNotation()) {
-                reportGroup.addExtension(
-                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
-                        new CodeableConcept(new Coding(
-                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE_DISPLAY)));
-            } else {
-                reportGroup.addExtension(
-                        MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION,
-                        new CodeableConcept(new Coding(
-                                MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE,
-                                MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE_DISPLAY)));
-            }
-        }
-    }
-
     private String getPopulationResourceIds(Object resourceObject) {
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
@@ -265,18 +245,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
+        reportPopulation.setCount(populationDef.getCount());
 
-        if (groupDef.isBooleanBasis()) {
-            reportPopulation.setCount(populationDef.getSubjects().size());
-        } else {
-            if (populationDef.type().equals(MeasurePopulationType.MEASUREOBSERVATION)) {
-                // resources has nested maps containing correct qty of resources
-                // Ratio Cont-Variable Measures have two MeasureObservations
-                reportPopulation.setCount(populationDef.countObservations());
-            } else {
-                // standard behavior
-                reportPopulation.setCount(populationDef.getAllSubjectResources().size());
-            }
+        // Supporting Evidence
+        if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
+                && populationDef.getSupportingEvidenceDefs() != null
+                && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
+            var extDefs = populationDef.getSupportingEvidenceDefs();
+            R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(reportPopulation, extDefs);
         }
 
         if (measurePopulation.hasDescription()) {
@@ -628,19 +604,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void copyPopulationAggregationResults(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
-        for (MeasureReportGroupPopulationComponent fhirPopulation : reportGroup.getPopulation()) {
-            var populationDef = groupDef.findPopulationById(fhirPopulation.getId());
-            populateAggregationResultExtension(fhirPopulation, populationDef);
+        for (MeasureReportGroupPopulationComponent reportPopulation : reportGroup.getPopulation()) {
+            var populationDef = groupDef.findPopulationById(reportPopulation.getId());
+            R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(reportPopulation, populationDef);
         }
-    }
-
-    private static void populateAggregationResultExtension(
-            MeasureReportGroupPopulationComponent measurePopulation, PopulationDef populationDef) {
-
-        // Add either the aggregation result to the numerator or denominator, if applicable
-        Optional.ofNullable(populationDef.getAggregationResult())
-                .ifPresent(nonNullAggregationResult -> measurePopulation.addExtension(
-                        MeasureConstants.EXT_AGGREGATION_METHOD_RESULT, new DecimalType(nonNullAggregationResult)));
     }
 
     /**
@@ -669,7 +636,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             for (var stratumDef : stratifierDef.getStratum()) {
                 // Find matching report stratum by comparing value strings
                 var reportStratum = reportStratifier.getStratum().stream()
-                        .filter(rs -> matchesStratumValue(rs, stratumDef))
+                        .filter(rs -> matchesStratumValue(rs, stratumDef, stratifierDef))
                         .findFirst()
                         .orElse(null);
 
@@ -685,67 +652,55 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (stratumScore != null) {
                     reportStratum.getMeasureScore().setValue(stratumScore);
                 }
+
+                // Copy per-stratum population aggregation results
+                copyStratumPopulationAggregationResults(reportStratum, stratumDef);
             }
         }
+    }
+
+    /**
+     * Copy per-stratum aggregation results to stratum population extensions.
+     * This persists the intermediate observation aggregates (numerator/denominator)
+     * that are needed for downstream distributed aggregation.
+     */
+    private void copyStratumPopulationAggregationResults(
+            StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+
+        for (StratifierGroupPopulationComponent reportStratumPopulation : reportStratum.getPopulation()) {
+            copySingleStratumPopulationAggregationResult(
+                    reportStratumPopulation, stratumDef.findPopulationById(reportStratumPopulation.getId()));
+        }
+    }
+
+    private void copySingleStratumPopulationAggregationResult(
+            StratifierGroupPopulationComponent reportStratumPopulation, StratumPopulationDef stratumPopulationDef) {
+
+        Double aggregationResult = stratumPopulationDef.getAggregationResult();
+
+        PopulationDef populationDef = stratumPopulationDef.populationDef();
+        if (populationDef == null) {
+            return;
+        }
+
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                reportStratumPopulation,
+                populationDef.getAggregateMethod(),
+                aggregationResult,
+                populationDef.getCriteriaReference());
     }
 
     /**
      * Check if a MeasureReport stratum matches a StratumDef by comparing text representations.
-     * Uses text-based comparison to match R4MeasureReportScorer behavior.
-     * Added in Part 1 to fix Gap 1 (text-based stratum matching).
-     *
-     * <p><strong>CRITICAL:</strong> This method uses CodeableConcept.text comparison instead of
-     * coding codes. This prevents 17 test failures in RATIO and CONTINUOUSVARIABLE measures
-     * with stratifiers when old scorers are removed in Part 2.
+     * Delegates to R4MeasureReportUtils for text-based comparison logic.
      *
      * @param reportStratum the MeasureReport stratum
      * @param stratumDef the StratumDef
+     * @param stratifierDef the parent StratifierDef (for context)
      * @return true if values match
      */
-    private boolean matchesStratumValue(MeasureReport.StratifierGroupComponent reportStratum, StratumDef stratumDef) {
-        // Use the same logic as R4MeasureReportScorer: compare CodeableConcept.text
-        String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
-        String defText = getStratumDefText(stratumDef);
-        return Objects.equals(reportText, defText);
-    }
-
-    /**
-     * Extract text representation from StratumDef for matching.
-     * Based on R4MeasureReportScorer#getStratumDefTextForR4.
-     * Added in Part 1 to fix Gap 1 (text-based stratum matching).
-     *
-     * @param stratumDef the StratumDef
-     * @return text representation of the stratum value
-     */
-    private String getStratumDefText(StratumDef stratumDef) {
-        String stratumText = null;
-
-        for (StratumValueDef valuePair : stratumDef.valueDefs()) {
-            var value = valuePair.value();
-            var componentDef = valuePair.def();
-
-            // Handle CodeableConcept values
-            if (value.getValueClass().equals(org.hl7.fhir.r4.model.CodeableConcept.class)) {
-                if (stratumDef.isComponent()) {
-                    // component stratifier: use code text
-                    stratumText = componentDef != null && componentDef.code() != null
-                            ? componentDef.code().text()
-                            : null;
-                } else {
-                    // non-component: extract text from CodeableConcept value
-                    if (value.getValue() instanceof org.hl7.fhir.r4.model.CodeableConcept codeableConcept) {
-                        stratumText = codeableConcept.getText();
-                    }
-                }
-            } else if (stratumDef.isComponent()) {
-                // Component with non-CodeableConcept value: convert to string
-                stratumText = value.getValueAsString();
-            } else {
-                // Non-component with non-CodeableConcept value: convert to string
-                stratumText = value.getValueAsString();
-            }
-        }
-
-        return stratumText;
+    private boolean matchesStratumValue(
+            StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
+        return R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef);
     }
 }

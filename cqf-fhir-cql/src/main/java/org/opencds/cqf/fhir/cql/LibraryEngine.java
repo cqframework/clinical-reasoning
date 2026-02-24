@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams;
+import org.opencds.cqf.cql.engine.execution.EvaluationParams.LibraryParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
@@ -337,7 +338,7 @@ public class LibraryEngine {
                     return Unit.INSTANCE;
                 });
             } else {
-                paramsBuilder.library(i, null);
+                paramsBuilder.library(i, new LibraryParams.Builder().build());
             }
         });
 

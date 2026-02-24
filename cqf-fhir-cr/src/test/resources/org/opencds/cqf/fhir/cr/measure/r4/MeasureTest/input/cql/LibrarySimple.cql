@@ -75,6 +75,79 @@ define "always false":
 define "always true":
     true
 
+define "list of boolean":
+    {true, false, true}
+
+define "list of dates":
+  { @2024-01-01, @2024-01-02, @2024-01-03 }
+
+define "PatientRes":
+    [Patient] P
+
+define "list of string":
+    {'test1', 'test2', 'test3'}
+
+define "interval":
+    Interval[@2024-01-01T00:00:00, @2024-12-31T23:59:59]
+
+define "TestIntervalList":
+  {
+    Interval[@2024-01-01T00:00:00, @2024-01-31T23:59:59],
+    Interval[@2024-02-01T00:00:00, @2024-02-29T23:59:59]
+
+  }
+
+define "TestDecimalList":
+  { 1.5, 2.75, 1.0 / 3.0 }
+
+define "TestFloatValue":
+    1.0 / 3.0
+
+define "list of numbers":
+    {31, 88, 11}
+
+define "string":
+    'string test'
+
+define "date":
+    @2026-01-01
+
+define "datetime":
+    @2026-12-30T23:59:59
+
+define "NullExample":
+         null
+
+define "EmptyListExample":
+  { }
+
+define "number":
+         31
+
+define "decimal":
+         31.31
+
+define "test tuple":
+         {
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  }
+
+define "list test tuple":
+         {{
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  },{
+    number: "number",
+    dates: "list of dates",
+    birthYear: "string"
+  }}
+
+define "test code":
+    "SDE Sex"
+
 // sde single value
 
 define "SDE Sex":
@@ -105,6 +178,8 @@ define function "MeasureObservationBoolean"():
 define "Gender Stratification":
   "SDE Sex"
 
+define function "Age of Period" (i Interval<DateTime>):
+  AgeInYearsAt(end of i)
 // boolean criteria stratifier
 
 define "boolean strat not finished":
@@ -156,6 +231,14 @@ define "Matching General Practitioner":
 define "Age":
     AgeInYearsAt(start of "Measurement Period")
 
+define "Patient Age Bracket":
+  case
+    when AgeInYearsAt(start of "Measurement Period") between 0 and 20 then '0--21'
+    when AgeInYearsAt(start of "Measurement Period") between 21 and 40 then '21--41'
+    when AgeInYearsAt(start of "Measurement Period") > 41 then '>41'
+    else 'unknown'
+  end
+
 define "Date":
     Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]
 
@@ -170,3 +253,25 @@ define "num date":
 
 define "exc date":
     "Date"
+
+// valueStratifier function for non-subject based measures
+
+define function "Age Range Stratifier"(encounter Encounter):
+  case
+    when AgeInYearsAt(start of encounter.period) between 0 and 20 then 'P0Y--P21Y'
+    when AgeInYearsAt(start of encounter.period) between 21 and 40 then 'P21Y--P41Y'
+    when AgeInYearsAt(start of encounter.period) > 41 then 'P41Y--P9999Y'
+    else null
+  end
+
+define function "Age Function"(encounter Encounter):
+  AgeInYearsAt(start of encounter.period)
+
+define function "Encounter Status Stratifier"(encounter Encounter):
+  Coalesce(encounter.status.value, 'unknown')
+
+define function "Empty Function"(encounter Encounter):
+  {}
+
+define function "Null Function"(encounter Encounter):
+  null

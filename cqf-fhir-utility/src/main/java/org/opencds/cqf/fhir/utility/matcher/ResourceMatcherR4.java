@@ -77,6 +77,7 @@ public class ResourceMatcherR4 implements ResourceMatcher {
     @Override
     public boolean isMatchToken(TokenParam param, IBase pathResult) {
         if (param.getValue() == null) {
+            // TODO - should this be false?
             return true;
         }
 
@@ -105,6 +106,7 @@ public class ResourceMatcherR4 implements ResourceMatcher {
             } else if (param.getSystem() != null && param.getSystem().equals(system)) {
                 return true;
             } else {
+                // this will never be reached because of the top null check
                 return false;
             }
         }

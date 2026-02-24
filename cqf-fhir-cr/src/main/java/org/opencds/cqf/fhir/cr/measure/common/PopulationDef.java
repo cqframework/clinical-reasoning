@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class PopulationDef {
@@ -15,6 +17,7 @@ public class PopulationDef {
     private final ConceptDef code;
     private final MeasurePopulationType measurePopulationType;
     private final CodeDef populationBasis;
+    private final List<SupportingEvidenceDef> supportingEvidenceDefs;
 
     @Nullable
     private final String criteriaReference;
@@ -33,8 +36,9 @@ public class PopulationDef {
             ConceptDef code,
             MeasurePopulationType measurePopulationType,
             String expression,
-            CodeDef populationBasis) {
-        this(id, code, measurePopulationType, expression, populationBasis, null, null);
+            CodeDef populationBasis,
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
+        this(id, code, measurePopulationType, expression, populationBasis, null, null, supportingEvidenceDefs);
     }
 
     public PopulationDef(
@@ -44,7 +48,8 @@ public class PopulationDef {
             String expression,
             CodeDef populationBasis,
             @Nullable String criteriaReference,
-            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod) {
+            @Nullable ContinuousVariableObservationAggregateMethod aggregateMethod,
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         this.id = id;
         this.code = code;
         this.measurePopulationType = measurePopulationType;
@@ -52,6 +57,7 @@ public class PopulationDef {
         this.populationBasis = populationBasis;
         this.criteriaReference = criteriaReference;
         this.aggregateMethod = aggregateMethod;
+        this.supportingEvidenceDefs = supportingEvidenceDefs;
     }
 
     public MeasurePopulationType type() {
@@ -86,6 +92,10 @@ public class PopulationDef {
         return this.populationBasis.code().equals("boolean");
     }
 
+    public boolean hasPopulationType(MeasurePopulationType populationType) {
+        return populationType == this.measurePopulationType;
+    }
+
     public Set<Object> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
             this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
@@ -96,6 +106,42 @@ public class PopulationDef {
 
     public Set<String> getSubjects() {
         return this.getSubjectResources().keySet();
+    }
+
+    /**
+     * Removes a measure observation resource key from all inner maps for a subject.
+     * <p/>
+     * After removal, any empty inner maps are removed from the subject's resource set.
+     * If the subject's resource set becomes empty, the subject is also removed from the map.
+     * This ensures that subjects with no remaining observations are not counted.
+     *
+     * @param subjectId the subject ID
+     * @param measureObservationResourceKey the resource key to remove
+     */
+    public void removeExcludedMeasureObservationResource(String subjectId, Object measureObservationResourceKey) {
+        if (!hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+            return;
+        }
+
+        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
+        if (resourcesForSubject == null) {
+            return;
+        }
+
+        // Remove the key from all inner maps
+        resourcesForSubject.forEach(element -> {
+            if (element instanceof Map<?, ?> innerMap) {
+                innerMap.remove(measureObservationResourceKey);
+            }
+        });
+
+        // Remove empty inner maps - critical for correct counting
+        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+
+        // If the subject's resource set is now empty, remove the subject from the map entirely
+        if (resourcesForSubject.isEmpty()) {
+            subjectResources.remove(subjectId);
+        }
     }
 
     public void retainAllResources(String subjectId, PopulationDef otherPopulationDef) {
@@ -117,15 +163,20 @@ public class PopulationDef {
     /**
      * Used if we want to count all resources that may be duplicated across subjects, for example,
      * for Date values that will be identical across subjects, but we want to count the duplicates.
-     * <p/>
+     * <p>
      * example:
+     * <pre>
      * population:
-     * <Subject1,<Organization/1>>
-     * <Subject2,<Organization/1>>
-     * Population Count for Population Basis Organization = 2, even though the resulting resource object is the same
-     * <Subject1,<1/1/2024>>
-     * <Subject2,<1/1/2024>>
-     * Population Count for Population Basis date = 2, even though the resulting resource object is the same
+     * (Subject1, Organization/1)
+     * (Subject2, Organization/1)
+     * Population Count for Population Basis Organization = 2,
+     * even though the resulting resource object is the same
+     *
+     * (Subject1, 1/1/2024)
+     * (Subject2, 1/1/2024)
+     * Population Count for Population Basis date = 2,
+     * even though the resulting resource object is the same
+     * </pre>
      *
      */
     public List<Object> getAllSubjectResources() {
@@ -183,29 +234,31 @@ public class PopulationDef {
         return aggregationResult;
     }
 
+    public void setAggregationResult(@Nullable QuantityDef quantityDefResult) {
+        setAggregationResult(
+                Optional.ofNullable(quantityDefResult).map(QuantityDef::value).orElse(null));
+    }
+
     public void setAggregationResult(@Nullable Double aggregationResult) {
         this.aggregationResult = aggregationResult;
     }
 
     /**
-     * Added by Claude Sonnet 4.5 on 2025-12-02
-     * Updated by Claude Sonnet 4.5 on 2025-12-08 to use own populationBasis instead of GroupDef parameter.
-     * Get the count for this population based on its type and population basis.
-     * This is the single source of truth for population counts.
-     *
-     * @return the count for this population
+     * Compute the count that will be assigned to the MeasureReport population, taking into
+     * account the population basis and population type (ex: MEASUREPOPULATON).
+     * @return The computed count of the report population.
      */
     public int getCount() {
-        // For MEASUREOBSERVATION populations, count the observations
-        if (this.measurePopulationType == MeasurePopulationType.MEASUREOBSERVATION) {
-            return countObservations();
-        }
-
         // For other population types, use population basis to determine count
         if (isBooleanBasis()) {
             // Boolean basis: count unique subjects
             return getSubjects().size();
         } else {
+            if (hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
+                // resources has nested maps containing correct qty of resources
+                // Ratio Cont-Variable Measures have two MeasureObservations
+                return countObservations();
+            }
             // Non-boolean basis: count all resources (including duplicates across subjects)
             return getAllSubjectResources().size();
         }
@@ -216,6 +269,7 @@ public class PopulationDef {
         String codeText = (code != null && code.text() != null) ? code.text() : "null";
         String criteriaRef = (criteriaReference != null) ? criteriaReference : "null";
         String aggMethod = (aggregateMethod != null) ? aggregateMethod.toString() : "null";
+        String aggResult = (aggregationResult != null) ? aggregationResult.toString() : "null";
 
         return "PopulationDef{"
                 + "id='" + id + '\''
@@ -224,6 +278,11 @@ public class PopulationDef {
                 + ", expression='" + expression + '\''
                 + ", criteriaReference='" + criteriaRef + '\''
                 + ", aggregateMethod=" + aggMethod
+                + ", aggregationResult=" + aggResult
                 + '}';
+    }
+
+    public List<SupportingEvidenceDef> getSupportingEvidenceDefs() {
+        return supportingEvidenceDefs == null ? null : new ArrayList<>(supportingEvidenceDefs);
     }
 }

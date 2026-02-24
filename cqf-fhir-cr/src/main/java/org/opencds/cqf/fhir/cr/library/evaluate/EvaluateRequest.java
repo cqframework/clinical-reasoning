@@ -19,6 +19,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 public class EvaluateRequest implements ICqlOperationRequest {
     private final ILibraryAdapter libraryAdapter;
@@ -42,7 +43,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
             ModelResolver modelResolver) {
         checkNotNull(library, "expected non-null value for library");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         fhirVersion = library.getStructureFhirVersionEnum();
         libraryAdapter = getAdapterFactory().createLibrary(library);
         this.subjectId = subjectId;
@@ -56,7 +56,8 @@ public class EvaluateRequest implements ICqlOperationRequest {
         }
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
+        this.modelResolver =
+                modelResolver != null ? modelResolver : FhirModelResolverCache.resolverForVersion(fhirVersion);
     }
 
     public IBaseResource getLibrary() {

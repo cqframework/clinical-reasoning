@@ -127,16 +127,19 @@ public class ExpressionProcessor {
         }
         String expressionPath = "expression";
         return switch (request.getFhirVersion()) {
-            case DSTU3 -> new CqfExpression(
-                    request.resolvePathString(element, "language"),
-                    request.resolvePathString(element, expressionPath),
-                    request.getReferencedLibraries());
-            case R4 -> CqfExpression.of(
-                    request.resolvePath(element, expressionPath, org.hl7.fhir.r4.model.Expression.class),
-                    request.getReferencedLibraries());
-            case R5 -> CqfExpression.of(
-                    request.resolvePath(element, expressionPath, org.hl7.fhir.r5.model.Expression.class),
-                    request.getReferencedLibraries());
+            case DSTU3 ->
+                new CqfExpression(
+                        request.resolvePathString(element, "language"),
+                        request.resolvePathString(element, expressionPath),
+                        request.getReferencedLibraries());
+            case R4 ->
+                CqfExpression.of(
+                        request.resolvePath(element, expressionPath, org.hl7.fhir.r4.model.Expression.class),
+                        request.getReferencedLibraries());
+            case R5 ->
+                CqfExpression.of(
+                        request.resolvePath(element, expressionPath, org.hl7.fhir.r5.model.Expression.class),
+                        request.getReferencedLibraries());
             default -> null;
         };
     }

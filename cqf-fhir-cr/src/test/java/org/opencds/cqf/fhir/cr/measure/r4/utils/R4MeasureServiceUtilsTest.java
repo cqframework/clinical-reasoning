@@ -225,7 +225,8 @@ class R4MeasureServiceUtilsTest {
                 containsString(testCase.expectedException().getMessage()));
     }
 
-    private record ProductLineParams(@Nullable String productLine, @Nullable Extension expectedExtension) {}
+    private record ProductLineParams(
+            @Nullable String productLine, @Nullable Extension expectedExtension) {}
 
     private static Stream<ProductLineParams> productLineParams() {
         return Stream.of(

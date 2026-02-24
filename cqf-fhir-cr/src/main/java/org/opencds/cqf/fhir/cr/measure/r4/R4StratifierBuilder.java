@@ -67,14 +67,14 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
-        if (stratifierDef.isComponentStratifier()) {
-            componentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
+        if (stratifierDef.isCriteriaStratifier()) {
+            criteriaStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         } else {
-            nonComponentStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
+            valueOrNonSubjectValueStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
         }
     }
 
-    private static void componentStratifier(
+    private static void valueOrNonSubjectValueStratifier(
             R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -84,19 +84,11 @@ class R4StratifierBuilder {
         stratifierDef.getStratum().forEach(stratumDef -> {
             var reportStratum = reportStratifier.addStratum();
 
-            buildStratum(
-                    bc,
-                    stratifierDef,
-                    stratumDef,
-                    reportStratum,
-                    stratumDef.valueDefs(),
-                    stratumDef.subjectIds(),
-                    populations,
-                    groupDef);
+            buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), populations, groupDef);
         });
     }
 
-    private static void nonComponentStratifier(
+    private static void criteriaStratifier(
             R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
@@ -114,8 +106,6 @@ class R4StratifierBuilder {
             // Ideally, the stratum def should have these values empty in MeasureEvaluator
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
-            // Seems to be irrelevant for criteria based stratifiers
-            var patients = List.<String>of();
 
             buildStratum(
                     bc,
@@ -123,7 +113,6 @@ class R4StratifierBuilder {
                     getOnlyStratumDef(stratifierDef),
                     reportStratum,
                     stratValues,
-                    patients,
                     populations,
                     groupDef);
             return; // short-circuit so we don't process non-criteria logic
@@ -149,15 +138,7 @@ class R4StratifierBuilder {
 
         var reportStratum = reportStratifier.addStratum();
 
-        buildStratum(
-                bc,
-                stratifierDef,
-                stratumDef,
-                reportStratum,
-                stratumDef.valueDefs(),
-                stratumDef.subjectIds(),
-                populations,
-                groupDef);
+        buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), populations, groupDef);
     }
 
     private static void buildStratum(
@@ -166,7 +147,6 @@ class R4StratifierBuilder {
             StratumDef stratumDef,
             StratifierGroupComponent stratum,
             Set<StratumValueDef> values,
-            Collection<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
@@ -200,9 +180,10 @@ class R4StratifierBuilder {
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
                 stratum.addComponent(sgcc);
-            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()) {
-                // non-component stratifiers only set stratified value, code is set on stratifier object
-                // value being stratified: 'M'
+            } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()
+                    || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
+                // non-component stratifiers (single-component or non-component) only set stratified value
+                // value being stratified: 'M', '35', etc.
                 stratum.setValue(expressionResultToCodableConcept(value));
             }
         }
@@ -227,8 +208,7 @@ class R4StratifierBuilder {
                 throw new InternalErrorException("could not find MeasureGroupPopulationComponent");
             }
             var stratumPopulation = stratum.addPopulation();
-            buildStratumPopulation(
-                    bc, stratifierDef, stratumPopulationDef, stratumPopulation, subjectIds, optMgpc.get(), groupDef);
+            buildStratumPopulation(bc, stratumPopulationDef, stratumPopulation, optMgpc.get(), groupDef);
         }
     }
 
@@ -255,10 +235,8 @@ class R4StratifierBuilder {
     // Simplified by Claude Sonnet 4.5 to use calculated values from StratumPopulationDef
     private static void buildStratumPopulation(
             R4MeasureReportBuilderContext bc,
-            StratifierDef stratifierDef,
             StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
-            Collection<String> subjectIds,
             MeasureGroupPopulationComponent population,
             GroupDef groupDef) {
 

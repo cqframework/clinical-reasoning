@@ -723,18 +723,18 @@ class ReleaseVisitorTests {
                                 Canonicals.getUrl(releasedRelatedArtifact.getResource()),
                                 Canonicals.getUrl(originalRelatedArtifact.getResource()))
                         && originalRelatedArtifact.getType() == releasedRelatedArtifact.getType()) {
-                    assertEquals(
-                            releasedRelatedArtifact.getExtension().size(),
-                            originalRelatedArtifact.getExtension().size());
-                    releasedRelatedArtifact.getExtension().forEach(ext -> {
-                        assertEquals(
-                                originalRelatedArtifact
-                                        .getExtensionsByUrl(ext.getUrl())
-                                        .size(),
-                                releasedRelatedArtifact
-                                        .getExtensionsByUrl(ext.getUrl())
-                                        .size());
+                    // Verify all original extensions are preserved
+                    originalRelatedArtifact.getExtension().forEach(originalExt -> {
+                        var matchingExtensions = releasedRelatedArtifact.getExtensionsByUrl(originalExt.getUrl());
+                        assertTrue(
+                                !matchingExtensions.isEmpty(),
+                                "Original extension " + originalExt.getUrl() + " should be preserved");
                     });
+                    // Verify extension count is at least as many as original (may have added CRMI extensions)
+                    assertTrue(
+                            releasedRelatedArtifact.getExtension().size()
+                                    >= originalRelatedArtifact.getExtension().size(),
+                            "Released artifact should have at least as many extensions as original");
                 }
             });
         }

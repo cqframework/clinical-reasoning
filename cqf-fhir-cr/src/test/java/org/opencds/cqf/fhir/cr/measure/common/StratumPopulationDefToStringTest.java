@@ -24,7 +24,7 @@ class StratumPopulationDefToStringTest {
         Set<Object> intersection = Set.of("obj1", "obj2");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-1", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-1", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis, null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
@@ -54,7 +54,7 @@ class StratumPopulationDefToStringTest {
         Set<Object> intersection = Set.of();
         CodeDef populationBasis = new CodeDef(null, null, "Encounter", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-value-1", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-value-1", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis, null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
@@ -91,7 +91,7 @@ class StratumPopulationDefToStringTest {
         List<String> resourceIds = List.of("pat1");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-patients", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-patients", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis, null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
@@ -128,7 +128,12 @@ class StratumPopulationDefToStringTest {
         List<String> resourceIds = List.of("res1");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-quantities", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-quantities",
+                null,
+                MeasurePopulationType.INITIALPOPULATION,
+                "expression",
+                populationBasis,
+                null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
@@ -158,7 +163,12 @@ class StratumPopulationDefToStringTest {
         List<String> resourceIds = List.of("res1", "res2");
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-intervals", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-intervals",
+                null,
+                MeasurePopulationType.INITIALPOPULATION,
+                "expression",
+                populationBasis,
+                null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
@@ -204,7 +214,7 @@ class StratumPopulationDefToStringTest {
         List<String> resourceIds = List.of("res1", "res2", "res3", "res4", "res5", "res6", "res7", "res8", "res9");
         CodeDef populationBasis = new CodeDef(null, null, "Encounter", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-mixed", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-mixed", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis, null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(
@@ -242,7 +252,12 @@ class StratumPopulationDefToStringTest {
 
         CodeDef populationBasis = new CodeDef(null, null, "boolean", null);
         PopulationDef populationDef = new PopulationDef(
-                "stratum-exactly-5", null, MeasurePopulationType.INITIALPOPULATION, "expression", populationBasis);
+                "stratum-exactly-5",
+                null,
+                MeasurePopulationType.INITIALPOPULATION,
+                "expression",
+                populationBasis,
+                null);
 
         // When
         StratumPopulationDef stratumDef = new StratumPopulationDef(

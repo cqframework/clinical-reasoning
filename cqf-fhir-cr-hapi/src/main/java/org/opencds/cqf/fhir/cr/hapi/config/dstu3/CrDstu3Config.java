@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Import;
 
 @SuppressWarnings("UnstableApiUsage")
 @Configuration
-@Import(RepositoryConfig.class)
+@Import({RepositoryConfig.class, CqlOperationConfig.class, EvaluateOperationConfig.class})
 public class CrDstu3Config {
 
     @Bean

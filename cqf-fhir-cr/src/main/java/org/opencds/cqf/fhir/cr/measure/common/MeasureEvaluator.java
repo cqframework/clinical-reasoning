@@ -67,16 +67,34 @@ public class MeasureEvaluator {
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
         return switch (measureEvalType) {
-            case PATIENT, SUBJECT -> this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.INDIVIDUAL, evaluationResult, applyScoring);
-            case SUBJECTLIST -> this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.SUBJECTLIST, evaluationResult, applyScoring);
+            case PATIENT, SUBJECT ->
+                this.evaluateSubject(
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        MeasureReportType.INDIVIDUAL,
+                        evaluationResult,
+                        applyScoring);
+            case SUBJECTLIST ->
+                this.evaluateSubject(
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        MeasureReportType.SUBJECTLIST,
+                        evaluationResult,
+                        applyScoring);
             case PATIENTLIST ->
-            // DSTU3 Only
-            this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.PATIENTLIST, evaluationResult, applyScoring);
-            case POPULATION -> this.evaluateSubject(
-                    measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
+                // DSTU3 Only
+                this.evaluateSubject(
+                        measureDef,
+                        subjectType,
+                        subjectId,
+                        MeasureReportType.PATIENTLIST,
+                        evaluationResult,
+                        applyScoring);
+            case POPULATION ->
+                this.evaluateSubject(
+                        measureDef, subjectType, subjectId, MeasureReportType.SUMMARY, evaluationResult, applyScoring);
         };
     }
 
@@ -128,6 +146,25 @@ public class MeasureEvaluator {
         } else {
             return Collections.singletonList(value);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
+
+        // Case 1 — true null
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            return null; // need to preserve result
+        }
+
+        Object value = expressionResult.getValue();
+
+        // Case 2 — list
+        if (value instanceof Iterable<?>) {
+            return (Iterable<Object>) value; // may be empty or not
+        }
+
+        // Case 3 — scalar
+        return List.of(value);
     }
 
     protected PopulationDef evaluatePopulationMembership(
@@ -302,6 +339,9 @@ public class MeasureEvaluator {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             dateOfCompliance.addResource(subjectId, doc);
         }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
         // Ratio Cont Variable Scoring
         if (observationNum != null && observationDen != null) {
             // Num alignment
@@ -316,7 +356,8 @@ public class MeasureEvaluator {
             if (numeratorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
                         numeratorExclusion.subjectResources, observationNum.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, numeratorExclusion, observationNum);
+                MeasureObservationHandler.removeObservationResourcesInPopulation(
+                        subjectId, numeratorExclusion, observationNum);
             }
             // Den alignment
             var expressionNameDen = getCriteriaExpressionName(observationDen);
@@ -330,7 +371,30 @@ public class MeasureEvaluator {
             if (denominatorExclusion != null) {
                 removeObservationSubjectResourcesInPopulation(
                         denominatorExclusion.subjectResources, observationDen.subjectResources);
-                removeObservationResourcesInPopulation(subjectId, denominatorExclusion, observationDen);
+                MeasureObservationHandler.removeObservationResourcesInPopulation(
+                        subjectId, denominatorExclusion, observationDen);
+            }
+        }
+    }
+
+    protected void populateSupportingEvidence(
+            PopulationDef populationDef,
+            MeasureReportType reportType,
+            EvaluationResult evaluationResult,
+            String subjectId) {
+        // only enabled for subject level reports
+        if (reportType == MeasureReportType.INDIVIDUAL
+                && !CollectionUtils.isEmpty(populationDef.getSupportingEvidenceDefs())) {
+            var extDef = populationDef.getSupportingEvidenceDefs();
+            for (SupportingEvidenceDef e : extDef) {
+                var result = evaluationResult.get(e.getExpression());
+                if (result == null) {
+                    throw new InvalidRequestException(
+                            "Supporting Evidence defined expression: '%s', is not found in Evaluation Results"
+                                    .formatted(e.getExpression()));
+                }
+                var object = evaluateSupportingCriteria(result);
+                e.addResource(subjectId, object);
             }
         }
     }
@@ -344,7 +408,8 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             EvaluationResult evaluationResult,
-            boolean applyScoring) {
+            boolean applyScoring,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
@@ -354,7 +419,6 @@ public class MeasureEvaluator {
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation = evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
-        measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         // Evaluate Population Expressions
         measurePopulation = evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult);
         if (measurePopulation != null && initialPopulation != null && applyScoring) {
@@ -386,13 +450,17 @@ public class MeasureEvaluator {
                         measurePopulation.subjectResources, measurePopulationObservation.getSubjectResources());
                 // measure observations also need to make sure they remove measure-population-exclusions
                 if (measurePopulationExclusion != null) {
-                    removeObservationResourcesInPopulation(
+
+                    MeasureObservationHandler.removeObservationResourcesInPopulation(
                             subjectId, measurePopulationExclusion, measurePopulationObservation);
                     removeObservationSubjectResourcesInPopulation(
                             measurePopulationExclusion.subjectResources,
                             measurePopulationObservation.getSubjectResources());
                 }
             }
+        }
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
         }
     }
     /**
@@ -493,115 +561,71 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            final Object firstEntryValue = entryValue.iterator().next();
-
-            if (!(firstEntryValue instanceof Map<?, ?>)) {
-                throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
-            }
-
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
-
-            // population values for this subject
-            Set<Object> populationValues = measurePopulation.get(subjectId);
-
-            // If there is no population for this subject, there is nothing "to remove because it matches",
-            // so leave the observation set as-is.
-            if (populationValues == null || populationValues.isEmpty()) {
-                continue;
-            }
-
-            // Remove observations that *do* match population values
-            obsSet.removeIf(obsMap -> {
-                for (Object key : obsMap.keySet()) {
-                    if (populationValues.contains(key)) {
-                        // This observation map is backed by a population resource -> remove it
-                        return true;
-                    }
-                }
-                return false;
-            });
-
-            // If no observations remain for this subject, remove the subject entry entirely
-            if (obsSet.isEmpty()) {
-                it.remove();
-            }
+            removeObservatorySubjectResource(measurePopulation, entryValue, subjectId, it);
         }
     }
 
-    /**
-     * Removes measureObservationDef resources for a subject when their "key" is
-     * found in the corresponding measurePopulationDef resources for that subject.
-     *
-     * In other words: delete observation results that are ALSO present in the
-     * population resources.
-     */
-    protected void removeObservationResourcesInPopulation(
+    private void removeObservatorySubjectResource(
+            Map<String, Set<Object>> measurePopulation,
+            Set<?> entryValue,
             String subjectId,
-            // MeasurePopulationType.MEASUREPOPULATIONEXCLUSION
-            PopulationDef measurePopulationDef,
-            // MeasurePopulationType.MEASUREOBSERVATION
-            PopulationDef measureObservationDef) {
+            Iterator<Entry<String, Set<Object>>> iterator) {
+        if (entryValue.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+        final Object firstEntryValue = entryValue.iterator().next();
 
-        if (measureObservationDef == null || measurePopulationDef == null) {
+        if (!(firstEntryValue instanceof Map<?, ?>)) {
+            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
+        }
+
+        @SuppressWarnings("unchecked")
+        Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
+
+        // population values for this subject
+        Set<Object> populationValues = measurePopulation.get(subjectId);
+
+        // If there is no population for this subject, there is nothing "to remove because iterator matches",
+        // so leave the observation set as-is.
+        if (populationValues == null || populationValues.isEmpty()) {
             return;
         }
 
-        // Population keys to match against
-        final Set<Object> measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
-
-        if (measurePopulationResourcesForSubject == null || measurePopulationResourcesForSubject.isEmpty()) {
-            // nothing to compare against -> nothing to remove
-            return;
-        }
-
-        // Work on a copy to avoid concurrent modification issues while removing
-        HashSetForFhirResourcesAndCqlTypes<Object> observationResources =
-                new HashSetForFhirResourcesAndCqlTypes<>(measureObservationDef.getResourcesForSubject(subjectId));
-
-        for (Object populationResource : observationResources) {
-
-            if (!(populationResource instanceof Map<?, ?> measureObservationResourceAsMap)) {
-                continue;
+        // Remove observations that *do* match population values
+        obsSet.removeIf(obsMap -> {
+            for (Object key : obsMap.keySet()) {
+                if (populationValues.contains(key)) {
+                    // This observation map is backed by a population resource -> remove iterator
+                    return true;
+                }
             }
+            return false;
+        });
 
-            // process this single populationResource
-            processSingleResource(
-                    populationResource,
-                    measureObservationResourceAsMap,
-                    measurePopulationResourcesForSubject,
-                    measureObservationDef,
-                    subjectId);
-        }
-    }
-
-    private void processSingleResource(
-            Object populationResource,
-            Map<?, ?> measureObservationResourceAsMap,
-            Set<Object> measurePopulationResourcesForSubject,
-            PopulationDef measureObservationDef,
-            String subjectId) {
-
-        for (Map.Entry<?, ?> entry : measureObservationResourceAsMap.entrySet()) {
-            Object key = entry.getKey();
-
-            // If the key is present in the population resources → remove this item
-            if (measurePopulationResourcesForSubject.contains(key)) {
-                measureObservationDef.getResourcesForSubject(subjectId).remove(populationResource);
-
-                // short-circuits this resource entirely
-                return;
-            }
+        // If no observations remain for this subject, remove the subject entry entirely
+        if (obsSet.isEmpty()) {
+            iterator.remove();
         }
     }
 
     protected void evaluateCohort(
-            GroupDef groupDef, String subjectType, String subjectId, EvaluationResult evaluationResult) {
+            GroupDef groupDef,
+            String subjectType,
+            String subjectId,
+            EvaluationResult evaluationResult,
+            MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult);
+
+        // supporting evidence
+        for (PopulationDef p : groupDef.populations()) {
+            populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
+        }
     }
 
     protected void evaluateGroup(
@@ -616,7 +640,7 @@ public class MeasureEvaluator {
         populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
         populationBasisValidator.validateStratifiers(measureDef, groupDef, evaluationResult);
 
-        evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult);
+        evaluateStratifiers(subjectId, groupDef.stratifiers(), evaluationResult, groupDef);
 
         var scoring = groupDef.measureScoring();
         switch (scoring) {
@@ -624,10 +648,11 @@ public class MeasureEvaluator {
                 evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, applyScoring);
+                evaluateContinuousVariable(
+                        groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType);
                 break;
             case COHORT:
-                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult);
+                evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, reportType);
                 break;
         }
     }
@@ -650,18 +675,23 @@ public class MeasureEvaluator {
     }
 
     protected void evaluateStratifiers(
-            String subjectId, List<StratifierDef> stratifierDefs, EvaluationResult evaluationResult) {
+            String subjectId,
+            List<StratifierDef> stratifierDefs,
+            EvaluationResult evaluationResult,
+            GroupDef groupDef) {
         for (StratifierDef stratifierDef : stratifierDefs) {
 
-            evaluateStratifier(subjectId, evaluationResult, stratifierDef);
+            evaluateStratifier(subjectId, evaluationResult, stratifierDef, groupDef);
         }
     }
 
-    private void evaluateStratifier(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
-        if (stratifierDef.isComponentStratifier()) {
-            addStratifierComponentResult(stratifierDef.components(), evaluationResult, subjectId);
+    private void evaluateStratifier(
+            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
+        if (stratifierDef.isCriteriaStratifier()) {
+            addCriteriaStratifierResult(subjectId, evaluationResult, stratifierDef);
         } else {
-            addStratifierNonComponentResult(subjectId, evaluationResult, stratifierDef);
+            addValueOrNonSubjectValueStratifierResult(
+                    stratifierDef.components(), evaluationResult, subjectId, groupDef);
         }
     }
 
@@ -670,22 +700,65 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier component expressions return null.
      */
-    void addStratifierComponentResult(
-            List<StratifierComponentDef> components, EvaluationResult evaluationResult, String subjectId) {
+    void addValueOrNonSubjectValueStratifierResult(
+            List<StratifierComponentDef> components,
+            EvaluationResult evaluationResult,
+            String subjectId,
+            GroupDef groupDef) {
 
         for (StratifierComponentDef component : components) {
-            var expressionResult = evaluationResult.get(component.expression());
+            if (groupDef.isBooleanBasis()) {
+                handleBooleanBasisComponent(component, evaluationResult, subjectId);
+            } else {
+                handleNonBooleanBasisComponent(component, evaluationResult, subjectId, groupDef);
+            }
+        }
+    }
 
-            if (expressionResult == null || expressionResult.getValue() == null) {
-                logger.warn(
-                        "Stratifier component expression '{}' returned null result for subject '{}'",
-                        component.expression(),
-                        subjectId);
+    private void handleBooleanBasisComponent(
+            StratifierComponentDef component, EvaluationResult evaluationResult, String subjectId) {
+
+        var expressionResult = evaluationResult.get(component.expression());
+
+        if (expressionResult == null || expressionResult.getValue() == null) {
+            logger.warn(
+                    "Stratifier component expression '{}' returned null result for subject '{}'",
+                    component.expression(),
+                    subjectId);
+            return; // short-circuit
+        }
+
+        component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+    }
+
+    private void handleNonBooleanBasisComponent(
+            StratifierComponentDef component, EvaluationResult evaluationResult, String subjectId, GroupDef groupDef) {
+
+        // First: look for function results on INITIALPOPULATION
+        for (PopulationDef popDef : groupDef.populations()) {
+            if (popDef.type() != MeasurePopulationType.INITIALPOPULATION) {
                 continue;
             }
 
-            component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+            var expressionResult = evaluationResult.get(popDef.id() + "-" + component.expression());
+
+            if (expressionResult != null && expressionResult.getValue() != null) {
+                component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+                return; // short-circuit once function result is found
+            }
         }
+
+        // Fallback: scalar (non-function) expression
+        var fallbackResult = evaluationResult.get(component.expression());
+        if (fallbackResult == null || fallbackResult.getValue() == null) {
+            logger.warn(
+                    "Stratifier component expression '{}' returned null result for subject '{}' (fallback)",
+                    component.expression(),
+                    subjectId);
+            return; // short-circuit
+        }
+
+        component.putResult(subjectId, fallbackResult.getValue(), fallbackResult.getEvaluatedResources());
     }
 
     /**
@@ -693,8 +766,7 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier expressions return null.
      */
-    void addStratifierNonComponentResult(
-            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+    void addCriteriaStratifierResult(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
         var expressionResult = evaluationResult.get(stratifierDef.expression());
 

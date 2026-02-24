@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.Collection;
+import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -60,7 +62,29 @@ public class StratumValueWrapper {
                 .toString();
     }
 
+    /**
+     * Sentinel value used for null stratum values.
+     * This allows subjects with null stratifier results to be grouped into their own stratum.
+     */
+    private static final String NULL_STRATUM_VALUE = "null";
+
+    /**
+     * Sentinel value used for empty collection stratum values.
+     * This allows subjects with empty list/collection stratifier results to be grouped into their own stratum.
+     */
+    private static final String EMPTY_STRATUM_VALUE = "empty";
+
     public String getKey() {
+        // Handle null values - group them into a special "null" stratum
+        if (value == null) {
+            return NULL_STRATUM_VALUE;
+        }
+
+        // Handle empty collections - group them into a special "empty" stratum
+        if (isEmptyCollection(value)) {
+            return EMPTY_STRATUM_VALUE;
+        }
+
         String key = null;
         if (value instanceof Coding coding) {
             // ASSUMPTION: We won't have different systems with the same code
@@ -78,7 +102,7 @@ public class StratumValueWrapper {
             key = identifier.getValue();
         } else if (value instanceof Resource resource) {
             key = resource.getIdElement().toVersionless().getValue();
-        } else if (value != null) {
+        } else {
             key = value.toString();
         }
 
@@ -94,6 +118,12 @@ public class StratumValueWrapper {
     }
 
     public String getDescription() {
+        if (value == null) {
+            return NULL_STRATUM_VALUE;
+        }
+        if (isEmptyCollection(value)) {
+            return EMPTY_STRATUM_VALUE;
+        }
         if (value instanceof Coding coding) {
             return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
         } else if (value instanceof CodeableConcept concept) {
@@ -110,10 +140,8 @@ public class StratumValueWrapper {
             return identifier.getValue();
         } else if (value instanceof Resource resource) {
             return resource.getIdElement().toVersionless().getValue();
-        } else if (value != null) {
-            return value.toString();
         } else {
-            return null;
+            return value.toString();
         }
     }
 
@@ -133,7 +161,31 @@ public class StratumValueWrapper {
         return String.join("-", elements);
     }
 
+    /**
+     * Check if the value is an empty collection (List, Set, Map, or other Iterable).
+     * CQL's empty list "{}" evaluates to an empty collection, which should be treated
+     * as a distinct stratum value rather than causing an error.
+     */
+    private static boolean isEmptyCollection(Object value) {
+        if (value instanceof Collection<?> collection) {
+            return collection.isEmpty();
+        }
+        if (value instanceof Map<?, ?> map) {
+            return map.isEmpty();
+        }
+        if (value instanceof Iterable<?> iterable) {
+            return !iterable.iterator().hasNext();
+        }
+        return false;
+    }
+
     private String getValueAsString(Object valueInner) {
+        if (valueInner == null) {
+            return NULL_STRATUM_VALUE;
+        }
+        if (isEmptyCollection(valueInner)) {
+            return EMPTY_STRATUM_VALUE;
+        }
         if (valueInner instanceof Coding coding) {
             return coding.getCode();
         } else if (valueInner instanceof CodeableConcept concept) {
@@ -153,10 +205,8 @@ public class StratumValueWrapper {
                     .map(this::getValueAsString)
                     .limit(5) // stop a massively long string if we have a huge list
                     .collect(Collectors.joining(","));
-        } else if (valueInner != null) {
-            return valueInner.toString();
         } else {
-            return "<null>";
+            return valueInner.toString();
         }
     }
 }

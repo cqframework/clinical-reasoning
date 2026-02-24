@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
@@ -117,6 +119,29 @@ public class SelectedMeasureDefPopulation<P>
         return this;
     }
 
+    public SelectedMeasureDefPopulation<P> hasNoAggregateMethod() {
+        return hasAggregateMethod(null);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregateMethodNA() {
+        return hasAggregateMethod(ContinuousVariableObservationAggregateMethod.N_A);
+    }
+
+    public SelectedMeasureDefPopulation<P> hasAggregateMethod(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "PopulationDef is null");
+        final ContinuousVariableObservationAggregateMethod actualAggregateMethod = value().getAggregateMethod();
+
+        if (null == expectedAggregateMethod) {
+            assertNull(actualAggregateMethod, "PopulationDef aggregate method is not null");
+            return this;
+        }
+
+        assertNotNull(actualAggregateMethod, "PopulationDef aggregate method is null");
+        assertEquals(expectedAggregateMethod, actualAggregateMethod, "Population aggregate method mismatch");
+        return this;
+    }
+
     /**
      * Assert the number of evaluated resources (from evaluatedResources set).
      *
@@ -171,14 +196,83 @@ public class SelectedMeasureDefPopulation<P>
     }
 
     /**
-     * Assert the population criteria reference (for MEASUREOBSERVATION populations).
+     * Assert the population has no criteria reference.
      *
-     * @param criteriaReference expected criteria reference
+     * @return this SelectedMeasureDefPopulation for chaining
+     */
+    public SelectedMeasureDefPopulation<P> hasNoCriteriaReference() {
+        return hasCriteriaReference(null);
+    }
+
+    /**
+     * Assert the population criteria reference (for MEASUREOBSERVATION populations).
+     * Performs comprehensive validation:
+     * - Verifies the criteria reference matches the expected value
+     * - Validates that the referenced population exists and has type NUMERATOR or DENOMINATOR
+     * - Applies heuristic validation based on population ID naming (e.g., "observation-num" must reference NUMERATOR)
+     *
+     * @param criteriaReference expected criteria reference (population ID), or null for no criteria reference
      * @return this SelectedMeasureDefPopulation for chaining
      */
     public SelectedMeasureDefPopulation<P> hasCriteriaReference(String criteriaReference) {
         assertNotNull(value(), "PopulationDef is null");
         assertEquals(criteriaReference, value().getCriteriaReference(), "Criteria reference mismatch");
+
+        // If null, no further validation needed
+        if (criteriaReference == null) {
+            return this;
+        }
+
+        // Get the parent group to access all populations
+        if (!(parent instanceof SelectedMeasureDefGroup<?> selectedMeasureDefGroup)) {
+            // Parent might be something else in stratifier context, skip validation
+            return this;
+        }
+
+        // Find the referenced population
+        var referencedPopulation = selectedMeasureDefGroup.value().populations().stream()
+                .filter(p -> criteriaReference.equalsIgnoreCase(p.id()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(
+                referencedPopulation,
+                String.format(
+                        "Criteria reference '%s' does not match any population ID in the group. Available populations: %s",
+                        criteriaReference,
+                        selectedMeasureDefGroup.value().populations().stream()
+                                .map(PopulationDef::id)
+                                .toList()));
+
+        // Validate that the referenced population is NUMERATOR or DENOMINATOR
+        var refType = referencedPopulation.type();
+        assertTrue(
+                refType == MeasurePopulationType.NUMERATOR || refType == MeasurePopulationType.DENOMINATOR,
+                String.format(
+                        "Criteria reference '%s' points to population with type '%s', but must be NUMERATOR or DENOMINATOR",
+                        criteriaReference, refType));
+
+        // Apply heuristic validation based on current population ID
+        final String currentPopId = value().id();
+        if (currentPopId != null) {
+            String lowerCaseId = currentPopId.toLowerCase();
+            if (lowerCaseId.contains("num")) {
+                assertEquals(
+                        MeasurePopulationType.NUMERATOR,
+                        refType,
+                        String.format(
+                                "Population ID '%s' contains 'num' but references '%s' which is type '%s' instead of NUMERATOR",
+                                currentPopId, criteriaReference, refType));
+            } else if (lowerCaseId.contains("den")) {
+                assertEquals(
+                        MeasurePopulationType.DENOMINATOR,
+                        refType,
+                        String.format(
+                                "Population ID '%s' contains 'den' but references '%s' which is type '%s' instead of DENOMINATOR",
+                                currentPopId, criteriaReference, refType));
+            }
+        }
+
         return this;
     }
 
@@ -212,5 +306,45 @@ public class SelectedMeasureDefPopulation<P>
      */
     public PopulationDef populationDef() {
         return value();
+    }
+
+    public SelectedMeasureDefPopulationExtension<SelectedMeasureDefPopulation<P>> getExtDef(String expressionName) {
+        var extDef = this.value.getSupportingEvidenceDefs().stream()
+                .filter(t -> t.getExpression().equals(expressionName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Expression not found"));
+        return new SelectedMeasureDefPopulationExtension<>(extDef, this);
+    }
+
+    public SelectedMeasureDefPopulation<P> assertNoSupportingEvidenceResults() {
+
+        var defs = this.value.getSupportingEvidenceDefs();
+
+        if (defs == null || defs.isEmpty()) {
+            return this; // nothing to check
+        }
+
+        for (var def : defs) {
+            var subjectResources = def.getSubjectResources();
+
+            if (subjectResources == null || subjectResources.isEmpty()) {
+                continue;
+            }
+
+            // Any key with a non-empty Set is a failure
+            for (var entry : subjectResources.entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    throw new AssertionError("SupportingEvidenceDef '" + def.getName() + "' produced results for key '"
+                            + entry.getKey() + "': " + entry.getValue());
+                }
+            }
+        }
+
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T unsafeCast(Object selected) {
+        return (T) selected;
     }
 }

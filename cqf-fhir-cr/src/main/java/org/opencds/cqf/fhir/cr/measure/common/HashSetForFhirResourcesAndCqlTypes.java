@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 
 /**
@@ -66,7 +68,7 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
      */
     @Override
     public boolean add(T newElement) {
-        final IBaseResource newElementResource = castToResourceIfApplicable(newElement);
+        final IBaseResource newElementResource = FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(newElement);
 
         if (newElementResource != null) {
             if (this.contains(newElementResource)) {
@@ -76,7 +78,7 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
             }
         }
 
-        final CqlType newElementCqlType = castToCqlTypeIfApplicable(newElement);
+        final CqlType newElementCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newElement);
 
         if (newElementCqlType != null) {
             if (this.contains(newElementCqlType)) {
@@ -101,23 +103,25 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
      */
     @Override
     public boolean remove(Object removalCandidate) {
-        final IBaseResource removalCandidateResource = castToResourceIfApplicable(removalCandidate);
+        final IBaseResource removalCandidateResource =
+                FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(removalCandidate);
 
         if (removalCandidateResource != null) {
             for (T next : this) {
                 if (next instanceof IBaseResource nextResource
-                        && areEqualResources(nextResource, removalCandidateResource)) {
+                        && FhirResourceAndCqlTypeUtils.areEqualResources(nextResource, removalCandidateResource)) {
                     return super.remove(nextResource);
                 }
             }
             return false;
         }
 
-        final CqlType removalCandidateCqlType = castToCqlTypeIfApplicable(removalCandidate);
+        final CqlType removalCandidateCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(removalCandidate);
 
         if (removalCandidateCqlType != null) {
             for (T next : this) {
-                if (next instanceof CqlType nextCqlType && areEqualCqlTypes(nextCqlType, removalCandidateCqlType)) {
+                if (next instanceof CqlType nextCqlType
+                        && FhirResourceAndCqlTypeUtils.areEqualCqlTypes(nextCqlType, removalCandidateCqlType)) {
                     return super.remove(nextCqlType);
                 }
             }
@@ -160,8 +164,8 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
     }
 
     private static boolean contains(Collection<?> collection, Object obj) {
-        final IBaseResource otherResource = castToResourceIfApplicable(obj);
-        final CqlType otherCqlType = castToCqlTypeIfApplicable(obj);
+        final IBaseResource otherResource = FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(obj);
+        final CqlType otherCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(obj);
 
         // prevent infinite recursion
         if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResourcesAndCqlTypes) {
@@ -173,67 +177,30 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
 
     private static boolean containsInner(Collection<?> collection, Object obj) {
         for (Object item : collection) {
-            if (obj instanceof IBaseResource objResource && item instanceof IBaseResource itemResource) {
-                if (areEqualResources(objResource, itemResource)) {
-                    return true;
-                }
-            } else if (obj instanceof CqlType objCqlType && item instanceof CqlType itemCqlType) {
-                if (areEqualCqlTypes(objCqlType, itemCqlType)) {
-                    return true;
-                }
-            } else {
-                if (Objects.equals(item, obj)) {
-                    return true;
-                }
+            if (FhirResourceAndCqlTypeUtils.areObjectsEqual(obj, item)) {
+                return true;
             }
         }
 
         return false;
     }
 
-    private static IBaseResource castToResourceIfApplicable(Object obj) {
-        if (obj instanceof IBaseResource resource) {
-            return resource;
-        }
-        return null;
-    }
-
-    private static CqlType castToCqlTypeIfApplicable(Object obj) {
-        if (obj instanceof CqlType cqlDate) {
-            return cqlDate;
-        }
-        return null;
-    }
-
-    private static boolean areEqualResources(IBaseResource resource1, IBaseResource resource2) {
-        if (resource1 == resource2) {
-            return true;
+    @Override
+    public String toString() {
+        if (isEmpty()) {
+            return "[]";
         }
 
-        if (resource1.getIdElement() == null || resource2.getIdElement() == null) {
-            return false;
+        final T firstElement = iterator().next();
+
+        if (firstElement instanceof IBaseResource) {
+            return stream()
+                    .map(IBaseResource.class::cast)
+                    .map(IBaseResource::getIdElement)
+                    .map(IPrimitiveType::getValueAsString)
+                    .collect(Collectors.joining(",", "[", "]"));
         }
 
-        // In case we have IDs that are identical but different resource types,
-        // e.g. Patient/123 vs Observation/123
-        if (resource1.getClass() != resource2.getClass()) {
-            return false;
-        }
-
-        return Objects.equals(resource1.getIdElement(), resource2.getIdElement());
-    }
-
-    private static boolean areEqualCqlTypes(CqlType cqlDate1, CqlType cqlDate2) {
-        if (cqlDate1 == cqlDate2) {
-            return true;
-        }
-
-        if (cqlDate1 == null || cqlDate2 == null) {
-            return false;
-        }
-
-        // We're relying on all CqlTypes to implement equal() properly
-        // Note this is equal(), not Object.equals()
-        return Boolean.TRUE.equals(cqlDate1.equal(cqlDate2));
+        return super.toString();
     }
 }

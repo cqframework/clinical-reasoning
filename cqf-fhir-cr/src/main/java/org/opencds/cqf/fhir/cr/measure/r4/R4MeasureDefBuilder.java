@@ -2,18 +2,22 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQF_EXPRESSION_CODE;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SUPPORTING_EVIDENCE_DEFINITION_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RISK_ADJUSTMENT_USAGE_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
+import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils.isBooleanPopulationBasis;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -42,8 +46,11 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils;
 
+@SuppressWarnings("squid:S1135")
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     @Override
@@ -51,7 +58,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         checkId(measure);
 
         // scoring
-        var measureScoring = getMeasureScoring(measure);
+        var measureScoring = R4MeasureUtils.getMeasureScoring(measure);
         // populationBasis
         var measureBasis = getMeasureBasis(measure);
         // improvement Notation
@@ -87,10 +94,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Populations
         checkIds(group);
+        validateRatioContinuousVariableIfApplicable(measure, group, groupScoring, measureScoring);
 
         var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
-                .map(t -> buildPopulationDef(t, group, measure.getUrl(), populationBasisDef))
+                .map(t -> buildPopulationDef(
+                        t, group, measure.getUrl(), populationBasisDef, getSupportingEvidenceDefs(t)))
                 .toList();
 
         final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
@@ -98,7 +107,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Stratifiers
         var stratifiers = group.getStratifier().stream()
-                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc))
+                .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc, populationBasisDef))
                 .toList();
 
         return new GroupDef(
@@ -106,14 +115,140 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(group.getCode()),
                 stratifiers,
                 mergePopulations(populationsWithCriteriaReference, optPopulationDefDateOfCompliance.orElse(null)),
-                getScoringDef(measure.getUrl(), measureScoring, groupScoring),
+                R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring),
                 hasGroupImpNotation,
                 getImprovementNotation(measureImpNotation, groupImpNotation),
                 populationBasisDef);
     }
 
+    private List<SupportingEvidenceDef> getSupportingEvidenceDefs(MeasureGroupPopulationComponent groupPopulation) {
+
+        List<SupportingEvidenceDef> supportingEvidenceDefs = new ArrayList<>();
+
+        List<Extension> ext = groupPopulation.getExtension().stream()
+                .filter(t -> EXT_SUPPORTING_EVIDENCE_DEFINITION_URL.equals(t.getUrl()))
+                .toList();
+
+        for (Extension e : ext) {
+
+            if (!(e.getValue() instanceof Expression expressionValue)) {
+                throw new InvalidRequestException("Extension does not contain valueExpression");
+            }
+
+            supportingEvidenceDefs.add(new SupportingEvidenceDef(
+                    expressionValue.getExpression(),
+                    EXT_SUPPORTING_EVIDENCE_URL,
+                    expressionValue.getDescription(),
+                    expressionValue.getName(),
+                    expressionValue.getLanguage(),
+                    extractConceptDefFromExpression(expressionValue)));
+        }
+
+        return supportingEvidenceDefs;
+    }
+
+    public static ConceptDef extractConceptDefFromExpression(Expression expr) {
+        if (expr == null) {
+            return null;
+        }
+
+        Coding coding = expr.getExtension().stream()
+                .filter(e -> EXT_CQF_EXPRESSION_CODE.equals(e.getUrl()))
+                .map(Extension::getValue)
+                .filter(Coding.class::isInstance)
+                .map(Coding.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        if (coding == null) {
+            return null;
+        }
+
+        CodeDef codeDef = new CodeDef(coding.getSystem(), coding.getVersion(), coding.getCode(), coding.getDisplay());
+
+        return new ConceptDef(List.of(codeDef), null);
+    }
+
     private void checkIds(MeasureGroupComponent group) {
         group.getPopulation().forEach(R4MeasureDefBuilder::checkId);
+    }
+
+    /**
+     * Validate ratio continuous variable measure structure if applicable.
+     *
+     * <p>For ratio continuous variable measures, validates:
+     * - Exactly 2 MEASURE_OBSERVATION populations exist
+     * - Each MEASURE_OBSERVATION has a criteria reference extension
+     * - One MEASURE_OBSERVATION references NUMERATOR, one references DENOMINATOR
+     *
+     * @param measure the Measure resource
+     * @param group the MeasureGroupComponent to validate
+     * @param groupScoring the group-level scoring (may be null)
+     * @param measureScoring the measure-level scoring
+     */
+    private void validateRatioContinuousVariableIfApplicable(
+            Measure measure, MeasureGroupComponent group, MeasureScoring groupScoring, MeasureScoring measureScoring) {
+
+        var effectiveScoring = R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring);
+
+        if (!R4MeasureUtils.isRatioContinuousVariable(effectiveScoring, group)) {
+            return;
+        }
+
+        var measureObservations = R4MeasureUtils.getMeasureObservationPopulations(group);
+
+        // Validate exactly 2 measure observations
+        if (measureObservations.size() != 2) {
+            throw new InvalidRequestException(
+                    "Ratio Continuous Variable requires 2 Measure Observations defined, you have: %s"
+                            .formatted(measureObservations.size()));
+        }
+
+        // Extract criteria references from both measure observations
+        var criteriaRef1 = R4MeasureUtils.getCriteriaReferenceFromPopulation(measureObservations.get(0));
+        var criteriaRef2 = R4MeasureUtils.getCriteriaReferenceFromPopulation(measureObservations.get(1));
+
+        // Both must have criteria references
+        if (criteriaRef1 == null) {
+            throw new InvalidRequestException(
+                    "MEASURE_OBSERVATION population with id '%s' is missing criteria reference extension for Measure: %s"
+                            .formatted(measureObservations.get(0).getId(), measure.getUrl()));
+        }
+        if (criteriaRef2 == null) {
+            throw new InvalidRequestException(
+                    "MEASURE_OBSERVATION population with id '%s' is missing criteria reference extension for Measure: %s"
+                            .formatted(measureObservations.get(1).getId(), measure.getUrl()));
+        }
+
+        // Verify criteria references exist as population IDs
+        // If they don't, skip this validation - getCriteriaReference will catch that error later
+        var criteriaRef1ExistsAsPopId =
+                group.getPopulation().stream().map(Element::getId).anyMatch(id -> id.equals(criteriaRef1));
+        var criteriaRef2ExistsAsPopId =
+                group.getPopulation().stream().map(Element::getId).anyMatch(id -> id.equals(criteriaRef2));
+
+        if (!criteriaRef1ExistsAsPopId || !criteriaRef2ExistsAsPopId) {
+            // Let getCriteriaReference handle this validation
+            return;
+        }
+
+        // One must reference numerator, one must reference denominator
+        var hasNumeratorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.NUMERATOR)
+                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.NUMERATOR);
+        var hasDenominatorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.DENOMINATOR)
+                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.DENOMINATOR);
+
+        if (!hasNumeratorRef || !hasDenominatorRef) {
+            throw new InvalidRequestException(
+                    ("Ratio Continuous Variable requires one MEASURE_OBSERVATION to reference '%s' "
+                                    + "and one to reference '%s', but found criteria references: '%s' and '%s' for Measure: %s")
+                            .formatted(
+                                    MeasurePopulationType.NUMERATOR.toCode(),
+                                    MeasurePopulationType.DENOMINATOR.toCode(),
+                                    criteriaRef1,
+                                    criteriaRef2,
+                                    measure.getUrl()));
+        }
     }
 
     @Nonnull
@@ -121,12 +256,14 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             MeasureGroupPopulationComponent population,
             MeasureGroupComponent group,
             String measureUrl,
-            CodeDef populationBasis) {
+            CodeDef populationBasis,
+            @Nullable List<SupportingEvidenceDef> supportingEvidenceDefs) {
         MeasurePopulationType popType = MeasurePopulationType.fromCode(
                 population.getCode().getCodingFirstRep().getCode());
         // criteriaReference & aggregateMethod are for MeasureObservation populations only
         String criteriaReference = getCriteriaReference(group, population, popType, measureUrl);
-        ContinuousVariableObservationAggregateMethod aggregateMethod = getAggregateMethod(measureUrl, population);
+        ContinuousVariableObservationAggregateMethod aggregateMethod =
+                R4MeasureUtils.getAggregateMethod(measureUrl, population);
         return new PopulationDef(
                 population.getId(),
                 conceptToConceptDef(population.getCode()),
@@ -134,9 +271,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 population.getCriteria().getExpression(),
                 populationBasis,
                 criteriaReference,
-                aggregateMethod);
+                aggregateMethod,
+                supportingEvidenceDefs);
     }
 
+    // TODO: JM, DateOfCompliance can now be more simply exposed via supporting evidence instead of this current
+    // workflow. Should deprecate.
     private Optional<PopulationDef> buildPopulationDefForDateOfCompliance(
             String measureUrl,
             MeasureGroupComponent group,
@@ -161,35 +301,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 totalConceptDefCreator(DATEOFCOMPLIANCE),
                 DATEOFCOMPLIANCE,
                 expression,
-                populationBasis);
+                populationBasis,
+                null);
 
         return Optional.of(populateDefDateOfCompliance);
-    }
-
-    private ContinuousVariableObservationAggregateMethod getAggregateMethod(
-            String measureUrl, @Nullable MeasureGroupPopulationComponent measureObservationPopulation) {
-
-        if (measureObservationPopulation == null) {
-            return ContinuousVariableObservationAggregateMethod.N_A;
-        }
-
-        var aggMethodExt = measureObservationPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
-        if (aggMethodExt != null) {
-            // this method is only required if scoringType = continuous-variable or Ratio Continuous variable
-            var aggregateMethodString = aggMethodExt.getValue().toString();
-
-            var aggregateMethod = ContinuousVariableObservationAggregateMethod.fromString(aggregateMethodString);
-
-            // check that method is accepted
-            if (aggregateMethod == null) {
-                throw new InvalidRequestException("Measure Observation method: %s is not a valid value for Measure: %s"
-                        .formatted(aggregateMethodString, measureUrl));
-            }
-
-            return aggregateMethod;
-        }
-
-        return ContinuousVariableObservationAggregateMethod.N_A;
     }
 
     @Nullable
@@ -226,9 +341,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
     }
 
     @Nonnull
-    private StratifierDef buildStratifierDef(String measureUrl, MeasureGroupStratifierComponent mgsc) {
+    private StratifierDef buildStratifierDef(
+            String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
         checkId(mgsc);
 
+        boolean isBooleanBasis = isBooleanPopulationBasis(populationBasisDef);
         // Components
         var components = new ArrayList<StratifierComponentDef>();
         for (MeasureGroupStratifierComponentComponent scc : mgsc.getComponent()) {
@@ -251,7 +368,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 mgsc.getId(),
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
-                getStratifierType(measureUrl, mgsc),
+                getStratifierType(measureUrl, mgsc, isBooleanBasis),
                 components);
     }
 
@@ -272,10 +389,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return sdes;
     }
 
+    @Nullable
     private static MeasureStratifierType getStratifierType(
-            String measureUrl, MeasureGroupStratifierComponent measureGroupStratifierComponent) {
+            String measureUrl,
+            MeasureGroupStratifierComponent measureGroupStratifierComponent,
+            boolean isBooleanBasis) {
         if (measureGroupStratifierComponent == null) {
-            return MeasureStratifierType.VALUE;
+            return null;
         }
 
         final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria();
@@ -296,14 +416,19 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         if (hasCriteria) {
             return MeasureStratifierType.CRITERIA;
+        } else if (!isBooleanBasis) {
+            return MeasureStratifierType.NON_SUBJECT_VALUE;
+        } else {
+            return MeasureStratifierType.VALUE;
         }
-
-        return MeasureStratifierType.VALUE;
     }
 
     private static void triggerFirstPassValidation(Measure measure) {
 
         checkId(measure);
+
+        // Validate unique population IDs within each group
+        validateUniquePopulationIds(measure);
 
         // SDES
         for (MeasureSupplementalDataComponent s : measure.getSupplementalData()) {
@@ -314,20 +439,21 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // Create instance to call instance methods
         var builder = new R4MeasureDefBuilder();
 
-        // scoring
-        builder.getMeasureScoring(measure);
-
         builder.validateMeasureImprovementNotation(measure);
     }
 
     private static void checkSDEUsage(
             Measure measure, MeasureSupplementalDataComponent measureSupplementalDataComponent) {
         var hasUsage = measureSupplementalDataComponent.getUsage().stream()
-                .filter(t -> t.getCodingFirstRep().getCode().equals(SDE_USAGE_CODE))
+                .filter(t -> {
+                    String code = t.getCodingFirstRep().getCode();
+                    return SDE_USAGE_CODE.equals(code) || RISK_ADJUSTMENT_USAGE_CODE.equals(code);
+                })
                 .toList();
         if (CollectionUtils.isEmpty(hasUsage)) {
-            throw new InvalidRequestException("SupplementalDataComponent usage is missing code: %s for Measure: %s"
-                    .formatted(SDE_USAGE_CODE, measure.getUrl()));
+            throw new InvalidRequestException(
+                    "SupplementalDataComponent usage is missing code: %s or %s for Measure: %s"
+                            .formatted(SDE_USAGE_CODE, RISK_ADJUSTMENT_USAGE_CODE, measure.getUrl()));
         }
     }
 
@@ -360,9 +486,35 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
     }
 
-    private MeasureScoring getMeasureScoring(Measure measure) {
-        var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
-        return getMeasureScoring(measure.getUrl(), scoringCode);
+    /**
+     * Validates that all population IDs within each group are unique.
+     *
+     * @param measure the Measure to validate
+     * @throws InvalidRequestException if duplicate population IDs exist within a group
+     */
+    private static void validateUniquePopulationIds(Measure measure) {
+        String measureIdentifier = measure.hasUrl() ? measure.getUrl() : measure.getId();
+
+        for (int groupIndex = 0; groupIndex < measure.getGroup().size(); groupIndex++) {
+            MeasureGroupComponent group = measure.getGroup().get(groupIndex);
+            String groupIdentifier = group.hasId() ? group.getId() : "group-" + (groupIndex + 1);
+
+            Set<String> seenPopulationIds = new HashSet<>();
+
+            for (MeasureGroupPopulationComponent population : group.getPopulation()) {
+                String populationId = population.getId();
+
+                // Skip null/blank IDs - they will be caught by checkId() validation
+                if (populationId == null || populationId.isBlank()) {
+                    continue;
+                }
+
+                if (!seenPopulationIds.add(populationId)) {
+                    throw new InvalidRequestException("Duplicate population ID '%s' found in %s of Measure: %s"
+                            .formatted(populationId, groupIdentifier, measureIdentifier));
+                }
+            }
+        }
     }
 
     public CodeDef getMeasureBasis(Measure measure) {
@@ -388,7 +540,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(measure.getUrl(), codeDef);
+            R4MeasureUtils.validateImprovementNotationCode(measure.getUrl(), codeDef);
             return codeDef;
         }
         return null;
@@ -400,35 +552,16 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             var codeDef = new CodeDef(
                     improvementNotationValue.getCodingFirstRep().getSystem(),
                     improvementNotationValue.getCodingFirstRep().getCode());
-            validateImprovementNotationCode(measure.getUrl(), codeDef);
+            R4MeasureUtils.validateImprovementNotationCode(measure.getUrl(), codeDef);
         }
     }
 
     public CodeDef getGroupImpNotation(Measure measure, MeasureGroupComponent group) {
-        var ext = group.getExtensionByUrl(MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION);
-        if (ext != null) {
-            var value = ext.getValue();
-            if (value instanceof CodeableConcept coding) {
-                var codeDef = new CodeDef(
-                        coding.getCodingFirstRep().getSystem(),
-                        coding.getCodingFirstRep().getCode());
-                validateImprovementNotationCode(measure.getUrl(), codeDef);
-                return codeDef;
-            }
-        }
-        return null;
+        return R4MeasureUtils.getGroupImprovementNotation(measure, group);
     }
 
     public MeasureScoring getGroupMeasureScoring(Measure measure, MeasureGroupComponent group) {
-        var ext = group.getExtensionByUrl(CQFM_SCORING_EXT_URL);
-        if (ext != null) {
-            var extVal = ext.getValue();
-            assert extVal instanceof CodeableConcept;
-            CodeableConcept coding = (CodeableConcept) extVal;
-            return getMeasureScoring(
-                    measure.getUrl(), coding.getCodingFirstRep().getCode());
-        }
-        return null;
+        return R4MeasureUtils.getGroupMeasureScoring(measure, group);
     }
 
     public CodeDef getGroupPopulationBasis(MeasureGroupComponent group) {

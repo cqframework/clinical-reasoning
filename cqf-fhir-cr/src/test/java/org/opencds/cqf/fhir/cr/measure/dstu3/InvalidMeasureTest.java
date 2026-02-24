@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.Given;
 
@@ -36,7 +37,19 @@ class InvalidMeasureTest {
                 .when()
                 .measureId("LibraryMissingContent")
                 .evaluate();
-        var e = assertThrows(IllegalStateException.class, () -> when.then());
-        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for library"));
+        var e = assertThrows(CqlIncludeException.class, when::then);
+        assertTrue(e.getMessage().contains("Could not load source for library"));
+    }
+
+    @Test
+    void evaluateThrowsErrorWithDuplicatePopulationIds() {
+        var when = GIVEN_INVALID_MEASURE_REPO
+                .when()
+                .measureId("DuplicatePopulationIds")
+                .evaluate();
+        var e = assertThrows(InvalidRequestException.class, when::then);
+        assertTrue(e.getMessage().contains("Duplicate population ID"));
+        assertTrue(e.getMessage().contains("initial-population"));
+        assertTrue(e.getMessage().contains("group-1"));
     }
 }

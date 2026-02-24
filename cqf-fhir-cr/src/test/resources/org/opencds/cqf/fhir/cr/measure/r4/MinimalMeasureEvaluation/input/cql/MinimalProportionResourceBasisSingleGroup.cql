@@ -19,6 +19,9 @@ define "Denominator Exclusion":
         with ["Patient"] BirthDate
             such that "CalendarAgeInYearsAt"(FHIRHelpers.ToDate(BirthDate.birthDate), start of InpatientEncounter.period) between 75 and 90
 
+define "has Criteria":
+    true
+
 define "Denominator Exception":
     ["Encounter"] InpatientEncounter
         where "LengthInDays"(FHIRHelpers.ToInterval(InpatientEncounter.period)) > 5

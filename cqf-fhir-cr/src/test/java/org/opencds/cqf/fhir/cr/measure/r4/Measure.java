@@ -33,11 +33,10 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportR
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+// consider rolling this entire thing into MultiMeasure with "single measure" assertions
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
-
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FunctionalInterface
     public interface Validator<T> {
@@ -88,6 +87,7 @@ public class Measure {
     public static class Given {
         private IRepository repository;
         private MeasureEvaluationOptions evaluationOptions;
+        private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
@@ -110,6 +110,8 @@ public class Measure {
                     .getEvaluationSettings()
                     .getTerminologySettings()
                     .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+
+            this.serverBase = "http://localhost";
 
             this.measurePeriodValidator = new MeasurePeriodValidator();
         }
@@ -136,20 +138,20 @@ public class Measure {
             return this;
         }
 
-        private R4MeasureService buildMeasureService() {
-            return new R4MeasureService(repository, evaluationOptions, measurePeriodValidator);
+        private R4MultiMeasureService buildMultiMeasureService() {
+            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public When when() {
-            return new When(buildMeasureService());
+            return new When(buildMultiMeasureService());
         }
     }
 
     public static class When {
-        private final R4MeasureService service;
+        private final R4MultiMeasureService multiMeasureService;
 
-        When(R4MeasureService service) {
-            this.service = service;
+        When(R4MultiMeasureService multiMeasureService) {
+            this.multiMeasureService = multiMeasureService;
         }
 
         private String measureId;
@@ -222,7 +224,7 @@ public class Measure {
         }
 
         public When evaluate() {
-            this.operation = () -> service.evaluateMeasureCaptureDefs(
+            this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
                     Eithers.forMiddle3(new IdType("Measure", measureId)),
                     periodStart,
                     periodEnd,
@@ -245,7 +247,7 @@ public class Measure {
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            return new Then(this.operation.get(), this.service.getRepository());
+            return new Then(this.operation.get(), this.multiMeasureService.getRepository());
         }
     }
 

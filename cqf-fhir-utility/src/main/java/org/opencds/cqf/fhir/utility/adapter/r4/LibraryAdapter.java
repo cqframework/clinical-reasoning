@@ -11,12 +11,10 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ParameterDefinition;
 import org.hl7.fhir.r4.model.Parameters;
@@ -85,23 +83,45 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
         addProfileReferences(references, referenceSource);
 
         // relatedArtifact[].resource
-        getRelatedArtifactsOfType(DEPENDSON).stream()
-                .filter(RelatedArtifact::hasResource)
-                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .forEach(references::add);
+        var relatedArtifacts = getRelatedArtifactsOfType(DEPENDSON);
+        for (int i = 0; i < relatedArtifacts.size(); i++) {
+            RelatedArtifact ra = relatedArtifacts.get(i);
+            if (ra.hasResource()) {
+                IDependencyInfo dep = DependencyInfo.convertRelatedArtifact(ra, referenceSource);
+                dep.addFhirPath("relatedArtifact[" + i + "].resource");
+                references.add(dep);
+            }
+        }
 
-        getLibrary().getDataRequirement().forEach(dr -> {
+        var dataRequirements = getLibrary().getDataRequirement();
+        for (int drIndex = 0; drIndex < dataRequirements.size(); drIndex++) {
+            var dr = dataRequirements.get(drIndex);
+
             // dataRequirement[].profile[]
-            dr.getProfile().stream()
-                    .filter(IPrimitiveType::hasValue)
-                    .forEach(profile -> references.add(new DependencyInfo(
-                            referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
+            var profiles = dr.getProfile();
+            for (int profileIndex = 0; profileIndex < profiles.size(); profileIndex++) {
+                var profile = profiles.get(profileIndex);
+                if (profile.hasValue()) {
+                    IDependencyInfo dep = new DependencyInfo(
+                            referenceSource, profile.getValue(), profile.getExtension(), profile::setValue);
+                    dep.addFhirPath("dataRequirement[" + drIndex + "].profile[" + profileIndex + "]");
+                    references.add(dep);
+                }
+            }
+
             // dataRequirement[].codeFilter[].valueSet
-            dr.getCodeFilter().stream()
-                    .filter(DataRequirementCodeFilterComponent::hasValueSet)
-                    .forEach(cf -> references.add(
-                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
-        });
+            var codeFilters = dr.getCodeFilter();
+            for (int cfIndex = 0; cfIndex < codeFilters.size(); cfIndex++) {
+                var cf = codeFilters.get(cfIndex);
+                if (cf.hasValueSet()) {
+                    IDependencyInfo dep =
+                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet);
+                    dep.addFhirPath("dataRequirement[" + drIndex + "].codeFilter[" + cfIndex + "].valueSet");
+                    references.add(dep);
+                }
+            }
+        }
+
         return references;
     }
 

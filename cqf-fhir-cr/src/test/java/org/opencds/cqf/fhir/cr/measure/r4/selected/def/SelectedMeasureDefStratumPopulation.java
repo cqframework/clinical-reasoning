@@ -2,8 +2,10 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 
@@ -146,6 +148,64 @@ public class SelectedMeasureDefStratumPopulation<P>
     public SelectedMeasureDefStratumPopulation<P> hasType(MeasurePopulationType expectedMeasurePopulationType) {
         assertNotNull(value(), "StratumPopulationDef is null");
         assertEquals(expectedMeasurePopulationType, value().populationDef().type());
+        return this;
+    }
+
+    // ==================== Aggregation Result Assertions ====================
+
+    /**
+     * Assert the per-stratum aggregation result value.
+     *
+     * @param expectedAggregationResult expected aggregation result
+     * @return this SelectedMeasureDefStratumPopulation for chaining
+     */
+    public SelectedMeasureDefStratumPopulation<P> hasAggregationResult(Double expectedAggregationResult) {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        final Double aggregationResult = value().getAggregationResult();
+        assertNotNull(
+                aggregationResult,
+                "StratumPopulationDef aggregation result is null, expected: " + expectedAggregationResult);
+        assertEquals(
+                expectedAggregationResult, aggregationResult, 0.001, "Stratum population aggregation result mismatch");
+        return this;
+    }
+
+    /**
+     * Assert that the per-stratum aggregation result is null.
+     *
+     * @return this SelectedMeasureDefStratumPopulation for chaining
+     */
+    public SelectedMeasureDefStratumPopulation<P> hasNoAggregationResult() {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        assertNull(
+                value().getAggregationResult(),
+                "StratumPopulationDef aggregation result should be null but was: " + value().getAggregationResult());
+        return this;
+    }
+
+    // ==================== Aggregate Method Assertions ====================
+
+    public SelectedMeasureDefStratumPopulation<P> hasNoAggregateMethod() {
+        return hasAggregateMethod(null);
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasAggregateMethodNA() {
+        return hasAggregateMethod(ContinuousVariableObservationAggregateMethod.N_A);
+    }
+
+    public SelectedMeasureDefStratumPopulation<P> hasAggregateMethod(
+            ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
+        assertNotNull(value(), "StratumPopulationDef is null");
+        final ContinuousVariableObservationAggregateMethod actualAggregateMethod =
+                value().populationDef().getAggregateMethod();
+
+        if (null == expectedAggregateMethod) {
+            assertNull(actualAggregateMethod, "StratumPopulationDef aggregate method is not null");
+            return this;
+        }
+
+        assertNotNull(actualAggregateMethod, "StratumPopulationDef aggregate method is null");
+        assertEquals(expectedAggregateMethod, actualAggregateMethod, "Stratum population aggregate method mismatch");
         return this;
     }
 }

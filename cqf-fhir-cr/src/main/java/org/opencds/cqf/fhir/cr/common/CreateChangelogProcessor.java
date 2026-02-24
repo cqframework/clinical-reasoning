@@ -474,8 +474,9 @@ public class CreateChangelogProcessor implements ICreateChangelogProcessor {
                         case REPLACE -> addReplaceOperation(type, path, currentValue, originalValue);
                         case DELETE -> addDeleteOperation(type, path, originalValue);
                         case INSERT -> addInsertOperation(type, path, currentValue);
-                        default -> throw new UnprocessableEntityException(
-                                "Unknown type provided when adding an operation to the ChangeLog");
+                        default ->
+                            throw new UnprocessableEntityException(
+                                    "Unknown type provided when adding an operation to the ChangeLog");
                     }
                 } else {
                     throw new UnprocessableEntityException(

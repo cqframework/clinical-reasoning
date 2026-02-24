@@ -189,8 +189,8 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
                 var page = changelog.getPage(url).orElseGet(() -> switch (resourceType) {
                     case "ValueSet" -> changelog.addPage((ValueSet) sourceResource, (ValueSet) targetResource, cache);
                     case "Library" -> changelog.addPage((Library) sourceResource, (Library) targetResource);
-                    case "PlanDefinition" -> changelog.addPage(
-                            (PlanDefinition) sourceResource, (PlanDefinition) targetResource);
+                    case "PlanDefinition" ->
+                        changelog.addPage((PlanDefinition) sourceResource, (PlanDefinition) targetResource);
                     default -> changelog.addPage(sourceResource, targetResource, url);
                 });
                 // 3) Process each change

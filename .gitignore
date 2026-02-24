@@ -2,6 +2,9 @@
 build/
 .gradle/
 
+# Kotlin
+.kotlin
+
 # Maven
 target/
 .m2
@@ -45,6 +48,9 @@ htmlReport/
 # Tool version managers
 .tool-versions
 mise.toml
+
+# Local development overrides
+local.properties
 
 # Other
 .cursorignore

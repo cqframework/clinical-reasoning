@@ -19,8 +19,7 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String TEMPLATE =
-            """
+    String TEMPLATE = """
         {
             "resourceType": "Questionnaire",
             "status": "active",
@@ -77,8 +76,7 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
     default void getRelatedArtifact_noValidExtensions_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str =
-                """
+        String str = """
         {
             "resourceType": "Questionnaire",
             "status": "active",
@@ -92,8 +90,7 @@ public interface IQuestionnaireAdapterTest<T extends IBaseResource> extends IBas
                 }
             ]
         }
-        """
-                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T questionnaire = parser.parseResource(questionnaireClass(), str);
 

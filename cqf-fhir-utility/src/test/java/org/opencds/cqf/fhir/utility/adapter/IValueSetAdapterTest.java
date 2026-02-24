@@ -19,8 +19,7 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
     String RESOURCE_REF_1 = "RESOURCE_REF_1";
     String RESOURCE_REF_2 = "RESOURCE_REF_2";
 
-    String TEMPLATE =
-            """
+    String TEMPLATE = """
         {
             "resourceType": "ValueSet",
             "status": "active",
@@ -82,8 +81,7 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
     default void getRelatedArtifact_noRelevantExtensions_returnsNothing() {
         // setup
         IParser parser = fhirContext().newJsonParser();
-        String str =
-                """
+        String str = """
                 {
                     "resourceType": "ValueSet",
                     "status": "active",
@@ -97,8 +95,7 @@ public interface IValueSetAdapterTest<T extends IBaseResource> extends IBaseAdap
                     }
             ]
         }
-        """
-                        .replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
+        """.replaceAll("REF", toRelatedArtifactCanonicalReference("some-ref"));
 
         T valueSet = parser.parseResource(valueSetClass(), str);
         IValueSetAdapter adapter = getAdapterFactory().createValueSet(valueSet);

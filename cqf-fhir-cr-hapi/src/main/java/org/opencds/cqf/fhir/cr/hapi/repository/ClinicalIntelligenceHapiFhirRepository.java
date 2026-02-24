@@ -61,9 +61,9 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     public <T extends IBaseResource, I extends IIdType> T read(
             Class<T> resourceType, I id, Map<String, String> headers) {
 
-        return (T) this.daoRegistry
+        return this.daoRegistry
                 .getResourceDao(resourceType)
-                .read(id, cloneWithAction(resourceType, headers, RestOperationTypeEnum.READ));
+                .read(id, cloneWithAction(headers, RestOperationTypeEnum.READ));
     }
 
     /**
@@ -83,7 +83,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
             IRepositoryRestQueryContributor queryContributor,
             Map<String, String> headers) {
 
-        var details = cloneWithAction(resourceType, headers, RestOperationTypeEnum.SEARCH_TYPE);
+        var details = cloneWithAction(headers, RestOperationTypeEnum.SEARCH_TYPE);
 
         var searchParameterMap =
                 SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(queryContributor);
@@ -106,16 +106,18 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return createBundle(details, bundleProvider);
     }
 
+    @Override
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
         return this.daoRegistry
                 .getResourceDao(resource)
-                .create(resource, cloneWithAction(resource, headers, RestOperationTypeEnum.CREATE));
+                .create(resource, cloneWithAction(headers, RestOperationTypeEnum.CREATE));
     }
 
+    @Override
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         final DaoMethodOutcome update = daoRegistry
                 .getResourceDao(resource)
-                .update(resource, cloneWithAction(resource, headers, RestOperationTypeEnum.UPDATE));
+                .update(resource, cloneWithAction(headers, RestOperationTypeEnum.UPDATE));
         boolean created = update.getCreated() != null && update.getCreated();
         if (created) {
             update.setResponseStatusCode(201);
@@ -126,6 +128,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return update;
     }
 
+    @Override
     public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
             I id, P patchParameters, Map<String, String> headers) {
         return this.daoRegistry
@@ -136,14 +139,15 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
                         PatchTypeEnum.FHIR_PATCH_JSON,
                         (String) null,
                         patchParameters,
-                        cloneWithAction(patchParameters, headers, RestOperationTypeEnum.PATCH));
+                        cloneWithAction(headers, RestOperationTypeEnum.PATCH));
     }
 
+    @Override
     public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
             Class<T> resourceType, I id, Map<String, String> headers) {
         return this.daoRegistry
                 .getResourceDao(resourceType)
-                .delete(id, cloneWithAction(resourceType, headers, RestOperationTypeEnum.DELETE));
+                .delete(id, cloneWithAction(headers, RestOperationTypeEnum.DELETE));
     }
 
     // N.B. We don't support request details cloning for link
@@ -187,16 +191,9 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         return bundleType;
     }
 
-    private <T extends IBaseResource> RequestDetails cloneWithAction(
-            T resource, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
-        return cloneWithAction(resource.getClass(), headers, operationTypeEnum);
-    }
+    private RequestDetails cloneWithAction(Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
 
-    private <T extends IBaseResource> RequestDetails cloneWithAction(
-            Class<T> resourceType, Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
-
-        return ClinicalIntelligenceRequestDetailsCloner.startWith(
-                        requestDetails, daoRegistry.getFhirContext(), resourceType)
+        return ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
                 .setAction(operationTypeEnum)
                 .addHeaders(headers)
                 .create();

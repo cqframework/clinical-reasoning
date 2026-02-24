@@ -83,11 +83,12 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             targetBundle = (Bundle) packages.get(1).get();
             service.shutdownNow();
         } catch (InterruptedException | ExecutionException e) {
-            service.shutdownNow();
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
             throw new UnprocessableEntityException(e.getMessage());
+        } finally {
+            service.shutdown();
         }
 
         // 2) Fill the cache with the bundle contents

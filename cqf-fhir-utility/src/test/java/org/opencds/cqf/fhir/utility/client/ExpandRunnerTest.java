@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -15,9 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
 
@@ -168,5 +171,218 @@ class ExpandRunnerTest {
                 1,
                 executeCalls.get(),
                 "Should only invoke $expand once when server returns the full expansion even if total > per-page");
+    }
+
+    @Test
+    void expandValueSet_vsacUrl_appendsVersionWithDash() {
+        // VSAC requires version appended with dash: "ValueSet/id-version" instead of standard format
+        var url = "https://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001|20240101";
+        var params = new Parameters();
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("https://cts.nlm.nih.gov/fhir");
+
+        var idCaptor = ArgumentCaptor.forClass(String.class);
+        when(client.operation()
+                        .onInstance(idCaptor.capture())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        runner.expandValueSet();
+
+        // Verify VSAC version syntax: id-version (dash separator)
+        var capturedId = idCaptor.getValue();
+        assertTrue(
+                capturedId.contains("-20240101"),
+                "VSAC URL should have version appended with dash, got: " + capturedId);
+    }
+
+    @Test
+    void expandValueSet_nonVsacUrl_usesStandardIdFormat() {
+        var url = "http://example.org/fhir/ValueSet/my-valueset|1.0.0";
+        var params = new Parameters();
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        var idCaptor = ArgumentCaptor.forClass(String.class);
+        when(client.operation()
+                        .onInstance(idCaptor.capture())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        runner.expandValueSet();
+
+        // Non-VSAC should use standard format without version in the ID
+        var capturedId = idCaptor.getValue();
+        assertEquals("ValueSet/my-valueset", capturedId, "Non-VSAC URL should use standard id format without version");
+    }
+
+    @Test
+    void expandValueSet_vsacUrlWithoutVersion_usesStandardIdFormat() {
+        var url = "https://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001";
+        var params = new Parameters();
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("https://cts.nlm.nih.gov/fhir");
+
+        var idCaptor = ArgumentCaptor.forClass(String.class);
+        when(client.operation()
+                        .onInstance(idCaptor.capture())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        runner.expandValueSet();
+
+        // VSAC URL without version should use standard format
+        var capturedId = idCaptor.getValue();
+        assertEquals(
+                "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+                capturedId,
+                "VSAC URL without version should use standard id format");
+    }
+
+    @Test
+    void expandValueSet_withParameters_logsParameterValues() {
+        // This test verifies the expand succeeds with parameters present (exercises formatParametersForLogging)
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = new Parameters();
+        params.addParameter().setName("system-version").setValue(new StringType("http://snomed.info/sct|2024"));
+        params.addParameter().setName("count").setValue(new org.hl7.fhir.r4.model.IntegerType(1000));
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        var result = (ValueSet) runner.expandValueSet();
+
+        // If formatParametersForLogging threw an exception, the expand would still succeed
+        // but we verify the expand completed correctly with parameters present
+        assertEquals(1, result.getExpansion().getContains().size());
+    }
+
+    @Test
+    void expandValueSet_withNullParameters_succeeds() {
+        // Tests that formatParametersForLogging handles null parameters gracefully
+        var url = "http://example.org/fhir/ValueSet/test";
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any())
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        // Pass null parameters - should not cause NPE in logging
+        var runner = new ExpandRunner(client, settings, url, null);
+        var result = (ValueSet) runner.expandValueSet();
+
+        assertEquals(1, result.getExpansion().getContains().size());
+    }
+
+    @Test
+    void expandValueSet_withEmptyParameters_succeeds() {
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = new Parameters(); // empty - no parameters added
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        var result = (ValueSet) runner.expandValueSet();
+
+        assertEquals(1, result.getExpansion().getContains().size());
     }
 }

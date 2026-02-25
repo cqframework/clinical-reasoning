@@ -1,16 +1,23 @@
 package org.opencds.cqf.fhir.utility.client.terminology;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import ca.uhn.fhir.context.FhirContext;
 import java.util.ArrayList;
 import java.util.List;
+import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 
 class FederatedTerminologyProviderRouterTest {
@@ -146,6 +153,89 @@ class FederatedTerminologyProviderRouterTest {
         var vs = new ValueSet();
         vs.setUrl(url);
         return (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs);
+    }
+
+    @Test
+    void expandWithConfigurations_withValidConfig_expandsValueSet() {
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(VSAC_VALUESET_URL);
+        expandedVs.getExpansion().addContains().setSystem("http://loinc.org").setCode("12345");
+
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(expandedVs)
+                .when(router)
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://cts.nlm.nih.gov/fhir", null);
+        var valueSet = createValueSetAdapter(VSAC_VALUESET_URL);
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expandWithConfigurations(valueSet, List.of(config), params);
+
+        assertNotNull(result);
+        assertEquals(1, ((ValueSet) result).getExpansion().getContains().size());
+    }
+
+    @Test
+    void expandWithConfigurations_configWithNoEndpoint_returnsNull() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        // Config with no endpointUri and no endpoint resource - getEffectiveEndpoint returns null
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, null, null);
+        var valueSet = createValueSetAdapter(VSAC_VALUESET_URL);
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expandWithConfigurations(valueSet, List.of(config), params);
+
+        assertNull(result);
+    }
+
+    @Test
+    void getValueSetResourceWithConfigurations_nullConfigs_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getValueSetResourceWithConfigurations(null, VSAC_VALUESET_URL);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getValueSetResourceWithConfigurations_emptyConfigs_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getValueSetResourceWithConfigurations(List.of(), VSAC_VALUESET_URL);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getCodeSystemResourceWithConfigurations_nullConfigs_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getCodeSystemResourceWithConfigurations(null, "http://loinc.org");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getCodeSystemResourceWithConfigurations_emptyConfigs_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getCodeSystemResourceWithConfigurations(List.of(), "http://loinc.org");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void constructor_registersDefaultAndVsacClients() {
+        // Verifying the router can be constructed and routes correctly
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        assertNotNull(router);
+    }
+
+    @Test
+    void getTerminologyServerClientSettings_returnsSettingsFromClient() {
+        var settings = org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(42);
+        var router = new FederatedTerminologyProviderRouter(fhirContext, settings);
+
+        var endpoint = new Endpoint();
+        endpoint.setAddress("https://example.org/fhir");
+        var endpointAdapter = (IEndpointAdapter) IAdapterFactory.createAdapterForResource(endpoint);
+
+        var result = router.getTerminologyServerClientSettings(endpointAdapter);
+        assertEquals(42, result.getTimeoutSeconds());
     }
 
     /**

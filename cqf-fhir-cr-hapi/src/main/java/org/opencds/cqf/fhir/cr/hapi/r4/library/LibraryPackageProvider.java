@@ -24,7 +24,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
@@ -81,25 +81,10 @@ public class LibraryPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
                 ? null
-                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.toList());
-        var params = packageParameters(
-                fhirVersion,
-                offset,
-                count,
-                bundleType,
-                include == null
-                        ? null
-                        : include.stream()
-                                .distinct()
-                                .map(PrimitiveType::getValueAsString)
-                                .collect(Collectors.toList()),
-                artifactEndpointConfigurationParam,
-                terminologyEndpointParam,
-                usePut == null ? Boolean.FALSE : usePut.booleanValue());
+                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
         return libraryProcessorFactory
                 .create(requestDetails)
                 .packageLibrary(
@@ -115,7 +100,8 @@ public class LibraryPackageProvider {
                                                 .distinct()
                                                 .map(PrimitiveType::getValueAsString)
                                                 .collect(Collectors.toList()),
-                                getEndpoint(fhirVersion, terminologyEndpoint),
+                                artifactEndpointConfigurationParam,
+                                terminologyEndpointParam,
                                 usePut == null ? Boolean.FALSE : usePut.booleanValue()));
     }
 
@@ -165,26 +151,10 @@ public class LibraryPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var idToUse = getIdType(fhirVersion, "Library", id);
-        var canonicalType = getCanonicalType(fhirVersion, canonical, url, version);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
         List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
                 ? null
-                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.toList());
-        var params = packageParameters(
-                fhirVersion,
-                offset,
-                count,
-                bundleType,
-                include == null
-                        ? null
-                        : include.stream()
-                                .distinct()
-                                .map(PrimitiveType::getValueAsString)
-                                .collect(Collectors.toList()),
-                artifactEndpointConfigurationParam,
-                terminologyEndpointParam,
-                usePut == null ? Boolean.FALSE : usePut.booleanValue());
+                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
         return libraryProcessorFactory
                 .create(requestDetails)
                 .packageLibrary(
@@ -203,7 +173,8 @@ public class LibraryPackageProvider {
                                                 .distinct()
                                                 .map(PrimitiveType::getValueAsString)
                                                 .collect(Collectors.toList()),
-                                getEndpoint(fhirVersion, terminologyEndpoint),
+                                artifactEndpointConfigurationParam,
+                                terminologyEndpointParam,
                                 usePut == null ? Boolean.FALSE : usePut.booleanValue()));
     }
 }

@@ -72,7 +72,7 @@ public class ExpandHelper {
         });
     }
 
-    public void expandValueSet(
+    public void expandValueSetOLD(
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,
             Optional<IEndpointAdapter> terminologyEndpoint,
@@ -93,8 +93,8 @@ public class ExpandHelper {
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .map(url -> TerminologyServerClient.getAddressBase(url, fhirContext()))
                 .orElse(null);
-        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches the
-        // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
+        // If terminologyEndpoint exists and we have no authoritativeSourceUrl or the authoritativeSourceUrl
+        // matches the terminologyEndpoint address then we will use the terminologyEndpoint for expansion
         if (terminologyEndpoint.isPresent()
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
@@ -141,6 +141,125 @@ public class ExpandHelper {
                         "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
             }
         }
+        expandedList.add(valueSet.getUrl());
+    }
+
+    public void expandValueSet(
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            Optional<IEndpointAdapter> terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
+            List<String> expandedList,
+            Date expansionTimestamp) {
+
+        // prevent re-expansion
+        if (expandedList.contains(valueSet.getUrl())) {
+            return;
+        }
+
+        filterOutUnsupportedParameters(expansionParameters);
+
+        // Attempt terminology server expansion first if authoritative
+        var authoritativeSourceUrl = valueSet.getExtension().stream()
+                .filter(e -> e.getUrl().equals(Constants.AUTHORITATIVE_SOURCE_URL))
+                .findFirst()
+                .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
+                .map(url -> TerminologyServerClient.getAddressBase(url, fhirContext()))
+                .orElse(null);
+
+        if (terminologyEndpoint.isPresent()
+                && (authoritativeSourceUrl == null
+                        || authoritativeSourceUrl.equals(
+                                terminologyEndpoint.get().getAddress()))) {
+            try {
+                terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+
+                expandedList.add(valueSet.getUrl());
+                return;
+            } catch (TerminologyServerExpansionException e) {
+                log.warn(
+                        "Terminology server expansion failed for {}. Falling back to local expansion. Reason: {}",
+                        valueSet.getUrl(),
+                        e.getMessage());
+            }
+        }
+
+        // Hybrid local expansion for ValueSets with explicit concepts and/or valueSet references
+        if (valueSet.hasCompose() && (valueSet.hasExplicitConcepts() || valueSet.hasValueSetReferences())) {
+
+            var expansion = valueSet.newExpansion();
+            boolean isNaive = false;
+
+            // Expand referenced ValueSets first
+            if (valueSet.hasValueSetReferences()) {
+                var includeExpansion = expandIncludes(
+                        valueSet,
+                        expansionParameters,
+                        terminologyEndpoint,
+                        valueSets,
+                        expandedList,
+                        repository,
+                        expansionTimestamp);
+
+                var copyAdapter = (IValueSetAdapter) adapterFactory.createResource(valueSet.get());
+                copyAdapter.setExpansion(includeExpansion);
+
+                addCodesToExpansion(expansion, copyAdapter);
+
+                if (valueSet.hasNaiveParameter()) {
+                    isNaive = true;
+                }
+            }
+
+            // Expand explicit concepts
+            if (valueSet.hasExplicitConcepts()) {
+                var explicitAdapter = (IValueSetAdapter) adapterFactory.createResource(valueSet.get());
+                explicitAdapter.naiveExpand();
+
+                addCodesToExpansion(expansion, explicitAdapter);
+                isNaive = true;
+            }
+
+            // Apply naive parameter if any naive expansions occurred
+            if (isNaive) {
+                addParameterToExpansion(fhirContext(), expansion, valueSet.createNaiveParameter());
+            }
+
+            // Set timestamp
+            try {
+                ValueSets.setExpansionTimestamp(
+                        fhirContext(), expansion, expansionTimestamp == null ? new Date() : expansionTimestamp);
+            } catch (Exception e) {
+                throw new UnprocessableEntityException(e.getMessage());
+            }
+
+            valueSet.setExpansion(expansion);
+            expandedList.add(valueSet.getUrl());
+            return;
+        }
+
+        // Fallback: repository $expand (for remaining ValueSets with compose)
+        if (valueSet.hasCompose()) {
+            try {
+                var headers = new HashMap<String, String>();
+                headers.put("Content-Type", "application/json");
+
+                var vs = repository.invoke(
+                        valueSet.get().getClass(),
+                        "$expand",
+                        (IBaseParameters) expansionParameters.get(),
+                        valueSet.get().getClass(),
+                        headers);
+
+                var expandedAdapter = (IValueSetAdapter) adapterFactory.createResource(vs);
+                valueSet.setExpansion(expandedAdapter.getExpansion());
+                validateExpansionParameters(valueSet, expansionParameters);
+            } catch (Exception e) {
+                throw new UnprocessableEntityException(
+                        "Cannot expand ValueSet without terminology server: " + valueSet.getUrl());
+            }
+        }
+
         expandedList.add(valueSet.getUrl());
     }
 

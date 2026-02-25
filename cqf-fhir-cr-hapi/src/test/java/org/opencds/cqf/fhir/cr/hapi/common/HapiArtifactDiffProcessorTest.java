@@ -126,8 +126,9 @@ class HapiArtifactDiffProcessorTest {
                 getOperationsByType(grouperChanges.getParameter(), "delete");
         List<Parameters.ParametersParameterComponent> insertOperations =
                 getOperationsByType(grouperChanges.getParameter(), "insert");
+
         // old codes removed
-        assertEquals(33, deleteOperations.size());
+        assertEquals(32, deleteOperations.size());
         // new codes added
         assertEquals(40, insertOperations.size());
     }

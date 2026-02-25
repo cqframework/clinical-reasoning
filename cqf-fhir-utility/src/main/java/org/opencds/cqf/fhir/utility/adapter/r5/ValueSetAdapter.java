@@ -230,6 +230,20 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     }
 
     @Override
+    public boolean hasExplicitConcepts() {
+        return getValueSet().hasCompose()
+                && getValueSet().getCompose().getInclude().stream()
+                        .anyMatch(i -> i.hasConcept() && !i.getConcept().isEmpty());
+    }
+
+    @Override
+    public boolean hasValueSetReferences() {
+        return getValueSet().hasCompose()
+                && getValueSet().getCompose().getInclude().stream()
+                        .anyMatch(i -> i.hasValueSet() && !i.getValueSet().isEmpty());
+    }
+
+    @Override
     public boolean hasNaiveParameter() {
         return getValueSet().getExpansion().getParameter().stream()
                 .anyMatch(p -> p.getName().equals("naive"));

@@ -79,7 +79,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         loadBundle("org/opencds/cqf/fhir/cr/hapi/r4/Bundle-GenerateQuestionnaireStructures.json");
         var requestDetails = setupRequestDetails();
         var result = libraryPackageProvider.packageLibrary(
-                "Library/ASLPDataElements", null, null, null, null, null, null, null, null, null, requestDetails);
+                "Library/ASLPDataElements", null, null, null, null, null, null, null, null, null, null, requestDetails);
         assertInstanceOf(Bundle.class, result);
     }
 
@@ -127,6 +127,7 @@ class LibraryOperationsProviderIT extends BaseCrR4TestServer {
         terminologyEndpointParam.setResource(terminologyEndpoint);
         result = libraryPackageProvider.packageLibrary(
                 "Library/Manifest-Partial-Set-FinalDraft-2025",
+                null,
                 null,
                 null,
                 null,

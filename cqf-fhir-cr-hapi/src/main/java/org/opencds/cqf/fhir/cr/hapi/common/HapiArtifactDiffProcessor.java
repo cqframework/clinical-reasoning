@@ -587,22 +587,37 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
     }
 
     private static boolean extensionEquals(Extension source, Extension target) {
-        if (!source.getValue().getClass().equals(target.getValue().getClass())) {
+        // Handle null values - extensions can have nested extensions without a value[x]
+        var sourceValue = source.getValue();
+        var targetValue = target.getValue();
+
+        // Both null - consider equal if URLs match (URL comparison should happen elsewhere)
+        if (sourceValue == null && targetValue == null) {
+            return true;
+        }
+
+        // One null, one not - not equal
+        if (sourceValue == null || targetValue == null) {
             return false;
         }
-        if (source.getValue() instanceof IPrimitiveType<?> sourcePrimitive) {
-            return (sourcePrimitive.getValue()).equals((((IPrimitiveType<?>) target.getValue()).getValue()));
-        } else if (source.getValue() instanceof CodeableConcept sourceCodableConcept) {
+
+        // Both non-null - compare types and values
+        if (!sourceValue.getClass().equals(targetValue.getClass())) {
+            return false;
+        }
+        if (sourceValue instanceof IPrimitiveType<?> sourcePrimitive) {
+            return (sourcePrimitive.getValue()).equals((((IPrimitiveType<?>) targetValue).getValue()));
+        } else if (sourceValue instanceof CodeableConcept sourceCodableConcept) {
             return sourceCodableConcept
                             .getCodingFirstRep()
                             .getSystem()
-                            .equals(((CodeableConcept) target.getValue())
+                            .equals(((CodeableConcept) targetValue)
                                     .getCodingFirstRep()
                                     .getSystem())
-                    && ((CodeableConcept) source.getValue())
+                    && ((CodeableConcept) sourceValue)
                             .getCodingFirstRep()
                             .getCode()
-                            .equals(((CodeableConcept) target.getValue())
+                            .equals(((CodeableConcept) targetValue)
                                     .getCodingFirstRep()
                                     .getCode());
         } else {

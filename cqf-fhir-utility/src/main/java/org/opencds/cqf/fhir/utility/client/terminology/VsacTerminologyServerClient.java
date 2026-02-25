@@ -3,8 +3,13 @@ package org.opencds.cqf.fhir.utility.client.terminology;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.client.Clients;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
@@ -45,5 +50,40 @@ public class VsacTerminologyServerClient extends GenericTerminologyServerClient 
     @Override
     public boolean isCanonicalMatch(String address) {
         return address.matches("https*://cts.nlm.nih.gov/fhir.*");
+    }
+
+    /**
+     * VSAC-specific expansion handling.
+     * VSAC requires the version to be part of the canonical URL (url|version) for ExpandRunner
+     * to construct the correct resource ID (ValueSet/id-version).
+     *
+     * @param fhirClient the FHIR client to use for expansion
+     * @param url the ValueSet URL (without version)
+     * @param parameters the expansion parameters (may contain version parameter)
+     * @return the expanded ValueSet
+     */
+    @Override
+    public IBaseResource expand(IGenericClient fhirClient, String url, IBaseParameters parameters) {
+        // Extract version from parameters if present
+        var parametersAdapter = (IParametersAdapter) IAdapterFactory.createAdapterForResource(parameters);
+        String version = null;
+
+        if (parametersAdapter.hasParameter(versionParamName)) {
+            var versionParam = parametersAdapter.getParameter(versionParamName);
+            if (versionParam != null && versionParam.hasValue()) {
+                var value = versionParam.getValue();
+                if (value instanceof IPrimitiveType<?> primitive) {
+                    version = String.valueOf(primitive.getValue());
+                }
+            }
+        }
+
+        // For VSAC, construct a versioned canonical URL (url|version)
+        // This allows ExpandRunner.buildResourceIdForExpand() to extract the version
+        // and build the correct VSAC resource ID: ValueSet/id-version
+        String versionedCanonical = version != null ? url + "|" + version : url;
+
+        // Call parent with versioned canonical
+        return super.expand(fhirClient, versionedCanonical, parameters);
     }
 }

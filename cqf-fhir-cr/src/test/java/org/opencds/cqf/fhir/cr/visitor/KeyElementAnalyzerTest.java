@@ -287,7 +287,8 @@ class KeyElementAnalyzerTest {
 
         var analyzer = new KeyElementAnalyzer(repository);
 
-        // Create profile with empty differential
+        // Create profile with element in differential (not snapshot)
+        // Note: KeyElementAnalyzer only looks at differential to avoid bloat from base FHIR snapshots
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
         profile.setType("Patient");
@@ -295,18 +296,18 @@ class KeyElementAnalyzerTest {
         profile.setAbstract(false);
         profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 
-        // Add element to snapshot only (differential is empty)
-        var snapshotElement = profile.getSnapshot().addElement();
-        snapshotElement.setPath("Patient.gender");
-        snapshotElement.setMustSupport(true);
-        snapshotElement.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
+        // Add element to differential (where KeyElementAnalyzer looks)
+        var differentialElement = profile.getDifferential().addElement();
+        differentialElement.setPath("Patient.gender");
+        differentialElement.setMustSupport(true);
+        differentialElement.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
 
         var result = analyzer.getKeyElementValueSets(profile);
 
-        // Should work with snapshot if differential is empty
+        // Should extract ValueSets from differential
         assertTrue(
                 result.contains("http://hl7.org/fhir/ValueSet/administrative-gender"),
-                "Should extract ValueSets from snapshot when differential is empty");
+                "Should extract ValueSets from differential elements");
     }
 
     // Helper method to create a simple StructureDefinition

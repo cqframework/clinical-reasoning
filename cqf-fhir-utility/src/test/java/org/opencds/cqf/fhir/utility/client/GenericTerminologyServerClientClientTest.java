@@ -481,6 +481,49 @@ public class GenericTerminologyServerClientClientTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    void getValueSetResource_serverReturnsOperationOutcome() {
+        var txServerClient = spy(new GenericTerminologyServerClient(fhirContextR4));
+
+        IEndpointAdapter endpoint = mock(IEndpointAdapter.class);
+        IGenericClient client = mock(IGenericClient.class);
+        IUntypedQuery<IBaseBundle> untyped = mock(IUntypedQuery.class);
+        IQuery<IBaseBundle> query = mock(IQuery.class);
+
+        // Create an OperationOutcome that represents a server error
+        var operationOutcome = new org.hl7.fhir.r4.model.OperationOutcome();
+        operationOutcome
+                .addIssue()
+                .setSeverity(org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity.ERROR)
+                .getDetails()
+                .setText("Unable to open file: The system cannot find the file specified.");
+
+        // Stub helpers
+        doReturn(client).when(txServerClient).initializeClientWithAuth(endpoint);
+        doReturn(org.hl7.fhir.r4.model.ValueSet.class).when(txServerClient).getValueSetClass();
+
+        // Stub fluent chain
+        when(client.search()).thenReturn(untyped);
+        when(untyped.forResource(org.hl7.fhir.r4.model.ValueSet.class)).thenReturn(query);
+        when(query.where(anyMap())).thenReturn(query);
+
+        // Simulate HTTP 500 error by throwing an exception
+        when(query.execute())
+                .thenThrow(new ca.uhn.fhir.rest.server.exceptions.InternalErrorException(
+                        "HTTP 500 Internal Server Error", operationOutcome));
+
+        // This should throw an exception since the current implementation doesn't handle OperationOutcome
+        // responses
+        assertThrows(
+                ca.uhn.fhir.rest.server.exceptions.InternalErrorException.class,
+                () -> txServerClient.getValueSetResource(endpoint, "http://cts.nlm.nih.gov/fhir/ValueSet/123"));
+
+        // Verify the search was attempted
+        verify(client).search();
+        verify(query).execute();
+    }
+
     @Test
     void expandAdditionalPages() {
         // setup tx server endpoint

@@ -296,11 +296,9 @@ public class KeyElementAnalyzer {
         try {
             FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
             var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            // Try differential first, fall back to snapshot
+            // ONLY use differential elements, never snapshot
+            // This prevents bloat from analyzing base FHIR StructureDefinitions with full snapshots
             List<IBase> elements = fhirPath.evaluate(structureDefinition, "differential.element", IBase.class);
-            if (elements.isEmpty()) {
-                elements = fhirPath.evaluate(structureDefinition, "snapshot.element", IBase.class);
-            }
             return elements;
         } catch (Exception e) {
             logger.debug("Error getting all elements", e);

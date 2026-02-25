@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
+import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +122,16 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             throws PreconditionFailedException {
         Map<String, String> igDependencyVersions = extractIgDependencyVersions(adapter);
         recursiveGather(
-                adapter, gatheredResources, capability, include, versionTuple, null, null, null, igDependencyVersions);
+                adapter,
+                gatheredResources,
+                capability,
+                include,
+                versionTuple,
+                null,
+                null,
+                null,
+                null,
+                igDependencyVersions);
     }
 
     protected void recursiveGather(
@@ -130,6 +140,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> capability,
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
             IEndpointAdapter terminologyEndpoint,
             ITerminologyProviderRouter router,
             IBaseOperationOutcome[] messagesWrapper)
@@ -141,6 +152,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                 capability,
                 include,
                 versionTuple,
+                artifactEndpointConfigurations,
                 terminologyEndpoint,
                 router,
                 messagesWrapper,
@@ -153,6 +165,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> capability,
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
             IEndpointAdapter terminologyEndpoint,
             ITerminologyProviderRouter client,
             IBaseOperationOutcome[] messagesWrapper,
@@ -203,7 +216,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                             return Optional.ofNullable(
                                             SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical))
                                     .map(bundle -> findResourceMatchingVersion(bundle, canonical, messagesWrapper))
-                                    .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint));
+                                    .orElseGet(() -> tryGetValueSetsFromTxServer(
+                                            ra, client, artifactEndpointConfigurations, terminologyEndpoint));
                         }
                         return null;
                     })
@@ -215,6 +229,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                             capability,
                             include,
                             versionTuple,
+                            artifactEndpointConfigurations,
                             terminologyEndpoint,
                             client,
                             messagesWrapper,
@@ -253,11 +268,43 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
     }
 
     private IDomainResource tryGetValueSetsFromTxServer(
-            IDependencyInfo ra, ITerminologyProviderRouter router, IEndpointAdapter endpoint) {
-        if (router != null
-                && endpoint != null
-                && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
-            return router.getValueSetResource(endpoint, ra.getReference()).orElse(null);
+            IDependencyInfo ra,
+            ITerminologyProviderRouter router,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
+            IEndpointAdapter terminologyEndpoint) {
+        if (router != null && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
+            // First try CRMI artifact endpoint configurations (prioritized by matching artifactRoute)
+            if (artifactEndpointConfigurations != null && !artifactEndpointConfigurations.isEmpty()) {
+                try {
+                    var result = router.getValueSetResourceWithConfigurations(
+                            artifactEndpointConfigurations, ra.getReference());
+                    if (result.isPresent()) {
+                        return result.get();
+                    }
+                } catch (Exception e) {
+                    // Log and continue - terminology server errors should not break the package operation
+                    logger.warn(
+                            "Failed to retrieve ValueSet '{}' from configured artifact endpoints: {}",
+                            ra.getReference(),
+                            e.getMessage());
+                    logger.debug("Full exception details", e);
+                }
+            }
+
+            // Fall back to terminologyEndpoint if configurations didn't resolve
+            if (terminologyEndpoint != null) {
+                try {
+                    return router.getValueSetResource(terminologyEndpoint, ra.getReference())
+                            .orElse(null);
+                } catch (Exception e) {
+                    // Log and continue - terminology server errors should not break the package operation
+                    logger.warn(
+                            "Failed to retrieve ValueSet '{}' from terminology endpoint: {}",
+                            ra.getReference(),
+                            e.getMessage());
+                    logger.debug("Full exception details", e);
+                }
+            }
         }
         return null;
     }

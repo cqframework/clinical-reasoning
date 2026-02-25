@@ -717,6 +717,60 @@ class PackageVisitorTests {
     }
 
     @Test
+    void packageOperation_terminologyServerReturnsOperationOutcome_shouldNotBreakOperation() {
+        // Load a bundle with a Library that has ValueSet dependencies
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                PackageVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+
+        // Add a relatedArtifact that references a ValueSet NOT in the repository
+        // This will force the $package operation to try fetching from the terminology server
+        library.addRelatedArtifact()
+                .setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://cts.nlm.nih.gov/fhir/ValueSet/missing-valueset|1.0.0");
+
+        var endpoint = new Endpoint();
+        endpoint.setAddress("http://tx.fhir.org/r4");
+
+        // Create mock router that simulates tx.fhir.org returning HTTP 500
+        var clientMock = mock(ITerminologyProviderRouter.class, new ReturnsDeepStubs());
+
+        // Create OperationOutcome that tx.fhir.org returns
+        var operationOutcome = new OperationOutcome();
+        operationOutcome
+                .addIssue()
+                .setSeverity(OperationOutcome.IssueSeverity.ERROR)
+                .getDetails()
+                .setText(
+                        "Unable to open file \"E:\\fhir-server\\fhir-server\\us.nlm.vsac#0.24.0\\package\\ValueSet-2.16.840.1.113762.1.4.1078.1180.json\": The system cannot find the file specified.");
+
+        // Mock getValueSetResource to throw InternalErrorException
+        when(clientMock.getValueSetResource(any(IEndpointAdapter.class), any()))
+                .thenThrow(new ca.uhn.fhir.rest.server.exceptions.InternalErrorException(
+                        "HTTP 500 Internal Server Error", operationOutcome));
+
+        // Mock expand to also fail (since handleValueSets will try to expand)
+        when(clientMock.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class)))
+                .thenThrow(new ca.uhn.fhir.rest.server.exceptions.InternalErrorException(
+                        "HTTP 500 Internal Server Error", operationOutcome));
+
+        var packageVisitor = new PackageVisitor(repo, clientMock);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var params = parameters(part("terminologyEndpoint", endpoint));
+
+        // Operation should succeed gracefully even when terminology server returns HTTP 500
+        Bundle packaged = (Bundle) libraryAdapter.accept(packageVisitor, params);
+        assertNotNull(packaged);
+        assertTrue(packaged.hasEntry());
+
+        // Verify that the terminology router was actually called
+        verify(clientMock, times(1)).getValueSetResource(any(IEndpointAdapter.class), any());
+    }
+
+    @Test
     void packageOperation_include_tests_returns_only_test_marked_entries() {
         // Arrange
         Bundle bundle = (Bundle) jsonParser.parseResource(
@@ -1415,5 +1469,161 @@ class PackageVisitorTests {
         }
         byte[] bytes = Base64.getDecoder().decode(base64);
         return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    @Test
+    @Disabled("Temporary diagnostic test - hangs on network requests. Enable manually to test VSAC routing.")
+    void packageOperation_vsac_expansion_diagnostic_test() {
+
+        // Create a simple manifest library with a single VSAC ValueSet reference
+        Library library = new Library();
+        library.setId("vsac-test-library");
+        library.setUrl("http://example.org/Library/vsac-test");
+        library.setVersion("1.0.0");
+        library.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        library.setType(new CodeableConcept()
+                .addCoding(new Coding()
+                        .setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+                        .setCode("asset-collection")));
+
+        // Add dependency on a VSAC ValueSet
+        library.addRelatedArtifact()
+                .setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.88.12.80.17|20190423");
+
+        repo.create(library);
+
+        // Create Basic auth header: "apikey:<API_KEY>"
+        String authHeader = "Authorization: Basic YXBpa2V5OmMzZjc5Mjk0LTU2YjgtNGFmOS04ODkxLTU0ZDQ1MDRiOTM0Nw==";
+
+        // Configure artifactEndpointConfiguration to route VSAC requests
+        var artifactEndpointConfig = new Parameters.ParametersParameterComponent();
+        artifactEndpointConfig.setName("artifactEndpointConfiguration");
+
+        // Add artifactRoute
+        var artifactRoutePart = new Parameters.ParametersParameterComponent();
+        artifactRoutePart.setName("artifactRoute");
+        artifactRoutePart.setValue(new org.hl7.fhir.r4.model.UriType("http://cts.nlm.nih.gov/fhir"));
+        artifactEndpointConfig.addPart(artifactRoutePart);
+
+        // Add endpoint with VSAC configuration
+        var endpointPart = new Parameters.ParametersParameterComponent();
+        endpointPart.setName("endpoint");
+        var vsacEndpoint = new Endpoint();
+        vsacEndpoint.setStatus(org.hl7.fhir.r4.model.Endpoint.EndpointStatus.ACTIVE);
+        vsacEndpoint
+                .getConnectionType()
+                .setSystem("http://terminology.hl7.org/CodeSystem/endpoint-connection-type")
+                .setCode("hl7-fhir-rest");
+        vsacEndpoint.setName("VSAC FHIR Terminology Server");
+        vsacEndpoint.setAddress("https://cts.nlm.nih.gov/fhir");
+        vsacEndpoint.addHeader(authHeader);
+        endpointPart.setResource(vsacEndpoint);
+        artifactEndpointConfig.addPart(endpointPart);
+
+        // Configure terminologyEndpoint as fallback (tx.fhir.org)
+        var txEndpoint = new Endpoint();
+        txEndpoint.setAddress("http://tx.fhir.org/r4");
+
+        // Build parameters
+        Parameters params = parameters(part("include", "ValueSet"), part("terminologyEndpoint", txEndpoint));
+        params.addParameter(artifactEndpointConfig);
+
+        // Run $package operation and capture any errors
+        PackageVisitor packageVisitor = new PackageVisitor(repo);
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        Bundle packagedBundle = null;
+        ca.uhn.fhir.rest.server.exceptions.InternalErrorException caughtException = null;
+
+        try {
+            packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+        } catch (ca.uhn.fhir.rest.server.exceptions.InternalErrorException e) {
+            caughtException = e;
+
+            // Examine the exception details
+            System.out.println("=== HTTP 500 Error Encountered ===");
+            System.out.println("Message: " + e.getMessage());
+
+            // Check if there's an OperationOutcome with details
+            if (e.getOperationOutcome() != null) {
+                OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+                System.out.println("OperationOutcome issues:");
+                for (var issue : oo.getIssue()) {
+                    System.out.println("  - Severity: " + issue.getSeverity());
+                    System.out.println("    Diagnostics: " + issue.getDiagnostics());
+                    if (issue.hasDetails() && issue.getDetails().hasText()) {
+                        System.out.println("    Details: " + issue.getDetails().getText());
+                    }
+                }
+            }
+
+            // Check the stack trace to see which server was called
+            System.out.println("Stack trace (first 10 frames):");
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            for (int i = 0; i < Math.min(10, stackTrace.length); i++) {
+                System.out.println("  " + stackTrace[i]);
+            }
+
+            // Check if there's a cause with more details
+            if (e.getCause() != null) {
+                System.out.println("Caused by: " + e.getCause().getClass().getName() + ": " + e.getCause().getMessage());
+            }
+        }
+
+        // DIAGNOSTIC OUTPUT: Determine what happened
+        if (caughtException != null) {
+            // The operation failed - we need to understand why
+            System.out.println("\n=== DIAGNOSTIC SUMMARY ===");
+            System.out.println("The $package operation failed with HTTP 500");
+            System.out.println("Questions to answer:");
+            System.out.println("1. Was the request routed to VSAC or tx.fhir.org?");
+            System.out.println("2. If routed to VSAC, what was the specific error?");
+            System.out.println("3. If routed to tx.fhir.org, why didn't VSAC handle it?");
+
+            // For now, fail the test with detailed info
+            throw caughtException;
+        }
+
+        // If we got here, the operation succeeded
+        assertNotNull(packagedBundle);
+        assertTrue(packagedBundle.hasEntry());
+
+        // Find the VSAC ValueSet in the bundle
+        ValueSet vsacValueSet = packagedBundle.getEntry().stream()
+                .map(BundleEntryComponent::getResource)
+                .filter(r -> r instanceof ValueSet)
+                .map(ValueSet.class::cast)
+                .filter(vs -> vs.getUrl()
+                        .equals("http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.88.12.80.17"))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(vsacValueSet, "Expected VSAC ValueSet to be in the packaged bundle");
+        assertEquals(
+                "20190423",
+                vsacValueSet.getVersion(),
+                "Expected ValueSet to have version 20190423 from VSAC");
+
+        // Verify the ValueSet was expanded
+        assertTrue(vsacValueSet.hasExpansion(), "Expected ValueSet to have expansion from VSAC");
+        assertTrue(
+                vsacValueSet.getExpansion().getTotal() > 0,
+                "Expected expansion to have at least one concept");
+
+        // Check for any error messages in the manifest
+        Library bundledLibrary = packagedBundle.getEntry().stream()
+                .filter(entry -> entry.getResource().getResourceType() == ResourceType.Library)
+                .map(entry -> (Library) entry.getResource())
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(bundledLibrary, "Expected Library to be in the packaged bundle");
+        ILibraryAdapter bundledAdapter = new AdapterFactory().createLibrary(bundledLibrary);
+
+        // Verify no error messages were added
+        assertFalse(
+                bundledAdapter.hasExtension(ILibraryAdapter.CQF_MESSAGES_EXT_URL),
+                "Expected no error messages when VSAC expansion succeeds");
     }
 }

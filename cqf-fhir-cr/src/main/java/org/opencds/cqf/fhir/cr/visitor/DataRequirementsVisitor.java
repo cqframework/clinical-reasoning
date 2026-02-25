@@ -36,6 +36,9 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
+import org.opencds.cqf.fhir.cr.implementationguide.ImplementationGuidePackageResolver;
+import org.opencds.cqf.fhir.cr.implementationguide.KeyElementFilter;
+import org.opencds.cqf.fhir.cr.implementationguide.KeyElementFilteringResult;
 import org.opencds.cqf.fhir.utility.Libraries;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -46,13 +49,17 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected DataRequirementsProcessor dataRequirementsProcessor;
     protected EvaluationSettings evaluationSettings;
     private PackageDownloader packageDownloader;
-    private List<IBaseResource> collectedResources;
+    private final List<IBaseResource> collectedResources;
+    private final ImplementationGuidePackageResolver packageResolver;
+    private final KeyElementFilter keyElementFilter;
 
     public DataRequirementsVisitor(IRepository repository, EvaluationSettings evaluationSettings) {
         super(repository);
         dataRequirementsProcessor = new DataRequirementsProcessor();
         this.evaluationSettings = evaluationSettings;
         this.collectedResources = new ArrayList<>();
+        this.packageResolver = new ImplementationGuidePackageResolver(repository, fhirContext());
+        this.keyElementFilter = new KeyElementFilter(repository);
     }
 
     /**
@@ -61,33 +68,59 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
      */
     public void setPackageDownloader(PackageDownloader packageDownloader) {
         this.packageDownloader = packageDownloader;
+        this.packageResolver.setPackageDownloader(packageDownloader);
     }
 
     /**
      * Returns the list of resources collected during $data-requirements processing.
-     * This includes all resources from the ImplementationGuide package(s) that were
-     * fetched during dependency resolution.
+     * This field is maintained for backwards compatibility but currently returns an empty list.
+     * The persistDependencies feature was abandoned due to performance issues.
      *
-     * @return List of collected resources, or empty list if none collected
+     * @return Empty list (maintained for backwards compatibility)
      */
     public List<IBaseResource> getCollectedResources() {
         return new ArrayList<>(collectedResources);
     }
 
     /**
-     * Processes $data-requirements for ImplementationGuides.
-     *
-     * <p><strong>Implementation Note:</strong> For ImplementationGuide resources, this operation focuses
-     * exclusively on ValueSet and CodeSystem dependencies. When resolving dependencies from package
-     * registry IGs, only ValueSets and CodeSystems that are bound to key elements (mustSupport,
-     * differential elements, mandatory children, slices, modifiers, etc.) in the IG's StructureDefinitions
-     * are included. Other resource types (StructureDefinitions, SearchParameters, CapabilityStatements, etc.)
-     * from dependency IGs are excluded to keep the data requirements focused on terminology resources
-     * actually needed for data validation and exchange.</p>
+     * Internal context class to hold shared state during $data-requirements processing.
+     * Encapsulates all the collections and metadata needed across different processing phases.
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public IBase visit(IKnowledgeArtifactAdapter adapter, IBaseParameters operationParameters) {
+    private static class DataRequirementsContext {
+        final ILibraryAdapter library;
+        final HashMap<String, IKnowledgeArtifactAdapter> gatheredResources;
+        final HashMap<String, String> resourceSourcePackages;
+        // Use wildcards to handle intersection types
+        final HashMap<String, ? extends ICompositeType> allDependencies;
+        final List<? extends ICompositeType> relatedArtifacts;
+        final String mainIgCanonical;
+
+        DataRequirementsContext(
+                ILibraryAdapter library,
+                HashMap<String, IKnowledgeArtifactAdapter> gatheredResources,
+                HashMap<String, String> resourceSourcePackages,
+                HashMap<String, ? extends ICompositeType> allDependencies,
+                List<? extends ICompositeType> relatedArtifacts,
+                String mainIgCanonical) {
+            this.library = library;
+            this.gatheredResources = gatheredResources;
+            this.resourceSourcePackages = resourceSourcePackages;
+            this.allDependencies = allDependencies;
+            this.relatedArtifacts = relatedArtifacts;
+            this.mainIgCanonical = mainIgCanonical;
+        }
+    }
+
+    /**
+     * Extracts operation parameters from the input.
+     */
+    private record OperationParameters(
+            Optional<IBaseParameters> parameters,
+            List<String> artifactVersion,
+            List<String> checkArtifactVersion,
+            List<String> forceArtifactVersion) {}
+
+    private OperationParameters extractOperationParameters(IBaseParameters operationParameters) {
         Optional<IBaseParameters> parameters = VisitorHelper.getResourceParameter("parameters", operationParameters);
         List<String> artifactVersion = VisitorHelper.getStringListParameter("artifactVersion", operationParameters)
                 .orElseGet(ArrayList::new);
@@ -97,12 +130,21 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         List<String> forceArtifactVersion = VisitorHelper.getStringListParameter(
                         "forceArtifactVersion", operationParameters)
                 .orElseGet(ArrayList::new);
+        return new OperationParameters(parameters, artifactVersion, checkArtifactVersion, forceArtifactVersion);
+    }
 
+    /**
+     * Initializes the module-definition Library and processes CQL data requirements if referenced libraries exist.
+     * This step evaluates CQL libraries to extract their data requirements and adds them to the output library.
+     */
+    private ILibraryAdapter initializeLibraryWithCqlDataRequirements(
+            IKnowledgeArtifactAdapter adapter, Optional<IBaseParameters> parameters) {
         var library = IAdapterFactory.forFhirContext(fhirContext())
                 .createLibrary(fhirContext().getResourceDefinition("Library").newInstance());
         library.setName("EffectiveDataRequirements");
         library.setStatus(adapter.getStatus());
         library.setType("module-definition");
+
         var referencedLibraries = adapter.retrieveReferencedLibraries(repository);
         if (!referencedLibraries.isEmpty()) {
             var libraryManager = createLibraryManager();
@@ -131,10 +173,18 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                 convertedLibrary.getRelatedArtifact().forEach(library::addRelatedArtifact);
             });
         }
+        return library;
+    }
+
+    /**
+     * Initializes the data structures for tracking dependencies, gathered resources, and source packages.
+     * Extracts all dependencies from the adapter before recursive gathering to identify unresolved dependencies.
+     */
+    @SuppressWarnings("unchecked")
+    private DataRequirementsContext initializeDependencyTracking(
+            IKnowledgeArtifactAdapter adapter, ILibraryAdapter library) {
         var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();
         var relatedArtifacts = stripInvalid(library);
-
-        // Track source package for each resource (canonical URL → source package canonical)
         var resourceSourcePackages = new HashMap<String, String>();
 
         // Extract all dependencies before recursive gather to track unresolved ones
@@ -147,213 +197,63 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         IKnowledgeArtifactAdapter::getRelatedArtifactReference,
                         ra -> ra,
                         (a, b) -> a)); // Keep first if duplicates
-        IAdapter.logger.info("Total dependencies extracted from IG: {}", allDependencies.size());
+        IAdapter.logger.info("Total dependencies extracted: {}", allDependencies.size());
 
-        // Fetch package resources for the MAIN IG first (before recursive gather)
-        // This ensures we have ValueSets, CodeSystems, and StructureDefinitions from the main IG package
         String mainIgCanonical =
                 adapter.hasVersion() ? adapter.getUrl() + "|" + adapter.getVersion() : adapter.getUrl();
-        IAdapter.logger.info("Fetching package resources for main IG: {}", mainIgCanonical);
-        var mainIgPackageResources = packageDownloader != null
-                ? PackageHelper.fetchPackageResources(
-                        mainIgCanonical,
-                        fhirContext(),
-                        IAdapterFactory.forFhirContext(fhirContext()),
-                        repository,
-                        packageDownloader)
-                : PackageHelper.fetchPackageResources(
-                        mainIgCanonical, fhirContext(), IAdapterFactory.forFhirContext(fhirContext()), repository);
 
-        // Add main IG package resources to gathered resources and track source package
-        mainIgPackageResources.forEach((resourceCanonicalUrl, resourceAdapter) -> {
-            if (!gatheredResources.containsKey(resourceCanonicalUrl)) {
-                gatheredResources.put(resourceCanonicalUrl, resourceAdapter);
-                resourceSourcePackages.put(resourceCanonicalUrl, mainIgCanonical);
-                IAdapter.logger.debug(
-                        "Added {} from main IG package to gathered resources",
-                        resourceAdapter.get().fhirType());
-            }
-        });
-        IAdapter.logger.info(
-                "Added {} resources from main IG package. Total gathered resources: {}",
-                mainIgPackageResources.size(),
-                gatheredResources.size());
-
-        recursiveGather(
-                adapter,
-                gatheredResources,
-                forceArtifactVersion,
-                forceArtifactVersion,
-                new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion));
-
-        // PHASE 1: Fetch unresolved ImplementationGuide dependencies from package registry
-        // This ensures we have their StructureDefinitions before doing key element analysis
-        IAdapter.logger.info("Phase 1: Fetching unresolved ImplementationGuide dependencies from package registry");
-
-        // Collect new relatedArtifacts from fetched IGs to add after iteration
         @SuppressWarnings("unchecked")
-        var newRelatedArtifacts = new HashMap<String, ICompositeType>();
+        HashMap<String, ? extends ICompositeType> allDepsWildcard = (HashMap) allDependencies;
 
-        allDependencies.forEach((canonical, ra) -> {
-            boolean wasResolved = gatheredResources.values().stream().anyMatch(r -> {
-                String resourceCanonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
-                return canonical.equals(resourceCanonical) || canonical.startsWith(r.getUrl());
-            });
+        return new DataRequirementsContext(
+                library,
+                gatheredResources,
+                resourceSourcePackages,
+                allDepsWildcard,
+                relatedArtifacts,
+                mainIgCanonical);
+    }
 
-            if (!wasResolved) {
-                // Check if this is an ImplementationGuide dependency
-                String relType = IKnowledgeArtifactAdapter.getRelatedArtifactType(ra);
-                boolean isIgDependency = "depends-on".equals(relType) && canonical.contains("ImplementationGuide");
+    /**
+     * Filters and adds dependencies based on key element analysis.
+     * Processes all gathered resources and dependencies, applying key element filtering to determine
+     * which artifacts should be included in the final data requirements. Uses O(1) HashSet lookups
+     * for performance optimization.
+     */
+    @SuppressWarnings("unchecked")
+    private void filterAndAddDependencies(DataRequirementsContext context, KeyElementFilteringResult filteringResult) {
+        IAdapter.logger.info("Filtering and adding dependencies");
 
-                if (isIgDependency) {
-                    // Try to fetch from package registry
-                    IAdapter.logger.info(
-                            "Attempting to fetch unresolved ImplementationGuide from package registry: {}", canonical);
-                    var igResource = PackageHelper.fetchImplementationGuideFromRegistry(canonical, fhirContext());
+        // Cast to mutable types for processing
+        @SuppressWarnings({"rawtypes"})
+        HashMap allDeps = (HashMap) context.allDependencies;
+        @SuppressWarnings({"rawtypes"})
+        List relatedArts = (List) context.relatedArtifacts;
 
-                    IKnowledgeArtifactAdapter igAdapter = null;
-                    String igCanonical = null;
-
-                    if (igResource != null) {
-                        // Successfully fetched IG
-                        igAdapter = IAdapterFactory.forFhirContext(fhirContext())
-                                .createKnowledgeArtifactAdapter(igResource);
-                        IAdapter.logger.info(
-                                "Successfully fetched IG from registry, now fetching all package resources: {}",
-                                canonical);
-
-                        // Add IG to gathered resources
-                        igCanonical = igAdapter.hasVersion()
-                                ? igAdapter.getUrl() + "|" + igAdapter.getVersion()
-                                : igAdapter.getUrl();
-                        gatheredResources.put(igCanonical, igAdapter);
-                    } else {
-                        // No IG found - this is expected for terminology packages like VSAC/PHINVADS
-                        IAdapter.logger.info(
-                                "No ImplementationGuide found in package (expected for terminology packages like VSAC/PHINVADS), "
-                                        + "but will still fetch package resources: {}",
-                                canonical);
-                    }
-
-                    // Track the source package canonical (either from IG or the dependency canonical)
-                    // Must be final for use in lambda
-                    final String sourcePackageCanonical = igCanonical != null ? igCanonical : canonical;
-
-                    // Fetch ALL resources from the package (ValueSets, CodeSystems, StructureDefinitions, etc.)
-                    // This works even if there's no IG resource in the package
-                    var packageResources = packageDownloader != null
-                            ? PackageHelper.fetchPackageResources(
-                                    canonical,
-                                    fhirContext(),
-                                    IAdapterFactory.forFhirContext(fhirContext()),
-                                    repository,
-                                    packageDownloader)
-                            : PackageHelper.fetchPackageResources(
-                                    canonical,
-                                    fhirContext(),
-                                    IAdapterFactory.forFhirContext(fhirContext()),
-                                    repository);
-
-                    // Add all package resources to gathered resources and track source package
-                    packageResources.forEach((resourceCanonicalUrl, resourceAdapter) -> {
-                        if (!gatheredResources.containsKey(resourceCanonicalUrl)) {
-                            gatheredResources.put(resourceCanonicalUrl, resourceAdapter);
-                            resourceSourcePackages.put(resourceCanonicalUrl, sourcePackageCanonical);
-                            IAdapter.logger.debug(
-                                    "Added {} from package {} to gathered resources",
-                                    resourceAdapter.get().fhirType(),
-                                    canonical);
-                        }
-                    });
-
-                    IAdapter.logger.info(
-                            "Added {} resources from package {}. Total gathered resources now: {}",
-                            packageResources.size(),
-                            canonical,
-                            gatheredResources.size());
-
-                    // If we have an IG, collect its relatedArtifacts and process recursively
-                    if (igAdapter != null) {
-                        // Collect relatedArtifacts from fetched IG (which have package-source extensions)
-                        // Store them temporarily to avoid ConcurrentModificationException
-                        igAdapter.getRelatedArtifact().stream()
-                                .filter(igRa -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(igRa) != null)
-                                .forEach(igRa -> {
-                                    String raCanonical = IKnowledgeArtifactAdapter.getRelatedArtifactReference(igRa);
-                                    // Only add if not already present (don't overwrite)
-                                    if (!allDependencies.containsKey(raCanonical)
-                                            && !newRelatedArtifacts.containsKey(raCanonical)) {
-                                        newRelatedArtifacts.put(raCanonical, (ICompositeType) igRa);
-                                        IAdapter.logger.debug(
-                                                "Collected relatedArtifact from fetched IG: {}", raCanonical);
-                                    }
-                                });
-
-                        // Process IG recursively to get its dependencies
-                        recursiveGather(
-                                igAdapter,
-                                gatheredResources,
-                                forceArtifactVersion,
-                                forceArtifactVersion,
-                                new ImmutableTriple<>(artifactVersion, checkArtifactVersion, forceArtifactVersion));
-
-                        IAdapter.logger.info(
-                                "Completed gathering resources from fetched IG: {}. Total gathered resources now: {}",
-                                canonical,
-                                gatheredResources.size());
-                    }
-                }
-            }
-        });
-
-        // Add collected relatedArtifacts from fetched IGs to allDependencies
-        if (!newRelatedArtifacts.isEmpty()) {
-            newRelatedArtifacts.forEach(
-                    (canonical, ra) -> allDependencies.put(canonical, (ICompositeType & IBaseHasExtensions) ra));
-            IAdapter.logger.info(
-                    "Added {} relatedArtifacts from fetched IGs to allDependencies. Total: {}",
-                    newRelatedArtifacts.size(),
-                    allDependencies.size());
-        }
-
-        // PHASE 2: Identify key element ValueSets from ALL gathered StructureDefinitions
-        // (including those from fetched IGs)
-        IAdapter.logger.info("Phase 2: Analyzing key elements from gathered StructureDefinitions");
-        var keyElementValueSets = identifyKeyElementValueSets(gatheredResources);
-
-        if (keyElementValueSets.isEmpty()) {
-            IAdapter.logger.warn(
-                    "No key element ValueSets found in gathered StructureDefinitions. "
-                            + "Key element filtering will be disabled - all ValueSets and CodeSystems from dependency IGs will be included. "
-                            + "This typically means the IG's StructureDefinitions are not available in the repository or package registry.");
-        } else {
-            IAdapter.logger.info(
-                    "Key element filtering enabled. Found {} key element ValueSets from {} StructureDefinitions.",
-                    keyElementValueSets.size(),
-                    gatheredResources.values().stream()
-                            .filter(r -> r.get().fhirType().equals("StructureDefinition"))
-                            .count());
-        }
-
-        // PHASE 3: Filter and add dependencies based on key element analysis
-        IAdapter.logger.info("Phase 3: Filtering and adding dependencies based on key element analysis");
-
-        // Add gathered resources as relatedArtifacts, applying key element filtering
-        // Only include ValueSet/CodeSystem resources (exclude ImplementationGuides, SearchParameters, etc.)
-        // Preserve original relatedArtifacts from allDependencies (which have package-source extensions)
-        gatheredResources.values().forEach(r -> {
+        // Process gathered resources, applying key element filtering
+        context.gatheredResources.values().forEach(r -> {
             String resourceType = r.get().fhirType();
             String canonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
-            String canonicalNoVersion = r.getUrl(); // URL without version for fallback matching
+            String canonicalNoVersion = r.getUrl();
 
-            // Allow Libraries (from main IG), but filter other resource types
-            if (resourceType.equals("Library") || shouldIncludeDependency(canonical, keyElementValueSets)) {
-                // Check if we have the original relatedArtifact from allDependencies (which has extensions)
-                // Try exact match first, then try URL-only match
-                var originalRa = allDependencies.get(canonical);
+            String sourcePackage = context.resourceSourcePackages.getOrDefault(
+                    canonical, context.resourceSourcePackages.get(canonicalNoVersion));
+            boolean isFromMainIG = context.mainIgCanonical.equals(sourcePackage);
+
+            // Allow Libraries and CodeSystems from main IG, filter others via key element analysis
+            if (resourceType.equals("Library")
+                    || (resourceType.equals("CodeSystem") && isFromMainIG)
+                    || filteringResult.shouldIncludeDependency(canonical, resourceType)) {
+
+                // Resolved CodeSystems keep their package version. Truly external CodeSystems
+                // (SNOMED, LOINC, etc.) that aren't resolved from any package are handled
+                // separately in the external CodeSystems section below (lines ~416-453).
+                var originalRa = allDeps.get(canonical);
                 if (originalRa == null && !canonical.equals(canonicalNoVersion)) {
-                    // Try matching without version
-                    originalRa = allDependencies.entrySet().stream()
+                    @SuppressWarnings("unchecked")
+                    var entryStream = (java.util.stream.Stream<java.util.Map.Entry<String, Object>>)
+                            allDeps.entrySet().stream();
+                    originalRa = entryStream
                             .filter(e -> e.getKey().startsWith(canonicalNoVersion))
                             .map(java.util.Map.Entry::getValue)
                             .findFirst()
@@ -361,45 +261,44 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                 }
 
                 if (originalRa != null) {
-                    // Use the original relatedArtifact (preserves package-source extension)
-                    String raReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(originalRa);
-                    if (relatedArtifacts.stream()
-                            .noneMatch(existing -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(existing)
-                                    .equals(raReference))) {
-                        relatedArtifacts.add((ICompositeType & IBaseHasExtensions) originalRa);
+                    String raReference = getRelatedArtifactReferenceUnchecked(originalRa);
+                    boolean alreadyExists = false;
+                    for (Object existing : relatedArts) {
+                        String existingRef = getRelatedArtifactReferenceUnchecked(existing);
+                        if (existingRef.equals(raReference)) {
+                            alreadyExists = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyExists) {
+                        relatedArts.add(originalRa);
                         IAdapter.logger.info(
                                 "Added gathered resource with original relatedArtifact (has extension): {} -> {}",
                                 canonical,
                                 raReference);
                     }
                 } else {
-                    // No original relatedArtifact - check if we know the source package (from package fetch)
-                    String sourcePackage = resourceSourcePackages.get(canonical);
-                    if (sourcePackage == null && !canonical.equals(canonicalNoVersion)) {
-                        // Try matching without version
-                        sourcePackage = resourceSourcePackages.get(canonicalNoVersion);
-                    }
-
                     if (sourcePackage != null) {
-                        // Create new relatedArtifact with package-source extension
-                        addRelatedArtifactWithSourcePackage(relatedArtifacts, r, sourcePackage);
+                        addRelatedArtifactWithSourcePackage(relatedArts, r, sourcePackage, false);
                         IAdapter.logger.info(
                                 "Added gathered resource from package {} with NEW sourcePackage extension: {}",
                                 sourcePackage,
                                 canonical);
                     } else {
-                        // No source package info - create basic relatedArtifact (shouldn't happen often)
-                        addRelatedArtifact(relatedArtifacts, r);
+                        addRelatedArtifact(relatedArts, r);
+                        @SuppressWarnings("unchecked")
+                        var allDepsKeys = (java.util.Set<String>) allDeps.keySet();
+                        var sourcePkgKeys = context.resourceSourcePackages.keySet();
                         IAdapter.logger.warn(
                                 "Added gathered resource WITHOUT sourcePackage extension (missing tracking): {} "
                                         + "[checked: exact='{}', noVersion='{}', allDeps keys={}, sourcePkg keys={}]",
                                 canonical,
                                 canonical,
                                 canonicalNoVersion,
-                                allDependencies.keySet().stream()
+                                allDepsKeys.stream()
                                         .filter(k -> k.contains(canonicalNoVersion))
                                         .toList(),
-                                resourceSourcePackages.keySet().stream()
+                                sourcePkgKeys.stream()
                                         .filter(k -> k.contains(canonicalNoVersion))
                                         .toList());
                     }
@@ -409,68 +308,78 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             }
         });
 
-        // Collect additional dependencies from fetched IGs
-        @SuppressWarnings("unchecked")
+        // Pre-compute sets for O(1) lookups (performance optimization)
+        var resolvedCanonicals = new java.util.HashSet<String>();
+        for (var r : context.gatheredResources.values()) {
+            String resourceCanonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
+            resolvedCanonicals.add(resourceCanonical);
+            resolvedCanonicals.add(r.getUrl());
+        }
+
+        var addedRelatedArtifactCanonicals = new java.util.HashSet<String>();
+        for (var ra : relatedArts) {
+            String raCanonical = getRelatedArtifactReferenceUnchecked(ra);
+            if (raCanonical != null) {
+                addedRelatedArtifactCanonicals.add(raCanonical);
+            }
+        }
+
+        // Process unresolved dependencies and IG relatedArtifacts
         var additionalDependencies = new HashMap<String, ICompositeType>();
 
-        allDependencies.forEach((canonical, ra) -> {
-            boolean wasResolved = gatheredResources.values().stream().anyMatch(r -> {
-                String resourceCanonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
-                return canonical.equals(resourceCanonical) || canonical.startsWith(r.getUrl());
-            });
+        allDeps.forEach((canonical, ra) -> {
+            var relArt = (ICompositeType & IBaseHasExtensions) ra;
+            String canonicalStr = (String) canonical;
+            String canonicalNoVersion = canonicalStr.split("\\|")[0];
+            boolean wasResolved =
+                    resolvedCanonicals.contains(canonicalStr) || resolvedCanonicals.contains(canonicalNoVersion);
 
             if (!wasResolved) {
-                // Check if this is an IG dependency (already fetched in Phase 1)
-                String relType = IKnowledgeArtifactAdapter.getRelatedArtifactType(ra);
-                boolean isIgDependency = "depends-on".equals(relType) && canonical.contains("ImplementationGuide");
+                String relType = IKnowledgeArtifactAdapter.getRelatedArtifactType(relArt);
+                boolean isIgDependency = "depends-on".equals(relType) && canonicalStr.contains("ImplementationGuide");
 
                 if (isIgDependency) {
-                    // IG was already fetched in Phase 1, get its adapter from gatheredResources
-                    gatheredResources.values().stream()
+                    context.gatheredResources.values().stream()
                             .filter(r -> r.get().fhirType().equals("ImplementationGuide"))
                             .filter(r -> {
                                 String igCanonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
-                                return canonical.equals(igCanonical) || canonical.startsWith(r.getUrl());
+                                return canonicalStr.equals(igCanonical) || canonicalStr.startsWith(r.getUrl());
                             })
                             .findFirst()
                             .ifPresent(igAdapter -> {
-                                // Collect the fetched IG's dependencies and filter them
                                 igAdapter.getRelatedArtifact().stream()
                                         .filter(igRa ->
                                                 IKnowledgeArtifactAdapter.getRelatedArtifactReference(igRa) != null)
                                         .forEach(igRa -> {
                                             String igRaCanonical =
                                                     IKnowledgeArtifactAdapter.getRelatedArtifactReference(igRa);
-
-                                            // Apply key element filtering
-                                            if (!shouldIncludeDependency(igRaCanonical, keyElementValueSets)) {
-                                                return; // Skip this dependency
+                                            String igRaResourceType =
+                                                    extractResourceType(igRaCanonical, context.gatheredResources);
+                                            if (!filteringResult.shouldIncludeDependency(
+                                                    igRaCanonical, igRaResourceType)) {
+                                                return;
                                             }
 
-                                            // Only add if not already tracked
-                                            if (!allDependencies.containsKey(igRaCanonical)
+                                            if (!allDeps.containsKey(igRaCanonical)
                                                     && !additionalDependencies.containsKey(igRaCanonical)) {
                                                 additionalDependencies.put(igRaCanonical, (ICompositeType) igRa);
                                                 IAdapter.logger.info(
                                                         "Including key element dependency from fetched IG {}: {}",
-                                                        canonical,
+                                                        canonicalStr,
                                                         igRaCanonical);
                                             }
                                         });
                             });
                 } else {
-                    // Non-IG unresolved dependency - apply filtering
-                    if (relatedArtifacts.stream()
-                            .noneMatch(existing -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(existing)
-                                    .equals(canonical))) {
-
-                        // Apply filtering: only include ValueSet/CodeSystem
-                        if (shouldIncludeDependency(canonical, keyElementValueSets)) {
-                            relatedArtifacts.add((ICompositeType & IBaseHasExtensions) ra);
+                    if (!addedRelatedArtifactCanonicals.contains(canonicalStr)) {
+                        String unresolvedResourceType = extractResourceType(canonicalStr, context.gatheredResources);
+                        if (filteringResult.shouldIncludeDependency(canonicalStr, unresolvedResourceType)) {
+                            relatedArts.add(relArt);
+                            addedRelatedArtifactCanonicals.add(canonicalStr);
                             IAdapter.logger.info(
-                                    "Including unresolved key element terminology dependency: {}", canonical);
+                                    "Including unresolved key element terminology dependency: {}", canonicalStr);
                         } else {
-                            IAdapter.logger.debug("Excluding unresolved non-terminology dependency: {}", canonical);
+                            IAdapter.logger.debug("Excluding unresolved non-terminology dependency: {}", canonicalStr);
                         }
                     }
                 }
@@ -479,30 +388,213 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
         // Process additional dependencies from fetched IGs
         additionalDependencies.forEach((canonical, ra) -> {
-            boolean wasResolved = gatheredResources.values().stream().anyMatch(r -> {
-                String resourceCanonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
-                return canonical.equals(resourceCanonical) || canonical.startsWith(r.getUrl());
-            });
+            String canonicalNoVersion = canonical.split("\\|")[0];
+            boolean wasResolved =
+                    resolvedCanonicals.contains(canonical) || resolvedCanonicals.contains(canonicalNoVersion);
 
-            if (!wasResolved) {
-                // Add as unresolved dependency (already filtered for key elements)
-                if (relatedArtifacts.stream()
-                        .noneMatch(existing -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(existing)
-                                .equals(canonical))) {
-                    relatedArtifacts.add((ICompositeType & IBaseHasExtensions) ra);
-                    IAdapter.logger.info("Including key element terminology dependency from fetched IG: {}", canonical);
-                }
+            if (!wasResolved && !addedRelatedArtifactCanonicals.contains(canonical)) {
+                var raTyped = (ICompositeType & IBaseHasExtensions) ra;
+                relatedArts.add(raTyped);
+                addedRelatedArtifactCanonicals.add(canonical);
+                IAdapter.logger.info("Including key element terminology dependency from fetched IG: {}", canonical);
             }
         });
 
-        library.setRelatedArtifact(relatedArtifacts);
+        // Add external CodeSystems and ValueSets referenced by key element ValueSets
+        // These are typically external terminologies (SNOMED, LOINC, etc.) that don't exist
+        // as resources in packages but are referenced by ValueSets
+        if (filteringResult.isFilteringEnabled()) {
+            IAdapter.logger.info("Adding external terminologies referenced by key element ValueSets");
 
-        // Collect resources from gatheredResources for potential persistence
-        collectedResources.clear();
-        gatheredResources.values().forEach(resourceAdapter -> collectedResources.add(resourceAdapter.get()));
-        IAdapter.logger.info("Collected {} resources for potential persistence", collectedResources.size());
+            // Add external CodeSystems
+            for (String codeSystemUrl : filteringResult.getReferencedCodeSystems()) {
+                if (!addedRelatedArtifactCanonicals.contains(codeSystemUrl)
+                        && !resolvedCanonicals.contains(codeSystemUrl)) {
+                    var externalCodeSystemRa = IKnowledgeArtifactAdapter.newRelatedArtifact(
+                            fhirVersion(), "depends-on", codeSystemUrl, null);
+                    addCqfResourceTypeExtension(externalCodeSystemRa, "CodeSystem");
+                    relatedArts.add(externalCodeSystemRa);
+                    addedRelatedArtifactCanonicals.add(codeSystemUrl);
+                    IAdapter.logger.info("Added external CodeSystem: {}", codeSystemUrl);
+                }
+            }
 
-        return library.get();
+            // Add external ValueSets
+            for (String valueSetUrl : filteringResult.getReferencedValueSets()) {
+                // Don't add if it's already a key element ValueSet
+                String valueSetUrlNoVersion = valueSetUrl.split("\\|")[0];
+                boolean isKeyElementVs = filteringResult.getKeyElementValueSets().stream()
+                        .anyMatch(vs -> vs.equals(valueSetUrl) || vs.startsWith(valueSetUrlNoVersion));
+
+                if (!isKeyElementVs
+                        && !addedRelatedArtifactCanonicals.contains(valueSetUrl)
+                        && !resolvedCanonicals.contains(valueSetUrl)
+                        && !resolvedCanonicals.contains(valueSetUrlNoVersion)) {
+                    var externalValueSetRa = IKnowledgeArtifactAdapter.newRelatedArtifact(
+                            fhirVersion(), "depends-on", valueSetUrl, null);
+                    addCqfResourceTypeExtension(externalValueSetRa, "ValueSet");
+                    relatedArts.add(externalValueSetRa);
+                    addedRelatedArtifactCanonicals.add(valueSetUrl);
+                    IAdapter.logger.info("Added external ValueSet: {}", valueSetUrl);
+                }
+            }
+        }
+
+        // Post-processing: Ensure all relatedArtifacts have the cqf-resourceType extension.
+        // Some code paths (unresolved dependencies, additionalDependencies from fetched IGs)
+        // add relatedArtifacts without this extension. We fix them here using the
+        // referencedCodeSystems/referencedValueSets sets and gatheredResources map.
+        for (Object ra : relatedArts) {
+            @SuppressWarnings("unchecked")
+            var typedRa = (ICompositeType & IBaseHasExtensions) ra;
+            if (hasCqfResourceTypeExtension(typedRa)) {
+                continue;
+            }
+            String raCanonical = getRelatedArtifactReferenceUnchecked(ra);
+            if (raCanonical == null) {
+                continue;
+            }
+            String raCanonicalNoVersion = raCanonical.split("\\|")[0];
+
+            // Determine resource type from filtering result sets or gathered resources
+            String resourceType = null;
+            if (filteringResult.getReferencedCodeSystems().contains(raCanonicalNoVersion)) {
+                resourceType = "CodeSystem";
+            } else if (filteringResult.getReferencedValueSets().contains(raCanonicalNoVersion)
+                    || filteringResult.getKeyElementValueSets().stream()
+                            .anyMatch(vs -> vs.equals(raCanonical) || vs.startsWith(raCanonicalNoVersion))) {
+                resourceType = "ValueSet";
+            } else {
+                // Try to find in gathered resources
+                resourceType = extractResourceType(raCanonical, context.gatheredResources);
+            }
+
+            if (resourceType != null) {
+                addCqfResourceTypeExtension(typedRa, resourceType);
+            }
+        }
+    }
+
+    /**
+     * Checks if a relatedArtifact already has the cqf-resourceType extension.
+     */
+    private <T extends ICompositeType & IBaseHasExtensions> boolean hasCqfResourceTypeExtension(T relatedArtifact) {
+        String extensionUrl = org.opencds.cqf.fhir.utility.Constants.CQF_RESOURCETYPE;
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact dstu3Ra) {
+            return dstu3Ra.getExtension().stream().anyMatch(e -> extensionUrl.equals(e.getUrl()));
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact r4Ra) {
+            return r4Ra.getExtension().stream().anyMatch(e -> extensionUrl.equals(e.getUrl()));
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5Ra) {
+            return r5Ra.getExtension().stream().anyMatch(e -> extensionUrl.equals(e.getUrl()));
+        }
+        return false;
+    }
+
+    /**
+     * Adds the cqf-resourceType extension to a relatedArtifact.
+     * This is needed for external terminologies whose URL patterns don't follow standard
+     * FHIR canonical conventions (e.g., http://www.ada.org/cdt for a CodeSystem).
+     */
+    @SuppressWarnings("unchecked")
+    private <T extends ICompositeType & IBaseHasExtensions> void addCqfResourceTypeExtension(
+            T relatedArtifact, String resourceType) {
+        switch (fhirVersion()) {
+            case DSTU3 -> ((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact)
+                    .addExtension(new org.hl7.fhir.dstu3.model.Extension()
+                            .setUrl(org.opencds.cqf.fhir.utility.Constants.CQF_RESOURCETYPE)
+                            .setValue(new org.hl7.fhir.dstu3.model.CodeType(resourceType)));
+            case R4 -> ((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact)
+                    .addExtension(new org.hl7.fhir.r4.model.Extension()
+                            .setUrl(org.opencds.cqf.fhir.utility.Constants.CQF_RESOURCETYPE)
+                            .setValue(new org.hl7.fhir.r4.model.CodeType(resourceType)));
+            case R5 -> ((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact)
+                    .addExtension(new org.hl7.fhir.r5.model.Extension()
+                            .setUrl(org.opencds.cqf.fhir.utility.Constants.CQF_RESOURCETYPE)
+                            .setValue(new org.hl7.fhir.r5.model.CodeType(resourceType)));
+            default -> IAdapter.logger.warn(
+                    "Unsupported FHIR version for adding cqf-resourceType extension: {}", fhirVersion());
+        }
+    }
+
+    /**
+     * Processes $data-requirements for knowledge artifacts.
+     *
+     * <p>This operation extracts data requirements from CQL libraries and gathers all related artifacts
+     * (Libraries, ValueSets, CodeSystems) needed for evaluation. The operation delegates to specialized
+     * classes for resource-type-specific processing:</p>
+     * <ul>
+     *   <li>ImplementationGuide resources use {@link ImplementationGuidePackageResolver} for package
+     *       fetching and {@link KeyElementFilter} for terminology filtering</li>
+     *   <li>Other resource types (Library, PlanDefinition, Measure, Questionnaire, ValueSet, etc.) use
+     *       recursive gathering to collect dependencies</li>
+     * </ul>
+     *
+     * <p>Returns a Library resource with type "module-definition" containing dataRequirement and
+     * relatedArtifact elements describing the data and terminology needed for evaluation.</p>
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public IBase visit(IKnowledgeArtifactAdapter adapter, IBaseParameters operationParameters) {
+        // Extract operation parameters
+        var params = extractOperationParameters(operationParameters);
+
+        // Initialize library with CQL data requirements
+        var library = initializeLibraryWithCqlDataRequirements(adapter, params.parameters());
+
+        // Initialize dependency tracking structures
+        var context = initializeDependencyTracking(adapter, library);
+
+        // Only use package resolution for ImplementationGuides
+        KeyElementFilteringResult filteringResult;
+        if (adapter.get().fhirType().equals("ImplementationGuide")) {
+            // Use ImplementationGuidePackageResolver to fetch packages and dependencies
+            var packageResult = packageResolver.resolvePackages(
+                    adapter,
+                    context.mainIgCanonical,
+                    context.allDependencies,
+                    this::recursiveGather,
+                    params.artifactVersion(),
+                    params.checkArtifactVersion(),
+                    params.forceArtifactVersion());
+
+            // Merge package resolution results into context
+            context.gatheredResources.putAll(packageResult.getResources());
+            context.resourceSourcePackages.putAll(packageResult.getResourceSourcePackages());
+
+            // Use KeyElementFilter to identify key element ValueSets and CodeSystems
+            filteringResult = keyElementFilter.analyzeKeyElements(
+                    context.gatheredResources, context.resourceSourcePackages, context.mainIgCanonical);
+        } else {
+            // For non-IG resources, create a default filtering result with filtering disabled
+            // This enables fallback mode: include all ValueSets and CodeSystems
+            filteringResult = new KeyElementFilteringResult(
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    java.util.Collections.emptySet(),
+                    false);
+        }
+
+        // Perform recursive gathering on the main adapter
+        recursiveGather(
+                adapter,
+                context.gatheredResources,
+                params.forceArtifactVersion(),
+                params.forceArtifactVersion(),
+                new ImmutableTriple<>(
+                        params.artifactVersion(), params.checkArtifactVersion(), params.forceArtifactVersion()));
+
+        // Phase 3: Filter and add dependencies based on key element analysis
+        filterAndAddDependencies(context, filteringResult);
+
+        // Finalize library with filtered relatedArtifacts
+        var finalRelatedArts = (List) context.relatedArtifacts;
+        context.library.setRelatedArtifact(finalRelatedArts);
+
+        // Note: collectedResources population removed - the persistDependencies feature
+        // was abandoned due to performance issues. The field and getter remain for
+        // backwards compatibility but will return an empty list.
+
+        return context.library.get();
     }
 
     @SuppressWarnings("unchecked")
@@ -587,56 +679,36 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     /**
-     * Identifies ValueSets that are bound to key elements in the gathered StructureDefinitions.
-     * Uses KeyElementAnalyzer to determine which ValueSets are actually needed based on
-     * mustSupport, differential elements, mandatory children, slices, modifiers, etc.
-     *
-     * @param gatheredResources the resources gathered from the main IG
-     * @return set of ValueSet canonical URLs that are bound to key elements
+     * Helper method to call getRelatedArtifactReference with proper unchecked suppression.
+     * This is needed when working with raw types from DataRequirementsContext.
      */
-    private java.util.Set<String> identifyKeyElementValueSets(
-            java.util.Map<String, IKnowledgeArtifactAdapter> gatheredResources) {
-        var keyElementValueSets = new java.util.HashSet<String>();
-        var analyzer = new KeyElementAnalyzer(repository);
-
-        for (var resourceAdapter : gatheredResources.values()) {
-            var resource = resourceAdapter.get();
-            // Only analyze StructureDefinitions
-            if (resource.fhirType().equals("StructureDefinition")) {
-                var valueSets = analyzer.getKeyElementValueSets(resource);
-                keyElementValueSets.addAll(valueSets);
-                IAdapter.logger.debug(
-                        "Found {} key element ValueSets in StructureDefinition: {}",
-                        valueSets.size(),
-                        resourceAdapter.getUrl());
-            }
-        }
-
-        IAdapter.logger.info("Total key element ValueSets identified: {}", keyElementValueSets.size());
-        return keyElementValueSets;
+    @SuppressWarnings("unchecked")
+    private <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactReferenceUnchecked(Object ra) {
+        return IKnowledgeArtifactAdapter.getRelatedArtifactReference((T) ra);
     }
 
     /**
      * Determines if a dependency should be included based on key element analysis.
-     * Only includes ValueSet and CodeSystem resources. For ValueSets, they must be
-     * identified as key elements. For CodeSystems, they are included if their canonical
-     * URL appears in any of the key element ValueSet URLs (as ValueSets often reference
-     * CodeSystems with matching URLs).
+     * Includes ValueSets bound to key elements and CodeSystems referenced by those ValueSets.
+     * CodeSystems from the main IG are included automatically via the caller's check.
      *
      * <p>If keyElementValueSets is empty (no StructureDefinitions found), this method
      * falls back to including all ValueSet and CodeSystem resources.
      *
      * @param canonical the canonical URL of the dependency
+     * @param resourceType the FHIR resource type (ValueSet, CodeSystem, etc.)
      * @param keyElementValueSets the set of ValueSet URLs bound to key elements (may be empty)
+     * @param referencedCodeSystems pre-computed set of CodeSystem URLs referenced by key element ValueSets
      * @return true if the dependency should be included
      */
-    private boolean shouldIncludeDependency(String canonical, java.util.Set<String> keyElementValueSets) {
+    private boolean shouldIncludeDependency(
+            String canonical,
+            String resourceType,
+            java.util.Set<String> keyElementValueSets,
+            java.util.Set<String> referencedCodeSystems) {
         if (canonical == null || canonical.isEmpty()) {
             return false;
         }
-
-        // Extract resource type from canonical URL
-        String resourceType = extractResourceType(canonical);
 
         // Only include ValueSet and CodeSystem resources
         if (resourceType == null || (!resourceType.equals("ValueSet") && !resourceType.equals("CodeSystem"))) {
@@ -654,7 +726,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
         // For ValueSets, check if it's a key element ValueSet
         if (resourceType.equals("ValueSet")) {
-            // Strip version from canonical for comparison
             String canonicalNoVersion = canonical.split("\\|")[0];
             boolean isKeyElement = keyElementValueSets.stream()
                     .anyMatch(vs -> vs.equals(canonical) || vs.startsWith(canonicalNoVersion));
@@ -665,45 +736,15 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             return isKeyElement;
         }
 
-        // For CodeSystems, include if the base URL appears in any key element ValueSet
-        // (ValueSets often reference CodeSystems from the same package)
+        // For CodeSystems, check if in the pre-computed set of referenced CodeSystems
         if (resourceType.equals("CodeSystem")) {
             String canonicalNoVersion = canonical.split("\\|")[0];
-
-            // Extract base URL (everything before "/CodeSystem/")
-            int codeSystemIndex = canonicalNoVersion.lastIndexOf("/CodeSystem/");
-            if (codeSystemIndex == -1) {
-                // CodeSystem URL doesn't follow the expected pattern (e.g., http://hl7.org/fhir/sid/icd-10-cm)
-                // For these non-standard URLs, we'll be more permissive and just check if the domain matches
-                IAdapter.logger.debug(
-                        "CodeSystem has non-standard URL pattern, using permissive matching: {}", canonical);
-
-                // Extract domain (e.g., "hl7.org" from "http://hl7.org/fhir/sid/icd-10-cm")
-                String domain = extractDomain(canonicalNoVersion);
-                if (domain == null) {
-                    IAdapter.logger.debug("Cannot extract domain from CodeSystem URL: {}", canonical);
-                    return false;
-                }
-
-                // Check if any key element ValueSet shares the same domain
-                boolean isReferenced = keyElementValueSets.stream().anyMatch(vs -> {
-                    String vsDomain = extractDomain(vs.split("\\|")[0]);
-                    return vsDomain != null && vsDomain.equals(domain);
-                });
-
-                if (!isReferenced) {
-                    IAdapter.logger.debug(
-                            "Excluding CodeSystem (non-standard URL) not referenced by key element ValueSets: {}",
-                            canonical);
-                }
-                return isReferenced;
-            }
-
-            String baseUrl = canonicalNoVersion.substring(0, codeSystemIndex);
-            boolean isReferenced = keyElementValueSets.stream().anyMatch(vs -> vs.startsWith(baseUrl));
+            boolean isReferenced = referencedCodeSystems.contains(canonicalNoVersion);
 
             if (!isReferenced) {
                 IAdapter.logger.debug("Excluding CodeSystem not referenced by key element ValueSets: {}", canonical);
+            } else {
+                IAdapter.logger.debug("Including CodeSystem referenced by key element ValueSet: {}", canonical);
             }
             return isReferenced;
         }
@@ -712,24 +753,38 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     /**
-     * Extracts the resource type from a canonical URL.
-     * Examples:
-     *   "http://example.org/ValueSet/my-vs" -> "ValueSet"
-     *   "http://example.org/CodeSystem/my-cs|1.0" -> "CodeSystem"
+     * Extracts the resource type for a given canonical URL.
+     * First attempts to look up the actual resource in gatheredResources to get the true fhirType().
+     * Falls back to URL pattern matching for unresolved dependencies.
      *
-     * @param canonical the canonical URL
-     * @return the resource type, or null if not found
+     * @param canonical the canonical URL (may include version with |)
+     * @param gatheredResources all resources gathered from packages and repository
+     * @return the resource type (e.g., "ValueSet", "CodeSystem"), or null if unknown
      */
-    private String extractResourceType(String canonical) {
+    private String extractResourceType(
+            String canonical, java.util.Map<String, IKnowledgeArtifactAdapter> gatheredResources) {
         if (canonical == null || canonical.isEmpty()) {
             return null;
         }
 
         // Strip version if present
-        String urlWithoutVersion = canonical.split("\\|")[0];
+        String canonicalNoVersion = canonical.split("\\|")[0];
 
-        // Look for resource type in URL path
-        String[] pathParts = urlWithoutVersion.split("/");
+        // First, try to find the actual resource in gatheredResources and get its fhirType()
+        // This handles cases like http://hl7.org/fhir/goal-status (CodeSystem without /CodeSystem/ in URL)
+        var resource = gatheredResources.values().stream()
+                .filter(r -> {
+                    String resourceCanonical = r.hasVersion() ? r.getUrl() + "|" + r.getVersion() : r.getUrl();
+                    return canonical.equals(resourceCanonical) || canonicalNoVersion.equals(r.getUrl());
+                })
+                .findFirst();
+
+        if (resource.isPresent()) {
+            return resource.get().get().fhirType();
+        }
+
+        // Fallback: Look for resource type in URL path (for unresolved dependencies)
+        String[] pathParts = canonicalNoVersion.split("/");
         for (int i = 0; i < pathParts.length - 1; i++) {
             String part = pathParts[i];
             // Common FHIR resource types we care about
@@ -745,51 +800,23 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     /**
-     * Extracts the domain from a URL.
-     * Examples:
-     *   "http://hl7.org/fhir/ValueSet/observation-status" -> "hl7.org"
-     *   "http://terminology.hl7.org/CodeSystem/v3-ActCode" -> "terminology.hl7.org"
-     *
-     * @param url the URL
-     * @return the domain, or null if not found
-     */
-    private String extractDomain(String url) {
-        if (url == null || url.isEmpty()) {
-            return null;
-        }
-
-        try {
-            // Remove protocol (http:// or https://)
-            String withoutProtocol = url.replaceFirst("^https?://", "");
-
-            // Extract domain (everything before the first slash)
-            int slashIndex = withoutProtocol.indexOf('/');
-            if (slashIndex > 0) {
-                return withoutProtocol.substring(0, slashIndex);
-            } else {
-                return withoutProtocol;
-            }
-        } catch (Exception e) {
-            IAdapter.logger.debug("Error extracting domain from URL: {}", url, e);
-            return null;
-        }
-    }
-
-    /**
      * Adds a relatedArtifact for a gathered resource with the package-source extension.
      *
      * @param relatedArtifacts the list of relatedArtifacts to add to
      * @param adapter the resource adapter
      * @param sourcePackageCanonical the canonical URL of the source IG package
+     * @param stripVersion if true, omit the version from the canonical reference (for external terminologies)
      */
-    @SuppressWarnings("unchecked")
     private <T extends ICompositeType & IBaseHasExtensions> void addRelatedArtifactWithSourcePackage(
-            List<T> relatedArtifacts, IKnowledgeArtifactAdapter adapter, String sourcePackageCanonical) {
+            List<T> relatedArtifacts,
+            IKnowledgeArtifactAdapter adapter,
+            String sourcePackageCanonical,
+            boolean stripVersion) {
         if (relatedArtifacts == null) {
             return;
         }
 
-        var reference = adapter.hasVersion()
+        var reference = (!stripVersion && adapter.hasVersion())
                 ? adapter.getUrl().concat("|%s".formatted(adapter.getVersion()))
                 : adapter.getUrl();
 
@@ -900,6 +927,9 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         "Unsupported FHIR version for adding package-source extension: {}", fhirVersion());
             }
         }
+
+        // Add cqf-resourceType extension to indicate the resource type
+        addCqfResourceTypeExtension(relatedArtifact, adapter.get().fhirType());
 
         relatedArtifacts.add(relatedArtifact);
     }

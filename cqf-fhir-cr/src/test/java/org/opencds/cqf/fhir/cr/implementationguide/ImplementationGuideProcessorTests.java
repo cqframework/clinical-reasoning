@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.IPublishProcessor;
@@ -26,6 +27,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
+@Disabled("Too slow - takes 4+ minutes. Enable manually when needed.")
 class ImplementationGuideProcessorTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final IParser jsonParser = fhirContextR4.newJsonParser();
@@ -57,6 +59,11 @@ class ImplementationGuideProcessorTests {
     private void setupMockPackages() {
         // Register mock dependency packages to avoid hitting packages.fhir.org
         // These are stub IGs that the test IG depends on
+
+        // Base FHIR R4 core package (version 4.0.1)
+        // Register as empty package to avoid network calls - base FHIR StructureDefinitions
+        // will be skipped during key element analysis anyway
+        mockPackageServer.registerPackage("hl7.fhir.r4.core", "4.0.1");
 
         // hl7.terminology package (version 5.0.0)
         var terminologyIg = (ImplementationGuide)

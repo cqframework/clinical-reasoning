@@ -249,6 +249,21 @@ Snapshots are pulled from: https://central.sonatype.com/repository/maven-snapsho
 - HAPI FHIR: https://github.com/hapifhir/hapi-fhir
 - CQL VS Code Extension: https://marketplace.visualstudio.com/items?itemName=cqframework.cql
 
+## Known Issues and Design Notes
+
+### External Terminology Versioning (Active Issue - 2026-02-13)
+
+When running `ImplementationGuide/$data-requirements`, external CodeSystems (SNOMED, ICD-10-CM, etc.) are being resolved from dependency packages (e.g., hl7.terminology) and their package versions are included in expansion parameters. This may not be the desired behavior, as external terminologies should typically be resolved by the terminology server without version constraints.
+
+**See:** [EXTERNAL_TERMINOLOGY_VERSIONING.md](EXTERNAL_TERMINOLOGY_VERSIONING.md) for detailed analysis, architecture flow, and potential solutions.
+
+**Status:** Awaiting feedback on solution approach. The issue affects ImplementationGuide packaging, ValueSet expansion, and terminology server integration.
+
+**Key files involved:**
+- `cqf-fhir-cr/src/main/java/org/opencds/cqf/fhir/cr/visitor/DataRequirementsVisitor.java`
+- `cqf-fhir-cr/src/main/java/org/opencds/cqf/fhir/cr/visitor/InferManifestParametersVisitor.java`
+- `cqf-fhir-cr/src/main/java/org/opencds/cqf/fhir/cr/implementationguide/KeyElementFilter.java`
+
 ## License
 
 Apache License 2.0 - All contributions licensed under Apache 2.0

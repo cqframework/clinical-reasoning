@@ -11,6 +11,11 @@ public class VersionComparator implements Comparator<String> {
 
     @Override
     public int compare(String v1, String v2) {
+        // Handle null values: nulls are considered "less than" non-nulls
+        if (v1 == null && v2 == null) return 0;
+        if (v1 == null) return -1;
+        if (v2 == null) return 1;
+
         boolean isV1SemVer = isStrictSemVer(v1);
         boolean isV2SemVer = isStrictSemVer(v2);
         if (isV1SemVer && isV2SemVer) {

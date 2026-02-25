@@ -13,7 +13,7 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
 public interface ITerminologyServerClient extends ITerminologyProvider {
 
-    String versionParamName = "valueSetVersion";
+    String versionParamName = "version";
     String urlParamName = "url";
 
     // Strips resource and id from the endpoint address URL, these are not needed as the client constructs the URL.

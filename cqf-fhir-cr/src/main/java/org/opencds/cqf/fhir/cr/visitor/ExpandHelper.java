@@ -102,13 +102,23 @@ public class ExpandHelper {
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
                                 terminologyEndpoint.get().getAddress()))) {
+            String terminologyServerAddress = terminologyEndpoint.get().getAddress();
+            log.info(
+                    "Attempting terminology server expansion for ValueSet: {} | Terminology Server: {}",
+                    valueSet.getUrl(),
+                    terminologyServerAddress);
             try {
                 terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+                log.info(
+                        "Successfully expanded ValueSet: {} using terminology server: {}",
+                        valueSet.getUrl(),
+                        terminologyServerAddress);
                 return;
             } catch (TerminologyServerExpansionException e) {
                 log.warn(
-                        "Failed to expand value set {}. Reason: {}. Will attempt to expand locally.",
+                        "Failed to expand ValueSet: {} | Terminology Server: {} | Reason: {} | Will attempt to expand locally.",
                         valueSet.getUrl(),
+                        terminologyServerAddress,
                         e.getMessage());
             }
         }
@@ -175,6 +185,10 @@ public class ExpandHelper {
 
         // Try CRMI configuration-based routing first if configurations are provided
         if (artifactEndpointConfigurations != null && !artifactEndpointConfigurations.isEmpty()) {
+            log.info(
+                    "Attempting CRMI configuration-based expansion for ValueSet: {} | {} endpoint configuration(s) available",
+                    valueSet.getUrl(),
+                    artifactEndpointConfigurations.size());
             try {
                 var expandedResult = terminologyServerRouter.expandWithConfigurations(
                         valueSet, artifactEndpointConfigurations, expansionParameters);
@@ -186,12 +200,13 @@ public class ExpandHelper {
                     valueSet.setExpansion(expandedValueSet.getExpansion());
                     validateExpansionParameters(valueSet, expansionParameters);
                     expandedList.add(valueSet.getUrl());
+                    log.info(
+                            "Successfully expanded ValueSet: {} using CRMI endpoint configurations", valueSet.getUrl());
                     return;
                 }
             } catch (TerminologyServerExpansionException e) {
                 log.warn(
-                        "Failed to expand value set {} using artifact endpoint configurations. Reason: {}. "
-                                + "Will attempt fallback expansion.",
+                        "Failed to expand ValueSet: {} using CRMI endpoint configurations | Reason: {} | Will attempt fallback expansion.",
                         valueSet.getUrl(),
                         e.getMessage());
             }

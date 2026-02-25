@@ -62,4 +62,20 @@ class VersionComparatorTest {
         String latest = Collections.max(versions, comparator);
         assertEquals("20240101", latest, "Expected latest date to win over semver");
     }
+
+    @Test
+    void testNullVersionHandling() {
+        // null compared to null should be equal
+        assertEquals(0, comparator.compare(null, null));
+
+        // null should be less than any non-null version
+        assertTrue(comparator.compare(null, "1.0.0") < 0);
+        assertTrue(comparator.compare(null, "20240101") < 0);
+        assertTrue(comparator.compare(null, "feature-abc") < 0);
+
+        // non-null should be greater than null
+        assertTrue(comparator.compare("1.0.0", null) > 0);
+        assertTrue(comparator.compare("20240101", null) > 0);
+        assertTrue(comparator.compare("feature-abc", null) > 0);
+    }
 }

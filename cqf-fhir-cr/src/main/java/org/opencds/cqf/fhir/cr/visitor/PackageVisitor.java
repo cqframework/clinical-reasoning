@@ -250,6 +250,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     capability,
                     include,
                     versionTuple,
+                    artifactEndpointConfigurations,
                     terminologyEndpoint.orElse(null),
                     terminologyServerRouter,
                     messagesWrapper);

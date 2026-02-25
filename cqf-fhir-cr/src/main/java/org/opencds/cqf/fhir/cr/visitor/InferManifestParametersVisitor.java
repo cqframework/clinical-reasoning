@@ -25,11 +25,8 @@ import org.slf4j.LoggerFactory;
  */
 public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor {
     private static final Logger logger = LoggerFactory.getLogger(InferManifestParametersVisitor.class);
-    private static final String CRMI_RESOURCE_TYPE_EXTENSION =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-resourceType";
-    private static final String CQF_RESOURCE_TYPE_EXTENSION =
-            "http://hl7.org/fhir/StructureDefinition/cqf-resourceType";
-    private static final String DISPLAY_EXTENSION = "http://hl7.org/fhir/StructureDefinition/display";
+    private static final String CQF_RESOURCE_TYPE_EXTENSION = org.opencds.cqf.fhir.utility.Constants.CQF_RESOURCETYPE;
+    private static final String DISPLAY_EXTENSION = org.opencds.cqf.fhir.utility.Constants.DISPLAY_EXTENSION;
 
     public InferManifestParametersVisitor(IRepository repository) {
         super(repository);
@@ -102,8 +99,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
         // Create Parameters resource for expansion parameters
         var parameters = new org.hl7.fhir.dstu3.model.Parameters();
 
-        // Process relatedArtifacts
+        // Copy relatedArtifacts from input library to manifest and process for parameters
         for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
+            // Add relatedArtifact to manifest
+            if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact dstu3RA) {
+                manifest.addRelatedArtifact(dstu3RA.copy());
+            }
+            // Process for expansion parameters
             processRelatedArtifactDstu3(relatedArtifact, parameters, inputLibrary);
         }
 
@@ -134,8 +136,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
         // Create Parameters resource for expansion parameters
         var parameters = new org.hl7.fhir.r4.model.Parameters();
 
-        // Process relatedArtifacts
+        // Copy relatedArtifacts from input library to manifest and process for parameters
         for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
+            // Add relatedArtifact to manifest
+            if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact r4RA) {
+                manifest.addRelatedArtifact(r4RA.copy());
+            }
+            // Process for expansion parameters
             processRelatedArtifactR4(relatedArtifact, parameters, inputLibrary);
         }
 
@@ -166,8 +173,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
         // Create Parameters resource for expansion parameters
         var parameters = new org.hl7.fhir.r5.model.Parameters();
 
-        // Process relatedArtifacts
+        // Copy relatedArtifacts from input library to manifest and process for parameters
         for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
+            // Add relatedArtifact to manifest
+            if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5RA) {
+                manifest.addRelatedArtifact(r5RA.copy());
+            }
+            // Process for expansion parameters
             processRelatedArtifactR5(relatedArtifact, parameters, inputLibrary);
         }
 
@@ -187,30 +199,42 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return;
         }
 
-        String resourceType = Canonicals.getResourceType(canonical);
+        String resourceType = extractResourceType(relatedArtifact, canonical, library);
         if (resourceType == null) {
-            return;
+            // Default to CodeSystem for unclassifiable depends-on entries.
+            // Most unclassifiable entries are external CodeSystems with non-standard URLs
+            // (e.g., http://loinc.org, http://www.ada.org/cdt) that lack cqf-resourceType extensions.
+            logger.info("Could not determine resource type for '{}', defaulting to CodeSystem", canonical);
+            resourceType = "CodeSystem";
         }
 
         // Extract display from relatedArtifact
         String display = extractDisplay(relatedArtifact, library);
 
+        addParameterDstu3(parameters, resourceType, canonical, display);
+    }
+
+    private void addParameterDstu3(
+            org.hl7.fhir.dstu3.model.Parameters parameters, String resourceType, String canonical, String display) {
         switch (resourceType) {
             case "CodeSystem":
-                parameters
+                var csParam = parameters
                         .addParameter()
                         .setName("system-version")
                         .setValue(new org.hl7.fhir.dstu3.model.StringType(canonical));
+                csParam.addExtension(
+                        CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
+                if (display != null && !display.isEmpty()) {
+                    csParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.dstu3.model.StringType(display));
+                }
                 break;
             case "ValueSet":
                 var valueSetParam = parameters
                         .addParameter()
                         .setName("canonicalVersion")
                         .setValue(new org.hl7.fhir.dstu3.model.UriType(canonical));
-                // Add cqf-resourceType extension
                 valueSetParam.addExtension(
                         CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
-                // Add display extension if present
                 if (display != null && !display.isEmpty()) {
                     valueSetParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.dstu3.model.StringType(display));
                 }
@@ -220,11 +244,7 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .addParameter()
                         .setName("canonicalVersion")
                         .setValue(new org.hl7.fhir.dstu3.model.UriType(canonical));
-                // Add crmi-resourceType extension (existing)
-                param.addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
-                // Add cqf-resourceType extension
                 param.addExtension(CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
-                // Add display extension if present
                 if (display != null && !display.isEmpty()) {
                     param.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.dstu3.model.StringType(display));
                 }
@@ -239,30 +259,39 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return;
         }
 
-        String resourceType = Canonicals.getResourceType(canonical);
+        String resourceType = extractResourceType(relatedArtifact, canonical, library);
         if (resourceType == null) {
-            return;
+            logger.info("Could not determine resource type for '{}', defaulting to CodeSystem", canonical);
+            resourceType = "CodeSystem";
         }
 
         // Extract display from relatedArtifact
         String display = extractDisplay(relatedArtifact, library);
 
+        addParameterR4(parameters, resourceType, canonical, display);
+    }
+
+    private void addParameterR4(
+            org.hl7.fhir.r4.model.Parameters parameters, String resourceType, String canonical, String display) {
         switch (resourceType) {
             case "CodeSystem":
-                parameters
+                var csParam = parameters
                         .addParameter()
                         .setName("system-version")
                         .setValue(new org.hl7.fhir.r4.model.StringType(canonical));
+                csParam.addExtension(
+                        CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
+                if (display != null && !display.isEmpty()) {
+                    csParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r4.model.StringType(display));
+                }
                 break;
             case "ValueSet":
                 var valueSetParam = parameters
                         .addParameter()
                         .setName("canonicalVersion")
                         .setValue(new org.hl7.fhir.r4.model.CanonicalType(canonical));
-                // Add cqf-resourceType extension
                 valueSetParam.addExtension(
                         CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
-                // Add display extension if present
                 if (display != null && !display.isEmpty()) {
                     valueSetParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r4.model.StringType(display));
                 }
@@ -272,11 +301,7 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .addParameter()
                         .setName("canonicalVersion")
                         .setValue(new org.hl7.fhir.r4.model.CanonicalType(canonical));
-                // Add crmi-resourceType extension (existing)
-                param.addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
-                // Add cqf-resourceType extension
                 param.addExtension(CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
-                // Add display extension if present
                 if (display != null && !display.isEmpty()) {
                     param.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r4.model.StringType(display));
                 }
@@ -291,30 +316,39 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return;
         }
 
-        String resourceType = Canonicals.getResourceType(canonical);
+        String resourceType = extractResourceType(relatedArtifact, canonical, library);
         if (resourceType == null) {
-            return;
+            logger.info("Could not determine resource type for '{}', defaulting to CodeSystem", canonical);
+            resourceType = "CodeSystem";
         }
 
         // Extract display from relatedArtifact
         String display = extractDisplay(relatedArtifact, library);
 
+        addParameterR5(parameters, resourceType, canonical, display);
+    }
+
+    private void addParameterR5(
+            org.hl7.fhir.r5.model.Parameters parameters, String resourceType, String canonical, String display) {
         switch (resourceType) {
             case "CodeSystem":
-                parameters
+                var csParam = parameters
                         .addParameter()
                         .setName("system-version")
                         .setValue(new org.hl7.fhir.r5.model.StringType(canonical));
+                csParam.addExtension(
+                        CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
+                if (display != null && !display.isEmpty()) {
+                    csParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r5.model.StringType(display));
+                }
                 break;
             case "ValueSet":
                 var valueSetParam = parameters
                         .addParameter()
                         .setName("canonicalVersion")
                         .setValue(new org.hl7.fhir.r5.model.CanonicalType(canonical));
-                // Add cqf-resourceType extension
                 valueSetParam.addExtension(
                         CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
-                // Add display extension if present
                 if (display != null && !display.isEmpty()) {
                     valueSetParam.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r5.model.StringType(display));
                 }
@@ -324,11 +358,7 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .addParameter()
                         .setName("canonicalVersion")
                         .setValue(new org.hl7.fhir.r5.model.CanonicalType(canonical));
-                // Add crmi-resourceType extension (existing)
-                param.addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
-                // Add cqf-resourceType extension
                 param.addExtension(CQF_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
-                // Add display extension if present
                 if (display != null && !display.isEmpty()) {
                     param.addExtension(DISPLAY_EXTENSION, new org.hl7.fhir.r5.model.StringType(display));
                 }
@@ -355,6 +385,49 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             return primitive.getValueAsString();
         }
 
+        return null;
+    }
+
+    /**
+     * Extracts the resource type from the cqf-resourceType extension on the relatedArtifact,
+     * falling back to inferring from the canonical URL if the extension is not present.
+     *
+     * @param relatedArtifact the relatedArtifact to extract the resource type from
+     * @param canonical the canonical URL to use for fallback inference
+     * @param library the library adapter for version-specific path resolution
+     * @return the resource type string, or null if it cannot be determined
+     */
+    private String extractResourceType(ICompositeType relatedArtifact, String canonical, ILibraryAdapter library) {
+        // First try to read from cqf-resourceType extension
+        // Access extensions directly based on the version-specific type
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact dstu3Ra) {
+            for (var ext : dstu3Ra.getExtension()) {
+                if (CQF_RESOURCE_TYPE_EXTENSION.equals(ext.getUrl())
+                        && ext.getValue() instanceof IPrimitiveType<?> primitive) {
+                    return primitive.getValueAsString();
+                }
+            }
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact r4Ra) {
+            for (var ext : r4Ra.getExtension()) {
+                if (CQF_RESOURCE_TYPE_EXTENSION.equals(ext.getUrl())
+                        && ext.getValue() instanceof IPrimitiveType<?> primitive) {
+                    return primitive.getValueAsString();
+                }
+            }
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5Ra) {
+            for (var ext : r5Ra.getExtension()) {
+                if (CQF_RESOURCE_TYPE_EXTENSION.equals(ext.getUrl())
+                        && ext.getValue() instanceof IPrimitiveType<?> primitive) {
+                    return primitive.getValueAsString();
+                }
+            }
+        }
+
+        // Fall back to inferring from canonical URL, validating against FHIR resource types
+        String inferred = Canonicals.getResourceType(canonical);
+        if (inferred != null && fhirContext().getResourceTypes().contains(inferred)) {
+            return inferred;
+        }
         return null;
     }
 }

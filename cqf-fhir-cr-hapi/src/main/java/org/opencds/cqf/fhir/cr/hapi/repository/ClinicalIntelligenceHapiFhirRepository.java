@@ -5,12 +5,15 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.repository.HapiFhirRepository;
-import ca.uhn.fhir.jpa.repository.SearchConverter;
-import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.jpa.repository.searchparam.SearchParameterMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.repository.impl.MultiMapRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -18,14 +21,14 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
-import com.google.common.collect.Multimap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +40,10 @@ import org.slf4j.LoggerFactory;
  * Since hapi-fhir is released quarterly, we want to maintain flexibility to change behaviour
  * within our more flexible release cadence.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
 
-    private static final Logger ourLog = LoggerFactory.getLogger(ClinicalIntelligenceHapiFhirRepository.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClinicalIntelligenceHapiFhirRepository.class);
 
     private final RequestDetails requestDetails;
     private final RestfulServer restfulServer;
@@ -53,8 +57,17 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         this.daoRegistry = daoRegistry;
     }
 
+    @Override
+    public <T extends IBaseResource, I extends IIdType> T read(
+            Class<T> resourceType, I id, Map<String, String> headers) {
+
+        return this.daoRegistry
+                .getResourceDao(resourceType)
+                .read(id, cloneWithAction(headers, RestOperationTypeEnum.READ));
+    }
+
     /**
-     * Override {@link HapiFhirRepository#search(Class, Class, Map, Map)} to ensure that the
+     * Override {@link HapiFhirRepository#search(Class, Class, IRepositoryRestQueryContributor, Map)} to ensure that the
      * _count {@link RequestDetails} parameter is passed through to the DAO layer instead of
      * dropping it.
      * <p/>
@@ -67,18 +80,15 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
     public <B extends IBaseBundle, T extends IBaseResource> B search(
             Class<B> bundleType,
             Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
+            IRepositoryRestQueryContributor queryContributor,
             Map<String, String> headers) {
 
-        var details = ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
-                .setAction(RestOperationTypeEnum.SEARCH_TYPE)
-                .addHeaders(headers)
-                .create();
+        var details = cloneWithAction(headers, RestOperationTypeEnum.SEARCH_TYPE);
 
-        var converter = new SearchConverter();
-        converter.convertParameters(searchParameters, fhirContext());
-        details.setParameters(converter.myResultParameters);
+        var searchParameterMap =
+                SearchParameterMapRepositoryRestQueryBuilder.buildFromQueryContributor(queryContributor);
 
+        details.setParameters(MultiMapRepositoryRestQueryBuilder.toFlatMap(searchParameterMap));
         details.setResourceName(daoRegistry.getFhirContext().getResourceType(resourceType));
 
         if (details instanceof SystemRequestDetails) {
@@ -89,12 +99,58 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         }
 
         var resourceDao = daoRegistry.getResourceDao(resourceType);
-        var bundleProvider = resourceDao.search(converter.mySearchParameterMap, details);
+        var bundleProvider = resourceDao.search(searchParameterMap, details);
 
         bundleProvider = sanitizeBundleProvider(bundleProvider);
 
         return createBundle(details, bundleProvider);
     }
+
+    @Override
+    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
+        return this.daoRegistry
+                .getResourceDao(resource)
+                .create(resource, cloneWithAction(headers, RestOperationTypeEnum.CREATE));
+    }
+
+    @Override
+    public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
+        final DaoMethodOutcome update = daoRegistry
+                .getResourceDao(resource)
+                .update(resource, cloneWithAction(headers, RestOperationTypeEnum.UPDATE));
+        boolean created = update.getCreated() != null && update.getCreated();
+        if (created) {
+            update.setResponseStatusCode(201);
+        } else {
+            update.setResponseStatusCode(200);
+        }
+
+        return update;
+    }
+
+    @Override
+    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
+            I id, P patchParameters, Map<String, String> headers) {
+        return this.daoRegistry
+                .getResourceDao(id.getResourceType())
+                .patch(
+                        id,
+                        (String) null,
+                        PatchTypeEnum.FHIR_PATCH_JSON,
+                        (String) null,
+                        patchParameters,
+                        cloneWithAction(headers, RestOperationTypeEnum.PATCH));
+    }
+
+    @Override
+    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
+            Class<T> resourceType, I id, Map<String, String> headers) {
+        return this.daoRegistry
+                .getResourceDao(resourceType)
+                .delete(id, cloneWithAction(headers, RestOperationTypeEnum.DELETE));
+    }
+
+    // N.B. We don't support request details cloning for link
 
     protected IBundleProvider sanitizeBundleProvider(IBundleProvider bundleProvider) {
         return nonNull(bundleProvider) ? bundleProvider : new SimpleBundleProvider();
@@ -125,7 +181,7 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         bundleType = BundleTypeEnum.VALUESET_BINDER.fromCodeString(bundleTypeValues[0]);
 
         if (isNull(bundleType)) {
-            ourLog.error(
+            logger.error(
                     "Could not convert value {} to a BundleTypeEnum.  Defaulting to {}",
                     bundleTypeValues[0],
                     bundleType);
@@ -133,6 +189,14 @@ public class ClinicalIntelligenceHapiFhirRepository extends HapiFhirRepository {
         }
 
         return bundleType;
+    }
+
+    private RequestDetails cloneWithAction(Map<String, String> headers, RestOperationTypeEnum operationTypeEnum) {
+
+        return ClinicalIntelligenceRequestDetailsCloner.startWith(requestDetails)
+                .setAction(operationTypeEnum)
+                .addHeaders(headers)
+                .create();
     }
 
     private <B extends IBaseBundle> B createBundle(RequestDetails requestDetails, IBundleProvider bundleProvider) {

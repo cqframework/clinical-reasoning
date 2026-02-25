@@ -4,6 +4,7 @@ import java.util.Objects;
 import org.opencds.cqf.fhir.cr.cli.command.CliCommand;
 import picocli.CommandLine;
 
+// CHECKSTYLE.OFF: all
 public class Main {
 
     public static void main(String[] args) {

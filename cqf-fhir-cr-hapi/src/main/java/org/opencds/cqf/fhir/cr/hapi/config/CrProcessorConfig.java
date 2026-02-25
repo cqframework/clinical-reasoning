@@ -5,10 +5,12 @@ import java.util.List;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.cql.CqlProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.ICqlProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IImplementationGuideProcessorFactory;
@@ -31,6 +33,11 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({CrBaseConfig.class})
 public class CrProcessorConfig {
+    @Bean
+    ICqlProcessorFactory cqlProcessorFactory(IRepositoryFactory repositoryFactory, CrSettings crSettings) {
+        return rd -> new CqlProcessor(repositoryFactory.create(rd), crSettings);
+    }
+
     @Bean
     IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory(
             IRepositoryFactory repositoryFactory, CrSettings crSettings) {

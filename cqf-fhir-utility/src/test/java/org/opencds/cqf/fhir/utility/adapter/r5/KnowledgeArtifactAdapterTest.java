@@ -57,6 +57,7 @@ class KnowledgeArtifactAdapterTest {
         var name = "name";
         def.setName(name);
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(def);
+        assertTrue(adapter.hasName());
         assertEquals(name, adapter.getName());
         var newName = "name2";
         adapter.setName(newName);

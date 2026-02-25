@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
@@ -36,8 +37,8 @@ class InvalidMeasureTest {
                 .when()
                 .measureId("LibraryMissingContent")
                 .evaluate();
-        var e = assertThrows(IllegalStateException.class, when::then);
-        assertTrue(e.getMessage().contains("Unable to load CQL/ELM for libraries"));
+        var e = assertThrows(CqlIncludeException.class, when::then);
+        assertTrue(e.getMessage().contains("Could not load source for library"));
     }
 
     @Test

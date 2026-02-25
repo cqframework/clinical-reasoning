@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
@@ -23,6 +25,8 @@ public class R4ImportBundleProducer {
 
     private static final Logger myLogger = LoggerFactory.getLogger(R4ImportBundleProducer.class);
     private static final IAdapterFactory adapterFactory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+
+    private R4ImportBundleProducer() {}
 
     /**
      * Determines whether a given ValueSet is a grouper
@@ -90,8 +94,8 @@ public class R4ImportBundleProducer {
         }
     }
 
-    public static String ensureHttps(String urlString) throws MalformedURLException {
-        URL url = new URL(urlString);
+    public static String ensureHttps(String urlString) throws MalformedURLException, URISyntaxException {
+        URL url = URI.create(urlString).toURL();
 
         // Check if the protocol is already HTTPS
         if ("https".equalsIgnoreCase(url.getProtocol())) {
@@ -99,7 +103,15 @@ public class R4ImportBundleProducer {
         }
 
         // Construct a new URL with the HTTPS protocol
-        URL httpsUrl = new URL("https", url.getHost(), url.getPort(), url.getFile());
+        URI httpsUrl = new URI(
+                "https", // scheme
+                null, // userinfo
+                url.getHost(), // host
+                url.getPort(), // port
+                url.getFile(), // path
+                null, // query
+                null // fragment
+                );
         return httpsUrl.toString();
     }
 
@@ -216,7 +228,7 @@ public class R4ImportBundleProducer {
 
         try {
             valueSetAuthoritativeSourceUrl = ensureHttps(valueSetAuthoritativeSourceUrl);
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException | MalformedURLException e) {
             // Do nothing here and let the malformed URL flow through.
         }
 

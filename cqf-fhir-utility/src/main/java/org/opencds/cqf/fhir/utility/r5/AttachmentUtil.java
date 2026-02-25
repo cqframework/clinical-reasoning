@@ -7,6 +7,8 @@ import org.hl7.fhir.r5.model.Library;
 
 public class AttachmentUtil {
 
+    private AttachmentUtil() {}
+
     public static String getCqlLocation(IBaseResource resource) {
         Library library = (Library) resource;
         for (Attachment attachment : library.getContent()) {

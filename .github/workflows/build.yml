@@ -13,7 +13,7 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-  maven:
+  gradle:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,26 +27,18 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
-          server-id: central
-          server-url: https://repo1.maven.org/maven2
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-      - name: Publish snapshot
-        run: ./mvnw --batch-mode -no-transfer-progress --update-snapshots deploy -Ppackage
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build and publish snapshot
+        run: ./gradlew build publish
         env:
-          MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ vars.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_TOKEN }}
       - name: Publish test report
         uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
         with:
-          report_paths: "**/target/surefire-reports/TEST-*.xml"
+          report_paths: "**/build/test-results/test/TEST-*.xml"
           job_name: "Build"
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x

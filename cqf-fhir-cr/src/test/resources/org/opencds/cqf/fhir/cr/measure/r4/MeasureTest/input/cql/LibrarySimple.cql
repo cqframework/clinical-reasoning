@@ -231,6 +231,14 @@ define "Matching General Practitioner":
 define "Age":
     AgeInYearsAt(start of "Measurement Period")
 
+define "Patient Age Bracket":
+  case
+    when AgeInYearsAt(start of "Measurement Period") between 0 and 20 then '0--21'
+    when AgeInYearsAt(start of "Measurement Period") between 21 and 40 then '21--41'
+    when AgeInYearsAt(start of "Measurement Period") > 41 then '>41'
+    else 'unknown'
+  end
+
 define "Date":
     Interval[@2024-02-01T00:00:00, @2024-10-31T23:59:59]
 

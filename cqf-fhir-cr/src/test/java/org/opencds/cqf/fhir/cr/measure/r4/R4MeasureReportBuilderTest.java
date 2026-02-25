@@ -20,15 +20,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -38,12 +42,18 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureObservationStratumCache;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 class R4MeasureReportBuilderTest {
@@ -380,5 +390,156 @@ class R4MeasureReportBuilderTest {
                 reportPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNull(
                 aggregateMethodExtension, "Aggregate method extension should not be present for N_A aggregate method");
+    }
+
+    @Test
+    void perStratumAggregationResultsAreCopiedAsExtensions() {
+        // Test that per-stratum aggregation results are copied to stratum population extensions
+        // in the built MeasureReport. Uses RCV pattern with numerator and denominator observations.
+
+        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+        CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
+        String measurePopSystem = "http://terminology.hl7.org/CodeSystem/measure-population";
+
+        // Build Measure with group, 2 MEASUREOBSERVATION populations, and a stratifier
+        var measure = (Measure) new Measure().setUrl(MEASURE_URL_1).setId(new IdType("Measure", MEASURE_ID_1));
+        var measureGroup = (MeasureGroupComponent) new MeasureGroupComponent().setId("group_0");
+
+        var numObsMeasurePop = measureGroup.addPopulation();
+        numObsMeasurePop.setId("num-obs-1");
+        numObsMeasurePop.setCode(new CodeableConcept()
+                .addCoding(new Coding(measurePopSystem, MeasurePopulationType.MEASUREOBSERVATION.toCode(), null)));
+
+        var denObsMeasurePop = measureGroup.addPopulation();
+        denObsMeasurePop.setId("den-obs-1");
+        denObsMeasurePop.setCode(new CodeableConcept()
+                .addCoding(new Coding(measurePopSystem, MeasurePopulationType.MEASUREOBSERVATION.toCode(), null)));
+
+        measureGroup.addStratifier(
+                (MeasureGroupStratifierComponent) new MeasureGroupStratifierComponent().setId("strat-1"));
+        measure.addGroup(measureGroup);
+
+        // Build PopulationDefs
+        ConceptDef obsCode = new ConceptDef(
+                List.of(new CodeDef(measurePopSystem, MeasurePopulationType.MEASUREOBSERVATION.toCode())), null);
+        PopulationDef numObsPopDef = new PopulationDef(
+                "num-obs-1",
+                obsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "NumExpr",
+                booleanBasis,
+                "num-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                List.of());
+        PopulationDef denObsPopDef = new PopulationDef(
+                "den-obs-1",
+                obsCode,
+                MeasurePopulationType.MEASUREOBSERVATION,
+                "DenExpr",
+                booleanBasis,
+                "den-1",
+                ContinuousVariableObservationAggregateMethod.SUM,
+                List.of());
+
+        // Build StratumPopulationDefs with pre-set aggregation results (simulating scorer output)
+        StratumPopulationDef stratumNumObs = new StratumPopulationDef(
+                numObsPopDef, Set.of("p1", "p2"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+        stratumNumObs.setAggregationResult(40.0);
+
+        StratumPopulationDef stratumDenObs = new StratumPopulationDef(
+                denObsPopDef, Set.of("p1", "p2"), Set.of(), List.of(), MeasureStratifierType.VALUE, booleanBasis);
+        stratumDenObs.setAggregationResult(20.0);
+
+        // Build StratumDef and StratifierDef
+        StratifierComponentDef genderComponent =
+                new StratifierComponentDef("comp-1", new ConceptDef(List.of(), "Gender"), "Gender");
+        MeasureObservationStratumCache cache = new MeasureObservationStratumCache(stratumNumObs, stratumDenObs);
+        StratumDef stratumDef = new StratumDef(
+                List.of(stratumNumObs, stratumDenObs),
+                Set.of(new StratumValueDef(new StratumValueWrapper("male"), genderComponent)),
+                Set.of("p1", "p2"),
+                cache);
+        stratumDef.setScore(2.0); // 40/20
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "strat-1", new ConceptDef(List.of(), "Gender"), "Gender", MeasureStratifierType.VALUE);
+        stratifierDef.addAllStratum(List.of(stratumDef));
+
+        // Build GroupDef and MeasureDef
+        GroupDef groupDef = new GroupDef(
+                "group_0",
+                null,
+                List.of(stratifierDef),
+                List.of(numObsPopDef, denObsPopDef),
+                MeasureScoring.RATIO,
+                false,
+                null,
+                booleanBasis);
+
+        MeasureDef measureDef = new MeasureDef(
+                new IdType(ResourceType.Measure.name(), MEASURE_ID_1),
+                MEASURE_URL_1,
+                null,
+                List.of(groupDef),
+                List.of());
+
+        // Build report
+        var measureReport =
+                r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.SUMMARY, null, List.of());
+
+        // VERIFY: Report structure
+        assertNotNull(measureReport);
+        assertEquals(1, measureReport.getGroup().size());
+
+        var reportGroup = measureReport.getGroupFirstRep();
+        assertEquals(1, reportGroup.getStratifier().size());
+
+        var reportStratifier = reportGroup.getStratifierFirstRep();
+        assertEquals(1, reportStratifier.getStratum().size());
+
+        var reportStratum = reportStratifier.getStratumFirstRep();
+        assertEquals(2, reportStratum.getPopulation().size());
+
+        // VERIFY: Stratum score was copied
+        assertEquals(2.0, reportStratum.getMeasureScore().getValue().doubleValue(), 0.001);
+
+        // Find numerator and denominator stratum populations by ID
+        MeasureReport.StratifierGroupPopulationComponent numStratumPop = reportStratum.getPopulation().stream()
+                .filter(p -> "num-obs-1".equals(p.getId()))
+                .findFirst()
+                .orElse(null);
+        MeasureReport.StratifierGroupPopulationComponent denStratumPop = reportStratum.getPopulation().stream()
+                .filter(p -> "den-obs-1".equals(p.getId()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(numStratumPop, "Should find numerator stratum population");
+        assertNotNull(denStratumPop, "Should find denominator stratum population");
+
+        // VERIFY: Numerator stratum population extensions
+        Extension numResultExt = numStratumPop.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(numResultExt, "Numerator stratum population should have aggregation result extension");
+        assertEquals(40.0, ((DecimalType) numResultExt.getValue()).getValue().doubleValue(), 0.001);
+
+        Extension numMethodExt = numStratumPop.getExtensionByUrl(MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(numMethodExt, "Numerator stratum population should have aggregate method extension");
+        assertEquals("sum", ((StringType) numMethodExt.getValue()).getValue());
+
+        Extension numCriteriaRefExt = numStratumPop.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(numCriteriaRefExt, "Numerator stratum population should have criteria reference extension");
+        assertEquals("num-1", ((StringType) numCriteriaRefExt.getValue()).getValue());
+
+        // VERIFY: Denominator stratum population extensions
+        Extension denResultExt = denStratumPop.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
+        assertNotNull(denResultExt, "Denominator stratum population should have aggregation result extension");
+        assertEquals(20.0, ((DecimalType) denResultExt.getValue()).getValue().doubleValue(), 0.001);
+
+        Extension denMethodExt = denStratumPop.getExtensionByUrl(MeasureConstants.EXT_CQFM_AGGREGATE_METHOD_URL);
+        assertNotNull(denMethodExt, "Denominator stratum population should have aggregate method extension");
+        assertEquals("sum", ((StringType) denMethodExt.getValue()).getValue());
+
+        Extension denCriteriaRefExt = denStratumPop.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
+        assertNotNull(denCriteriaRefExt, "Denominator stratum population should have criteria reference extension");
+        assertEquals("den-1", ((StringType) denCriteriaRefExt.getValue()).getValue());
     }
 }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.valueset;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -14,40 +15,40 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class ValueSetDataRequirementsProvider {
     private final IValueSetProcessorFactory valueSetFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public ValueSetDataRequirementsProvider(IValueSetProcessorFactory valueSetFactory) {
         this.valueSetFactory = valueSetFactory;
+        fhirVersion = FhirVersionEnum.DSTU3;
+    }
+
+    @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = ValueSet.class)
+    public IBaseResource getDataRequirements(@IdParam IdType id, RequestDetails requestDetails)
+            throws InternalErrorException, FHIRException {
+        return valueSetFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null);
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = ValueSet.class)
     public IBaseResource getDataRequirements(
-            @IdParam IdType id,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
+            @OperationParam(name = "id") StringType id,
+            @OperationParam(name = "canonical", typeName = "uri") IPrimitiveType<String> canonical,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
+            @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, canonical, url, version);
-        return valueSetFactory.create(requestDetails).dataRequirements(Eithers.for3(canonicalType, id, null), null);
-    }
-
-    @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = ValueSet.class)
-    public IBaseResource getDataRequirements(
-            @OperationParam(name = "id") String id,
-            @OperationParam(name = "canonical") String canonical,
-            @OperationParam(name = "url") String url,
-            @OperationParam(name = "version") String version,
-            RequestDetails requestDetails)
-            throws InternalErrorException, FHIRException {
-        IdType idToUse = id == null ? null : new IdType("ValueSet", id);
-        StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, canonical, url, version);
         return valueSetFactory
                 .create(requestDetails)
-                .dataRequirements(Eithers.for3(canonicalType, idToUse, null), null);
+                .dataRequirements(
+                        Eithers.for3(
+                                getCanonicalType(fhirVersion, canonical, url, version),
+                                getIdType(fhirVersion, "ValueSet", id),
+                                null),
+                        null);
     }
 }

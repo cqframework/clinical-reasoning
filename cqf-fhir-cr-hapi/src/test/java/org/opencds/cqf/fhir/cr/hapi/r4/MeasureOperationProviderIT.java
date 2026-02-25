@@ -77,7 +77,7 @@ class MeasureOperationProviderIT extends BaseCrR4TestServer {
         } catch (InvalidRequestException exception) {
             assertThat(exception.getMessage())
                     .isEqualTo(
-                            "HTTP 400 Bad Request: SupplementalDataComponent usage is missing code: supplemental-data for Measure: http://nhsnlink.org/fhir/Measure/"
+                            "HTTP 400 Bad Request: SupplementalDataComponent usage is missing code: supplemental-data or risk-adjustment-factor for Measure: http://nhsnlink.org/fhir/Measure/"
                                     + measureId);
         }
     }

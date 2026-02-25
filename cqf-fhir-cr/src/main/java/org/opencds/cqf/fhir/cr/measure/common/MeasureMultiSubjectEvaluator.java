@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -390,17 +391,69 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Builds a table mapping subjects (or subject|resource pairs) to their stratifier values.
+     * Builds a Guava Table mapping row keys to stratifier component values for grouping into strata.
      *
-     * <p>Handles three cases:
+     * <p>The table structure is: {@code Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef>}
+     * where StratifierRowKey identifies the subject (and optionally resource), StratumValueWrapper holds the
+     * component value, and StratifierComponentDef identifies which component produced the value.
+     *
+     * <h3>Supported Expression Types</h3>
      * <ul>
-     *   <li><b>Map values (NON_SUBJECT_VALUE)</b>: CQL functions returning Map&lt;inputResource, outputValue&gt;</li>
-     *   <li><b>Iterable values (multi-value)</b>: CQL expressions returning List of values per subject</li>
-     *   <li><b>Scalar values (standard)</b>: Single value per subject</li>
+     *   <li><b>Function (Map)</b>: CQL functions returning {@code Map<resource, value>} for NON_SUBJECT_VALUE
+     *       stratifiers. Creates one row per resource with composite key (subject|resource).</li>
+     *   <li><b>Iterable (List)</b>: CQL expressions returning multiple values per subject for multi-value
+     *       stratifiers. Creates one row per value with subject-only key.</li>
+     *   <li><b>Scalar</b>: Single value per subject. Creates one row with subject-only key, OR expands
+     *       to match function row keys when mixed with function components.</li>
      * </ul>
      *
-     * <p>For non-subject value stratifiers, the CQL function returns Map&lt;inputResource, outputValue&gt;.
-     * We expand this into multiple rows, one per input resource, using a composite row key.
+     * <h3>Mixed Function and Scalar Components</h3>
+     * <p>When a stratifier has both function components (per-resource) and scalar components (per-subject),
+     * the scalar values are expanded to match the function row keys. This ensures all components align
+     * for proper grouping.
+     *
+     * <h4>Example: Stratifier with 3 components</h4>
+     * <ul>
+     *   <li>Component 1: "Encounter Status" (function) - returns status per encounter</li>
+     *   <li>Component 2: "Encounter Age" (function) - returns age range per encounter</li>
+     *   <li>Component 3: "Patient Age" (scalar) - returns patient's age bracket</li>
+     * </ul>
+     *
+     * <h4>Input Data</h4>
+     * <pre>
+     * Patient-A has 2 encounters: Enc-1 (finished), Enc-2 (in-progress)
+     * Patient-A age bracket: "21--41"
+     * </pre>
+     *
+     * <h4>Resulting Table Structure</h4>
+     * <pre>
+     * | RowKey              | Component           | Value       |
+     * |---------------------|---------------------|-------------|
+     * | Patient-A|Enc-1     | Encounter Status    | finished    |
+     * | Patient-A|Enc-1     | Encounter Age       | P21Y--P41Y  |
+     * | Patient-A|Enc-1     | Patient Age         | 21--41      |  ← scalar expanded
+     * | Patient-A|Enc-2     | Encounter Status    | in-progress |
+     * | Patient-A|Enc-2     | Encounter Age       | P21Y--P41Y  |
+     * | Patient-A|Enc-2     | Patient Age         | 21--41      |  ← scalar expanded
+     * </pre>
+     *
+     * <p>The scalar "Patient Age" value is expanded to both row keys (Patient-A|Enc-1 and Patient-A|Enc-2)
+     * so that when strata are grouped by unique value combinations, all 3 components are present for each row.
+     *
+     * <h4>Resulting Strata (grouped by value combination)</h4>
+     * <pre>
+     * | Stratum | Components                                           | Count |
+     * |---------|------------------------------------------------------|-------|
+     * | 1       | finished + P21Y--P41Y + 21--41                       | 1     |
+     * | 2       | in-progress + P21Y--P41Y + 21--41                    | 1     |
+     * </pre>
+     *
+     * <h3>Scalar-Only Stratifiers</h3>
+     * <p>When all components are scalar (no function components), row keys remain subject-only.
+     * Population counts are determined by looking up all resources belonging to each subject.
+     *
+     * @param componentDefs the list of stratifier component definitions with their evaluation results
+     * @return a table mapping row keys to component values for grouping
      */
     private static Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
             List<StratifierComponentDef> componentDefs) {
@@ -408,8 +461,12 @@ public class MeasureMultiSubjectEvaluator {
         final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 HashBasedTable.create();
 
+        // First pass: Collect all composite row keys (subject|resource) from function components
+        // These are needed to expand scalar components to match function row keys
+        final Map<String, Set<StratifierRowKey>> functionRowKeysBySubject = collectFunctionRowKeys(componentDefs);
+
         for (StratifierComponentDef componentDef : componentDefs) {
-            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef)) {
+            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef, functionRowKeysBySubject)) {
                 subjectResultTable.put(
                         stratumTableRow.stratifierRowKey(), stratumTableRow.stratumValueWrapper(), componentDef);
             }
@@ -418,17 +475,55 @@ public class MeasureMultiSubjectEvaluator {
         return subjectResultTable;
     }
 
-    private static List<StratumTableRow> mapToListOfTableEntries(StratifierComponentDef componentDef) {
+    /**
+     * Collects all composite row keys (subject|resource) from function components.
+     *
+     * <p>This is used to expand scalar components to match the function row keys when
+     * stratifiers mix function and scalar components.
+     *
+     * @return Map from subject (e.g., "Patient/123") to set of composite row keys
+     */
+    private static Map<String, Set<StratifierRowKey>> collectFunctionRowKeys(
+            List<StratifierComponentDef> componentDefs) {
+
+        final Map<String, Set<StratifierRowKey>> functionRowKeysBySubject = new HashMap<>();
+
+        for (StratifierComponentDef componentDef : componentDefs) {
+            for (var entry : componentDef.getResults().entrySet()) {
+                String subjectId = entry.getKey();
+                CriteriaResult result = entry.getValue();
+                Object rawValue = result == null ? null : result.rawValue();
+
+                // Only process function results (Map values)
+                if (rawValue instanceof Map<?, ?> functionResults) {
+                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+                    Set<StratifierRowKey> rowKeys =
+                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+
+                    for (Object key : functionResults.keySet()) {
+                        String normalizedKey = normalizeResourceKey(key);
+                        rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
+                    }
+                }
+            }
+        }
+
+        return functionRowKeysBySubject;
+    }
+
+    private static List<StratumTableRow> mapToListOfTableEntries(
+            StratifierComponentDef componentDef, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
 
         return componentDef.getResults().entrySet().stream()
-                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue()))
+                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue(), functionRowKeysBySubject))
                 .flatMap(Collection::stream)
                 .toList();
     }
 
     private record StratumTableRow(StratifierRowKey stratifierRowKey, StratumValueWrapper stratumValueWrapper) {}
 
-    private static List<StratumTableRow> mapToListOfTableEntries(String subjectId, CriteriaResult result) {
+    private static List<StratumTableRow> mapToListOfTableEntries(
+            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
 
         final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
         final Object rawValue = result == null ? null : result.rawValue();
@@ -440,7 +535,35 @@ public class MeasureMultiSubjectEvaluator {
             return addIterableValueRows(qualifiedSubject, iterableValue);
         }
 
+        // Scalar value: check if we need to expand to match function row keys
+        Set<StratifierRowKey> functionRowKeys = functionRowKeysBySubject.get(qualifiedSubject);
+        if (CollectionUtils.isNotEmpty(functionRowKeys)) {
+            // Expand scalar to match function row keys for this subject
+            return expandScalarToMatchFunctionRowKeys(functionRowKeys, rawValue);
+        }
+
+        // No function row keys - use simple subject-only row key
         return List.of(addScalarValueRow(qualifiedSubject, rawValue));
+    }
+
+    /**
+     * Expands a scalar value to match the row keys from function components.
+     *
+     * <p>When stratifiers mix function and scalar components, the scalar value applies
+     * to all resources for that subject. This method creates one row per function row key,
+     * all with the same scalar value.
+     *
+     * @param functionRowKeys the row keys from function components for this subject
+     * @param scalarValue the scalar value to expand
+     * @return list of table rows, one per function row key
+     */
+    private static List<StratumTableRow> expandScalarToMatchFunctionRowKeys(
+            Set<StratifierRowKey> functionRowKeys, Object scalarValue) {
+
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(scalarValue);
+        return functionRowKeys.stream()
+                .map(rowKey -> new StratumTableRow(rowKey, valueWrapper))
+                .toList();
     }
 
     /**
@@ -686,63 +809,140 @@ public class MeasureMultiSubjectEvaluator {
             PopulationDef populationDef) {
         // Check if we have composite row keys for NON_SUBJECT_VALUE stratifiers
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
-            // Extract resource IDs from row keys that have input parameters
-            Set<String> stratumResourceIds = rowKeys.stream()
+            final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
+            boolean isResourceType = resourceType != null;
+            boolean isPrimitiveBasis = !isResourceType;
+
+            // Convert row keys to SubjectResourceKey for type-safe comparison
+            // For FHIR resources: uses resource ID only (globally unique)
+            // For primitive types: includes subject context (same value can appear for multiple patients)
+            List<SubjectResourceKey> stratumResourceKeys = rowKeys.stream()
                     .filter(StratifierRowKey::hasInputParam)
-                    .map(key -> key.inputParamId().orElseThrow())
-                    .collect(Collectors.toSet());
+                    .map(key -> SubjectResourceKey.fromRowKey(key, isPrimitiveBasis))
+                    .toList();
 
-            if (!stratumResourceIds.isEmpty()) {
-                // Get all population resource IDs
-                Set<String> populationResourceIds = getPopulationResourceIdSet(fhirContext, groupDef, populationDef);
+            if (!stratumResourceKeys.isEmpty()) {
+                // Get all population resource keys using the same SubjectResourceKey type
+                Set<SubjectResourceKey> populationResourceKeys =
+                        getPopulationResourceKeySet(fhirContext, groupDef, populationDef);
 
-                // Intersect stratum resource IDs with population resource IDs
-                return stratumResourceIds.stream()
-                        .filter(populationResourceIds::contains)
+                // Intersect stratum resource keys with population resource keys
+                // The record's natural equality handles the comparison correctly
+                return stratumResourceKeys.stream()
+                        .filter(populationResourceKeys::contains)
+                        .map(SubjectResourceKey::resourceValue)
                         .toList();
             }
+
+            // Scalar-only NON_SUBJECT_VALUE stratifier: no function row keys, use subject-level
+            // Get all resources for the subjects in this stratum from the population
+            Set<String> subjectIds =
+                    rowKeys.stream().map(StratifierRowKey::subjectOnlyKey).collect(Collectors.toSet());
+
+            return getResourcesForSubjects(fhirContext, groupDef, populationDef, subjectIds);
         }
 
         return List.of();
     }
 
     /**
-     * Get all resource IDs from a population as a Set for efficient intersection.
+     * Gets all resource IDs from a population for a given set of subjects.
+     *
+     * <p>This is used for scalar-only NON_SUBJECT_VALUE stratifiers where we need to count
+     * all resources belonging to subjects in the stratum, not specific resources identified
+     * by function row keys.
+     */
+    private static List<String> getResourcesForSubjects(
+            FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef, Set<String> subjectIds) {
+
+        final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
+        boolean isResourceType = resourceType != null;
+        List<String> resourceIds = new ArrayList<>();
+
+        if (populationDef.getSubjectResources() == null) {
+            return resourceIds;
+        }
+
+        for (var entry : populationDef.getSubjectResources().entrySet()) {
+            String subjectId = entry.getKey();
+            // Check if this subject (with or without qualifier) is in our set
+            String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+            if (!subjectIds.contains(qualifiedSubject) && !subjectIds.contains(subjectId)) {
+                continue;
+            }
+
+            Set<Object> resources = entry.getValue();
+            if (resources != null) {
+                if (isResourceType) {
+                    resources.stream()
+                            .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                            .filter(java.util.Objects::nonNull)
+                            .forEach(resourceIds::add);
+                } else {
+                    resources.stream().map(Object::toString).forEach(resourceIds::add);
+                }
+            }
+        }
+
+        return resourceIds;
+    }
+
+    /**
+     * Get resource keys from a population as a Set of {@link SubjectResourceKey} for efficient intersection.
+     *
+     * <p>For FHIR resource types (like Encounter), returns keys with only the resource ID since they
+     * are globally unique. For primitive types (like Date), returns keys with both subject and value
+     * to preserve subject-specific results where the same value can legitimately appear for multiple subjects.
+     *
+     * <p><strong>IMPORTANT:</strong> PopulationDef.subjectResources are keyed on UNQUALIFIED patient IDs
+     * (e.g., "patient1"), but StratifierRowKey uses QUALIFIED IDs (e.g., "Patient/patient1").
+     * For primitive types, this method qualifies the subject ID to ensure proper matching.
      *
      * <p>For MEASUREOBSERVATION populations, the subjectResources contain Set&lt;Map&lt;inputResource, outputValue&gt;&gt;
      * so we extract the keys (input resources) from those maps.
      */
-    private static Set<String> getPopulationResourceIdSet(
+    private static Set<SubjectResourceKey> getPopulationResourceKeySet(
             FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef) {
         final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
         boolean isResourceType = resourceType != null;
-        Set<String> resourceIds = new HashSet<>();
+        Set<SubjectResourceKey> resourceKeys = new HashSet<>();
 
         if (populationDef.getSubjectResources() != null) {
-            for (Set<Object> resources : populationDef.getSubjectResources().values()) {
+            for (var entry : populationDef.getSubjectResources().entrySet()) {
+                String subjectId = entry.getKey();
+                // Qualify the subject ID to match the format used in StratifierRowKey (only needed for primitive types)
+                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+                Set<Object> resources = entry.getValue();
                 if (resources != null) {
                     // For MEASUREOBSERVATION, resources are Map<inputResource, outputValue>
                     // We need to extract the keys (input resources)
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+                        // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
                                 .filter(Map.class::isInstance)
                                 .map(m -> (Map<?, ?>) m)
                                 .flatMap(m -> m.keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)
-                                .forEach(resourceIds::add);
+                                .map(SubjectResourceKey::resourceOnly)
+                                .forEach(resourceKeys::add);
                     } else if (isResourceType) {
+                        // FHIR resource types have globally unique IDs - no subject qualification needed
                         resources.stream()
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)
-                                .forEach(resourceIds::add);
+                                .map(SubjectResourceKey::resourceOnly)
+                                .forEach(resourceKeys::add);
                     } else {
-                        resources.stream().map(Object::toString).forEach(resourceIds::add);
+                        // Primitive types (like Date) - include subject context to preserve duplicates
+                        resources.stream()
+                                .map(obj -> SubjectResourceKey.of(qualifiedSubject, obj.toString()))
+                                .forEach(resourceKeys::add);
                     }
                 }
             }
         }
-        return resourceIds;
+        return resourceKeys;
     }
 
     /**

@@ -57,8 +57,9 @@ public interface ITerminologyServerClient extends ITerminologyProvider {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.Enumerations.ResourceTypeEnumFactory();
             case R4 -> new org.hl7.fhir.r4.model.Enumerations.ResourceTypeEnumFactory();
             case R5 -> new org.hl7.fhir.r5.model.Enumerations.ResourceTypeEnumEnumFactory();
-            default -> throw new UnprocessableEntityException(
-                    "unsupported FHIR version: " + ctx.getVersion().getVersion().toString());
+            default ->
+                throw new UnprocessableEntityException("unsupported FHIR version: "
+                        + ctx.getVersion().getVersion().toString());
         };
     }
 

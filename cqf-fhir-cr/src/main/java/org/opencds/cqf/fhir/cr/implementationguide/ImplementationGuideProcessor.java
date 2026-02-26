@@ -96,7 +96,10 @@ public class ImplementationGuideProcessor {
     public IBaseResource dataRequirements(IBaseResource implementationGuide, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
                 ? dataRequirementsProcessor
-                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
+                : new DataRequirementsProcessor(
+                        repository,
+                        crSettings.getEvaluationSettings(),
+                        crSettings.getTerminologyServerClientSettings());
         return processor.getDataRequirements(implementationGuide, parameters);
     }
 

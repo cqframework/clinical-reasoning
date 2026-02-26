@@ -10,6 +10,8 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.visitor.DataRequirementsVisitor;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DataRequirementsProcessor implements IDataRequirementsProcessor {
@@ -25,6 +27,17 @@ public class DataRequirementsProcessor implements IDataRequirementsProcessor {
         this.repository = repository;
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         dataRequirementsVisitor = new DataRequirementsVisitor(this.repository, evaluationSettings);
+    }
+
+    public DataRequirementsProcessor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            TerminologyServerClientSettings terminologyServerClientSettings) {
+        this.repository = repository;
+        this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
+        var router = new FederatedTerminologyProviderRouter(
+                this.repository.fhirContext(), terminologyServerClientSettings);
+        dataRequirementsVisitor = new DataRequirementsVisitor(this.repository, evaluationSettings, router);
     }
 
     @Override

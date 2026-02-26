@@ -41,15 +41,25 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 
 public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     protected DataRequirementsProcessor dataRequirementsProcessor;
     protected EvaluationSettings evaluationSettings;
+    protected final ITerminologyProviderRouter terminologyProviderRouter;
 
     public DataRequirementsVisitor(IRepository repository, EvaluationSettings evaluationSettings) {
+        this(repository, evaluationSettings, null);
+    }
+
+    public DataRequirementsVisitor(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            ITerminologyProviderRouter terminologyProviderRouter) {
         super(repository);
         dataRequirementsProcessor = new DataRequirementsProcessor();
         this.evaluationSettings = evaluationSettings;
+        this.terminologyProviderRouter = terminologyProviderRouter;
     }
 
     @Override

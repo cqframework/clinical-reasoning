@@ -237,7 +237,8 @@ public class ApplyRequest implements ICpgRequest {
         });
         return new PopulateRequest(
                 questionnaireAdapter.get(),
-                getQuestionnaireResponse(),
+                // Not yet ready to pass QR to $populate
+                // getQuestionnaireResponse(),
                 subjectId,
                 context,
                 null,

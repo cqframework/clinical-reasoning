@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://www.cqframework.org/clinical-reasoning/</loc>
+         <lastmod>2026-02-26</lastmod>
+    </url>
+    <url>
+         <loc>https://www.cqframework.org/clinical-reasoning/cql/</loc>
+         <lastmod>2026-02-26</lastmod>
+    </url>
+    <url>
+         <loc>https://www.cqframework.org/clinical-reasoning/developer-guide/</loc>
+         <lastmod>2026-02-26</lastmod>
+    </url>
+    <url>
+         <loc>https://www.cqframework.org/clinical-reasoning/operations/</loc>
+         <lastmod>2026-02-26</lastmod>
+    </url>
+</urlset>

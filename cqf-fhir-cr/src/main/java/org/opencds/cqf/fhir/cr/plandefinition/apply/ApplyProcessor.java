@@ -232,12 +232,15 @@ public class ApplyProcessor implements IApplyProcessor {
 
     protected IBaseResource liftContainedResourcesToParent(ICpgRequest request, IBaseResource resource) {
         return switch (request.getFhirVersion()) {
-            case DSTU3 -> org.opencds.cqf.fhir.utility.dstu3.ContainedHelper.liftContainedResourcesToParent(
-                    (org.hl7.fhir.dstu3.model.DomainResource) resource);
-            case R4 -> org.opencds.cqf.fhir.utility.r4.ContainedHelper.liftContainedResourcesToParent(
-                    (org.hl7.fhir.r4.model.DomainResource) resource);
-            case R5 -> org.opencds.cqf.fhir.utility.r5.ContainedHelper.liftContainedResourcesToParent(
-                    (org.hl7.fhir.r5.model.DomainResource) resource);
+            case DSTU3 ->
+                org.opencds.cqf.fhir.utility.dstu3.ContainedHelper.liftContainedResourcesToParent(
+                        (org.hl7.fhir.dstu3.model.DomainResource) resource);
+            case R4 ->
+                org.opencds.cqf.fhir.utility.r4.ContainedHelper.liftContainedResourcesToParent(
+                        (org.hl7.fhir.r4.model.DomainResource) resource);
+            case R5 ->
+                org.opencds.cqf.fhir.utility.r5.ContainedHelper.liftContainedResourcesToParent(
+                        (org.hl7.fhir.r5.model.DomainResource) resource);
             default -> resource;
         };
     }

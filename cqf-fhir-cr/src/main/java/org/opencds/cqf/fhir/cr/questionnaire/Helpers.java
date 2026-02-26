@@ -28,9 +28,8 @@ public class Helpers {
             return null;
         }
         return switch (typeCode) {
-            case "code", "coding", "CodeableConcept" -> fhirVersion.isEqualOrNewerThan(FhirVersionEnum.R5)
-                    ? QUESTION
-                    : CHOICE;
+            case "code", "coding", "CodeableConcept" ->
+                fhirVersion.isEqualOrNewerThan(FhirVersionEnum.R5) ? QUESTION : CHOICE;
             case "uri", "url", "canonical" -> URL;
             case "Quantity" -> QUANTITY;
             case "Reference" -> REFERENCE;

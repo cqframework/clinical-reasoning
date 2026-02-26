@@ -163,15 +163,20 @@ public class PopulationDef {
     /**
      * Used if we want to count all resources that may be duplicated across subjects, for example,
      * for Date values that will be identical across subjects, but we want to count the duplicates.
-     * <p/>
+     * <p>
      * example:
+     * <pre>
      * population:
-     * <Subject1,<Organization/1>>
-     * <Subject2,<Organization/1>>
-     * Population Count for Population Basis Organization = 2, even though the resulting resource object is the same
-     * <Subject1,<1/1/2024>>
-     * <Subject2,<1/1/2024>>
-     * Population Count for Population Basis date = 2, even though the resulting resource object is the same
+     * (Subject1, Organization/1)
+     * (Subject2, Organization/1)
+     * Population Count for Population Basis Organization = 2,
+     * even though the resulting resource object is the same
+     *
+     * (Subject1, 1/1/2024)
+     * (Subject2, 1/1/2024)
+     * Population Count for Population Basis date = 2,
+     * even though the resulting resource object is the same
+     * </pre>
      *
      */
     public List<Object> getAllSubjectResources() {

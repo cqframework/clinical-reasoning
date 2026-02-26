@@ -161,4 +161,63 @@ class ArtifactEndpointConfigurationTest {
         assertTrue(str.contains(VSAC_ROUTE));
         assertTrue(str.contains("https://tx.server.com"));
     }
+
+    @Test
+    void toString_withEndpoint_includesEndpointAddress() {
+        var fhirContext = FhirContext.forR4Cached();
+        var factory = IAdapterFactory.forFhirContext(fhirContext);
+        var r4Endpoint = new org.hl7.fhir.r4.model.Endpoint();
+        r4Endpoint.setAddress("https://my.endpoint.com/fhir");
+        var endpointAdapter = factory.createEndpoint(r4Endpoint);
+
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, null, endpointAdapter);
+        var str = config.toString();
+
+        assertTrue(str.contains("https://my.endpoint.com/fhir"));
+        assertTrue(str.contains(VSAC_ROUTE));
+    }
+
+    @Test
+    void getArtifactRoute_present_returnsOptional() {
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://tx.server.com", null);
+        assertTrue(config.getArtifactRoute().isPresent());
+        assertEquals(VSAC_ROUTE, config.getArtifactRoute().get());
+    }
+
+    @Test
+    void getArtifactRoute_null_returnsEmpty() {
+        var config = new ArtifactEndpointConfiguration(null, "https://tx.server.com", null);
+        assertTrue(config.getArtifactRoute().isEmpty());
+    }
+
+    @Test
+    void getEndpointUri_present_returnsOptional() {
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://tx.server.com", null);
+        assertTrue(config.getEndpointUri().isPresent());
+        assertEquals("https://tx.server.com", config.getEndpointUri().get());
+    }
+
+    @Test
+    void getEndpointUri_null_returnsEmpty() {
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, null, null);
+        assertTrue(config.getEndpointUri().isEmpty());
+    }
+
+    @Test
+    void getEndpoint_present_returnsOptional() {
+        var fhirContext = FhirContext.forR4Cached();
+        var factory = IAdapterFactory.forFhirContext(fhirContext);
+        var r4Endpoint = new org.hl7.fhir.r4.model.Endpoint();
+        r4Endpoint.setAddress("https://my.endpoint.com/fhir");
+        var endpointAdapter = factory.createEndpoint(r4Endpoint);
+
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, null, endpointAdapter);
+        assertTrue(config.getEndpoint().isPresent());
+    }
+
+    @Test
+    void getEndpoint_null_returnsEmpty() {
+        var config = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://tx.server.com", null);
+        assertTrue(config.getEndpoint().isEmpty());
+    }
 }

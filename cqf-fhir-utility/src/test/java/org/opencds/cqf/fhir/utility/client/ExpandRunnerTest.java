@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -358,6 +359,74 @@ class ExpandRunnerTest {
     void expandValueSet_withEmptyParameters_succeeds() {
         var url = "http://example.org/fhir/ValueSet/test";
         var params = new Parameters(); // empty - no parameters added
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(5)
+                .setMaxRetryCount(1)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        var result = (ValueSet) runner.expandValueSet();
+
+        assertEquals(1, result.getExpansion().getContains().size());
+    }
+
+    @Test
+    void expandValueSet_transientServerError_retriesAndSucceeds() {
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = new Parameters();
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenThrow(new InternalErrorException("Server error"))
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        var result = (ValueSet) runner.expandValueSet();
+
+        assertEquals(1, result.getExpansion().getContains().size());
+    }
+
+    @Test
+    void expandValueSet_withPartParameters_formatsPartsForLogging() {
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = new Parameters();
+        var partParam = params.addParameter().setName("complex-param");
+        partParam.addPart().setName("sub1").setValue(new StringType("value1"));
+        partParam.addPart().setName("sub2").setValue(new StringType("value2"));
 
         var expandedVs = new ValueSet();
         expandedVs.setUrl(url);

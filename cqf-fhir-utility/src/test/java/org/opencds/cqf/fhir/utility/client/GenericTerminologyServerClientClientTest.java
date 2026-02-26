@@ -545,4 +545,38 @@ public class GenericTerminologyServerClientClientTest {
         // ensure 3 expansion calls (+1 from when() invocation)
         verify(fhirClient, times(4)).operation();
     }
+
+    @Test
+    void expand_withNullUrlAndNoUrlParam_throwsUnprocessableEntity() {
+        var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+        var endpoint = factory.createEndpoint(new org.hl7.fhir.r4.model.Endpoint());
+        endpoint.setAddress("https://example.org/fhir");
+        var parameters = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var client = spy(new GenericTerminologyServerClient(fhirContextR4));
+        doReturn(mock(IGenericClient.class)).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));
+
+        assertThrows(
+                UnprocessableEntityException.class,
+                () -> client.expand(endpoint, parameters, null, null, FhirVersionEnum.R4));
+    }
+
+    @Test
+    void initializeClientWithAuth_withHeaders_registersHeaders() {
+        var endpoint = new org.hl7.fhir.r4.model.Endpoint();
+        endpoint.setAddress("https://example.org/fhir");
+        endpoint.addHeader("Authorization: Bearer token123");
+        var endpointAdapter = (IEndpointAdapter) IAdapterFactory.createAdapterForResource(endpoint);
+
+        var client = new GenericTerminologyServerClient(fhirContextR4);
+        var fhirClient = client.initializeClientWithAuth(endpointAdapter);
+
+        assertNotNull(fhirClient);
+    }
+
+    @Test
+    void constructor_singleArg_usesDefaultSettings() {
+        var client = new GenericTerminologyServerClient(fhirContextR4);
+        assertNotNull(client.getTerminologyServerClientSettings());
+    }
 }

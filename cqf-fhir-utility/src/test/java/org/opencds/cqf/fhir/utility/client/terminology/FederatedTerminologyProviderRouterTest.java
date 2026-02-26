@@ -5,12 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -236,6 +241,216 @@ class FederatedTerminologyProviderRouterTest {
 
         var result = router.getTerminologyServerClientSettings(endpointAdapter);
         assertEquals(42, result.getTimeoutSeconds());
+    }
+
+    // --- List-based expand methods ---
+
+    @Test
+    void expand_valueSetWithEndpointList_prioritizesAndDelegates() {
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(VSAC_VALUESET_URL);
+
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(expandedVs)
+                .when(router)
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+
+        var endpoint1 = createEndpointAdapter("https://server1.com/fhir");
+        var endpoint2 = createEndpointAdapter("https://cts.nlm.nih.gov/fhir");
+        var valueSet = createValueSetAdapter(VSAC_VALUESET_URL);
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expand(valueSet, List.of(endpoint1, endpoint2), params);
+        assertNotNull(result);
+    }
+
+    @Test
+    void expand_endpointListWithFhirVersion_delegatesToSingleEndpoint() {
+        var expandedVs = new ValueSet();
+
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(expandedVs)
+                .when(router)
+                .expand(any(IEndpointAdapter.class), any(IParametersAdapter.class), any(FhirVersionEnum.class));
+
+        var endpoint = createEndpointAdapter("https://server1.com/fhir");
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expand(List.of(endpoint), params, FhirVersionEnum.R4);
+        assertNotNull(result);
+    }
+
+    @Test
+    void expand_endpointListWithUrlAndVersion_prioritizesAndDelegates() {
+        var expandedVs = new ValueSet();
+
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(expandedVs)
+                .when(router)
+                .expand(
+                        any(IEndpointAdapter.class),
+                        any(IParametersAdapter.class),
+                        anyString(),
+                        anyString(),
+                        any(FhirVersionEnum.class));
+
+        var endpoint = createEndpointAdapter("https://cts.nlm.nih.gov/fhir");
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expand(List.of(endpoint), params, VSAC_VALUESET_URL, "1.0", FhirVersionEnum.R4);
+        assertNotNull(result);
+    }
+
+    @Test
+    void expand_endpointListReturnsNull_whenAllExpandsReturnNull() {
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(null)
+                .when(router)
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+
+        var endpoint = createEndpointAdapter("https://server1.com/fhir");
+        var valueSet = createValueSetAdapter(VSAC_VALUESET_URL);
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expand(valueSet, List.of(endpoint), params);
+        assertNull(result);
+    }
+
+    @Test
+    void expand_emptyEndpointList_returnsNull() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var valueSet = createValueSetAdapter(VSAC_VALUESET_URL);
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expand(valueSet, List.of(), params);
+        assertNull(result);
+    }
+
+    // --- List-based get methods ---
+
+    @Test
+    void getValueSetResource_endpointList_delegatesAndReturnsFirst() {
+        var vs = new ValueSet();
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(Optional.of((IDomainResource) vs))
+                .when(router)
+                .getValueSetResource(any(IEndpointAdapter.class), anyString());
+
+        var endpoint = createEndpointAdapter("https://cts.nlm.nih.gov/fhir");
+
+        var result = router.getValueSetResource(List.of(endpoint), VSAC_VALUESET_URL);
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void getCodeSystemResource_endpointList_delegatesAndReturnsFirst() {
+        var cs = new org.hl7.fhir.r4.model.CodeSystem();
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(Optional.of((IDomainResource) cs))
+                .when(router)
+                .getCodeSystemResource(any(IEndpointAdapter.class), anyString());
+
+        var endpoint = createEndpointAdapter("https://example.org/fhir");
+
+        var result = router.getCodeSystemResource(List.of(endpoint), "http://loinc.org");
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void getLatestValueSetResource_endpointList_delegatesAndReturnsFirst() {
+        var vs = new ValueSet();
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doReturn(Optional.of((IDomainResource) vs))
+                .when(router)
+                .getLatestValueSetResource(any(IEndpointAdapter.class), anyString());
+
+        var endpoint = createEndpointAdapter("https://cts.nlm.nih.gov/fhir");
+
+        var result = router.getLatestValueSetResource(List.of(endpoint), VSAC_VALUESET_URL);
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void getValueSetResource_emptyEndpointList_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getValueSetResource(List.of(), VSAC_VALUESET_URL);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getCodeSystemResource_emptyEndpointList_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getCodeSystemResource(List.of(), "http://loinc.org");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getLatestValueSetResource_emptyEndpointList_returnsEmpty() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var result = router.getLatestValueSetResource(List.of(), VSAC_VALUESET_URL);
+        assertTrue(result.isEmpty());
+    }
+
+    // --- Exception handling in *WithConfigurations methods ---
+
+    @Test
+    void expandWithConfigurations_exceptionInExpand_triesNextConfig() {
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(VSAC_VALUESET_URL);
+
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doThrow(new RuntimeException("Connection failed"))
+                .doReturn(expandedVs)
+                .when(router)
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+
+        var config1 = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://server1.com/fhir", null);
+        var config2 = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://server2.com/fhir", null);
+        var valueSet = createValueSetAdapter(VSAC_VALUESET_URL);
+        var params = factory.createParameters(new org.hl7.fhir.r4.model.Parameters());
+
+        var result = router.expandWithConfigurations(valueSet, List.of(config1, config2), params);
+        assertNotNull(result);
+    }
+
+    @Test
+    void getValueSetResourceWithConfigurations_exceptionInGet_triesNextConfig() {
+        var vs = new ValueSet();
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doThrow(new RuntimeException("Connection failed"))
+                .doReturn(Optional.of((IDomainResource) vs))
+                .when(router)
+                .getValueSetResource(any(IEndpointAdapter.class), anyString());
+
+        var config1 = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://server1.com/fhir", null);
+        var config2 = new ArtifactEndpointConfiguration(VSAC_ROUTE, "https://server2.com/fhir", null);
+
+        var result = router.getValueSetResourceWithConfigurations(List.of(config1, config2), VSAC_VALUESET_URL);
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void getCodeSystemResourceWithConfigurations_exceptionInGet_triesNextConfig() {
+        var cs = new org.hl7.fhir.r4.model.CodeSystem();
+        var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
+        doThrow(new RuntimeException("Connection failed"))
+                .doReturn(Optional.of((IDomainResource) cs))
+                .when(router)
+                .getCodeSystemResource(any(IEndpointAdapter.class), anyString());
+
+        var config1 = new ArtifactEndpointConfiguration(null, "https://server1.com/fhir", null);
+        var config2 = new ArtifactEndpointConfiguration(null, "https://server2.com/fhir", null);
+
+        var result = router.getCodeSystemResourceWithConfigurations(List.of(config1, config2), "http://loinc.org");
+        assertTrue(result.isPresent());
+    }
+
+    // --- Helper methods ---
+
+    private IEndpointAdapter createEndpointAdapter(String address) {
+        var endpoint = new Endpoint();
+        endpoint.setAddress(address);
+        return (IEndpointAdapter) IAdapterFactory.createAdapterForResource(endpoint);
     }
 
     /**

@@ -136,7 +136,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
             gatherDependenciesWithClassification(
                     adapter,
-                    adapter,
                     gatheredCanonicals,
                     resolvedCache,
                     artifactEndpointConfigurations,
@@ -160,7 +159,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     private <T extends ICompositeType & IBaseHasExtensions> void gatherDependenciesWithClassification(
-            IKnowledgeArtifactAdapter rootAdapter,
             IKnowledgeArtifactAdapter artifactAdapter,
             Set<String> gatheredCanonicals,
             Map<String, IKnowledgeArtifactAdapter> resolvedCache,
@@ -207,7 +205,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             // Recurse into resolved dependency
             if (dependencyAdapter != null) {
                 gatherDependenciesWithClassification(
-                        rootAdapter,
                         dependencyAdapter,
                         gatheredCanonicals,
                         resolvedCache,
@@ -217,31 +214,28 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         relatedArtifacts);
             }
 
-            // Only add dependencies from leaf artifacts (not the root)
-            if (!artifactAdapter.getUrl().equals(rootAdapter.getUrl())) {
-                var reference = dependency.getReference();
-                if (dependencyAdapter != null) {
-                    reference = dependencyAdapter.getCanonical();
-                }
-
-                // Skip if already in the related artifacts list
-                var finalReference = reference;
-                if (relatedArtifacts.stream().anyMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
-                        .equals(finalReference))) {
-                    continue;
-                }
-
-                var newDep = (T) IKnowledgeArtifactAdapter.newRelatedArtifact(
-                        fhirVersion(),
-                        Constants.RELATEDARTIFACT_TYPE_DEPENDSON,
-                        reference,
-                        dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
-
-                // Add CRMI extensions
-                addCrmiExtensions(newDep, dependency, artifactAdapter, dependencyAdapter, currentRoles);
-
-                relatedArtifacts.add(newDep);
+            var reference = dependency.getReference();
+            if (dependencyAdapter != null) {
+                reference = dependencyAdapter.getCanonical();
             }
+
+            // Skip if already in the related artifacts list
+            var finalReference = reference;
+            if (relatedArtifacts.stream().anyMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
+                    .equals(finalReference))) {
+                continue;
+            }
+
+            var newDep = (T) IKnowledgeArtifactAdapter.newRelatedArtifact(
+                    fhirVersion(),
+                    Constants.RELATEDARTIFACT_TYPE_DEPENDSON,
+                    reference,
+                    dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
+
+            // Add CRMI extensions
+            addCrmiExtensions(newDep, dependency, artifactAdapter, dependencyAdapter, currentRoles);
+
+            relatedArtifacts.add(newDep);
         }
     }
 

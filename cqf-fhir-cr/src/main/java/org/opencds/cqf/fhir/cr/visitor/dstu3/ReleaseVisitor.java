@@ -98,7 +98,7 @@ public class ReleaseVisitor {
     public static Bundle searchArtifactAssessmentForArtifact(IIdType reference, IRepository repository) {
         Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
         List<IQueryParameterType> urlList = new ArrayList<>();
-        urlList.add(new ReferenceParam(reference));
+        urlList.add(new ReferenceParam(reference.getResourceType() + "/" + reference.getIdPart()));
         searchParams.put("artifact", urlList);
         return repository.search(Bundle.class, Basic.class, searchParams);
     }

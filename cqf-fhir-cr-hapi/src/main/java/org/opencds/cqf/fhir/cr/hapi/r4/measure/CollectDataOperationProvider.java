@@ -1,25 +1,32 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 
 public class CollectDataOperationProvider {
     private final ICollectDataServiceFactory r4CollectDataServiceFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;
+    private final FhirVersionEnum fhirVersion;
 
     public CollectDataOperationProvider(
             ICollectDataServiceFactory r4CollectDataServiceFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         this.r4CollectDataServiceFactory = r4CollectDataServiceFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -51,18 +58,18 @@ public class CollectDataOperationProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_COLLECTDATA, idempotent = true, type = Measure.class)
     public Parameters collectData(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "practitioner") String practitioner,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "practitioner") StringType practitioner,
             RequestDetails requestDetails) {
         return r4CollectDataServiceFactory
                 .create(requestDetails)
                 .collectData(
                         id,
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        subject,
-                        practitioner);
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(subject),
+                        getStringValue(practitioner));
     }
 }

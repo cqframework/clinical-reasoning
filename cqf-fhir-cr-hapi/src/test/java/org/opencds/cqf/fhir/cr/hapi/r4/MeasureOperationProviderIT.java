@@ -39,6 +39,7 @@ class MeasureOperationProviderIT extends BaseCrR4TestServer {
                 .named(ProviderConstants.CR_OPERATION_EVALUATE_MEASURE)
                 .withParameters(parametersEval)
                 .returnResourceType(MeasureReport.class)
+                .useHttpGet()
                 .execute();
     }
 

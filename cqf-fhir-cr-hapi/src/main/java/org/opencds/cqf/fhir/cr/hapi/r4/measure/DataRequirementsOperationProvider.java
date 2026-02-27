@@ -1,10 +1,14 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -12,9 +16,11 @@ import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 
 public class DataRequirementsOperationProvider {
     private final IDataRequirementsServiceFactory r4DataRequirementsServiceFactory;
+    private final FhirVersionEnum fhirVersion;
 
     public DataRequirementsOperationProvider(IDataRequirementsServiceFactory r4DataRequirementsServiceFactory) {
         this.r4DataRequirementsServiceFactory = r4DataRequirementsServiceFactory;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -35,9 +41,11 @@ public class DataRequirementsOperationProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Measure.class)
     public Library dataRequirements(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
             RequestDetails requestDetails) {
-        return r4DataRequirementsServiceFactory.create(requestDetails).dataRequirements(id, periodStart, periodEnd);
+        return r4DataRequirementsServiceFactory
+                .create(requestDetails)
+                .dataRequirements(id, getStringValue(periodStart), getStringValue(periodEnd));
     }
 }

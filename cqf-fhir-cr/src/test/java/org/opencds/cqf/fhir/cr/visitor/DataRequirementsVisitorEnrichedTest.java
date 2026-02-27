@@ -44,7 +44,8 @@ class DataRequirementsVisitorEnrichedTest {
 
     /**
      * Uses update instead of create to preserve resource IDs, since InMemoryFhirRepository.create()
-     * overwrites the ID with a random value.
+     * overwrites the ID with a random value. IDs must include the resource type prefix
+     * (e.g. "ValueSet/test-vs") for InMemoryFhirRepository lookups to work correctly.
      */
     private void addToRepo(IRepository repository, IBaseResource resource) {
         repository.update(resource);

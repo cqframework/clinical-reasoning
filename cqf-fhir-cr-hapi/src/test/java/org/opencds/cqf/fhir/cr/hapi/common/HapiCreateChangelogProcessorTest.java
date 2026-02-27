@@ -23,22 +23,7 @@ import org.springframework.data.util.StreamUtils;
 class HapiCreateChangelogProcessorTest {
 
     public HapiCreateChangelogProcessor createChangelogProcessor;
-
-    /*    private Parameters createChangelogSetup() {
-        loadTransaction("small-diff-bundle.json");
-        var bundle = (Bundle) loadTransaction("small-dxtc-modified-diff-bundle.json");
-        var maybeLib = bundle.getEntry().stream().filter(entry -> entry.getResponse().getLocation().contains("Library")).findFirst();
-        Parameters diffParams = new Parameters();
-        diffParams.addParameter("source", specificationLibReference);
-        diffParams.addParameter("target", maybeLib.get().getResponse().getLocation());
-        var endpoint = new Endpoint();
-        endpoint.setAddress("https://cts.nlm.nih.gov/fhir");
-        endpoint.addExtension("vsacUsername", new StringType("tahaattarismile"));
-        endpoint.addExtension("apiKey", new StringType("e071d986-0c68-4d06-95ee-00602a2bb748"));
-        diffParams.addParameter("target", maybeLib.get().getResponse().getLocation());
-        // diffParams.addParameter().setName("terminologyEndpoint").setResource( endpoint);
-        return diffParams;
-    }*/
+    public InMemoryFhirRepository repository;
 
     @Test
     void create_changelog_pages() {
@@ -166,7 +151,7 @@ class HapiCreateChangelogProcessorTest {
                     assertTrue(page.get("oldData").get("codes").isArray());
                     for (final var code : page.get("oldData").get("codes")) {
                         CodeAndOperation expectedOldCode =
-                                oldCodes.get(code.get("code").asText());
+                                oldCodes.get(code.get("codeValue").asText());
                         assertNotNull(expectedOldCode);
                         if (expectedOldCode.operation != null) {
                             assertEquals(
@@ -179,7 +164,7 @@ class HapiCreateChangelogProcessorTest {
                     assertTrue(page.get("newData").get("codes").isArray());
                     for (final var code : page.get("newData").get("codes")) {
                         CodeAndOperation expectedNewCode =
-                                newCodes.get(code.get("code").asText());
+                                newCodes.get(code.get("codeValue").asText());
                         assertNotNull(expectedNewCode);
                         if (expectedNewCode.operation != null) {
                             assertEquals(
@@ -269,13 +254,13 @@ class HapiCreateChangelogProcessorTest {
             var pages = node.get("pages");
             for (final var page : pages) {
                 if (Canonicals.getResourceType(page.get("url").asText()).equals("ValueSet")) {
-                    assertTrue(page.get("oldData").get("leafValuesets").isArray());
+                    assertTrue(page.get("oldData").get("leafValueSets").isArray());
                     assertTrue(page.get("oldData")
                             .get("priority")
                             .get("value")
                             .asText()
                             .equals("routine"));
-                    for (final var leaf : page.get("oldData").get("leafValuesets")) {
+                    for (final var leaf : page.get("oldData").get("leafValueSets")) {
                         assertTrue(leaf.get("conditions").isArray());
                         var memberOid = leaf.get("memberOid").asText();
                         assertTrue(oldLeafsAndConditions.containsKey(memberOid));
@@ -286,7 +271,7 @@ class HapiCreateChangelogProcessorTest {
                             Optional<CodeAndOperation> conditionInList = expectedConditions.stream()
                                     .filter(c -> c.code != null
                                             && c.code.equals(
-                                                    condition.get("code").asText()))
+                                                    condition.get("codeValue").asText()))
                                     .findAny();
                             assertTrue(conditionInList.isPresent());
                             if (conditionInList.get().operation != null) {
@@ -312,13 +297,13 @@ class HapiCreateChangelogProcessorTest {
                                             .asText());
                         }
                     }
-                    assertTrue(page.get("newData").get("leafValuesets").isArray());
+                    assertTrue(page.get("newData").get("leafValueSets").isArray());
                     assertTrue(page.get("newData")
                             .get("priority")
                             .get("value")
                             .asText()
                             .equals("routine"));
-                    for (final var leaf : page.get("newData").get("leafValuesets")) {
+                    for (final var leaf : page.get("newData").get("leafValueSets")) {
                         assertTrue(leaf.get("conditions").isArray());
                         var memberOid = leaf.get("memberOid").asText();
                         assertTrue(newLeafsAndConditions.containsKey(memberOid));
@@ -329,7 +314,7 @@ class HapiCreateChangelogProcessorTest {
                             Optional<CodeAndOperation> conditionInList = expectedConditions.stream()
                                     .filter(c -> c.code != null
                                             && c.code.equals(
-                                                    condition.get("code").asText()))
+                                                    condition.get("codeValue").asText()))
                                     .findAny();
                             assertTrue(conditionInList.isPresent());
                             if (conditionInList.get().operation != null) {
@@ -402,8 +387,8 @@ class HapiCreateChangelogProcessorTest {
             var pages = node.get("pages");
             for (final var page : pages) {
                 if (Canonicals.getResourceType(page.get("url").asText()).equals("ValueSet")) {
-                    assertTrue(page.get("oldData").get("leafValuesets").isArray());
-                    for (final var leaf : page.get("oldData").get("leafValuesets")) {
+                    assertTrue(page.get("oldData").get("leafValueSets").isArray());
+                    for (final var leaf : page.get("oldData").get("leafValueSets")) {
                         var expectedLeaf = oldLeafs.get(leaf.get("memberOid").asText());
                         assertNotNull(expectedLeaf);
                         if (!expectedLeaf.isBlank()) {
@@ -412,8 +397,8 @@ class HapiCreateChangelogProcessorTest {
                                     leaf.get("operation").get("type").asText());
                         }
                     }
-                    assertTrue(page.get("newData").get("leafValuesets").isArray());
-                    for (final var leaf : page.get("newData").get("leafValuesets")) {
+                    assertTrue(page.get("newData").get("leafValueSets").isArray());
+                    for (final var leaf : page.get("newData").get("leafValueSets")) {
                         var expectedLeaf = newLeafs.get(leaf.get("memberOid").asText());
                         assertNotNull(expectedLeaf);
                         if (!expectedLeaf.isBlank()) {
@@ -473,9 +458,9 @@ class HapiCreateChangelogProcessorTest {
                             page.get("newData").get("name").get("value").asText()));
                 }
                 if (Canonicals.getIdPart(page.get("url").asText()).equals("dxtc")) {
-                    assertTrue(page.get("oldData").get("leafValuesets").isArray());
-                    assertEquals(3, page.get("oldData").get("leafValuesets").size());
-                    for (final var leaf : page.get("oldData").get("leafValuesets")) {
+                    assertTrue(page.get("oldData").get("leafValueSets").isArray());
+                    assertEquals(3, page.get("oldData").get("leafValueSets").size());
+                    for (final var leaf : page.get("oldData").get("leafValueSets")) {
                         var name = leaf.get("name").asText();
                         assertTrue(oldLeafValueSetNames.contains(name));
                         assertNotNull(leaf.get("codeSystems")
@@ -489,9 +474,9 @@ class HapiCreateChangelogProcessorTest {
                                 .get("oid")
                                 .asText());
                     }
-                    assertTrue(page.get("newData").get("leafValuesets").isArray());
-                    assertEquals(3, page.get("newData").get("leafValuesets").size());
-                    for (final var leaf : page.get("newData").get("leafValuesets")) {
+                    assertTrue(page.get("newData").get("leafValueSets").isArray());
+                    assertEquals(3, page.get("newData").get("leafValueSets").size());
+                    for (final var leaf : page.get("newData").get("leafValueSets")) {
                         var name = leaf.get("name").asText();
                         assertTrue(newLeafValueSetNames.contains(name));
                         if (leaf.get("url")
@@ -588,22 +573,22 @@ class HapiCreateChangelogProcessorTest {
         for (final var code : deletedGrouperPage.get().get("oldData").get("codes")) {
             // all codes have a "delete" operation
             assertTrue(code.get("operation").get("type").asText().equals("delete"));
-            assertTrue(VSMGrouperCodes.contains(code.get("code").asText()));
+            assertTrue(VSMGrouperCodes.contains(code.get("codeValue").asText()));
             assertNotNull(code.get("version").asText());
             assertTrue(versions.contains(code.get("version").asText()));
         }
 
         assertEquals(
                 VSMGrouperLeafVsets.size(),
-                deletedGrouperPage.get().get("oldData").get("leafValuesets").size());
-        for (final var leaf : deletedGrouperPage.get().get("oldData").get("leafValuesets")) {
+                deletedGrouperPage.get().get("oldData").get("leafValueSets").size());
+        for (final var leaf : deletedGrouperPage.get().get("oldData").get("leafValueSets")) {
             // all leaf valuesets have a "delete" operation
             assertTrue(leaf.get("operation").get("type").asText().equals("delete"));
             assertTrue(VSMGrouperLeafVsets.contains(leaf.get("memberOid").asText()));
         }
 
         // reverse source and target
-        var returnedBinary2 = (Binary) createChangelogProcessor.createChangelog(source, target, null);
+        var returnedBinary2 = (Binary) createChangelogProcessor.createChangelog(target, source, null);
         assertNotNull(returnedBinary2);
         var node2 = mapper.readTree(new String(Base64.getDecoder().decode(returnedBinary2.getContentAsBase64())));
         assertTrue(node2.get("pages").isArray());
@@ -631,15 +616,15 @@ class HapiCreateChangelogProcessorTest {
                 createdGrouperPage.get().get("newData").get("codes").size());
         for (final var code : createdGrouperPage.get().get("newData").get("codes")) {
             assertTrue(code.get("operation").get("type").asText().equals("insert"));
-            assertTrue(VSMGrouperCodes.contains(code.get("code").asText()));
+            assertTrue(VSMGrouperCodes.contains(code.get("codeValue").asText()));
             assertNotNull(code.get("version").asText());
             assertTrue(versions.contains(code.get("version").asText()));
         }
 
         assertEquals(
                 VSMGrouperLeafVsets.size(),
-                createdGrouperPage.get().get("newData").get("leafValuesets").size());
-        for (final var leaf : createdGrouperPage.get().get("newData").get("leafValuesets")) {
+                createdGrouperPage.get().get("newData").get("leafValueSets").size());
+        for (final var leaf : createdGrouperPage.get().get("newData").get("leafValueSets")) {
             assertTrue(leaf.get("operation").get("type").asText().equals("insert"));
             assertTrue(VSMGrouperLeafVsets.contains(leaf.get("memberOid").asText()));
         }

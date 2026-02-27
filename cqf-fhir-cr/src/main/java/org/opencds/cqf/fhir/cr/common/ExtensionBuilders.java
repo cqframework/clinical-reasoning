@@ -117,6 +117,53 @@ public class ExtensionBuilders {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T extends IBaseExtension<?, ?>> T buildComplexPackageSourceExt(
+            FhirVersionEnum fhirVersion, String packageId, String version, String uri) {
+        return switch (fhirVersion) {
+            case DSTU3 -> {
+                var ext = new org.hl7.fhir.dstu3.model.Extension(Constants.PACKAGE_SOURCE);
+                if (packageId != null) {
+                    ext.addExtension("packageId", new org.hl7.fhir.dstu3.model.StringType(packageId));
+                }
+                if (version != null) {
+                    ext.addExtension("version", new org.hl7.fhir.dstu3.model.StringType(version));
+                }
+                if (uri != null) {
+                    ext.addExtension("uri", new org.hl7.fhir.dstu3.model.UriType(uri));
+                }
+                yield (T) ext;
+            }
+            case R4 -> {
+                var ext = new org.hl7.fhir.r4.model.Extension(Constants.PACKAGE_SOURCE);
+                if (packageId != null) {
+                    ext.addExtension("packageId", new org.hl7.fhir.r4.model.StringType(packageId));
+                }
+                if (version != null) {
+                    ext.addExtension("version", new org.hl7.fhir.r4.model.StringType(version));
+                }
+                if (uri != null) {
+                    ext.addExtension("uri", new org.hl7.fhir.r4.model.UriType(uri));
+                }
+                yield (T) ext;
+            }
+            case R5 -> {
+                var ext = new org.hl7.fhir.r5.model.Extension(Constants.PACKAGE_SOURCE);
+                if (packageId != null) {
+                    ext.addExtension("packageId", new org.hl7.fhir.r5.model.StringType(packageId));
+                }
+                if (version != null) {
+                    ext.addExtension("version", new org.hl7.fhir.r5.model.StringType(version));
+                }
+                if (uri != null) {
+                    ext.addExtension("uri", new org.hl7.fhir.r5.model.UriType(uri));
+                }
+                yield (T) ext;
+            }
+            default -> null;
+        };
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T extends IBaseExtension<?, ?>> T buildReferenceSourceExt(
             FhirVersionEnum fhirVersion, String artifactCanonical, String fhirPath) {
         return switch (fhirVersion) {

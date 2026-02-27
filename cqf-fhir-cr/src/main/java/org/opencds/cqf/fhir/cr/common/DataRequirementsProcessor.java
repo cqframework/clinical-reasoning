@@ -35,8 +35,8 @@ public class DataRequirementsProcessor implements IDataRequirementsProcessor {
             TerminologyServerClientSettings terminologyServerClientSettings) {
         this.repository = repository;
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        var router = new FederatedTerminologyProviderRouter(
-                this.repository.fhirContext(), terminologyServerClientSettings);
+        var router =
+                new FederatedTerminologyProviderRouter(this.repository.fhirContext(), terminologyServerClientSettings);
         dataRequirementsVisitor = new DataRequirementsVisitor(this.repository, evaluationSettings, router);
     }
 

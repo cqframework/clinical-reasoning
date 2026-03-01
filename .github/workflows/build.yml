@@ -34,7 +34,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ vars.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_TOKEN }}
       - name: Publish test report
-        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
+        uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v6.3.1
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: "**/build/test-results/test/TEST-*.xml"

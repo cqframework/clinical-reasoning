@@ -7,7 +7,6 @@ import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapter
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import java.nio.charset.StandardCharsets;
@@ -47,8 +46,11 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
+import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +66,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final int MAX_ID_LENGTH = 64;
     private static final String CANONICAL_ENCODED_PREFIX = "cv-";
     private static final Pattern FHIR_ID_PATTERN = Pattern.compile("^[A-Za-z0-9\\-.]+$");
-    protected final TerminologyServerClient terminologyServerClient;
+    protected final ITerminologyProviderRouter terminologyServerRouter;
     protected final ExpandHelper expandHelper;
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
@@ -72,17 +74,18 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private final IAdapterFactory adapterFactory;
 
     public PackageVisitor(IRepository repository) {
-        this(repository, (TerminologyServerClient) null, null);
+        this(repository, (ITerminologyProviderRouter) null, null);
     }
 
-    public PackageVisitor(IRepository repository, TerminologyServerClient client) {
-        this(repository, client, null);
+    public PackageVisitor(IRepository repository, ITerminologyProviderRouter terminologyServerRouter) {
+        this(repository, terminologyServerRouter, null);
     }
 
     public PackageVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
-        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
-        this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.terminologyServerRouter =
+                new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
+        this.expandHelper = new ExpandHelper(this.repository, terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
@@ -92,20 +95,22 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             TerminologyServerClientSettings terminologyServerClientSettings,
             IValueSetExpansionCache cache) {
         super(repository, cache);
-        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
-        this.expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        this.terminologyServerRouter =
+                new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
+        this.expandHelper = new ExpandHelper(this.repository, terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
 
-    public PackageVisitor(IRepository repository, TerminologyServerClient client, IValueSetExpansionCache cache) {
+    public PackageVisitor(
+            IRepository repository, ITerminologyProviderRouter terminologyServerRouter, IValueSetExpansionCache cache) {
         super(repository, cache);
-        if (client == null) {
-            terminologyServerClient = new TerminologyServerClient(fhirContext());
+        if (terminologyServerRouter == null) {
+            this.terminologyServerRouter = new FederatedTerminologyProviderRouter(fhirContext());
         } else {
-            terminologyServerClient = client;
+            this.terminologyServerRouter = terminologyServerRouter;
         }
-        expandHelper = new ExpandHelper(this.repository, terminologyServerClient);
+        expandHelper = new ExpandHelper(this.repository, this.terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
     }
@@ -155,13 +160,14 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     public IBase visit(IKnowledgeArtifactAdapter adapter, IBaseParameters packageParameters) {
         var fhirVersion = adapter.get().getStructureFhirVersionEnum();
 
-        Optional<String> artifactRoute = VisitorHelper.getStringParameter("artifactRoute", packageParameters);
-        Optional<String> endpointUri = VisitorHelper.getStringParameter("endpointUri", packageParameters);
-        Optional<IEndpointAdapter> endpoint = VisitorHelper.getResourceParameter("endpoint", packageParameters)
-                .map(ep -> (IEndpointAdapter) createAdapterForResource(ep));
+        // Parse CRMI artifactEndpointConfiguration parameters for terminology routing
+        var artifactEndpointConfigurations = VisitorHelper.getArtifactEndpointConfigurations(packageParameters);
+
+        // Legacy single terminologyEndpoint parameter (for backward compatibility)
         Optional<IEndpointAdapter> terminologyEndpoint = VisitorHelper.getResourceParameter(
                         "terminologyEndpoint", packageParameters)
                 .map(ep -> (IEndpointAdapter) createAdapterForResource(ep));
+
         Optional<Boolean> packageOnly = VisitorHelper.getBooleanParameter("packageOnly", packageParameters);
         Optional<Integer> count = VisitorHelper.getIntegerParameter("count", packageParameters);
         Optional<Integer> offset = VisitorHelper.getIntegerParameter("offset", packageParameters);
@@ -184,17 +190,6 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .orElseGet(() -> new ArrayList<>());
         boolean isPut =
                 VisitorHelper.getBooleanParameter("isPut", packageParameters).orElse(false);
-
-        if ((artifactRoute.isPresent()
-                        && !StringUtils.isBlank(artifactRoute.get())
-                        && !artifactRoute.get().isEmpty())
-                || (endpointUri.isPresent()
-                        && !StringUtils.isBlank(endpointUri.get())
-                        && !endpointUri.get().isEmpty())
-                || endpoint.isPresent()) {
-            throw new NotImplementedOperationException(
-                    "This repository is not implementing custom Content and endpoints at this time");
-        }
         if (count.isPresent() && count.get() < 0) {
             throw new InvalidRequestException("'count' must be non-negative");
         }
@@ -256,7 +251,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                     include,
                     versionTuple,
                     terminologyEndpoint.orElse(null),
-                    terminologyServerClient,
+                    terminologyServerRouter,
                     messagesWrapper);
             messages = messagesWrapper[0]; // Capture any messages created during gathering
             packagedResources.values().stream()
@@ -271,7 +266,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             var included = findUnsupportedInclude(BundleHelper.getEntry(packagedBundle), include, adapter, exclude);
             BundleHelper.setEntry(packagedBundle, included);
         }
-        handleValueSets(packagedBundle, terminologyEndpoint);
+        handleValueSets(packagedBundle, artifactEndpointConfigurations, terminologyEndpoint);
         applyManifestUsageContextsToValueSets(adapter, packagedBundle);
 
         // Only add messages if there are actual issues
@@ -288,7 +283,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         // what is dependency, where did it originate? potentially the package?
     }
 
-    protected void handleValueSets(IBaseBundle packagedBundle, Optional<IEndpointAdapter> terminologyEndpoint) {
+    protected void handleValueSets(
+            IBaseBundle packagedBundle,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
+            Optional<IEndpointAdapter> terminologyEndpoint) {
         var expansionParams = newParameters(fhirContext());
         var rootSpecificationLibrary = getRootSpecificationLibrary(packagedBundle);
         if (rootSpecificationLibrary != null) {
@@ -335,12 +333,19 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             var expansionStartTime = new Date().getTime();
             params.setParameter(params.getParameter().stream()
                     .filter(p -> !List.of(
-                                    TerminologyServerClient.urlParamName, TerminologyServerClient.versionParamName)
+                                    ITerminologyServerClient.urlParamName, ITerminologyServerClient.versionParamName)
                             .contains(p.getName()))
                     .map(IParametersParameterComponentAdapter::get)
                     .toList());
             try {
-                expandHelper.expandValueSet(valueSet, params, terminologyEndpoint, valueSets, expandedList, new Date());
+                expandHelper.expandValueSet(
+                        valueSet,
+                        params,
+                        artifactEndpointConfigurations,
+                        terminologyEndpoint,
+                        valueSets,
+                        expandedList,
+                        new Date());
                 addExpansionWarningsToOperationOutcome(valueSet);
                 var elapsed = String.valueOf(((new Date()).getTime() - expansionStartTime) / 1000);
                 myLogger.info("Expanded {} in {}s", url, elapsed);

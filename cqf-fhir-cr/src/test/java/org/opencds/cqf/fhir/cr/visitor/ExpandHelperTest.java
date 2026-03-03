@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -31,9 +30,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 class ExpandHelperTest {
@@ -66,8 +68,8 @@ class ExpandHelperTest {
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(Multimap.class), any());
-        verify(client, never()).getValueSetResource(any(), any());
-        verify(client, never()).expand(any(IValueSetAdapter.class), any(), any());
+        verify(client, never()).getValueSetResource(any(IEndpointAdapter.class), anyString());
+        verify(client, never()).expand(any(IEndpointAdapter.class), any(), any());
     }
 
     @Test
@@ -103,8 +105,8 @@ class ExpandHelperTest {
                 new Date());
         assertEquals(3, grouper.getExpansion().getContains().size());
         verify(rep, never()).search(any(), any(), any(Multimap.class));
-        verify(client, times(1)).getValueSetResource(any(), any());
-        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
+        verify(client, times(1)).getValueSetResource(any(IEndpointAdapter.class), anyString());
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
     }
 
     @Test
@@ -134,8 +136,8 @@ class ExpandHelperTest {
         var expandHelper = new ExpandHelper(rep, client);
         var expansionParams = new Parameters();
         // Setup exp params with Grouper URL and version
-        expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
-        expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
+        expansionParams.addParameter(ITerminologyServerClient.urlParamName, grouperUrl);
+        expansionParams.addParameter(ITerminologyServerClient.versionParamName, grouperVersion);
         expandHelper.expandValueSet(
                 (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
                 factory.createParameters(expansionParams),
@@ -144,18 +146,19 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
         var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
-        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), parametersCaptor.capture());
+        verify(client, times(1))
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
         verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         var childExpParams = parametersCaptor.getValue();
-        assertNotNull(childExpParams.getParameter(TerminologyServerClient.urlParamName));
+        assertNotNull(childExpParams.getParameter(ITerminologyServerClient.urlParamName));
         // leaf is expanded with Leaf url not Grouper url
 
         var url = ((IPrimitiveType<String>)
-                        (childExpParams.getParameter(TerminologyServerClient.urlParamName)).getValue())
+                        (childExpParams.getParameter(ITerminologyServerClient.urlParamName)).getValue())
                 .getValue();
         assertEquals(leafUrl, url);
         // the Version parameter is removed because leaf has no version
-        assertNull(childExpParams.getParameter(TerminologyServerClient.versionParamName));
+        assertNull(childExpParams.getParameter(ITerminologyServerClient.versionParamName));
     }
 
     @Test
@@ -181,8 +184,8 @@ class ExpandHelperTest {
         var expandHelper = new ExpandHelper(rep, client);
         var expansionParams = new Parameters();
         // Setup exp params with Grouper URL and version
-        expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
-        expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
+        expansionParams.addParameter(ITerminologyServerClient.urlParamName, grouperUrl);
+        expansionParams.addParameter(ITerminologyServerClient.versionParamName, grouperVersion);
 
         Exception notExpectingAnyException = null;
         try {
@@ -199,7 +202,7 @@ class ExpandHelperTest {
         // should not error on empty Grouper
         assertNull(notExpectingAnyException);
         // should not call the client
-        verify(client, times(0)).expand(any(IValueSetAdapter.class), any(), any());
+        verify(client, times(0)).expand(any(IEndpointAdapter.class), any(), any());
         // should not search the repository
         verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         // should not add any expansions
@@ -233,8 +236,8 @@ class ExpandHelperTest {
         var expandHelper = new ExpandHelper(rep, client);
         var expansionParams = new Parameters();
         // Setup exp params with Grouper URL and version
-        expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
-        expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
+        expansionParams.addParameter(ITerminologyServerClient.urlParamName, grouperUrl);
+        expansionParams.addParameter(ITerminologyServerClient.versionParamName, grouperVersion);
 
         Exception notExpectingAnyException = null;
         try {
@@ -251,7 +254,7 @@ class ExpandHelperTest {
         // should not error on empty leaf
         assertNull(notExpectingAnyException);
         // should call the client
-        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), any());
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
         // should not search the repository
         verify(rep, times(0)).search(any(), any(), any(Multimap.class), any());
         // should not add any expansions
@@ -286,8 +289,8 @@ class ExpandHelperTest {
         var expandHelper = new ExpandHelper(rep, client);
         var expansionParams = new Parameters();
         // Setup exp params with Grouper URL and version
-        expansionParams.addParameter(TerminologyServerClient.urlParamName, grouperUrl);
-        expansionParams.addParameter(TerminologyServerClient.versionParamName, grouperVersion);
+        expansionParams.addParameter(ITerminologyServerClient.urlParamName, grouperUrl);
+        expansionParams.addParameter(ITerminologyServerClient.versionParamName, grouperVersion);
 
         ExpandHelper.unsupportedParametersToRemove.forEach(unsupportedParam -> {
             expansionParams.addParameter(unsupportedParam, "test");
@@ -300,7 +303,8 @@ class ExpandHelperTest {
                 new ArrayList<String>(),
                 new Date());
         var parametersCaptor = ArgumentCaptor.forClass(IParametersAdapter.class);
-        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(), parametersCaptor.capture());
+        verify(client, times(1))
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
         var filteredExpansionParams = parametersCaptor.getValue();
         assertEquals(2, filteredExpansionParams.getParameter().size());
         ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
@@ -345,7 +349,7 @@ class ExpandHelperTest {
         assertEquals(version, initiallyNoVersionNoExpansion.getVersion());
         // trivial checks
         verify(rep, never()).search(any(), any(), any(Multimap.class));
-        verify(client, times(1)).expand(eq(adapter), any(), any());
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
     }
 
     @Test
@@ -606,10 +610,12 @@ class ExpandHelperTest {
         return mockRepository;
     }
 
-    TerminologyServerClient mockTerminologyServerWithValueSetR4(ValueSet valueSet) {
-        var mockClient = mock(TerminologyServerClient.class);
-        when(mockClient.getValueSetResource(any(), anyString())).thenReturn(java.util.Optional.of(valueSet));
-        when(mockClient.expand(any(IValueSetAdapter.class), any(), any())).thenReturn(valueSet);
+    ITerminologyProviderRouter mockTerminologyServerWithValueSetR4(ValueSet valueSet) {
+        var mockClient = mock(FederatedTerminologyProviderRouter.class);
+        when(mockClient.getValueSetResource(any(IEndpointAdapter.class), anyString()))
+                .thenReturn(java.util.Optional.of(valueSet));
+        when(mockClient.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenReturn(valueSet);
         return mockClient;
     }
 }

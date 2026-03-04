@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -10,12 +11,16 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.springframework.stereotype.Component;
@@ -59,32 +64,31 @@ public class MeasureOperationsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasure(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
-            @OperationParam(name = "reportType") String reportType,
-            @OperationParam(name = "patient") String patient,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
-            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "reportType") CodeType reportType,
+            @OperationParam(name = "patient") StringType patient,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "lastReceivedOn") DateTimeType lastReceivedOn,
+            @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         return dstu3MeasureProcessorFactory
                 .create(requestDetails)
                 .evaluateMeasure(
                         id,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        patient,
-                        practitioner,
-                        lastReceivedOn,
-                        productLine,
+                        getStringValue(periodStart),
+                        getStringValue(periodEnd),
+                        getStringValue(reportType),
+                        getStringValue(patient),
+                        getStringValue(practitioner),
+                        getStringValue(lastReceivedOn),
+                        getStringValue(productLine),
                         additionalData,
                         parameters,
-                        terminologyEndpointParam);
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint));
     }
 }

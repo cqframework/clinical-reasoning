@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -9,9 +12,12 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 
@@ -19,11 +25,13 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
 public class CareGapsOperationProvider {
     private final ICareGapsServiceFactory r4CareGapsProcessorFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;
+    private final FhirVersionEnum fhirVersion;
 
     public CareGapsOperationProvider(
             ICareGapsServiceFactory r4CareGapsProcessorFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         this.r4CareGapsProcessorFactory = r4CareGapsProcessorFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
+        fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
@@ -52,8 +60,8 @@ public class CareGapsOperationProvider {
      *
      * @param requestDetails generally auto-populated by the HAPI server
      *                          framework.
-     * @param reriodStart       the start of the gaps through period
-     * @param reriodEnd         the end of the gaps through period
+     * @param periodStart       the start of the gaps through period
+     * @param periodEnd         the end of the gaps through period
      * @param subject           a reference to either a Patient or Group for which
      *                          the gaps in care report(s) will be generated
      * @param status            the status code of gaps in care reports that will be
@@ -75,26 +83,37 @@ public class CareGapsOperationProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_CARE_GAPS, idempotent = true, type = Measure.class)
     public Parameters careGapsReport(
             RequestDetails requestDetails,
-            @OperationParam(name = "periodStart") String reriodStart,
-            @OperationParam(name = "periodEnd") String reriodEnd,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "status") List<String> status,
-            @OperationParam(name = "measureId") List<String> measureId,
-            @OperationParam(name = "measureIdentifier") List<String> measureIdentifier,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "status") List<StringType> status,
+            @OperationParam(name = "measureId") List<StringType> measureId,
+            @OperationParam(name = "measureIdentifier") List<StringType> measureIdentifier,
             @OperationParam(name = "measureUrl") List<CanonicalType> measureUrl,
             @OperationParam(name = "nonDocument") BooleanType nonDocument) {
 
         return r4CareGapsProcessorFactory
                 .create(requestDetails)
                 .getCareGapsReport(
-                        stringTimePeriodHandler.getStartZonedDateTime(reriodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(reriodEnd, requestDetails),
-                        subject,
-                        status,
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(subject),
+                        status == null
+                                ? null
+                                : status.stream()
+                                        .map(ParameterHelper::getStringValue)
+                                        .toList(),
                         measureId == null
                                 ? null
-                                : measureId.stream().map(IdType::new).toList(),
-                        measureIdentifier,
+                                : measureId.stream()
+                                        .map(ParameterHelper::getStringValue)
+                                        .map(IdType::new)
+                                        .toList(),
+                        measureIdentifier == null
+                                ? null
+                                : measureIdentifier.stream()
+                                        .map(ParameterHelper::getStringValue)
+                                        .toList(),
                         measureUrl,
                         Optional.ofNullable(nonDocument)
                                 .map(BooleanType::getValue)

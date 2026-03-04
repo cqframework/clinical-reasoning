@@ -399,8 +399,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     dependency.setReference(dependencyAdapter.getCanonical());
 
                     // Classify roles for this dependency to determine if it's key
+                    var conformanceResolver = new ConformanceResourceResolver(repository);
                     List<String> currentDependencyRoles = DependencyRoleClassifier.classifyDependencyRoles(
-                            dependency, artifactAdapter, dependencyAdapter, repository);
+                            dependency, artifactAdapter, dependencyAdapter, conformanceResolver);
 
                     // Propagate key role from parent if needed
                     if (parentRoles.contains("key") && !currentDependencyRoles.contains("key")) {
@@ -803,8 +804,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             List<String> parentRoles) {
 
         // 1. Classify dependency roles
+        var conformanceResolver = new ConformanceResourceResolver(repository);
         List<String> roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, sourceArtifact, dependencyArtifact, repository);
+                dependency, sourceArtifact, dependencyArtifact, conformanceResolver);
 
         // 2. Propagate "key" role from parent if this is a transitive dependency
         if (parentRoles != null && parentRoles.contains("key") && !roles.contains("key")) {

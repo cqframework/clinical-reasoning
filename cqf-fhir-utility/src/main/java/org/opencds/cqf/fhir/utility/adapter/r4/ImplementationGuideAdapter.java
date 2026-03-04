@@ -85,7 +85,19 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
                         .getResourceDefinition(refElement.getResourceType())
                         .newInstance()
                         .getClass();
-                var read = repository.read(refClass, new IdType(refValue));
+                Object read;
+                try {
+                    read = repository.read(refClass, new IdType(refValue));
+                } catch (Exception e) {
+                    IAdapter.logger.warn(
+                            "Unable to read resource for reference: {}, using relative reference", refValue);
+                    var ref = dr.getReference().hasReferenceElement()
+                            ? dr.getReference().getReferenceElement()
+                            : new IdType(refValue);
+                    references.add(new DependencyInfo(
+                            getImplementationGuide().getUrl(), ref.getValueAsString(), null, ref::setValue));
+                    continue;
+                }
                 if (read instanceof MetadataResource mr && (mr.hasUrl() || mr.hasUrlElement())) {
                     var url = mr.hasUrlElement() ? mr.getUrlElement() : new UrlType(mr.getUrl());
                     references.add(

@@ -131,6 +131,11 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             var terminologyEndpoint = VisitorHelper.getResourceParameter("terminologyEndpoint", operationParameters)
                     .map(r -> (IEndpointAdapter) createAdapterForResource(r));
 
+            // Create conformance resource resolver for key element analysis
+            var dependsOnPackages = extractDependsOnPackages(adapter);
+            var conformanceResolver =
+                    new ConformanceResourceResolver(repository, dependsOnPackages, artifactEndpointConfigurations);
+
             var gatheredCanonicals = new HashSet<String>();
             var resolvedCache = new HashMap<String, IKnowledgeArtifactAdapter>();
 
@@ -141,7 +146,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                     artifactEndpointConfigurations,
                     terminologyEndpoint.orElse(null),
                     new ArrayList<>(),
-                    relatedArtifacts);
+                    relatedArtifacts,
+                    conformanceResolver);
         } else {
             // Original path: simple recursiveGather (Library, Measure, etc.)
             var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();
@@ -165,7 +171,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
             IEndpointAdapter terminologyEndpoint,
             List<String> parentRoles,
-            List<T> relatedArtifacts) {
+            List<T> relatedArtifacts,
+            ConformanceResourceResolver conformanceResolver) {
         if (artifactAdapter == null) {
             return;
         }
@@ -197,7 +204,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
             // Classify roles
             var currentRoles = DependencyRoleClassifier.classifyDependencyRoles(
-                    dependency, artifactAdapter, dependencyAdapter, repository);
+                    dependency, artifactAdapter, dependencyAdapter, conformanceResolver);
             if (parentRoles.contains("key") && !currentRoles.contains("key")) {
                 currentRoles.add(0, "key");
             }
@@ -211,7 +218,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         artifactEndpointConfigurations,
                         terminologyEndpoint,
                         currentRoles,
-                        relatedArtifacts);
+                        relatedArtifacts,
+                        conformanceResolver);
             }
 
             var reference = dependency.getReference();
@@ -429,6 +437,31 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         IAdapterFactory adapterFactory = IAdapterFactory.forFhirContext(fhirContext());
         return new RepositoryFhirLibrarySourceProvider(
                 repository, adapterFactory, new LibraryVersionSelector(adapterFactory));
+    }
+
+    /**
+     * Extracts package ID + version pairs from an IG adapter's dependsOn entries.
+     */
+    private List<String[]> extractDependsOnPackages(IKnowledgeArtifactAdapter adapter) {
+        List<String[]> packages = new ArrayList<>();
+        try {
+            if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide ig) {
+                for (var dep : ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+                    }
+                }
+            } else if (adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide ig) {
+                for (var dep : ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Error extracting dependsOn packages", e);
+        }
+        return packages;
     }
 
     protected LibraryManager createLibraryManager() {

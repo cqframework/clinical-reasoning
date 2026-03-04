@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.pertainToGoalExtension;
+import static org.opencds.cqf.fhir.cr.questionnaire.Helpers.getQuestionnaireFromContained;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -24,6 +26,8 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
+import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,63 +120,90 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected void initApply(ApplyRequest request) {
+        var questionnaireResponses = request.getQuestionnaireResponses();
         var url = request.getPlanDefinitionAdapter().getUrl();
         // If the PlanDefinition has no URL we will not generate a Questionnaire
         // We will also add a warning to the result informing the user
         if (url != null) {
             var questionnaireUrl = url.replace("/PlanDefinition/", "/Questionnaire/");
-            List<IBaseResource> entryResources =
-                    request.getData() == null ? List.of() : getEntryResources(request.getData());
-            var questionnaire = entryResources.stream()
-                    .filter(r -> r.fhirType().equals("Questionnaire"))
-                    .map(q -> request.getAdapterFactory().createQuestionnaire(q))
-                    .filter(q -> q.getUrl().equals(questionnaireUrl))
+            // In the case of an adaptive Questionnaire it will be contained within the QuestionnaireResponse
+            // We are assuming a single QuestionnaireResponse in this instance
+            var questionnaireResponse = questionnaireResponses.stream()
+                    .filter(r -> r.getQuestionnaire().contains("#"))
                     .findFirst()
-                    .orElse(request.getAdapterFactory()
-                            .createQuestionnaire(generateProcessor.generate(
-                                    request.getPlanDefinition().getIdElement().getIdPart())));
-            questionnaire.setUrl(questionnaireUrl);
+                    .orElse(null);
+            var containedQuestionnaire = getQuestionnaireFromContained(questionnaireResponse);
+            var questionnaire = containedQuestionnaire == null
+                    ? null
+                    : request.getAdapterFactory().createQuestionnaire(containedQuestionnaire);
+            // Otherwise if we have any Questionnaire in the data Bundle
+            // with a url that matches the PlanDefinition we will use it
+            if (questionnaire == null) {
+                questionnaire = getEntryResources(request.getData()).stream()
+                        .filter(r -> r.fhirType().equals("Questionnaire"))
+                        .map(q -> request.getAdapterFactory().createQuestionnaire(q))
+                        .filter(q -> q.getUrl().equals(questionnaireUrl))
+                        .findFirst()
+                        .orElse(null);
+            }
+            // If we still don't have a Questionnaire we will generate one and give it the correct url
+            if (questionnaire == null) {
+                questionnaire = request.getAdapterFactory()
+                        .createQuestionnaire(generateProcessor.generate(
+                                request.getPlanDefinition().getIdElement().getIdPart()));
+                questionnaire.setUrl(questionnaireUrl);
+            }
+            // Update the version
             var version = request.getPlanDefinitionAdapter().getVersion();
             if (version != null) {
                 var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
                 questionnaire.setVersion(version.concat(
                         "-%s-%s".formatted(request.getSubjectId().getIdPart(), formatter.format(new Date()))));
             }
+            // If we don't have a questionnaireResponse check for one in the data bundle
+            if (questionnaireResponse == null) {
+                var canonical = questionnaire.getCanonical();
+                questionnaireResponse = questionnaireResponses.stream()
+                        .filter(r -> r.getQuestionnaire().equals(canonical))
+                        .findFirst()
+                        .orElse(null);
+            }
             request.setQuestionnaire(questionnaire);
+            request.setQuestionnaireResponse(questionnaireResponse);
             request.addCqlLibraryExtension();
         } else {
             request.logException("PlanDefinition %s is missing a canonical url."
                     .formatted(request.getPlanDefinition().getIdElement().getValue()));
         }
-        extractQuestionnaireResponse(request);
+        extractQuestionnaireResponse(request, questionnaireResponses);
     }
 
-    protected void extractQuestionnaireResponse(ApplyRequest request) {
-        if (request.getData() != null) {
-            getEntryResources(request.getData()).stream()
-                    .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
-                    .map(qr -> request.getAdapterFactory().createQuestionnaireResponse(qr))
-                    .forEach(questionnaireResponse -> {
-                        try {
-                            var extractBundle = extractProcessor.extract(
-                                    Eithers.forRight(questionnaireResponse.get()),
-                                    Eithers.forRight(request.getQuestionnaire()),
-                                    request.getParameters(),
-                                    request.getData(),
-                                    request.getLibraryEngine());
-                            for (var entry : getEntry(extractBundle)) {
-                                addEntry(request.getData(), entry);
-                                // Not adding extracted resources back into the response to reduce size of payload
-                                // $extract can be called on the QuestionnaireResponse if these are desired
-                                // addEntry(request.getExtractedResources(), getEntryResource(request.getFhirVersion(),
-                                // entry))
-                            }
-                        } catch (Exception e) {
-                            request.logException("Error encountered extracting %s: %s"
-                                    .formatted(questionnaireResponse.getId().getIdPart(), e.getMessage()));
-                        }
-                    });
-        }
+    protected void extractQuestionnaireResponse(ApplyRequest request, List<IQuestionnaireResponseAdapter> responses) {
+        responses.forEach(questionnaireResponse -> {
+            try {
+                Either<IIdType, IBaseResource> questionnaire = questionnaireResponse
+                                .getQuestionnaire()
+                                .equals(request.getQuestionnaireAdapter().getCanonical())
+                        ? Eithers.forRight(request.getQuestionnaire())
+                        : null;
+                var extractBundle = extractProcessor.extract(
+                        Eithers.forRight(questionnaireResponse.get()),
+                        questionnaire,
+                        request.getParameters(),
+                        request.getData(),
+                        request.getLibraryEngine());
+                for (var entry : getEntry(extractBundle)) {
+                    addEntry(request.getData(), entry);
+                    // Not adding extracted resources back into the response to reduce size of payload
+                    // $extract can be called on the QuestionnaireResponse if these are desired
+                    // addEntry(request.getExtractedResources(), getEntryResource(request.getFhirVersion(),
+                    // entry))
+                }
+            } catch (Exception e) {
+                request.logException("Error encountered extracting %s: %s"
+                        .formatted(questionnaireResponse.getId().getIdPart(), e.getMessage()));
+            }
+        });
     }
 
     public IBaseResource applyPlanDefinition(ApplyRequest request) {

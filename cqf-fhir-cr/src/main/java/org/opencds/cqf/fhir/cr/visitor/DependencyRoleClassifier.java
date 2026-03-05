@@ -82,7 +82,7 @@ public class DependencyRoleClassifier {
 
         // Only StructureDefinition sources have a formal key element procedure
         if (source != null && source.get().fhirType().equals("StructureDefinition")) {
-            return isKeyDependencyForProfile(dependency, source, resolver);
+            return isKeyDependencyForProfile(dependency, dependencyArtifact, source, resolver);
         }
 
         // For all other artifact types, there is no standards-based definition of "key"
@@ -96,21 +96,25 @@ public class DependencyRoleClassifier {
      * {@code scanForKeyElements()}.
      *
      * @param dependency the dependency information
+     * @param dependencyArtifact the resolved dependency artifact (may be null)
      * @param source the StructureDefinition source artifact
      * @param resolver the conformance resource resolver
      * @return true if the dependency is a ValueSet bound to a key element
      */
     private static boolean isKeyDependencyForProfile(
-            IDependencyInfo dependency, IKnowledgeArtifactAdapter source, ConformanceResourceResolver resolver) {
+            IDependencyInfo dependency,
+            IKnowledgeArtifactAdapter dependencyArtifact,
+            IKnowledgeArtifactAdapter source,
+            ConformanceResourceResolver resolver) {
 
         if (resolver == null) {
             return false;
         }
 
         try {
-            // Check if dependency is a ValueSet
-            String dependencyRef = dependency.getReference();
-            if (dependencyRef == null || !dependencyRef.contains("ValueSet")) {
+            // Check if dependency is a ValueSet using the resolved resource type
+            if (dependencyArtifact == null
+                    || !"ValueSet".equals(dependencyArtifact.get().fhirType())) {
                 return false;
             }
 
@@ -121,7 +125,7 @@ public class DependencyRoleClassifier {
             Set<String> keyValueSets = analyzer.getKeyElementValueSets(structureDefinition);
 
             // Check if this dependency's canonical is in the key ValueSets
-            String dependencyCanonical = getDependencyCanonical(dependencyRef);
+            String dependencyCanonical = getDependencyCanonical(dependency.getReference());
             for (String keyVs : keyValueSets) {
                 if (canonicalsMatch(keyVs, dependencyCanonical)) {
                     return true;

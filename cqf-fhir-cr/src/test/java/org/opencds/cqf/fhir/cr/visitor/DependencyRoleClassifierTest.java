@@ -263,19 +263,63 @@ class DependencyRoleClassifierTest {
 
         var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
 
-        // Test first ValueSet
+        // Test first ValueSet — must provide resolved ValueSet adapter
+        var vs1 = new ValueSet();
+        vs1.setUrl("http://hl7.org/fhir/ValueSet/marital-status");
+        var vs1Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs1);
         var dependency1 = createDependency("http://hl7.org/fhir/ValueSet/marital-status");
-        var roles1 = DependencyRoleClassifier.classifyDependencyRoles(dependency1, profileAdapter, null, resolver);
+        var roles1 =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency1, profileAdapter, vs1Adapter, resolver);
 
         assertTrue(roles1.contains("key"));
         assertTrue(roles1.contains("default"));
 
         // Test second ValueSet
+        var vs2 = new ValueSet();
+        vs2.setUrl("http://hl7.org/fhir/ValueSet/administrative-gender");
+        var vs2Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs2);
         var dependency2 = createDependency("http://hl7.org/fhir/ValueSet/administrative-gender");
-        var roles2 = DependencyRoleClassifier.classifyDependencyRoles(dependency2, profileAdapter, null, resolver);
+        var roles2 =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency2, profileAdapter, vs2Adapter, resolver);
 
         assertTrue(roles2.contains("key"));
         assertTrue(roles2.contains("default"));
+    }
+
+    @Test
+    void testNonFhirUrlValueSetClassifiedAsKeyWhenResolved() {
+        var resolver = createResolver();
+
+        var profile = new StructureDefinition();
+        profile.setUrl("http://example.org/StructureDefinition/TestPatient");
+        profile.setType("Patient");
+        profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+
+        // Add root element and key element with binding to a non-FHIR-URL ValueSet
+        var rootElement = profile.getSnapshot().addElement();
+        rootElement.setId("Patient");
+        rootElement.setPath("Patient");
+
+        var element = profile.getSnapshot().addElement();
+        element.setId("Patient.maritalStatus");
+        element.setPath("Patient.maritalStatus");
+        element.setMustSupport(true);
+        element.getBinding().setStrength(BindingStrength.REQUIRED).setValueSet("http://www.ada.org/cdt");
+
+        var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
+
+        // Provide a resolved ValueSet adapter with a non-FHIR canonical URL
+        var valueSet = new ValueSet();
+        valueSet.setUrl("http://www.ada.org/cdt");
+        var valueSetAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        var dependency = createDependency("http://www.ada.org/cdt");
+
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, valueSetAdapter, resolver);
+
+        assertTrue(roles.contains("key"), "Non-FHIR-URL ValueSet should be classified as key when resolved");
+        assertTrue(roles.contains("default"));
     }
 
     @Test

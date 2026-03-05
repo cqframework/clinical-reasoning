@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 
 class ConformanceResourceResolverTest {
 
@@ -103,5 +105,52 @@ class ConformanceResourceResolverTest {
         var adapter = resolver.createAdapter(resource);
         assertNotNull(adapter);
         assertEquals("Patient", adapter.getType());
+    }
+
+    @Test
+    void testGetRepositoryReturnsOriginalWhenNoPackages() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository);
+
+        assertSame(repository, resolver.getRepository(), "Should return original repository when no packages");
+    }
+
+    @Test
+    void testGetRepositoryReturnsFederatedWhenPackagesProvided() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var packages = new java.util.ArrayList<String[]>();
+        packages.add(new String[] {"hl7.fhir.us.core", "6.1.0"});
+        var resolver = new ConformanceResourceResolver(repository, packages, Collections.emptyList());
+
+        var result = resolver.getRepository();
+        assertNotNull(result);
+        assertEquals(
+                FederatedRepository.class,
+                result.getClass(),
+                "Should return FederatedRepository when packages are provided");
+    }
+
+    @Test
+    void testGetResourceTypeReturnsNullWhenNoPackages() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository);
+
+        assertNull(resolver.getResourceType("http://example.org/ValueSet/test"));
+    }
+
+    @Test
+    void testGetRepositoryReturnsOriginalWhenNullPackages() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository, null, Collections.emptyList());
+
+        assertSame(repository, resolver.getRepository(), "Should return original repository when packages is null");
     }
 }

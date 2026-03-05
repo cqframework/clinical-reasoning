@@ -125,6 +125,13 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
         var relatedArtifacts = stripInvalid(library);
 
+        logger.debug(
+                "DataRequirementsVisitor.visit: terminologyProviderRouter={}, adapter type={}",
+                terminologyProviderRouter != null
+                        ? terminologyProviderRouter.getClass().getSimpleName()
+                        : "null",
+                adapter.get().fhirType());
+
         if (terminologyProviderRouter != null) {
             // Enriched path: dependency classification, Tx queries, CRMI extensions
             var artifactEndpointConfigurations = VisitorHelper.getArtifactEndpointConfigurations(operationParameters);
@@ -133,8 +140,14 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
             // Create conformance resource resolver for key element analysis
             var dependsOnPackages = extractDependsOnPackages(adapter);
+            logger.debug("Extracted {} dependsOn package(s) from IG", dependsOnPackages.size());
+            for (var pkg : dependsOnPackages) {
+                logger.debug("  Package seed: {}#{}", pkg[0], pkg[1]);
+            }
             var conformanceResolver =
                     new ConformanceResourceResolver(repository, dependsOnPackages, artifactEndpointConfigurations);
+            var federatedRepo = conformanceResolver.getRepository();
+            logger.debug("Federated repo type: {}", federatedRepo.getClass().getSimpleName());
 
             var gatheredCanonicals = new HashSet<String>();
             var resolvedCache = new HashMap<String, IKnowledgeArtifactAdapter>();
@@ -147,7 +160,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                     terminologyEndpoint.orElse(null),
                     new ArrayList<>(),
                     relatedArtifacts,
-                    conformanceResolver);
+                    conformanceResolver,
+                    federatedRepo);
         } else {
             // Original path: simple recursiveGather (Library, Measure, etc.)
             var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();
@@ -172,7 +186,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             IEndpointAdapter terminologyEndpoint,
             List<String> parentRoles,
             List<T> relatedArtifacts,
-            ConformanceResourceResolver conformanceResolver) {
+            ConformanceResourceResolver conformanceResolver,
+            IRepository dependencyRepo) {
         if (artifactAdapter == null) {
             return;
         }
@@ -182,7 +197,11 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         }
         gatheredCanonicals.add(canonical);
 
-        var dependencies = artifactAdapter.getDependencies(repository);
+        var dependencies = artifactAdapter.getDependencies(dependencyRepo);
+        logger.debug(
+                "gatherDependenciesWithClassification: {} returned {} dependencies",
+                artifactAdapter.get().fhirType(),
+                dependencies.size());
         for (var dependency : dependencies) {
             var dependencyUrl = Canonicals.getUrl(dependency.getReference());
             if (StringUtils.isBlank(dependencyUrl)) {
@@ -197,8 +216,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             if (resolvedCache.containsKey(dependencyUrl)) {
                 dependencyAdapter = resolvedCache.get(dependencyUrl);
             } else {
-                dependencyAdapter =
-                        tryResolveDependencyReadOnly(dependency, artifactEndpointConfigurations, terminologyEndpoint);
+                dependencyAdapter = tryResolveDependencyReadOnly(
+                        dependency, artifactEndpointConfigurations, terminologyEndpoint, dependencyRepo);
                 resolvedCache.put(dependencyUrl, dependencyAdapter);
             }
 
@@ -219,12 +238,19 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                         terminologyEndpoint,
                         currentRoles,
                         relatedArtifacts,
-                        conformanceResolver);
+                        conformanceResolver,
+                        dependencyRepo);
             }
 
             var reference = dependency.getReference();
             if (dependencyAdapter != null) {
                 reference = dependencyAdapter.getCanonical();
+            } else if (StringUtils.isBlank(Canonicals.getVersion(reference))) {
+                // Unresolved dependency without a version — try the NPM package index
+                var indexedVersion = conformanceResolver.getVersion(reference);
+                if (indexedVersion != null) {
+                    reference = Canonicals.getUrl(reference) + "|" + indexedVersion;
+                }
             }
 
             // Skip if already in the related artifacts list
@@ -241,7 +267,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                     dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
 
             // Add CRMI extensions
-            addCrmiExtensions(newDep, dependency, artifactAdapter, dependencyAdapter, currentRoles);
+            addCrmiExtensions(
+                    newDep, dependency, artifactAdapter, dependencyAdapter, currentRoles, conformanceResolver);
 
             relatedArtifacts.add(newDep);
         }
@@ -250,18 +277,19 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     private IKnowledgeArtifactAdapter tryResolveDependencyReadOnly(
             IDependencyInfo dependency,
             List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
-            IEndpointAdapter terminologyEndpoint) {
+            IEndpointAdapter terminologyEndpoint,
+            IRepository dependencyRepo) {
         var reference = dependency.getReference();
         var resourceType = Canonicals.getResourceType(reference);
 
-        // First try resolving from the local repository
+        // First try resolving from the federated repository
         if (StringUtils.isNotBlank(Canonicals.getVersion(reference))) {
-            var adapter = getArtifactByCanonical(reference);
+            var adapter = getArtifactByCanonical(reference, dependencyRepo);
             if (adapter != null) {
                 return adapter;
             }
         } else {
-            var maybeAdapter = VisitorHelper.tryGetLatestVersion(reference, repository);
+            var maybeAdapter = VisitorHelper.tryGetLatestVersion(reference, dependencyRepo);
             if (maybeAdapter.isPresent()) {
                 return maybeAdapter.get();
             }
@@ -299,9 +327,9 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         return null;
     }
 
-    private IKnowledgeArtifactAdapter getArtifactByCanonical(String canonical) {
+    private IKnowledgeArtifactAdapter getArtifactByCanonical(String canonical, IRepository dependencyRepo) {
         try {
-            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical);
+            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(dependencyRepo, canonical);
             if (bundle != null) {
                 var resource =
                         IKnowledgeArtifactAdapter.findLatestVersion(bundle).orElse(null);
@@ -321,11 +349,20 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             IDependencyInfo dependency,
             IKnowledgeArtifactAdapter sourceArtifact,
             IKnowledgeArtifactAdapter dependencyArtifact,
-            List<String> roles) {
+            List<String> roles,
+            ConformanceResourceResolver conformanceResolver) {
         var extensionList = (List<IBaseExtension<?, ?>>) relatedArtifact.getExtension();
 
-        // cqf-resourceType extension
-        var resourceType = Canonicals.getResourceType(dependency.getReference());
+        // cqf-resourceType extension — fallback chain:
+        // 1. Resolved resource fhirType() (most accurate)
+        // 2. NPM package index (for unresolved deps)
+        // 3. Skip (don't add garbage)
+        String resourceType = null;
+        if (dependencyArtifact != null) {
+            resourceType = dependencyArtifact.get().fhirType();
+        } else if (conformanceResolver != null) {
+            resourceType = conformanceResolver.getResourceType(dependency.getReference());
+        }
         if (resourceType != null) {
             addResourceTypeExtension(resourceType, relatedArtifact);
         }
@@ -335,22 +372,14 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             extensionList.add(ExtensionBuilders.buildDependencyRoleExt(fhirVersion(), role));
         }
 
-        // package-source extension (complex)
-        if (dependencyArtifact != null) {
-            PackageSourceResolver.resolvePackageSource(dependencyArtifact, repository)
-                    .ifPresent(packageSource -> {
-                        String packageId;
-                        String version;
-                        if (packageSource.contains("#")) {
-                            packageId = packageSource.substring(0, packageSource.indexOf('#'));
-                            version = packageSource.substring(packageSource.indexOf('#') + 1);
-                        } else {
-                            packageId = packageSource;
-                            version = null;
-                        }
-                        extensionList.add(ExtensionBuilders.buildComplexPackageSourceExt(
-                                fhirVersion(), packageId, version, dependencyArtifact.getUrl()));
-                    });
+        // package-source extension (complex) — use NPM package index
+        var depUrl = dependencyArtifact != null ? dependencyArtifact.getUrl() : dependency.getReference();
+        if (conformanceResolver != null && depUrl != null) {
+            var pkgInfo = conformanceResolver.getPackageInfo(depUrl);
+            if (pkgInfo != null) {
+                extensionList.add(ExtensionBuilders.buildComplexPackageSourceExt(
+                        fhirVersion(), pkgInfo.packageId(), pkgInfo.version(), pkgInfo.canonical()));
+            }
         }
 
         // crmi-referenceSource extensions
@@ -440,18 +469,28 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     /**
-     * Extracts package ID + version pairs from an IG adapter's dependsOn entries.
+     * Extracts package ID + version pairs from an IG, including the root IG's own package
+     * and all dependsOn entries. The root IG's package is included first so that its own
+     * definition resources can be resolved from the NPM cache when not in the repository.
+     * NpmRepository walks transitive dependencies automatically, so dependsOn entries are
+     * included as explicit seeds for redundancy.
      */
     private List<String[]> extractDependsOnPackages(IKnowledgeArtifactAdapter adapter) {
         List<String[]> packages = new ArrayList<>();
         try {
             if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide ig) {
+                if (ig.hasPackageId() && ig.hasVersion()) {
+                    packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
+                }
                 for (var dep : ig.getDependsOn()) {
                     if (dep.hasPackageId() && dep.hasVersion()) {
                         packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
                     }
                 }
             } else if (adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide ig) {
+                if (ig.hasPackageId() && ig.hasVersion()) {
+                    packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
+                }
                 for (var dep : ig.getDependsOn()) {
                     if (dep.hasPackageId() && dep.hasVersion()) {
                         packages.add(new String[] {dep.getPackageId(), dep.getVersion()});

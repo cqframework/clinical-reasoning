@@ -1,0 +1,83 @@
+{
+  "resourceType": "Patient",
+  "id": "acc6f85b-14ad-4daa-8981-66c1c37c8f07",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2028-9",
+            "display": "Asian",
+            "userSelected": true
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "Asian"
+        },
+        {
+          "url": "detailed",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "1653-5",
+            "display": "Tohono O'Odham"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2135-2",
+            "display": "Hispanic or Latino",
+            "userSelected": true
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "Hispanic or Latino"
+        },
+        {
+          "url": "detailed",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2180-8",
+            "display": "Puerto Rican"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+      "valueCode": "184115007"
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://hospital.smarthealthit.org",
+      "value": "999999995"
+    }
+  ],
+  "name": [
+    {
+      "family": "SDE",
+      "given": [
+        "SDECoverage2"
+      ]
+    }
+  ],
+  "gender": "unknown",
+  "birthDate": "1952-12-31"
+}

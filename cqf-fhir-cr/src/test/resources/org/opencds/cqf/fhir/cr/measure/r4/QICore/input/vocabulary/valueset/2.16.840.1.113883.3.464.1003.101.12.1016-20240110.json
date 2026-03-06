@@ -1,0 +1,218 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1016-20240110",
+  "meta": {
+    "versionId": "35",
+    "lastUpdated": "2024-01-10T01:09:31.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-10"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2024-01-10"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.101.12.1016"
+    }
+  ],
+  "version": "20240110",
+  "name": "HomeHealthcareServices",
+  "title": "Home Healthcare Services",
+  "status": "active",
+  "date": "2024-01-10T01:09:31-05:00",
+  "publisher": "NCQA PHEMUR",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for encounters for home health visits.),(Data Element Scope: This value set may use a model element related to Encounter.),(Inclusion Criteria: Includes concepts that represent an encounter for a home health visit for the evaluation and management of a new or established patient.),(Exclusion Criteria: No exclusions.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1265"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1080"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:0bca89b4-53a7-4b67-8103-5c53f2fde633",
+    "timestamp": "2025-08-28T16:53:29-04:00",
+    "total": 19,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185460008",
+        "display": "Home visit request by patient (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185462000",
+        "display": "Home visit request by relative (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185466002",
+        "display": "Home visit for urgent condition (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185467006",
+        "display": "Home visit for acute condition (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185468001",
+        "display": "Home visit for chronic condition (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185470005",
+        "display": "Home visit elderly assessment (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "225929007",
+        "display": "Joint home visit (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "315205008",
+        "display": "Bank holiday home visit (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "439708006",
+        "display": "Home visit (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "698704008",
+        "display": "Home visit for rheumatology service (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "704126008",
+        "display": "Home visit for anticoagulant drug monitoring (procedure)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99341",
+        "display": "Home or residence visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination and straightforward medical decision making. When using total time on the date of the encounter for code selection, 15 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99342",
+        "display": "Home or residence visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using total time on the date of the encounter for code selection, 30 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99344",
+        "display": "Home or residence visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination and moderate level of medical decision making. When using total time on the date of the encounter for code selection, 60 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99345",
+        "display": "Home or residence visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination and high level of medical decision making. When using total time on the date of the encounter for code selection, 75 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99347",
+        "display": "Home or residence visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and straightforward medical decision making. When using total time on the date of the encounter for code selection, 20 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99348",
+        "display": "Home or residence visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and low level of medical decision making. When using total time on the date of the encounter for code selection, 30 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99349",
+        "display": "Home or residence visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and moderate level of medical decision making. When using total time on the date of the encounter for code selection, 40 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99350",
+        "display": "Home or residence visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination and high level of medical decision making. When using total time on the date of the encounter for code selection, 60 minutes must be met or exceeded."
+      }
+    ]
+  }
+}

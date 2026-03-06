@@ -1,0 +1,41 @@
+{
+  "resourceType": "Condition",
+  "id": "196a1345-a957-4274-b033-7b36e7cd3da2",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+    ]
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "Encounter Diagnosis"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "137681000119108",
+        "display": "History of prophylactic mastectomy of right breast (situation)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f887d498-35c1-41e4-85f5-288b52895140"
+  },
+  "onsetDateTime": "2025-12-31T23:59:59.000+00:00"
+}

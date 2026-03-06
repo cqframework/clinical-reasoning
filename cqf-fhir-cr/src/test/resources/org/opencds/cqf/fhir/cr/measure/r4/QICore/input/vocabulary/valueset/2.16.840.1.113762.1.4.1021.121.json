@@ -1,0 +1,64 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1021.121",
+  "meta": {
+    "versionId": "12",
+    "lastUpdated": "2025-05-21T11:15:55.000-04:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2025-02-28"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1021.121",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1021.121"
+    }
+  ],
+  "version": "20250228",
+  "name": "FederalAdministrativeSex",
+  "title": "Federal Administrative Sex",
+  "status": "active",
+  "date": "2025-02-28T01:07:20-05:00",
+  "publisher": "HL7 US Realm Program Management Steward",
+  "expansion": {
+    "identifier": "urn:uuid:0a80c455-fc01-4fdb-9e7e-25e2f24458cc",
+    "timestamp": "2025-08-29T13:49:36-04:00",
+    "total": 2,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "248152002",
+        "display": "Female (finding)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "248153007",
+        "display": "Male (finding)"
+      }
+    ]
+  }
+}

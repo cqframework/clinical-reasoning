@@ -1,0 +1,169 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.151-20230214",
+  "meta": {
+    "versionId": "20",
+    "lastUpdated": "2024-02-01T14:29:20.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Yale Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-12"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2023-02-14"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.151",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1045.151"
+    }
+  ],
+  "version": "20230214",
+  "name": "OxygenSaturationByPulseOximetry",
+  "title": "Oxygen Saturation by Pulse Oximetry",
+  "status": "active",
+  "date": "2023-02-14T01:02:32-05:00",
+  "publisher": "Yale",
+  "description": "CCDE for Yale",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for a physical exam with an observation or measurement of oxygen saturation.),(Data Element Scope: This value set may use a model element related to Physical Exam.),(Inclusion Criteria: Includes concepts that represent a physical exam during which observation or measurement of a person's oxygen saturation occurred via pulse oximtery.),(Exclusion Criteria: Oxygen saturation values captured through other means of collection (for example a blood specimen))",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "59408-5",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry"
+          },
+          {
+            "code": "59410-1",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --on room air"
+          },
+          {
+            "code": "59414-3",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --pre bronchodilation"
+          },
+          {
+            "code": "59415-0",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --pre physiotherapy"
+          },
+          {
+            "code": "59416-8",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --pre treatment"
+          },
+          {
+            "code": "59417-6",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --resting"
+          },
+          {
+            "code": "89276-0",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --W exercise"
+          },
+          {
+            "code": "89277-8",
+            "display": "Oxygen saturation in Arterial blood by Pulse oximetry --during anesthesia"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:56a2e42b-58f5-462a-9ab7-57290c130a62",
+    "timestamp": "2025-08-28T17:07:05-04:00",
+    "total": 8,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "59408-5",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "59410-1",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --on room air"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "59414-3",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --pre bronchodilation"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "59415-0",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --pre physiotherapy"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "59416-8",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --pre treatment"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "59417-6",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --resting"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "89276-0",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --W exercise"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "89277-8",
+        "display": "Oxygen saturation in Arterial blood by Pulse oximetry --during anesthesia"
+      }
+    ]
+  }
+}

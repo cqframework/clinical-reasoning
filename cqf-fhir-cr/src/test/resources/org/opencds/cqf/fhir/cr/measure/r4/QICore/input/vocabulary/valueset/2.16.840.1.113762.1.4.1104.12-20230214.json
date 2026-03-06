@@ -1,0 +1,235 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1104.12-20230214",
+  "meta": {
+    "versionId": "6",
+    "lastUpdated": "2024-02-01T16:08:57.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Yale Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-12"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2023-02-14"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1104.12",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1104.12"
+    }
+  ],
+  "version": "20230214",
+  "name": "MedicareAdvantagePayer",
+  "title": "Medicare Advantage Payer",
+  "status": "active",
+  "date": "2023-02-14T01:02:32-05:00",
+  "publisher": "Yale",
+  "description": "CCDE",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to identify concepts for Medicare Advantage payer types.),(Data Element Scope: This value set may use a model element related to Patient Characteristic.),(Inclusion Criteria: Includes concepts that identify a patient with Medicare Advantage as a payer source.),(Exclusion Criteria: Excludes concepts that represent Medicare Fee-For-Service as a payer source.)",
+  "compose": {
+    "include": [
+      {
+        "system": "https://nahdo.org/sopt",
+        "concept": [
+          {
+            "code": "11",
+            "display": "Medicare Managed Care (Includes Medicare Advantage Plans)"
+          },
+          {
+            "code": "111",
+            "display": "Medicare HMO"
+          },
+          {
+            "code": "1111",
+            "display": "Medicare Chronic Condition Special Needs Plan (C-SNP)"
+          },
+          {
+            "code": "1112",
+            "display": "Medicare Institutional Special Needs Plan (I-SNP)"
+          },
+          {
+            "code": "112",
+            "display": "Medicare PPO"
+          },
+          {
+            "code": "113",
+            "display": "Medicare POS"
+          },
+          {
+            "code": "119",
+            "display": "Medicare Managed Care Other"
+          },
+          {
+            "code": "123",
+            "display": "Medicare Medical Savings Account (MSA)"
+          },
+          {
+            "code": "13",
+            "display": "Medicare Hospice"
+          },
+          {
+            "code": "14",
+            "display": "Dual Eligibility Medicare/Medicaid Organization"
+          },
+          {
+            "code": "141",
+            "display": "Dual Eligible Special Needs Plan (D-SNP)"
+          },
+          {
+            "code": "142",
+            "display": "Fully Integrated Dual Eligible Special Needs Plan (FIDE-SNP)"
+          },
+          {
+            "code": "19",
+            "display": "Medicare Other"
+          },
+          {
+            "code": "191",
+            "display": "Medicare Pharmacy Benefit Manager"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:87d18c46-7dff-4a3c-ba84-001266318772",
+    "timestamp": "2025-08-28T16:51:18-04:00",
+    "total": 14,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "11",
+        "display": "Medicare Managed Care (Includes Medicare Advantage Plans)"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "111",
+        "display": "Medicare HMO"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "1111",
+        "display": "Medicare Chronic Condition Special Needs Plan (C-SNP)"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "1112",
+        "display": "Medicare Institutional Special Needs Plan (I-SNP)"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "112",
+        "display": "Medicare PPO"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "113",
+        "display": "Medicare POS"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "119",
+        "display": "Medicare Managed Care Other"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "123",
+        "display": "Medicare Medical Savings Account (MSA)"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "13",
+        "display": "Medicare Hospice"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "14",
+        "display": "Dual Eligibility Medicare/Medicaid Organization"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "141",
+        "display": "Dual Eligible Special Needs Plan (D-SNP)"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "142",
+        "display": "Fully Integrated Dual Eligible Special Needs Plan (FIDE-SNP)"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "19",
+        "display": "Medicare Other"
+      },
+      {
+        "system": "https://nahdo.org/sopt",
+        "inactive": false,
+        "version": "9.2",
+        "code": "191",
+        "display": "Medicare Pharmacy Benefit Manager"
+      }
+    ]
+  }
+}

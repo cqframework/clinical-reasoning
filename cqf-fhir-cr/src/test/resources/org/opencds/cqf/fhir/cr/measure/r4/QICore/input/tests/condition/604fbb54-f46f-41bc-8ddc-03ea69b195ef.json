@@ -1,0 +1,52 @@
+{
+  "resourceType": "Condition",
+  "id": "604fbb54-f46f-41bc-8ddc-03ea69b195ef",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+    ]
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "problem-list-item",
+          "display": "Problem List Item"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "248802009",
+        "display": "Absence of breast (finding)"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "7771000",
+          "display": "Left (qualifier value)"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/7e5d94fa-3630-43b6-9b6e-b75c0fba7cd0"
+  },
+  "onsetDateTime": "2026-01-01T00:00:00.000+00:00"
+}

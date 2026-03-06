@@ -1,0 +1,342 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1029.206-20210220",
+  "meta": {
+    "versionId": "12",
+    "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Joint Commission Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-keyWord",
+      "valueString": "PC-05,VTE-01,VTE-02"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-02-03"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2021-02-20"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.206",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1029.206"
+    }
+  ],
+  "version": "20210220",
+  "name": "IntensiveCareUnit",
+  "title": "Intensive Care Unit",
+  "status": "active",
+  "experimental": false,
+  "date": "2021-02-20T01:02:00-05:00",
+  "publisher": "TJC EH Steward",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts of locations of adult or pediatric intensive care units (ICUs).),(Data Element Scope: This value set may use a model element related to Encounter.),(Inclusion Criteria: Includes concepts that represent a location for an adult or pediatric intensive care unit (ICU).),(Exclusion Criteria: Excludes concepts that represent neonatal intensive care units (NICU).)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1029.204"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.23"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:3f9a8955-b78a-47fd-a488-df25e46b5f2a",
+    "timestamp": "2025-08-28T16:55:45-04:00",
+    "total": 36,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1025-6",
+        "display": "Trauma Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1026-4",
+        "display": "Burn Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1027-2",
+        "display": "Medical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1028-0",
+        "display": "Medical Cardiac Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1029-8",
+        "display": "Medical-Surgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1030-6",
+        "display": "Surgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1031-4",
+        "display": "Neurosurgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1032-2",
+        "display": "Surgical Cardiothoracic Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1033-0",
+        "display": "Respiratory Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1034-8",
+        "display": "Prenatal Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1035-5",
+        "display": "Neurologic Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1042-1",
+        "display": "Pediatric Burn Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1043-9",
+        "display": "Pediatric Surgical Cardiothoracic Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1044-7",
+        "display": "Pediatric Medical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1045-4",
+        "display": "Pediatric Medical-Surgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1046-2",
+        "display": "Pediatric Neurosurgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1047-0",
+        "display": "Pediatric Respiratory Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1048-8",
+        "display": "Pediatric Surgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1049-6",
+        "display": "Pediatric Trauma Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1220-3",
+        "display": "Long Term Acute Care Intensive Care Unit"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1222-9",
+        "display": "Long Term Acute Care Pediatric Intensive Care Unit"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1223-7",
+        "display": "Oncology Medical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1224-5",
+        "display": "Oncology Surgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1225-2",
+        "display": "Oncology Medical-Surgical Critical Care"
+      },
+      {
+        "system": "https://www.cdc.gov/nhsn/cdaportal/terminology/codesystem/hsloc.html",
+        "inactive": false,
+        "version": "2022",
+        "code": "1233-6",
+        "display": "Oncology Pediatric Critical Care"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309904001",
+        "display": "Intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309905000",
+        "display": "Adult intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309907008",
+        "display": "Cardiac intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309908003",
+        "display": "Metabolic intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309909006",
+        "display": "Neurological intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309910001",
+        "display": "Pediatric intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "309911002",
+        "display": "Respiratory intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "418433008",
+        "display": "Surgical intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "426439001",
+        "display": "Burns intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "441994008",
+        "display": "Medical intensive care unit (environment)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "448391000124102",
+        "display": "Trauma intensive care unit (environment)"
+      }
+    ]
+  }
+}

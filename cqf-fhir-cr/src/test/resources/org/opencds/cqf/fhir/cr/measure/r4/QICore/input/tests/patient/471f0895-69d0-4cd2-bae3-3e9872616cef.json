@@ -1,0 +1,27 @@
+{
+  "resourceType": "Patient",
+  "id": "471f0895-69d0-4cd2-bae3-3e9872616cef",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+    ]
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://hospital.smarthealthit.or",
+      "value": "12345"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Doe",
+      "given": [
+        "John"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1980-01-01"
+}

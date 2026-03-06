@@ -1,0 +1,118 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1110.38-20190426",
+  "meta": {
+    "versionId": "8",
+    "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "TJC EH Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-keyWord",
+      "valueString": "Not_In_Use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-04-03"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2019-04-26"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.38",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1110.38"
+    }
+  ],
+  "version": "20190426",
+  "name": "OutpatientSurgeryService",
+  "title": "Outpatient Surgery Service",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-04-26T01:01:00-04:00",
+  "publisher": "TJC EH Steward",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: This value set contains concepts that are used to identify outpatient surgery encounter types.),(Data Element Scope: This value set may use Quality Data Model (QDM) category related to Encounter, Performed. The intent of this data element is to identify patients who have had an outpatient surgery encounter.),(Inclusion Criteria: Includes only relevant concepts associated with SNOMED codes identifying outpatient surgery encounters.),(Exclusion Criteria: No exclusions.)",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "110468005",
+            "display": "Ambulatory surgery (procedure)"
+          },
+          {
+            "code": "709063003",
+            "display": "Admission to same day surgery center (procedure)"
+          },
+          {
+            "code": "711580002",
+            "display": "Minor ambulatory surgery (procedure)"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:a0038eba-4364-42c8-9399-5dcf6ea139b1",
+    "timestamp": "2025-08-28T16:49:25-04:00",
+    "total": 3,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "110468005",
+        "display": "Ambulatory surgery (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "709063003",
+        "display": "Admission to same day surgery center (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "711580002",
+        "display": "Minor ambulatory surgery (procedure)"
+      }
+    ]
+  }
+}

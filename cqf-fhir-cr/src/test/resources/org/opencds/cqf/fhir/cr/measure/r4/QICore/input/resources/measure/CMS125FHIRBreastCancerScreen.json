@@ -1,0 +1,4457 @@
+{
+  "resourceType": "Measure",
+  "id": "CMS125FHIRBreastCancerScreen",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-shareablemeasure",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-measure-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-measure-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/executable-measure-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cql-measure-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/elm-measure-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Library",
+      "id": "effective-data-requirements",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "248153007",
+            "display": "Male (finding)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "248152002",
+            "display": "Female (finding)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+            "code": "imaging",
+            "display": "imaging"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "428361000124107",
+            "display": "Discharge to home for hospice care (procedure)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "428371000124100",
+            "display": "Discharge to healthcare facility for hospice care (procedure)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://loinc.org",
+            "code": "45755-6",
+            "display": "Hospice care [Minimum Data Set]"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "373066001",
+            "display": "Yes (qualifier value)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "confirmed",
+            "display": "confirmed"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "unconfirmed",
+            "display": "unconfirmed"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "provisional",
+            "display": "provisional"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "differential",
+            "display": "differential"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "code": "active",
+            "display": "Active"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "code": "recurrence",
+            "display": "Recurrence"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "code": "relapse",
+            "display": "Relapse"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "24028007",
+            "display": "Right (qualifier value)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "7771000",
+            "display": "Left (qualifier value)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://loinc.org",
+            "code": "98181-1",
+            "display": "Medical equipment used"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://loinc.org",
+            "code": "71802-3",
+            "display": "Housing status"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://snomed.info/sct",
+            "code": "160734000",
+            "display": "Lives in nursing home (finding)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
+          "valueCoding": {
+            "system": "http://loinc.org",
+            "code": "71007-9",
+            "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "SupplementalDataElements"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Sex"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Sex\":\n  case\n    when Patient.sex = '248153007' then \"Male (finding)\"\n    when Patient.sex = '248152002' then \"Female (finding)\"\n    else null\n  end"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 0
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Sex"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Sex\":\n  SDE.\"SDE Sex\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 1
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "October 1 Two Years Prior to the Measurement Period"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"October 1 Two Years Prior to the Measurement Period\":\n  DateTime((year from start of \"Measurement Period\" - 2), 10, 1, 0, 0, 0, 0, 0)"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 2
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Numerator"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Numerator\":\n  exists ( ( [ObservationClinicalResult: \"Mammography\"] ).isDiagnosticStudyPerformed ( ) ) Mammogram\n    where Mammogram.effective.toInterval ( ) ends during day of Interval[\"October 1 Two Years Prior to the Measurement Period\", end of \"Measurement Period\"]"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 3
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Stratification 2"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Stratification 2\":\n  AgeInYearsAt(date from \n    end of \"Measurement Period\"\n  ) in Interval[52, 74]"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 4
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Stratification 1"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Stratification 1\":\n  AgeInYearsAt(date from \n    end of \"Measurement Period\"\n  ) in Interval[42, 51]"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 5
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "AdultOutpatientEncounters"
+            },
+            {
+              "url": "name",
+              "valueString": "Qualifying Encounters"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Qualifying Encounters\":\n  ( ( [Encounter: \"Office Visit\"]\n    union [Encounter: \"Annual Wellness Visit\"]\n    union [Encounter: \"Preventive Care Services Established Office Visit, 18 and Up\"]\n    union [Encounter: \"Preventive Care Services Initial Office Visit, 18 and Up\"]\n    union [Encounter: \"Home Healthcare Services\"]\n    union [Encounter: \"Virtual Encounter\"]\n    union [Encounter: \"Telephone Visits\"] ).isEncounterPerformed() ) ValidEncounter\n    where ValidEncounter.period during day of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 6
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Initial Population"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Initial Population\":\n  AgeInYearsAt(date from \n    end of \"Measurement Period\"\n  ) in Interval[42, 74]\n    and Patient.sex = '248152002'\n    and exists AdultOutpatientEncounters.\"Qualifying Encounters\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 7
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Denominator"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Denominator\":\n  \"Initial Population\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 8
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "SupplementalDataElements"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Payer"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Payer\":\n  [Coverage: type in \"Payer Type\"] Payer\n    return {\n      code: Payer.type,\n      period: Payer.period\n    }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 9
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Payer"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Payer\":\n  SDE.\"SDE Payer\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 10
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Initial Population"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Initial Population\":\n  AgeInYearsAt(date from \n    end of \"Measurement Period\"\n  ) in Interval[42, 74]\n    and Patient.sex = '248152002'\n    and exists AdultOutpatientEncounters.\"Qualifying Encounters\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 11
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "SupplementalDataElements"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Ethnicity"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Ethnicity\":\n  Patient.ethnicity E\n    return Tuple {\n      codes: { E.ombCategory } union E.detailed,\n      display: E.text\n    }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 12
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Ethnicity"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Ethnicity\":\n  SDE.\"SDE Ethnicity\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 13
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Hospice"
+            },
+            {
+              "url": "name",
+              "valueString": "Has Hospice Services"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Has Hospice Services\":\n  exists ((([Encounter: \"Encounter Inpatient\"]).isEncounterPerformed()) InpatientEncounter\n      where (InpatientEncounter.hospitalization.dischargeDisposition ~ \"Discharge to home for hospice care (procedure)\"\n          or InpatientEncounter.hospitalization.dischargeDisposition ~ \"Discharge to healthcare facility for hospice care (procedure)\"\n      )\n        and InpatientEncounter.period ends during day of \"Measurement Period\"\n  )\n    or exists ((([Encounter: \"Hospice Encounter\"]).isEncounterPerformed()) HospiceEncounter\n        where HospiceEncounter.period overlaps day of \"Measurement Period\"\n    )\n    or exists ((([ObservationScreeningAssessment: \"Hospice care [Minimum Data Set]\"]).isAssessmentPerformed()) HospiceAssessment\n        where HospiceAssessment.value ~ \"Yes (qualifier value)\"\n          and HospiceAssessment.effective.toInterval() overlaps day of \"Measurement Period\"\n    )\n    or exists ((([ServiceRequest: \"Hospice Care Ambulatory\"]).isInterventionOrder()) HospiceOrder\n        where HospiceOrder.authoredOn during day of \"Measurement Period\"\n    )\n    or exists ((([Procedure: \"Hospice Care Ambulatory\"]).isInterventionPerformed()) HospicePerformed\n        where HospicePerformed.performed.toInterval() overlaps day of \"Measurement Period\"\n    )\n    or exists ((([ConditionProblemsHealthConcerns: \"Hospice Diagnosis\"]\n        union [ConditionEncounterDiagnosis: \"Hospice Diagnosis\"]).verified()) HospiceCareDiagnosis\n        where HospiceCareDiagnosis.prevalenceInterval() overlaps day of \"Measurement Period\"\n    )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 14
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Right Mastectomy Diagnosis"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Right Mastectomy Diagnosis\":\n  ( ( ( [ConditionEncounterDiagnosis: \"Status Post Right Mastectomy\"]\n      union [ConditionProblemsHealthConcerns: \"Status Post Right Mastectomy\"] ) RightMastectomyProcedure\n      union ( ( [ConditionEncounterDiagnosis: \"Unilateral Mastectomy, Unspecified Laterality\"]\n          union [ConditionProblemsHealthConcerns: \"Unilateral Mastectomy, Unspecified Laterality\"] ) UnilateralMastectomyDiagnosis\n          where exists UnilateralMastectomyDiagnosis.bodySite S\n            where S ~ \"Right (qualifier value)\"\n      )\n  ).verified ( ) ) RightMastectomy\n    where RightMastectomy.prevalenceInterval ( ) starts on or before end of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 15
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Right Mastectomy Procedure"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Right Mastectomy Procedure\":\n  ( ( [Procedure: \"Unilateral Mastectomy Right\"] ).isProcedurePerformed ( ) ) UnilateralMastectomyRightPerformed\n    where UnilateralMastectomyRightPerformed.performed.toInterval ( ) ends on or before end of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 16
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Left Mastectomy Diagnosis"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Left Mastectomy Diagnosis\":\n  ( ( ( [ConditionEncounterDiagnosis: \"Status Post Left Mastectomy\"]\n        union [ConditionProblemsHealthConcerns: \"Status Post Left Mastectomy\"]\n    )\n      union ( ( [ConditionEncounterDiagnosis: \"Unilateral Mastectomy, Unspecified Laterality\"]\n          union [ConditionProblemsHealthConcerns: \"Unilateral Mastectomy, Unspecified Laterality\"] ) UnilateralMastectomyDiagnosis\n          where exists UnilateralMastectomyDiagnosis.bodySite S\n            where S ~ \"Left (qualifier value)\"\n      )\n  ).verified ( ) ) LeftMastectomy\n    where LeftMastectomy.prevalenceInterval ( ) starts on or before end of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 17
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Left Mastectomy Procedure"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Left Mastectomy Procedure\":\n  ( ( [Procedure: \"Unilateral Mastectomy Left\"] ).isProcedurePerformed ( ) ) UnilateralMastectomyLeftPerformed\n    where UnilateralMastectomyLeftPerformed.performed.toInterval ( ) ends on or before end of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 18
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Bilateral Mastectomy Diagnosis"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Bilateral Mastectomy Diagnosis\":\n  ( ( [ConditionEncounterDiagnosis: \"History of bilateral mastectomy\"]\n      union [ConditionProblemsHealthConcerns: \"History of bilateral mastectomy\"]\n  ).verified ( ) ) BilateralMastectomyHistory\n    where BilateralMastectomyHistory.prevalenceInterval ( ) starts on or before end of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 19
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Bilateral Mastectomy Procedure"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Bilateral Mastectomy Procedure\":\n  ( ( [Procedure: \"Bilateral Mastectomy\"] ).isProcedurePerformed ( ) ) BilateralMastectomyPerformed\n    where BilateralMastectomyPerformed.performed.toInterval ( ) ends on or before end of \"Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 20
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "AdvancedIllnessandFrailty"
+            },
+            {
+              "url": "name",
+              "valueString": "Has Criteria Indicating Frailty"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Has Criteria Indicating Frailty\":\n  exists ( (([DeviceRequest: \"Frailty Device\"]).isDeviceOrderPersonalUseDevices()) FrailtyDeviceOrder\n      where FrailtyDeviceOrder.authoredOn.toInterval() during day of \"Measurement Period\"\n  )\n    or exists ( (([ObservationScreeningAssessment: \"Medical equipment used\"]).isAssessmentPerformed()) EquipmentUsed\n        where EquipmentUsed.value as Concept in \"Frailty Device\" \n        and EquipmentUsed.effective.toInterval() ends during day of \"Measurement Period\"\n    )\n    or exists ( (([ConditionProblemsHealthConcerns: \"Frailty Diagnosis\"]\n    union [ConditionEncounterDiagnosis: \"Frailty Diagnosis\"]).verified()) FrailtyDiagnosis\n        where FrailtyDiagnosis.prevalenceInterval() overlaps day of \"Measurement Period\"\n    )\n    or exists ( (([Encounter: \"Frailty Encounter\"]).isEncounterPerformed()) FrailtyEncounter\n        where FrailtyEncounter.period overlaps day of \"Measurement Period\"\n    )\n    or exists ( (([SimpleObservation: \"Frailty Symptom\"]).isSymptom()) FrailtySymptom\n        where FrailtySymptom.effective.toInterval() overlaps day of \"Measurement Period\"\n    )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 21
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "AdvancedIllnessandFrailty"
+            },
+            {
+              "url": "name",
+              "valueString": "Has Advanced Illness in Year Before or During Measurement Period"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Has Advanced Illness in Year Before or During Measurement Period\":\nexists ((([ConditionProblemsHealthConcerns: \"Advanced Illness\"]\nunion [ConditionEncounterDiagnosis: \"Advanced Illness\"]).verified()) AdvancedIllnessDiagnosis\nwhere AdvancedIllnessDiagnosis.prevalenceInterval() starts during day of Interval[start of \"Measurement Period\" - 1 year, end of \"Measurement Period\"])"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 22
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "AdvancedIllnessandFrailty"
+            },
+            {
+              "url": "name",
+              "valueString": "Has Dementia Medications in Year Before or During Measurement Period"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Has Dementia Medications in Year Before or During Measurement Period\":\n  exists (( ([MedicationRequest: \"Dementia Medications\"]).isMedicationActive()) DementiaMedication\n      where DementiaMedication.medicationRequestPeriod() overlaps day of Interval[start of \"Measurement Period\" - 1 year, \n        end of \"Measurement Period\"]\n  )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 23
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "AdvancedIllnessandFrailty"
+            },
+            {
+              "url": "name",
+              "valueString": "Is Age 66 or Older with Advanced Illness and Frailty"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Is Age 66 or Older with Advanced Illness and Frailty\":\n   AgeInYearsAt(date from end of \"Measurement Period\")>= 66\n    and \"Has Criteria Indicating Frailty\"\n    and ( \"Has Advanced Illness in Year Before or During Measurement Period\"\n        or \"Has Dementia Medications in Year Before or During Measurement Period\"\n    )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 24
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "AdvancedIllnessandFrailty"
+            },
+            {
+              "url": "name",
+              "valueString": "Is Age 66 or Older Living Long Term in a Nursing Home"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Is Age 66 or Older Living Long Term in a Nursing Home\":\n  AgeInYearsAt(date from \n     end of \"Measurement Period\"\n  )>= 66\n    and ( ( Last( (([ObservationScreeningAssessment: \"Housing status\"]).isAssessmentPerformed()) HousingStatus    \n          where HousingStatus.effective.toInterval() ends on or before \n          day of end of \"Measurement Period\"\n          sort by \n          end of effective.toInterval() asc\n      )) LastHousingStatus\n        where LastHousingStatus.value ~ \"Lives in nursing home (finding)\"\n    ) is not null"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 25
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "PalliativeCare"
+            },
+            {
+              "url": "name",
+              "valueString": "Has Palliative Care in the Measurement Period"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Has Palliative Care in the Measurement Period\":\n  exists ((([ObservationScreeningAssessment: \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\"]).isAssessmentPerformed()) PalliativeAssessment\n      where PalliativeAssessment.effective.toInterval() overlaps day of \"Measurement Period\"\n  )\n    or exists ((([ConditionProblemsHealthConcerns: \"Palliative Care Diagnosis\"]\n    union [ConditionEncounterDiagnosis: \"Palliative Care Diagnosis\"]).verified()) PalliativeDiagnosis\n        where PalliativeDiagnosis.prevalenceInterval() overlaps day of \"Measurement Period\"\n    )\n    or exists ((([Encounter: \"Palliative Care Encounter\"]).isEncounterPerformed()) PalliativeEncounter\n        where PalliativeEncounter.period overlaps day of \"Measurement Period\"\n    )\n    or exists ((([Procedure: \"Palliative Care Intervention\"]).isInterventionPerformed()) PalliativeIntervention\n        where PalliativeIntervention.performed.toInterval() overlaps day of \"Measurement Period\"\n    )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 26
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "Denominator Exclusions"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"Denominator Exclusions\":\n  Hospice.\"Has Hospice Services\"\n    or ( ( exists ( \"Right Mastectomy Diagnosis\" )\n          or exists ( \"Right Mastectomy Procedure\" )\n      )\n        and ( exists ( \"Left Mastectomy Diagnosis\" )\n            or exists ( \"Left Mastectomy Procedure\" )\n        )\n    )\n    or exists \"Bilateral Mastectomy Diagnosis\"\n    or exists \"Bilateral Mastectomy Procedure\"\n    or AIFrailLTCF.\"Is Age 66 or Older with Advanced Illness and Frailty\"\n    or AIFrailLTCF.\"Is Age 66 or Older Living Long Term in a Nursing Home\"\n    or PalliativeCare.\"Has Palliative Care in the Measurement Period\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 27
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "SupplementalDataElements"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Race"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Race\":\n  Patient.race R\n    return Tuple {\n      codes: R.ombCategory union R.detailed,\n      display: R.text\n    }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 28
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CMS125FHIRBreastCancerScreen"
+            },
+            {
+              "url": "name",
+              "valueString": "SDE Race"
+            },
+            {
+              "url": "statement",
+              "valueString": "define \"SDE Race\":\n  SDE.\"SDE Race\""
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 29
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "FHIRHelpers"
+            },
+            {
+              "url": "name",
+              "valueString": "ToString"
+            },
+            {
+              "url": "statement",
+              "valueString": "define function ToString(value uri): value.value"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 30
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isDiagnosticStudyPerformed"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Diagnostic Study, Performed\ndefine fluent function isDiagnosticStudyPerformed(Obs List<ObservationClinicalResult>):\n  Obs O\n    where O.status in { 'final', 'amended', 'corrected' }\n        and exists ( O.category ObservationCategory\n        where ( ObservationCategory ) ~ \"imaging\"\n    )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 31
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "FHIRHelpers"
+            },
+            {
+              "url": "name",
+              "valueString": "ToConcept"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n@description: Converts the given FHIR [CodeableConcept](https://hl7.org/fhir/datatypes.html#CodeableConcept) value to a CQL Concept.\n*/\ndefine function ToConcept(concept FHIR.CodeableConcept):\n    if concept is null then\n        null\n    else\n        System.Concept {\n            codes: concept.coding C return ToCode(C),\n            display: concept.text.value\n        }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 32
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "FHIRHelpers"
+            },
+            {
+              "url": "name",
+              "valueString": "ToCode"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n@description: Converts the given FHIR [Coding](https://hl7.org/fhir/datatypes.html#Coding) value to a CQL Code.\n*/\ndefine function ToCode(coding FHIR.Coding):\n    if coding is null then\n        null\n    else\n        System.Code {\n          code: coding.code.value,\n          system: coding.system.value,\n          version: coding.version.value,\n          display: coding.display.value\n        }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 33
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "QICoreCommon"
+            },
+            {
+              "url": "name",
+              "valueString": "toInterval"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n@description: Normalizes a value that is a choice of timing-valued types to an equivalent interval\n@comment: Normalizes a choice type of DateTime, Quanitty, Interval<DateTime>, or Interval<Quantity> types\nto an equivalent interval. This selection of choice types is a superset of the majority of choice types that are used as possible\nrepresentations for timing-valued elements in QICore, allowing this function to be used across any resource.\nThe input can be provided as a DateTime, Quantity, Interval<DateTime> or Interval<Quantity>.\nThe intent of this function is to provide a clear and concise mechanism to treat single\nelements that have multiple possible representations as intervals so that logic doesn't have to account\nfor the variability. More complex calculations (such as medication request period or dispense period\ncalculation) need specific guidance and consideration. That guidance may make use of this function, but\nthe focus of this function is on single element calculations where the semantics are unambiguous.\nIf the input is a DateTime, the result a DateTime Interval beginning and ending on that DateTime.\nIf the input is a Quantity, the quantity is expected to be a calendar-duration interpreted as an Age,\nand the result is a DateTime Interval beginning on the Date the patient turned that age and ending immediately before one year later.\nIf the input is a DateTime Interval, the result is the input.\nIf the input is a Quantity Interval, the quantities are expected to be calendar-durations interpreted as an Age, and the result\nis a DateTime Interval beginning on the date the patient turned the age given as the start of the quantity interval, and ending\nimmediately before one year later than the date the patient turned the age given as the end of the quantity interval.\nIf the input is a Timing, an error will be thrown indicating that Timing calculations are not implemented. Any other input will reslt in a null DateTime Interval\n*/\ndefine fluent function toInterval(choice Choice<DateTime, Quantity, Interval<DateTime>, Interval<Quantity>, Timing>):\n  case\n\t  when choice is DateTime then\n    \tInterval[choice as DateTime, choice as DateTime]\n\t\twhen choice is Interval<DateTime> then\n  \t\tchoice as Interval<DateTime>\n\t\twhen choice is Quantity then\n\t\t  Interval[Patient.birthDate + (choice as Quantity),\n\t\t\t  Patient.birthDate + (choice as Quantity) + 1 year)\n\t\twhen choice is Interval<Quantity> then\n\t\t  Interval[Patient.birthDate + (choice.low as Quantity),\n\t\t\t  Patient.birthDate + (choice.high as Quantity) + 1 year)\n\t\twhen choice is Timing then\n      Message(null, true, 'NOT_IMPLEMENTED', 'Error', 'Calculation of an interval from a Timing value is not supported') as Interval<DateTime>\n\t\telse\n\t\t\tnull as Interval<DateTime>\n\tend"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 34
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isEncounterPerformed"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Encounter, Performed\n//General usage unless required otherwise by measure intent (e.g., follow-up encounters)\ndefine fluent function isEncounterPerformed(Enc List<Encounter>):\n  Enc E\n    where E.status = 'finished'"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 35
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "FHIRHelpers"
+            },
+            {
+              "url": "name",
+              "valueString": "ToInterval"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n@description: Converts the given [Period](https://hl7.org/fhir/datatypes.html#Period)\nvalue to a CQL DateTime Interval\n@comment: If the start value of the given period is unspecified, the starting\nboundary of the resulting interval will be open (meaning the start of the interval\nis unknown, as opposed to interpreted as the beginning of time).\n*/\ndefine function ToInterval(period FHIR.Period):\n    if period is null then\n        null\n    else\n        if period.\"start\" is null then\n            Interval(period.\"start\".value, period.\"end\".value]\n        else\n            Interval[period.\"start\".value, period.\"end\".value]"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 36
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isAssessmentPerformed"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Assessment, Performed\ndefine fluent function isAssessmentPerformed(Obs List<ObservationScreeningAssessment>):\n  Obs O\n    where O.status in { 'final', 'amended', 'corrected' }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 37
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isInterventionOrder"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Intervention, Order\ndefine fluent function isInterventionOrder(ServiceRequest List<ServiceRequest>):\n  ServiceRequest S\n    where S.status in { 'active', 'completed' }\n      and S.intent in {'order', 'original-order', 'reflex-order', 'filler-order', 'instance-order'}"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 38
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isInterventionPerformed"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Intervention, Performed\ndefine fluent function isInterventionPerformed(Proc List<Procedure>):\n  Proc P\n    where P.status ~ 'completed'"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 39
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "verified"
+            },
+            {
+              "url": "statement",
+              "valueString": "//This library contains functions used to constrain FHIR resource elements for measures authored by NCQA, based on QICore 6.0.0 resources including IG and authoring patterns. The functions may appear similar to some QICoreCommon functions but differ in that they have constraints that are relevant for measures authored by NCQA.\n\n//Condition\n//Returns conditions in the given list that either have no verification status or have a verification status of confirmed, unconfirmed, provisional, or differential\ndefine fluent function verified(conditions List<Choice<ConditionProblemsHealthConcerns, ConditionEncounterDiagnosis>>):\n  conditions C\n    where C.verificationStatus is not null implies\n      (C.verificationStatus ~ \"confirmed\"\n        or C.verificationStatus ~ \"unconfirmed\"\n        or C.verificationStatus ~ \"provisional\"\n        or C.verificationStatus ~ \"differential\"\n      )"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 40
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "QICoreCommon"
+            },
+            {
+              "url": "name",
+              "valueString": "prevalenceInterval"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n@description: Returns an interval representing the normalized prevalence period of a given Condition.\n@comment: Uses the ToInterval and ToAbatementInterval functions to determine the widest potential interval from\nonset to abatement as specified in the given Condition. If the condition is active, or has an abatement date the resulting \ninterval will have a closed ending boundary. Otherwise, the resulting interval will have an open ending boundary.\n*/\ndefine fluent function prevalenceInterval(condition Choice<\"ConditionEncounterDiagnosis\", \"ConditionProblemsHealthConcerns\">):\nif condition.clinicalStatus ~ \"active\"\n  or condition.clinicalStatus ~ \"recurrence\"\n  or condition.clinicalStatus ~ \"relapse\" then\n  Interval[start of condition.onset.toInterval(), end of condition.abatementInterval()]\nelse\n    (end of condition.abatementInterval()) abatementDate\n    return if abatementDate is null then\n      Interval[start of condition.onset.toInterval(), abatementDate)\n    else\n      Interval[start of condition.onset.toInterval(), abatementDate]"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 41
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "QICoreCommon"
+            },
+            {
+              "url": "name",
+              "valueString": "abatementInterval"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n@description: Returns an interval representing the normalized abatement of a given Condition.\n@comment: If the abatement element of the Condition is represented as a DateTime, the result\nis an interval beginning and ending on that DateTime.\nIf the abatement is represented as a Quantity, the quantity is expected to be a calendar-duration and is interpreted as the age of the patient. The\nresult is an interval from the date the patient turned that age to immediately before one year later.\nIf the abatement is represented as a Quantity Interval, the quantities are expected to be calendar-durations and are interpreted as an age range during\nwhich the abatement occurred. The result is an interval from the date the patient turned the starting age of the quantity interval, and ending immediately\nbefore one year later than the date the patient turned the ending age of the quantity interval.\n*/\ndefine fluent function abatementInterval(condition Choice<\"ConditionEncounterDiagnosis\", \"ConditionProblemsHealthConcerns\">):\n\tif condition.abatement is DateTime then\n\t  Interval[condition.abatement as DateTime, condition.abatement as DateTime]\n\telse if condition.abatement is Quantity then\n\t\tInterval[Patient.birthDate + (condition.abatement as Quantity),\n\t\t\tPatient.birthDate + (condition.abatement as Quantity) + 1 year)\n\telse if condition.abatement is Interval<Quantity> then\n\t  Interval[Patient.birthDate + (condition.abatement.low as Quantity),\n\t\t  Patient.birthDate + (condition.abatement.high as Quantity) + 1 year)\n\telse if condition.abatement is Interval<DateTime> then\n\t  Interval[condition.abatement.low, condition.abatement.high)\n\telse null as Interval<DateTime>"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 42
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isProcedurePerformed"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Procedure, Performed\ndefine fluent function isProcedurePerformed(Proc List<Procedure>):\n  Proc P\n    where P.status ~ 'completed'"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 43
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isDeviceOrderPersonalUseDevices"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Device, Order - Personal Use Devices\ndefine fluent function isDeviceOrderPersonalUseDevices(DeviceRequest List<DeviceRequest>):\n  DeviceRequest D\n    where D.status in { 'active', 'completed' }\n      and D.intent in {'order', 'original-order', 'reflex-order', 'filler-order', 'instance-order'}"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 44
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isSymptom"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Symptom\ndefine fluent function isSymptom(Obs List<SimpleObservation>):\n  Obs O\n    where O.status in { 'preliminary', 'final', 'amended', 'corrected' }"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 45
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "Status"
+            },
+            {
+              "url": "name",
+              "valueString": "isMedicationActive"
+            },
+            {
+              "url": "statement",
+              "valueString": "//Medication, Active\ndefine fluent function isMedicationActive(MedicationRequest List<MedicationRequest>):\n  MedicationRequest M\n    where M.status = 'active'\n      and M.intent in {'order', 'original-order', 'reflex-order', 'filler-order', 'instance-order'}"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 46
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CumulativeMedicationDuration"
+            },
+            {
+              "url": "name",
+              "valueString": "medicationRequestPeriod"
+            },
+            {
+              "url": "statement",
+              "valueString": "define fluent function medicationRequestPeriod(Request \"MedicationRequest\"):\n  Request R\n    let\n      dosage: singleton from R.dosageInstruction,\n      doseAndRate: singleton from dosage.doseAndRate,\n      timing: dosage.timing,\n      frequency: Coalesce(timing.repeat.frequencyMax, timing.repeat.frequency),\n      period: Quantity(timing.repeat.period, timing.repeat.periodUnit),\n      doseRange: doseAndRate.dose,\n      doseQuantity: doseAndRate.dose,\n      dose: Coalesce(end of doseRange, doseQuantity),\n      dosesPerDay: Coalesce(ToDaily(frequency, period), Count(timing.repeat.timeOfDay), 1.0),\n      boundsPeriod: timing.repeat.bounds as Interval<DateTime>,\n      daysSupply: (convert R.dispenseRequest.expectedSupplyDuration to days).value,\n      quantity: R.dispenseRequest.quantity,\n      refills: Coalesce(R.dispenseRequest.numberOfRepeatsAllowed, 0),\n      startDate:\n        Coalesce(\n          date from start of boundsPeriod,\n          date from R.authoredOn,\n          date from start of R.dispenseRequest.validityPeriod\n        ),\n      totalDaysSupplied: Coalesce(daysSupply, quantity.value / (dose.value * dosesPerDay)) * (1 + refills)\n    return\n      if startDate is not null and totalDaysSupplied is not null then\n        Interval[startDate, startDate + Quantity(totalDaysSupplied - 1, 'day') ]\n      else if startDate is not null and boundsPeriod.\"high\" is not null then\n        Interval[startDate, date from end of boundsPeriod]\n      else\n        null"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 47
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CumulativeMedicationDuration"
+            },
+            {
+              "url": "name",
+              "valueString": "Quantity"
+            },
+            {
+              "url": "statement",
+              "valueString": "/**********************************************************************/\n/* Functions in this region are copied from opioid-mme-r4             */\n/**********************************************************************/\n\ndefine function Quantity(value Decimal, unit String):\n  if value is not null then\n    System.Quantity { value: value, unit: unit }\n  else\n    null"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 48
+            }
+          ]
+        },
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-logicDefinition",
+          "extension": [
+            {
+              "url": "libraryName",
+              "valueString": "CumulativeMedicationDuration"
+            },
+            {
+              "url": "name",
+              "valueString": "ToDaily"
+            },
+            {
+              "url": "statement",
+              "valueString": "/*\n Goal is to get to number of days\n Two broad approaches to the calculation:\n  1) Based on supply and frequency, calculate the number of expected days the medication will cover/has covered\n  2) Based on relevant period, determine a covered interval and calculate the length of that interval in days\nThis topic covers several use cases and illustrates how to calculate Cumulative\nMedication Duration for each type of medication resource using the supply and\nfrequency approach.\n*/\n\n/*\n  For the first approach, we need to get from frequency to a frequency/day\n  So we define ToDaily\n*/\n\n/*\n  Calculates daily frequency given frequency within a period\n*/\ndefine function ToDaily(frequency System.Integer, period System.Quantity):\n  case period.unit\n    when 'h' then frequency * (24.0 / period.value)\n    when 'min' then frequency * (24.0 / period.value) * 60\n    when 's' then frequency * (24.0 / period.value) * 60 * 60\n    when 'd' then frequency * (24.0 / period.value) / 24\n    when 'wk' then frequency * (24.0 / period.value) / (24 * 7)\n    when 'mo' then frequency * (24.0 / period.value) / (24 * 30) /* assuming 30 days in month */\n    when 'a' then frequency * (24.0 / period.value) / (24 * 365) /* assuming 365 days in year */\n    when 'hour' then frequency * (24.0 / period.value)\n    when 'minute' then frequency * (24.0 / period.value) * 60\n    when 'second' then frequency * (24.0 / period.value) * 60 * 60\n    when 'day' then frequency * (24.0 / period.value) / 24\n    when 'week' then frequency * (24.0 / period.value) / (24 * 7)\n    when 'month' then frequency * (24.0 / period.value) / (24 * 30) /* assuming 30 days in month */\n    when 'year' then frequency * (24.0 / period.value) / (24 * 365) /* assuming 365 days in year */\n    when 'hours' then frequency * (24.0 / period.value)\n    when 'minutes' then frequency * (24.0 / period.value) * 60\n    when 'seconds' then frequency * (24.0 / period.value) * 60 * 60\n    when 'days' then frequency * (24.0 / period.value) / 24\n    when 'weeks' then frequency * (24.0 / period.value) / (24 * 7)\n    when 'months' then frequency * (24.0 / period.value) / (24 * 30) /* assuming 30 days in month */\n    when 'years' then frequency * (24.0 / period.value) / (24 * 365) /* assuming 365 days in year */\n    else Message(null, true, 'CMDLogic.ToDaily.UnknownUnit', ErrorLevel, 'Unknown unit ' & period.unit)\n  end"
+            },
+            {
+              "url": "displaySequence",
+              "valueInteger": 49
+            }
+          ]
+        }
+      ],
+      "name": "EffectiveDataRequirements",
+      "status": "active",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/library-type",
+            "code": "module-definition"
+          }
+        ]
+      },
+      "relatedArtifact": [
+        {
+          "type": "depends-on",
+          "display": "QICore model information",
+          "resource": "http://hl7.org/fhir/Library/QICore-ModelInfo"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library SDE",
+          "resource": "https://madie.cms.gov/Library/SupplementalDataElements|5.1.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library Status",
+          "resource": "https://madie.cms.gov/Library/Status|1.15.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library QICoreCommon",
+          "resource": "https://madie.cms.gov/Library/QICoreCommon|4.0.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library AdultOutpatientEncounters",
+          "resource": "https://madie.cms.gov/Library/AdultOutpatientEncounters|4.19.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library Status",
+          "resource": "https://madie.cms.gov/Library/Status|1.15.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library Hospice",
+          "resource": "https://madie.cms.gov/Library/Hospice|6.18.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library Status",
+          "resource": "https://madie.cms.gov/Library/Status|1.15.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library QICoreCommon",
+          "resource": "https://madie.cms.gov/Library/QICoreCommon|4.0.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library AIFrailLTCF",
+          "resource": "https://madie.cms.gov/Library/AdvancedIllnessandFrailty|1.27.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library Status",
+          "resource": "https://madie.cms.gov/Library/Status|1.15.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library QICoreCommon",
+          "resource": "https://madie.cms.gov/Library/QICoreCommon|4.0.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library CMD",
+          "resource": "https://madie.cms.gov/Library/CumulativeMedicationDuration|6.0.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library PalliativeCare",
+          "resource": "https://madie.cms.gov/Library/PalliativeCare|1.18.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library Status",
+          "resource": "https://madie.cms.gov/Library/Status|1.15.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library QICoreCommon",
+          "resource": "https://madie.cms.gov/Library/QICoreCommon|4.0.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Library FHIRHelpers",
+          "resource": "https://madie.cms.gov/Library/FHIRHelpers|4.4.000"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system SNOMEDCT",
+          "resource": "http://snomed.info/sct"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system ObservationCategoryCodes",
+          "resource": "http://terminology.hl7.org/CodeSystem/observation-category"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system SNOMEDCT",
+          "resource": "http://snomed.info/sct"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system LOINC",
+          "resource": "http://loinc.org"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system ConditionVerificationStatusCodes",
+          "resource": "http://terminology.hl7.org/CodeSystem/condition-ver-status"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system ConditionClinicalStatusCodes",
+          "resource": "http://terminology.hl7.org/CodeSystem/condition-clinical"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system SNOMEDCT",
+          "resource": "http://snomed.info/sct"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system LOINC",
+          "resource": "http://loinc.org"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system SNOMEDCT",
+          "resource": "http://snomed.info/sct"
+        },
+        {
+          "type": "depends-on",
+          "display": "Code system LOINC",
+          "resource": "http://loinc.org"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Mammography",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Office Visit",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Annual Wellness Visit",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Preventive Care Services Established Office Visit, 18 and Up",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Preventive Care Services Initial Office Visit, 18 and Up",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Home Healthcare Services",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Virtual Encounter",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Telephone Visits",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Payer Type",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Encounter Inpatient",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Hospice Encounter",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Hospice Care Ambulatory",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Hospice Diagnosis",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Status Post Right Mastectomy",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Unilateral Mastectomy, Unspecified Laterality",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Unilateral Mastectomy Right",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Status Post Left Mastectomy",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Unilateral Mastectomy Left",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set History of bilateral mastectomy",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Bilateral Mastectomy",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Frailty Device",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Frailty Diagnosis",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Frailty Encounter",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Frailty Symptom",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Advanced Illness",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Dementia Medications",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Palliative Care Diagnosis",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Palliative Care Encounter",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+        },
+        {
+          "type": "depends-on",
+          "display": "Value set Palliative Care Intervention",
+          "resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+        }
+      ],
+      "parameter": [
+        {
+          "name": "Measurement Period",
+          "use": "in",
+          "min": 0,
+          "max": "1",
+          "type": "Period"
+        },
+        {
+          "name": "ErrorLevel",
+          "use": "in",
+          "min": 0,
+          "max": "1",
+          "type": "string"
+        },
+        {
+          "name": "SDE Sex",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "Coding"
+        },
+        {
+          "name": "Numerator",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "boolean"
+        },
+        {
+          "name": "Stratification 2",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "boolean"
+        },
+        {
+          "name": "Stratification 1",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "boolean"
+        },
+        {
+          "name": "Denominator",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "boolean"
+        },
+        {
+          "name": "SDE Payer",
+          "use": "out",
+          "min": 0,
+          "max": "*",
+          "type": "Resource"
+        },
+        {
+          "name": "Initial Population",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "boolean"
+        },
+        {
+          "name": "SDE Ethnicity",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "Resource"
+        },
+        {
+          "name": "Denominator Exclusions",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "boolean"
+        },
+        {
+          "name": "SDE Race",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "type": "Resource"
+        }
+      ],
+      "dataRequirement": [
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "extension"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "extension"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-clinical-result"
+          ],
+          "mustSupport": [
+            "code",
+            "effective"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1018"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "extension"
+          ]
+        },
+        {
+          "type": "Coverage",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-coverage"
+          ],
+          "mustSupport": [
+            "type",
+            "period"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "extension"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "url"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "url",
+            "extension"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "birthDate.value"
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type",
+            "hospitalization",
+            "hospitalization.dischargeDisposition",
+            "period"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type",
+            "period"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003"
+            }
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+          ],
+          "mustSupport": [
+            "code",
+            "value",
+            "effective"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "45755-6",
+                  "display": "Hospice care [Minimum Data Set]"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "ServiceRequest",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest"
+          ],
+          "mustSupport": [
+            "code",
+            "authoredOn",
+            "authoredOn.value"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+            }
+          ]
+        },
+        {
+          "type": "Procedure",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+          ],
+          "mustSupport": [
+            "code",
+            "performed"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1584"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1165"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1070"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+            }
+          ]
+        },
+        {
+          "type": "Procedure",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+          ],
+          "mustSupport": [
+            "code",
+            "performed"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1134"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1069"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071"
+            }
+          ]
+        },
+        {
+          "type": "Procedure",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+          ],
+          "mustSupport": [
+            "code",
+            "performed"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1133"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1068"
+            }
+          ]
+        },
+        {
+          "type": "Procedure",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+          ],
+          "mustSupport": [
+            "code",
+            "performed"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1005"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ]
+        },
+        {
+          "type": "DeviceRequest",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-devicerequest"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+            }
+          ]
+        },
+        {
+          "type": "DeviceRequest",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-devicerequest"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300"
+            }
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+          ],
+          "mustSupport": [
+            "code",
+            "value",
+            "effective"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "98181-1",
+                  "display": "Medical equipment used"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1074"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type",
+            "period"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1088"
+            }
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-simple-observation"
+          ],
+          "mustSupport": [
+            "code",
+            "effective"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.12.1075"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.110.12.1082"
+            }
+          ]
+        },
+        {
+          "type": "MedicationRequest",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationrequest"
+          ],
+          "mustSupport": [
+            "medication"
+          ],
+          "codeFilter": [
+            {
+              "path": "medication",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.196.12.1510"
+            }
+          ]
+        },
+        {
+          "type": "MedicationRequest",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationrequest"
+          ],
+          "mustSupport": [
+            "medication.reference.value"
+          ]
+        },
+        {
+          "type": "Medication",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medication"
+          ],
+          "mustSupport": [
+            "id.value",
+            "code"
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+          ],
+          "mustSupport": [
+            "code",
+            "effective"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "71802-3",
+                  "display": "Housing status"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+          ],
+          "mustSupport": [
+            "code",
+            "effective",
+            "value"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "71802-3",
+                  "display": "Housing status"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Observation",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+          ],
+          "mustSupport": [
+            "code",
+            "effective"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "code": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "71007-9",
+                  "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+          ],
+          "mustSupport": [
+            "code"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1167"
+            }
+          ]
+        },
+        {
+          "type": "Encounter",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+          ],
+          "mustSupport": [
+            "type",
+            "period"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1090"
+            }
+          ]
+        },
+        {
+          "type": "Procedure",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+          ],
+          "mustSupport": [
+            "code",
+            "performed"
+          ],
+          "codeFilter": [
+            {
+              "path": "code",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1135"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "url"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "url",
+            "extension"
+          ]
+        },
+        {
+          "type": "Coverage",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-coverage"
+          ],
+          "mustSupport": [
+            "type",
+            "period"
+          ],
+          "codeFilter": [
+            {
+              "path": "type",
+              "valueSet": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591"
+            }
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "url",
+            "extension"
+          ]
+        },
+        {
+          "type": "Patient",
+          "profile": [
+            "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+          ],
+          "mustSupport": [
+            "url",
+            "extension"
+          ]
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "id": "supplementalDataGuidance",
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-supplementalDataGuidance",
+      "extension": [
+        {
+          "url": "guidance",
+          "valueString": "For every patient evaluated by this measure also identify payer, race, ethnicity and sex"
+        },
+        {
+          "url": "usage",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+                "code": "supplemental-data",
+                "display": "Supplemental Data"
+              }
+            ],
+            "text": "Supplemental Data Guidance"
+          }
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements",
+      "valueCanonical": "#effective-data-requirements"
+    }
+  ],
+  "url": "https://madie.cms.gov/Measure/CMS125FHIRBreastCancerScreen",
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/artifact-identifier-type",
+            "code": "short-name",
+            "display": "Short Name"
+          }
+        ]
+      },
+      "system": "https://madie.cms.gov/measure/shortName",
+      "value": "CMS125FHIR"
+    },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/artifact-identifier-type",
+            "code": "version-independent",
+            "display": "Version Independent"
+          }
+        ]
+      },
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:f766afa2-f780-45d2-b224-c1bdb733fa6f"
+    },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/artifact-identifier-type",
+            "code": "version-specific",
+            "display": "Version Specific"
+          }
+        ]
+      },
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:uuid:ae8bc6fe-718d-4c4f-af2f-22aaf9c7844d"
+    },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/artifact-identifier-type",
+            "code": "publisher",
+            "display": "Publisher"
+          }
+        ]
+      },
+      "system": "https://madie.cms.gov/measure/cmsId",
+      "value": "125FHIR",
+      "assigner": {
+        "display": "CMS"
+      }
+    }
+  ],
+  "version": "1.0.000",
+  "name": "CMS125FHIRBreastCancerScreen",
+  "title": "Breast Cancer ScreeningFHIR",
+  "status": "active",
+  "experimental": false,
+  "date": "2026-01-15T17:59:32+00:00",
+  "publisher": "National Committee for Quality Assurance",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.ncqa.org/"
+        }
+      ]
+    }
+  ],
+  "description": "Percentage of women 40-74 years of age who had a mammogram to screen for breast cancer in the 27 months prior to the end of the Measurement Period",
+  "usage": "This measure evaluates primary screening. Do not count biopsies, breast ultrasounds, or MRIs because they are not appropriate methods for primary breast cancer screening. Please note the measure may include screenings performed outside the age range of patients referenced in the initial population. Screenings that occur prior to the measurement period are valid to meet measure criteria. This eCQM is a patient-based measure. This FHIR-based measure has been derived from the QDM-based measure: CMS125v14. Please refer to the HL7 QI-Core Implementation Guide (https://hl7.org/fhir/us/qicore/STU6/) for more information on QI-Core and mapping recommendations from QDM to QI-Core STU 6. (https://hl7.org/fhir/us/qicore/STU6/qdm-to-qicore.html).",
+  "copyright": "This Physician Performance Measure (Measure) and related data specifications are owned and were developed by the National Committee for Quality Assurance (NCQA). NCQA is not responsible for any use of the Measure. NCQA makes no representations, warranties or endorsements about the quality of any product, test or protocol identified as numerator compliant or otherwise identified as meeting the requirements of the measure or specification. NCQA makes no representations, warranties, or endorsement about the quality of any organization or physician that uses or reports performance measures and NCQA has no liability to anyone who relies on such measures or specifications. NCQA holds a copyright in the Measure. The Measure may be used for internal, noncommercial purposes (e.g., use by healthcare providers in connection with their practices) without obtaining approval from NCQA. All other uses, including a commercial use (including but not limited to vendors using or embedding the measures and specifications into any product or service to calculate measure results for customers for any purpose), must be approved by NCQA and are subject to a license at the discretion of NCQA. (C) 2012-2025 National Committee for Quality Assurance. All Rights Reserved. Limited proprietary coding is contained in the Measure specifications for user convenience. Users of proprietary code sets should obtain all necessary licenses from the owners of the code sets. NCQA disclaims all liability for use or accuracy of any third-party codes contained in the specifications. CPT(R) codes, descriptions and other data are copyright 2025. American Medical Association. All rights reserved. CPT is a trademark of the American Medical Association. Fee schedules, relative value units, conversion factors and/or related components are not assigned by the AMA, are not part of CPT, and the AMA is not recommending their use. The AMA does not directly or indirectly practice medicine or dispense medical services. The AMA assumes no liability for data contained or not contained herein. Applicable FARS/DFARS restrictions apply to government use. Some measure specifications contain coding from LOINC(R) (https://loinc.org). The LOINC table, LOINC codes, LOINC panels and form file, LOINC linguistic variants file, LOINC/RSNA Radiology Playbook, and LOINC/IEEE Medical Device Code Mapping Table are copyright 2004-2025 Regenstrief Institute, Inc. and the Logical Observation Identifiers Names and Codes (LOINC) Committee, and are available at no cost under the license at https://loinc.org/kb/license/. This material contains SNOMED Clinical Terms(R) (SNOMED CT[R]) copyright 2004-2024 International Health Terminology Standards Development Organisation. ICD-10 copyright 2025 World Health Organization. All Rights Reserved. Some measures use RxNorm, a standardized nomenclature and coding for clinical drugs and drug delivery devices, which is made publicly available courtesy of the U.S. National Library of Medicine (NLM), National Institutes of Health, Department of Health and Human Services. NLM is not responsible for the measures and does not endorse or recommend this or any other product. \u201cHL7\u201d is the registered trademark of Health Level Seven International.",
+  "effectivePeriod": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "author": [
+    {
+      "name": "National Committee for Quality Assurance",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.ncqa.org/"
+        }
+      ]
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "citation",
+      "citation": "American Cancer Society. (2017). Breast Cancer Facts &amp; Figures 2017-2018. Retrieved February 8, 2019, from https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/breast-cancer-facts-and-figures/breast-cancer-facts-and-figures-2017-2018.pdf"
+    },
+    {
+      "type": "citation",
+      "citation": "American College of Radiology (ACR). (2017). ACR Appropriateness Criteria: Breast Cancer Screening. Retrieved from https://acsearch.acr.org/docs/70910/Narrative/"
+    },
+    {
+      "type": "citation",
+      "citation": "National Comprehensive Cancer Network (NCCN). (2021). Breast Cancer Screening and Diagnosis. Retrieved from https://www.nccn.org/professionals/physician_gls/pdf/breast-screening.pdf"
+    },
+    {
+      "type": "citation",
+      "citation": "Noone, A.M., Howlader, N., Krapcho, M., Miller, D., Brest, A., Yu, M., Ruhl, J., Tatalovich, Z., Mariotto, A., Lewis, D.R., Chen, H.S., Feuer, E.J., Cronin, K.A. (eds). (2018). SEER Cancer Statistics Review, 1975-2015. National Cancer Institute. Bethesda, MD. Retrieved February 8, 2019, from https://seer.cancer.gov/csr/1975_2015/"
+    },
+    {
+      "type": "citation",
+      "citation": "U.S. Preventive Services Task Force (2024). Screening for Breast Cancer: U.S. Preventive Services Task Force Recommendation Statement. JAMA, 2024;331(22):1918-1930. doi:10.1001/jama.2024.5534."
+    }
+  ],
+  "library": [
+    "https://madie.cms.gov/Library/CMS125FHIRBreastCancerScreen"
+  ],
+  "disclaimer": "The performance Measure is not a clinical guideline and does not establish a standard of medical care, and has not been tested for all potential applications. THE MEASURE AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND. Due to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+  "rationale": "Breast cancer is one of the most common types of cancers, accounting for 15 percent of all new cancer diagnoses in the U.S. (Noone et al., 2018). In 2015, over 3 million women were estimated to be living with breast cancer in the U.S. and it is estimated that 12 percent of women will be diagnosed with breast cancer at some point during their lifetime (Noone et al., 2018). While there are other factors that affect a woman's risk of developing breast cancer, advancing age is a primary risk factor. Breast cancer is most frequently diagnosed among women ages 55-64; the median age at diagnosis is 62 years (Noone et al., 2018). The chance of a woman being diagnosed with breast cancer in a given year increases with age. By age 40, the chances are 1 in 68; by age 50 it becomes 1 in 43; by age 60, it is 1 in 29 (American Cancer Society, 2017).",
+  "clinicalRecommendationStatement": "The U.S. Preventive Services Task Force (USPSTF) recommends biennial screening mammography for women aged 40-74 years (B recommendation) (USPSTF, 2024). The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of screening mammography in women aged 75 years or older (I statement) (USPSTF, 2024). The USPSTF concludes that the current evidence is insufficient to assess the benefits and harms of digital breast tomosynthesis (DBT) as a primary screening method for breast cancer (I statement) (USPSTF, 2024). The USPSTF concludes that the current evidence is insufficient to assess the balance of benefits and harms of adjunctive screening for breast cancer using breast ultrasonography and magnetic resonance imaging in women identified to have dense breasts on an otherwise negative screening mammogram (I statement) (USPSTF, 2024). The National Comprehensive Cancer Network (NCCN) and the American College of Radiology (ACR) recommend using conventional mammography or DBT for screening women at low, intermediate or high risk for breast cancer (NCCN, 2021) (ACR, 2017).",
+  "group": [
+    {
+      "id": "Group_1",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-scoring",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+                "code": "proportion",
+                "display": "Proportion"
+              }
+            ]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+          "valueCode": "boolean"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-type",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-type",
+                "code": "process",
+                "display": "Process"
+              }
+            ]
+          }
+        },
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-rateAggregation",
+          "valueCode": "None"
+        },
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-improvementNotation",
+          "valueCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+                "code": "increase",
+                "display": "Increased score indicates improvement"
+              }
+            ]
+          }
+        }
+      ],
+      "population": [
+        {
+          "id": "InitialPopulation_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "description": "Women 42-74 years of age by the end of the measurement period with a visit during the measurement period",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          }
+        },
+        {
+          "id": "Denominator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "description": "Equals Initial Population",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator"
+          }
+        },
+        {
+          "id": "DenominatorExclusion_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "description": "Exclude patients who are in hospice care for any part of the measurement period. Women who had a bilateral mastectomy or who have a history of a bilateral mastectomy or for whom there is evidence of a right and a left unilateral mastectomy on or before the end of the measurement period. Exclude patients 66 and older by the end of the measurement period with an indication of frailty for any part of the measurement period who also meet any of the following advanced illness criteria: - Advanced illness diagnosis during the measurement period or the year prior - OR taking dementia medications during the measurement period or the year prior Exclude patients 66 and older by the end of the measurement period who are living long term in a nursing home any time on or before the end of the measurement period. Exclude patients receiving palliative care for any part of the measurement period.",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Denominator Exclusions"
+          }
+        },
+        {
+          "id": "Numerator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "description": "Women with one or more mammograms any time on or between October 1 two years prior to the measurement period and the end of the measurement period",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Numerator"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "Stratification_1_1",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "initial-population",
+                    "display": "Initial Population"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "denominator",
+                    "display": "Denominator"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "denominator-exclusion",
+                    "display": "Denominator Exclusion"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "numerator",
+                    "display": "Numerator"
+                  }
+                ]
+              }
+            }
+          ],
+          "description": "Report a total rate, and each of the following age strata: Stratum 1: Patients age 42-51 by the end of the measurement period",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Stratification 1"
+          }
+        },
+        {
+          "id": "Stratification_1_2",
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "initial-population",
+                    "display": "Initial Population"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "denominator",
+                    "display": "Denominator"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "denominator-exclusion",
+                    "display": "Denominator Exclusion"
+                  }
+                ]
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-appliesTo",
+              "valueCodeableConcept": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                    "code": "numerator",
+                    "display": "Numerator"
+                  }
+                ]
+              }
+            }
+          ],
+          "description": "Stratum 2: Patients age 52-74 by the end of the measurement period",
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Stratification 2"
+          }
+        }
+      ]
+    }
+  ],
+  "supplementalData": [
+    {
+      "id": "sde-ethnicity",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "description": "SDE Ethnicity",
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "SDE Ethnicity"
+      }
+    },
+    {
+      "id": "sde-payer",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "description": "SDE Payer",
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "SDE Payer"
+      }
+    },
+    {
+      "id": "sde-race",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "description": "SDE Race",
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "SDE Race"
+      }
+    },
+    {
+      "id": "sde-sex",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "description": "SDE Sex",
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "SDE Sex"
+      }
+    }
+  ]
+}

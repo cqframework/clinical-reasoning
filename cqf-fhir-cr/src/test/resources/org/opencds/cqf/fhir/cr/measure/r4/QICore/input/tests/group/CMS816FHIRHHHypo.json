@@ -1,0 +1,183 @@
+{
+  "resourceType": "Group",
+  "id": "CMS816FHIRHHHypo",
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/artifact-testArtifact",
+      "valueCanonical": "http://ecqi.healthit.gov/ecqms/Measure/CMS816FHIRHHHypo"
+    }
+  ],
+  "active": true,
+  "type": "person",
+  "actual": true,
+  "member": [
+    {
+      "entity": {
+        "reference": "Patient/05c8cd12-addd-4b94-8f92-da093c556a84",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/1a89fbca-df20-4f17-97d0-9fa5990860b2",
+        "display": "LabGT80within5minutes NUMERFail"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/1d298cf0-aa38-4943-ba4c-f7209cf59e63",
+        "display": "John Doe"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/1d2bb25a-21a7-4529-9486-a320d4864719",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/2adf5469-46a1-4020-be3b-01f91f8acc9d",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/304052f7-e416-4da4-87ae-488e6589cab3",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/339a989b-722c-4452-9d25-454e2d53eea8",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/37fd9c7e-bf9e-4769-b448-094ed97bd3e8",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/3fdd92df-f418-45ef-93a6-920e3d813f32",
+        "display": "John Doe"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/41c102cb-d7f0-421d-ac76-5ac1c8dbe56a",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/423a396b-7d81-476d-b2ea-bc8bba062ce2",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/471f0895-69d0-4cd2-bae3-3e9872616cef",
+        "display": "John Doe"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/480245d6-3ce8-4944-b6c8-339cf2f69acb",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/5570227b-f288-4a0c-9df5-807d2afa241a",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/5bfa3b7e-2b6f-4eb5-b09b-7c6f1145780b",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/61a026c6-be9e-4a0f-b495-8ea421edfe39",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/6bc18290-1925-4239-81d7-0118bd062225",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/7cb05de4-6b74-4ce5-a2ea-be59635a74f6",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/7df60531-857d-45bc-ad5b-31b5462f3f54",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/8301c6c8-e50c-4457-add0-1ebd909c8ca7",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/8eca4ab8-49f0-45e4-b1ee-dc34e54dd430",
+        "display": "LabTestLT40 NUMERPass"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/974284eb-fc89-452a-9b38-a884c0e0477e",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/aa5f21cc-2d56-4749-a190-2828d579f790",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/cf9c230a-adc0-4830-bf04-fed4ab5ff6c8",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/d26ca5cd-9415-4c14-8a0b-947747c29ec2",
+        "display": "MedsinEDNotPartofEncounter IPPFail"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/e360ffc2-5b98-425a-a2bd-b051ba5ec506",
+        "display": "Age17inEDAge18StartOfIPEncounter DENOMPass"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/ecde4132-9028-420a-aa7c-d1d14e5c1ab0",
+        "display": "Patient Example"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/f58dcdc6-cce9-4b49-b657-7e1e2593e428",
+        "display": "Patient Example"
+      }
+    }
+  ]
+}

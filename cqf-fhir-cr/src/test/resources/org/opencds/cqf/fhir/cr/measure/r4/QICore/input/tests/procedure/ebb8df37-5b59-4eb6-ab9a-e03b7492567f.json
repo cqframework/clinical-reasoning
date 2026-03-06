@@ -1,0 +1,32 @@
+{
+  "resourceType": "Procedure",
+  "id": "ebb8df37-5b59-4eb6-ab9a-e03b7492567f",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-procedure"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-recorded",
+      "valueDateTime": "2025-01-01T00:00:00.000+00:00"
+    }
+  ],
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/ICD10",
+        "code": "0HTT0ZZ",
+        "display": "Resection of Right Breast, Open Approach"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/356ab8ed-7c44-46ec-9fa9-9ec462054f2b"
+  },
+  "performedPeriod": {
+    "start": "2026-01-01T00:00:00.000+00:00",
+    "end": "2026-01-01T00:00:00.000+00:00"
+  }
+}

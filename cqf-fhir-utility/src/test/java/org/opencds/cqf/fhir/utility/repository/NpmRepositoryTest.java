@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -102,5 +103,48 @@ class NpmRepositoryTest {
                 repo.search(org.hl7.fhir.r4.model.Bundle.class, Patient.class, searchParams, Collections.emptyMap());
         assertNotNull(bundle);
         assertEquals(1, bundle.getEntry().size());
+    }
+
+    @Test
+    void getVersionReturnsNullForUnknownUrl() {
+        var repo = new NpmRepository(fhirContext, Collections.emptyList());
+
+        assertNull(repo.getVersion("http://example.org/ValueSet/unknown"));
+    }
+
+    @Test
+    void getVersionReturnsNullForNull() {
+        var repo = new NpmRepository(fhirContext, Collections.emptyList());
+
+        assertNull(repo.getVersion(null));
+    }
+
+    @Test
+    void getPackageInfoReturnsNullForUnknownUrl() {
+        var repo = new NpmRepository(fhirContext, Collections.emptyList());
+
+        assertNull(repo.getPackageInfo("http://example.org/ValueSet/unknown"));
+    }
+
+    @Test
+    void getPackageInfoReturnsNullForNull() {
+        var repo = new NpmRepository(fhirContext, Collections.emptyList());
+
+        assertNull(repo.getPackageInfo(null));
+    }
+
+    @Test
+    void isKnownCodeSystemReturnsTrueForWellKnown() {
+        assertTrue(
+                org.opencds.cqf.fhir.utility.terminology.CodeSystems.isKnownCodeSystem("http://loinc.org"),
+                "LOINC should be a known CodeSystem");
+    }
+
+    @Test
+    void isKnownCodeSystemReturnsFalseForUnknown() {
+        assertFalse(
+                org.opencds.cqf.fhir.utility.terminology.CodeSystems.isKnownCodeSystem(
+                        "http://example.org/CodeSystem/unknown"),
+                "Unknown URL should not be a known CodeSystem");
     }
 }

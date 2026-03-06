@@ -1,11 +1,15 @@
 package org.opencds.cqf.fhir.cr.implementationguide;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.List;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Library;
@@ -116,5 +120,83 @@ class ImplementationGuideProcessorTest {
         assertInstanceOf(Library.class, result);
         var library = (Library) result;
         assertEquals("module-definition", library.getType().getCodingFirstRep().getCode());
+    }
+
+    /**
+     * Verifies the direct resource overload of dataRequirements works.
+     */
+    @Test
+    void dataRequirements_withDirectResource_returnsModuleDefinition() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        var ig = new ImplementationGuide();
+        ig.setId("ImplementationGuide/test-ig");
+        ig.setUrl("http://example.org/ImplementationGuide/test-ig");
+        ig.setVersion("1.0.0");
+        ig.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        ig.setName("TestIG");
+        ig.setPackageId("test.ig");
+        repository.update(ig);
+
+        var processor = new ImplementationGuideProcessor(repository, CrSettings.getDefault());
+
+        // Call the direct resource overload
+        var result = processor.dataRequirements(ig, newParameters(fhirContext));
+
+        assertInstanceOf(Library.class, result);
+        var library = (Library) result;
+        assertEquals("module-definition", library.getType().getCodingFirstRep().getCode());
+    }
+
+    /**
+     * Verifies that packageImplementationGuide with defaults does not throw.
+     */
+    @Test
+    void packageImplementationGuide_withDefaults_works() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        var ig = new ImplementationGuide();
+        ig.setId("ImplementationGuide/test-ig");
+        ig.setUrl("http://example.org/ImplementationGuide/test-ig");
+        ig.setVersion("1.0.0");
+        ig.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        ig.setName("TestIG");
+        ig.setPackageId("test.ig");
+        repository.update(ig);
+
+        var processor = new ImplementationGuideProcessor(repository, CrSettings.getDefault());
+
+        var result =
+                assertDoesNotThrow(() -> processor.packageImplementationGuide(Eithers.forMiddle3(ig.getIdElement())));
+
+        assertNotNull(result);
+        assertInstanceOf(Bundle.class, result);
+    }
+
+    /**
+     * Verifies that constructor with custom IDataRequirementsProcessor wires it correctly.
+     */
+    @Test
+    void constructor_withOperationProcessors_wiresProcessors() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        var ig = new ImplementationGuide();
+        ig.setId("ImplementationGuide/test-ig");
+        ig.setUrl("http://example.org/ImplementationGuide/test-ig");
+        ig.setVersion("1.0.0");
+        ig.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        ig.setName("TestIG");
+        ig.setPackageId("test.ig");
+        repository.update(ig);
+
+        // Create a custom DataRequirementsProcessor
+        var customProcessor = new org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor(repository);
+
+        var processor = new ImplementationGuideProcessor(repository, CrSettings.getDefault(), List.of(customProcessor));
+
+        // Call dataRequirements — should use the custom processor
+        var result = processor.dataRequirements(Eithers.forMiddle3(ig.getIdElement()), newParameters(fhirContext));
+
+        assertInstanceOf(Library.class, result);
     }
 }

@@ -355,7 +355,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
         // cqf-resourceType extension — fallback chain:
         // 1. Resolved resource fhirType() (most accurate)
-        // 2. NPM package index (for unresolved deps)
+        // 2. NPM package index + NamingSystem-derived set (for unresolved deps)
         // 3. Skip (don't add garbage)
         String resourceType = null;
         if (dependencyArtifact != null) {

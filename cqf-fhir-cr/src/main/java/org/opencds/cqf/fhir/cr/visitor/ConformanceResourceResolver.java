@@ -16,6 +16,8 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
+import org.opencds.cqf.fhir.utility.repository.NpmRepository;
+import org.opencds.cqf.fhir.utility.terminology.CodeSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,11 +186,19 @@ public class ConformanceResourceResolver {
     }
 
     /**
-     * Looks up the FHIR resource type for a canonical URL from the NPM package index.
-     * Returns null if the URL is not found in any loaded package.
+     * Looks up the FHIR resource type for a canonical URL.
+     * Falls back to the well-known CodeSystem set when the NPM package index has no entry.
+     * Returns null if the URL is not found.
      */
     public String getResourceType(String canonicalUrl) {
-        return npmRepository.getResourceType(canonicalUrl);
+        var fromNpm = npmRepository.getResourceType(canonicalUrl);
+        if (fromNpm != null) {
+            return fromNpm;
+        }
+        if (CodeSystems.isKnownCodeSystem(canonicalUrl)) {
+            return "CodeSystem";
+        }
+        return null;
     }
 
     /**

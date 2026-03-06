@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.visitor;
+package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +92,6 @@ public class NpmRepository extends InMemoryFhirRepository {
 
     /**
      * Returns the loaded NPM packages, triggering lazy loading if needed.
-     * Used by {@link ConformanceResourceResolver} to build the StructureDefinition URL index.
      */
     public List<NpmPackage> getLoadedPackages() {
         ensurePackagesLoaded();

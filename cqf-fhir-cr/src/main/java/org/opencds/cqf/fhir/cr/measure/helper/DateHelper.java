@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.helper;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -59,7 +60,7 @@ public class DateHelper {
         }
 
         if (dateVals.isEmpty()) {
-            throw new IllegalArgumentException("Invalid date");
+            throw new InvalidRequestException("Invalid date");
         }
 
         calendar.setTimeZone(TimeZone.getDefault());

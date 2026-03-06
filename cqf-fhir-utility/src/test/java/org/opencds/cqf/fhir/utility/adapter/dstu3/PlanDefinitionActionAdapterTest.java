@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
@@ -28,7 +29,7 @@ class PlanDefinitionActionAdapterTest {
     @Test
     void invalid_object_fails() {
         var action = new RequestGroupActionComponent();
-        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createPlanDefinitionAction(action));
+        assertThrows(InvalidRequestException.class, () -> adapterFactory.createPlanDefinitionAction(action));
     }
 
     @Test

@@ -15,6 +15,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVers
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -146,7 +147,7 @@ class QuestionnaireProcessorTests {
         var when = given().repository(repositoryR4)
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"));
-        assertThrows(IllegalArgumentException.class, () -> when.thenPopulate(false));
+        assertThrows(InvalidRequestException.class, () -> when.thenPopulate(false));
     }
 
     @Test

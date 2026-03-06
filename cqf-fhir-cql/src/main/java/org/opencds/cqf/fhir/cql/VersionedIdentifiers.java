@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.elm.r1.VersionedIdentifier;
 
 public class VersionedIdentifiers {
@@ -10,13 +11,13 @@ public class VersionedIdentifiers {
 
     public static VersionedIdentifier forUrl(String url) {
         if (!url.contains("/Library/") && !url.startsWith("Library/")) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Invalid resource type for determining library version identifier: Library");
         }
 
         String[] urlSplit = url.split("Library/");
         if (urlSplit.length > 2) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
         }
 

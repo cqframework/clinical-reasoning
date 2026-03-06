@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -17,7 +18,7 @@ public class CodeableConceptAdapter extends BaseAdapter implements ICodeableConc
     public CodeableConceptAdapter(IBase codeableConcept) {
         super(FhirVersionEnum.R5, codeableConcept);
         if (!(codeableConcept instanceof CodeableConcept)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "object passed as codeableConcept argument is not a CodeableConcept data type");
         }
         this.codeableConcept = (CodeableConcept) codeableConcept;

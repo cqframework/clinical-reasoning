@@ -184,7 +184,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             boolean hasValidCode = IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code)
                     || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
             if (!hasValidCode) {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "ImprovementNotation Coding has invalid code: %s, combination for Measure: %s"
                                 .formatted(code, measure.getUrl()));
             }

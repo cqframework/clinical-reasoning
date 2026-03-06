@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 class AdapterFactoryTest {
     @Test
     void testUnsupportedVersion() {
-        assertThrows(IllegalArgumentException.class, () -> IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU2));
+        assertThrows(InvalidRequestException.class, () -> IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU2));
     }
 
     @Test

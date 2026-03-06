@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.enumeration;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 public enum CareGapsStatusCode {
     OPEN_GAP("open-gap"),
@@ -36,6 +37,6 @@ public enum CareGapsStatusCode {
             return "Prospective Gap";
         }
 
-        throw new RuntimeException(Msg.code(2301) + "Error getting display strings for care gaps status codes");
+        throw new InternalErrorException(Msg.code(2301) + "Error getting display strings for care gaps status codes");
     }
 }

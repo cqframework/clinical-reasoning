@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -146,7 +147,7 @@ class MultiMeasure {
         // an IgRepository
         public IRepository getRepository() {
             if (this.repository == null) {
-                throw new IllegalStateException(
+                throw new InternalErrorException(
                         "Repository has not been set. Use 'repository' or 'repositoryFor' to set it.");
             }
             return this.repository;
@@ -262,7 +263,7 @@ class MultiMeasure {
 
         public MultiMeasure.Then then() {
             if (this.operation == null) {
-                throw new IllegalStateException(
+                throw new InternalErrorException(
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
@@ -671,7 +672,7 @@ class MultiMeasure {
         public SelectedReference<P> hasPopulations(String... population) {
             var ex = this.value().getExtensionsByUrl(MeasureConstants.EXT_CRITERIA_REFERENCE_URL);
             if (ex.isEmpty()) {
-                throw new IllegalStateException(
+                throw new InternalErrorException(
                         "no evaluated resource extensions were found, and expected %s".formatted(population.length));
             }
 

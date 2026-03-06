@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.IntegerType;
@@ -22,7 +23,7 @@ class ParametersAdapterTest {
     @Test
     void invalid_object_fails() {
         var planDefinition = new PlanDefinition();
-        assertThrows(IllegalArgumentException.class, () -> new ParametersAdapter(planDefinition));
+        assertThrows(InvalidRequestException.class, () -> new ParametersAdapter(planDefinition));
     }
 
     @Test
@@ -56,15 +57,15 @@ class ParametersAdapterTest {
         assertFalse(adapter.hasParameter());
         adapter.addParameter("param1", "value1");
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidRequestException.class,
                 () -> adapter.addParameter("param2", new org.hl7.fhir.r4.model.IntegerType(1)));
         adapter.addParameter("param2", new IntegerType(1));
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidRequestException.class,
                 () -> adapter.addParameter("param3", new org.hl7.fhir.r4.model.Parameters()));
         adapter.addParameter("param3", new Parameters());
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidRequestException.class,
                 () -> adapter.addParameter(
                         "param4", new org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent()));
         adapter.addParameter(new ParametersParameterComponent("param4").setValue(new BooleanType(true)));

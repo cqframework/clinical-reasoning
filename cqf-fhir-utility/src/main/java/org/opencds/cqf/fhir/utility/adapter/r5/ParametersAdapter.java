@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -18,7 +19,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         super(parameters);
 
         if (!parameters.fhirType().equals("Parameters")) {
-            throw new IllegalArgumentException("resource passed as parameters argument is not a Parameters resource");
+            throw new InvalidRequestException("resource passed as parameters argument is not a Parameters resource");
         }
 
         this.parameters = (Parameters) parameters;
@@ -89,7 +90,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         if (value instanceof DataType type) {
             getParameters().addParameter(name, type);
         } else {
-            throw new IllegalArgumentException("element passed as value argument is not a valid data type");
+            throw new InvalidRequestException("element passed as value argument is not a valid data type");
         }
     }
 
@@ -98,7 +99,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         if (resource instanceof Resource resource1) {
             getParameters().addParameter().setName(name).setResource(resource1);
         } else {
-            throw new IllegalArgumentException("element passed as value argument is not a valid data type");
+            throw new InvalidRequestException("element passed as value argument is not a valid data type");
         }
     }
 
@@ -107,7 +108,7 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
         if (parameter instanceof ParametersParameterComponent component) {
             getParameters().addParameter(component);
         } else {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "element passed as parameter argument is not a valid parameter component");
         }
     }

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ public class ActivityDefinitionAdapter extends KnowledgeArtifactAdapter implemen
     public ActivityDefinitionAdapter(IDomainResource activityDefinition) {
         super(activityDefinition);
         if (!(activityDefinition instanceof ActivityDefinition)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "resource passed as activityDefinition argument is not an ActivityDefinition resource");
         }
     }

@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireRes
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -65,7 +66,7 @@ class ProcessDefinitionItemTests {
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
-        assertThrows(IllegalArgumentException.class, () -> fixture.processDefinitionItem(request, itemPair));
+        assertThrows(InvalidRequestException.class, () -> fixture.processDefinitionItem(request, itemPair));
     }
 
     @Test
@@ -78,7 +79,7 @@ class ProcessDefinitionItemTests {
         var questionnaire = new Questionnaire();
         var response = new QuestionnaireResponse();
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
-        assertThrows(IllegalArgumentException.class, () -> fixture.processDefinitionItem(request, itemPair));
+        assertThrows(InvalidRequestException.class, () -> fixture.processDefinitionItem(request, itemPair));
     }
 
     @Test

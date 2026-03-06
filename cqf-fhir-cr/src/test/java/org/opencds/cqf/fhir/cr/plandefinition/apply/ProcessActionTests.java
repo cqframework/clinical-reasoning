@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -118,7 +119,7 @@ class ProcessActionTests {
                         new Expression().setLanguage("text/cql-expression").setExpression(expression));
         var request = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
-        doThrow(new IllegalArgumentException())
+        doThrow(new InvalidRequestException("test error"))
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), eq(null), any(), eq(null));
         var actionAdapter =

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class MeasureAdapter extends KnowledgeArtifactAdapter
         super(measure);
         if (!(measure instanceof Measure)) {
             // This is NOT due to a bad request/user error.  It's a system error.
-            throw new IllegalArgumentException("resource passed as measure argument is not a Measure resource");
+            throw new InvalidRequestException("resource passed as measure argument is not a Measure resource");
         }
     }
 

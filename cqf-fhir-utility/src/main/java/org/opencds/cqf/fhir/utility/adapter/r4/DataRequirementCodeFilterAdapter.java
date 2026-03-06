@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -17,7 +18,7 @@ public class DataRequirementCodeFilterAdapter extends BaseAdapter implements IDa
     public DataRequirementCodeFilterAdapter(IBase codeFilter) {
         super(FhirVersionEnum.R4, codeFilter);
         if (!(codeFilter instanceof DataRequirementCodeFilterComponent)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "object passed as codeFilter argument is not a DataRequirementCodeFilterComponent data type");
         }
         this.codeFilter = (DataRequirementCodeFilterComponent) codeFilter;

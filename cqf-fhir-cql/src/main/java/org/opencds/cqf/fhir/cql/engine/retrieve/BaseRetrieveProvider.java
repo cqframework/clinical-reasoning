@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ExtensionUtil;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -103,7 +104,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         // Should never see TRUST, since that should be handled by the repository.
         // ENFORCED is not yet supported.
 
-        throw new UnsupportedOperationException("%s profile mode is not yet supported.".formatted(profileMode));
+        throw new InvalidRequestException("%s profile mode is not yet supported.".formatted(profileMode));
     }
 
     public Predicate<IBaseResource> filterByContext(
@@ -408,7 +409,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         }
 
         if (dateRange == null) {
-            throw new IllegalStateException("A date range must be provided when filtering using date parameters");
+            throw new InternalErrorException("A date range must be provided when filtering using date parameters");
         }
 
         Date start;
@@ -428,7 +429,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             }
             end = ((org.opencds.cqf.cql.engine.runtime.Date) dateRangeEnd).toJavaDate();
         } else {
-            throw new UnsupportedOperationException(
+            throw new InvalidRequestException(
                     "Expected Interval of type org.opencds.cqf.cql.engine.runtime.Date or org.opencds.cqf.cql.engine.runtime.DateTime, found "
                             + Optional.ofNullable(dateRange.getStart())
                                     .map(innerStart -> innerStart.getClass().getSimpleName())
@@ -470,7 +471,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
             searchParams.put(sp.getName(), dateRangeParam);
         } else {
-            throw new IllegalStateException("A date path must be provided when filtering using date parameters");
+            throw new InternalErrorException("A date path must be provided when filtering using date parameters");
         }
     }
 

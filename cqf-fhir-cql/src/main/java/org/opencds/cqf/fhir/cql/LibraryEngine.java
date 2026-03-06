@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nullable;
@@ -233,17 +234,17 @@ public class LibraryEngine {
     public void validateExpression(String language, String expression) {
         if (language == null) {
             logger.error("Missing language type for the Expression");
-            throw new IllegalArgumentException("Missing language type for the Expression");
+            throw new InvalidRequestException("Missing language type for the Expression");
         } else if (expression == null) {
             logger.error("Missing expression for the Expression");
-            throw new IllegalArgumentException("Missing expression for the Expression");
+            throw new InvalidRequestException("Missing expression for the Expression");
         }
     }
 
     public void validateLibrary(String libraryUrl) {
         if (libraryUrl == null) {
             logger.error("Missing library for the Expression");
-            throw new IllegalArgumentException("Missing library for the Expression");
+            throw new InvalidRequestException("Missing library for the Expression");
         }
     }
 

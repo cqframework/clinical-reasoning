@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import java.lang.reflect.Parameter;
@@ -48,22 +49,22 @@ interface ParameterBinder {
         var idParamCount =
                 parameterBinders.stream().filter(x -> x.type() == Type.ID).count();
         if (idParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @IdParam");
+            throw new InvalidRequestException("Method cannot have more than one @IdParam");
         }
 
         if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
-            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
+            throw new InvalidRequestException("If @IdParam is present, it must be the first parameter");
         }
 
         var extraParamCount =
                 parameterBinders.stream().filter(x -> x.type() == Type.EXTRA).count();
         if (extraParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @ExtraParams");
+            throw new InvalidRequestException("Method cannot have more than one @ExtraParams");
         }
 
         if (extraParamCount > 0
                 && parameterBinders.get(parameterBinders.size() - 1).type() != Type.EXTRA) {
-            throw new IllegalArgumentException("If @ExtraParams is present, it must be the last parameter");
+            throw new InvalidRequestException("If @ExtraParams is present, it must be the last parameter");
         }
 
         return parameterBinders;
@@ -94,10 +95,10 @@ interface ParameterBinder {
                 .count();
 
         if (count == 0) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Method Parameter must be annotated with @IdParam, @OperationParam, or @ExtraParams");
         } else if (count > 1) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @ExtraParams");
         }
     }
@@ -124,7 +125,7 @@ interface ParameterBinder {
 
         @Override
         public Object bind(IBaseParameters parameters) {
-            throw new UnsupportedOperationException("bind is not supported for @IdParam");
+            throw new InvalidRequestException("bind is not supported for @IdParam");
         }
 
         @Override
@@ -161,7 +162,7 @@ interface ParameterBinder {
             } else if (List.class.isAssignableFrom(type)) {
                 return ParameterClass.LIST;
             } else {
-                throw new IllegalArgumentException("Parameter annotated with @Operation must be a FHIR type or a List");
+                throw new InvalidRequestException("Parameter annotated with @Operation must be a FHIR type or a List");
             }
         }
 
@@ -180,7 +181,7 @@ interface ParameterBinder {
             if (parameters == null && operationParam.min() <= 0) {
                 return null;
             } else if (parameters == null) {
-                throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
+                throw new InvalidRequestException("Parameter " + this.name() + " is required but was not provided");
             }
 
             var context = FhirContext.forCached(parameters.getStructureFhirVersionEnum());
@@ -189,11 +190,11 @@ interface ParameterBinder {
             Parameters.removeParameter(parameters, this.name());
 
             if (params.isEmpty() && operationParam.min() > 0) {
-                throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
+                throw new InvalidRequestException("Parameter " + this.name() + " is required but was not provided");
             }
 
             if (params.size() > 1) {
-                throw new IllegalArgumentException("Parameter " + this.name()
+                throw new InvalidRequestException("Parameter " + this.name()
                         + " has more than one value. Use parameter parts for multiple values");
             }
 
@@ -209,19 +210,19 @@ interface ParameterBinder {
             // For single-valued parameters, this is incorrect
             var parts = terser.getValues(params.get(0), "part");
             if (parameterClass != ParameterClass.LIST && !parts.isEmpty()) {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "Parameter " + this.name() + " is not the expected type " + parameter.getType());
             }
 
             if (parameterClass == ParameterClass.LIST) {
                 var size = parts.size();
                 if (operationParam.min() > size) {
-                    throw new IllegalArgumentException("Parameter " + this.name()
+                    throw new InvalidRequestException("Parameter " + this.name()
                             + " has fewer values than the minimum of " + operationParam.min());
                 }
 
                 if (operationParam.max() > 0 && size > operationParam.max()) {
-                    throw new IllegalArgumentException("Parameter " + this.name()
+                    throw new InvalidRequestException("Parameter " + this.name()
                             + " has more values than the maximum of " + operationParam.max());
                 }
             }
@@ -237,7 +238,7 @@ interface ParameterBinder {
                     } else if (r != null) {
                         values.add(r);
                     } else {
-                        throw new IllegalArgumentException(
+                        throw new InvalidRequestException(
                                 "Parameter " + this.name() + " has an empty part. Expected a resource or value[x]");
                     }
                 }
@@ -249,31 +250,29 @@ interface ParameterBinder {
             IBaseResource valueResource = terser.getSingleValueOrNull(param, "resource", IBaseResource.class);
             IBase value = terser.getSingleValueOrNull(param, "value[x]", IBase.class);
             if (valueResource != null && value != null) {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "Parameter " + this.name() + " has both a resource and a value. Only one is allowed");
             }
 
             if (parameterClass == ParameterClass.RESOURCE) {
                 if (value != null) {
-                    throw new IllegalArgumentException(
+                    throw new InvalidRequestException(
                             "Parameter " + this.name() + " is not the expected type " + parameter.getType());
                 }
 
                 if (valueResource == null && operationParam.min() > 0) {
-                    throw new IllegalArgumentException(
-                            "Parameter " + this.name() + " is required but was not provided");
+                    throw new InvalidRequestException("Parameter " + this.name() + " is required but was not provided");
                 }
             }
 
             if (parameterClass == ParameterClass.VALUE) {
                 if (valueResource != null) {
-                    throw new IllegalArgumentException(
+                    throw new InvalidRequestException(
                             "Parameter " + this.name() + " is not the expected type " + parameter.getType());
                 }
 
                 if (value == null && operationParam.min() > 0) {
-                    throw new IllegalArgumentException(
-                            "Parameter " + this.name() + " is required but was not provided");
+                    throw new InvalidRequestException("Parameter " + this.name() + " is required but was not provided");
                 }
             }
 
@@ -285,7 +284,7 @@ interface ParameterBinder {
             try {
                 return this.parameter.getType().cast(returnValue);
             } catch (ClassCastException e) {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "Parameter value '" + this.name() + "'' is not of the expected type " + parameter.getType());
             }
         }

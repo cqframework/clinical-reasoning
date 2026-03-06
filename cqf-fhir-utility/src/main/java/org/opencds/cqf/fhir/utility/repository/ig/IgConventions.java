@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -124,7 +125,7 @@ public record IgConventions(
         // If it exists, we will use that as the base path for further checks.
         path = path.resolve("input");
         if (!Files.exists(path)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "The provided path does not contain an 'input' or 'src' directory: " + path);
         }
 
@@ -184,7 +185,7 @@ public record IgConventions(
                             compartment.getParent().getFileName().toString());
 
                     if (compartmentMode == CompartmentMode.NONE) {
-                        throw new IllegalArgumentException(
+                        throw new InvalidRequestException(
                                 "The compartment directory does not match any known compartment type: " + compartment);
                     }
                 }

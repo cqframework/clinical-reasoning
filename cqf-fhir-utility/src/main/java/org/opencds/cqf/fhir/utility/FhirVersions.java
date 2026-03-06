@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class FhirVersions {
@@ -33,7 +34,7 @@ public class FhirVersions {
         } else if (packageName.contains("ca.uhn.fhir.model.dstu2")) {
             return FhirVersionEnum.DSTU2;
         } else {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Unable to determine FHIR version for IBaseResource type: %s".formatted(baseTypeClass.getName()));
         }
     }

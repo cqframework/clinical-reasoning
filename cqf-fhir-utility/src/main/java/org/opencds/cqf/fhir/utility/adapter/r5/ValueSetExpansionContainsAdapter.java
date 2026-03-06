@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
@@ -13,7 +14,7 @@ public class ValueSetExpansionContainsAdapter extends BaseAdapter implements IVa
     public ValueSetExpansionContainsAdapter(IBase contains) {
         super(FhirVersionEnum.R5, contains);
         if (!(contains instanceof ValueSetExpansionContainsComponent)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "element passed as contains argument is not a ValueSetExpansionContainsComponent element");
         }
         this.contains = (ValueSetExpansionContainsComponent) contains;

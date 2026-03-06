@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
@@ -458,7 +459,7 @@ public class SearchHelper {
                 break;
 
             default:
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "Unsupported version of FHIR: %s".formatted(fhirVersion.getFhirVersionString()));
         }
     }

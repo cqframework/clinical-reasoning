@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Library;
@@ -265,7 +266,7 @@ class PackageSourceResolverTest {
             var result = (java.util.Map<String, String>) method.invoke(testVisitor, igAdapter);
             dependencyVersions.putAll(result);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new InternalErrorException(e);
         }
 
         // Verify that dependency versions were extracted

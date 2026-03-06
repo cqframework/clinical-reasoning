@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent;
@@ -18,7 +19,7 @@ class DataRequirementAdapterTest {
     void invalid_object_fails() {
         var adapterFactory = new AdapterFactory();
         var coding = new Coding();
-        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createDataRequirement(coding));
+        assertThrows(InvalidRequestException.class, () -> adapterFactory.createDataRequirement(coding));
     }
 
     @Test

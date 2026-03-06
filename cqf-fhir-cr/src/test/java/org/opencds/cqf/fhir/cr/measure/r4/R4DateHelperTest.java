@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -71,7 +72,7 @@ class R4DateHelperTest {
         try {
             helper.buildMeasurementPeriod(measurementPeriodInterval);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("Measurement period should be an interval of CQL DateTime or Date"));
         }
     }

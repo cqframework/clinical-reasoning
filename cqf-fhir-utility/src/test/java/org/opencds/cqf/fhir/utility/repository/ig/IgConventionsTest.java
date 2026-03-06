@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -98,6 +99,6 @@ class IgConventionsTest {
     @Test
     void autoDetectInvalidDirectory() {
         var notValidIg = tempDir.resolve("notValidIg");
-        assertThrows(IllegalArgumentException.class, () -> IgConventions.autoDetect(notValidIg));
+        assertThrows(InvalidRequestException.class, () -> IgConventions.autoDetect(notValidIg));
     }
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.MeasureReport;
@@ -73,7 +74,7 @@ class MeasureProcessorCQLParameterTest {
                 assertEquals(expectedMeasureCount, population.getCount());
                 break;
             default:
-                throw new IllegalArgumentException("Unexpected population code: " + code);
+                throw new InvalidRequestException("Unexpected population code: " + code);
         }
     }
 }

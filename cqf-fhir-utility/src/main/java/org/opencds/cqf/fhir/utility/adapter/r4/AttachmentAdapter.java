@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.Attachment;
@@ -14,11 +15,11 @@ class AttachmentAdapter extends BaseAdapter implements IAttachmentAdapter {
     public AttachmentAdapter(IBase attachment) {
         super(FhirVersionEnum.R4, attachment);
         if (!attachment.fhirType().equals("Attachment")) {
-            throw new IllegalArgumentException("resource passed as attachment argument is not an Attachment resource");
+            throw new InvalidRequestException("resource passed as attachment argument is not an Attachment resource");
         }
 
         if (!(attachment instanceof Attachment)) {
-            throw new IllegalArgumentException("attachment is incorrect fhir version for this adapter");
+            throw new InvalidRequestException("attachment is incorrect fhir version for this adapter");
         }
 
         this.attachment = (Attachment) attachment;

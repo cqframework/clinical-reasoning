@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor.dstu3;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,7 +175,7 @@ public class ReleaseVisitor {
                 rootAdapter.addExtension(inputExpansionParametersExtension);
                 ((DomainResource) rootAdapter.get()).addContained(inputParametersCopy);
             } else {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "Unsupported IBaseParameters implementation: " + inputExpansionParams.getClass());
             }
         }

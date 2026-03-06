@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +22,7 @@ public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQ
     public QuestionnaireAdapter(IDomainResource questionnaire) {
         super(questionnaire);
         if (!(questionnaire instanceof Questionnaire)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "resource passed as questionnaire argument is not a Questionnaire resource");
         }
     }

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ElementDefinition;
@@ -20,7 +21,7 @@ class ElementDefinitionAdapterTest {
     @Test
     void invalid_object_fails() {
         var codeableConcept = new CodeableConcept();
-        assertThrows(IllegalArgumentException.class, () -> new ElementDefinitionAdapter(codeableConcept));
+        assertThrows(InvalidRequestException.class, () -> new ElementDefinitionAdapter(codeableConcept));
     }
 
     @SuppressWarnings("squid:S5961")

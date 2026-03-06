@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     public QuestionnaireResponseAdapter(IDomainResource questionnaireResponse) {
         super(questionnaireResponse);
         if (!(questionnaireResponse instanceof QuestionnaireResponse)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "resource passed as questionnaire argument is not a QuestionnaireResponse resource");
         }
     }

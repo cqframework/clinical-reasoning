@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
     public ImplementationGuideAdapter(IDomainResource implementationGuide) {
         super(implementationGuide);
         if (!(implementationGuide instanceof ImplementationGuide)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "resource passed as implementationGuide argument is not a ImplementationGuide resource");
         }
     }

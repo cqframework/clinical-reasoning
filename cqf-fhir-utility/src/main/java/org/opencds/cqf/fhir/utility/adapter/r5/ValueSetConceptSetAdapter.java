@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -16,7 +17,7 @@ public class ValueSetConceptSetAdapter extends BaseAdapter implements IValueSetC
     public ValueSetConceptSetAdapter(IBase conceptSet) {
         super(FhirVersionEnum.R5, conceptSet);
         if (!(conceptSet instanceof ConceptSetComponent)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "element passed as conceptSet argument is not a ConceptSetComponent element");
         }
         this.conceptSet = (ConceptSetComponent) conceptSet;

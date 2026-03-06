@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 import static org.opencds.cqf.fhir.utility.Parameters.newParameters;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
         // We require either an expression or content.  If content is set expression will be used if present,
         // otherwise all expressions defined in 'content' will be evaluated.
         if (expression == null && content == null) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "The $cql operation requires the expression parameter and/or content parameter to exist");
         }
         this.expression = expression;

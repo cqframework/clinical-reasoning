@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashMap;
 import java.util.Map;
@@ -124,7 +125,7 @@ class R4MeasureReportBuilderContext {
     private void validateReference(String reference) {
         // Can't be null
         if (reference == null) {
-            throw new NullPointerException("validated reference is null");
+            throw new InternalErrorException("validated reference is null");
         }
 
         // If it's a contained reference, must be just the Guid and nothing else

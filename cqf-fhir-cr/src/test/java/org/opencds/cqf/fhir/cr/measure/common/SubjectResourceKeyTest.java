@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.jupiter.api.Nested;
@@ -213,7 +214,7 @@ class SubjectResourceKeyTest {
         void fromRowKey_throwsWhenNoInputParam() {
             StratifierRowKey rowKey = StratifierRowKey.subjectOnly("Patient/123");
 
-            assertThrows(IllegalArgumentException.class, () -> SubjectResourceKey.fromRowKey(rowKey, true));
+            assertThrows(InvalidRequestException.class, () -> SubjectResourceKey.fromRowKey(rowKey, true));
         }
 
         @Test

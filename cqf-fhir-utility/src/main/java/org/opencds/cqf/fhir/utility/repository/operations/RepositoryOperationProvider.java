@@ -22,6 +22,7 @@ import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_USE_SERVER_
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Map;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -79,7 +80,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeActivityDefinition(
             IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (activityDefinitionProcessorFactory == null) {
-            throw new IllegalArgumentException(noFactoryError.formatted(activityDef, operationName));
+            throw new InvalidRequestException(noFactoryError.formatted(activityDef, operationName));
         }
         var processor = activityDefinitionProcessorFactory.create(repository);
         switch (operationName) {
@@ -109,7 +110,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
                         (IBaseResource) paramMap.get(APPLY_PARAMETER_TERMINOLOGY_ENDPOINT));
 
             default:
-                throw new IllegalArgumentException(unSupportedOpError.formatted(operationName, activityDef));
+                throw new InvalidRequestException(unSupportedOpError.formatted(operationName, activityDef));
         }
     }
 
@@ -117,7 +118,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokePlanDefinition(
             IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (planDefinitionProcessorFactory == null) {
-            throw new IllegalArgumentException(noFactoryError.formatted(planDef, operationName));
+            throw new InvalidRequestException(noFactoryError.formatted(planDef, operationName));
         }
         var processor = planDefinitionProcessorFactory.create(repository);
         switch (operationName) {
@@ -187,7 +188,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
                 }
 
             default:
-                throw new IllegalArgumentException(unSupportedOpError.formatted(operationName, planDef));
+                throw new InvalidRequestException(unSupportedOpError.formatted(operationName, planDef));
         }
     }
 
@@ -195,12 +196,12 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeQuestionnaire(
             IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (questionnaireProcessorFactory == null) {
-            throw new IllegalArgumentException(noFactoryError.formatted(questionnaire, operationName));
+            throw new InvalidRequestException(noFactoryError.formatted(questionnaire, operationName));
         }
         var processor = questionnaireProcessorFactory.create(repository);
         switch (operationName) {
             default:
-                throw new IllegalArgumentException(unSupportedOpError.formatted(operationName, questionnaire));
+                throw new InvalidRequestException(unSupportedOpError.formatted(operationName, questionnaire));
         }
     }
 
@@ -208,12 +209,12 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R invokeQuestionnaireResponse(
             IRepository repository, IIdType id, String operationName, Map<String, Object> paramMap) {
         if (questionnaireResponseProcessorFactory == null) {
-            throw new IllegalArgumentException(noFactoryError.formatted(questionnaireResponse, operationName));
+            throw new InvalidRequestException(noFactoryError.formatted(questionnaireResponse, operationName));
         }
         var processor = questionnaireResponseProcessorFactory.create(repository);
         switch (operationName) {
             default:
-                throw new IllegalArgumentException(unSupportedOpError.formatted(operationName, questionnaireResponse));
+                throw new InvalidRequestException(unSupportedOpError.formatted(operationName, questionnaireResponse));
         }
     }
 }

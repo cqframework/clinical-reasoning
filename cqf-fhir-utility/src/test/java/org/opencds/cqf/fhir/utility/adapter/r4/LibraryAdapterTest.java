@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ class LibraryAdapterTest {
     @Test
     void invalid_object_fails() {
         var planDefinition = new PlanDefinition();
-        assertThrows(IllegalArgumentException.class, () -> new LibraryAdapter(planDefinition));
+        assertThrows(InvalidRequestException.class, () -> new LibraryAdapter(planDefinition));
     }
 
     @Test

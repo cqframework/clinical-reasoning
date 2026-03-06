@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
 class AttachmentAdapterTest {
@@ -51,7 +52,7 @@ class AttachmentAdapterTest {
 
     @Test
     void r4WrongTypeThrows() {
-        assertThrows(IllegalArgumentException.class, () -> IAdapterFactory.forFhirVersion(
+        assertThrows(InvalidRequestException.class, () -> IAdapterFactory.forFhirVersion(
                         ca.uhn.fhir.context.FhirVersionEnum.R4)
                 .createAttachment(new org.hl7.fhir.r4.model.Patient()));
     }

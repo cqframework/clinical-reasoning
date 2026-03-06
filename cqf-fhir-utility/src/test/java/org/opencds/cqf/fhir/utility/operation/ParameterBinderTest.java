@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -119,7 +120,7 @@ class ParameterBinderTest {
         // Error, passed a string instead of a resource
         var p2 = new Parameters();
         p2.addParameter().setName("resource").setValue(new StringType("123"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("type"));
 
         // Error, passed a list of resources instead of a single resource
@@ -127,14 +128,14 @@ class ParameterBinderTest {
         var part = p3.addParameter().setName("resource").setValue(new StringType("123"));
         part.addPart().setResource(new Library().setId("456"));
         part.addPart().setResource(new Library().setId("789"));
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p3));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p3));
         assertTrue(e.getMessage().contains("type"));
 
         // Error, passed both a resource and a string
         var p4 = new Parameters();
         var part2 = p4.addParameter().setName("resource").setValue(new StringType("123"));
         part2.setResource(new Library().setId("456"));
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p4));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p4));
         assertTrue(e.getMessage().contains("both"));
     }
 
@@ -154,7 +155,7 @@ class ParameterBinderTest {
         // Error, passed a Library instead of an Encounter
         var p2 = new Parameters();
         p2.addParameter().setName("encounter").setResource(new Library().setId("123"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("type"));
     }
 
@@ -173,17 +174,17 @@ class ParameterBinderTest {
 
         // Error, no parameter given
         var p2 = new Parameters();
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("required"));
 
         // Error, no resource given
         var p3 = new Parameters();
         p3.addParameter().setName("resource");
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p3));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p3));
         assertTrue(e.getMessage().contains("required"));
 
         // Error, nothing given
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(null));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(null));
         assertTrue(e.getMessage().contains("required"));
     }
 
@@ -218,7 +219,7 @@ class ParameterBinderTest {
         // Error, passed a resource instead of a string
         var p2 = new Parameters();
         p2.addParameter().setName("string").setResource(new Library().setId("123"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("type"));
 
         // Error, passed a list of strings instead of a single string
@@ -226,20 +227,20 @@ class ParameterBinderTest {
         var part = p3.addParameter().setName("string");
         part.addPart().setValue(new StringType("123"));
         part.addPart().setValue(new StringType("456"));
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p3));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p3));
         assertTrue(e.getMessage().contains("type"));
 
         // Error, passed both a resource and a string
         var p4 = new Parameters();
         var part2 = p4.addParameter().setName("string").setValue(new StringType("123"));
         part2.setResource(new Library().setId("456"));
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p4));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p4));
         assertTrue(e.getMessage().contains("both"));
 
         // Error, passed a date instead of a string
         var p5 = new Parameters();
         p5.addParameter().setName("string").setValue(new DateType("2020-01-01"));
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p5));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p5));
         assertTrue(e.getMessage().contains("type"));
     }
 
@@ -263,7 +264,7 @@ class ParameterBinderTest {
         var p2 = new Parameters();
         var part2 = p2.addParameter().setName("resources");
         part2.addPart();
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("empty"));
     }
 
@@ -278,7 +279,7 @@ class ParameterBinderTest {
         var part = p.addParameter().setName("resources");
         part.addPart().setResource(new Library().setId("456"));
         part.addPart().setResource(new Library().setId("789"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p));
         assertTrue(e.getMessage().contains("max"));
     }
 
@@ -292,7 +293,7 @@ class ParameterBinderTest {
         var p = new Parameters();
         var part = p.addParameter().setName("resources");
         part.addPart().setResource(new Library().setId("456"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p));
         assertTrue(e.getMessage().contains("min"));
     }
 
@@ -311,17 +312,17 @@ class ParameterBinderTest {
 
         // Error, no parameter given
         var p2 = new Parameters();
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("required"));
 
         // Error, no string given
         var p3 = new Parameters();
         p3.addParameter().setName("string");
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p3));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(p3));
         assertTrue(e.getMessage().contains("required"));
 
         // Error, nothing given
-        e = assertThrows(IllegalArgumentException.class, () -> binder.bind(null));
+        e = assertThrows(InvalidRequestException.class, () -> binder.bind(null));
         assertTrue(e.getMessage().contains("required"));
     }
 
@@ -345,7 +346,7 @@ class ParameterBinderTest {
         var p2 = new Parameters();
         var part2 = p2.addParameter().setName("strings");
         part2.addPart();
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p2));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p2));
         assertTrue(e.getMessage().contains("empty"));
     }
 
@@ -360,7 +361,7 @@ class ParameterBinderTest {
         var part = p.addParameter().setName("strings");
         part.addPart().setValue(new StringType("123"));
         part.addPart().setValue(new StringType("456"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p));
         assertTrue(e.getMessage().contains("max"));
     }
 
@@ -374,7 +375,7 @@ class ParameterBinderTest {
         var p = new Parameters();
         var part = p.addParameter().setName("strings");
         part.addPart().setValue(new StringType("123"));
-        var e = assertThrows(IllegalArgumentException.class, () -> binder.bind(p));
+        var e = assertThrows(InvalidRequestException.class, () -> binder.bind(p));
         assertTrue(e.getMessage().contains("min"));
     }
 }

@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.readRepository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -204,7 +205,7 @@ public class TestCql {
             if (data instanceof IBaseBundle bundle) {
                 return prefetchData(name, bundle);
             } else {
-                throw new IllegalArgumentException("prefetch data asset must be a Bundle");
+                throw new InvalidRequestException("prefetch data asset must be a Bundle");
             }
         }
 

@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.utility.Constants.ARTIFACT_RELATED_ARTIFACT;
 import static org.opencds.cqf.fhir.utility.Constants.CPG_RELATED_ARTIFACT;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +41,7 @@ class GraphDefinitionAdapterTest implements IGraphDefinitionAdaptorTest<GraphDef
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createGraphDefinition(library));
+        assertThrows(InvalidRequestException.class, () -> adapterFactory.createGraphDefinition(library));
     }
 
     @Test

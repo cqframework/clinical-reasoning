@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -44,7 +45,7 @@ public class ImplementationGuideAdapterTest implements IImplementationGuideAdapt
     @Test
     void invalid_object_fails() {
         var planDefinition = new PlanDefinition();
-        assertThrows(IllegalArgumentException.class, () -> new ImplementationGuideAdapter(planDefinition));
+        assertThrows(InvalidRequestException.class, () -> new ImplementationGuideAdapter(planDefinition));
     }
 
     @Test

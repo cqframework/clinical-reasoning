@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
@@ -105,7 +106,8 @@ public class ResourceValidator {
             var messages =
                     errors.stream().map(SingleValidationMessage::getMessage).collect(Collectors.toList());
             var issues = String.join("; ", messages);
-            throw new RuntimeException("Unable to validate resource. The following problems were found: " + issues);
+            throw new InternalErrorException(
+                    "Unable to validate resource. The following problems were found: " + issues);
         } else {
             return validationResult.toOperationOutcome();
         }

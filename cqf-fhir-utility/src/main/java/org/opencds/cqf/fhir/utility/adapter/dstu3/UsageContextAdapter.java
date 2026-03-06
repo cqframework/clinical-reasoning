@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.UsageContext;
@@ -17,7 +18,7 @@ public class UsageContextAdapter extends BaseAdapter implements IUsageContextAda
     public UsageContextAdapter(IBase usageContext) {
         super(FhirVersionEnum.DSTU3, usageContext);
         if (!(usageContext instanceof UsageContext)) {
-            throw new IllegalArgumentException("object passed as coding argument is not a UsageContext data type");
+            throw new InvalidRequestException("object passed as coding argument is not a UsageContext data type");
         }
         this.usageContext = (UsageContext) usageContext;
     }

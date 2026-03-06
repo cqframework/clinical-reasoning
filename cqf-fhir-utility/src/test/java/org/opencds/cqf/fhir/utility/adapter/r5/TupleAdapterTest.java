@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Library;
@@ -17,7 +18,7 @@ class TupleAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createTuple(library));
+        assertThrows(InvalidRequestException.class, () -> adapterFactory.createTuple(library));
     }
 
     @Test

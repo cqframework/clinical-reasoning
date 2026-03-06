@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -18,7 +19,7 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
     public StructureDefinitionAdapter(IDomainResource structureDefinition) {
         super(structureDefinition);
         if (!(structureDefinition instanceof StructureDefinition)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "resource passed as planDefinition argument is not a StructureDefinition resource");
         }
     }

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.UsageContext;
@@ -26,7 +27,7 @@ class UsageContextAdapterTest {
         CodeableConcept cc = new CodeableConcept();
 
         // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createUsageContext(cc));
+        assertThrows(InvalidRequestException.class, () -> adapterFactory.createUsageContext(cc));
     }
 
     @Test

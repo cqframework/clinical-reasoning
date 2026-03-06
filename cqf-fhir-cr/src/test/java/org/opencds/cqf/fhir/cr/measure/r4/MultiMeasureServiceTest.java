@@ -996,7 +996,7 @@ class MultiMeasureServiceTest {
                 .reporter("payer")
                 .evaluate();
 
-        assertThrows(IllegalArgumentException.class, when::then);
+        assertThrows(InvalidRequestException.class, when::then);
     }
 
     @Test
@@ -1034,7 +1034,7 @@ class MultiMeasureServiceTest {
                 .reporter("Patient/male-2022")
                 .evaluate();
 
-        assertThrows(IllegalArgumentException.class, when::then);
+        assertThrows(InvalidRequestException.class, when::then);
     }
 
     // This test is effectively a sanity test to ensure that Organization subjects

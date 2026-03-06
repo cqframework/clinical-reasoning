@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.repository;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.client.Clients;
@@ -28,7 +29,7 @@ public class Repositories {
             case R4 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r4.model.Endpoint) endpoint);
             case R5 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r5.model.Endpoint) endpoint);
             default ->
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
         };
     }

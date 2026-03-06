@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.List;
 
 public class ConceptDef {
@@ -22,7 +23,7 @@ public class ConceptDef {
 
     public CodeDef first() {
         if (isEmpty()) {
-            throw new IllegalStateException("No codes in this concept, so can't return first()");
+            throw new InternalErrorException("No codes in this concept, so can't return first()");
         }
 
         return this.codes.get(0);

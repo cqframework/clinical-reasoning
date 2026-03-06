@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.UriType;
@@ -56,30 +57,30 @@ class VersionUtilitiesTests {
 
     @Test
     void TestNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             VersionUtilities.enumForVersion(null);
         });
     }
 
     @Test
     void TestMalformed() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             VersionUtilities.enumForVersion("bubba");
         });
     }
 
     @Test
     void TestUnsupported() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             VersionUtilities.enumForVersion("R6");
         });
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             VersionUtilities.stringTypeForVersion(FhirVersionEnum.R4B);
         });
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             VersionUtilities.uriTypeForVersion(FhirVersionEnum.R4B);
         });
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             VersionUtilities.booleanTypeForVersion(FhirVersionEnum.R4B, true);
         });
     }

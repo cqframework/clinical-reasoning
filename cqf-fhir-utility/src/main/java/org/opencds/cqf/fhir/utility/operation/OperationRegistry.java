@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -120,7 +121,7 @@ public class OperationRegistry {
                 .collect(Collectors.toList());
 
         if (methodBinders.isEmpty()) {
-            throw new IllegalArgumentException("No operations found on class " + clazz.getName());
+            throw new InvalidRequestException("No operations found on class " + clazz.getName());
         }
 
         for (var methodBinder : methodBinders) {
@@ -183,7 +184,7 @@ public class OperationRegistry {
         }
 
         if (typeContexts.size() > 1) {
-            throw new IllegalStateException(
+            throw new InternalErrorException(
                     "Multiple operations found with name " + normalizedName + " and type " + typeName);
         }
 

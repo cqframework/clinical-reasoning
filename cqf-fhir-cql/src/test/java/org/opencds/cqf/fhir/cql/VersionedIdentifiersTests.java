@@ -4,17 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
 class VersionedIdentifiersTests {
     @Test
     void exceptions() {
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidRequestException.class,
                 () -> VersionedIdentifiers.forUrl("http://fhir.org/guides/cdc/opioid-cds/Binary/HelloWorld"));
 
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidRequestException.class,
                 () -> VersionedIdentifiers.forUrl(
                         "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld/Library/HelloWorld"));
     }

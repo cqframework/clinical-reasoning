@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
             } else if (subjectId.startsWith("Organization")) {
                 subjects.addAll(getOrganizationSubjectIds(subjectId, repository));
             } else {
-                throw new IllegalArgumentException("Unsupported subjectId: %s".formatted(subjectIds));
+                throw new InvalidRequestException("Unsupported subjectId: %s".formatted(subjectIds));
             }
         });
 

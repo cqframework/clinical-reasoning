@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
@@ -13,7 +14,7 @@ public class CodingAdapter extends BaseAdapter implements ICodingAdapter {
     public CodingAdapter(IBase coding) {
         super(FhirVersionEnum.DSTU3, coding);
         if (!(coding instanceof Coding)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "object passed as codeableConcept argument is not a CodeableConcept data type");
         }
         this.coding = (Coding) coding;

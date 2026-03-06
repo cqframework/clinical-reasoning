@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +34,7 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     public ValueSetAdapter(IDomainResource valueSet) {
         super(valueSet);
         if (!(valueSet instanceof ValueSet)) {
-            throw new IllegalArgumentException("resource passed as valueSet argument is not a ValueSet resource");
+            throw new InvalidRequestException("resource passed as valueSet argument is not a ValueSet resource");
         }
     }
 

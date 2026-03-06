@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ class ValueSetConceptSetAdapterTest {
     @Test
     void invalid_object_fails() {
         var expansion = new ValueSet.ValueSetExpansionComponent();
-        assertThrows(IllegalArgumentException.class, () -> new ValueSetConceptSetAdapter(expansion));
+        assertThrows(InvalidRequestException.class, () -> new ValueSetConceptSetAdapter(expansion));
     }
 
     @Test

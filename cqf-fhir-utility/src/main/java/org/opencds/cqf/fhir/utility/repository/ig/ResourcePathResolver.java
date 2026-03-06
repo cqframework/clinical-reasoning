@@ -3,6 +3,8 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableTable;
@@ -146,10 +148,10 @@ class ResourcePathResolver {
 
     private void validateAssignment(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         if (assignment.isNone() && conventions.compartmentMode() != CompartmentMode.NONE) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "CompartmentAssignment cannot be 'none' when conventions specify compartments");
         } else if (conventions.compartmentMode() == CompartmentMode.NONE && !assignment.isNone()) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "CompartmentAssignment must be 'none' when conventions specify no compartments");
         }
 
@@ -157,7 +159,7 @@ class ResourcePathResolver {
         if (category == ResourceCategory.DATA
                 && (assignment.isShared())
                 && conventions.compartmentIsolation() == CompartmentIsolation.FULL) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Data resources cannot be assigned to a shared compartment when compartment isolation is FULL.");
         }
     }
@@ -209,7 +211,7 @@ class ResourcePathResolver {
     private List<String> categoryDirectories(ResourceCategory category) {
         var map = BASE_DIRECTORIES.rowMap().get(conventions.categoryLayout());
         if (map == null || !map.containsKey(category)) {
-            throw new IllegalStateException("No base directories configured for category " + category + " with layout "
+            throw new InternalErrorException("No base directories configured for category " + category + " with layout "
                     + conventions.categoryLayout());
         }
         return map.get(category);
@@ -266,7 +268,7 @@ class ResourcePathResolver {
                     base, conventions.compartmentMode().type().toLowerCase());
         }
 
-        throw new IllegalStateException("Unhandled compartment assignment: " + assignment);
+        throw new InternalErrorException("Unhandled compartment assignment: " + assignment);
     }
 
     private boolean supportsCompartments(Path base) {
@@ -282,7 +284,7 @@ class ResourcePathResolver {
             try (var stream = Files.list(compartmentRoot)) {
                 stream.filter(Files::isDirectory).forEach(paths::add);
             } catch (Exception e) {
-                throw new IllegalStateException("Failed to enumerate compartments", e);
+                throw new InternalErrorException("Failed to enumerate compartments", e);
             }
         }
 

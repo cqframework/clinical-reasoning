@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +67,7 @@ public class CodeExtractor {
         } else if (object instanceof Code code) {
             codes.add(code);
         } else {
-            throw new IllegalArgumentException("Unable to extract codes from object %s".formatted(object.toString()));
+            throw new InvalidRequestException("Unable to extract codes from object %s".formatted(object.toString()));
         }
 
         return codes;
@@ -83,7 +84,7 @@ public class CodeExtractor {
             return this.generateCodes(Collections.singletonList(object));
         }
 
-        throw new IllegalArgumentException("Unable to extract codes from fhirType %s".formatted(object.fhirType()));
+        throw new InvalidRequestException("Unable to extract codes from fhirType %s".formatted(object.fhirType()));
     }
 
     private List<Code> getCodeFromEnumeration(IBaseEnumeration<Enum<?>> enumeration) {
@@ -153,14 +154,14 @@ public class CodeExtractor {
         }
 
         if (values.size() > 1) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "More than one value returned while attempting to access primitive value.");
         }
 
         IBase baseValue = values.get(0);
 
         if (!(baseValue instanceof IPrimitiveType)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Non-primitive value encountered while trying to access primitive value.");
         } else {
             return ((IPrimitiveType<?>) baseValue).getValueAsString();

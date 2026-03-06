@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
@@ -76,7 +77,7 @@ public class GroupDef {
 
         List<PopulationDef> defs = this.populationIndex.get(type);
         if (defs.size() > 1) {
-            throw new IllegalStateException("There is more than one PopulationDef of type: " + type.toCode());
+            throw new InternalErrorException("There is more than one PopulationDef of type: " + type.toCode());
         }
 
         return defs.get(0);

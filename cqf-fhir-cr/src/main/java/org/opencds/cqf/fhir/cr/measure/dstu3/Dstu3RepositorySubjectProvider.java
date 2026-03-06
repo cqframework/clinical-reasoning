@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +66,7 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                 }
 
             } else {
-                throw new IllegalArgumentException("Unsupported subjectId: %s".formatted(subjectIds));
+                throw new InvalidRequestException("Unsupported subjectId: %s".formatted(subjectIds));
             }
         });
 

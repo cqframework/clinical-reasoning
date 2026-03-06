@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.r4.model.Bundle;
@@ -55,7 +56,7 @@ class ReviseProcessorTests {
         Library proposedLibrary = existingLibrary.copy();
         proposedLibrary.setVersion("10.0.0");
 
-        Assertions.assertThrows(IllegalStateException.class, () -> processor.reviseResource(proposedLibrary));
+        Assertions.assertThrows(InternalErrorException.class, () -> processor.reviseResource(proposedLibrary));
     }
 
     @Test
@@ -75,7 +76,7 @@ class ReviseProcessorTests {
         Library proposedLibrary = existingLibrary.copy();
         proposedLibrary.setStatus(PublicationStatus.ACTIVE);
 
-        Assertions.assertThrows(IllegalStateException.class, () -> processor.reviseResource(proposedLibrary));
+        Assertions.assertThrows(InternalErrorException.class, () -> processor.reviseResource(proposedLibrary));
     }
 
     @Test

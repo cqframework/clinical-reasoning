@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
@@ -13,7 +14,7 @@ public class ValueSetConceptReferenceAdapter extends BaseAdapter implements IVal
     public ValueSetConceptReferenceAdapter(IBase conceptReference) {
         super(FhirVersionEnum.DSTU3, conceptReference);
         if (!(conceptReference instanceof ConceptReferenceComponent)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "element passed as conceptReference argument is not a ConceptReferenceComponent element");
         }
         this.conceptReference = (ConceptReferenceComponent) conceptReference;

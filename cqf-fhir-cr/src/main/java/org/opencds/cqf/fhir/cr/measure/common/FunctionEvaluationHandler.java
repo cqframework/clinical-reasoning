@@ -423,7 +423,7 @@ public class FunctionEvaluationHandler {
                 functionResults.put(result, functionResult.getValue());
                 Set<Object> evaluated = functionResult.getEvaluatedResources();
                 if (evaluated == null) {
-                    throw new IllegalStateException("CQL function '" + stratifierExpression
+                    throw new InternalErrorException("CQL function '" + stratifierExpression
                             + "' returned null evaluatedResources for measure: " + measureUrl);
                 }
                 evaluatedResources.addAll(evaluated);
@@ -629,7 +629,7 @@ public class FunctionEvaluationHandler {
         if (!(observationResult instanceof String
                 || observationResult instanceof Integer
                 || observationResult instanceof Double)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: %s"
                             .formatted(
                                     functionArguments.size() > 1

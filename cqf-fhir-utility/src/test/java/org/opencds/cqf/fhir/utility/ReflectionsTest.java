@@ -51,7 +51,7 @@ class ReflectionsTest {
 
     @Test
     void getNameNotExists() {
-        assertThrows(RuntimeException.class, () -> {
+        assertThrows(NullPointerException.class, () -> {
             Reflections.getNameFunction(Observation.class);
         });
     }

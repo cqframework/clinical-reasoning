@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -112,12 +113,12 @@ class MethodBinderTest {
 
     @Test
     void idLast_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("idLast"));
+        assertThrows(InvalidRequestException.class, () -> methodBinderByName("idLast"));
     }
 
     @Test
     void manyIds_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("manyIds"));
+        assertThrows(InvalidRequestException.class, () -> methodBinderByName("manyIds"));
     }
 
     @Test
@@ -135,7 +136,7 @@ class MethodBinderTest {
 
     @Test
     void extraFirst_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("extraFirst"));
+        assertThrows(InvalidRequestException.class, () -> methodBinderByName("extraFirst"));
     }
 
     @Test
@@ -148,7 +149,7 @@ class MethodBinderTest {
 
     @Test
     void manyExtra_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("manyExtra"));
+        assertThrows(InvalidRequestException.class, () -> methodBinderByName("manyExtra"));
     }
 
     @Test
@@ -158,7 +159,7 @@ class MethodBinderTest {
 
     @Test
     void operationParamIsNotFhirType_throws() {
-        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("operationParamIsNotFhirType"));
+        assertThrows(InvalidRequestException.class, () -> methodBinderByName("operationParamIsNotFhirType"));
     }
 
     @Test
@@ -219,7 +220,7 @@ class MethodBinderTest {
 
         var provider = new ExampleMethods();
         var parameters = new Parameters().addParameter("anyParam", new StringType("anyValue"));
-        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, parameters));
+        var e = assertThrows(InvalidRequestException.class, () -> m.bind(provider, null, parameters));
         assertTrue(e.getMessage().contains("not bound"));
     }
 
@@ -229,7 +230,7 @@ class MethodBinderTest {
 
         var provider = new ExampleMethods();
         var id = new IdType("Library/123");
-        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, id, null));
+        var e = assertThrows(InvalidRequestException.class, () -> m.bind(provider, id, null));
         assertTrue(e.getMessage().contains("non-instance"));
     }
 
@@ -238,7 +239,7 @@ class MethodBinderTest {
         var m = methodBinderByName("idFirst");
 
         var provider = new ExampleMethods();
-        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, null));
+        var e = assertThrows(InvalidRequestException.class, () -> m.bind(provider, null, null));
         assertTrue(e.getMessage().contains("id required"));
     }
 
@@ -253,7 +254,7 @@ class MethodBinderTest {
         }
 
         var method = MissingOperationAnnotation.class.getDeclaredMethods()[0];
-        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
+        var e = assertThrows(InvalidRequestException.class, () -> new MethodBinder(method));
         assertTrue(e.getMessage().contains("must be annotated"));
     }
 
@@ -271,7 +272,7 @@ class MethodBinderTest {
                 .findFirst()
                 .orElseThrow();
 
-        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
+        var e = assertThrows(InvalidRequestException.class, () -> new MethodBinder(method));
         assertTrue(e.getMessage().contains("one of"));
     }
 

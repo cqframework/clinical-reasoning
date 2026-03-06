@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
 
@@ -85,7 +86,7 @@ public record SubjectResourceKey(@Nullable String subjectId, String resourceValu
      */
     public static SubjectResourceKey fromRowKey(StratifierRowKey rowKey, boolean isPrimitiveBasis) {
         String inputParam = rowKey.inputParamId()
-                .orElseThrow(() -> new IllegalArgumentException("RowKey must have an inputParamId"));
+                .orElseThrow(() -> new InvalidRequestException("RowKey must have an inputParamId"));
 
         if (isPrimitiveBasis) {
             return of(rowKey.subjectQualified(), inputParam);

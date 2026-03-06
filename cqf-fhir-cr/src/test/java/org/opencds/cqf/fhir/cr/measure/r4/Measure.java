@@ -4,6 +4,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nullable;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -243,7 +244,7 @@ public class Measure {
 
         public Then then() {
             if (this.operation == null) {
-                throw new IllegalStateException(
+                throw new InternalErrorException(
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 

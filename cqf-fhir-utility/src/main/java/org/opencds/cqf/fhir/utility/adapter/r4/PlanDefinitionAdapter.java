@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements I
     public PlanDefinitionAdapter(IDomainResource planDefinition) {
         super(planDefinition);
         if (!(planDefinition instanceof PlanDefinition)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "resource passed as planDefinition argument is not a PlanDefinition resource");
         }
     }

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.model;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.EnumMap;
 import java.util.Map;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
@@ -37,7 +38,7 @@ public class FhirModelResolverCache {
                     resolver = new DynamicModelResolver(new R5FhirModelResolver());
                     break;
                 default:
-                    throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                    throw new InvalidRequestException("unknown or unsupported FHIR version");
             }
 
             cache.put(fhirVersionEnum, resolver);

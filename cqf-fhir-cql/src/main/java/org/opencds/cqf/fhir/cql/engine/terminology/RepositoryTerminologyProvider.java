@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
 import java.util.Collections;
 import java.util.Comparator;
@@ -127,7 +128,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
         var expansion = this.valueSetIndex.computeIfAbsent(url, k -> tryExpand(valueSet));
         if (expansion == null) {
-            throw new IllegalArgumentException("Unable to get expansion for ValueSet %s".formatted(valueSet.getId()));
+            throw new InvalidRequestException("Unable to get expansion for ValueSet %s".formatted(valueSet.getId()));
         }
 
         return expansion;
@@ -167,7 +168,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         if (codes == null
                 && this.terminologySettings.getValuesetExpansionMode()
                         == VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION) {
-            throw new IllegalArgumentException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
+            throw new InvalidRequestException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
         }
 
         return codes;
@@ -176,7 +177,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     private List<Code> tryNaiveExpansion(IBaseResource vs, ValueSetInfo valueSet) {
 
         if (containsExpansionLogic(vs)) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "ValueSet %s requires $expand to support correctly, and $expand is not available"
                             .formatted(valueSet.getId()));
         }
@@ -188,7 +189,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         var codes = ValueSets.getCodesInCompose(fhirContext, vs);
 
         if (codes == null) {
-            throw new IllegalArgumentException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
+            throw new InvalidRequestException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
         }
 
         return codes;
@@ -206,11 +207,11 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         var resources = BundleUtil.toListOfResources(fhirContext, results);
 
         if (resources.isEmpty()) {
-            throw new IllegalArgumentException("Unable to locate ValueSet %s".formatted(valueSet.getId()));
+            throw new InvalidRequestException("Unable to locate ValueSet %s".formatted(valueSet.getId()));
         }
 
         if (resources.size() > 1) {
-            throw new IllegalArgumentException("Multiple ValueSets resolved for %s".formatted(valueSet.getId()));
+            throw new InvalidRequestException("Multiple ValueSets resolved for %s".formatted(valueSet.getId()));
         }
 
         var vs = resources.get(0);
@@ -235,7 +236,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
         var codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
         if (codes == null
                 && this.terminologySettings.getValuesetPreExpansionMode() == VALUESET_PRE_EXPANSION_MODE.REQUIRE) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "ValueSet PreExpansion mode was set to REQUIRE, and valueSet %s did not have an expansion"
                             .formatted(valueSet.getId()));
         }

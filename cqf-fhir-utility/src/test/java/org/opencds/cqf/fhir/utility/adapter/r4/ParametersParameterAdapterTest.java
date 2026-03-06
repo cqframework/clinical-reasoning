@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.HumanName;
@@ -26,7 +27,7 @@ class ParametersParameterAdapterTest {
     @Test
     void invalid_object_fails() {
         var action = new PlanDefinitionActionComponent();
-        assertThrows(IllegalArgumentException.class, () -> new ParametersParameterComponentAdapter(action));
+        assertThrows(InvalidRequestException.class, () -> new ParametersParameterComponentAdapter(action));
     }
 
     @Test

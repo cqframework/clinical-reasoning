@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -97,7 +98,7 @@ public class DynamicValueProcessor {
             var value = result.size() == 1 ? result.get(0) : result;
             if (requiresRequestAction(path, resource)) {
                 if (requestAction == null) {
-                    throw new IllegalArgumentException(
+                    throw new InvalidRequestException(
                             "Error resolving dynamicValue with path %s: expected requestAction not found"
                                     .formatted(path));
                 }
@@ -105,7 +106,7 @@ public class DynamicValueProcessor {
                     // Custom logic to handle setting the indicator of a CDS Card because RequestGroup.action does not
                     // have a priority property in DSTU3
                     if (request.getFhirVersion() != FhirVersionEnum.DSTU3) {
-                        throw new IllegalArgumentException(
+                        throw new InvalidRequestException(
                                 "Please use the priority path when setting indicator values when using FHIR R4 or higher for CDS Hooks evaluation");
                     }
                     // default to adding extension to last action

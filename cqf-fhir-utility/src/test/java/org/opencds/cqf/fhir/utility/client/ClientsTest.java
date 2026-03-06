@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -49,7 +50,7 @@ class ClientsTest {
     @Test
     void rejectInvalidHeaders() {
         IGenericClient client = Clients.forUrl(FhirContext.forR4Cached(), "http://test.com");
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             Clients.registerHeaders(client, "BasicXYZ123");
         });
     }

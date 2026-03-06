@@ -185,10 +185,16 @@ public class NpmRepository extends InMemoryFhirRepository {
                                 if (info.getResourceType() != null) {
                                     typeIndex.putIfAbsent(info.getUrl(), info.getResourceType());
                                 }
-                                if (info.getVersion() != null) {
-                                    verIndex.putIfAbsent(info.getUrl(), info.getVersion());
+                                // Stub CodeSystems (content: not-present) are placeholders —
+                                // their version and package provenance are not meaningful.
+                                var isStub = "CodeSystem".equals(info.getResourceType())
+                                        && "not-present".equals(info.getContent());
+                                if (!isStub) {
+                                    if (info.getVersion() != null) {
+                                        verIndex.putIfAbsent(info.getUrl(), info.getVersion());
+                                    }
+                                    pkgIndex.putIfAbsent(info.getUrl(), owningPackage);
                                 }
-                                pkgIndex.putIfAbsent(info.getUrl(), owningPackage);
                             }
                         }
                     } catch (Exception ex) {

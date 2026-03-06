@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.common;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -25,7 +25,7 @@ public class ReviseProcessor implements IReviseProcessor {
         }
 
         if (!existingResource.getStatus().equals(Enumerations.PublicationStatus.DRAFT)) {
-            throw new InternalErrorException(String.format(
+            throw new InvalidRequestException(String.format(
                     "Current resource status is '%s'. Only resources with status of 'draft' can be revised.",
                     existingResource.getStatus().toString()));
         }
@@ -33,7 +33,7 @@ public class ReviseProcessor implements IReviseProcessor {
         var proposedResource = (MetadataResource) resource;
 
         if (!proposedResource.getStatus().equals(Enumerations.PublicationStatus.DRAFT)) {
-            throw new InternalErrorException(String.format(
+            throw new InvalidRequestException(String.format(
                     "The resource status can not be updated from 'draft'. The proposed resource has status: %s",
                     proposedResource.getStatus().toString()));
         }

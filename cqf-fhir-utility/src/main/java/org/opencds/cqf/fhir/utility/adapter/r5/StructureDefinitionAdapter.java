@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +28,7 @@ public class StructureDefinitionAdapter extends ResourceAdapter implements IStru
     public StructureDefinitionAdapter(IDomainResource structureDefinition) {
         super(structureDefinition);
         if (!(structureDefinition instanceof StructureDefinition)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "resource passed as planDefinition argument is not a StructureDefinition resource");
         }
     }

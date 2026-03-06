@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +27,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
     public KnowledgeArtifactAdapter(IDomainResource resource) {
         super(resource);
         if (!(resource instanceof MetadataResource)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "resource passed as resource argument is not a MetadataResource resource");
         }
         adaptedResource = (MetadataResource) resource;

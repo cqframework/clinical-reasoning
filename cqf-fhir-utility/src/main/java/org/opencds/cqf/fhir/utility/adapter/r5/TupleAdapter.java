@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.LinkedHashMap;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.Tuple;
@@ -13,7 +12,7 @@ public class TupleAdapter extends BaseAdapter implements ITupleAdapter {
     public TupleAdapter(IBase tuple) {
         super(FhirVersionEnum.R5, tuple);
         if (!(tuple instanceof Tuple)) {
-            throw new InvalidRequestException("object passed as tuple argument is not a Tuple data type");
+            throw new IllegalArgumentException("object passed as tuple argument is not a Tuple data type");
         }
     }
 

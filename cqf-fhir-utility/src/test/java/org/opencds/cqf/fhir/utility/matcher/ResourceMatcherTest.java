@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -597,7 +596,9 @@ class ResourceMatcherTest {
     @Test
     void dstu3GetDateRangeFromUnsupportedThrows() {
         var matcher = new ResourceMatcherDSTU3();
-        assertThrows(InvalidRequestException.class, () -> matcher.getDateRange(new org.hl7.fhir.dstu3.model.Address()));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> matcher.getDateRange(new org.hl7.fhir.dstu3.model.Address()));
     }
 
     @Test

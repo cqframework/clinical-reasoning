@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -17,7 +16,7 @@ class EndpointAdapterTest {
     @Test
     void invalid_object_fails() {
         var planDefinition = new PlanDefinition();
-        assertThrows(InvalidRequestException.class, () -> new EndpointAdapter(planDefinition));
+        assertThrows(IllegalArgumentException.class, () -> new EndpointAdapter(planDefinition));
     }
 
     @Test

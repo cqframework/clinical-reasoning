@@ -193,7 +193,7 @@ class ActivityDefinitionProcessorTests {
 
     @Test
     void unsupportedFhirVersion() throws IllegalArgumentException {
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             IRequestResolverFactory.getDefault(FhirVersionEnum.R4B);
         });
     }

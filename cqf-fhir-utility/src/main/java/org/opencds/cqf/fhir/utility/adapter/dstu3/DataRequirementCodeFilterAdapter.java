@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
@@ -18,7 +17,7 @@ public class DataRequirementCodeFilterAdapter extends BaseAdapter implements IDa
     public DataRequirementCodeFilterAdapter(IBase codeFilter) {
         super(FhirVersionEnum.DSTU3, codeFilter);
         if (!(codeFilter instanceof DataRequirementCodeFilterComponent)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as codeFilter argument is not a DataRequirementCodeFilterComponent data type");
         }
         this.codeFilter = (DataRequirementCodeFilterComponent) codeFilter;

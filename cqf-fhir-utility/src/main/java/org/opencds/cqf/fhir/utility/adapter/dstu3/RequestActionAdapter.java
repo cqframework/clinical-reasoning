@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -33,7 +32,7 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     public RequestActionAdapter(IBase requestAction) {
         super(FhirVersionEnum.DSTU3, requestAction);
         if (!(requestAction instanceof RequestGroupActionComponent)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "element passed as action argument is not a RequestGroupActionComponent Element");
         }
         this.requestAction = (RequestGroupActionComponent) requestAction;

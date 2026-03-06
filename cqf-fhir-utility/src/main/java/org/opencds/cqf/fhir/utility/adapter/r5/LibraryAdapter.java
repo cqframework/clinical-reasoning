@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +34,7 @@ public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibrary
     public LibraryAdapter(IDomainResource library) {
         super(library);
         if (!(library instanceof Library)) {
-            throw new InvalidRequestException("resource passed as library argument is not a Library resource");
+            throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
         }
     }
 

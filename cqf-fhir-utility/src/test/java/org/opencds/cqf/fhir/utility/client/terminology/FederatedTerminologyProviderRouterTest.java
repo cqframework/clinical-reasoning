@@ -12,7 +12,6 @@ import static org.mockito.Mockito.spy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -400,7 +399,7 @@ class FederatedTerminologyProviderRouterTest {
         expandedVs.setUrl(VSAC_VALUESET_URL);
 
         var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
-        doThrow(new InternalErrorException("Connection failed"))
+        doThrow(new RuntimeException("Connection failed"))
                 .doReturn(expandedVs)
                 .when(router)
                 .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
@@ -418,7 +417,7 @@ class FederatedTerminologyProviderRouterTest {
     void getValueSetResourceWithConfigurations_exceptionInGet_triesNextConfig() {
         var vs = new ValueSet();
         var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
-        doThrow(new InternalErrorException("Connection failed"))
+        doThrow(new RuntimeException("Connection failed"))
                 .doReturn(Optional.of((IDomainResource) vs))
                 .when(router)
                 .getValueSetResource(any(IEndpointAdapter.class), anyString());
@@ -434,7 +433,7 @@ class FederatedTerminologyProviderRouterTest {
     void getCodeSystemResourceWithConfigurations_exceptionInGet_triesNextConfig() {
         var cs = new org.hl7.fhir.r4.model.CodeSystem();
         var router = spy(new FederatedTerminologyProviderRouter(fhirContext));
-        doThrow(new InternalErrorException("Connection failed"))
+        doThrow(new RuntimeException("Connection failed"))
                 .doReturn(Optional.of((IDomainResource) cs))
                 .when(router)
                 .getCodeSystemResource(any(IEndpointAdapter.class), anyString());

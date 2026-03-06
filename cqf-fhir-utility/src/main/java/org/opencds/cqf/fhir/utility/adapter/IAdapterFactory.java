@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,7 +19,7 @@ public interface IAdapterFactory {
             case R4 -> new org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory();
             case R5 -> new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
             default ->
-                throw new InvalidRequestException("Unsupported FHIR version: %s".formatted(fhirVersion.toString()));
+                throw new IllegalArgumentException("Unsupported FHIR version: %s".formatted(fhirVersion.toString()));
         };
     }
 

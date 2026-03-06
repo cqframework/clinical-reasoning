@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Sets;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -43,7 +42,7 @@ public abstract class BaseResourceAdapter implements IResourceAdapter {
 
     protected BaseResourceAdapter(IBaseResource resource) {
         if (resource == null) {
-            throw new InvalidRequestException("resource can not be null");
+            throw new IllegalArgumentException("resource can not be null");
         }
         this.resource = resource;
         fhirContext = FhirContext.forCached(resource.getStructureFhirVersionEnum());

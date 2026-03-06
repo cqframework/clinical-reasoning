@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.Date;
@@ -39,9 +38,9 @@ class ResourceAdapterTest {
 
     @Test
     void invalid_object_fails() {
-        assertThrows(InvalidRequestException.class, () -> new ResourceAdapter(null));
+        assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(null));
         var library = new org.hl7.fhir.r5.model.Library();
-        assertThrows(InvalidRequestException.class, () -> new ResourceAdapter(library));
+        assertThrows(IllegalArgumentException.class, () -> new ResourceAdapter(library));
     }
 
     @Test
@@ -65,7 +64,7 @@ class ResourceAdapterTest {
         assertEquals(date, ((Meta) adapter.getProperty("meta")[0]).getLastUpdated());
         resource.addName(new HumanName().addGiven("name1"));
         resource.addName(new HumanName().addGiven("name2"));
-        assertThrows(InvalidRequestException.class, () -> adapter.getSingleProperty("name"));
+        assertThrows(IllegalArgumentException.class, () -> adapter.getSingleProperty("name"));
     }
 
     @Test

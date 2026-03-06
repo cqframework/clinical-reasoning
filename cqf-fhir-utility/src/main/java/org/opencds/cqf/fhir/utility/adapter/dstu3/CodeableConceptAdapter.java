@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -16,7 +15,7 @@ public class CodeableConceptAdapter extends BaseAdapter implements ICodeableConc
     public CodeableConceptAdapter(IBase codeableConcept) {
         super(FhirVersionEnum.DSTU3, codeableConcept);
         if (!(codeableConcept instanceof CodeableConcept)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as codeableConcept argument is not a CodeableConcept data type");
         }
         this.codeableConcept = (CodeableConcept) codeableConcept;

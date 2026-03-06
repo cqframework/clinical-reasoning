@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +60,7 @@ public enum CompartmentMode {
                     .filter(param -> param.getName().equals("_id"))
                     .collect(Collectors.toSet());
             if (params.isEmpty()) {
-                throw new InternalErrorException("No _id search parameter found for resource type: " + resourceType);
+                throw new IllegalStateException("No _id search parameter found for resource type: " + resourceType);
             }
         } else {
             params = fhirContext.getResourceDefinition(resourceType).getSearchParams().stream()

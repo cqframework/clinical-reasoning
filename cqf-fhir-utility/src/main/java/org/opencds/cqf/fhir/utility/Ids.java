@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -229,7 +228,7 @@ public class Ids {
             case R5:
                 return (IdType) new org.hl7.fhir.r5.model.IdType(id);
             default:
-                throw new InvalidRequestException(
+                throw new IllegalArgumentException(
                         "newId does not support FHIR version %s".formatted(fhirVersionEnum.getFhirVersionString()));
         }
     }

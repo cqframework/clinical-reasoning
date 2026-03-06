@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ElementDefinition;
@@ -18,7 +17,7 @@ class CodeableConceptAdapterTest {
     @Test
     void invalid_object_fails() {
         var element = new ElementDefinition();
-        assertThrows(InvalidRequestException.class, () -> new CodeableConceptAdapter(element));
+        assertThrows(IllegalArgumentException.class, () -> new CodeableConceptAdapter(element));
     }
 
     @Test

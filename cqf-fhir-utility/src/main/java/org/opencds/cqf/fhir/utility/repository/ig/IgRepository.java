@@ -10,7 +10,6 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -698,7 +697,7 @@ public class IgRepository implements IRepository {
     protected <R extends IBaseResource> R invokeOperation(
             IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
         if (operationProvider == null) {
-            throw new InvalidRequestException("No operation provider found. Unable to invoke operations.");
+            throw new IllegalArgumentException("No operation provider found. Unable to invoke operations.");
         }
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
     }

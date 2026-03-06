@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -39,7 +37,7 @@ public interface ResourceLoader {
                 parser = context.newXmlParser();
                 break;
             default:
-                throw new InvalidRequestException(
+                throw new IllegalArgumentException(
                         "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
         }
 
@@ -71,7 +69,7 @@ public interface ResourceLoader {
             }
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new InternalErrorException("Error loading resource from %s".formatted(location), e);
+            throw new RuntimeException("Error loading resource from %s".formatted(location), e);
         }
     }
 }

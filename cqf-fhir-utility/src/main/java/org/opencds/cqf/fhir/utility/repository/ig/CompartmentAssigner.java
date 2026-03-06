@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,7 +58,7 @@ class CompartmentAssigner {
 
         var segments = headerValue.split("/");
         if (segments.length != 2) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "Invalid compartment header value. Expected format: <CompartmentType>/<CompartmentId>");
         }
 

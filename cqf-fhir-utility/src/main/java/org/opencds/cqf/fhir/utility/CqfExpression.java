@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +30,7 @@ public class CqfExpression {
         var className = extension.getClass().getCanonicalName();
         var modelSplit = className.split(fhirPackagePath);
         if (modelSplit.length < 2) {
-            throw new InvalidRequestException("Unsupported FHIR model for extension class");
+            throw new IllegalArgumentException();
         }
         var model = modelSplit[1];
         model = model.substring(0, model.indexOf(".")).toUpperCase();
@@ -125,7 +124,7 @@ public class CqfExpression {
         if (referencedLibraries != null && !referencedLibraries.isEmpty()) {
             return referencedLibraries.values().stream().findFirst().get();
         }
-        throw new InvalidRequestException("No Library reference found for expression: %s".formatted(expr));
+        throw new IllegalArgumentException("No Library reference found for expression: %s".formatted(expr));
     }
 
     public String getName() {

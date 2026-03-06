@@ -5,7 +5,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -21,7 +20,7 @@ public class Resources {
         if (type.isInstance(obj)) {
             return Optional.of(type.cast(obj));
         }
-        throw new InvalidRequestException(errorMessage);
+        throw new IllegalArgumentException(errorMessage);
     }
 
     public static <T extends IBaseResource, I extends IIdType> T newResource(Class<T> resourceClass, String idPart) {
@@ -42,7 +41,7 @@ public class Resources {
         try {
             resource = resourceClass.getConstructor().newInstance();
         } catch (Exception e) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "resourceClass must be a type with an empty default constructor to use this function");
         }
 
@@ -55,7 +54,7 @@ public class Resources {
         try {
             backboneElement = backboneElementClass.getConstructor().newInstance();
         } catch (Exception e) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "backboneElementClass must be a type with an empty default constructor to use this function");
         }
 
@@ -71,7 +70,7 @@ public class Resources {
         try {
             base = baseClass.getConstructor().newInstance();
         } catch (Exception e) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "bClass must be a type with an empty default constructor to use this function");
         }
 
@@ -84,7 +83,7 @@ public class Resources {
             return (Class<T>) Class.forName(
                     "org.hl7.fhir.%s.model.%s".formatted(fhirVersion.toString().toLowerCase(), type));
         } catch (Exception e) {
-            throw new InvalidRequestException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 

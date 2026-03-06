@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -38,7 +37,7 @@ class StructureDefinitionAdapterTest implements IStructureDefinitionAdapterTest<
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(InvalidRequestException.class, () -> new StructureDefinitionAdapter(library));
+        assertThrows(IllegalArgumentException.class, () -> new StructureDefinitionAdapter(library));
         assertNotNull(adapterFactory.createStructureDefinition(new StructureDefinition()));
     }
 

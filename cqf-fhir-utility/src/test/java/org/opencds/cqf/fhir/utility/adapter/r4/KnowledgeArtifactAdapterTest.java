@@ -11,7 +11,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,7 +31,7 @@ class KnowledgeArtifactAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new org.hl7.fhir.r5.model.Library();
-        assertThrows(InvalidRequestException.class, () -> new KnowledgeArtifactAdapter(library));
+        assertThrows(IllegalArgumentException.class, () -> new KnowledgeArtifactAdapter(library));
     }
 
     @Test

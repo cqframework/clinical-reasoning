@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.client.terminology;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Optional;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 
@@ -107,7 +106,7 @@ public class ArtifactEndpointConfiguration {
                 r5Endpoint.setAddress(uri);
                 return factory.createEndpoint(r5Endpoint);
             default:
-                throw new InvalidRequestException(
+                throw new IllegalArgumentException(
                         "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
         }
     }

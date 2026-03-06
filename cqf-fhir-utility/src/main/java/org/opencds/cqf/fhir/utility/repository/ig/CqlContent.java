@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.repository.ig;
 
 import static java.util.Objects.requireNonNull;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -43,7 +42,7 @@ public class CqlContent {
                 cqlContentAttacher = org.opencds.cqf.fhir.utility.r5.AttachmentUtil::addData;
                 break;
             default:
-                throw new InvalidRequestException(
+                throw new IllegalArgumentException(
                         "Unsupported FHIR version: %s".formatted(resource.getStructureFhirVersionEnum()));
         }
 

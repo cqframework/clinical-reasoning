@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Coding;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
@@ -14,7 +13,7 @@ public class CodingAdapter extends BaseAdapter implements ICodingAdapter {
     public CodingAdapter(IBase coding) {
         super(FhirVersionEnum.R4, coding);
         if (!(coding instanceof Coding)) {
-            throw new InvalidRequestException("object passed as coding argument is not a Coding data type");
+            throw new IllegalArgumentException("object passed as coding argument is not a Coding data type");
         }
         this.coding = (Coding) coding;
     }

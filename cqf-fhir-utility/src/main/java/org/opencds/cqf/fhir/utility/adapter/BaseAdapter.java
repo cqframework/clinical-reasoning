@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -17,7 +16,7 @@ public abstract class BaseAdapter implements IAdapter<IBase> {
 
     protected BaseAdapter(FhirVersionEnum fhirVersion, IBase element) {
         if (element == null) {
-            throw new InvalidRequestException("element can not be null");
+            throw new IllegalArgumentException("element can not be null");
         }
         this.element = element;
         fhirContext = FhirContext.forCached(fhirVersion);

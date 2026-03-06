@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
@@ -14,7 +13,7 @@ public class TriggerDefinitionAdapter extends BaseAdapter implements ITriggerDef
     public TriggerDefinitionAdapter(IBase triggerDefinition) {
         super(FhirVersionEnum.R4, triggerDefinition);
         if (!(triggerDefinition instanceof TriggerDefinition)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as triggerDefinition argument is not a TriggerDefinition data type");
         }
         this.triggerDefinition = (TriggerDefinition) triggerDefinition;

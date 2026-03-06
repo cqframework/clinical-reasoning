@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -49,7 +48,7 @@ class ResourcesTest {
     @Test
     void castOrThrowInvalid() {
         var library = new Library();
-        assertThrows(InvalidRequestException.class, () -> Resources.castOrThrow(library, Patient.class, "wrong type"));
+        assertThrows(IllegalArgumentException.class, () -> Resources.castOrThrow(library, Patient.class, "wrong type"));
     }
 
     @Test
@@ -97,7 +96,7 @@ class ResourcesTest {
     @Test
     void getClassForTypeAndVersionInvalid() {
         assertThrows(
-                InvalidRequestException.class,
+                IllegalArgumentException.class,
                 () -> Resources.getClassForTypeAndVersion("NonExistentType", FhirVersionEnum.R4));
     }
 }

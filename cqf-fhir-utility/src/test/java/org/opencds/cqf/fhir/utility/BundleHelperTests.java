@@ -28,7 +28,6 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.setRequestIfNoneExist;
 import static org.opencds.cqf.fhir.utility.BundleHelper.setRequestUrl;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -46,70 +45,70 @@ class BundleHelperTests {
         var entry = new org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent();
         var bundle = new org.hl7.fhir.dstu2.model.Bundle().addEntry(entry);
         var resource = new org.hl7.fhir.dstu2.model.Patient();
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             getEntryFirstRep(bundle);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             getEntryResourceFirstRep(bundle);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             getEntryResources(bundle);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             getEntryResource(fhirVersion, entry);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             isEntryRequestPut(fhirVersion, entry);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             isEntryRequestPost(fhirVersion, entry);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             getEntry(bundle);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             addEntry(bundle, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newBundle(fhirVersion);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             setBundleType(bundle, "transaction");
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             setBundleTotal(bundle, 10);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newEntry(fhirVersion);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newEntryWithResource(resource);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newEntryWithResponse(fhirVersion, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newResponseWithLocation(fhirVersion, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newRequest(fhirVersion, null, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             newRequest(fhirVersion, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             setRequestUrl(fhirVersion, null, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             setRequestIfNoneExist(fhirVersion, null, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             setEntryFullUrl(fhirVersion, null, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             setEntryRequest(fhirVersion, null, null);
         });
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             resourceToRuntimeSearchParam(resource);
         });
     }
@@ -212,7 +211,7 @@ class BundleHelperTests {
                                     .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE));
 
             BundleHelper.isEntryRequestDelete(FhirVersionEnum.DSTU2, bundle);
-        } catch (InvalidRequestException e) {
+        } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Unsupported version of FHIR"));
         }
     }
@@ -269,7 +268,7 @@ class BundleHelperTests {
                                     .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE));
 
             BundleHelper.getEntryRequestId(FhirVersionEnum.DSTU2, bundle);
-        } catch (InvalidRequestException e) {
+        } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Unsupported version of FHIR"));
         }
     }

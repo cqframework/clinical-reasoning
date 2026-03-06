@@ -6,8 +6,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -260,7 +258,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     private static ExtensionInfo parseExtensionSegment(String segment) {
         var matcher = EXTENSION_PATTERN.matcher(segment);
         if (!matcher.matches()) {
-            throw new InvalidRequestException("Not an extension segment: " + segment);
+            throw new IllegalArgumentException("Not an extension segment: " + segment);
         }
         var url = matcher.group(1);
         var index = matcher.group(3) != null ? Integer.parseInt(matcher.group(3)) : 0;
@@ -270,7 +268,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private IBase resolveOrCreateExtension(IBase target, ExtensionInfo info) {
         if (!(target instanceof IBaseHasExtensions hasExtensions)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "Target does not support extensions: " + target.getClass().getName());
         }
         var matching = hasExtensions.getExtension().stream()
@@ -294,7 +292,7 @@ public class DynamicModelResolver extends CachingModelResolverDecorator {
             case R4 -> new org.hl7.fhir.r4.model.Extension(url);
             case R5 -> new org.hl7.fhir.r5.model.Extension(url);
             default ->
-                throw new InternalErrorException(
+                throw new IllegalStateException(
                         "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
         };
     }

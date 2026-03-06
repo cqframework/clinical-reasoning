@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import org.hl7.fhir.r4.model.Coding;
@@ -42,7 +41,7 @@ class AdapterTest {
         var fhirVersion = FhirVersionEnum.R4;
         var coding = new Coding();
         var factory = IAdapterFactory.forFhirVersion(fhirVersion);
-        assertThrows(InvalidRequestException.class, () -> factory.createCoding(null));
+        assertThrows(IllegalArgumentException.class, () -> factory.createCoding(null));
         var adapter = factory.createCoding(coding);
         assertEquals(coding, adapter.get());
         assertEquals(fhirVersion, adapter.fhirVersion());

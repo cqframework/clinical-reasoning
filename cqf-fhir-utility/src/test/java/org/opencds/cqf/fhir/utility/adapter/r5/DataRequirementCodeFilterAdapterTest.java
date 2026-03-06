@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.r5.model.DataRequirement.DataRequirementDateFilterComponent;
@@ -17,7 +16,7 @@ class DataRequirementCodeFilterAdapterTest {
     @Test
     void invalid_object_fails() {
         var filter = new DataRequirementDateFilterComponent();
-        assertThrows(InvalidRequestException.class, () -> new DataRequirementCodeFilterAdapter(filter));
+        assertThrows(IllegalArgumentException.class, () -> new DataRequirementCodeFilterAdapter(filter));
     }
 
     @Test

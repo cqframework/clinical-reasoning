@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -21,7 +20,7 @@ public class VersionUtilities {
      */
     public static FhirVersionEnum enumForVersion(String fhirVersion) {
         if (fhirVersion == null || fhirVersion.isEmpty()) {
-            throw new InvalidRequestException("fhirVersion can not be null or empty");
+            throw new IllegalArgumentException("fhirVersion can not be null or empty");
         }
 
         // This matches "R4", "dstu3", etc.
@@ -49,7 +48,7 @@ public class VersionUtilities {
             case "5":
                 return FhirVersionEnum.R5;
             default:
-                throw new InvalidRequestException(UNSUPPORTED);
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -81,7 +80,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.StringType(string);
             default:
-                throw new InvalidRequestException(UNSUPPORTED);
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -113,7 +112,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.UriType(uri);
             default:
-                throw new InvalidRequestException(UNSUPPORTED);
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -146,7 +145,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.CanonicalType(value);
             default:
-                throw new InvalidRequestException(UNSUPPORTED);
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -163,7 +162,7 @@ public class VersionUtilities {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.BooleanType(value);
             case R4 -> new org.hl7.fhir.r4.model.BooleanType(value);
             case R5 -> new org.hl7.fhir.r5.model.BooleanType(value);
-            default -> throw new InvalidRequestException(UNSUPPORTED);
+            default -> throw new IllegalArgumentException(UNSUPPORTED);
         };
     }
 
@@ -185,7 +184,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.CodeType(code);
             default:
-                throw new InvalidRequestException(UNSUPPORTED);
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 
@@ -207,7 +206,7 @@ public class VersionUtilities {
             case R5:
                 return new org.hl7.fhir.r5.model.Reference().setReference(value);
             default:
-                throw new InvalidRequestException(UNSUPPORTED);
+                throw new IllegalArgumentException(UNSUPPORTED);
         }
     }
 }

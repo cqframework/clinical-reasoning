@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,7 +29,7 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     public ParametersParameterComponentAdapter(IBase parametersParameterComponent) {
         super(FhirVersionEnum.R5, parametersParameterComponent);
         if (!parametersParameterComponent.fhirType().equals("Parameters.parameter")) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "element passed as parametersParameterComponent argument is not a ParametersParameterComponent Element");
         }
 

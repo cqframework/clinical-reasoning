@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.spring.fhir.adapter;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +21,7 @@ public class AdapterConfiguration {
             case DSTU2_1:
             case DSTU2_HL7ORG:
             default:
-                throw new InvalidRequestException("FHIR version %s is not supported."
+                throw new UnsupportedOperationException("FHIR version %s is not supported."
                         .formatted(fhirContext.getVersion().getVersion().toString()));
         }
     }

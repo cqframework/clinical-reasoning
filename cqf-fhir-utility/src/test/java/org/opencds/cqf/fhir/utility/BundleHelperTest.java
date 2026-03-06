@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -361,7 +360,7 @@ class BundleHelperTest {
 
     @Test
     void unsupportedVersionThrows() {
-        assertThrows(InvalidRequestException.class, () -> BundleHelper.newBundle(FhirVersionEnum.DSTU2));
+        assertThrows(IllegalArgumentException.class, () -> BundleHelper.newBundle(FhirVersionEnum.DSTU2));
     }
 
     private org.hl7.fhir.instance.model.api.IBaseResource createPatient(FhirVersionEnum version) {
@@ -369,7 +368,7 @@ class BundleHelperTest {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.Patient().setId("test");
             case R4 -> new org.hl7.fhir.r4.model.Patient().setId("test");
             case R5 -> new org.hl7.fhir.r5.model.Patient().setId("test");
-            default -> throw new InvalidRequestException("Unsupported");
+            default -> throw new IllegalArgumentException("Unsupported");
         };
     }
 
@@ -402,7 +401,7 @@ class BundleHelperTest {
                 sp.setExpression("Patient.name");
                 yield sp;
             }
-            default -> throw new InvalidRequestException("Unsupported");
+            default -> throw new IllegalArgumentException("Unsupported");
         };
     }
 }

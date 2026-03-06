@@ -11,7 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -40,7 +39,7 @@ class QuestionnaireAdapterTest implements IQuestionnaireAdapterTest<Questionnair
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(InvalidRequestException.class, () -> adapterFactory.createQuestionnaire(library));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createQuestionnaire(library));
     }
 
     @Test

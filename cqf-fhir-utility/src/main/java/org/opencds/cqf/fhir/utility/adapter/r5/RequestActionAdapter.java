@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -32,7 +31,7 @@ public class RequestActionAdapter extends BaseAdapter implements IRequestActionA
     public RequestActionAdapter(IBase requestAction) {
         super(FhirVersionEnum.R5, requestAction);
         if (!(requestAction instanceof RequestOrchestrationActionComponent)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "element passed as action argument is not a RequestOrchestrationActionComponent Element");
         }
         this.requestAction = (RequestOrchestrationActionComponent) requestAction;

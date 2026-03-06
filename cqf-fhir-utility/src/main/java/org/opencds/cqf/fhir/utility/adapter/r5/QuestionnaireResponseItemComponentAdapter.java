@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -23,7 +22,7 @@ public class QuestionnaireResponseItemComponentAdapter extends BaseAdapter
     public QuestionnaireResponseItemComponentAdapter(IBase item) {
         super(FhirVersionEnum.R5, item);
         if (!(item instanceof QuestionnaireResponseItemComponent)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as item argument is not a QuestionnaireResponseItemComponent data type");
         }
         this.item = (QuestionnaireResponseItemComponent) item;

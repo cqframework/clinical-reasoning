@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
@@ -285,7 +284,7 @@ public class Clients {
         } else {
             for (String header : headerList) {
                 if (!header.contains(":")) {
-                    throw new InvalidRequestException("Endpoint header must contain \":\" .");
+                    throw new IllegalArgumentException("Endpoint header must contain \":\" .");
                 }
                 String[] authSplit = header.split(":");
                 leftAuth = authSplit[0];

@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 import static java.util.Optional.ofNullable;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Optional;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -19,7 +18,7 @@ class ResourceAdapter extends BaseResourceAdapter {
         super(resource);
 
         if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R5)) {
-            throw new InvalidRequestException("resource is incorrect fhir version for this adapter");
+            throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
         }
     }
 
@@ -54,7 +53,7 @@ class ResourceAdapter extends BaseResourceAdapter {
         }
 
         if (values.length > 1) {
-            throw new InvalidRequestException("more than one value found for property: %s".formatted(name));
+            throw new IllegalArgumentException("more than one value found for property: %s".formatted(name));
         }
 
         return values[0];

@@ -11,7 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -36,7 +35,7 @@ class PlanDefinitionAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(InvalidRequestException.class, () -> adapterFactory.createPlanDefinition(library));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createPlanDefinition(library));
     }
 
     @Test

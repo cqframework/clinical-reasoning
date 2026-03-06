@@ -3,14 +3,13 @@ package org.opencds.cqf.fhir.utility.monad;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.Test;
 
 class TriesTest {
 
     @Test
     void ofWithError() {
-        var t = Tries.of(new InternalErrorException("error"), null);
+        var t = Tries.of(new RuntimeException("error"), null);
         assertTrue(t.hasException());
     }
 
@@ -31,14 +30,14 @@ class TriesTest {
     @Test
     void ofSupplierFailure() {
         var t = Tries.of(() -> {
-            throw new InternalErrorException("fail");
+            throw new RuntimeException("fail");
         });
         assertTrue(t.hasException());
     }
 
     @Test
     void ofExceptionDirectly() {
-        var t = Tries.<String>ofException(new InternalErrorException("fail"));
+        var t = Tries.<String>ofException(new RuntimeException("fail"));
         assertTrue(t.hasException());
     }
 

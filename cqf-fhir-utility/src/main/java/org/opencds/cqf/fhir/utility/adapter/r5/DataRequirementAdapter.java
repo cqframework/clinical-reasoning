@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -18,7 +17,7 @@ public class DataRequirementAdapter extends BaseAdapter implements IDataRequirem
     public DataRequirementAdapter(IBase compositeType) {
         super(FhirVersionEnum.R5, compositeType);
         if (!(compositeType instanceof DataRequirement dataRequirementInner)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as dataRequirement argument is not a DataRequirement data type");
         }
         this.dataRequirement = dataRequirementInner;

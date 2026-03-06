@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.jupiter.api.Test;
 
 class TryTest {
@@ -35,7 +34,7 @@ class TryTest {
 
         t = Tries.of(1);
         result = t.flatMap(i -> {
-            throw new InternalErrorException("runtime exception");
+            throw new RuntimeException("runtime exception");
         });
         assertFalse(result.hasResult());
         assertTrue(result.hasException());
@@ -58,7 +57,7 @@ class TryTest {
 
         t = Tries.of(1);
         result = t.map(i -> {
-            throw new InternalErrorException("runtime exception");
+            throw new RuntimeException("runtime exception");
         });
         assertFalse(result.hasResult());
         assertTrue(result.hasException());

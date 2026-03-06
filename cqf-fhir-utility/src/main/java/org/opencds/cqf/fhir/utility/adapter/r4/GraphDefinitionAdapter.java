@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -23,7 +22,7 @@ public class GraphDefinitionAdapter extends ResourceAdapter implements IGraphDef
     public GraphDefinitionAdapter(IDomainResource graphDefinition) {
         super(graphDefinition);
         if (!(graphDefinition instanceof GraphDefinition)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "resource passed as graphDefinition argument is not a GraphDefinition resource");
         }
     }

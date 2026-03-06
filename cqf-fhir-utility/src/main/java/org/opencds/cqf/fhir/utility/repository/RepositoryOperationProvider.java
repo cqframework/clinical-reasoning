@@ -20,7 +20,6 @@ import static org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_USE_SERVER_
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -81,7 +80,7 @@ public class RepositoryOperationProvider implements IRepositoryOperationProvider
                             (IBaseResource) paramMap.get(APPLY_PARAMETER_TERMINOLOGY_ENDPOINT));
 
                 default:
-                    throw new InvalidRequestException(
+                    throw new IllegalArgumentException(
                             "(%s) operation not supported for type (%s)".formatted(operationName, resourceType));
             }
         }

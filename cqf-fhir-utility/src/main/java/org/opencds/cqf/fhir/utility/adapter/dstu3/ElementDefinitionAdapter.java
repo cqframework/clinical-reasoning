@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.ElementDefinition;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
@@ -20,7 +19,7 @@ public class ElementDefinitionAdapter extends BaseAdapter implements IElementDef
     public ElementDefinitionAdapter(IBase elementDefinition) {
         super(FhirVersionEnum.DSTU3, elementDefinition);
         if (!(elementDefinition instanceof ElementDefinition)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as elementDefinition argument is not a ElementDefinition data type");
         }
         this.elementDefinition = (ElementDefinition) elementDefinition;

@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceBlockDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,7 +34,7 @@ public class ValueSets {
         }
 
         if (compose.size() > 1) {
-            throw new InvalidRequestException("ValueSet has multiple compose definitions.");
+            throw new IllegalArgumentException("ValueSet has multiple compose definitions.");
         }
 
         return compose.get(0);
@@ -172,7 +171,7 @@ public class ValueSets {
         }
 
         if (expansion.size() > 1) {
-            throw new InvalidRequestException("ValueSet has multiple expansion definitions.");
+            throw new IllegalArgumentException("ValueSet has multiple expansion definitions.");
         }
 
         return expansion.get(0);
@@ -364,14 +363,14 @@ public class ValueSets {
         }
 
         if (values.size() > 1) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "More than one value returned while attempting to access primitive value.");
         }
 
         IBase baseValue = values.get(0);
 
         if (!(baseValue instanceof IPrimitiveType)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "Non-primitive value encountered while trying to access primitive value.");
         } else {
             return ((IPrimitiveType<?>) baseValue).getValueAsString();

@@ -8,8 +8,6 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.BundleUtil;
 import java.io.File;
 import java.net.URI;
@@ -67,7 +65,7 @@ public class DirectoryBundler {
             }
         } catch (Exception e) {
             logger.error("error parsing uri from path: %s".formatted(path), e);
-            throw new InternalErrorException(e);
+            throw new RuntimeException(e);
         }
 
         Collection<File> files;
@@ -92,14 +90,14 @@ public class DirectoryBundler {
             }
         } catch (Exception e) {
             logger.error("error attempting to list jar: %s".formatted(uri.toString()));
-            throw new InternalErrorException(e);
+            throw new RuntimeException(e);
         }
     }
 
     private Collection<File> listDirectory(String path) {
         File resourceDirectory = new File(path);
         if (!resourceDirectory.getAbsoluteFile().exists()) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "The specified path to resource files does not exist: %s".formatted(path));
         }
 
@@ -108,7 +106,7 @@ public class DirectoryBundler {
         } else if (path.toLowerCase().endsWith("xml") || path.toLowerCase().endsWith("json")) {
             return Collections.singletonList(resourceDirectory);
         } else {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "path was not a directory or a recognized FHIR file format (XML, JSON) : %s".formatted(path));
         }
     }

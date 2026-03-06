@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Library;
@@ -23,7 +22,7 @@ class QuestionnaireItemComponentAdapterTest {
     @Test
     void invalid_object_fails() {
         var library = new Library();
-        assertThrows(InvalidRequestException.class, () -> adapterFactory.createQuestionnaireItem(library));
+        assertThrows(IllegalArgumentException.class, () -> adapterFactory.createQuestionnaireItem(library));
     }
 
     @Test

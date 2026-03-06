@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -70,7 +69,7 @@ class CqlContentTest {
     @Test
     void invalidFhirVersionThrows() {
         var lib = new org.hl7.fhir.r4b.model.Library();
-        assertThrows(InvalidRequestException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             CqlContent.loadCqlContent(lib, tempDir);
         });
     }

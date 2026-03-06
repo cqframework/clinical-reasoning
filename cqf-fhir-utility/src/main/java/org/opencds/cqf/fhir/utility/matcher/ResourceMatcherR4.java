@@ -7,7 +7,6 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +48,7 @@ public class ResourceMatcherR4 implements ResourceMatcher {
         } else if (type instanceof Timing) {
             throw new NotImplementedException("Timing resolution has not yet been implemented");
         } else {
-            throw new InvalidRequestException("Expected element of type Period or Timing, found "
+            throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
                     + type.getClass().getSimpleName());
         }
     }

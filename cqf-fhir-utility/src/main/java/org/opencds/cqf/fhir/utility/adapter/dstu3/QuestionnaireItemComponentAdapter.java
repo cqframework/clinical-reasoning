@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +27,7 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
     public QuestionnaireItemComponentAdapter(IBase item) {
         super(FhirVersionEnum.DSTU3, item);
         if (!(item instanceof QuestionnaireItemComponent)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "object passed as item argument is not a QuestionnaireItemComponent data type");
         }
         this.item = (QuestionnaireItemComponent) item;

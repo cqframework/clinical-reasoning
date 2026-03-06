@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +48,7 @@ public abstract class BaseBackboneElementBuilder<
                 initializeR5(backboneElement);
                 break;
             default:
-                throw new InvalidRequestException("ResourceBuilder.initializeResource does not support FHIR version %s"
+                throw new IllegalArgumentException("ResourceBuilder.initializeResource does not support FHIR version %s"
                         .formatted(FhirVersions.forClass(resourceClass).getFhirVersionString()));
         }
 

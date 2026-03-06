@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,7 +26,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
     public KnowledgeArtifactAdapter(IDomainResource resource) {
         super(resource);
         if (!(resource instanceof CanonicalResource)) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "resource passed as resource argument is not a CanonicalResource resource");
         }
         adaptedResource = (CanonicalResource) resource;

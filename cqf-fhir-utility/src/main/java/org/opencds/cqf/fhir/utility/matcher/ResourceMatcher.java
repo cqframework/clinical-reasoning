@@ -16,8 +16,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
@@ -91,7 +89,7 @@ public interface ResourceMatcher {
             s = this.getCustomParameters().get(name);
         }
         if (s == null) {
-            throw new InternalErrorException(
+            throw new RuntimeException(
                     "The SearchParameter %s for Resource %s is not supported.".formatted(name, resource.fhirType()));
         }
 
@@ -108,7 +106,7 @@ public interface ResourceMatcher {
                 try {
                     return getEngine().parse(p.path());
                 } catch (Exception e) {
-                    throw new InternalErrorException(
+                    throw new RuntimeException(
                             "Parsing SearchParameter %s for Resource %s resulted in an error."
                                     .formatted(name, resource.fhirType()),
                             e);
@@ -116,7 +114,7 @@ public interface ResourceMatcher {
             });
             pathResult = getEngine().evaluate(resource, parsed, IBase.class);
         } catch (Exception e) {
-            throw new InternalErrorException(
+            throw new RuntimeException(
                     "Evaluating SearchParameter %s for Resource %s resulted in an error."
                             .formatted(name, resource.fhirType()),
                     e);
@@ -242,7 +240,7 @@ public interface ResourceMatcher {
             } else if (reference1.getResource() != null) {
                 refVal = reference1.getResource().getIdElement().getValue();
             } else {
-                throw new InvalidRequestException("No reference found");
+                throw new UnsupportedOperationException("No reference found");
             }
             return refVal.equals(((ReferenceParam) param).getValue());
         } else if (pathResult instanceof IPrimitiveType<?> type1) {
@@ -259,7 +257,7 @@ public interface ResourceMatcher {
                 }
             }
         } else {
-            throw new InvalidRequestException(
+            throw new UnsupportedOperationException(
                     "Expected Reference element, found " + pathResult.getClass().getSimpleName());
         }
         return false;
@@ -273,11 +271,11 @@ public interface ResourceMatcher {
             if (result instanceof Date date) {
                 return isDateMatch(param, date);
             } else {
-                throw new InvalidRequestException(
+                throw new UnsupportedOperationException(
                         "Expected date, found " + pathResult.getClass().getSimpleName());
             }
         } else {
-            throw new InvalidRequestException(
+            throw new UnsupportedOperationException(
                     "Expected element of type date, dateTime, instant, Timing or Period, found "
                             + pathResult.getClass().getSimpleName());
         }
@@ -313,7 +311,7 @@ public interface ResourceMatcher {
                 String msg = String.format(
                         "Unsupported DateTime comparison operation %s",
                         param.getPrefix().getValue());
-                throw new InvalidRequestException(msg);
+                throw new UnsupportedOperationException(msg);
             }
         }
     }
@@ -344,7 +342,7 @@ public interface ResourceMatcher {
         }
 
         if (param.getModifier() == TokenParamModifier.IN) {
-            throw new InvalidRequestException("In modifier is unsupported");
+            throw new UnsupportedOperationException("In modifier is unsupported");
         }
 
         for (var c : codes) {
@@ -362,7 +360,7 @@ public interface ResourceMatcher {
         if (pathResult instanceof IPrimitiveType<?> type) {
             return param.getValue().equals(type.getValue());
         }
-        throw new InvalidRequestException("Expected element of type url or uri, found "
+        throw new UnsupportedOperationException("Expected element of type url or uri, found "
                 + pathResult.getClass().getSimpleName());
     }
 
@@ -370,7 +368,7 @@ public interface ResourceMatcher {
         if (pathResult instanceof IPrimitiveType<?> type) {
             return param.getValue().equals(type.getValue());
         }
-        throw new InvalidRequestException("Expected element of type string, found "
+        throw new UnsupportedOperationException("Expected element of type string, found "
                 + pathResult.getClass().getSimpleName());
     }
 

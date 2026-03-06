@@ -477,4 +477,335 @@ class InferManifestParametersVisitorTest {
         assertTrue(ext.getValue() instanceof Reference, "Extension value should be a Reference");
         assertEquals("#expansion-parameters", ((Reference) ext.getValue()).getReference());
     }
+
+    // ---- DSTU3 tests ----
+
+    @Test
+    void inferManifestParameters_Dstu3_CodeSystemDependency_CreatesSystemVersionParameter() {
+        var dstu3Context = ca.uhn.fhir.context.FhirContext.forDstu3Cached();
+        var repository = new InMemoryFhirRepository(dstu3Context);
+
+        var moduleDefinition = createDstu3ModuleDefinition();
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource(new org.hl7.fhir.dstu3.model.Reference("http://example.org/CodeSystem/test-cs|1.0.0"));
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var dstu3AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+        var adapter = dstu3AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.dstu3.model.Library) visitor.visit(adapter, null);
+
+        assertEquals("asset-collection", result.getType().getCodingFirstRep().getCode());
+        assertEquals("ModuleDefManifest", result.getName());
+        assertEquals(1, result.getContained().size());
+
+        var parameters =
+                (org.hl7.fhir.dstu3.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("system-version", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_Dstu3_ValueSetDependency_CreatesCanonicalVersionParameter() {
+        var dstu3Context = ca.uhn.fhir.context.FhirContext.forDstu3Cached();
+        var repository = new InMemoryFhirRepository(dstu3Context);
+
+        var moduleDefinition = createDstu3ModuleDefinition();
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource(new org.hl7.fhir.dstu3.model.Reference("http://example.org/ValueSet/test-vs|2.0.0"));
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var dstu3AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+        var adapter = dstu3AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.dstu3.model.Library) visitor.visit(adapter, null);
+
+        var parameters =
+                (org.hl7.fhir.dstu3.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("canonicalVersion", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_Dstu3_EmptyRelatedArtifacts_NoParameters() {
+        var dstu3Context = ca.uhn.fhir.context.FhirContext.forDstu3Cached();
+        var repository = new InMemoryFhirRepository(dstu3Context);
+
+        var moduleDefinition = createDstu3ModuleDefinition();
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var dstu3AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+        var adapter = dstu3AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.dstu3.model.Library) visitor.visit(adapter, null);
+
+        assertEquals("asset-collection", result.getType().getCodingFirstRep().getCode());
+        assertTrue(result.getContained().isEmpty());
+    }
+
+    @Test
+    void inferManifestParameters_Dstu3_ComposedOfPropagated() {
+        var dstu3Context = ca.uhn.fhir.context.FhirContext.forDstu3Cached();
+        var repository = new InMemoryFhirRepository(dstu3Context);
+
+        var moduleDefinition = createDstu3ModuleDefinition();
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF)
+                .setResource(new org.hl7.fhir.dstu3.model.Reference("http://example.org/ImplementationGuide/ig|1.0.0"));
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource(new org.hl7.fhir.dstu3.model.Reference("http://example.org/CodeSystem/test-cs|1.0.0"));
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var dstu3AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+        var adapter = dstu3AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.dstu3.model.Library) visitor.visit(adapter, null);
+
+        var composedOf = result.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF)
+                .toList();
+        assertEquals(1, composedOf.size());
+        assertEquals(1, result.getContained().size());
+    }
+
+    @Test
+    void inferManifestParameters_Dstu3_KeyDependencyRoleFilter() {
+        var dstu3Context = ca.uhn.fhir.context.FhirContext.forDstu3Cached();
+        var repository = new InMemoryFhirRepository(dstu3Context);
+
+        var moduleDefinition = createDstu3ModuleDefinition();
+
+        // Add depends-on with "key" role
+        var keyRa = moduleDefinition.addRelatedArtifact();
+        keyRa.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        keyRa.setResource(new org.hl7.fhir.dstu3.model.Reference("http://example.org/CodeSystem/key-cs|1.0.0"));
+        keyRa.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.dstu3.model.CodeType("key"));
+
+        // Add depends-on with "default" role only
+        var defaultRa = moduleDefinition.addRelatedArtifact();
+        defaultRa.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        defaultRa.setResource(new org.hl7.fhir.dstu3.model.Reference("http://example.org/ValueSet/default-vs|2.0.0"));
+        defaultRa.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.dstu3.model.CodeType("default"));
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var dstu3AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+        var adapter = dstu3AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.dstu3.model.Library) visitor.visit(adapter, null);
+
+        var parameters =
+                (org.hl7.fhir.dstu3.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("system-version", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_Dstu3_NullName_UsesDefault() {
+        var dstu3Context = ca.uhn.fhir.context.FhirContext.forDstu3Cached();
+        var repository = new InMemoryFhirRepository(dstu3Context);
+
+        var moduleDefinition = createDstu3ModuleDefinition();
+        moduleDefinition.setName(null); // null name
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var dstu3AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory();
+        var adapter = dstu3AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.dstu3.model.Library) visitor.visit(adapter, null);
+
+        assertEquals("Manifest", result.getName());
+    }
+
+    private org.hl7.fhir.dstu3.model.Library createDstu3ModuleDefinition() {
+        var lib = new org.hl7.fhir.dstu3.model.Library();
+        lib.setUrl("http://example.org/Library/module-def");
+        lib.setVersion("1.0.0");
+        lib.setName("ModuleDef");
+        lib.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
+        var typeCC = new org.hl7.fhir.dstu3.model.CodeableConcept();
+        typeCC.addCoding()
+                .setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+                .setCode("module-definition");
+        lib.setType(typeCC);
+        return lib;
+    }
+
+    // ---- R5 tests ----
+
+    @Test
+    void inferManifestParameters_R5_CodeSystemDependency_CreatesSystemVersionParameter() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://example.org/CodeSystem/test-cs|1.0.0");
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        assertEquals("asset-collection", result.getType().getCodingFirstRep().getCode());
+        assertEquals("ModuleDefManifest", result.getName());
+        assertEquals(1, result.getContained().size());
+
+        var parameters =
+                (org.hl7.fhir.r5.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("system-version", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_R5_ValueSetDependency_CreatesCanonicalVersionParameter() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://example.org/ValueSet/test-vs|2.0.0");
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        var parameters =
+                (org.hl7.fhir.r5.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("canonicalVersion", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_R5_EmptyRelatedArtifacts_NoParameters() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        assertEquals("asset-collection", result.getType().getCodingFirstRep().getCode());
+        assertTrue(result.getContained().isEmpty());
+    }
+
+    @Test
+    void inferManifestParameters_R5_ComposedOfPropagated() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF)
+                .setResource("http://example.org/ImplementationGuide/ig|1.0.0");
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://example.org/CodeSystem/test-cs|1.0.0");
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        var composedOf = result.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF)
+                .toList();
+        assertEquals(1, composedOf.size());
+        assertEquals(1, result.getContained().size());
+    }
+
+    @Test
+    void inferManifestParameters_R5_KeyDependencyRoleFilter() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+
+        // Add depends-on with "key" role
+        var keyRa = moduleDefinition.addRelatedArtifact();
+        keyRa.setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        keyRa.setResource("http://example.org/CodeSystem/key-cs|1.0.0");
+        keyRa.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r5.model.CodeType("key"));
+
+        // Add depends-on with "default" role only
+        var defaultRa = moduleDefinition.addRelatedArtifact();
+        defaultRa.setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        defaultRa.setResource("http://example.org/ValueSet/default-vs|2.0.0");
+        defaultRa.addExtension(Constants.CRMI_DEPENDENCY_ROLE, new org.hl7.fhir.r5.model.CodeType("default"));
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        var parameters =
+                (org.hl7.fhir.r5.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("system-version", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_R5_ResourceTypeExtension() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+
+        // Add dependency with cqf-resourceType extension
+        var ra = moduleDefinition.addRelatedArtifact();
+        ra.setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.DEPENDSON);
+        var resourceElement = new org.hl7.fhir.r5.model.CanonicalType("https://www.usps.com/|1.0.0");
+        resourceElement.addExtension(Constants.CQF_RESOURCETYPE, new org.hl7.fhir.r5.model.CodeType("CodeSystem"));
+        ra.setResourceElement(resourceElement);
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        var parameters =
+                (org.hl7.fhir.r5.model.Parameters) result.getContained().get(0);
+        assertEquals(1, parameters.getParameter().size());
+        assertEquals("system-version", parameters.getParameter().get(0).getName());
+    }
+
+    @Test
+    void inferManifestParameters_R5_NullName_UsesDefault() {
+        var r5Context = ca.uhn.fhir.context.FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+
+        var moduleDefinition = createR5ModuleDefinition();
+        moduleDefinition.setName(null);
+
+        var visitor = new InferManifestParametersVisitor(repository);
+        var r5AdapterFactory = new org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory();
+        var adapter = r5AdapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (org.hl7.fhir.r5.model.Library) visitor.visit(adapter, null);
+
+        assertEquals("Manifest", result.getName());
+    }
+
+    private org.hl7.fhir.r5.model.Library createR5ModuleDefinition() {
+        var lib = new org.hl7.fhir.r5.model.Library();
+        lib.setUrl("http://example.org/Library/module-def");
+        lib.setVersion("1.0.0");
+        lib.setName("ModuleDef");
+        lib.setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE);
+        var typeCC = new org.hl7.fhir.r5.model.CodeableConcept();
+        typeCC.addCoding()
+                .setSystem("http://terminology.hl7.org/CodeSystem/library-type")
+                .setCode("module-definition");
+        lib.setType(typeCC);
+        return lib;
+    }
 }

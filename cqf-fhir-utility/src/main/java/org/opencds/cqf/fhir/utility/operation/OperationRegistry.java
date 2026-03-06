@@ -121,7 +121,7 @@ public class OperationRegistry {
                 .collect(Collectors.toList());
 
         if (methodBinders.isEmpty()) {
-            throw new InvalidRequestException("No operations found on class " + clazz.getName());
+            throw new IllegalArgumentException("No operations found on class " + clazz.getName());
         }
 
         for (var methodBinder : methodBinders) {

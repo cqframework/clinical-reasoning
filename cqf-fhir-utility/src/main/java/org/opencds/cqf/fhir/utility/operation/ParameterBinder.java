@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
@@ -49,22 +50,22 @@ interface ParameterBinder {
         var idParamCount =
                 parameterBinders.stream().filter(x -> x.type() == Type.ID).count();
         if (idParamCount > 1) {
-            throw new InvalidRequestException("Method cannot have more than one @IdParam");
+            throw new IllegalArgumentException("Method cannot have more than one @IdParam");
         }
 
         if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
-            throw new InvalidRequestException("If @IdParam is present, it must be the first parameter");
+            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
         }
 
         var extraParamCount =
                 parameterBinders.stream().filter(x -> x.type() == Type.EXTRA).count();
         if (extraParamCount > 1) {
-            throw new InvalidRequestException("Method cannot have more than one @ExtraParams");
+            throw new IllegalArgumentException("Method cannot have more than one @ExtraParams");
         }
 
         if (extraParamCount > 0
                 && parameterBinders.get(parameterBinders.size() - 1).type() != Type.EXTRA) {
-            throw new InvalidRequestException("If @ExtraParams is present, it must be the last parameter");
+            throw new IllegalArgumentException("If @ExtraParams is present, it must be the last parameter");
         }
 
         return parameterBinders;
@@ -95,10 +96,10 @@ interface ParameterBinder {
                 .count();
 
         if (count == 0) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "Method Parameter must be annotated with @IdParam, @OperationParam, or @ExtraParams");
         } else if (count > 1) {
-            throw new InvalidRequestException(
+            throw new IllegalArgumentException(
                     "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @ExtraParams");
         }
     }
@@ -125,7 +126,7 @@ interface ParameterBinder {
 
         @Override
         public Object bind(IBaseParameters parameters) {
-            throw new InvalidRequestException("bind is not supported for @IdParam");
+            throw new InternalErrorException("bind is not supported for @IdParam");
         }
 
         @Override
@@ -162,7 +163,7 @@ interface ParameterBinder {
             } else if (List.class.isAssignableFrom(type)) {
                 return ParameterClass.LIST;
             } else {
-                throw new InvalidRequestException("Parameter annotated with @Operation must be a FHIR type or a List");
+                throw new IllegalArgumentException("Parameter annotated with @Operation must be a FHIR type or a List");
             }
         }
 

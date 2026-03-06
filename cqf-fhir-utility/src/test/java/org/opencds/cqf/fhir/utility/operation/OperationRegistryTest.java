@@ -58,7 +58,7 @@ class OperationRegistryTest {
 
         var operationRegistry = new OperationRegistry();
         assertThrows(
-                InvalidRequestException.class,
+                IllegalArgumentException.class,
                 () -> operationRegistry.register(MissingAnnotationExample.class, r -> new MissingAnnotationExample()));
     }
 

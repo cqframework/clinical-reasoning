@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 /**
  * Immutable cache holding pre-computed references for measure observation scoring.
@@ -25,11 +25,11 @@ public record MeasureObservationStratumCache(
     /**
      * Compact constructor enforcing all-or-nothing semantics.
      *
-     * @throws InvalidRequestException if either parameter is null
+     * @throws InternalErrorException if either parameter is null
      */
     public MeasureObservationStratumCache {
         if (numeratorObservation == null || denominatorObservation == null) {
-            throw new InvalidRequestException("Both numerator and denominator observations must be non-null");
+            throw new InternalErrorException("Both numerator and denominator observations must be non-null");
         }
     }
 }

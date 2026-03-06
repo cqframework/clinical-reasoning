@@ -113,12 +113,12 @@ class MethodBinderTest {
 
     @Test
     void idLast_throws() {
-        assertThrows(InvalidRequestException.class, () -> methodBinderByName("idLast"));
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("idLast"));
     }
 
     @Test
     void manyIds_throws() {
-        assertThrows(InvalidRequestException.class, () -> methodBinderByName("manyIds"));
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("manyIds"));
     }
 
     @Test
@@ -136,7 +136,7 @@ class MethodBinderTest {
 
     @Test
     void extraFirst_throws() {
-        assertThrows(InvalidRequestException.class, () -> methodBinderByName("extraFirst"));
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("extraFirst"));
     }
 
     @Test
@@ -149,7 +149,7 @@ class MethodBinderTest {
 
     @Test
     void manyExtra_throws() {
-        assertThrows(InvalidRequestException.class, () -> methodBinderByName("manyExtra"));
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("manyExtra"));
     }
 
     @Test
@@ -159,7 +159,7 @@ class MethodBinderTest {
 
     @Test
     void operationParamIsNotFhirType_throws() {
-        assertThrows(InvalidRequestException.class, () -> methodBinderByName("operationParamIsNotFhirType"));
+        assertThrows(IllegalArgumentException.class, () -> methodBinderByName("operationParamIsNotFhirType"));
     }
 
     @Test
@@ -254,7 +254,7 @@ class MethodBinderTest {
         }
 
         var method = MissingOperationAnnotation.class.getDeclaredMethods()[0];
-        var e = assertThrows(InvalidRequestException.class, () -> new MethodBinder(method));
+        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
         assertTrue(e.getMessage().contains("must be annotated"));
     }
 
@@ -272,7 +272,7 @@ class MethodBinderTest {
                 .findFirst()
                 .orElseThrow();
 
-        var e = assertThrows(InvalidRequestException.class, () -> new MethodBinder(method));
+        var e = assertThrows(IllegalArgumentException.class, () -> new MethodBinder(method));
         assertTrue(e.getMessage().contains("one of"));
     }
 

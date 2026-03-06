@@ -1,0 +1,48 @@
+{
+  "resourceType": "Organization",
+  "id": "fdc0f679-fa90-4754-908a-567199eaa291",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-organization"
+    ]
+  },
+  "identifier": [
+    {
+      "use": "temp",
+      "system": "urn:oid:2.16.840.1.113883.4.4",
+      "value": "21-3259825"
+    }
+  ],
+  "active": true,
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "pay",
+          "display": "Payer"
+        }
+      ]
+    }
+  ],
+  "name": "Blue Cross Blue Shield of Texas",
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "(+1) 972-766-6900"
+    }
+  ],
+  "address": [
+    {
+      "use": "billing",
+      "type": "postal",
+      "line": [
+        "P.O. Box 660044"
+      ],
+      "city": "Dallas",
+      "state": "TX",
+      "postalCode": "75266-0044",
+      "country": "USA"
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.1003-20210820",
+  "meta": {
+    "versionId": "9",
+    "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-10"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2021-08-20"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1003",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.1003"
+    }
+  ],
+  "version": "20210820",
+  "name": "HospiceEncounter",
+  "title": "Hospice Encounter",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-03-03T18:46:01-05:00",
+  "publisher": "NCQA PHEMUR",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for encounters for hospice care services.),(Data Element Scope: This value set may use a model element related to Encounter.),(Inclusion Criteria: Includes concepts that represent hospice services in a hospice, home or inpatient setting.),(Exclusion Criteria: Excludes concepts that represent palliative care or comfort measures.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1002"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.1001"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:12f7e191-f0e1-400d-8314-3d23c8797be3",
+    "timestamp": "2025-08-28T16:49:51-04:00",
+    "total": 26,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "183919006",
+        "display": "Urgent admission to hospice (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "183920000",
+        "display": "Routine admission to hospice (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "183921001",
+        "display": "Admission to hospice for respite (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "305336008",
+        "display": "Admission to hospice (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "305911006",
+        "display": "Seen in hospice (finding)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "385765002",
+        "display": "Hospice care management (procedure)"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9473",
+        "display": "Services performed by chaplain in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9474",
+        "display": "Services performed by dietary counselor in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9475",
+        "display": "Services performed by other counselor in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9476",
+        "display": "Services performed by volunteer in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9477",
+        "display": "Services performed by care coordinator in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9478",
+        "display": "Services performed by other qualified therapist in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G9479",
+        "display": "Services performed by qualified pharmacist in the hospice setting, each 15 minutes"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5003",
+        "display": "Hospice care provided in nursing long term care facility (ltc) or non-skilled nursing facility (nf)"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5004",
+        "display": "Hospice care provided in skilled nursing facility (snf)"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5005",
+        "display": "Hospice care provided in inpatient hospital"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5006",
+        "display": "Hospice care provided in inpatient hospice facility"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5007",
+        "display": "Hospice care provided in long term care facility"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5008",
+        "display": "Hospice care provided in inpatient psychiatric facility"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "Q5010",
+        "display": "Hospice home care provided in a hospice facility"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "S9126",
+        "display": "Hospice care, in the home, per diem"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "T2042",
+        "display": "Hospice routine home care; per diem"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "T2043",
+        "display": "Hospice continuous home care; per hour"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "T2044",
+        "display": "Hospice inpatient respite care; per diem"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "T2045",
+        "display": "Hospice general inpatient care; per diem"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "T2046",
+        "display": "Hospice long term care, room and board only; per diem"
+      }
+    ]
+  }
+}

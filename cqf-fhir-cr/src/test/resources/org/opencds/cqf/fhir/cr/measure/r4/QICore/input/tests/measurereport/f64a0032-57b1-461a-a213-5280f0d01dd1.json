@@ -1,0 +1,112 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "f64a0032-57b1-461a-a213-5280f0d01dd1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Parameters",
+      "id": "bd9b1520-7f59-42d2-8bbc-08c2d27b3410-parameters",
+      "parameter": [
+        {
+          "name": "subject",
+          "valueString": "8eca4ab8-49f0-45e4-b1ee-dc34e54dd430"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters",
+      "valueReference": {
+        "reference": "#bd9b1520-7f59-42d2-8bbc-08c2d27b3410-parameters"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-testCaseDescription",
+      "valueMarkdown": "IP encounter, hypoglycemic administered, 1 glucose lab test with result LT 40. Meets Numerator."
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase",
+      "valueBoolean": true
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "https://madie.cms.gov/Measure/CMS816FHIRHHHypo",
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "group": [
+    {
+      "id": "Group_1",
+      "population": [
+        {
+          "id": "InitialPopulation_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "Denominator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "Numerator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 1
+        }
+      ],
+      "measureScore": {
+        "value": 0.0
+      }
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "Patient/8eca4ab8-49f0-45e4-b1ee-dc34e54dd430"
+    },
+    {
+      "reference": "Coverage/0b445110-9693-422c-813a-d04a452b28a3"
+    },
+    {
+      "reference": "Encounter/e932e926-cd1b-4ea7-960a-bea5b3e97dc7"
+    },
+    {
+      "reference": "MedicationAdministration/0f003d30-2668-417f-b510-db8e134353d8"
+    },
+    {
+      "reference": "Observation/fac81fc4-77a8-4c21-8cdd-c9808b0a682e"
+    }
+  ]
+}

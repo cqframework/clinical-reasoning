@@ -1,0 +1,45 @@
+{
+  "resourceType": "Observation",
+  "id": "e201c555-b333-4ded-a97b-0940fb2a11ce",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "survey"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "71802-3",
+        "display": "Housing status"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/07fb2077-048c-4cb0-ba3e-6e67ed33133d"
+  },
+  "effectivePeriod": {
+    "start": "2026-12-31T23:59:59.000+00:00",
+    "end": "2026-12-31T23:59:59.000+00:00"
+  },
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "160734000",
+        "display": "Lives in nursing home (finding)"
+      }
+    ]
+  }
+}

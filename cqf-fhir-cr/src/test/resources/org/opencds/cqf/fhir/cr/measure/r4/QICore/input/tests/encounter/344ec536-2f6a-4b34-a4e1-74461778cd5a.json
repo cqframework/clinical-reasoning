@@ -1,0 +1,33 @@
+{
+  "resourceType": "Encounter",
+  "id": "344ec536-2f6a-4b34-a4e1-74461778cd5a",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+    ]
+  },
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "185463005",
+          "display": "Visit out of hours (procedure)"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/f4d00e60-e525-4644-a397-4d7d970bcfdb"
+  },
+  "period": {
+    "start": "2026-01-01T00:00:00.000+00:00",
+    "end": "2026-01-01T00:00:00.000+00:00"
+  }
+}

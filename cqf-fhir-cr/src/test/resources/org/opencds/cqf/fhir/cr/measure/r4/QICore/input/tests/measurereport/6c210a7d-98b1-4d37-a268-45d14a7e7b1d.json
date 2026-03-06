@@ -1,0 +1,112 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "6c210a7d-98b1-4d37-a268-45d14a7e7b1d",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Parameters",
+      "id": "173f2de5-3287-4cb0-98c2-de49f8afa4dd-parameters",
+      "parameter": [
+        {
+          "name": "subject",
+          "valueString": "37fd9c7e-bf9e-4769-b448-094ed97bd3e8"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters",
+      "valueReference": {
+        "reference": "#173f2de5-3287-4cb0-98c2-de49f8afa4dd-parameters"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-testCaseDescription",
+      "valueMarkdown": "Encounter ends 7/16 at 9pm. Hypo med given. Lab test 1 with result done 7/16 at 8:58pm within 24 hours of med = 35. Lab test 2 with result done 3 minutes later at 9:01pm (1 minute after discharge ) = 81. Numerator pass since high result is after enc"
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase",
+      "valueBoolean": true
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "https://madie.cms.gov/Measure/CMS816FHIRHHHypo",
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "group": [
+    {
+      "id": "Group_1",
+      "population": [
+        {
+          "id": "InitialPopulation_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "Denominator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "Numerator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 1
+        }
+      ],
+      "measureScore": {
+        "value": 0.0
+      }
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "Encounter/bc664ff4-68d4-47f4-94cb-060a37bf56a5"
+    },
+    {
+      "reference": "MedicationAdministration/943b0f5d-3add-42f9-9aad-40837eaa4567"
+    },
+    {
+      "reference": "Observation/eeb9cf11-b9e1-451d-95a1-7b463871e5f5"
+    },
+    {
+      "reference": "Observation/1e5b4578-37ea-48b7-90eb-566b396941fc"
+    },
+    {
+      "reference": "Patient/37fd9c7e-bf9e-4769-b448-094ed97bd3e8"
+    }
+  ]
+}

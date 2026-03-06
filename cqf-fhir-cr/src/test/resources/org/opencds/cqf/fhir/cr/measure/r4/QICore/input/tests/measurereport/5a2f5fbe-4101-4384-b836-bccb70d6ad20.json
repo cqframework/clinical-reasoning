@@ -1,0 +1,109 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "5a2f5fbe-4101-4384-b836-bccb70d6ad20",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Parameters",
+      "id": "5789de1f-215d-4b92-901d-162fe996b648-parameters",
+      "parameter": [
+        {
+          "name": "subject",
+          "valueString": "cf9c230a-adc0-4830-bf04-fed4ab5ff6c8"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters",
+      "valueReference": {
+        "reference": "#5789de1f-215d-4b92-901d-162fe996b648-parameters"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-testCaseDescription",
+      "valueMarkdown": "Patient inpatient, but the med administered was not hypoglycemic med. Hypo med must be administered during encounter to meet IPP.  Patient had glucose <40 during encounter, but there was no hypo med administered on or prior to test no Numerator."
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase",
+      "valueBoolean": true
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "https://madie.cms.gov/Measure/CMS816FHIRHHHypo",
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "group": [
+    {
+      "id": "Group_1",
+      "population": [
+        {
+          "id": "InitialPopulation_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 0
+        },
+        {
+          "id": "Denominator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 0
+        },
+        {
+          "id": "Numerator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 0
+        }
+      ],
+      "measureScore": {
+        "value": 0.0
+      }
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "Encounter/a0c41e8b-5f3b-4b60-8e2a-569702ecb1e4"
+    },
+    {
+      "reference": "MedicationAdministration/b8682202-20d4-4a13-8a63-3bad854331ee"
+    },
+    {
+      "reference": "Observation/cd22567e-b6ad-4bba-9748-1024ae7cd979"
+    },
+    {
+      "reference": "Patient/cf9c230a-adc0-4830-bf04-fed4ab5ff6c8"
+    }
+  ]
+}

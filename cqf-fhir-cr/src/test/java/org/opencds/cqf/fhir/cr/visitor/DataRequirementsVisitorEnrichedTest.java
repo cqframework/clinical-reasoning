@@ -158,9 +158,14 @@ class DataRequirementsVisitorEnrichedTest {
 
         // The enriched path produces RelatedArtifacts from leaf artifacts (not the root)
         assertTrue(!library.getRelatedArtifact().isEmpty(), "Should have gathered dependencies");
-        for (var ra : library.getRelatedArtifact()) {
+        // Check dependency role extensions only on depends-on entries (composed-of entries won't have them)
+        var dependsOnRas = library.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .toList();
+        assertTrue(!dependsOnRas.isEmpty(), "Should have at least one depends-on entry");
+        for (var ra : dependsOnRas) {
             var roleExtensions = ra.getExtensionsByUrl(Constants.CRMI_DEPENDENCY_ROLE);
-            assertTrue(!roleExtensions.isEmpty(), "Each relatedArtifact should have at least one dependency role");
+            assertTrue(!roleExtensions.isEmpty(), "Each depends-on should have at least one dependency role");
 
             boolean hasDefault = roleExtensions.stream()
                     .anyMatch(ext -> "default".equals(((org.hl7.fhir.r4.model.CodeType) ext.getValue()).getValue()));
@@ -342,6 +347,41 @@ class DataRequirementsVisitorEnrichedTest {
 
         // Verify that the router was called with configurations
         verify(router).getValueSetResourceWithConfigurations(any(List.class), anyString());
+    }
+
+    /**
+     * Verifies that the root IG appears as a composed-of RelatedArtifact
+     * in the module-definition Library output when using the enriched path.
+     */
+    @Test
+    void visit_enrichedPath_addsRootIgAsComposedOf() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        // Create a simple IG with no definition resources
+        var ig = createSimpleIg("test-ig", "http://example.org/ImplementationGuide/test-ig", "1.0.0");
+        addToRepo(repository, ig);
+
+        var router = mock(ITerminologyProviderRouter.class);
+        var visitor = new DataRequirementsVisitor(repository, EvaluationSettings.getDefault(), router);
+
+        var operationParameters = newParameters(fhirContext);
+
+        var igAdapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var result = visitor.visit(igAdapter, operationParameters);
+
+        assertInstanceOf(Library.class, result);
+        var library = (Library) result;
+
+        // Find the composed-of entry for the root IG
+        var composedOfEntries = library.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.COMPOSEDOF)
+                .toList();
+        assertEquals(1, composedOfEntries.size(), "Should have exactly one composed-of entry for the root IG");
+
+        var igEntry = composedOfEntries.get(0);
+        assertTrue(
+                igEntry.getResource().contains("http://example.org/ImplementationGuide/test-ig"),
+                "composed-of entry should reference the IG canonical");
     }
 
     private ImplementationGuide createSimpleIg(String id, String url, String version) {

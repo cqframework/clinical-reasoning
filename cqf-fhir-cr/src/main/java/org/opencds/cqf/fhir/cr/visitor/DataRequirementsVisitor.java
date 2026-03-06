@@ -162,6 +162,14 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                     relatedArtifacts,
                     conformanceResolver,
                     federatedRepo);
+
+            // Add root IG as a composed-of entry
+            if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide
+                    || adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide) {
+                var igComposedOf = IKnowledgeArtifactAdapter.newRelatedArtifact(
+                        fhirVersion(), "composed-of", adapter.getCanonical(), adapter.getDescriptor());
+                relatedArtifacts.add(igComposedOf);
+            }
         } else {
             // Original path: simple recursiveGather (Library, Measure, etc.)
             var gatheredResources = new HashMap<String, IKnowledgeArtifactAdapter>();

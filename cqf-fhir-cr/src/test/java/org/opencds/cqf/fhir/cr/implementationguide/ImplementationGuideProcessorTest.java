@@ -81,8 +81,11 @@ class ImplementationGuideProcessorTest {
         // Verify enriched path produced dependencies with CRMI extensions
         assertTrue(!library.getRelatedArtifact().isEmpty(), "Should have gathered dependencies");
 
-        for (var ra : library.getRelatedArtifact()) {
-            // Each dependency should have crmi-dependencyRole extension
+        // Check dependency role extensions only on depends-on entries (composed-of entries won't have them)
+        var dependsOnRas = library.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .toList();
+        for (var ra : dependsOnRas) {
             var roleExtensions = ra.getExtensionsByUrl(Constants.CRMI_DEPENDENCY_ROLE);
             assertTrue(!roleExtensions.isEmpty(), "Should have dependency role extension");
         }

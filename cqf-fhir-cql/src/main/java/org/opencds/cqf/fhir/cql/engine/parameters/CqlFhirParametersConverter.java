@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +103,7 @@ public class CqlFhirParametersConverter {
                     .newInstance();
         } catch (Exception e) {
             logger.error("Error trying to create Parameters resource", e);
-            throw new RuntimeException(e);
+            throw new InternalErrorException(e);
         }
 
         IParametersAdapter pa = this.adapterFactory.createParameters(params);
@@ -171,7 +172,7 @@ public class CqlFhirParametersConverter {
             var ppca = this.addPart(pa, name);
             ppca.setResource(resource);
         } else {
-            throw new IllegalArgumentException("unknown type when trying to convert to parameters: %s"
+            throw new InvalidRequestException("unknown type when trying to convert to parameters: %s"
                     .formatted(value.getClass().getSimpleName()));
         }
     }
@@ -211,7 +212,7 @@ public class CqlFhirParametersConverter {
         } else if (value instanceof IBaseResource resource) {
             ppca.setResource(resource);
         } else {
-            throw new IllegalArgumentException("unknown type when trying to convert to parameters: %s"
+            throw new InvalidRequestException("unknown type when trying to convert to parameters: %s"
                     .formatted(value.getClass().getSimpleName()));
         }
     }
@@ -256,7 +257,7 @@ public class CqlFhirParametersConverter {
             // So infer based on the values.
             if (isList == null) {
                 if (values.isEmpty()) {
-                    throw new IllegalArgumentException(
+                    throw new InvalidRequestException(
                             "Unable to determine if parameter %s is meant to be collection. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata."
                                     .formatted(entry.getKey()));
                 } else {
@@ -265,7 +266,7 @@ public class CqlFhirParametersConverter {
             }
 
             if (!isList && entry.getValue().size() > 1) {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "The parameter %s was defined as a single value but multiple values were passed"
                                 .formatted(entry.getKey()));
             }
@@ -281,7 +282,7 @@ public class CqlFhirParametersConverter {
             }
 
             if (type == null) {
-                throw new IllegalArgumentException(
+                throw new InvalidRequestException(
                         "Unable to infer type for parameter %s. Use the http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-parameterDefinition extension to specify metadata."
                                 .formatted(entry.getKey()));
             }

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
@@ -39,9 +40,9 @@ class R4MeasureServiceUtilsTest {
     private static final String PATIENT_PAT_1 = "Patient/pat1";
     private static final String PATIENT = PATIENT_PAT_1;
     private static final String GROUP = "Group/grp1";
-    private static final IllegalArgumentException EXCEPTION_ILLEGAL_REPORTER = new IllegalArgumentException(
+    private static final InvalidRequestException EXCEPTION_ILLEGAL_REPORTER = new InvalidRequestException(
             "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
-    private static final Either<Object, IllegalArgumentException> EITHER_ILLEGAL_ARGUMENT_EXCEPTION =
+    private static final Either<Object, InvalidRequestException> EITHER_ILLEGAL_ARGUMENT_EXCEPTION =
             Eithers.forRight(EXCEPTION_ILLEGAL_REPORTER);
     private static final Either<Optional<Reference>, Exception> EITHER_EMPTY_RESULT = buildEitherLeft(null);
 

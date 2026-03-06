@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -102,7 +103,7 @@ class DynamicValueProcessorTests {
         doReturn(expressionResultsR4)
                 .when(fixture)
                 .getDynamicValueExpressionResult(requestR4, cqfExpression, null, null);
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             fixture.resolveDynamicValue(requestR4, dvR4, null, null, raR4);
         });
     }

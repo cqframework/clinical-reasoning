@@ -15,6 +15,7 @@ import ca.uhn.fhir.context.RuntimeChildExtension;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -93,7 +94,7 @@ public class ProcessDefinitionItem {
                 resourceType = split[split.length - 1];
             } else {
                 if (definition == null) {
-                    throw new IllegalArgumentException("Unable to retrieve definition for item: %s".formatted(linkId));
+                    throw new InvalidRequestException("Unable to retrieve definition for item: %s".formatted(linkId));
                 }
                 resourceType = getDefinitionType(definition);
             }
@@ -346,7 +347,7 @@ public class ProcessDefinitionItem {
             return;
         }
         if (!definition.contains("#")) {
-            throw new IllegalArgumentException("Invalid definition encountered for item %s"
+            throw new InvalidRequestException("Invalid definition encountered for item %s"
                     .formatted(itemPair.getResponseItem().getLinkId()));
         }
         var pathAdapter = getPathAdapter(request, profile, definition);
@@ -470,7 +471,7 @@ public class ProcessDefinitionItem {
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs) {
         if (profile == null) {
-            throw new IllegalArgumentException("Unable to parse slice element without a profile for definition: %s"
+            throw new InvalidRequestException("Unable to parse slice element without a profile for definition: %s"
                     .formatted(String.join(".", identifiers)));
         }
         var sliceIndex = -1;
@@ -638,7 +639,7 @@ public class ProcessDefinitionItem {
 
     protected String getDefinitionType(String definition) {
         if (!definition.contains("#")) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Unable to determine resource type from item definition: %s".formatted(definition));
         }
         return definition.split("#")[1];

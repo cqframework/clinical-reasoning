@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -104,7 +105,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
             return subject;
         }
 
-        throw new IllegalArgumentException("Unable to determine subject from launch context.");
+        throw new InvalidRequestException("Unable to determine subject from launch context.");
     }
 
     @Override

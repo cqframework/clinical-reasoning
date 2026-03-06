@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -43,8 +44,7 @@ public enum R4MeasureEvalType {
     public static Optional<R4MeasureEvalType> fromCode(String code) {
         R4MeasureEvalType evalType = lookup.get(code);
         if (code != null && evalType == null) {
-            throw new UnsupportedOperationException(
-                    "ReportType: %s, is not an accepted R4 EvalType value.".formatted(code));
+            throw new InvalidRequestException("ReportType: %s, is not an accepted R4 EvalType value.".formatted(code));
         }
         return Optional.ofNullable(evalType);
     }

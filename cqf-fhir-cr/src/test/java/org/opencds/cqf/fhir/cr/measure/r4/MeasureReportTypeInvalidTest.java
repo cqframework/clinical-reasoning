@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
@@ -26,7 +27,7 @@ class MeasureReportTypeInvalidTest {
         try {
             evaluate.then();
             fail("'summary' is not a valid value and should fail");
-        } catch (UnsupportedOperationException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("ReportType: summary, is not an accepted R4 EvalType value."));
         }
     }
@@ -42,7 +43,7 @@ class MeasureReportTypeInvalidTest {
         try {
             evaluate.then();
             fail("'patient-list' is not a valid value for R4 and should fail");
-        } catch (UnsupportedOperationException e) {
+        } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("ReportType: patient-list, is not an accepted R4 EvalType value."));
         }
     }

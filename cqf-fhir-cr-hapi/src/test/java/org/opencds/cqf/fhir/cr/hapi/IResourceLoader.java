@@ -23,6 +23,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import java.io.File;
 import java.io.FileInputStream;
@@ -110,7 +112,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
                     case "json" -> getFhirContext().newJsonParser();
                     case "xml" -> getFhirContext().newXmlParser();
                     default ->
-                        throw new IllegalArgumentException(
+                        throw new InvalidRequestException(
                                 "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
                 };
 
@@ -129,7 +131,7 @@ public interface IResourceLoader extends IDaoRegistryUser {
             }
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new RuntimeException("Error loading resource from %s".formatted(theLocation), e);
+            throw new InternalErrorException("Error loading resource from %s".formatted(theLocation), e);
         }
     }
 }

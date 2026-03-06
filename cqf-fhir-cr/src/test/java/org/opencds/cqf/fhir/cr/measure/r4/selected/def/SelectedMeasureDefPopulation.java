@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
@@ -312,7 +313,7 @@ public class SelectedMeasureDefPopulation<P>
         var extDef = this.value.getSupportingEvidenceDefs().stream()
                 .filter(t -> t.getExpression().equals(expressionName))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Expression not found"));
+                .orElseThrow(() -> new InvalidRequestException("Expression not found"));
         return new SelectedMeasureDefPopulationExtension<>(extDef, this);
     }
 

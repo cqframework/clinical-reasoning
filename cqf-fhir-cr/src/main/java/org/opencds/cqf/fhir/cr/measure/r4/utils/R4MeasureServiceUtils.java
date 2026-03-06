@@ -160,7 +160,7 @@ public class R4MeasureServiceUtils {
     public Optional<Reference> getReporter(String reporter) {
         if (reporter != null && !reporter.isEmpty() && !reporter.contains("/")) {
             // This value may come from configuration, not a user request
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
         }
         Reference reference = null;
@@ -175,7 +175,7 @@ public class R4MeasureServiceUtils {
                 reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_LOCATION));
             } else {
                 // This value may come from configuration, not a user request
-                throw new IllegalArgumentException("MeasureReport.reporter does not accept ResourceType: " + reporter);
+                throw new InvalidRequestException("MeasureReport.reporter does not accept ResourceType: " + reporter);
             }
         }
 

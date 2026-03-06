@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.visitor.dstu3;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.EnumFactory;
@@ -39,7 +40,7 @@ public class CRMIReleaseExperimentalBehavior {
                     return NONE;
 
                 default:
-                    throw new IllegalArgumentException(
+                    throw new InvalidRequestException(
                             "Unknown CRMIReleaseExperimentalBehaviorCode '" + codeString + "'");
             }
         }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -29,7 +30,7 @@ class CdsResponseEncoderServiceTest {
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(invalidResponse));
+        Exception exception = assertThrows(InternalErrorException.class, () -> encoder.encodeResponse(invalidResponse));
 
         // then
         assertEquals("response is not an instance of a Resource", exception.getMessage());
@@ -43,7 +44,7 @@ class CdsResponseEncoderServiceTest {
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters));
+        Exception exception = assertThrows(InternalErrorException.class, () -> encoder.encodeResponse(parameters));
 
         // then
         assertEquals("response does not contain a Bundle", exception.getMessage());
@@ -61,7 +62,7 @@ class CdsResponseEncoderServiceTest {
         CdsResponseEncoderService encoder = new CdsResponseEncoderService(repository);
 
         // when
-        Exception exception = assertThrows(RuntimeException.class, () -> encoder.encodeResponse(parameters));
+        Exception exception = assertThrows(InternalErrorException.class, () -> encoder.encodeResponse(parameters));
 
         // then
         assertEquals("unable to resolve response", exception.getMessage());

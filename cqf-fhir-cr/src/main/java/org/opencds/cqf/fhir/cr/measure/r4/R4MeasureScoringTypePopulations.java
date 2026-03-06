@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "MeasurePopulationType: %s, is not a member of allowed 'proportion' populations."
                                     .formatted(popType.toCode()));
                 }
@@ -70,7 +71,7 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "'proportion' measure is missing required population: %s.".formatted(requiredPop.toCode()));
                 }
             }
@@ -105,7 +106,7 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "MeasurePopulationType: %s, is not a member of allowed 'ratio' populations."
                                     .formatted(popType.toCode()));
                 }
@@ -135,7 +136,7 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "'ratio' measure is missing required population: %s.".formatted(requiredPop.toCode()));
                 }
             }
@@ -169,7 +170,7 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "MeasurePopulationType: %s, is not a member of allowed 'continuous-variable' populations."
                                     .formatted(popType.toCode()));
                 }
@@ -201,7 +202,7 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "'continuous-variable' measure is missing required population: %s."
                                     .formatted(requiredPop.toCode()));
                 }
@@ -230,7 +231,7 @@ public class R4MeasureScoringTypePopulations {
             var populationSet = getPopulations();
             for (MeasurePopulationType popType : populations) {
                 if (!populationSet.contains(popType)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "MeasurePopulationType: %s, is not a member of allowed 'cohort' populations."
                                     .formatted(popType.toCode()));
                 }
@@ -258,7 +259,7 @@ public class R4MeasureScoringTypePopulations {
         public static void validateRequired(List<MeasurePopulationType> populations) {
             for (MeasurePopulationType requiredPop : getPopulations()) {
                 if (!populations.contains(requiredPop)) {
-                    throw new UnsupportedOperationException(
+                    throw new InvalidRequestException(
                             "'cohort' measure is missing required population: %s.".formatted(requiredPop.toCode()));
                 }
             }
@@ -290,7 +291,7 @@ public class R4MeasureScoringTypePopulations {
                 CONTINUOUS_VARIABLE_REQUIRED.validateRequired(populations);
                 break;
             default:
-                throw new UnsupportedOperationException(
+                throw new InvalidRequestException(
                         "Measure scoring type: %s, is not an accepted value".formatted(measureScoring.toCode()));
         }
     }

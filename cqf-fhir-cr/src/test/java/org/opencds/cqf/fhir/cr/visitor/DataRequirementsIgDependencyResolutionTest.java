@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,7 @@ class DataRequirementsIgDependencyResolutionTest {
             method.setAccessible(true);
             return (String) method.invoke(visitor, canonical, igDependencyVersions);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new InternalErrorException(e);
         }
     }
 

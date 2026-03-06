@@ -5,6 +5,7 @@ import static kotlinx.io.JvmCoreKt.asSource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -141,7 +142,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             }
             case R5 -> adapterFactory.createLibrary(r5Library);
             default ->
-                throw new IllegalArgumentException("FHIR version %s is not supported."
+                throw new InvalidRequestException("FHIR version %s is not supported."
                         .formatted(fhirVersion().getFhirVersionString()));
         };
     }
@@ -151,7 +152,7 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         try {
             translator = CqlTranslator.fromSource(buffered(asSource(cqlStream)), libraryManager);
         } catch (IOException e) {
-            throw new IllegalArgumentException("Errors occurred translating library: %s".formatted(e.getMessage()));
+            throw new InvalidRequestException("Errors occurred translating library: %s".formatted(e.getMessage()));
         }
 
         return translator;

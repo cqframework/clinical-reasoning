@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse.extract;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -18,7 +19,7 @@ public class ProcessItem {
             List<IBaseResource> resources,
             IBaseReference subject) {
         if (questionnaireCodeMap == null || questionnaireCodeMap.isEmpty()) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Unable to retrieve Questionnaire code map for Observation based extraction");
         }
         var categoryExt =

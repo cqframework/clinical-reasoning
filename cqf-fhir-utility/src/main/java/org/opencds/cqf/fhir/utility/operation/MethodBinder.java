@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.operation.ParameterBinder.validate;
 
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -87,9 +88,9 @@ class MethodBinder {
 
     private List<Object> args(IIdType id, IBaseParameters parameters) {
         if (this.scope != Scope.INSTANCE && id != null) {
-            throw new IllegalArgumentException("id not supported on non-instance operation");
+            throw new InvalidRequestException("id not supported on non-instance operation");
         } else if (this.scope == Scope.INSTANCE && id == null) {
-            throw new IllegalArgumentException("id required for instance operation");
+            throw new InvalidRequestException("id required for instance operation");
         }
 
         var args = new ArrayList<>(parameterBinders.size());
@@ -111,7 +112,7 @@ class MethodBinder {
         }
 
         if (cloned != null && !cloned.isEmpty()) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "Parameters were not bound to @Operation invocation: " + Resources.stringify(cloned));
         }
 

@@ -331,7 +331,7 @@ class R4CareGapsTest {
                 .measureId("BreastCancerScreeningFHIR")
                 .getCareGapsReport();
 
-        assertThrows(RuntimeException.class, when::then);
+        assertThrows(InvalidRequestException.class, when::then);
     }
 
     @Test

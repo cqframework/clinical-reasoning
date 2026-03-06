@@ -9,6 +9,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -219,7 +220,7 @@ class MethodBinderTest {
 
         var provider = new ExampleMethods();
         var parameters = new Parameters().addParameter("anyParam", new StringType("anyValue"));
-        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, parameters));
+        var e = assertThrows(InvalidRequestException.class, () -> m.bind(provider, null, parameters));
         assertTrue(e.getMessage().contains("not bound"));
     }
 
@@ -229,7 +230,7 @@ class MethodBinderTest {
 
         var provider = new ExampleMethods();
         var id = new IdType("Library/123");
-        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, id, null));
+        var e = assertThrows(InvalidRequestException.class, () -> m.bind(provider, id, null));
         assertTrue(e.getMessage().contains("non-instance"));
     }
 
@@ -238,7 +239,7 @@ class MethodBinderTest {
         var m = methodBinderByName("idFirst");
 
         var provider = new ExampleMethods();
-        var e = assertThrows(IllegalArgumentException.class, () -> m.bind(provider, null, null));
+        var e = assertThrows(InvalidRequestException.class, () -> m.bind(provider, null, null));
         assertTrue(e.getMessage().contains("id required"));
     }
 

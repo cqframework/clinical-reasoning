@@ -6,6 +6,7 @@ import static software.amazon.awssdk.utils.StringUtils.replacePrefixIgnoreCase;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardSourceJson;
@@ -156,7 +157,7 @@ public class CdsResponseEncoderService {
             case "routine" -> CdsServiceIndicatorEnum.INFO;
             case "urgent" -> CdsServiceIndicatorEnum.WARNING;
             case "stat" -> CdsServiceIndicatorEnum.CRITICAL;
-            default -> throw new IllegalArgumentException("Invalid priority code: " + code);
+            default -> throw new InvalidRequestException("Invalid priority code: " + code);
         };
     }
 

@@ -5,6 +5,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -186,11 +187,11 @@ public class ApplyRequestBuilder {
 
     public ApplyRequest buildApplyRequest() {
         if (StringUtils.isBlank(this.subject)) {
-            throw new IllegalArgumentException("Missing required parameter: 'subject'");
+            throw new InvalidRequestException("Missing required parameter: 'subject'");
         }
 
         if (StringUtils.isBlank(this.practitioner)) {
-            throw new IllegalArgumentException("Missing required parameter: 'practitioner'");
+            throw new InvalidRequestException("Missing required parameter: 'practitioner'");
         }
 
         this.repository = proxy(

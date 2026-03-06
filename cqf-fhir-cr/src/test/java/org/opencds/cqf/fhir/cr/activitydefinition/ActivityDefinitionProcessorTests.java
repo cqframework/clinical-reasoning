@@ -12,6 +12,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Path;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -98,7 +99,7 @@ class ActivityDefinitionProcessorTests {
     void applyNoSubjectThrowsException() {
         Either3<IPrimitiveType<String>, IIdType, IBaseResource> id = Eithers.forMiddle3(Ids.newId(
                 activityDefinitionProcessorR4.fhirContext(), "ActivityDefinition", "activityDefinition-test"));
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             activityDefinitionProcessorR4.apply(id, null, null, null, null, null, null, null, null, null);
         });
     }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.Period;
@@ -32,7 +33,7 @@ public class R4DateHelper {
 
             period.setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
-            throw new IllegalArgumentException("Measurement period should be an interval of CQL DateTime or Date");
+            throw new InvalidRequestException("Measurement period should be an interval of CQL DateTime or Date");
         }
         return period;
     }

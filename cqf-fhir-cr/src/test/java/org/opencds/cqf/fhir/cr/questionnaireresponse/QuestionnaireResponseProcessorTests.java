@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.given;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
@@ -48,7 +49,7 @@ class QuestionnaireResponseProcessorTests {
 
     @Test
     void extractNoQuestionnaireReferenceThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidRequestException.class, () -> {
             testExtract(fhirContextR4, "r4", "mypain-no-url");
         });
     }

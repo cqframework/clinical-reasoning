@@ -14,6 +14,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVers
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -210,7 +211,7 @@ public class TestLibrary {
         public When prefetchData(String name, String dataAssetName) {
             var data = jsonParser.parseResource(open(dataAssetName));
             if (!(data instanceof IBaseBundle)) {
-                throw new IllegalArgumentException("prefetch data asset must be a Bundle");
+                throw new InvalidRequestException("prefetch data asset must be a Bundle");
             }
             prefetchData = List.of((IBaseBackboneElement) newPart(
                     repository.fhirContext(),

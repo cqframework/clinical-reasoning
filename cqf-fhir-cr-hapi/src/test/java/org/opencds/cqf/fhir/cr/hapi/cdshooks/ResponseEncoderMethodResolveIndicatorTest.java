@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceIndicatorEnum;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +39,8 @@ class ResponseEncoderMethodResolveIndicatorTest {
 
     @Test
     void testResolveIndicator_invalidCode() {
-        IllegalArgumentException exception =
-                assertThrows(IllegalArgumentException.class, () -> fixture.resolveIndicator("invalid"));
+        InvalidRequestException exception =
+                assertThrows(InvalidRequestException.class, () -> fixture.resolveIndicator("invalid"));
 
         assertTrue(exception.getMessage().contains("Invalid priority code: invalid"));
     }

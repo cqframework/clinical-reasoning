@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class ApplyRequestBuilderTest {
 
         ApplyRequestBuilder builder = new ApplyRequestBuilder(repository, evaluationSettings);
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
+        InvalidRequestException ex = assertThrows(InvalidRequestException.class, builder::buildApplyRequest);
         assertEquals("Missing required parameter: 'subject'", ex.getMessage());
     }
 
@@ -44,7 +45,7 @@ class ApplyRequestBuilderTest {
         ApplyRequestBuilder builder =
                 new ApplyRequestBuilder(repository, evaluationSettings).withSubject("Patient/123");
 
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
+        InvalidRequestException ex = assertThrows(InvalidRequestException.class, builder::buildApplyRequest);
         assertEquals("Missing required parameter: 'practitioner'", ex.getMessage());
     }
 

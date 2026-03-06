@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
@@ -53,7 +54,7 @@ class CqlEvaluationRequestTests {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidRequestException.class,
                 () -> new CqlEvaluationRequest(null, null, null, null, null, null, null, libraryEngine, null));
     }
 

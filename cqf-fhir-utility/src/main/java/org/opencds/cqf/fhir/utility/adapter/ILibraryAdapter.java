@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -133,7 +134,7 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
 
     default String getExpansionParameterName(String resourceType, String crmiVersion) {
         if (StringUtils.isBlank(resourceType)) {
-            throw new IllegalArgumentException("Missing required parameter: 'resourceType'");
+            throw new InvalidRequestException("Missing required parameter: 'resourceType'");
         }
 
         boolean isCrmiV1 = crmiVersion != null && crmiVersion.equals(Constants.CRMI_VERSION_1);

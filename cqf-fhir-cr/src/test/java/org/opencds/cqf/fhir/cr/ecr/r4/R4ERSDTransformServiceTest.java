@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +110,9 @@ public class R4ERSDTransformServiceTest {
                     .when(() -> R4ImportBundleProducer.transformImportBundle(any(), any(), anyString()))
                     .thenReturn(transformedEntries);
 
-            doThrow(new RuntimeException("Simulated failure")).when(repository).transaction(any(Bundle.class));
+            doThrow(new InternalErrorException("Simulated failure"))
+                    .when(repository)
+                    .transaction(any(Bundle.class));
 
             assertDoesNotThrow(() -> service.eRSDV2ImportOperation(mockBundle, "http://example.com/fhir"));
         }

@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -186,7 +187,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subjectId)) {
-            throw new IllegalArgumentException("Missing required parameter: 'subject'");
+            throw new InvalidRequestException("Missing required parameter: 'subject'");
         }
         final ApplyRequest request = buildApplyRequest(
                 activityDefinition,
@@ -221,7 +222,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subject)) {
-            throw new IllegalArgumentException("Missing required parameter: 'subject'");
+            throw new InvalidRequestException("Missing required parameter: 'subject'");
         }
         return new ApplyRequest(
                 resolveActivityDefinition(activityDefinition),

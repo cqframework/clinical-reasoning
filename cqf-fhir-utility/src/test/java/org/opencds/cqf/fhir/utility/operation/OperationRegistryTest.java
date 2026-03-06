@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import java.util.function.Function;
@@ -43,7 +44,7 @@ class OperationRegistryTest {
             try {
                 return clazz.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new InternalErrorException(e);
             }
         });
     }
@@ -116,7 +117,7 @@ class OperationRegistryTest {
 
         var ctx = constructAndRegister(AmbiguousExample.class).buildInvocationContext(repo, "ambiguous");
         ctx.resourceType(Library.class);
-        var e = assertThrows(IllegalStateException.class, () -> ctx.execute());
+        var e = assertThrows(InternalErrorException.class, () -> ctx.execute());
         assertTrue(e.getMessage().toLowerCase().contains("multiple"));
     }
 
@@ -152,7 +153,7 @@ class OperationRegistryTest {
 
         var op2 = registry.buildInvocationContext(repo, "get-id").parameters(arguments);
 
-        var e = assertThrows(IllegalArgumentException.class, () -> op2.execute());
+        var e = assertThrows(InvalidRequestException.class, () -> op2.execute());
         assertTrue(e.getMessage().contains("parts"));
 
         // Parameters with wrong type should fail
@@ -160,7 +161,7 @@ class OperationRegistryTest {
         arguments.addParameter().setName("resource").setValue(new StringType("123"));
 
         var op3 = registry.buildInvocationContext(repo, "get-id").parameters(arguments);
-        e = assertThrows(IllegalArgumentException.class, () -> op3.execute());
+        e = assertThrows(InvalidRequestException.class, () -> op3.execute());
         assertTrue(e.getMessage().contains("type"));
     }
 

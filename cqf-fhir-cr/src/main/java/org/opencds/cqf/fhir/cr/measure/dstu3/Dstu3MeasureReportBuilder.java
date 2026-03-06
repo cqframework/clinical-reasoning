@@ -111,7 +111,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected void buildGroups(Measure measure, MeasureDef measureDef) {
         if (measure.getGroup().size() != measureDef.groups().size()) {
             // This is not a user error:
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "The Measure has a different number of groups defined than the MeasureDef");
         }
 
@@ -137,12 +137,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             GroupDef groupDef) {
         if (measureGroup.getPopulation().size() != (groupDef.populations().size())) {
             // This is not a user error:
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef");
         }
 
         if (measureGroup.getStratifier().size() != groupDef.stratifiers().size()) {
-            throw new IllegalArgumentException(
+            throw new InvalidRequestException(
                     "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
         }
 

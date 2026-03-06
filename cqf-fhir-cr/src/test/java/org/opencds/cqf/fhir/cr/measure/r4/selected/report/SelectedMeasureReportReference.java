@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Extension;
@@ -32,7 +33,7 @@ public class SelectedMeasureReportReference extends Selected<Reference, Selected
     public SelectedMeasureReportReference referenceHasExtension(String extValueRef) {
         var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
         if (ex.isEmpty()) {
-            throw new IllegalStateException(
+            throw new InternalErrorException(
                     "no evaluated resource extensions were found, and expected %s".formatted(extValueRef));
         }
         String foundRef = null;
@@ -57,7 +58,7 @@ public class SelectedMeasureReportReference extends Selected<Reference, Selected
     public SelectedMeasureReportReference hasPopulations(String... population) {
         var ex = this.value().getExtensionsByUrl(EXT_CRITERIA_REFERENCE_URL);
         if (ex.isEmpty()) {
-            throw new IllegalStateException(
+            throw new InternalErrorException(
                     "no evaluated resource extensions were found, and expected %s".formatted(population.length));
         }
 

@@ -11,6 +11,7 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
@@ -83,7 +84,7 @@ class PlanDefinitionProcessorTests {
     void applyNoSubjectThrowsException() {
         var planDefinitionID = "hello-world-patient-view";
         var when = given().repositoryFor(fhirContextR4, "r4").when().planDefinitionId(planDefinitionID);
-        assertThrows(IllegalArgumentException.class, when::thenApply);
+        assertThrows(InvalidRequestException.class, when::thenApply);
     }
 
     @Test

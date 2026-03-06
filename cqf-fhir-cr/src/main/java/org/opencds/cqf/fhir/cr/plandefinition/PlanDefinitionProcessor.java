@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -152,7 +153,7 @@ public class PlanDefinitionProcessor {
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine) {
         if (StringUtils.isBlank(subject)) {
-            throw new IllegalArgumentException("Missing required parameter: 'subject'");
+            throw new InvalidRequestException("Missing required parameter: 'subject'");
         }
         return new ApplyRequest(
                 resolvePlanDefinition(planDefinition),

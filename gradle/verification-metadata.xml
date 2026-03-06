@@ -4,10 +4,12 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
-         <!-- Gradle build infrastructure — versions vary by Gradle distribution -->
+          <!-- Gradle build infrastructure — versions vary by Gradle distribution -->
          <trust group="org.jetbrains.kotlin" regex="true" name=".*"/>
          <trust group="org.jetbrains.kotlinx" regex="true" name=".*"/>
          <trust group="org.jetbrains" name="annotations"/>
+         <trust file=".*-sources\.jar" regex="true"/>
+         <trust file=".*-javadoc\.jar" regex="true"/>
       </trusted-artifacts>
    </configuration>
    <components>

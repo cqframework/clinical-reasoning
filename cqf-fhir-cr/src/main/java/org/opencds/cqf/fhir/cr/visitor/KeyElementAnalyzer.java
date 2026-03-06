@@ -1,40 +1,67 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.repository.IRepository;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import org.hl7.fhir.instance.model.api.IBase;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Analyzes StructureDefinitions to determine key elements and their associated ValueSet bindings.
  * <p>
- * Implements the key element procedure:
- * <ul>
- *   <li>Step A: Build seed set (mustSupport, differential, ancestors)</li>
- *   <li>Step B: Expand downward (mandatory children, constrained, slices, modifiers)</li>
- *   <li>Step C: Extract bindings from key elements</li>
- *   <li>Step D: Walk inheritance chain applying A-C at each level</li>
- * </ul>
+ * Aligned with the IG Publisher's {@code StructureDefinitionRenderer.scanForKeyElements()} procedure.
+ * <p>
+ * Key element criteria (from IG Publisher lines 680-762):
+ * <ol>
+ *   <li>mustSupport (with ancestors)</li>
+ *   <li>min != 0 (mandatory)</li>
+ *   <li>hasCondition (invariant references, count > 1)</li>
+ *   <li>isModifier</li>
+ *   <li>hasSlicing (non-extension paths)</li>
+ *   <li>hasSliceName</li>
+ *   <li>in differential</li>
+ *   <li>max constrained from base</li>
+ *   <li>min constrained from base</li>
+ *   <li>binding changed from base</li>
+ *   <li>hasFixed</li>
+ *   <li>hasPattern</li>
+ *   <li>hasMaxLength</li>
+ *   <li>R5 key constraints (mustHaveValue, valueAlternatives, minValue, maxValue)</li>
+ *   <li>significant extensions</li>
+ * </ol>
  */
 public class KeyElementAnalyzer {
     private static final Logger logger = LoggerFactory.getLogger(KeyElementAnalyzer.class);
-    private final IRepository repository;
 
-    public KeyElementAnalyzer(IRepository repository) {
-        this.repository = repository;
+    private static final List<String> SIGNIFICANT_EXTENSIONS = List.of(
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-allowedUnits",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestPractice",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-graphConstraint",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxDecimalPlaces",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxSize",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-mimeType",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-minLength",
+            "http://hl7.org/fhir/StructureDefinition/elementdefinition-obligation");
+
+    private final ConformanceResourceResolver resolver;
+    private final IAdapterFactory adapterFactory;
+
+    public KeyElementAnalyzer(ConformanceResourceResolver resolver, FhirVersionEnum fhirVersion) {
+        this.resolver = resolver;
+        this.adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
     }
 
     /**
      * Analyzes a StructureDefinition to extract ValueSet canonical URLs that are bound to key elements.
+     * Walks the inheritance chain applying the key element procedure at each level.
      *
      * @param structureDefinition the StructureDefinition resource to analyze
      * @return set of ValueSet canonical URLs bound to key elements
@@ -48,421 +75,473 @@ public class KeyElementAnalyzer {
 
         // Step D: Walk the inheritance chain
         IBaseResource currentProfile = structureDefinition;
+        Set<String> visited = new HashSet<>();
+
         while (currentProfile != null) {
+            IStructureDefinitionAdapter sd = adapterFactory.createStructureDefinition(currentProfile);
+            String url = sd.getUrl();
+
+            // Prevent infinite loops
+            if (url != null && !visited.add(url)) {
+                break;
+            }
+
             // Steps A-C for current profile
-            Set<String> keyElements = getKeyElements(currentProfile);
-            valueSets.addAll(extractBindingsFromKeyElements(currentProfile, keyElements));
+            valueSets.addAll(analyzeProfile(sd));
 
             // Move to base definition
-            currentProfile = getBaseDefinition(currentProfile);
+            currentProfile = resolveBaseDefinition(sd);
         }
 
         return valueSets;
     }
 
     /**
-     * Step A: Build seed set of key elements.
-     * Step B: Expand downward recursively.
-     *
-     * @param structureDefinition the StructureDefinition to analyze
-     * @return set of element paths that are key elements
+     * Analyzes a single profile level: key eligibility, mustSupport scan,
+     * differential hash, scanForKeyElements, and binding extraction.
      */
-    private Set<String> getKeyElements(IBaseResource structureDefinition) {
-        Set<String> keyElements = new HashSet<>();
-
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-
-            // Step A: Build seed set
-            Set<String> seedSet = buildSeedSet(structureDefinition);
-            keyElements.addAll(seedSet);
-
-            // Step B: Expand downward for each seed element
-            Set<String> elementsToProcess = new HashSet<>(seedSet);
-            Set<String> processed = new HashSet<>();
-
-            while (!elementsToProcess.isEmpty()) {
-                Set<String> newElements = new HashSet<>();
-
-                for (String elementPath : elementsToProcess) {
-                    if (processed.contains(elementPath)) {
-                        continue;
-                    }
-                    processed.add(elementPath);
-
-                    // Find children that meet expansion criteria
-                    List<IBase> children = getChildElementsForExpansion(structureDefinition, elementPath);
-                    for (IBase child : children) {
-                        String childPath = getElementPath(child, fhirVersion);
-                        if (childPath != null && !keyElements.contains(childPath)) {
-                            keyElements.add(childPath);
-                            newElements.add(childPath);
-                        }
-                    }
-                }
-
-                elementsToProcess = newElements;
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting key elements", e);
-        }
-
-        return keyElements;
-    }
-
-    /**
-     * Step A: Build seed set (root + mustSupport + differential + ancestors).
-     */
-    private Set<String> buildSeedSet(IBaseResource structureDefinition) {
-        Set<String> seedSet = new HashSet<>();
-
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-
-            // Get elements (differential preferred, snapshot fallback)
-            List<IBase> elements = getAllElements(structureDefinition);
-
-            // Add root element
-            String rootPath = getRootPath(structureDefinition);
-            if (rootPath != null) {
-                seedSet.add(rootPath);
-            }
-
-            // Process each element
-            for (IBase element : elements) {
-                String path = getElementPath(element, fhirVersion);
-                if (path == null) {
-                    continue;
-                }
-
-                // Add all elements to seed set
-                seedSet.add(path);
-
-                // If element has mustSupport, also add all ancestors
-                Boolean mustSupport = getElementMustSupport(element, fhirVersion);
-                if (Boolean.TRUE.equals(mustSupport)) {
-                    seedSet.addAll(getAncestorPaths(path));
-                }
-            }
-        } catch (Exception e) {
-            logger.debug("Error building seed set for StructureDefinition", e);
-        }
-
-        return seedSet;
-    }
-
-    /**
-     * Step B: Get child elements that should be expanded based on constraints.
-     */
-    private List<IBase> getChildElementsForExpansion(IBaseResource structureDefinition, String parentPath) {
-        List<IBase> childrenToExpand = new ArrayList<>();
-
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-            List<IBase> allElements = getAllElements(structureDefinition);
-
-            for (IBase element : allElements) {
-                String elementPath = getElementPath(element, fhirVersion);
-                if (!isChildOf(elementPath, parentPath)) {
-                    continue;
-                }
-
-                // Check expansion criteria
-                if (shouldExpandChild(element, fhirVersion)) {
-                    childrenToExpand.add(element);
-                }
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting child elements for expansion", e);
-        }
-
-        return childrenToExpand;
-    }
-
-    /**
-     * Determines if a child element should be expanded based on Step B criteria.
-     */
-    private boolean shouldExpandChild(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            // Criterion 1: min != 0 (mandatory)
-            Integer min = getElementMin(element, fhirVersion);
-            if (min != null && min > 0) {
-                return true;
-            }
-
-            // Criterion 2: max was constrained
-            if (isMaxConstrained(element, fhirVersion)) {
-                return true;
-            }
-
-            // Criterion 3: Participates in invariant (constraint)
-            if (hasConstraints(element, fhirVersion)) {
-                return true;
-            }
-
-            // Criterion 4: Is a slice
-            if (isSlice(element, fhirVersion)) {
-                return true;
-            }
-
-            // Criterion 5: Is a modifier element
-            Boolean isModifier = getElementIsModifier(element, fhirVersion);
-            if (Boolean.TRUE.equals(isModifier)) {
-                return true;
-            }
-        } catch (Exception e) {
-            logger.debug("Error checking child expansion criteria", e);
-        }
-
-        return false;
-    }
-
-    /**
-     * Step C: Extract bindings from key elements.
-     */
-    private Set<String> extractBindingsFromKeyElements(IBaseResource structureDefinition, Set<String> keyElements) {
+    private Set<String> analyzeProfile(IStructureDefinitionAdapter sd) {
         Set<String> valueSets = new HashSet<>();
 
         try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-            List<IBase> allElements = getAllElements(structureDefinition);
+            // Step 1: Key eligibility guard
+            String derivation = sd.getDerivation();
+            if (!"constraint".equalsIgnoreCase(derivation)) {
+                return valueSets;
+            }
 
-            for (IBase element : allElements) {
-                String path = getElementPath(element, fhirVersion);
-                if (path != null && keyElements.contains(path)) {
-                    String valueSetUrl = getBindingValueSet(element, fhirVersion);
+            // Get snapshot elements (required for proper analysis)
+            List<IElementDefinitionAdapter> snapshotElements = sd.getAllSnapshotElements();
+            if (snapshotElements.isEmpty()) {
+                // Fall back to differential if no snapshot
+                snapshotElements = sd.getAllDifferentialElements();
+                if (snapshotElements.isEmpty()) {
+                    return valueSets;
+                }
+            }
+
+            // Step 2: Build mustSupport map
+            Map<String, Boolean> mustSupportMap = buildMustSupportMap(snapshotElements);
+
+            // Step 3: Build differential hash
+            Set<String> differentialIds = buildDifferentialHash(sd);
+
+            // Step 4: scanForKeyElements
+            Set<String> keyElementIds = scanForKeyElements(snapshotElements, mustSupportMap, differentialIds, sd);
+
+            // Step 5: Extract bindings from key elements
+            for (var element : snapshotElements) {
+                String id = element.getId();
+                if (id != null && keyElementIds.contains(id)) {
+                    String valueSetUrl = element.getBindingValueSet();
                     if (valueSetUrl != null && !valueSetUrl.isEmpty()) {
                         valueSets.add(valueSetUrl);
                     }
                 }
             }
         } catch (Exception e) {
-            logger.debug("Error extracting bindings from key elements", e);
+            logger.debug("Error analyzing profile for key elements", e);
         }
 
         return valueSets;
     }
 
     /**
-     * Gets the base definition for inheritance walking (Step D).
+     * Builds the mustSupport map by walking snapshot elements as a tree.
+     * When element has mustSupport == true, add it AND all ancestors to map.
+     * (IG Publisher lines 644-658)
      */
-    private IBaseResource getBaseDefinition(IBaseResource structureDefinition) {
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(structureDefinition, "baseDefinition", IPrimitiveType.class);
+    private Map<String, Boolean> buildMustSupportMap(List<IElementDefinitionAdapter> elements) {
+        Map<String, Boolean> mustSupportMap = new HashMap<>();
 
-            if (!results.isEmpty()) {
-                String baseDefUrl = results.get(0).getValueAsString();
-                if (baseDefUrl != null && !baseDefUrl.isEmpty()) {
-                    // Try to resolve the base definition from repository
-                    // For core resources, we might not have them, so return null
-                    if (baseDefUrl.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-                        // This is a core resource, stop inheritance walk
-                        return null;
-                    }
-
-                    // Try to load from repository
-                    try {
-                        var id = Ids.newId(fhirVersion, "StructureDefinition", baseDefUrl);
-                        return repository.read(structureDefinition.getClass(), id);
-                    } catch (Exception e) {
-                        logger.debug("Could not load base definition: {}", baseDefUrl);
-                        return null;
+        for (var element : elements) {
+            if (element.getMustSupport()) {
+                String id = element.getId();
+                if (id != null) {
+                    mustSupportMap.put(id, true);
+                    // Add all ancestors
+                    for (String ancestorId : getAncestorIds(id, elements)) {
+                        mustSupportMap.putIfAbsent(ancestorId, false);
                     }
                 }
             }
-        } catch (Exception e) {
-            logger.debug("Error getting base definition", e);
         }
 
-        return null;
+        return mustSupportMap;
     }
 
-    // Helper methods for extracting information from ElementDefinition
+    /**
+     * Builds the set of element IDs present in the differential.
+     * (IG Publisher lines 609-627)
+     */
+    private Set<String> buildDifferentialHash(IStructureDefinitionAdapter sd) {
+        Set<String> differentialIds = new HashSet<>();
 
-    private List<IBase> getDifferentialElements(IBaseResource structureDefinition) {
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            return fhirPath.evaluate(structureDefinition, "differential.element", IBase.class);
-        } catch (Exception e) {
-            logger.debug("Error getting differential elements", e);
-            return new ArrayList<>();
-        }
-    }
-
-    private List<IBase> getAllElements(IBaseResource structureDefinition) {
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            // Try differential first, fall back to snapshot
-            List<IBase> elements = fhirPath.evaluate(structureDefinition, "differential.element", IBase.class);
-            if (elements.isEmpty()) {
-                elements = fhirPath.evaluate(structureDefinition, "snapshot.element", IBase.class);
+        List<IElementDefinitionAdapter> diffElements = sd.getAllDifferentialElements();
+        for (var element : diffElements) {
+            String id = element.getId();
+            if (id != null) {
+                differentialIds.add(id);
             }
-            return elements;
-        } catch (Exception e) {
-            logger.debug("Error getting all elements", e);
-            return new ArrayList<>();
+        }
+
+        return differentialIds;
+    }
+
+    /**
+     * Scans elements for key element criteria, aligned with IG Publisher scanForKeyElements().
+     * (IG Publisher lines 680-762)
+     */
+    private Set<String> scanForKeyElements(
+            List<IElementDefinitionAdapter> elements,
+            Map<String, Boolean> mustSupportMap,
+            Set<String> differentialIds,
+            IStructureDefinitionAdapter sd) {
+
+        Set<String> keyElements = new HashSet<>();
+
+        if (elements.isEmpty()) {
+            return keyElements;
+        }
+
+        // Always add root element
+        var rootElement = elements.get(0);
+        String rootId = rootElement.getId();
+        if (rootId != null) {
+            keyElements.add(rootId);
+        }
+
+        // Scan direct children of root, then recurse
+        scanChildren(elements, rootElement, keyElements, mustSupportMap, differentialIds, sd);
+
+        return keyElements;
+    }
+
+    /**
+     * Recursively scans children of a parent element for key criteria.
+     */
+    private void scanChildren(
+            List<IElementDefinitionAdapter> allElements,
+            IElementDefinitionAdapter parent,
+            Set<String> keyElements,
+            Map<String, Boolean> mustSupportMap,
+            Set<String> differentialIds,
+            IStructureDefinitionAdapter sd) {
+
+        List<IElementDefinitionAdapter> children = getDirectChildren(allElements, parent);
+
+        for (var child : children) {
+            String childId = child.getId();
+            if (childId == null) {
+                continue;
+            }
+
+            if (isKeyElement(child, mustSupportMap, differentialIds, sd)) {
+                keyElements.add(childId);
+                // Recursively scan this child's children
+                scanChildren(allElements, child, keyElements, mustSupportMap, differentialIds, sd);
+            }
         }
     }
 
-    private String getRootPath(IBaseResource structureDefinition) {
-        try {
-            FhirVersionEnum fhirVersion = structureDefinition.getStructureFhirVersionEnum();
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(structureDefinition, "type", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                return results.get(0).getValueAsString();
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting root path", e);
-        }
-        return null;
-    }
+    /**
+     * Evaluates all key element criteria for a single element.
+     */
+    private boolean isKeyElement(
+            IElementDefinitionAdapter element,
+            Map<String, Boolean> mustSupportMap,
+            Set<String> differentialIds,
+            IStructureDefinitionAdapter sd) {
 
-    private String getElementPath(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "path", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                return results.get(0).getValueAsString();
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting element path", e);
-        }
-        return null;
-    }
+        String id = element.getId();
+        String path = element.getPath();
 
-    private Boolean getElementMustSupport(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "mustSupport", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                return (Boolean) results.get(0).getValue();
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting mustSupport", e);
+        // Criterion 1: mustSupport
+        if (mustSupportMap.containsKey(id)) {
+            return true;
         }
-        return null;
-    }
 
-    private Integer getElementMin(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "min", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                Object value = results.get(0).getValue();
-                if (value instanceof Integer) {
-                    return (Integer) value;
-                } else if (value instanceof String) {
-                    return Integer.parseInt((String) value);
-                }
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting min cardinality", e);
+        // Criterion 2: min != 0 (mandatory)
+        if (element.hasMin() && element.getMin() != 0) {
+            return true;
         }
-        return null;
-    }
 
-    private Boolean getElementIsModifier(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "isModifier", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                return (Boolean) results.get(0).getValue();
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting isModifier", e);
+        // Criterion 3: hasCondition (invariant references)
+        if (element.hasCondition()) {
+            return true;
         }
-        return null;
-    }
 
-    private String getBindingValueSet(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "binding.valueSet", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                return results.get(0).getValueAsString();
-            }
-        } catch (Exception e) {
-            logger.debug("Error getting binding valueSet", e);
+        // Criterion 4: isModifier
+        if (element.isModifier()) {
+            return true;
         }
-        return null;
-    }
 
-    private boolean isMaxConstrained(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "max", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                String max = results.get(0).getValueAsString();
-                // If max is not "*", it's been constrained
-                return max != null && !max.equals("*");
-            }
-        } catch (Exception e) {
-            logger.debug("Error checking max constraint", e);
+        // Criterion 5: hasSlicing on non-extension paths
+        if (element.hasSlicing()
+                && path != null
+                && !path.endsWith(".extension")
+                && !path.endsWith(".modifierExtension")) {
+            return true;
         }
+
+        // Criterion 6: hasSliceName
+        String sliceName = element.getSliceName();
+        if (sliceName != null && !sliceName.isEmpty()) {
+            return true;
+        }
+
+        // Criterion 7: in differential
+        if (differentialIds.contains(id)) {
+            return true;
+        }
+
+        // Criterion 8: max constrained from base
+        if (element.hasMax()) {
+            String max = element.getMax();
+            String baseMax = element.getBaseMax();
+            if (max != null && baseMax != null && !max.equals(baseMax)) {
+                return true;
+            }
+        }
+
+        // Criterion 9: min constrained from base
+        if (element.hasMin()) {
+            int min = element.getMin();
+            int baseMin = element.getBaseMin();
+            if (min != baseMin) {
+                return true;
+            }
+        }
+
+        // Criterion 10: binding changed from base
+        if (isBindingChangedFromBase(element, sd)) {
+            return true;
+        }
+
+        // Criterion 11: hasFixed
+        if (element.hasFixed()) {
+            return true;
+        }
+
+        // Criterion 12: hasPattern
+        if (element.hasPattern()) {
+            return true;
+        }
+
+        // Criterion 13: hasMaxLength
+        if (element.hasMaxLength()) {
+            return true;
+        }
+
+        // Criterion 14: R5 key constraints
+        if (element.hasR5KeyConstraints()) {
+            return true;
+        }
+
+        // Criterion 15: significant extensions
+        if (hasSignificantExtensions(element)) {
+            return true;
+        }
+
         return false;
     }
 
-    private boolean hasConstraints(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "constraint", IBase.class);
-            return !results.isEmpty();
-        } catch (Exception e) {
-            logger.debug("Error checking constraints", e);
+    /**
+     * Checks if the element's binding has changed from its base definition.
+     * (IG Publisher lines 720-740)
+     */
+    private boolean isBindingChangedFromBase(IElementDefinitionAdapter element, IStructureDefinitionAdapter sd) {
+        if (!element.hasBinding()) {
+            return false;
         }
-        return false;
-    }
 
-    private boolean isSlice(IBase element, FhirVersionEnum fhirVersion) {
-        try {
-            var fhirPath = FhirContext.forCached(fhirVersion).newFhirPath();
-            var results = fhirPath.evaluate(element, "sliceName", IPrimitiveType.class);
-            if (!results.isEmpty()) {
-                String sliceName = results.get(0).getValueAsString();
-                return sliceName != null && !sliceName.isEmpty();
+        String childStrength = element.getBindingStrength();
+        String childValueSet = element.getBindingValueSet();
+
+        // Only check for required/extensible bindings
+        if (childStrength == null || (!"required".equals(childStrength) && !"extensible".equals(childStrength))) {
+            return false;
+        }
+
+        // Find the base element to compare
+        String basePath = element.getBasePath();
+        if (basePath == null || !basePath.contains(".")) {
+            return false;
+        }
+
+        String baseTypeName = basePath.substring(0, basePath.indexOf("."));
+        String baseCanonical = "http://hl7.org/fhir/StructureDefinition/" + baseTypeName;
+
+        IBaseResource baseSd = resolver != null ? resolver.resolveStructureDefinition(baseCanonical) : null;
+        if (baseSd == null) {
+            // Conservative: if we can't resolve base, treat as changed
+            return true;
+        }
+
+        IStructureDefinitionAdapter baseSdAdapter = adapterFactory.createStructureDefinition(baseSd);
+        List<IElementDefinitionAdapter> baseElements = baseSdAdapter.getAllSnapshotElements();
+
+        // Find matching element by path
+        IElementDefinitionAdapter baseElement = null;
+        for (var be : baseElements) {
+            if (basePath.equals(be.getPath())) {
+                baseElement = be;
+                break;
             }
-        } catch (Exception e) {
-            logger.debug("Error checking if element is slice", e);
         }
+
+        if (baseElement == null) {
+            // Conservative: base element not found
+            return true;
+        }
+
+        // Compare bindings
+        if (!baseElement.hasBinding()) {
+            // Child has binding but base doesn't
+            return true;
+        }
+
+        String baseStrength = baseElement.getBindingStrength();
+        String baseValueSet = baseElement.getBindingValueSet();
+
+        // Check if strength or valueSet differs
+        if (!safeEquals(childStrength, baseStrength)) {
+            return true;
+        }
+        if (!safeEquals(childValueSet, baseValueSet)) {
+            return true;
+        }
+
         return false;
     }
 
-    private Set<String> getAncestorPaths(String path) {
+    /**
+     * Checks if the element has any significant extensions.
+     */
+    private boolean hasSignificantExtensions(IElementDefinitionAdapter element) {
+        List<String> extensionUrls = element.getExtensionUrls();
+        if (extensionUrls == null || extensionUrls.isEmpty()) {
+            return false;
+        }
+
+        for (String url : extensionUrls) {
+            if (SIGNIFICANT_EXTENSIONS.contains(url)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets direct children of a parent element from the element list.
+     * (IG Publisher lines 1772-1788)
+     */
+    private List<IElementDefinitionAdapter> getDirectChildren(
+            List<IElementDefinitionAdapter> elements, IElementDefinitionAdapter parent) {
+
+        String parentPath = parent.getPath();
+        if (parentPath == null) {
+            return List.of();
+        }
+
+        int parentDepth = parentPath.split("\\.").length;
+
+        return elements.stream()
+                .filter(e -> {
+                    String ePath = e.getPath();
+                    if (ePath == null || !ePath.startsWith(parentPath + ".")) {
+                        return false;
+                    }
+                    // Direct child = depth exactly one more than parent
+                    // But also include slices (same path, different sliceName)
+                    int eDepth = ePath.split("\\.").length;
+                    return eDepth == parentDepth + 1;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets ancestor IDs for a given element ID from the element list.
+     */
+    private Set<String> getAncestorIds(String elementId, List<IElementDefinitionAdapter> elements) {
         Set<String> ancestors = new HashSet<>();
-        if (path == null || !path.contains(".")) {
+        if (elementId == null || !elementId.contains(".")) {
             return ancestors;
         }
 
-        String[] parts = path.split("\\.");
-        StringBuilder current = new StringBuilder();
+        // Build a path-to-ID map for lookup
+        Map<String, String> pathToId = new HashMap<>();
+        for (var e : elements) {
+            String path = e.getPath();
+            String id = e.getId();
+            if (path != null && id != null) {
+                pathToId.put(path, id);
+            }
+        }
 
+        // Find the element's path
+        String elementPath = null;
+        for (var e : elements) {
+            if (elementId.equals(e.getId())) {
+                elementPath = e.getPath();
+                break;
+            }
+        }
+
+        if (elementPath == null || !elementPath.contains(".")) {
+            return ancestors;
+        }
+
+        // Walk up the path hierarchy
+        String[] parts = elementPath.split("\\.");
+        StringBuilder current = new StringBuilder();
         for (int i = 0; i < parts.length - 1; i++) {
             if (i > 0) {
                 current.append(".");
             }
             current.append(parts[i]);
-            ancestors.add(current.toString());
+            String ancestorId = pathToId.get(current.toString());
+            if (ancestorId != null) {
+                ancestors.add(ancestorId);
+            }
         }
 
         return ancestors;
     }
 
-    private boolean isChildOf(String childPath, String parentPath) {
-        if (childPath == null || parentPath == null) {
+    /**
+     * Resolves the base definition for inheritance walking.
+     */
+    private IBaseResource resolveBaseDefinition(IStructureDefinitionAdapter sd) {
+        try {
+            var baseDefElement = sd.getBaseDefinition();
+            if (baseDefElement == null) {
+                return null;
+            }
+
+            String baseDefUrl = baseDefElement.getValueAsString();
+            if (baseDefUrl == null || baseDefUrl.isEmpty()) {
+                return null;
+            }
+
+            if (resolver != null) {
+                return resolver.resolveStructureDefinition(baseDefUrl);
+            }
+        } catch (Exception e) {
+            logger.debug("Error resolving base definition", e);
+        }
+
+        return null;
+    }
+
+    private static boolean safeEquals(String a, String b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
             return false;
         }
-
-        // Direct child check: parent.child but not parent.child.grandchild
-        if (childPath.startsWith(parentPath + ".")) {
-            String remainder = childPath.substring(parentPath.length() + 1);
-            return !remainder.contains(".");
-        }
-
-        return false;
+        return a.equals(b);
     }
 }

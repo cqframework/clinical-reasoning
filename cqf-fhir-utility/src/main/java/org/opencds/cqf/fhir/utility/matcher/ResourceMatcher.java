@@ -357,6 +357,9 @@ public interface ResourceMatcher {
     }
 
     default boolean isMatchUri(UriParam param, IBase pathResult) {
+        if (param.getValue() == null) {
+            return false;
+        }
         if (pathResult instanceof IPrimitiveType<?> type) {
             return param.getValue().equals(type.getValue());
         }

@@ -2,11 +2,14 @@ package org.opencds.cqf.fhir.cr.visitor;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.Date;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.slf4j.Logger;
@@ -25,8 +28,6 @@ import org.slf4j.LoggerFactory;
  */
 public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor {
     private static final Logger logger = LoggerFactory.getLogger(InferManifestParametersVisitor.class);
-    private static final String CRMI_RESOURCE_TYPE_EXTENSION =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-resourceType";
 
     public InferManifestParametersVisitor(IRepository repository) {
         super(repository);
@@ -84,11 +85,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
     private org.hl7.fhir.dstu3.model.Library createDstu3Manifest(ILibraryAdapter inputLibrary) {
         var manifest = new org.hl7.fhir.dstu3.model.Library();
 
-        // Copy basic metadata
+        // Set metadata: manifest is a generated artifact
         manifest.setUrl(inputLibrary.getUrl());
         manifest.setVersion(inputLibrary.getVersion());
         manifest.setName(inputLibrary.getName() != null ? inputLibrary.getName() + "Manifest" : "Manifest");
-        manifest.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.fromCode(inputLibrary.getStatus()));
+        manifest.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.DRAFT);
+        manifest.setExperimental(true);
+        manifest.setDate(new Date());
 
         var typeCC = new org.hl7.fhir.dstu3.model.CodeableConcept();
         typeCC.addCoding()
@@ -104,10 +107,21 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             processRelatedArtifactDstu3(relatedArtifact, parameters, inputLibrary);
         }
 
-        // Store parameters as a contained resource
+        // Store parameters as a contained resource with cqf-expansionParameters extension
         if (!parameters.getParameter().isEmpty()) {
             parameters.setId("expansion-parameters");
             manifest.getContained().add(parameters);
+            manifest.addExtension(
+                    Constants.CQF_EXPANSION_PARAMETERS,
+                    new org.hl7.fhir.dstu3.model.Reference("#expansion-parameters"));
+        }
+
+        // Copy composed-of relatedArtifacts to manifest
+        for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
+            String raType = extractRelatedArtifactType(relatedArtifact);
+            if ("composed-of".equals(raType)) {
+                manifest.addRelatedArtifact((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact);
+            }
         }
 
         return manifest;
@@ -116,11 +130,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
     private org.hl7.fhir.r4.model.Library createR4Manifest(ILibraryAdapter inputLibrary) {
         var manifest = new org.hl7.fhir.r4.model.Library();
 
-        // Copy basic metadata
+        // Set metadata: manifest is a generated artifact
         manifest.setUrl(inputLibrary.getUrl());
         manifest.setVersion(inputLibrary.getVersion());
         manifest.setName(inputLibrary.getName() != null ? inputLibrary.getName() + "Manifest" : "Manifest");
-        manifest.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.fromCode(inputLibrary.getStatus()));
+        manifest.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT);
+        manifest.setExperimental(true);
+        manifest.setDate(new Date());
 
         var typeCC = new org.hl7.fhir.r4.model.CodeableConcept();
         typeCC.addCoding()
@@ -136,10 +152,20 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             processRelatedArtifactR4(relatedArtifact, parameters, inputLibrary);
         }
 
-        // Store parameters as a contained resource
+        // Store parameters as a contained resource with cqf-expansionParameters extension
         if (!parameters.getParameter().isEmpty()) {
             parameters.setId("expansion-parameters");
             manifest.getContained().add(parameters);
+            manifest.addExtension(
+                    Constants.CQF_EXPANSION_PARAMETERS, new org.hl7.fhir.r4.model.Reference("#expansion-parameters"));
+        }
+
+        // Copy composed-of relatedArtifacts to manifest
+        for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
+            String raType = extractRelatedArtifactType(relatedArtifact);
+            if ("composed-of".equals(raType)) {
+                manifest.addRelatedArtifact((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact);
+            }
         }
 
         return manifest;
@@ -148,11 +174,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
     private org.hl7.fhir.r5.model.Library createR5Manifest(ILibraryAdapter inputLibrary) {
         var manifest = new org.hl7.fhir.r5.model.Library();
 
-        // Copy basic metadata
+        // Set metadata: manifest is a generated artifact
         manifest.setUrl(inputLibrary.getUrl());
         manifest.setVersion(inputLibrary.getVersion());
         manifest.setName(inputLibrary.getName() != null ? inputLibrary.getName() + "Manifest" : "Manifest");
-        manifest.setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.fromCode(inputLibrary.getStatus()));
+        manifest.setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.DRAFT);
+        manifest.setExperimental(true);
+        manifest.setDate(new Date());
 
         var typeCC = new org.hl7.fhir.r5.model.CodeableConcept();
         typeCC.addCoding()
@@ -168,10 +196,20 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
             processRelatedArtifactR5(relatedArtifact, parameters, inputLibrary);
         }
 
-        // Store parameters as a contained resource
+        // Store parameters as a contained resource with cqf-expansionParameters extension
         if (!parameters.getParameter().isEmpty()) {
             parameters.setId("expansion-parameters");
             manifest.getContained().add(parameters);
+            manifest.addExtension(
+                    Constants.CQF_EXPANSION_PARAMETERS, new org.hl7.fhir.r5.model.Reference("#expansion-parameters"));
+        }
+
+        // Copy composed-of relatedArtifacts to manifest
+        for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
+            String raType = extractRelatedArtifactType(relatedArtifact);
+            if ("composed-of".equals(raType)) {
+                manifest.addRelatedArtifact((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact);
+            }
         }
 
         return manifest;
@@ -179,12 +217,20 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
 
     private void processRelatedArtifactDstu3(
             ICompositeType relatedArtifact, org.hl7.fhir.dstu3.model.Parameters parameters, ILibraryAdapter library) {
+        String raType = extractRelatedArtifactType(relatedArtifact);
+        if (!"depends-on".equals(raType)) {
+            return;
+        }
+        if (!hasKeyDependencyRole(relatedArtifact)) {
+            return;
+        }
+
         var canonical = extractCanonical(relatedArtifact, library);
         if (canonical == null) {
             return;
         }
 
-        String resourceType = Canonicals.getResourceType(canonical);
+        String resourceType = extractResourceType(relatedArtifact, canonical);
         if (resourceType == null) {
             return;
         }
@@ -203,24 +249,26 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .setValue(new org.hl7.fhir.dstu3.model.StringType(canonical));
                 break;
             default:
-                parameters
-                        .addParameter()
-                        .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.dstu3.model.StringType(canonical))
-                        .addExtension(
-                                CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.dstu3.model.CodeType(resourceType));
                 break;
         }
     }
 
     private void processRelatedArtifactR4(
             ICompositeType relatedArtifact, org.hl7.fhir.r4.model.Parameters parameters, ILibraryAdapter library) {
+        String raType = extractRelatedArtifactType(relatedArtifact);
+        if (!"depends-on".equals(raType)) {
+            return;
+        }
+        if (!hasKeyDependencyRole(relatedArtifact)) {
+            return;
+        }
+
         var canonical = extractCanonical(relatedArtifact, library);
         if (canonical == null) {
             return;
         }
 
-        String resourceType = Canonicals.getResourceType(canonical);
+        String resourceType = extractResourceType(relatedArtifact, canonical);
         if (resourceType == null) {
             return;
         }
@@ -239,23 +287,26 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .setValue(new org.hl7.fhir.r4.model.StringType(canonical));
                 break;
             default:
-                parameters
-                        .addParameter()
-                        .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.r4.model.StringType(canonical))
-                        .addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r4.model.CodeType(resourceType));
                 break;
         }
     }
 
     private void processRelatedArtifactR5(
             ICompositeType relatedArtifact, org.hl7.fhir.r5.model.Parameters parameters, ILibraryAdapter library) {
+        String raType = extractRelatedArtifactType(relatedArtifact);
+        if (!"depends-on".equals(raType)) {
+            return;
+        }
+        if (!hasKeyDependencyRole(relatedArtifact)) {
+            return;
+        }
+
         var canonical = extractCanonical(relatedArtifact, library);
         if (canonical == null) {
             return;
         }
 
-        String resourceType = Canonicals.getResourceType(canonical);
+        String resourceType = extractResourceType(relatedArtifact, canonical);
         if (resourceType == null) {
             return;
         }
@@ -274,13 +325,32 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                         .setValue(new org.hl7.fhir.r5.model.StringType(canonical));
                 break;
             default:
-                parameters
-                        .addParameter()
-                        .setName("canonicalVersion")
-                        .setValue(new org.hl7.fhir.r5.model.StringType(canonical))
-                        .addExtension(CRMI_RESOURCE_TYPE_EXTENSION, new org.hl7.fhir.r5.model.CodeType(resourceType));
                 break;
         }
+    }
+
+    private String extractResourceType(ICompositeType relatedArtifact, String canonical) {
+        // Try cqf-resourceType extension on the resource element
+        if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact r4Ra) {
+            var ext = r4Ra.getResourceElement().getExtensionByUrl(Constants.CQF_RESOURCETYPE);
+            if (ext != null && ext.getValue() instanceof IPrimitiveType<?> code) {
+                return code.getValueAsString();
+            }
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5Ra) {
+            var ext = r5Ra.getResourceElement().getExtensionByUrl(Constants.CQF_RESOURCETYPE);
+            if (ext != null && ext.getValue() instanceof IPrimitiveType<?> code) {
+                return code.getValueAsString();
+            }
+        } else if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact dstu3Ra) {
+            if (dstu3Ra.hasResource()) {
+                var ext = dstu3Ra.getResource().getExtensionByUrl(Constants.CQF_RESOURCETYPE);
+                if (ext != null && ext.getValue() instanceof IPrimitiveType<?> code) {
+                    return code.getValueAsString();
+                }
+            }
+        }
+        // Fallback to URL parsing
+        return Canonicals.getResourceType(canonical);
     }
 
     private String extractCanonical(ICompositeType relatedArtifact, ILibraryAdapter library) {
@@ -293,5 +363,61 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
         }
 
         return null;
+    }
+
+    private String extractRelatedArtifactType(ICompositeType relatedArtifact) {
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact dstu3Ra) {
+            return dstu3Ra.getType() != null ? dstu3Ra.getType().toCode() : null;
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact r4Ra) {
+            return r4Ra.getType() != null ? r4Ra.getType().toCode() : null;
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5Ra) {
+            return r5Ra.getType() != null ? r5Ra.getType().toCode() : null;
+        }
+        return null;
+    }
+
+    private boolean hasKeyDependencyRole(ICompositeType relatedArtifact) {
+        List<?> extensions = null;
+
+        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact dstu3Ra) {
+            extensions = dstu3Ra.getExtension();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact r4Ra) {
+            extensions = r4Ra.getExtension();
+        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5Ra) {
+            extensions = r5Ra.getExtension();
+        }
+
+        if (extensions == null || extensions.isEmpty()) {
+            return true; // backward compat: no dependencyRole extensions → treat as eligible
+        }
+
+        boolean hasDependencyRoleExt = false;
+        boolean hasKeyRole = false;
+
+        for (Object ext : extensions) {
+            String url = null;
+            Object value = null;
+
+            if (ext instanceof org.hl7.fhir.dstu3.model.Extension dstu3Ext) {
+                url = dstu3Ext.getUrl();
+                value = dstu3Ext.getValue();
+            } else if (ext instanceof org.hl7.fhir.r4.model.Extension r4Ext) {
+                url = r4Ext.getUrl();
+                value = r4Ext.getValue();
+            } else if (ext instanceof org.hl7.fhir.r5.model.Extension r5Ext) {
+                url = r5Ext.getUrl();
+                value = r5Ext.getValue();
+            }
+
+            if (Constants.CRMI_DEPENDENCY_ROLE.equals(url)) {
+                hasDependencyRoleExt = true;
+                if (value instanceof IPrimitiveType<?> primitive && "key".equals(primitive.getValueAsString())) {
+                    hasKeyRole = true;
+                }
+            }
+        }
+
+        // If no dependencyRole extensions at all, backward compat: treat as eligible
+        return !hasDependencyRoleExt || hasKeyRole;
     }
 }

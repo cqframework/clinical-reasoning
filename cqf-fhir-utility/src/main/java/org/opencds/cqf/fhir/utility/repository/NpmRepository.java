@@ -138,79 +138,14 @@ public class NpmRepository extends InMemoryFhirRepository {
         if (loadedPackages != null) {
             return;
         }
-        // Build into a local list first — only assign to loadedPackages on success
-        // so a failure doesn't poison subsequent calls with an empty list.
         var result = new ArrayList<NpmPackage>();
         var typeIndex = new HashMap<String, String>();
         var verIndex = new HashMap<String, String>();
         var pkgIndex = new HashMap<String, PackageInfo>();
         logger.info("Loading NPM packages from {} seed(s)", dependsOnPackages.size());
         try {
-            // Use the user's FHIR package cache (~/.fhir/packages).
-            // withSystemCacheFolder() uses /var/lib/.fhir/packages on non-Windows,
-            // which is the system-wide cache and typically empty.
-            var cacheDir = new File(System.getProperty("user.home"), ".fhir" + File.separator + "packages");
-            cacheDir.mkdirs();
-
-            var mgr = new FilesystemPackageCacheManager.Builder()
-                    .withCacheFolder(cacheDir.getAbsolutePath())
-                    .build();
-
-            Set<String> loaded = new HashSet<>();
-            Queue<String[]> toLoad = new LinkedList<>(dependsOnPackages);
-            while (!toLoad.isEmpty()) {
-                var pkgInfo = toLoad.poll();
-                if (pkgInfo == null || pkgInfo.length < 2) {
-                    continue;
-                }
-                var key = pkgInfo[0] + "#" + pkgInfo[1];
-                if (!loaded.add(key)) {
-                    continue;
-                }
-
-                try {
-                    var npmPkg = mgr.loadPackage(pkgInfo[0], pkgInfo[1]);
-                    if (npmPkg == null) {
-                        logger.warn("NPM package not found: {}", key);
-                        continue;
-                    }
-                    result.add(npmPkg);
-                    logger.info("Loaded NPM package: {}", key);
-
-                    // Build URL → metadata indexes from package's .index.json
-                    try {
-                        var owningPackage = new PackageInfo(npmPkg.id(), npmPkg.version(), npmPkg.canonical());
-                        for (var info : npmPkg.listIndexedResources()) {
-                            if (info.getUrl() != null) {
-                                if (info.getResourceType() != null) {
-                                    typeIndex.putIfAbsent(info.getUrl(), info.getResourceType());
-                                }
-                                // Stub CodeSystems (content: not-present) are placeholders —
-                                // their version and package provenance are not meaningful.
-                                var isStub = "CodeSystem".equals(info.getResourceType())
-                                        && "not-present".equals(info.getContent());
-                                if (!isStub) {
-                                    if (info.getVersion() != null) {
-                                        verIndex.putIfAbsent(info.getUrl(), info.getVersion());
-                                    }
-                                    pkgIndex.putIfAbsent(info.getUrl(), owningPackage);
-                                }
-                            }
-                        }
-                    } catch (Exception ex) {
-                        logger.debug("Error indexing resources from package {}: {}", key, ex.getMessage());
-                    }
-
-                    for (var dep : npmPkg.dependencies()) {
-                        var parts = dep.split("#", 2);
-                        if (parts.length == 2) {
-                            toLoad.add(new String[] {parts[0], parts[1]});
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.warn("Failed to load NPM package {}: {}", key, e.getMessage());
-                }
-            }
+            var mgr = createPackageCacheManager();
+            loadPackagesTransitively(mgr, result, typeIndex, verIndex, pkgIndex);
             logger.info("NPM package loading complete: {} package(s) loaded", result.size());
         } catch (Exception e) {
             logger.warn("Could not initialize NPM package cache manager: {}", e.getMessage(), e);
@@ -219,5 +154,96 @@ public class NpmRepository extends InMemoryFhirRepository {
         versionIndex = verIndex;
         packageIndex = pkgIndex;
         loadedPackages = result;
+    }
+
+    private FilesystemPackageCacheManager createPackageCacheManager() throws java.io.IOException {
+        // Use the user's FHIR package cache (~/.fhir/packages).
+        var cacheDir = new File(System.getProperty("user.home"), ".fhir" + File.separator + "packages");
+        cacheDir.mkdirs();
+        return new FilesystemPackageCacheManager.Builder()
+                .withCacheFolder(cacheDir.getAbsolutePath())
+                .build();
+    }
+
+    private void loadPackagesTransitively(
+            FilesystemPackageCacheManager mgr,
+            List<NpmPackage> result,
+            Map<String, String> typeIndex,
+            Map<String, String> verIndex,
+            Map<String, PackageInfo> pkgIndex) {
+        Set<String> loaded = new HashSet<>();
+        Queue<String[]> toLoad = new LinkedList<>(dependsOnPackages);
+        while (!toLoad.isEmpty()) {
+            var pkgInfo = toLoad.poll();
+            if (pkgInfo == null || pkgInfo.length < 2) {
+                continue;
+            }
+            var key = pkgInfo[0] + "#" + pkgInfo[1];
+            if (!loaded.add(key)) {
+                continue;
+            }
+            loadSinglePackage(mgr, pkgInfo, key, result, typeIndex, verIndex, pkgIndex, toLoad);
+        }
+    }
+
+    private void loadSinglePackage(
+            FilesystemPackageCacheManager mgr,
+            String[] pkgInfo,
+            String key,
+            List<NpmPackage> result,
+            Map<String, String> typeIndex,
+            Map<String, String> verIndex,
+            Map<String, PackageInfo> pkgIndex,
+            Queue<String[]> toLoad) {
+        try {
+            var npmPkg = mgr.loadPackage(pkgInfo[0], pkgInfo[1]);
+            if (npmPkg == null) {
+                logger.warn("NPM package not found: {}", key);
+                return;
+            }
+            result.add(npmPkg);
+            logger.info("Loaded NPM package: {}", key);
+
+            indexPackageResources(npmPkg, key, typeIndex, verIndex, pkgIndex);
+
+            for (var dep : npmPkg.dependencies()) {
+                var parts = dep.split("#", 2);
+                if (parts.length == 2) {
+                    toLoad.add(new String[] {parts[0], parts[1]});
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to load NPM package {}: {}", key, e.getMessage());
+        }
+    }
+
+    private void indexPackageResources(
+            NpmPackage npmPkg,
+            String key,
+            Map<String, String> typeIndex,
+            Map<String, String> verIndex,
+            Map<String, PackageInfo> pkgIndex) {
+        try {
+            var owningPackage = new PackageInfo(npmPkg.id(), npmPkg.version(), npmPkg.canonical());
+            for (var info : npmPkg.listIndexedResources()) {
+                if (info.getUrl() == null) {
+                    continue;
+                }
+                if (info.getResourceType() != null) {
+                    typeIndex.putIfAbsent(info.getUrl(), info.getResourceType());
+                }
+                // Stub CodeSystems (content: not-present) are placeholders —
+                // their version and package provenance are not meaningful.
+                var isStub = "CodeSystem".equals(info.getResourceType()) && "not-present".equals(info.getContent());
+                if (!isStub) {
+                    if (info.getVersion() != null) {
+                        verIndex.putIfAbsent(info.getUrl(), info.getVersion());
+                    }
+                    pkgIndex.putIfAbsent(info.getUrl(), owningPackage);
+                }
+            }
+        } catch (Exception ex) {
+            logger.debug("Error indexing resources from package {}: {}", key, ex.getMessage());
+        }
     }
 }

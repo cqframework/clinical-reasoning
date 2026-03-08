@@ -36,7 +36,6 @@ public class ConformanceResourceResolver {
     private final FhirContext fhirContext;
     private final NpmRepository npmRepository;
     private final IRepository federatedRepository;
-    private final List<ArtifactEndpointConfiguration> endpointConfigurations;
     private final DefaultProfileValidationSupport coreSupport;
     private Map<String, IBaseResource> packageCache; // lazy, built on first SD miss
 
@@ -57,7 +56,6 @@ public class ConformanceResourceResolver {
             List<ArtifactEndpointConfiguration> endpointConfigurations) {
         this.repository = repository;
         this.fhirContext = repository.fhirContext();
-        this.endpointConfigurations = endpointConfigurations != null ? endpointConfigurations : Collections.emptyList();
         this.coreSupport = new DefaultProfileValidationSupport(fhirContext);
         this.npmRepository = new NpmRepository(fhirContext, dependsOnPackages);
         var hasDependsOnPackages = dependsOnPackages != null && !dependsOnPackages.isEmpty();
@@ -74,7 +72,7 @@ public class ConformanceResourceResolver {
      * Returns a repository that federates the real repository with NPM package resources.
      * When dependsOnPackages is empty, this returns the original repository unchanged.
      */
-    public IRepository getRepository() {
+    public IRepository getFederatedRepository() {
         return federatedRepository;
     }
 
@@ -156,25 +154,32 @@ public class ConformanceResourceResolver {
             try {
                 var sdFiles = npmPackage.listResources("StructureDefinition");
                 for (var filename : sdFiles) {
-                    try (InputStream is = npmPackage.load("package", filename)) {
-                        var resource = parser.parseResource(is);
-                        var adapter = IAdapterFactory.forFhirVersion(
-                                        fhirContext.getVersion().getVersion())
-                                .createStructureDefinition(resource);
-                        var url = adapter.getUrl();
-                        if (url != null && !url.isEmpty()) {
-                            cache.put(url, resource);
-                        }
-                    } catch (Exception e) {
-                        logger.debug(
-                                "Error loading StructureDefinition from package {}: {}", npmPackage.id(), filename, e);
-                    }
+                    loadStructureDefinition(npmPackage, filename, parser, cache);
                 }
             } catch (Exception e) {
                 logger.debug("Error listing StructureDefinitions from package {}", npmPackage.id(), e);
             }
         }
         return cache;
+    }
+
+    private void loadStructureDefinition(
+            NpmPackage npmPackage,
+            String filename,
+            ca.uhn.fhir.parser.IParser parser,
+            Map<String, IBaseResource> cache) {
+        try (InputStream is = npmPackage.load("package", filename)) {
+            var resource = parser.parseResource(is);
+            var adapter = IAdapterFactory.forFhirVersion(
+                            fhirContext.getVersion().getVersion())
+                    .createStructureDefinition(resource);
+            var url = adapter.getUrl();
+            if (url != null && !url.isEmpty()) {
+                cache.put(url, resource);
+            }
+        } catch (Exception e) {
+            logger.debug("Error loading StructureDefinition from package {}: {}", npmPackage.id(), filename, e);
+        }
     }
 
     /**

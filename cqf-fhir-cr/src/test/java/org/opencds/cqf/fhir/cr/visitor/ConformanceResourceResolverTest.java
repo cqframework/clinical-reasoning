@@ -11,7 +11,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 
 class ConformanceResourceResolverTest {
@@ -38,37 +41,18 @@ class ConformanceResourceResolverTest {
         assertNotNull(result, "Should resolve core FHIR Observation type");
     }
 
-    @Test
-    void testResolveNullUrl() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
-
-        var resolver = new ConformanceResourceResolver(repository);
-        var result = resolver.resolveStructureDefinition(null);
-
-        assertNull(result, "Should return null for null URL");
+    static Stream<String> unresolvedUrls() {
+        return Stream.of(null, "", "http://example.org/StructureDefinition/NonExistent");
     }
 
-    @Test
-    void testResolveEmptyUrl() {
+    @ParameterizedTest
+    @MethodSource("unresolvedUrls")
+    void testResolveReturnsNullForUnresolvableUrl(String url) {
         var repository = mock(IRepository.class);
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
 
         var resolver = new ConformanceResourceResolver(repository);
-        var result = resolver.resolveStructureDefinition("");
-
-        assertNull(result, "Should return null for empty URL");
-    }
-
-    @Test
-    void testResolveUnknownUrl() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
-
-        var resolver = new ConformanceResourceResolver(repository);
-        var result = resolver.resolveStructureDefinition("http://example.org/StructureDefinition/NonExistent");
-
-        assertNull(result, "Should return null for unknown URL");
+        assertNull(resolver.resolveStructureDefinition(url));
     }
 
     @Test
@@ -114,7 +98,7 @@ class ConformanceResourceResolverTest {
 
         var resolver = new ConformanceResourceResolver(repository);
 
-        assertSame(repository, resolver.getRepository(), "Should return original repository when no packages");
+        assertSame(repository, resolver.getFederatedRepository(), "Should return original repository when no packages");
     }
 
     @Test
@@ -126,7 +110,7 @@ class ConformanceResourceResolverTest {
         packages.add(new String[] {"hl7.fhir.us.core", "6.1.0"});
         var resolver = new ConformanceResourceResolver(repository, packages, Collections.emptyList());
 
-        var result = resolver.getRepository();
+        var result = resolver.getFederatedRepository();
         assertNotNull(result);
         assertEquals(
                 FederatedRepository.class,
@@ -151,7 +135,10 @@ class ConformanceResourceResolverTest {
 
         var resolver = new ConformanceResourceResolver(repository, null, Collections.emptyList());
 
-        assertSame(repository, resolver.getRepository(), "Should return original repository when packages is null");
+        assertSame(
+                repository,
+                resolver.getFederatedRepository(),
+                "Should return original repository when packages is null");
     }
 
     @Test

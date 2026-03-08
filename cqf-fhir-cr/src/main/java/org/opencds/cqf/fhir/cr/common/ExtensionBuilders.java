@@ -10,6 +10,9 @@ import org.opencds.cqf.fhir.utility.Constants;
 public class ExtensionBuilders {
     private ExtensionBuilders() {}
 
+    private static final String PACKAGE_ID = "packageId";
+    private static final String VERSION = "version";
+
     public static final SimpleEntry<String, String> QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION =
             new SimpleEntry<>(Constants.QUESTIONNAIRE_RESPONSE_AUTHOR, Constants.CQL_ENGINE_DEVICE);
 
@@ -123,10 +126,10 @@ public class ExtensionBuilders {
             case DSTU3 -> {
                 var ext = new org.hl7.fhir.dstu3.model.Extension(Constants.PACKAGE_SOURCE);
                 if (packageId != null) {
-                    ext.addExtension("packageId", new org.hl7.fhir.dstu3.model.StringType(packageId));
+                    ext.addExtension(PACKAGE_ID, new org.hl7.fhir.dstu3.model.StringType(packageId));
                 }
                 if (version != null) {
-                    ext.addExtension("version", new org.hl7.fhir.dstu3.model.StringType(version));
+                    ext.addExtension(VERSION, new org.hl7.fhir.dstu3.model.StringType(version));
                 }
                 if (uri != null) {
                     ext.addExtension("uri", new org.hl7.fhir.dstu3.model.UriType(uri));
@@ -136,10 +139,10 @@ public class ExtensionBuilders {
             case R4 -> {
                 var ext = new org.hl7.fhir.r4.model.Extension(Constants.PACKAGE_SOURCE);
                 if (packageId != null) {
-                    ext.addExtension("packageId", new org.hl7.fhir.r4.model.StringType(packageId));
+                    ext.addExtension(PACKAGE_ID, new org.hl7.fhir.r4.model.StringType(packageId));
                 }
                 if (version != null) {
-                    ext.addExtension("version", new org.hl7.fhir.r4.model.StringType(version));
+                    ext.addExtension(VERSION, new org.hl7.fhir.r4.model.StringType(version));
                 }
                 if (uri != null) {
                     ext.addExtension("uri", new org.hl7.fhir.r4.model.UriType(uri));
@@ -149,10 +152,10 @@ public class ExtensionBuilders {
             case R5 -> {
                 var ext = new org.hl7.fhir.r5.model.Extension(Constants.PACKAGE_SOURCE);
                 if (packageId != null) {
-                    ext.addExtension("packageId", new org.hl7.fhir.r5.model.StringType(packageId));
+                    ext.addExtension(PACKAGE_ID, new org.hl7.fhir.r5.model.StringType(packageId));
                 }
                 if (version != null) {
-                    ext.addExtension("version", new org.hl7.fhir.r5.model.StringType(version));
+                    ext.addExtension(VERSION, new org.hl7.fhir.r5.model.StringType(version));
                 }
                 if (uri != null) {
                     ext.addExtension("uri", new org.hl7.fhir.r5.model.UriType(uri));

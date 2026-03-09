@@ -237,8 +237,6 @@ public interface ResourceMatcher {
             return paramValue.equals(extractReferenceValue(reference1));
         } else if (pathResult instanceof IPrimitiveType<?> type1) {
             return paramValue.equals(type1.getValueAsString());
-        } else if (pathResult instanceof Iterable<?> iterable) {
-            return isMatchReferenceInIterable(paramValue, iterable);
         }
         throw new UnsupportedOperationException(
                 "Expected Reference element, found " + pathResult.getClass().getSimpleName());
@@ -252,19 +250,6 @@ public interface ResourceMatcher {
             return reference.getResource().getIdElement().getValue();
         }
         throw new UnsupportedOperationException("No reference found");
-    }
-
-    private static boolean isMatchReferenceInIterable(String paramValue, Iterable<?> iterable) {
-        for (var element : iterable) {
-            if (element instanceof IBaseReference reference
-                    && paramValue.equals(reference.getReferenceElement().getValue())) {
-                return true;
-            }
-            if (element instanceof IPrimitiveType<?> type && paramValue.equals(type.getValueAsString())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     default boolean isMatchDate(DateParam param, IBase pathResult) {

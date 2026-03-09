@@ -270,6 +270,71 @@ public class ImplementationGuideAdapterTest implements IImplementationGuideAdapt
     }
 
     @Test
+    void adapter_getDependenciesWithRepo_skipsExampleResources() {
+        var ig = new ImplementationGuide();
+        // Example resource — should be skipped
+        var exampleResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Library/example-lib"));
+        exampleResource.setIsExample(true);
+        // Non-example — should be included
+        var nonExample = new ImplementationGuideDefinitionResourceComponent(new Reference("Library/real-lib"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(exampleResource, nonExample));
+        ig.setDefinition(igDef);
+
+        var lib = new Library();
+        lib.setId("Library/real-lib");
+        lib.setUrl("http://example.org/Library/real-lib");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(lib);
+        var repo = new InMemoryFhirRepository(FhirContext.forR5(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertEquals(1, deps.size());
+        assertEquals("http://example.org/Library/real-lib", deps.get(0).getReference());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_handlesMetadataResourceWithoutUrl() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Library/no-url-lib"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        var lib = new Library();
+        lib.setId("Library/no-url-lib");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(lib);
+        var repo = new InMemoryFhirRepository(FhirContext.forR5(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_skipsResourceWithoutReference() {
+        var ig = new ImplementationGuide();
+        var noRefResource = new ImplementationGuideDefinitionResourceComponent();
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(noRefResource));
+        ig.setDefinition(igDef);
+
+        var repo = new InMemoryFhirRepository(FhirContext.forR5());
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
     void adapter_canonical_with_version_and_without_version() {
         var ig = new ImplementationGuide();
         ig.setUrl("http://example.org/ig");

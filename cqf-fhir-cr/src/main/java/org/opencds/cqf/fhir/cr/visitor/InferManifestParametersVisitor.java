@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.visitor;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -415,6 +416,6 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
         } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact r5Ra) {
             return r5Ra.getExtension();
         }
-        return null;
+        return Collections.emptyList();
     }
 }

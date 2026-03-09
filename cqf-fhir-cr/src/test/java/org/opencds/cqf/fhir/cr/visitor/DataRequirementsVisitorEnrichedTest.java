@@ -626,6 +626,76 @@ class DataRequirementsVisitorEnrichedTest {
         assertEquals("module-definition", library.getType().getCodingFirstRep().getCode());
     }
 
+    /**
+     * Verifies that dependsOn entries missing packageId or version are skipped,
+     * and an IG without its own packageId still processes dependsOn entries.
+     */
+    @Test
+    void visit_enrichedPath_extractsDependsOnPackages_handlesMissingFields() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        // IG without packageId — covers false branch at ig.hasPackageId()
+        var ig = new ImplementationGuide();
+        ig.setId("ImplementationGuide/test-ig-no-pkg");
+        ig.setUrl("http://example.org/ImplementationGuide/test-ig-no-pkg");
+        ig.setVersion("1.0.0");
+        ig.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        ig.setName("TestIGNoPkg");
+        // dependsOn with packageId + version (valid)
+        ig.addDependsOn()
+                .setPackageId("hl7.fhir.us.core")
+                .setVersion("6.1.0")
+                .setUri("http://hl7.org/fhir/us/core/ImplementationGuide/hl7.fhir.us.core");
+        // dependsOn without packageId (should be skipped)
+        ig.addDependsOn().setVersion("3.0.0").setUri("http://example.org/ig/missing-pkg");
+        // dependsOn without version (should be skipped)
+        ig.addDependsOn().setPackageId("some.ig").setUri("http://example.org/ig/missing-version");
+        addToRepo(repository, ig);
+
+        var router = mock(ITerminologyProviderRouter.class);
+        var visitor = new DataRequirementsVisitor(repository, EvaluationSettings.getDefault(), router);
+
+        var operationParameters = newParameters(fhirContext);
+        var igAdapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+
+        var result = visitor.visit(igAdapter, operationParameters);
+        assertInstanceOf(Library.class, result);
+    }
+
+    /**
+     * Verifies that R5 IG dependsOn packages are extracted correctly.
+     */
+    @Test
+    void visit_enrichedPath_extractsR5DependsOnPackages() {
+        var r5Context = FhirContext.forR5Cached();
+        var repository = new InMemoryFhirRepository(r5Context);
+        var r5AdapterFactory = IAdapterFactory.forFhirContext(r5Context);
+
+        var ig = new org.hl7.fhir.r5.model.ImplementationGuide();
+        ig.setId("ImplementationGuide/test-r5-ig");
+        ig.setUrl("http://example.org/ImplementationGuide/test-r5-ig");
+        ig.setVersion("1.0.0");
+        ig.setStatus(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE);
+        ig.setName("TestR5IG");
+        ig.setPackageId("test.r5.ig");
+        ig.addDependsOn()
+                .setPackageId("hl7.fhir.us.core")
+                .setVersion("6.1.0")
+                .setUri("http://hl7.org/fhir/us/core/ImplementationGuide/hl7.fhir.us.core");
+        // dependsOn without packageId (covers false branch)
+        ig.addDependsOn().setVersion("3.0.0").setUri("http://example.org/ig/missing-pkg");
+        repository.update(ig);
+
+        var router = mock(ITerminologyProviderRouter.class);
+        var visitor = new DataRequirementsVisitor(repository, EvaluationSettings.getDefault(), router);
+
+        var operationParameters = newParameters(r5Context);
+        var igAdapter = r5AdapterFactory.createKnowledgeArtifactAdapter(ig);
+
+        var result = visitor.visit(igAdapter, operationParameters);
+        assertInstanceOf(org.hl7.fhir.r5.model.Library.class, result);
+    }
+
     private ImplementationGuide createIgWithDefinitionResource(
             String id, String url, String version, String resourceReference) {
         var ig = createSimpleIg(id, url, version);

@@ -235,7 +235,7 @@ public class KeyElementAnalyzer {
                 continue;
             }
 
-            if (isKeyElement(child, mustSupportMap, differentialIds, sd)) {
+            if (isKeyElement(child, mustSupportMap, differentialIds)) {
                 keyElements.add(childId);
                 // Recursively scan this child's children
                 scanChildren(allElements, child, keyElements, mustSupportMap, differentialIds, sd);
@@ -247,10 +247,7 @@ public class KeyElementAnalyzer {
      * Evaluates all key element criteria for a single element.
      */
     private boolean isKeyElement(
-            IElementDefinitionAdapter element,
-            Map<String, Boolean> mustSupportMap,
-            Set<String> differentialIds,
-            IStructureDefinitionAdapter sd) {
+            IElementDefinitionAdapter element, Map<String, Boolean> mustSupportMap, Set<String> differentialIds) {
         return isKeyByStructuralCriteria(element, mustSupportMap, differentialIds)
                 || isKeyByConstraintCriteria(element);
     }

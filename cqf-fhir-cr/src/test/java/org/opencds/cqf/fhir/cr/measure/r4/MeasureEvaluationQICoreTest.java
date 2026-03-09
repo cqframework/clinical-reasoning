@@ -56,7 +56,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & Bilateral Mastectomy Dx that starts on 12/31 of the MP. Testing the Condition Encounter Diagnosis profile.
      */
     @Test
-    void test_013f85ee_5c8a_47d1_9fa3_b4ad0e99ca45() {
+    void test_cms125_bilateral_mastectomy_dx_cond_enc_dx_013f85ee_5c8a_47d1_9fa3_b4ad0e99ca45() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/05b5981f-0075-462d-ad19-d29f7205d1fa")
@@ -158,7 +158,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice diagnosis overlaps MP. Testing condition encounter diagnosis.
      */
     @Test
-    void test_0709b11a_1a4d_482d_b2a1_e562f15ab9f6() {
+    void test_cms125_hospice_dx_overlaps_mp_cond_enc_dx_0709b11a_1a4d_482d_b2a1_e562f15ab9f6() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/461f1aab-e645-4973-ae9a-4c09bfaef59a")
@@ -245,7 +245,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 during the MP.
      */
     @Test
-    void test_080c3e69_9f37_472f_bd70_34acdc2536ba() {
+    void test_cms125_age52_encounter_during_mp_080c3e69_9f37_472f_bd70_34acdc2536ba() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/81dce125-8691-4625-ac6b-07fce0a45680")
@@ -293,7 +293,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 42yo w/ an Office Visit Encounter 12/31 during the year before the MP.
      */
     @Test
-    void test_0a9a9906_c061_4a40_a1d6_2965732aa59a() {
+    void test_cms125_age42_encounter_before_mp_0a9a9906_c061_4a40_a1d6_2965732aa59a() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/8f459050-c870-4719-9952-80baa25d1fa1")
@@ -341,7 +341,7 @@ class MeasureEvaluationQICoreTest {
      * Advanced illness diagnosis before 2 years
      */
     @Test
-    void test_0c4d5b0d_470d_443d_9dc9_1dbda3f69d59() {
+    void test_cms125_advanced_illness_dx_before_2yr_0c4d5b0d_470d_443d_9dc9_1dbda3f69d59() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/cf727fca-40bc-46ed-b97b-e9021cffb8d3")
@@ -389,7 +389,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter, meds administered, lab test 1 = 35, lab 2 result = entered-in-error
      */
     @Test
-    void test_0d80e691_5b27_48ba_bb22_d31a481ede1a() {
+    void test_cms816_lab_result_entered_in_error_0d80e691_5b27_48ba_bb22_d31a481ede1a() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/471f0895-69d0-4cd2-bae3-3e9872616cef")
@@ -431,7 +431,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter, meds administered, two glucose lab tests but no results. Must have results and must be LT 40 to meet numerator.
      */
     @Test
-    void test_0fb98a8a_a7ac_49a3_a1bd_e042373dc1c6() {
+    void test_cms816_glucose_labs_no_results_0fb98a8a_a7ac_49a3_a1bd_e042373dc1c6() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/5bfa3b7e-2b6f-4eb5-b09b-7c6f1145780b")
@@ -473,7 +473,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 during the MP and Mammogram Observation 9/30 before observation interval.
      */
     @Test
-    void test_102319bd_d710_4adf_bee0_40ff88a7b838() {
+    void test_cms125_mammogram_before_obs_interval_102319bd_d710_4adf_bee0_40ff88a7b838() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/f7574a1c-122e-45ef-9ab5-cfa35a40d6d6")
@@ -521,7 +521,7 @@ class MeasureEvaluationQICoreTest {
      * Advanced illness diagnosis within 2 years
      */
     @Test
-    void test_1129152b_fe9b_4ccf_b28b_71bada6d3088() {
+    void test_cms125_advanced_illness_dx_within_2yr_1129152b_fe9b_4ccf_b28b_71bada6d3088() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/62901c95-5d12-45e8-b5b1-d131e36d8299")
@@ -569,7 +569,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 during the MP and Mammogram Observation 1/1 after observation interval.
      */
     @Test
-    void test_157d6c28_7d6c_47be_906e_cd622931cf65() {
+    void test_cms125_mammogram_after_obs_interval_157d6c28_7d6c_47be_906e_cd622931cf65() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/f4d00e60-e525-4644-a397-4d7d970bcfdb")
@@ -617,7 +617,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter started in ER before IP. Hypo med relevant date/time during ER. Meets denominator.
      */
     @Test
-    void test_1d024438_43d5_466f_a8a5_e74c19609c31() {
+    void test_cms816_encounter_started_er_before_ip_1d024438_43d5_466f_a8a5_e74c19609c31() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/41c102cb-d7f0-421d-ac76-5ac1c8dbe56a")
@@ -659,7 +659,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 of the MP & Hospice Encounter that ends on 12/31 of the year before the MP.
      */
     @Test
-    void test_1e2e967d_b2e6_4117_9b91_b2509d539bea() {
+    void test_cms125_hospice_enc_ends_before_mp_1e2e967d_b2e6_4117_9b91_b2509d539bea() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/57d8d494-e828-4edf-8c8b-e27da33ea223")
@@ -707,7 +707,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter, meds administered, lab test 1 = 35, lab 2  exactly 5 minutes after with result = 81 so does not meet Numerator. Timing is based on rel datetime of first test to second test.
      */
     @Test
-    void test_1e896d30_3808_482a_b8a3_51198a58d4a6() {
+    void test_cms816_lab2_gt80_exactly_5min_after_1e896d30_3808_482a_b8a3_51198a58d4a6() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/6bc18290-1925-4239-81d7-0118bd062225")
@@ -749,7 +749,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter with meds and 3 glucose labs. Two are <40, one is >80 but is not within 5 minutes of other labs. Meets num. = 1 harm. Used start of relevant period for lab test timings
      */
     @Test
-    void test_1f48c160_8aba_4e86_bd5d_c5c4bdef1afd() {
+    void test_cms816_three_labs_two_lt40_meets_num_1f48c160_8aba_4e86_bd5d_c5c4bdef1afd() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/339a989b-722c-4452-9d25-454e2d53eea8")
@@ -791,7 +791,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Left and Right Mastectomy Dx that both start on 12/31 of the MP.
      */
     @Test
-    void test_22796e3c_f16a_4f8d_85df_0c3ffe3f0570() {
+    void test_cms125_left_right_mastectomy_dx_22796e3c_f16a_4f8d_85df_0c3ffe3f0570() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/4827b310-b012-4b0e-8a7d-572103c65892")
@@ -839,7 +839,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & Bilateral Mastectomy Dx that starts on 12/31 of the MP.
      */
     @Test
-    void test_24dd332c_0b35_498b_923b_bcc65cf828b2() {
+    void test_cms125_bilateral_mastectomy_dx_during_mp_24dd332c_0b35_498b_923b_bcc65cf828b2() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/4fa225f9-836c-4304-95a2-5b9d6d4ff9c7")
@@ -887,7 +887,7 @@ class MeasureEvaluationQICoreTest {
      * Palliative care encounter during MP
      */
     @Test
-    void test_28a4057b_1650_4474_b2d8_14ddee97ae4b() {
+    void test_cms125_palliative_care_enc_during_mp_28a4057b_1650_4474_b2d8_14ddee97ae4b() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/adb08da2-b4d0-4916-9b9c-7c2c86e1042b")
@@ -935,7 +935,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & a Palliative Care Observation that starts on 1/1 after the Observation Interval.
      */
     @Test
-    void test_28bea5fd_cabe_4b26_8a94_6123fba505c9() {
+    void test_cms125_palliative_care_obs_after_interval_28bea5fd_cabe_4b26_8a94_6123fba505c9() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/f2f748c2-321f-4c05-896a-2ef9d925eaf9")
@@ -983,7 +983,7 @@ class MeasureEvaluationQICoreTest {
      * For meeting SDE 100% coverage - invalid patient gender code
      */
     @Test
-    void test_29cdd56a_bb8a_4277_a67c_c4b306a59657() {
+    void test_cms125_sde_invalid_gender_29cdd56a_bb8a_4277_a67c_c4b306a59657() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/acc6f85b-14ad-4daa-8981-66c1c37c8f07")
@@ -1031,7 +1031,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Bilateral Mastectomy Procedure that ends on 12/31 of the MP.
      */
     @Test
-    void test_2a364e88_7272_444d_a264_e931bba5391e() {
+    void test_cms125_bilateral_mastectomy_proc_during_mp_2a364e88_7272_444d_a264_e931bba5391e() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/4cf81a94-81fb-4be2-b075-7d8f9ff02a6e")
@@ -1079,7 +1079,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Unilateral Mastectomy on Right Breast Procedure that ends on 1/1 after the MP.
      */
     @Test
-    void test_2c3c1dc3_814c_4d77_bb60_7a458bbd63ac() {
+    void test_cms125_uni_right_mastectomy_proc_after_mp_2c3c1dc3_814c_4d77_bb60_7a458bbd63ac() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/633c26f2-9c7a-4eaf-b983-83b9e13656ac")
@@ -1127,7 +1127,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty device request doNotPerform modifier extension is false
      */
     @Test
-    void test_2e186c68_d7f4_4b2e_9f8a_e73c79905e7e() {
+    void test_cms125_frailty_device_request_do_not_perform_false_2e186c68_d7f4_4b2e_9f8a_e73c79905e7e() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/d4540640-2561-4ebd-b7c6-15878a4dc582")
@@ -1175,7 +1175,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & a Palliative Care Observation that starts on 1/1 of the MP During Observation Interval.
      */
     @Test
-    void test_360de092_eb92_49f7_958d_47bc1e79c3cd() {
+    void test_cms125_palliative_care_obs_start_of_mp_360de092_eb92_49f7_958d_47bc1e79c3cd() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/14193177-2f4e-4480-a471-87ff9d137a8b")
@@ -1223,7 +1223,7 @@ class MeasureEvaluationQICoreTest {
      * IP Encounter with med. Lab LT 40, followed by lab LT 80 within 5 minutes. Meets Numerator.
      */
     @Test
-    void test_3b2e8979_70aa_4e44_9d50_d8e8b7437c3f() {
+    void test_cms816_lab_lt40_followed_lt80_meets_num_3b2e8979_70aa_4e44_9d50_d8e8b7437c3f() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/7cb05de4-6b74-4ce5-a2ea-be59635a74f6")
@@ -1265,7 +1265,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Left and Right Mastectomy Dx that both start on 12/31 of the MP. Testing condition encounter diagnosis.
      */
     @Test
-    void test_3be56c12_2a7e_413e_8775_87a91daeb930() {
+    void test_cms125_left_right_mastectomy_dx_cond_enc_dx_3be56c12_2a7e_413e_8775_87a91daeb930() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/f887d498-35c1-41e4-85f5-288b52895140")
@@ -1313,7 +1313,7 @@ class MeasureEvaluationQICoreTest {
      * Inpatient encounter with no hypoglycemic medication administered. Med is required to meet IPP.
      */
     @Test
-    void test_405942a0_a415_4f3b_9e8d_da2a937fb762() {
+    void test_cms816_no_hypo_med_administered_405942a0_a415_4f3b_9e8d_da2a937fb762() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/5570227b-f288-4a0c-9df5-807d2afa241a")
@@ -1355,7 +1355,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & both a Unilateral Mastectomy on Right Breast and Unilateral Mastectomy on Left Breast Procedure that both end on 12/31 of the MP.
      */
     @Test
-    void test_4138e2f8_7c51_4cbf_82b7_9983b775991a() {
+    void test_cms125_uni_right_and_left_mastectomy_proc_during_mp_4138e2f8_7c51_4cbf_82b7_9983b775991a() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/857fec09-9c8c-4e4b-a123-85f473b8fc2a")
@@ -1403,7 +1403,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice observation value is yes
      */
     @Test
-    void test_44e2a7d7_b35b_4902_a4d9_d89ff4221755() {
+    void test_cms125_hospice_obs_value_yes_44e2a7d7_b35b_4902_a4d9_d89ff4221755() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/bbb391da-9572-4954-be95-3ea00eb31c91")
@@ -1451,7 +1451,7 @@ class MeasureEvaluationQICoreTest {
      * 3 different encounters, all have harm (meets numerator). IPP/Denom = 3, Numerator should = 3.
      */
     @Test
-    void test_45065811_b103_4031_bc12_fee1b69673d4() {
+    void test_cms816_three_encounters_all_meet_num_45065811_b103_4031_bc12_fee1b69673d4() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/f58dcdc6-cce9-4b49-b657-7e1e2593e428")
@@ -1493,7 +1493,7 @@ class MeasureEvaluationQICoreTest {
      * Inpatient encounter where patient started in ER prior to admission. Age 17 in ER, turned 18 at exact date as start of IP encounter, meds administered, no lab tests. Edge case. Denominator pass.
      */
     @Test
-    void test_468149e1_3455_41f9_b102_9514a7f04beb() {
+    void test_cms816_age_17_in_er_turned_18_at_ip_468149e1_3455_41f9_b102_9514a7f04beb() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/e360ffc2-5b98-425a-a2bd-b051ba5ec506")
@@ -1535,7 +1535,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 during the MP.
      */
     @Test
-    void test_489d89a3_983e_4219_892c_b7c702be16d1() {
+    void test_cms125_age52_encounter_during_mp_489d89a3_983e_4219_892c_b7c702be16d1() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/6226b04f-5e2d-4977-9169-8e9451ffa939")
@@ -1583,7 +1583,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice procedure starts during MP
      */
     @Test
-    void test_49135ebe_fd39_4017_aacf_88e191d3125d() {
+    void test_cms125_hospice_proc_during_mp_49135ebe_fd39_4017_aacf_88e191d3125d() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/99b68a44-5e66-4c37-a513-80db8b6249ce")
@@ -1631,7 +1631,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter where Pt had glucose <40 but it was 1 minute before hypo medication administered. Must be <40 within 24 hour AFTER hypo medication to meet numerator. Numerator fails.
      */
     @Test
-    void test_4a65a910_307b_4f78_b607_00621c82df67() {
+    void test_cms816_glucose_lt40_before_med_4a65a910_307b_4f78_b607_00621c82df67() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/7df60531-857d-45bc-ad5b-31b5462f3f54")
@@ -1673,7 +1673,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 65 years, 11 months & 30 days old w/ an Office Visit Encounter 1/1 of the MP & an Observation AIFrailty Living In Nursing Home that starts on 12/31 of the MP.
      */
     @Test
-    void test_53382a12_55a1_409e_a192_acfa489b42ec() {
+    void test_cms125_nursing_home_obs_age_65y11m_53382a12_55a1_409e_a192_acfa489b42ec() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/07fb2077-048c-4cb0-ba3e-6e67ed33133d")
@@ -1721,7 +1721,7 @@ class MeasureEvaluationQICoreTest {
      * Patient inpatient, but the med administered was not hypoglycemic med. Hypo med must be administered during encounter to meet IPP.  Patient had glucose <40 during encounter, but there was no hypo med administered on or prior to test no Numerator.
      */
     @Test
-    void test_5a2f5fbe_4101_4384_b836_bccb70d6ad20() {
+    void test_cms816_non_hypo_med_administered_5a2f5fbe_4101_4384_b836_bccb70d6ad20() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/cf9c230a-adc0-4830-bf04-fed4ab5ff6c8")
@@ -1763,7 +1763,7 @@ class MeasureEvaluationQICoreTest {
      * IP Encounter with hypoglycemic med given. Lab LT 40 mg/dL, followed by lab GT 80 mg/dL within 5 minutes. Does not meet Numerator.
      */
     @Test
-    void test_5bf02387_de2a_45ba_b284_fcbc62e63be6() {
+    void test_cms816_lab_lt40_followed_gt80_no_num_5bf02387_de2a_45ba_b284_fcbc62e63be6() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/1a89fbca-df20-4f17-97d0-9fa5990860b2")
@@ -1805,7 +1805,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & Right Mastectomy Dx that starts on 1/1 the year after the MP.
      */
     @Test
-    void test_5d118fae_95cc_44c4_84aa_c4b5920d28b4() {
+    void test_cms125_right_mastectomy_dx_after_mp_5d118fae_95cc_44c4_84aa_c4b5920d28b4() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/b528b1a6-cd8d-4f66-83c2-6467e83b6996")
@@ -1853,7 +1853,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 75 years w/ an Office Visit Encounter 1/1 during the MP.
      */
     @Test
-    void test_5d1729ba_2dc4_41d1_a6f2_d42690f3d9e8() {
+    void test_cms125_age75_encounter_during_mp_5d1729ba_2dc4_41d1_a6f2_d42690f3d9e8() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/16b5141f-ec71-499c-a6f1-59b3c390a54a")
@@ -1901,7 +1901,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 of the MP & Hospice Encounter that ends on 1/1 during the MP.
      */
     @Test
-    void test_5e9d1098_0613_4441_ac17_09a992fd6dee() {
+    void test_cms125_hospice_enc_ends_during_mp_5e9d1098_0613_4441_ac17_09a992fd6dee() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/0beefd14-c554-4f1e-856c-c8696177ce9e")
@@ -1949,7 +1949,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 of the MP & Hospice Encounter that ends on 1/1 after the MP.
      */
     @Test
-    void test_6191dfb9_4a22_4606_a938_cb030471ef64() {
+    void test_cms125_hospice_enc_ends_after_mp_6191dfb9_4a22_4606_a938_cb030471ef64() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/dd6bd96f-3a4e-4796-bee0-1d31884e96d7")
@@ -1997,7 +1997,7 @@ class MeasureEvaluationQICoreTest {
      * Pt turned 18 at exact date/time at start of ED encounter, meds administered, no lab tests. Denom pass.
      */
     @Test
-    void test_6244d8f6_995c_4a0e_9d86_9c3abfc3fcb7() {
+    void test_cms816_turned_18_at_ed_start_6244d8f6_995c_4a0e_9d86_9c3abfc3fcb7() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/974284eb-fc89-452a-9b38-a884c0e0477e")
@@ -2039,7 +2039,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty encounter overlaps MP
      */
     @Test
-    void test_699e12b2_26d4_43a8_add0_bcdd6629fe88() {
+    void test_cms125_frailty_enc_overlaps_mp_699e12b2_26d4_43a8_add0_bcdd6629fe88() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/da85601e-ce6f-4351-b639-1e58c725bf2f")
@@ -2087,7 +2087,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice encounter overlaps MP
      */
     @Test
-    void test_6b17ecfe_be06_4b57_b9dc_771f4f180d0d() {
+    void test_cms125_hospice_enc_overlaps_mp_6b17ecfe_be06_4b57_b9dc_771f4f180d0d() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/4f10a0f7-bb14-40d5-beb2-c728eb88a30d")
@@ -2135,7 +2135,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter ends 7/16 at 9pm. Hypo med given. Lab test 1 with result done 7/16 at 8:58pm within 24 hours of med = 35. Lab test 2 with result done 3 minutes later at 9:01pm (1 minute after discharge ) = 81. Numerator pass since high result is after enc
      */
     @Test
-    void test_6c210a7d_98b1_4d37_a268_45d14a7e7b1d() {
+    void test_cms816_high_result_after_discharge_6c210a7d_98b1_4d37_a268_45d14a7e7b1d() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/37fd9c7e-bf9e-4769-b448-094ed97bd3e8")
@@ -2177,7 +2177,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & an Observation AIFrailty Living In Nursing Home that starts on 12/31 of the MP, with a status of null.
      */
     @Test
-    void test_6cd90376_024c_4aa8_bebd_caf0c2abfd1b() {
+    void test_cms125_nursing_home_obs_null_status_6cd90376_024c_4aa8_bebd_caf0c2abfd1b() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/46fbbd0e-d175-4203-97bb-fe616cd2ab77")
@@ -2225,7 +2225,7 @@ class MeasureEvaluationQICoreTest {
      * Palliative care intervention during MP
      */
     @Test
-    void test_6e528bdf_df67_4f23_af00_fc257b686d14() {
+    void test_cms125_palliative_care_intervention_6e528bdf_df67_4f23_af00_fc257b686d14() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/3ea0a87a-3ded-4939-920a-4e69bc20a26f")
@@ -2273,7 +2273,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & an Observation AIFrailty Living In Nursing Home that starts on 12/31 of the MP.
      */
     @Test
-    void test_6ee6dbd2_a3c8_4c36_b129_ef136ee08d8d() {
+    void test_cms125_nursing_home_obs_during_mp_6ee6dbd2_a3c8_4c36_b129_ef136ee08d8d() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/7a09940e-c3c8-49a7-bf09-eaf9df116dfb")
@@ -2321,7 +2321,7 @@ class MeasureEvaluationQICoreTest {
      * Pt started in Observation, hypoglycemic administered during Observ stay. Pt transferred to inpatient but transfer occurred 1 hour + 1 minute after end of observation stay. Transfer must be within hour or less to meet IPP.
      */
     @Test
-    void test_71abfe6c_655f_4ad2_8e11_d07275f052b0() {
+    void test_cms816_obs_to_ip_transfer_gt1hr_71abfe6c_655f_4ad2_8e11_d07275f052b0() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/423a396b-7d81-476d-b2ea-bc8bba062ce2")
@@ -2363,7 +2363,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice discharge to home during MP
      */
     @Test
-    void test_72062307_5e9c_4b35_858b_b1ac46b877f2() {
+    void test_cms125_hospice_discharge_to_home_72062307_5e9c_4b35_858b_b1ac46b877f2() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/2886b1b6-5834-4788-8cd7-b54bbda54ca9")
@@ -2411,7 +2411,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Unilateral Mastectomy Dx with R. Qualifier that starts on 1/1 after the MP.
      */
     @Test
-    void test_748d6371_18c3_4bce_977c_a859a547bde5() {
+    void test_cms125_uni_mastectomy_right_dx_after_mp_748d6371_18c3_4bce_977c_a859a547bde5() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/68067d39-5287-40dd-ba97-c2aa1bf46d78")
@@ -2459,7 +2459,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & Hospice Encounter that ends on 12/31 of the MP.
      */
     @Test
-    void test_7a4f414d_68b6_4a95_9c19_e5cbec4f2605() {
+    void test_cms125_hospice_enc_ends_end_of_mp_7a4f414d_68b6_4a95_9c19_e5cbec4f2605() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/0930082c-fda1-42e8-a15f-92ceaefa5908")
@@ -2507,7 +2507,7 @@ class MeasureEvaluationQICoreTest {
      * Telephone visit - for meeting 100% coverage
      */
     @Test
-    void test_80221012_b5dc_46b9_9691_8a0ac2b995eb() {
+    void test_cms125_telephone_visit_80221012_b5dc_46b9_9691_8a0ac2b995eb() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/591e960d-b937-41f3-9817-56cf201a06db")
@@ -2555,7 +2555,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty symptom overlaps MP
      */
     @Test
-    void test_81d2ade5_fa91_428c_b39f_3f0b8b7b2c16() {
+    void test_cms125_frailty_symptom_overlaps_mp_81d2ade5_fa91_428c_b39f_3f0b8b7b2c16() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/f38ce16a-658f-4aa0-b4a6-fac61d2e58a8")
@@ -2603,7 +2603,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & an Observation AIFrailty Living In Nursing Home that starts on 1/1 the year after the MP.
      */
     @Test
-    void test_85e4e484_36a6_4dda_8823_fa49fa241d44() {
+    void test_cms125_nursing_home_obs_after_mp_85e4e484_36a6_4dda_8823_fa49fa241d44() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/6fc33313-98bc-460e-9e38-9240dcbd111a")
@@ -2651,7 +2651,7 @@ class MeasureEvaluationQICoreTest {
      * Advanced illness diagnosis within 2 years. Testing condition encounter diagnosis.
      */
     @Test
-    void test_874b2823_67e5_48c4_916a_3457357a1508() {
+    void test_cms125_advanced_illness_dx_within_2yr_cond_enc_dx_874b2823_67e5_48c4_916a_3457357a1508() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/8a0f6b6e-fb1c-4e60-b150-b88d1a4e487b")
@@ -2699,7 +2699,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 74yo w/ an Office Visit Encounter 12/31 during the MP.
      */
     @Test
-    void test_89176983_0efa_41bf_8d68_b545304b362c() {
+    void test_cms125_age74_encounter_during_mp_89176983_0efa_41bf_8d68_b545304b362c() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/5be43868-ffec-4de5-b99e-185513b74c82")
@@ -2747,7 +2747,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter, meds administered, lab test 1 = 35, lab 2 result = exactly 80 within 5 minutes of first lab.
      */
     @Test
-    void test_930c7e3c_9400_4f9f_8c21_4106df79bade() {
+    void test_cms816_lab2_exactly_80_within_5min_930c7e3c_9400_4f9f_8c21_4106df79bade() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/1d298cf0-aa38-4943-ba4c-f7209cf59e63")
@@ -2789,7 +2789,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & both a Unilateral Mastectomy on Right Breast and Unilateral Mastectomy on Left Breast Procedure that both end on 1/1 of the MP.
      */
     @Test
-    void test_9804f8d0_65fd_43ed_aa05_36701108ba2b() {
+    void test_cms125_uni_right_and_left_mastectomy_proc_start_mp_9804f8d0_65fd_43ed_aa05_36701108ba2b() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/356ab8ed-7c44-46ec-9fa9-9ec462054f2b")
@@ -2837,7 +2837,7 @@ class MeasureEvaluationQICoreTest {
      * Virtual encounter - for meeting 100% coverage
      */
     @Test
-    void test_98d0ee09_fd9c_465e_82fb_c222ad16dc60() {
+    void test_cms125_virtual_encounter_98d0ee09_fd9c_465e_82fb_c222ad16dc60() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/33afc6f6-11c8-4d29-9e2d-cdc292565458")
@@ -2885,7 +2885,7 @@ class MeasureEvaluationQICoreTest {
      * Preventive care service initial visit - for meeting 100% coverage
      */
     @Test
-    void test_99925929_7140_4230_b13a_e26cccb0c5d3() {
+    void test_cms125_preventive_care_initial_visit_99925929_7140_4230_b13a_e26cccb0c5d3() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/bea75baa-41f5-4755-9986-15c2bba658d5")
@@ -2933,7 +2933,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & Bilateral Mastectomy Dx that starts on 1/1 after the MP.
      */
     @Test
-    void test_9d2d1444_f7a9_4497_a785_cacfab3639fb() {
+    void test_cms125_bilateral_mastectomy_dx_after_mp_9d2d1444_f7a9_4497_a785_cacfab3639fb() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/f9de4c72-b2ed-4c8f-94fe-8c934e42e0a0")
@@ -2981,7 +2981,7 @@ class MeasureEvaluationQICoreTest {
      * IP Encounter with meds administered, but glucose lab <40 was before med. Must be <40 within 24 hours after med to meet numerator. Numerator fails.
      */
     @Test
-    void test_9eeadd82_4599_4b8b_95a5_f1d59697b451() {
+    void test_cms816_lab_lt40_before_med_no_num_9eeadd82_4599_4b8b_95a5_f1d59697b451() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/aa5f21cc-2d56-4749-a190-2828d579f790")
@@ -3023,7 +3023,7 @@ class MeasureEvaluationQICoreTest {
      * Preventive care service established visit - for meeting 100% coverage
      */
     @Test
-    void test_a2991cc3_1347_4a0b_adc1_f4adad7848bf() {
+    void test_cms125_preventive_care_established_visit_a2991cc3_1347_4a0b_adc1_f4adad7848bf() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/473f9149-c7f0-4979-8924-9534cabe5117")
@@ -3071,7 +3071,7 @@ class MeasureEvaluationQICoreTest {
      * Dementia medications during MP
      */
     @Test
-    void test_a6399df7_7d9a_45da_a64b_97f695646ce6() {
+    void test_cms125_dementia_meds_during_mp_a6399df7_7d9a_45da_a64b_97f695646ce6() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/0ced1e0c-9c92-4582-a4b1-e44f130e436f")
@@ -3119,7 +3119,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter, meds administered, lab test 2 result GT 80 within 5 min of lab test 1 that has result of 35 mg/dL.
      */
     @Test
-    void test_a754b13e_2ef7_4c69_a205_f9af9a9a089e() {
+    void test_cms816_lab2_gt80_within_5min_of_lab1_a754b13e_2ef7_4c69_a205_f9af9a9a089e() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/304052f7-e416-4da4-87ae-488e6589cab3")
@@ -3161,7 +3161,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter, med relevant period start date/time is same date/time as end of encounter date/time. No lab tests. Meets denom rule - med must start during encounter.
      */
     @Test
-    void test_a821b7fb_7913_45e4_82e2_cf232818d643() {
+    void test_cms816_med_starts_at_encounter_end_a821b7fb_7913_45e4_82e2_cf232818d643() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/8301c6c8-e50c-4457-add0-1ebd909c8ca7")
@@ -3203,7 +3203,7 @@ class MeasureEvaluationQICoreTest {
      * Annual wellness visit - for meeting 100% coverage
      */
     @Test
-    void test_abe0121d_fbf8_47c9_979d_a345aea31af9() {
+    void test_cms125_annual_wellness_visit_abe0121d_fbf8_47c9_979d_a345aea31af9() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/deb40976-ede4-4657-8af8-078369fa65f4")
@@ -3251,7 +3251,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty diagnosis overlaps MP
      */
     @Test
-    void test_ac67c1e3_d0df_4745_bc85_d4ec0a18e8f3() {
+    void test_cms125_frailty_dx_overlaps_mp_ac67c1e3_d0df_4745_bc85_d4ec0a18e8f3() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/5e3f01ad-1eda-4cb7-8d37-1146beae59e9")
@@ -3299,7 +3299,7 @@ class MeasureEvaluationQICoreTest {
      * Encounter with meds and 3 glucose labs. All results are less than 40, and all within 24 hours of hypo med. Meets num = 1 harm per encounter.
      */
     @Test
-    void test_af8c832f_f1ad_407a_9751_575339d08367() {
+    void test_cms816_three_labs_all_lt40_one_harm_af8c832f_f1ad_407a_9751_575339d08367() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/2adf5469-46a1-4020-be3b-01f91f8acc9d")
@@ -3341,7 +3341,7 @@ class MeasureEvaluationQICoreTest {
      * Patient had hypoglycemic medication administered, but was during a non-qualifying encounter (outpatient visit code). No inpatient encounter so does not meet IPP/Denom.
      */
     @Test
-    void test_afaa7de1_25f6_49fc_8343_84afa5deca44() {
+    void test_cms816_non_qualifying_encounter_outpatient_afaa7de1_25f6_49fc_8343_84afa5deca44() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/61a026c6-be9e-4a0f-b495-8ea421edfe39")
@@ -3383,7 +3383,7 @@ class MeasureEvaluationQICoreTest {
      * Right age with encounter, meds administered, no lab tests. Med relevant period starts during encounter, no relevant end period. Meets denominator as med relevant period must start during encounter but no end required.
      */
     @Test
-    void test_b0513b24_8789_4c07_a13d_322d9defbeb8() {
+    void test_cms816_med_no_end_period_meets_denom_b0513b24_8789_4c07_a13d_322d9defbeb8() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/1d2bb25a-21a7-4529-9486-a320d4864719")
@@ -3425,7 +3425,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 42yo w/ an Office Visit Encounter 1/1 during the year after the MP.
      */
     @Test
-    void test_b13e2497_2814_4824_bd65_065b4f69918c() {
+    void test_cms125_age42_encounter_after_mp_b13e2497_2814_4824_bd65_065b4f69918c() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/87f00b2a-f664-4b82-843e-559bf1f86520")
@@ -3473,7 +3473,7 @@ class MeasureEvaluationQICoreTest {
      * Palliative care diagnosis during MP. Testing condition encounter diagnosis.
      */
     @Test
-    void test_b814bacf_21ef_46e4_bd83_73c0dd5ad2a6() {
+    void test_cms125_palliative_care_dx_cond_enc_dx_b814bacf_21ef_46e4_bd83_73c0dd5ad2a6() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/5c8bffdf-7ef4-44e1-af5a-8a64f1b7e545")
@@ -3521,7 +3521,7 @@ class MeasureEvaluationQICoreTest {
      * Two encounters, one with meds administered, one without meds, no lab tests. Denom = 1 for first encounter. Doesn't meet denom in second encounter due to no meds during 2nd encounter.
      */
     @Test
-    void test_b8bedfa5_6f9c_4727_be26_8b53d9a13a5b() {
+    void test_cms816_two_encounters_one_without_meds_b8bedfa5_6f9c_4727_be26_8b53d9a13a5b() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/ecde4132-9028-420a-aa7c-d1d14e5c1ab0")
@@ -3563,7 +3563,7 @@ class MeasureEvaluationQICoreTest {
      * Weight  1 minute before encounter starts.
      */
     @Test
-    void test_bdc43d6c_a156_49df_b49f_dd878514bbe9() {
+    void test_cms529_weight_before_encounter_bdc43d6c_a156_49df_b49f_dd878514bbe9() {
         given.when()
                 .measureId(CMS529)
                 .subject("Patient/afd5733f-e9eb-4a17-9be7-783850a132fc")
@@ -3595,7 +3595,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 42yo w/ an Office Visit Encounter 1/1 during the MP.
      */
     @Test
-    void test_bfbcff07_d5ee_416f_83b8_a662f0f18b56() {
+    void test_cms125_age42_encounter_during_mp_bfbcff07_d5ee_416f_83b8_a662f0f18b56() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/c32eb7d1-eac5-458e-b965-c717620579a2")
@@ -3643,7 +3643,7 @@ class MeasureEvaluationQICoreTest {
      * For meeting SDE 100% coverage - patient gender male, sde payer coverage, ethnicity detailed, race detailed
      */
     @Test
-    void test_c1ad971b_aa0d_403c_97f7_04b01c85659d() {
+    void test_cms125_sde_male_payer_ethnicity_race_c1ad971b_aa0d_403c_97f7_04b01c85659d() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/aec15569-ccd3-4c5c-8e46-2bec68c03e72")
@@ -3691,7 +3691,7 @@ class MeasureEvaluationQICoreTest {
      * IP enc where pt given hypo med in ED, but ED not part of inpatient encounter, because  Observation start date/time was > 1 hour from ED end date/time. Observation to IP stay occurred but hypo meds given in ED don't count. Does not meet IPP criteria.
      */
     @Test
-    void test_c418d2fb_8842_4dac_8d56_6ef6d1394883() {
+    void test_cms816_ed_not_part_of_ip_obs_gap_gt1hr_c418d2fb_8842_4dac_8d56_6ef6d1394883() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/d26ca5cd-9415-4c14-8a0b-947747c29ec2")
@@ -3733,7 +3733,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & a Palliative Care Observation that starts on 12/31 before the observation interval.
      */
     @Test
-    void test_c4910aaf_43c1_4f7f_bfaa_4f1ba4385ba3() {
+    void test_cms125_palliative_care_obs_before_interval_c4910aaf_43c1_4f7f_bfaa_4f1ba4385ba3() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/ffbb03e1-7188-42ef-8deb-c6cf3f790bfe")
@@ -3781,7 +3781,7 @@ class MeasureEvaluationQICoreTest {
      * Patient inpatient, but the medication administered was not hypoglycemic med. Hypo med must be administered during encounter to meet IPP.
      */
     @Test
-    void test_cd6e174e_1e9f_464f_9cd3_eced2946d48a() {
+    void test_cms816_non_hypo_med_administered_cd6e174e_1e9f_464f_9cd3_eced2946d48a() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/480245d6-3ce8-4944-b6c8-339cf2f69acb")
@@ -3823,7 +3823,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Unilateral Mastectomy Dx with R. Qualifier that starts on 1/1 of the MP, and & a Unilateral Mastectomy Dx with L. Qualifier that starts on 1/1 of the MP.
      */
     @Test
-    void test_cf1b9baa_75c9_4c96_a01b_56c08a35e8d5() {
+    void test_cms125_uni_mastectomy_right_left_dx_cf1b9baa_75c9_4c96_a01b_56c08a35e8d5() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/7e5d94fa-3630-43b6-9b6e-b75c0fba7cd0")
@@ -3871,7 +3871,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 41 years, 11 months & 30 days w/ an Office Visit Encounter 1/1 during the MP.
      */
     @Test
-    void test_e09f5012_db7e_4c18_bcf9_06a32902379c() {
+    void test_cms125_age_41y11m_encounter_during_mp_e09f5012_db7e_4c18_bcf9_06a32902379c() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/94220a48-4424-4040-91bf-9c16bf3368dd")
@@ -3919,7 +3919,7 @@ class MeasureEvaluationQICoreTest {
      * Right age with encounter, meds administered, no lab tests. Med relevant period starts during encounter, ends after encounter. Denom pass - meets rule that med must 'start' during encounter. No rule that it must end during encounter.
      */
     @Test
-    void test_e66fcfe4_57f5_4259_bb05_540d4f6a864c() {
+    void test_cms816_med_ends_after_encounter_denom_e66fcfe4_57f5_4259_bb05_540d4f6a864c() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/05c8cd12-addd-4b94-8f92-da093c556a84")
@@ -3961,7 +3961,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice diagnosis overlaps MP
      */
     @Test
-    void test_e676f8fb_fbc5_4323_8f2f_df0cfdd80b9d() {
+    void test_cms125_hospice_dx_overlaps_mp_e676f8fb_fbc5_4323_8f2f_df0cfdd80b9d() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/01c88972-84e2-4594-835b-924481b9990a")
@@ -4009,7 +4009,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty diagnosis overlaps MP. Testing condition encounter diagnosis.
      */
     @Test
-    void test_eb7ec114_0c95_4e73_98ad_772a8197ffff() {
+    void test_cms125_frailty_dx_cond_enc_dx_eb7ec114_0c95_4e73_98ad_772a8197ffff() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/14b87edd-7f1e-4f6a-9910-f905966ec904")
@@ -4057,7 +4057,7 @@ class MeasureEvaluationQICoreTest {
      * Home healthcare service - for meeting 100% coverage
      */
     @Test
-    void test_ec13c21c_dac6_44cb_8c9a_946611b1bf61() {
+    void test_cms125_home_healthcare_service_ec13c21c_dac6_44cb_8c9a_946611b1bf61() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/6b2e313f-6139-45fa-8e18-cc2f0b908981")
@@ -4105,7 +4105,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit Encounter 1/1 of the MP & a Uni Mastectomy Dx with R. Qualifier that starts on 1/1 of the MP, & a Uni Mastectomy Dx with L. Qualifier that starts on 1/1 of the MP. Testing condition encounter diagnosis.
      */
     @Test
-    void test_ecb58606_3877_4862_873b_2dbf09abcbac() {
+    void test_cms125_uni_mastectomy_right_left_dx_cond_enc_dx_ecb58606_3877_4862_873b_2dbf09abcbac() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/c6897181-bb69-4bda-a44d-7c07cf81fc1b")
@@ -4153,7 +4153,7 @@ class MeasureEvaluationQICoreTest {
      * 1st IP Encounter with med. Lab LT 40, followed by lab LT 80 within 5 minutes. Meets Numerator. 2nd enc starts in ED. Has lab LT 40 followed by lab GT 80 within 5 minutes. Does not meet numerator. IPP/Denom = 2, Num = 1
      */
     @Test
-    void test_ee57a2ad_7e51_4c6e_b71a_9c2483a81cb9() {
+    void test_cms816_two_encounters_one_meets_num_ee57a2ad_7e51_4c6e_b71a_9c2483a81cb9() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/3fdd92df-f418-45ef-93a6-920e3d813f32")
@@ -4195,7 +4195,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty observation - medication device used - during MP
      */
     @Test
-    void test_ee5db0d0_8af1_4521_a060_aed5b026e194() {
+    void test_cms125_frailty_obs_med_device_during_mp_ee5db0d0_8af1_4521_a060_aed5b026e194() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/8278ae07-69ec-469c-ae01-e933d051f764")
@@ -4243,7 +4243,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & a Palliative Care Observation that starts on 12/31 of the MP During Observation Interval.
      */
     @Test
-    void test_ef76250a_2408_42d0_9147_1cc0b459090e() {
+    void test_cms125_palliative_care_obs_end_of_mp_ef76250a_2408_42d0_9147_1cc0b459090e() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/5fd02264-fd4e-4eb7-a635-0023876920ac")
@@ -4291,7 +4291,7 @@ class MeasureEvaluationQICoreTest {
      * Frailty device request no performed modifier extension
      */
     @Test
-    void test_f2a7180d_acd8_4394_acdd_8959d861ef65() {
+    void test_cms125_frailty_device_request_no_modifier_f2a7180d_acd8_4394_acdd_8959d861ef65() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/24557438-17c9-405c-88dc-0c0bfda17d27")
@@ -4339,7 +4339,7 @@ class MeasureEvaluationQICoreTest {
      * IP encounter, hypoglycemic administered, 1 glucose lab test with result LT 40. Meets Numerator.
      */
     @Test
-    void test_f64a0032_57b1_461a_a213_5280f0d01dd1() {
+    void test_cms816_one_lab_lt40_meets_num_f64a0032_57b1_461a_a213_5280f0d01dd1() {
         given.when()
                 .measureId(CMS816)
                 .subject("Patient/8eca4ab8-49f0-45e4-b1ee-dc34e54dd430")
@@ -4381,7 +4381,7 @@ class MeasureEvaluationQICoreTest {
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Bilateral Mastectomy Procedure that ends on 1/1 after the MP.
      */
     @Test
-    void test_fe7f54a2_7f97_4694_819e_b1b649414d03() {
+    void test_cms125_bilateral_mastectomy_proc_after_mp_fe7f54a2_7f97_4694_819e_b1b649414d03() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/defc50ff-2898-4ab0-ac06-75eae73bc6fa")
@@ -4429,7 +4429,7 @@ class MeasureEvaluationQICoreTest {
      * Hospice service request during MP
      */
     @Test
-    void test_ff2520e5_8d79_493c_b3a0_76278531021d() {
+    void test_cms125_hospice_service_request_ff2520e5_8d79_493c_b3a0_76278531021d() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/cc1a4555-2e3e-43ac-bbca-6e44ea41b2f3")
@@ -4477,7 +4477,7 @@ class MeasureEvaluationQICoreTest {
      * Palliative care diagnosis during MP
      */
     @Test
-    void test_ffe8b795_6293_4c6e_915c_ffb0923c2297() {
+    void test_cms125_palliative_care_dx_ffe8b795_6293_4c6e_915c_ffb0923c2297() {
         given.when()
                 .measureId(CMS125)
                 .subject("Patient/73f77133-4d08-438a-ac81-6bb858a74c31")

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.report;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Objects;
@@ -89,6 +90,19 @@ public class SelectedMeasureReportStratifier
                     stratumSelector) {
         var s = stratumSelector.select(value());
         return new SelectedMeasureReportStratum(s, this);
+    }
+
+    public SelectedMeasureReportStratifier hasNullCodeText() {
+        var firstCodeText = value().getCode().stream()
+                .map(CodeableConcept::getText)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
+        assertNull(
+                firstCodeText, "Stratifier has expected null code text but instead has: %s".formatted(firstCodeText));
+
+        return this;
     }
 
     public SelectedMeasureReportStratifier hasCodeText(String stratifierCodeText) {

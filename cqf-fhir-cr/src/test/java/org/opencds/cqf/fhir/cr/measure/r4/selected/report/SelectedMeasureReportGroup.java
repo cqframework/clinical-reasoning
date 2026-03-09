@@ -10,6 +10,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
+import java.math.BigDecimal;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
@@ -32,13 +33,33 @@ public class SelectedMeasureReportGroup
         return this;
     }
 
+    public SelectedMeasureReportGroup hasMeasureScore(String score) {
+        return hasScore(score);
+    }
+
+    public SelectedMeasureReportGroup hasMeasureScore(boolean hasScore) {
+        assertEquals(hasScore, this.value().hasMeasureScore());
+        return this;
+    }
+
+    public SelectedMeasureReportGroup hasMeasureScore(double score) {
+        MeasureValidationUtils.validateGroupScore(this.value(), BigDecimal.valueOf(score));
+        return this;
+    }
+
     public SelectedMeasureReportGroup hasScore(String score) {
         MeasureValidationUtils.validateGroupScore(this.value(), score);
         return this;
     }
 
-    public SelectedMeasureReportGroup hasMeasureScore(boolean hasScore) {
-        assertEquals(hasScore, this.value().hasMeasureScore());
+    public SelectedMeasureReportGroup hasNullScore() {
+        return hasNoMeasureScore();
+    }
+
+    public SelectedMeasureReportGroup hasNoMeasureScore() {
+        assertFalse(
+                this.value().hasMeasureScore(),
+                "Expected no measure score but got: %s".formatted(this.value().getMeasureScore()));
         return this;
     }
 

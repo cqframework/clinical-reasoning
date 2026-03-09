@@ -146,16 +146,24 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
         return this;
     }
 
+    public SelectedMeasureDefGroup<P> hasScore(double score) {
+        return hasMeasureScore(score);
+    }
+
     /**
      * Assert the group score value.
      *
      * @param score expected score
      * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedMeasureDefGroup<P> hasScore(Double score) {
+    public SelectedMeasureDefGroup<P> hasMeasureScore(Double score) {
         assertNotNull(value(), "GroupDef is null");
         assertEquals(score, value().getScore(), "Group score mismatch");
         return this;
+    }
+
+    public SelectedMeasureDefGroup<P> hasNullScore() {
+        return hasNoMeasureScore();
     }
 
     /**
@@ -163,7 +171,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      *
      * @return this SelectedMeasureDefGroup for chaining
      */
-    public SelectedMeasureDefGroup<P> hasNullScore() {
+    public SelectedMeasureDefGroup<P> hasNoMeasureScore() {
         assertNotNull(value(), "GroupDef is null");
         assertNull(value().getScore(), "Expected null score (pre-scoring), but found: " + value().getScore());
         return this;

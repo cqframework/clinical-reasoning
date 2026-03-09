@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.report;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -25,6 +26,11 @@ public class SelectedMeasureReportStratum
 
     public SelectedMeasureReportStratum hasScore(String score) {
         MeasureValidationUtils.validateStratumScore(value(), score);
+        return this;
+    }
+
+    public SelectedMeasureReportStratum hasNoScore() {
+        assertNull(value().getMeasureScore().getValue());
         return this;
     }
 

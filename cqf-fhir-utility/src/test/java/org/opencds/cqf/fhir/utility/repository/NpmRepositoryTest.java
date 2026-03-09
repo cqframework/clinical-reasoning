@@ -39,19 +39,17 @@ class NpmRepositoryTest {
     @Test
     void readThrowsWhenPackagesEmptyAndResourceNotCached() {
         var repo = new NpmRepository(fhirContext, Collections.emptyList());
+        var id = new IdType("Patient/nonexistent");
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            repo.read(Resource.class, new IdType("Patient/nonexistent"));
-        });
+        assertThrows(ResourceNotFoundException.class, () -> repo.read(Resource.class, id));
     }
 
     @Test
     void readThrowsWhenPackagesNullAndResourceNotCached() {
         var repo = new NpmRepository(fhirContext, null);
+        var id = new IdType("Patient/nonexistent");
 
-        assertThrows(ResourceNotFoundException.class, () -> {
-            repo.read(Resource.class, new IdType("Patient/nonexistent"));
-        });
+        assertThrows(ResourceNotFoundException.class, () -> repo.read(Resource.class, id));
     }
 
     @Test

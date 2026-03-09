@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -236,7 +235,7 @@ public class KeyElementAnalyzer {
                 continue;
             }
 
-            if (isKeyElement(child, mustSupportMap, differentialIds, sd)) {
+            if (isKeyElement(child, mustSupportMap, differentialIds)) {
                 keyElements.add(childId);
                 // Recursively scan this child's children
                 scanChildren(allElements, child, keyElements, mustSupportMap, differentialIds, sd);
@@ -248,54 +247,50 @@ public class KeyElementAnalyzer {
      * Evaluates all key element criteria for a single element.
      */
     private boolean isKeyElement(
-            IElementDefinitionAdapter element,
-            Map<String, Boolean> mustSupportMap,
-            Set<String> differentialIds,
-            IStructureDefinitionAdapter sd) {
+            IElementDefinitionAdapter element, Map<String, Boolean> mustSupportMap, Set<String> differentialIds) {
+        return isKeyByStructuralCriteria(element, mustSupportMap, differentialIds)
+                || isKeyByConstraintCriteria(element);
+    }
 
+    private boolean isKeyByStructuralCriteria(
+            IElementDefinitionAdapter element, Map<String, Boolean> mustSupportMap, Set<String> differentialIds) {
         String id = element.getId();
         String path = element.getPath();
 
-        // Criterion 1: mustSupport
+        // mustSupport
         if (mustSupportMap.containsKey(id)) {
             return true;
         }
-
-        // Criterion 2: min != 0 (mandatory)
+        // min != 0 (mandatory)
         if (element.hasMin() && element.getMin() != 0) {
             return true;
         }
-
-        // Criterion 3: hasCondition (invariant references)
+        // hasCondition (invariant references)
         if (element.hasCondition()) {
             return true;
         }
-
-        // Criterion 4: isModifier
+        // isModifier
         if (element.isModifier()) {
             return true;
         }
-
-        // Criterion 5: hasSlicing on non-extension paths
+        // hasSlicing on non-extension paths
         if (element.hasSlicing()
                 && path != null
                 && !path.endsWith(".extension")
                 && !path.endsWith(".modifierExtension")) {
             return true;
         }
-
-        // Criterion 6: hasSliceName
+        // hasSliceName
         String sliceName = element.getSliceName();
         if (sliceName != null && !sliceName.isEmpty()) {
             return true;
         }
+        // in differential
+        return differentialIds.contains(id);
+    }
 
-        // Criterion 7: in differential
-        if (differentialIds.contains(id)) {
-            return true;
-        }
-
-        // Criterion 8: max constrained from base
+    private boolean isKeyByConstraintCriteria(IElementDefinitionAdapter element) {
+        // max constrained from base
         if (element.hasMax()) {
             String max = element.getMax();
             String baseMax = element.getBaseMax();
@@ -303,54 +298,26 @@ public class KeyElementAnalyzer {
                 return true;
             }
         }
-
-        // Criterion 9: min constrained from base
-        if (element.hasMin()) {
-            int min = element.getMin();
-            int baseMin = element.getBaseMin();
-            if (min != baseMin) {
-                return true;
-            }
-        }
-
-        // Criterion 10: binding changed from base
-        if (isBindingChangedFromBase(element, sd)) {
+        // min constrained from base
+        if (element.hasMin() && element.getMin() != element.getBaseMin()) {
             return true;
         }
-
-        // Criterion 11: hasFixed
-        if (element.hasFixed()) {
+        // binding changed from base
+        if (isBindingChangedFromBase(element)) {
             return true;
         }
-
-        // Criterion 12: hasPattern
-        if (element.hasPattern()) {
-            return true;
-        }
-
-        // Criterion 13: hasMaxLength
-        if (element.hasMaxLength()) {
-            return true;
-        }
-
-        // Criterion 14: R5 key constraints
-        if (element.hasR5KeyConstraints()) {
-            return true;
-        }
-
-        // Criterion 15: significant extensions
-        if (hasSignificantExtensions(element)) {
-            return true;
-        }
-
-        return false;
+        return element.hasFixed()
+                || element.hasPattern()
+                || element.hasMaxLength()
+                || element.hasR5KeyConstraints()
+                || hasSignificantExtensions(element);
     }
 
     /**
      * Checks if the element's binding has changed from its base definition.
      * (IG Publisher lines 720-740)
      */
-    private boolean isBindingChangedFromBase(IElementDefinitionAdapter element, IStructureDefinitionAdapter sd) {
+    private boolean isBindingChangedFromBase(IElementDefinitionAdapter element) {
         if (!element.hasBinding()) {
             return false;
         }
@@ -405,14 +372,7 @@ public class KeyElementAnalyzer {
         String baseValueSet = baseElement.getBindingValueSet();
 
         // Check if strength or valueSet differs
-        if (!safeEquals(childStrength, baseStrength)) {
-            return true;
-        }
-        if (!safeEquals(childValueSet, baseValueSet)) {
-            return true;
-        }
-
-        return false;
+        return !safeEquals(childStrength, baseStrength) || !safeEquals(childValueSet, baseValueSet);
     }
 
     /**
@@ -458,42 +418,47 @@ public class KeyElementAnalyzer {
                     int eDepth = ePath.split("\\.").length;
                     return eDepth == parentDepth + 1;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
      * Gets ancestor IDs for a given element ID from the element list.
      */
     private Set<String> getAncestorIds(String elementId, List<IElementDefinitionAdapter> elements) {
-        Set<String> ancestors = new HashSet<>();
         if (elementId == null || !elementId.contains(".")) {
-            return ancestors;
+            return new HashSet<>();
         }
 
-        // Build a path-to-ID map for lookup
-        Map<String, String> pathToId = new HashMap<>();
-        for (var e : elements) {
-            String path = e.getPath();
-            String id = e.getId();
-            if (path != null && id != null) {
-                pathToId.put(path, id);
-            }
+        var elementPath = findPathById(elementId, elements);
+        if (elementPath == null || !elementPath.contains(".")) {
+            return new HashSet<>();
         }
 
-        // Find the element's path
-        String elementPath = null;
+        var pathToId = buildPathToIdMap(elements);
+        return collectAncestorIds(elementPath, pathToId);
+    }
+
+    private String findPathById(String elementId, List<IElementDefinitionAdapter> elements) {
         for (var e : elements) {
             if (elementId.equals(e.getId())) {
-                elementPath = e.getPath();
-                break;
+                return e.getPath();
             }
         }
+        return null;
+    }
 
-        if (elementPath == null || !elementPath.contains(".")) {
-            return ancestors;
+    private Map<String, String> buildPathToIdMap(List<IElementDefinitionAdapter> elements) {
+        Map<String, String> pathToId = new HashMap<>();
+        for (var e : elements) {
+            if (e.getPath() != null && e.getId() != null) {
+                pathToId.put(e.getPath(), e.getId());
+            }
         }
+        return pathToId;
+    }
 
-        // Walk up the path hierarchy
+    private Set<String> collectAncestorIds(String elementPath, Map<String, String> pathToId) {
+        Set<String> ancestors = new HashSet<>();
         String[] parts = elementPath.split("\\.");
         StringBuilder current = new StringBuilder();
         for (int i = 0; i < parts.length - 1; i++) {
@@ -506,7 +471,6 @@ public class KeyElementAnalyzer {
                 ancestors.add(ancestorId);
             }
         }
-
         return ancestors;
     }
 

@@ -125,12 +125,14 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
         var relatedArtifacts = stripInvalid(library);
 
-        logger.debug(
-                "DataRequirementsVisitor.visit: terminologyProviderRouter={}, adapter type={}",
-                terminologyProviderRouter != null
-                        ? terminologyProviderRouter.getClass().getSimpleName()
-                        : "null",
-                adapter.get().fhirType());
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "DataRequirementsVisitor.visit: terminologyProviderRouter={}, adapter type={}",
+                    terminologyProviderRouter != null
+                            ? terminologyProviderRouter.getClass().getSimpleName()
+                            : "null",
+                    adapter.get().fhirType());
+        }
 
         if (terminologyProviderRouter != null) {
             // Enriched path: dependency classification, Tx queries, CRMI extensions
@@ -146,22 +148,18 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             }
             var conformanceResolver =
                     new ConformanceResourceResolver(repository, dependsOnPackages, artifactEndpointConfigurations);
-            var federatedRepo = conformanceResolver.getRepository();
+            var federatedRepo = conformanceResolver.getFederatedRepository();
             logger.debug("Federated repo type: {}", federatedRepo.getClass().getSimpleName());
 
-            var gatheredCanonicals = new HashSet<String>();
-            var resolvedCache = new HashMap<String, IKnowledgeArtifactAdapter>();
-
-            gatherDependenciesWithClassification(
-                    adapter,
-                    gatheredCanonicals,
-                    resolvedCache,
+            var ctx = new GatherContext(
+                    new HashSet<>(),
+                    new HashMap<>(),
                     artifactEndpointConfigurations,
                     terminologyEndpoint.orElse(null),
-                    new ArrayList<>(),
-                    relatedArtifacts,
                     conformanceResolver,
                     federatedRepo);
+
+            gatherDependenciesWithClassification(adapter, new ArrayList<>(), relatedArtifacts, ctx);
 
             // Add root IG as a composed-of entry
             if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide
@@ -186,100 +184,107 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         return library.get();
     }
 
-    private <T extends ICompositeType & IBaseHasExtensions> void gatherDependenciesWithClassification(
-            IKnowledgeArtifactAdapter artifactAdapter,
+    private record GatherContext(
             Set<String> gatheredCanonicals,
             Map<String, IKnowledgeArtifactAdapter> resolvedCache,
-            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
+            List<ArtifactEndpointConfiguration> endpointConfigurations,
             IEndpointAdapter terminologyEndpoint,
+            ConformanceResourceResolver conformanceResolver,
+            IRepository dependencyRepo) {}
+
+    private <T extends ICompositeType & IBaseHasExtensions> void gatherDependenciesWithClassification(
+            IKnowledgeArtifactAdapter artifactAdapter,
             List<String> parentRoles,
             List<T> relatedArtifacts,
-            ConformanceResourceResolver conformanceResolver,
-            IRepository dependencyRepo) {
+            GatherContext ctx) {
         if (artifactAdapter == null) {
             return;
         }
         var canonical = artifactAdapter.getCanonical();
-        if (gatheredCanonicals.contains(canonical)) {
+        if (!ctx.gatheredCanonicals.add(canonical)) {
             return;
         }
-        gatheredCanonicals.add(canonical);
 
-        var dependencies = artifactAdapter.getDependencies(dependencyRepo);
-        logger.debug(
-                "gatherDependenciesWithClassification: {} returned {} dependencies",
-                artifactAdapter.get().fhirType(),
-                dependencies.size());
-        for (var dependency : dependencies) {
-            var dependencyUrl = Canonicals.getUrl(dependency.getReference());
-            if (StringUtils.isBlank(dependencyUrl)) {
-                dependencyUrl = dependency.getReference();
-            }
-            if (StringUtils.isBlank(dependencyUrl)) {
-                continue;
-            }
-
-            // Resolve dependency
-            IKnowledgeArtifactAdapter dependencyAdapter;
-            if (resolvedCache.containsKey(dependencyUrl)) {
-                dependencyAdapter = resolvedCache.get(dependencyUrl);
-            } else {
-                dependencyAdapter = tryResolveDependencyReadOnly(
-                        dependency, artifactEndpointConfigurations, terminologyEndpoint, dependencyRepo);
-                resolvedCache.put(dependencyUrl, dependencyAdapter);
-            }
-
-            // Classify roles
-            var currentRoles = DependencyRoleClassifier.classifyDependencyRoles(
-                    dependency, artifactAdapter, dependencyAdapter, conformanceResolver);
-            if (parentRoles.contains("key") && !currentRoles.contains("key")) {
-                currentRoles.add(0, "key");
-            }
-
-            // Recurse into resolved dependency
-            if (dependencyAdapter != null) {
-                gatherDependenciesWithClassification(
-                        dependencyAdapter,
-                        gatheredCanonicals,
-                        resolvedCache,
-                        artifactEndpointConfigurations,
-                        terminologyEndpoint,
-                        currentRoles,
-                        relatedArtifacts,
-                        conformanceResolver,
-                        dependencyRepo);
-            }
-
-            var reference = dependency.getReference();
-            if (dependencyAdapter != null) {
-                reference = dependencyAdapter.getCanonical();
-            } else if (StringUtils.isBlank(Canonicals.getVersion(reference))) {
-                // Unresolved dependency without a version — try the NPM package index
-                var indexedVersion = conformanceResolver.getVersion(reference);
-                if (indexedVersion != null) {
-                    reference = Canonicals.getUrl(reference) + "|" + indexedVersion;
-                }
-            }
-
-            // Skip if already in the related artifacts list
-            var finalReference = reference;
-            if (relatedArtifacts.stream().anyMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
-                    .equals(finalReference))) {
-                continue;
-            }
-
-            var newDep = (T) IKnowledgeArtifactAdapter.newRelatedArtifact(
-                    fhirVersion(),
-                    Constants.RELATEDARTIFACT_TYPE_DEPENDSON,
-                    reference,
-                    dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
-
-            // Add CRMI extensions
-            addCrmiExtensions(
-                    newDep, dependency, artifactAdapter, dependencyAdapter, currentRoles, conformanceResolver);
-
-            relatedArtifacts.add(newDep);
+        var dependencies = artifactAdapter.getDependencies(ctx.dependencyRepo);
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "gatherDependenciesWithClassification: {} returned {} dependencies",
+                    artifactAdapter.get().fhirType(),
+                    dependencies.size());
         }
+        for (var dependency : dependencies) {
+            processDependency(dependency, artifactAdapter, parentRoles, relatedArtifacts, ctx);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends ICompositeType & IBaseHasExtensions> void processDependency(
+            IDependencyInfo dependency,
+            IKnowledgeArtifactAdapter artifactAdapter,
+            List<String> parentRoles,
+            List<T> relatedArtifacts,
+            GatherContext ctx) {
+        var dependencyUrl = Canonicals.getUrl(dependency.getReference());
+        if (StringUtils.isBlank(dependencyUrl)) {
+            dependencyUrl = dependency.getReference();
+        }
+        if (StringUtils.isBlank(dependencyUrl)) {
+            return;
+        }
+
+        // Resolve dependency
+        var dependencyAdapter = ctx.resolvedCache.computeIfAbsent(
+                dependencyUrl,
+                k -> tryResolveDependencyReadOnly(
+                        dependency, ctx.endpointConfigurations, ctx.terminologyEndpoint, ctx.dependencyRepo));
+
+        // Classify roles
+        var currentRoles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, artifactAdapter, dependencyAdapter, ctx.conformanceResolver);
+        if (parentRoles.contains("key") && !currentRoles.contains("key")) {
+            currentRoles.add(0, "key");
+        }
+
+        // Recurse into resolved dependency
+        if (dependencyAdapter != null) {
+            gatherDependenciesWithClassification(dependencyAdapter, currentRoles, relatedArtifacts, ctx);
+        }
+
+        var reference = enrichReference(dependency, dependencyAdapter, ctx.conformanceResolver);
+
+        // Skip if already in the related artifacts list
+        if (relatedArtifacts.stream().anyMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
+                .equals(reference))) {
+            return;
+        }
+
+        var newDep = (T) IKnowledgeArtifactAdapter.newRelatedArtifact(
+                fhirVersion(),
+                Constants.RELATEDARTIFACT_TYPE_DEPENDSON,
+                reference,
+                dependencyAdapter != null ? dependencyAdapter.getDescriptor() : null);
+
+        // Add CRMI extensions
+        addCrmiExtensions(newDep, dependency, dependencyAdapter, currentRoles, ctx.conformanceResolver);
+
+        relatedArtifacts.add(newDep);
+    }
+
+    private String enrichReference(
+            IDependencyInfo dependency,
+            IKnowledgeArtifactAdapter dependencyAdapter,
+            ConformanceResourceResolver conformanceResolver) {
+        if (dependencyAdapter != null) {
+            return dependencyAdapter.getCanonical();
+        }
+        var reference = dependency.getReference();
+        if (StringUtils.isBlank(Canonicals.getVersion(reference))) {
+            var indexedVersion = conformanceResolver.getVersion(reference);
+            if (indexedVersion != null) {
+                return Canonicals.getUrl(reference) + "|" + indexedVersion;
+            }
+        }
+        return reference;
     }
 
     private IKnowledgeArtifactAdapter tryResolveDependencyReadOnly(
@@ -288,7 +293,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             IEndpointAdapter terminologyEndpoint,
             IRepository dependencyRepo) {
         var reference = dependency.getReference();
-        var resourceType = Canonicals.getResourceType(reference);
 
         // First try resolving from the federated repository
         if (StringUtils.isNotBlank(Canonicals.getVersion(reference))) {
@@ -304,35 +308,51 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         }
 
         // Fall back to Tx server for unversioned ValueSets and CodeSystems
-        if (resourceType != null && terminologyProviderRouter != null) {
-            Optional<IDomainResource> txResult = Optional.empty();
+        return tryResolveFromTerminologyServer(reference, artifactEndpointConfigurations, terminologyEndpoint);
+    }
 
-            if (!artifactEndpointConfigurations.isEmpty()) {
-                // Use configuration-based routing
-                if (Constants.RESOURCETYPE_VALUESET.equals(resourceType)) {
-                    txResult = terminologyProviderRouter.getValueSetResourceWithConfigurations(
-                            artifactEndpointConfigurations, Canonicals.getUrl(reference));
-                } else if (Constants.RESOURCETYPE_CODESYSTEM.equals(resourceType)) {
-                    txResult = terminologyProviderRouter.getCodeSystemResourceWithConfigurations(
-                            artifactEndpointConfigurations, Canonicals.getUrl(reference));
-                }
-            } else if (terminologyEndpoint != null) {
-                // Use single endpoint
-                if (Constants.RESOURCETYPE_VALUESET.equals(resourceType)) {
-                    txResult = terminologyProviderRouter.getLatestValueSetResource(
-                            List.of(terminologyEndpoint), Canonicals.getUrl(reference));
-                } else if (Constants.RESOURCETYPE_CODESYSTEM.equals(resourceType)) {
-                    txResult = terminologyProviderRouter.getCodeSystemResource(
-                            List.of(terminologyEndpoint), Canonicals.getUrl(reference));
-                }
-            }
-
-            if (txResult.isPresent()) {
-                return (IKnowledgeArtifactAdapter) createAdapterForResource(txResult.get());
-            }
+    private IKnowledgeArtifactAdapter tryResolveFromTerminologyServer(
+            String reference,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
+            IEndpointAdapter terminologyEndpoint) {
+        var resourceType = Canonicals.getResourceType(reference);
+        if (resourceType == null || terminologyProviderRouter == null) {
+            return null;
         }
 
-        return null;
+        var url = Canonicals.getUrl(reference);
+        Optional<IDomainResource> txResult;
+
+        if (!artifactEndpointConfigurations.isEmpty()) {
+            txResult = queryTerminologyWithConfigurations(resourceType, artifactEndpointConfigurations, url);
+        } else if (terminologyEndpoint != null) {
+            txResult = queryTerminologyWithEndpoint(resourceType, terminologyEndpoint, url);
+        } else {
+            return null;
+        }
+
+        return txResult.map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r))
+                .orElse(null);
+    }
+
+    private Optional<IDomainResource> queryTerminologyWithConfigurations(
+            String resourceType, List<ArtifactEndpointConfiguration> configurations, String url) {
+        if (Constants.RESOURCETYPE_VALUESET.equals(resourceType)) {
+            return terminologyProviderRouter.getValueSetResourceWithConfigurations(configurations, url);
+        } else if (Constants.RESOURCETYPE_CODESYSTEM.equals(resourceType)) {
+            return terminologyProviderRouter.getCodeSystemResourceWithConfigurations(configurations, url);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<IDomainResource> queryTerminologyWithEndpoint(
+            String resourceType, IEndpointAdapter endpoint, String url) {
+        if (Constants.RESOURCETYPE_VALUESET.equals(resourceType)) {
+            return terminologyProviderRouter.getLatestValueSetResource(List.of(endpoint), url);
+        } else if (Constants.RESOURCETYPE_CODESYSTEM.equals(resourceType)) {
+            return terminologyProviderRouter.getCodeSystemResource(List.of(endpoint), url);
+        }
+        return Optional.empty();
     }
 
     private IKnowledgeArtifactAdapter getArtifactByCanonical(String canonical, IRepository dependencyRepo) {
@@ -355,7 +375,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     private <T extends ICompositeType & IBaseHasExtensions> void addCrmiExtensions(
             T relatedArtifact,
             IDependencyInfo dependency,
-            IKnowledgeArtifactAdapter sourceArtifact,
             IKnowledgeArtifactAdapter dependencyArtifact,
             List<String> roles,
             ConformanceResourceResolver conformanceResolver) {
@@ -487,28 +506,36 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         List<String[]> packages = new ArrayList<>();
         try {
             if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide ig) {
-                if (ig.hasPackageId() && ig.hasVersion()) {
-                    packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
-                }
-                for (var dep : ig.getDependsOn()) {
-                    if (dep.hasPackageId() && dep.hasVersion()) {
-                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
-                    }
-                }
+                extractR4DependsOnPackages(ig, packages);
             } else if (adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide ig) {
-                if (ig.hasPackageId() && ig.hasVersion()) {
-                    packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
-                }
-                for (var dep : ig.getDependsOn()) {
-                    if (dep.hasPackageId() && dep.hasVersion()) {
-                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
-                    }
-                }
+                extractR5DependsOnPackages(ig, packages);
             }
         } catch (Exception e) {
             logger.debug("Error extracting dependsOn packages", e);
         }
         return packages;
+    }
+
+    private void extractR4DependsOnPackages(org.hl7.fhir.r4.model.ImplementationGuide ig, List<String[]> packages) {
+        if (ig.hasPackageId() && ig.hasVersion()) {
+            packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
+        }
+        for (var dep : ig.getDependsOn()) {
+            if (dep.hasPackageId() && dep.hasVersion()) {
+                packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+            }
+        }
+    }
+
+    private void extractR5DependsOnPackages(org.hl7.fhir.r5.model.ImplementationGuide ig, List<String[]> packages) {
+        if (ig.hasPackageId() && ig.hasVersion()) {
+            packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
+        }
+        for (var dep : ig.getDependsOn()) {
+            if (dep.hasPackageId() && dep.hasVersion()) {
+                packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+            }
+        }
     }
 
     protected LibraryManager createLibraryManager() {

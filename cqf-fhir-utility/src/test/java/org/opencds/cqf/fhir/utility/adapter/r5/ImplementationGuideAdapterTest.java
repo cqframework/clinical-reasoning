@@ -25,10 +25,12 @@ import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
 import org.hl7.fhir.r5.model.Library;
+import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -202,6 +204,69 @@ public class ImplementationGuideAdapterTest implements IImplementationGuideAdapt
         assertTrue(refs.contains(profileCanonical));
         // The library may be returned as the literal reference (Library/SpecLib) or canonicalized using repo metadata
         assertTrue(refs.contains(libraryRef) || refs.contains(libUrl));
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_handlesUnresolvableReference() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Bogus/123"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        var repo = new InMemoryFhirRepository(FhirContext.forR5());
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_handlesArtifactUrlExtension() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Patient/test-patient"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        var patient = new Patient();
+        patient.setId("Patient/test-patient");
+        patient.addExtension(
+                "http://hl7.org/fhir/StructureDefinition/artifact-url",
+                new UriType("http://example.org/artifact/test"));
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(patient);
+        var repo = new InMemoryFhirRepository(FhirContext.forR5(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertEquals(1, deps.size());
+        assertEquals("http://example.org/artifact/test", deps.get(0).getReference());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_logsWarningForResourceWithoutUrl() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Patient/test-patient"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        var patient = new Patient();
+        patient.setId("Patient/test-patient");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(patient);
+        var repo = new InMemoryFhirRepository(FhirContext.forR5(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertTrue(deps.isEmpty());
     }
 
     @Test

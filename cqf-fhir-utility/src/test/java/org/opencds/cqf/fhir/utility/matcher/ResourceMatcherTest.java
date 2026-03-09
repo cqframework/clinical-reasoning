@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -567,6 +569,38 @@ class ResourceMatcherTest {
             fail(ex);
             return null;
         }
+    }
+
+    // -- Reference matching tests for extracted helper methods --
+
+    @Test
+    void isMatchReference_withPrimitiveType_matches() {
+        var param = new ReferenceParam("Patient/123");
+        var primitive = new org.hl7.fhir.r4.model.StringType("Patient/123");
+        assertTrue(resourceMatcher.isMatchReference(param, primitive));
+    }
+
+    @Test
+    void isMatchReference_withPrimitiveType_noMatch() {
+        var param = new ReferenceParam("Patient/123");
+        var primitive = new org.hl7.fhir.r4.model.StringType("Patient/456");
+        assertFalse(resourceMatcher.isMatchReference(param, primitive));
+    }
+
+    @Test
+    void isMatchReference_withUnsupportedType_throws() {
+        var param = new ReferenceParam("test");
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> resourceMatcher.isMatchReference(param, new org.hl7.fhir.r4.model.Address()));
+    }
+
+    @Test
+    void isMatchReference_withEmptyReference_throws() {
+        var param = new ReferenceParam("Patient/123");
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> resourceMatcher.isMatchReference(param, new org.hl7.fhir.r4.model.Reference()));
     }
 
     // -- DSTU3 matcher tests --

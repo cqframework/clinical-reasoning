@@ -11,15 +11,18 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Period;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.MeasureValidationUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 
 public class SelectedMeasureReportGroup
         extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedMeasureReport> {
@@ -106,6 +109,16 @@ public class SelectedMeasureReportGroup
                         && x.getCode().getCoding().get(0).getCode().equals(name))
                 .findFirst()
                 .get());
+    }
+
+    public SelectedMeasureReportPopulation populationByType(MeasurePopulationType populationType) {
+        final Optional<MeasureReportGroupPopulationComponent> optMatchingPopulation = value().getPopulation().stream()
+                .filter(population -> R4MeasureReportUtils.doesReportPopulationTypeMatch(population, populationType))
+                .findFirst();
+
+        assertTrue(optMatchingPopulation.isPresent(), "Population with type: %s not found".formatted(populationType));
+
+        return new SelectedMeasureReportPopulation(optMatchingPopulation.get(), this);
     }
 
     public SelectedMeasureReportPopulation populationId(String populationId) {

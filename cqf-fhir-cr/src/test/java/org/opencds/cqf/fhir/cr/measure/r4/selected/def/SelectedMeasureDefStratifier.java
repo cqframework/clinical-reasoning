@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -176,6 +177,32 @@ public class SelectedMeasureDefStratifier<P>
     public SelectedMeasureDefStratifier<P> hasStratifierId(String id) {
         assertNotNull(value(), "StratifierDef is null");
         assertEquals(id, value().id(), "Stratifier ID mismatch");
+        return this;
+    }
+
+    /**
+     * Assert that the stratifier code text is null.
+     *
+     * @return this SelectedMeasureDefStratifier for chaining
+     */
+    public SelectedMeasureDefStratifier<P> hasNullCodeText() {
+        assertNotNull(value(), "StratifierDef is null");
+        var code = value().code();
+        var codeText = code != null ? code.text() : null;
+        assertNull(codeText, "Stratifier has expected null code text but instead has: " + codeText);
+        return this;
+    }
+
+    /**
+     * Assert the stratifier code text value.
+     *
+     * @param expectedCodeText expected code text
+     * @return this SelectedMeasureDefStratifier for chaining
+     */
+    public SelectedMeasureDefStratifier<P> hasCodeText(String expectedCodeText) {
+        assertNotNull(value(), "StratifierDef is null");
+        assertNotNull(value().code(), "StratifierDef code is null");
+        assertEquals(expectedCodeText, value().code().text(), "Stratifier code text mismatch");
         return this;
     }
 

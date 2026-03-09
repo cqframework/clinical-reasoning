@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -59,6 +60,17 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No population found with code: " + populationCode);
+        return new SelectedMeasureDefPopulation<>(population, this);
+    }
+
+    public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> populationByType(
+            MeasurePopulationType populationType) {
+        assertNotNull(value(), "GroupDef is null");
+        PopulationDef population = value().populations().stream()
+                .filter(p -> p.type() == populationType)
+                .findFirst()
+                .orElse(null);
+        assertNotNull(population, "No population found with code: " + populationType);
         return new SelectedMeasureDefPopulation<>(population, this);
     }
 

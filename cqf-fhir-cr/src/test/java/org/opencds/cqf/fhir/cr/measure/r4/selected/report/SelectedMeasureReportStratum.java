@@ -7,14 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.MeasureValidationUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 
 public class SelectedMeasureReportStratum
         extends Selected<MeasureReport.StratifierGroupComponent, SelectedMeasureReportStratifier> {
@@ -44,6 +47,19 @@ public class SelectedMeasureReportStratum
         final List<StratifierGroupPopulationComponent> population = value.getPopulation();
         assertEquals(count, population.size());
         return this;
+    }
+
+    public SelectedMeasureReportStratumPopulation populationByType(MeasurePopulationType populationType) {
+        final Optional<StratifierGroupPopulationComponent> optMatchingPopulation = value().getPopulation().stream()
+                .filter(stratumPopulation ->
+                        R4MeasureReportUtils.doesStratumPopulationTypeMatch(stratumPopulation, populationType))
+                .findFirst();
+
+        assertTrue(
+                optMatchingPopulation.isPresent(),
+                "Stratum Population with type: %s not found".formatted(populationType));
+
+        return new SelectedMeasureReportStratumPopulation(optMatchingPopulation.get(), this);
     }
 
     public SelectedMeasureReportStratumPopulation firstPopulation() {

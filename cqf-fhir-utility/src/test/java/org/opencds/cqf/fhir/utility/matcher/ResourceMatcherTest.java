@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.utility.matcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -341,13 +343,10 @@ class ResourceMatcherTest {
     }
 
     @ParameterizedTest
-    @MethodSource("coverageParameters")
-    void matches_dateParamCoverage_worksAsExpected(
+    @MethodSource({"coverageParameters", "stringLikeMatchParameters", "tokenMatchingParameters"})
+    void matches_worksAsExpected(
             String spName, List<IQueryParameterType> params, IBaseResource resource, boolean expectedMatch) {
-        // test
         var matches = resourceMatcher.matches(spName, params, resource);
-
-        // verify
         assertEquals(expectedMatch, matches);
     }
 
@@ -441,17 +440,6 @@ class ResourceMatcherTest {
         return args;
     }
 
-    @ParameterizedTest
-    @MethodSource("stringLikeMatchParameters")
-    void matches_stringParamsCoverage_works(
-            String spName, List<IQueryParameterType> params, IBaseResource resource, boolean expectedMatch) {
-        // test
-        var matches = resourceMatcher.matches(spName, params, resource);
-
-        // verify
-        assertEquals(expectedMatch, matches);
-    }
-
     static List<Arguments> tokenMatchingParameters() {
         var args = new ArrayList<Arguments>();
 
@@ -540,17 +528,6 @@ class ResourceMatcherTest {
         return args;
     }
 
-    @ParameterizedTest
-    @MethodSource("tokenMatchingParameters")
-    void matches_tokenParamsCoverage_worksAsExpected(
-            String spName, List<IQueryParameterType> params, IBaseResource resource, boolean expectedMatch) {
-        // test
-        var matches = resourceMatcher.matches(spName, params, resource);
-
-        // verify
-        assertEquals(expectedMatch, matches);
-    }
-
     private static Date createDate(String dateStr) {
         try {
             return formatter.parse(dateStr);
@@ -567,6 +544,56 @@ class ResourceMatcherTest {
             fail(ex);
             return null;
         }
+    }
+
+    // -- Reference matching tests for extracted helper methods --
+
+    @Test
+    void isMatchReference_withPrimitiveType_matches() {
+        var param = new ReferenceParam("Patient/123");
+        var primitive = new org.hl7.fhir.r4.model.StringType("Patient/123");
+        assertTrue(resourceMatcher.isMatchReference(param, primitive));
+    }
+
+    @Test
+    void isMatchReference_withPrimitiveType_noMatch() {
+        var param = new ReferenceParam("Patient/123");
+        var primitive = new org.hl7.fhir.r4.model.StringType("Patient/456");
+        assertFalse(resourceMatcher.isMatchReference(param, primitive));
+    }
+
+    @Test
+    void isMatchReference_withUnsupportedType_throws() {
+        var param = new ReferenceParam("test");
+        var address = new org.hl7.fhir.r4.model.Address();
+        assertThrows(UnsupportedOperationException.class, () -> resourceMatcher.isMatchReference(param, address));
+    }
+
+    @Test
+    void isMatchReference_withEmptyReference_throws() {
+        var param = new ReferenceParam("Patient/123");
+        var ref = new org.hl7.fhir.r4.model.Reference();
+        assertThrows(UnsupportedOperationException.class, () -> resourceMatcher.isMatchReference(param, ref));
+    }
+
+    @Test
+    void isMatchReference_withEmbeddedResource_matches() {
+        var param = new ReferenceParam("Patient/123");
+        var patient = new org.hl7.fhir.r4.model.Patient();
+        patient.setId("Patient/123");
+        var ref = new org.hl7.fhir.r4.model.Reference();
+        ref.setResource(patient);
+        assertTrue(resourceMatcher.isMatchReference(param, ref));
+    }
+
+    @Test
+    void isMatchReference_withEmbeddedResource_noMatch() {
+        var param = new ReferenceParam("Patient/123");
+        var patient = new org.hl7.fhir.r4.model.Patient();
+        patient.setId("Patient/456");
+        var ref = new org.hl7.fhir.r4.model.Reference();
+        ref.setResource(patient);
+        assertFalse(resourceMatcher.isMatchReference(param, ref));
     }
 
     // -- DSTU3 matcher tests --
@@ -590,15 +617,15 @@ class ResourceMatcherTest {
     @Test
     void dstu3GetDateRangeFromTimingThrows() {
         var matcher = new ResourceMatcherDSTU3();
-        assertThrows(NotImplementedException.class, () -> matcher.getDateRange(new org.hl7.fhir.dstu3.model.Timing()));
+        var timing = new org.hl7.fhir.dstu3.model.Timing();
+        assertThrows(NotImplementedException.class, () -> matcher.getDateRange(timing));
     }
 
     @Test
     void dstu3GetDateRangeFromUnsupportedThrows() {
         var matcher = new ResourceMatcherDSTU3();
-        assertThrows(
-                UnsupportedOperationException.class,
-                () -> matcher.getDateRange(new org.hl7.fhir.dstu3.model.Address()));
+        var address = new org.hl7.fhir.dstu3.model.Address();
+        assertThrows(UnsupportedOperationException.class, () -> matcher.getDateRange(address));
     }
 
     @Test
@@ -655,7 +682,8 @@ class ResourceMatcherTest {
     @Test
     void r5GetDateRangeFromTimingThrows() {
         var matcher = new ResourceMatcherR5();
-        assertThrows(NotImplementedException.class, () -> matcher.getDateRange(new org.hl7.fhir.r5.model.Timing()));
+        var timing = new org.hl7.fhir.r5.model.Timing();
+        assertThrows(NotImplementedException.class, () -> matcher.getDateRange(timing));
     }
 
     @Test

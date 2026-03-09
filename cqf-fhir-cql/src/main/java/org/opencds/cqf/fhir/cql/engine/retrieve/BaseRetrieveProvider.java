@@ -16,10 +16,10 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ExtensionUtil;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -53,14 +53,12 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
     private final RetrieveSettings retrieveSettings;
     private final TerminologyProvider terminologyProvider;
     private final SearchParameterResolver resolver;
-    private final FhirContext fhirContext;
 
     protected BaseRetrieveProvider(
             final FhirContext fhirContext,
             final TerminologyProvider terminologyProvider,
             final RetrieveSettings retrieveSettings) {
         requireNonNull(fhirContext, "fhirContext can not be null.");
-        this.fhirContext = fhirContext;
         fhirVersion = fhirContext.getVersion().getVersion();
         this.retrieveSettings = requireNonNull(retrieveSettings, "retrieveSettings can not be null");
         this.terminologyProvider = requireNonNull(terminologyProvider, "terminologyProvider can not be null");
@@ -307,7 +305,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             var profileParam = getFhirVersion().isOlderThan(FhirVersionEnum.R5)
                     ? new UriParam(templateId)
                     : new ReferenceParam(templateId);
-            searchParams.put("_profile", Collections.singletonList(profileParam));
+            searchParams.put("_profile", makeMutableSingleElementList(profileParam));
         }
     }
 
@@ -326,11 +324,14 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                 : new IdDt((String) contextValue);
         var sp = this.resolver.getSearchParameterDefinition(dataType, contextPath);
 
+        if (sp == null) {
+            throw new InternalErrorException("resolved search parameter definition is null");
+        }
         // Self-references are token params.
         if (sp.getName().equals("_id")) {
-            searchParams.put(sp.getName(), Collections.singletonList(new TokenParam((String) contextValue)));
+            searchParams.put(sp.getName(), makeMutableSingleElementList(new TokenParam((String) contextValue)));
         } else {
-            searchParams.put(sp.getName(), Collections.singletonList(new ReferenceParam(ref)));
+            searchParams.put(sp.getName(), makeMutableSingleElementList(new ReferenceParam(ref)));
         }
     }
 
@@ -345,6 +346,9 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         }
 
         var sp = this.resolver.getSearchParameterDefinition(dataType, codePath, RestSearchParameterTypeEnum.TOKEN);
+        if (sp == null) {
+            throw new InternalErrorException("resolved search parameter definition is null");
+        }
         if (codes != null) {
             List<IQueryParameterType> codeList = new ArrayList<>();
             // TODO: Fix up the RetrieveProvider API in the engine
@@ -364,7 +368,7 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                 // Use the in modifier e.g. Observation?code:in=valueSetUrl
                 searchParams.put(
                         sp.getName(),
-                        Collections.singletonList(new TokenParam()
+                        makeMutableSingleElementList(new TokenParam()
                                 .setModifier(TokenParamModifier.IN)
                                 .setValue(valueSet)));
             } else {
@@ -411,18 +415,32 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         Date end;
         if (dateRange.getStart() instanceof DateTime) {
             start = ((DateTime) dateRange.getStart()).toJavaDate();
+            var dateRangeEnd = dateRange.getEnd();
+            if (dateRangeEnd == null) {
+                throw new InternalErrorException("resolved search parameter definition is null");
+            }
             end = ((DateTime) dateRange.getEnd()).toJavaDate();
         } else if (dateRange.getStart() instanceof org.opencds.cqf.cql.engine.runtime.Date) {
             start = ((org.opencds.cqf.cql.engine.runtime.Date) dateRange.getStart()).toJavaDate();
-            end = ((org.opencds.cqf.cql.engine.runtime.Date) dateRange.getEnd()).toJavaDate();
+            var dateRangeEnd = dateRange.getEnd();
+            if (dateRangeEnd == null) {
+                throw new InternalErrorException("resolved search parameter definition is null");
+            }
+            end = ((org.opencds.cqf.cql.engine.runtime.Date) dateRangeEnd).toJavaDate();
         } else {
             throw new UnsupportedOperationException(
                     "Expected Interval of type org.opencds.cqf.cql.engine.runtime.Date or org.opencds.cqf.cql.engine.runtime.DateTime, found "
-                            + dateRange.getStart().getClass().getSimpleName());
+                            + Optional.ofNullable(dateRange.getStart())
+                                    .map(innerStart -> innerStart.getClass().getSimpleName())
+                                    .orElse(null));
         }
 
         if (StringUtils.isNotBlank(dateParamName)) {
             var sp = this.resolver.getSearchParameterDefinition(dataType, dateParamName);
+
+            if (sp == null) {
+                throw new InternalErrorException("resolved search parameter definition is null");
+            }
 
             // a date range is a search && condition - so we'll use a composite
             DateParam gte = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
@@ -434,12 +452,22 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
             DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
             dateRangeParam.add(dateParam);
             var sp = this.resolver.getSearchParameterDefinition(dataType, dateLowPath);
+
+            if (sp == null) {
+                throw new InternalErrorException("resolved search parameter definition is null");
+            }
+
             searchParams.put(sp.getName(), dateRangeParam);
         } else if (StringUtils.isNotBlank(dateHighPath)) {
             List<IQueryParameterType> dateRangeParam = new ArrayList<>();
             DateParam dateParam = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
             dateRangeParam.add(dateParam);
             var sp = this.resolver.getSearchParameterDefinition(dataType, dateHighPath);
+
+            if (sp == null) {
+                throw new InternalErrorException("resolved search parameter definition is null");
+            }
+
             searchParams.put(sp.getName(), dateRangeParam);
         } else {
             throw new IllegalStateException("A date path must be provided when filtering using date parameters");
@@ -464,5 +492,9 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
 
     protected RetrieveSettings getRetrieveSettings() {
         return this.retrieveSettings;
+    }
+
+    private static <T> ArrayList<T> makeMutableSingleElementList(T singleElement) {
+        return new ArrayList<>(List.of(singleElement));
     }
 }

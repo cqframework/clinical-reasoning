@@ -146,6 +146,7 @@ public class Constants {
 
     public static final String CRMI_OPERATION_APPROVE = "$approve";
     public static final String CRMI_OPERATION_ARTIFACT_DIFF = "$artifact-diff";
+    public static final String CRMI_OPERATION_DATA_REQUIREMENTS = "$data-requirements";
     public static final String CRMI_OPERATION_DELETE = "$delete";
     public static final String CRMI_OPERATION_PACKAGE = "$package";
     public static final String CRMI_OPERATION_RELEASE = "$release";
@@ -240,6 +241,7 @@ public class Constants {
     public static final String AUTHORITATIVE_SOURCE_URL =
             "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource";
 
+    public static final String VSAC_BASE_URL = "https://cts.nlm.nih.gov/fhir";
     public static final String VSAC_USERNAME = "vsacUsername";
     public static final String APIKEY = "apiKey";
     public static final String STATUS_ACTIVE = "active";

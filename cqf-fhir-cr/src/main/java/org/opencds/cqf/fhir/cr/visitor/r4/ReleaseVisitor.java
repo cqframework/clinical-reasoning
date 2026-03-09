@@ -39,7 +39,7 @@ import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.r4.ArtifactAssessment;
 import org.slf4j.Logger;
 
@@ -175,7 +175,7 @@ public class ReleaseVisitor {
             IKnowledgeArtifactAdapter rootAdapter,
             Measure measure,
             IEndpointAdapter endpointAdapter,
-            TerminologyServerClient terminologyServerClient) {
+            ITerminologyServerClient terminologyServerClient) {
         Library effectiveDataRequirementsLib = getEffectiveDataRequirementsLib(measure);
 
         if (effectiveDataRequirementsLib != null) {
@@ -259,7 +259,7 @@ public class ReleaseVisitor {
 
     private static void setCodeSystemVersion(
             IEndpointAdapter endpointAdapter,
-            TerminologyServerClient terminologyServerClient,
+            ITerminologyServerClient terminologyServerClient,
             Coding proposedCoding,
             Parameters expansionParams) {
         List<CanonicalType> systemVersions = new ArrayList<>();

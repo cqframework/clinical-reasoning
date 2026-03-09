@@ -222,6 +222,90 @@ class StructureDefinitionAdapterTest implements IStructureDefinitionAdapterTest<
         assertEquals(2, differentialElements.size());
     }
 
+    @Test
+    void testGetDerivation() {
+        var sd = new StructureDefinition();
+        sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        assertEquals("constraint", adapter.getDerivation());
+    }
+
+    @Test
+    void testGetAllSnapshotElements() {
+        var sd = new StructureDefinition();
+        sd.getSnapshot().addElement().setPath("Patient").setId("Patient");
+        sd.getSnapshot().addElement().setPath("Patient.name").setId("Patient.name");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        var allElements = adapter.getAllSnapshotElements();
+        assertEquals(2, allElements.size());
+    }
+
+    @Test
+    void testGetAllDifferentialElements() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient").setId("Patient");
+        sd.getDifferential().addElement().setPath("Patient.name").setId("Patient.name");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        var allElements = adapter.getAllDifferentialElements();
+        assertEquals(2, allElements.size());
+    }
+
+    @Test
+    void testGetElement() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient.name").setId("Patient.name");
+        sd.getSnapshot().addElement().setPath("Patient.id").setId("Patient.id");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        // Should find in differential first
+        var element = adapter.getElement("Patient.name");
+        assertNotNull(element);
+        assertEquals("Patient.name", element.getPath());
+
+        // Should fall back to snapshot
+        var snapshotElement = adapter.getElement("Patient.id");
+        assertNotNull(snapshotElement);
+        assertEquals("Patient.id", snapshotElement.getPath());
+
+        // Not found should return null
+        var notFound = adapter.getElement("Patient.nonexistent");
+        assertEquals(null, notFound);
+    }
+
+    @Test
+    void testGetElementByPath() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient.name").setId("Patient.name");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        var element = adapter.getElementByPath("name");
+        assertNotNull(element);
+        assertEquals("Patient.name", element.getPath());
+    }
+
+    @Test
+    void testGetSliceElements() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier:ssn");
+        var sliceChild = sd.getDifferential().addElement();
+        sliceChild.setPath("Patient.identifier").setId("Patient.identifier:ssn.value");
+        sliceChild.setSliceName("ssn");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        // getSliceElements returns elements whose ID contains the sliceName but have no sliceName themselves
+        var sliceElements = adapter.getSliceElements("ssn");
+        assertEquals(1, sliceElements.size());
+    }
+
     @Override
     public Class<StructureDefinition> structureDefinitionClass() {
         return StructureDefinition.class;

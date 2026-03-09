@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.plugins.spotless.asDep())
     implementation(libs.plugins.errorprone.asDep())
     implementation(libs.plugins.animalsniffer.asDep())
+    implementation(libs.plugins.vanniktech.publish.asDep())
 }
 
 // Expose tool versions from this catalog to precompiled script plugins

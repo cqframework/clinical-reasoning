@@ -25,9 +25,11 @@ import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionComponent;
 import org.hl7.fhir.r4.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
@@ -193,6 +195,147 @@ public class ImplementationGuideAdapterTest implements IImplementationGuideAdapt
         assertTrue(refs.contains(profileCanonical));
         // The library may be returned as the literal reference (Library/SpecLib) or canonicalized using repo metadata
         assertTrue(refs.contains(libraryRef) || refs.contains(libUrl));
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_handlesUnresolvableReference() {
+        var ig = new ImplementationGuide();
+        // "Bogus" is not a valid FHIR resource type, so getResourceDefinition will throw
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Bogus/123"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        // Should not throw - logs warning and skips unresolvable reference
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_handlesArtifactUrlExtension() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Patient/test-patient"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        // Patient is a DomainResource but NOT a MetadataResource — falls to artifact-url extension check
+        var patient = new Patient();
+        patient.setId("Patient/test-patient");
+        patient.addExtension(
+                "http://hl7.org/fhir/StructureDefinition/artifact-url",
+                new UriType("http://example.org/artifact/test"));
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(patient);
+        var repo = new InMemoryFhirRepository(FhirContext.forR4Cached(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertEquals(1, deps.size());
+        assertEquals("http://example.org/artifact/test", deps.get(0).getReference());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_logsWarningForResourceWithoutUrl() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Patient/test-patient"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        // Patient without URL and without artifact-url extension
+        var patient = new Patient();
+        patient.setId("Patient/test-patient");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(patient);
+        var repo = new InMemoryFhirRepository(FhirContext.forR4Cached(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        // Should log warning and return no deps for this resource
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_skipsExampleResources() {
+        var ig = new ImplementationGuide();
+        // Example via BooleanType
+        var exampleResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Library/example-lib"));
+        exampleResource.setExample(new org.hl7.fhir.r4.model.BooleanType(true));
+        // Example via CanonicalType
+        var exampleResource2 =
+                new ImplementationGuideDefinitionResourceComponent(new Reference("Library/example-lib2"));
+        exampleResource2.setExample(new org.hl7.fhir.r4.model.CanonicalType("http://example.org/SD/foo"));
+        // Non-example — should be included
+        var nonExample = new ImplementationGuideDefinitionResourceComponent(new Reference("Library/real-lib"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(exampleResource, exampleResource2, nonExample));
+        ig.setDefinition(igDef);
+
+        var lib = new Library();
+        lib.setId("Library/real-lib");
+        lib.setUrl("http://example.org/Library/real-lib");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(lib);
+        var repo = new InMemoryFhirRepository(FhirContext.forR4Cached(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        // Only the non-example resource should appear
+        assertEquals(1, deps.size());
+        assertEquals("http://example.org/Library/real-lib", deps.get(0).getReference());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_handlesMetadataResourceWithoutUrl() {
+        var ig = new ImplementationGuide();
+        var igResource = new ImplementationGuideDefinitionResourceComponent(new Reference("Library/no-url-lib"));
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(igResource));
+        ig.setDefinition(igDef);
+
+        // Library (MetadataResource) without URL set
+        var lib = new Library();
+        lib.setId("Library/no-url-lib");
+
+        var bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(lib);
+        var repo = new InMemoryFhirRepository(FhirContext.forR4Cached(), bundle);
+
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        // MetadataResource without URL falls through to warning
+        assertTrue(deps.isEmpty());
+    }
+
+    @Test
+    void adapter_getDependenciesWithRepo_skipsResourceWithoutReference() {
+        var ig = new ImplementationGuide();
+        // Resource with no reference set
+        var noRefResource = new ImplementationGuideDefinitionResourceComponent();
+        var igDef = new ImplementationGuideDefinitionComponent();
+        igDef.setResource(List.of(noRefResource));
+        ig.setDefinition(igDef);
+
+        var repo = new InMemoryFhirRepository(FhirContext.forR4Cached());
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(ig);
+        var deps = adapter.getDependencies(repo);
+
+        assertTrue(deps.isEmpty());
     }
 
     @Test

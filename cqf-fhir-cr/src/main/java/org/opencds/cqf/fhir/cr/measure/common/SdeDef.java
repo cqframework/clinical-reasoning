@@ -9,12 +9,18 @@ public class SdeDef {
     private final String id;
     private final ConceptDef code;
     private final String expression;
+    private final String description;
     private Map<String, CriteriaResult> results;
 
     public SdeDef(String id, ConceptDef code, String expression) {
+        this(id, code, expression, null);
+    }
+
+    public SdeDef(String id, ConceptDef code, String expression, String description) {
         this.id = id;
         this.code = code;
         this.expression = expression;
+        this.description = description;
     }
 
     public String id() {
@@ -27,6 +33,10 @@ public class SdeDef {
 
     public ConceptDef code() {
         return this.code;
+    }
+
+    public String description() {
+        return this.description;
     }
 
     public void putResult(String subject, Object value, Set<Object> evaluatedResources) {

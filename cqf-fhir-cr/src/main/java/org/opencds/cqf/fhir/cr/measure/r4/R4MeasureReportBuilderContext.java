@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_POPULATION_DESCRIPTION_URL;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ class R4MeasureReportBuilderContext {
         addExtensionIfNotExists(reference, ext);
     }
 
-    public void addCriteriaExtensionToSupplementalData(Resource resource, String criteriaId) {
+    public void addCriteriaExtensionToSupplementalData(Resource resource, String criteriaId, String description) {
         var id = getId(resource);
 
         // This is not an evaluated resource, so add it to the contained resources
@@ -99,6 +100,9 @@ class R4MeasureReportBuilderContext {
         }
         var ref = addSupplementalDataReference(id);
         addCriteriaExtensionToReference(ref, criteriaId);
+        if (description != null && !description.isEmpty()) {
+            addExtensionIfNotExists(ref, new Extension(EXT_POPULATION_DESCRIPTION_URL, new StringType(description)));
+        }
     }
 
     public void addCriteriaExtensionToEvaluatedResource(Resource resource, String criteriaId) {

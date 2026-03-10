@@ -63,8 +63,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static final String EXT_POPULATION_DESCRIPTION_URL =
             "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription";
+    // DEQM STU5: R5 cross-version extension for MeasureReport.supplementalData
     protected static final String EXT_SDE_REFERENCE_URL =
-            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData";
     protected static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
 

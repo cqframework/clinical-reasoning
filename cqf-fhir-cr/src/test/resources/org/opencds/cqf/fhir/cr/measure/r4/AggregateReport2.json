@@ -96,7 +96,7 @@
       "valueReference": {
         "extension": [
           {
-            "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference",
             "valueString": "SDEFirstAppointmentDate"
           }
         ],
@@ -104,19 +104,19 @@
       }
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-ethnicity-coding-2186-5"
       }
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-race-coding-2106-3"
       }
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-sex-code-m"
       }
@@ -421,7 +421,7 @@
     {
       "extension": [
         {
-          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference",
           "valueString": "numerator"
         }
       ],
@@ -430,7 +430,7 @@
     {
       "extension": [
         {
-          "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference",
           "valueString": "numerator"
         }
       ],

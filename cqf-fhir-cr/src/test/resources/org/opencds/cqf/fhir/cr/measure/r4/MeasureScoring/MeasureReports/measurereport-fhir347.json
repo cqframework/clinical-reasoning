@@ -102,11 +102,11 @@
       "valueString":"Percentage of the following patients - all considered at high risk of cardiovascular events - who were prescribed or were on statin therapy during the measurement period: \n*Adults aged >= 21 years who were previously diagnosed with or currently have an active diagnosis of clinical atherosclerotic cardiovascular disease (ASCVD); OR \n*Adults aged >= 21 years who have ever had a fasting or direct low-density lipoprotein cholesterol (LDL-C) level >= 190 mg/dL or were previously diagnosed with or currently have an active diagnosis of familial or pure hypercholesterolemia; OR \n*Adults aged 40-75 years with a diagnosis of diabetes with a fasting or direct LDL-C level of 70-189 mg/dL"
     },
     {
-      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference":{
         "extension":[
           {
-            "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "url":"http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference",
             "valueString":"85BE86EE-B363-47AA-AB81-DBB29B9DDD78"
           }
         ],
@@ -114,11 +114,11 @@
       }
     },
     {
-      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference":{
         "extension":[
           {
-            "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "url":"http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference",
             "valueString":"7C854DD4-B722-4F9C-8B29-ADBC03477654"
           }
         ],
@@ -126,11 +126,11 @@
       }
     },
     {
-      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference":{
         "extension":[
           {
-            "url":"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference",
+            "url":"http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference",
             "valueString":"6EDE3B46-C978-46A4-BA59-C55BE2B590B0"
           }
         ],

@@ -8314,7 +8314,8 @@ class MeasureEvaluationQICoreTest {
                 .hasCount(1)
                 .up()
                 .populationByType(DENOMINATOREXCLUSION)
-//                .hasCount(1)
+                // Note:  this is actually 0 with the unadjusted fluent function medicationRequestPeriod
+                .hasCount(1)
                 .up()
                 .populationByType(NUMERATOR)
                 .hasCount(0)

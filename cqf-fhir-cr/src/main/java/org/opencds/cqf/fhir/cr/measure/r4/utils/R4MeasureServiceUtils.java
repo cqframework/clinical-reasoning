@@ -70,6 +70,13 @@ public class R4MeasureServiceUtils {
         this.repository = repository;
     }
 
+    public R4MeasureServiceUtils withRepository(IRepository repository) {
+        if (repository == this.repository) {
+            return this;
+        }
+        return new R4MeasureServiceUtils(repository);
+    }
+
     public MeasureReport addProductLineExtension(MeasureReport measureReport, String productLine) {
         if (productLine != null) {
             Extension ext = new Extension();

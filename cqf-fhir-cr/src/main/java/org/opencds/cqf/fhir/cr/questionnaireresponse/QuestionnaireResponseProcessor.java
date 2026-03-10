@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.questionnaireresponse;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -24,6 +23,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,19 +38,16 @@ public class QuestionnaireResponseProcessor {
     protected IRepository repository;
     protected CrSettings crSettings;
     protected IExtractProcessor extractProcessor;
-
-    public QuestionnaireResponseProcessor(IRepository repository) {
-        this(repository, CrSettings.getDefault());
-    }
-
-    public QuestionnaireResponseProcessor(IRepository repository, CrSettings crSettings) {
-        this(repository, crSettings, null);
-    }
+    protected final RepositoryProxyFactory repositoryProxyFactory;
 
     public QuestionnaireResponseProcessor(
-            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
+            IRepository repository,
+            CrSettings crSettings,
+            List<? extends IOperationProcessor> operationProcessors,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
         this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.questionnaireResolver = new ResourceResolver(QUESTIONNAIRE, this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
@@ -139,7 +136,7 @@ public class QuestionnaireResponseProcessor {
             IBaseParameters parameters,
             IBaseBundle data,
             boolean useServerData) {
-        repository = proxy(repository, useServerData, (IRepository) null, null, null);
+        repository = repositoryProxyFactory.proxy(repository, useServerData, (IBaseResource) null, null, null);
         return extract(
                 questionnaireResponseId,
                 questionnaireId,

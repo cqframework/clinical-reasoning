@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -42,7 +43,8 @@ class PlanDefinitionProcessorTests {
     void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-        var processor = new PlanDefinitionProcessor(repository);
+        var processor = new PlanDefinitionProcessor(
+                repository, CrSettings.getDefault(), null, null, new NoOpRepositoryProxyFactory());
         assertNotNull(processor.settings());
     }
 
@@ -60,10 +62,15 @@ class PlanDefinitionProcessorTests {
                 CrSettings.getDefault(),
                 requestResolverFactory,
                 List.of(
-                        new ApplyProcessor(repository, activityProcessor),
+                        new ApplyProcessor(
+                                repository,
+                                activityProcessor,
+                                CrSettings.getDefault(),
+                                new NoOpRepositoryProxyFactory()),
                         packageProcessor,
                         dataRequirementsProcessor,
-                        activityProcessor));
+                        activityProcessor),
+                new NoOpRepositoryProxyFactory());
         assertNotNull(processor.settings());
         var result = processor.apply(
                 Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", "DischargeInstructionsPlan")),

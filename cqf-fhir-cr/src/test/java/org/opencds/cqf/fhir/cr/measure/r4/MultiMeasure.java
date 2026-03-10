@@ -48,6 +48,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("squid:S1135")
@@ -101,6 +102,7 @@ class MultiMeasure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private MeasurePeriodValidator measurePeriodValidator;
+        private RepositoryProxyFactory repositoryProxyFactory;
 
         public Given() {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -142,6 +144,11 @@ class MultiMeasure {
             return this;
         }
 
+        public MultiMeasure.Given repositoryProxyFactory(RepositoryProxyFactory repositoryProxyFactory) {
+            this.repositoryProxyFactory = repositoryProxyFactory;
+            return this;
+        }
+
         // Exposed for unit tests that only want to use part of this framework when passing in
         // an IgRepository
         public IRepository getRepository() {
@@ -153,7 +160,12 @@ class MultiMeasure {
         }
 
         private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+            return new R4MultiMeasureService(
+                    repository,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodValidator,
+                    repositoryProxyFactory != null ? repositoryProxyFactory : new NoOpRepositoryProxyFactory());
         }
 
         public MultiMeasure.When when() {

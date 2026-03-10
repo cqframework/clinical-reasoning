@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.graphdefinition.apply;
 
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
+import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -26,6 +25,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ApplyRequestBuilder {
@@ -33,6 +33,7 @@ public class ApplyRequestBuilder {
     private IRepository repository;
     private final EvaluationSettings evaluationSettings;
     private final FhirVersionEnum fhirVersion;
+    private final RepositoryProxyFactory repositoryProxyFactory;
     private GraphDefinition graphDefinition;
     private String subject;
     private String encounter;
@@ -46,19 +47,23 @@ public class ApplyRequestBuilder {
     private boolean useServerData = true;
     private IBaseBundle data;
     private List<ParametersParameterComponent> prefetchData;
-    private IRepository dataRepository;
-    private IRepository contentRepository;
-    private IRepository terminologyRepository;
+    private IBaseResource dataEndpoint;
+    private IBaseResource contentEndpoint;
+    private IBaseResource terminologyEndpoint;
     private Parameters parameters;
     private IIdType id;
     private ZonedDateTime periodStartString;
     private ZonedDateTime periodEndString;
     private IPrimitiveType<String> canonicalType;
 
-    public ApplyRequestBuilder(IRepository repository, EvaluationSettings evaluationSettings) {
+    public ApplyRequestBuilder(
+            IRepository repository,
+            EvaluationSettings evaluationSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = repository;
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         this.evaluationSettings = evaluationSettings;
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
     }
 
     public ApplyRequestBuilder withGraphDefinitionId(IdType id) {
@@ -141,36 +146,23 @@ public class ApplyRequestBuilder {
         return this;
     }
 
-    public ApplyRequestBuilder withDataEndpoint(ParametersParameterComponent dataEndpointParam) {
-        IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, dataEndpointParam);
-        this.dataRepository = createRestRepository(repository.fhirContext(), endpoint);
+    public ApplyRequestBuilder withRepository(IRepository repository) {
+        this.repository = repository;
         return this;
     }
 
-    public ApplyRequestBuilder withDataRepository(IRepository dataRepository) {
-        this.dataRepository = dataRepository;
+    public ApplyRequestBuilder withDataEndpoint(ParametersParameterComponent dataEndpointParam) {
+        this.dataEndpoint = EndpointHelper.getEndpoint(fhirVersion, dataEndpointParam);
         return this;
     }
 
     public ApplyRequestBuilder withContentEndpoint(ParametersParameterComponent contentEndpointParam) {
-        IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, contentEndpointParam);
-        this.contentRepository = createRestRepository(repository.fhirContext(), endpoint);
-        return this;
-    }
-
-    public ApplyRequestBuilder withContentRepository(IRepository contentRepository) {
-        this.contentRepository = contentRepository;
+        this.contentEndpoint = EndpointHelper.getEndpoint(fhirVersion, contentEndpointParam);
         return this;
     }
 
     public ApplyRequestBuilder withTerminologyEndpoint(ParametersParameterComponent terminologyEndpointParam) {
-        IBaseResource endpoint = EndpointHelper.getEndpoint(fhirVersion, terminologyEndpointParam);
-        this.terminologyRepository = createRestRepository(repository.fhirContext(), endpoint);
-        return this;
-    }
-
-    public ApplyRequestBuilder withTerminologyRepository(IRepository terminologyRepository) {
-        this.terminologyRepository = terminologyRepository;
+        this.terminologyEndpoint = EndpointHelper.getEndpoint(fhirVersion, terminologyEndpointParam);
         return this;
     }
 
@@ -193,12 +185,8 @@ public class ApplyRequestBuilder {
             throw new IllegalArgumentException("Missing required parameter: 'practitioner'");
         }
 
-        this.repository = proxy(
-                this.repository,
-                this.useServerData,
-                this.dataRepository,
-                this.contentRepository,
-                this.terminologyRepository);
+        this.repository = repositoryProxyFactory.proxy(
+                this.repository, this.useServerData, this.dataEndpoint, this.contentEndpoint, this.terminologyEndpoint);
 
         Either3<IPrimitiveType<String>, IIdType, IBaseResource> eitherGraphDefinition =
                 Eithers.for3(canonicalType, this.id, this.graphDefinition);

@@ -28,8 +28,10 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -108,6 +110,9 @@ public class TestGraphDefinition {
         private GraphDefinitionProcessor processor;
         private ApplyRequestBuilder applyRequestBuilder;
         private IParser jsonParser;
+        private IRepository dataRepository;
+        private IRepository contentRepository;
+        private IRepository terminologyRepository;
 
         public When(
                 IRepository repository,
@@ -115,7 +120,8 @@ public class TestGraphDefinition {
                 EvaluationSettings evaluationSettings) {
             this.repository = repository;
             this.processor = graphDefinitionProcessor;
-            this.applyRequestBuilder = new ApplyRequestBuilder(this.repository, evaluationSettings);
+            this.applyRequestBuilder =
+                    new ApplyRequestBuilder(this.repository, evaluationSettings, new NoOpRepositoryProxyFactory());
             this.jsonParser = repository.fhirContext().newJsonParser();
         }
 
@@ -135,17 +141,17 @@ public class TestGraphDefinition {
         }
 
         public When data(String dataAssetName) {
-            applyRequestBuilder.withDataRepository(createRepository(dataAssetName));
+            this.dataRepository = createRepository(dataAssetName);
             return this;
         }
 
         public When content(String dataAssetName) {
-            applyRequestBuilder.withContentRepository(createRepository(dataAssetName));
+            this.contentRepository = createRepository(dataAssetName);
             return this;
         }
 
         public When terminology(String dataAssetName) {
-            applyRequestBuilder.withTerminologyRepository(createRepository(dataAssetName));
+            this.terminologyRepository = createRepository(dataAssetName);
             return this;
         }
 
@@ -161,7 +167,7 @@ public class TestGraphDefinition {
         }
 
         public When dataRepository(IgRepository theRepository) {
-            applyRequestBuilder.withDataRepository(theRepository);
+            this.dataRepository = theRepository;
             return this;
         }
 
@@ -171,6 +177,9 @@ public class TestGraphDefinition {
         }
 
         public GeneratedBundle thenApply() {
+            var proxiedRepo =
+                    Repositories.proxy(repository, true, dataRepository, contentRepository, terminologyRepository);
+            applyRequestBuilder.withRepository(proxiedRepo);
             ApplyRequest applyRequest = applyRequestBuilder.buildApplyRequest();
             IBaseResource generatedBundle = this.processor.apply(applyRequest);
 

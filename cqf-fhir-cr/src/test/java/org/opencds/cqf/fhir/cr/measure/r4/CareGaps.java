@@ -139,7 +139,12 @@ public class CareGaps {
 
         private R4CareGapsService buildCareGapsService() {
             return new R4CareGapsService(
-                    careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
+                    careGapsProperties,
+                    repository,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodEvaluator,
+                    new NoOpRepositoryProxyFactory());
         }
 
         public When when() {

@@ -1,8 +1,6 @@
 package org.opencds.cqf.fhir.cr.activitydefinition;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -28,6 +26,7 @@ import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -40,22 +39,17 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
     protected IRepository repository;
     protected CrSettings crSettings;
     protected ExtensionResolver extensionResolver;
-
-    public ActivityDefinitionProcessor(IRepository repository) {
-        this(repository, CrSettings.getDefault());
-    }
-
-    public ActivityDefinitionProcessor(IRepository repository, CrSettings crSettings) {
-        this(repository, crSettings, null, null);
-    }
+    protected final RepositoryProxyFactory repositoryProxyFactory;
 
     public ActivityDefinitionProcessor(
             IRepository repository,
             CrSettings crSettings,
             IRequestResolverFactory requestResolverFactory,
-            List<? extends IOperationProcessor> operationProcessors) {
+            List<? extends IOperationProcessor> operationProcessors,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
@@ -118,43 +112,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        return apply(
-                activityDefinition,
-                subjectId,
-                encounterId,
-                practitionerId,
-                organizationId,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                data,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
-            Either3<C, IIdType, R> activityDefinition,
-            String subjectId,
-            String encounterId,
-            String practitionerId,
-            String organizationId,
-            IBaseDatatype userType,
-            IBaseDatatype userLanguage,
-            IBaseDatatype userTaskContext,
-            IBaseDatatype setting,
-            IBaseDatatype settingContext,
-            IBaseParameters parameters,
-            boolean useServerData,
-            IBaseBundle data,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(
+                repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return apply(
                 activityDefinition,
                 subjectId,

@@ -98,7 +98,7 @@
   ],
   "extension":[
     {
-      "url":"http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+      "url":"http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription",
       "valueString":"Percentage of the following patients - all considered at high risk of cardiovascular events - who were prescribed or were on statin therapy during the measurement period: \n*Adults aged >= 21 years who were previously diagnosed with or currently have an active diagnosis of clinical atherosclerotic cardiovascular disease (ASCVD); OR \n*Adults aged >= 21 years who have ever had a fasting or direct low-density lipoprotein cholesterol (LDL-C) level >= 190 mg/dL or were previously diagnosed with or currently have an active diagnosis of familial or pure hypercholesterolemia; OR \n*Adults aged 40-75 years with a diagnosis of diabetes with a fasting or direct LDL-C level of 70-189 mg/dL"
     },
     {

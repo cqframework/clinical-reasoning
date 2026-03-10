@@ -116,7 +116,7 @@
   ],
   "extension": [
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+      "url": "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription",
       "valueString": "This measure assesses the number of patients who received VTE prophylaxis or have documentation why no VTE prophylaxis was given the day of or the day after hospital admission or surgery end date for surgeries that start the day of or the day after hospital admission"
     },
     {

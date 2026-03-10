@@ -62,7 +62,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static final String EXT_POPULATION_DESCRIPTION_URL =
-            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+            "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription";
     protected static final String EXT_SDE_REFERENCE_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
     protected static final String POPULATION_BASIS_URL =

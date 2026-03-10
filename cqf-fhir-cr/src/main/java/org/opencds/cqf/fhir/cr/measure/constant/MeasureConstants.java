@@ -38,7 +38,7 @@ public class MeasureConstants {
     public static final String EXT_SDE_DISAGGREGATE_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-Measure.supplementalDataElement.disaggregate";
     public static final String EXT_POPULATION_DESCRIPTION_URL =
-            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+            "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription";
     public static final String EXT_SDE_REFERENCE_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
     public static final String EXT_OPERATION_OUTCOME_REFERENCE_URL =

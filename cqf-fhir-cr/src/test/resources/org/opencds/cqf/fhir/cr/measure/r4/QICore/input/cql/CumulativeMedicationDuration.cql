@@ -264,7 +264,7 @@ define function MedicationRequestPeriod(Request "MedicationRequest"):
       else
         null
 
- define fluent function medicationRequestPeriod(Request "MedicationRequest"):
+define fluent function medicationRequestPeriod(Request "MedicationRequest"):
   Request R
     let
       dosage: singleton from R.dosageInstruction,
@@ -277,7 +277,8 @@ define function MedicationRequestPeriod(Request "MedicationRequest"):
       dose: Coalesce(end of doseRange, doseQuantity),
       dosesPerDay: Coalesce(ToDaily(frequency, period), Count(timing.repeat.timeOfDay), 1.0),
       boundsPeriod: timing.repeat.bounds as Interval<DateTime>,
-      daysSupply: (convert R.dispenseRequest.expectedSupplyDuration to days).value,
+      // Bryn/Seena: workaround for flaw in CumulativeMedicationDuration logic:
+      daysSupply: R.dispenseRequest.expectedSupplyDuration, //(convert R.dispenseRequest.expectedSupplyDuration to days).value,
       quantity: R.dispenseRequest.quantity,
       refills: Coalesce(R.dispenseRequest.numberOfRepeatsAllowed, 0),
       startDate:
@@ -289,7 +290,8 @@ define function MedicationRequestPeriod(Request "MedicationRequest"):
       totalDaysSupplied: Coalesce(daysSupply, quantity.value / (dose.value * dosesPerDay)) * (1 + refills)
     return
       if startDate is not null and totalDaysSupplied is not null then
-        Interval[startDate, startDate + Quantity(totalDaysSupplied - 1, 'day') ]
+      // Bryn/Seena: workaround for flaw in CumulativeMedicationDuration logic:
+        Interval[startDate, startDate + (totalDaysSupplied - 1 day) ] //Interval[startDate, startDate + Quantity(totalDaysSupplied - 1, 'day') ]
       else if startDate is not null and boundsPeriod."high" is not null then
         Interval[startDate, date from end of boundsPeriod]
       else

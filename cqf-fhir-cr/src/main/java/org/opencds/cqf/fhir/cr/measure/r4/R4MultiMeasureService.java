@@ -302,7 +302,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository;
         }
 
-        r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
+        if (measureEvaluationOptions.isEnsureSearchParameters()) {
+            r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
+        }
 
         // backward compatibility: in the single measure case, we set the subjectId to practitioner,
         // but we don't in the multi-measure case.

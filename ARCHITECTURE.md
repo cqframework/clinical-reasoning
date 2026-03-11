@@ -38,13 +38,15 @@ As you cross boundaries in an application, the primary domain model shifts. Each
 
 ### Forbidden Imports in Core Modules
 
-The following modules MUST NOT import from `ca.uhn.fhir.rest.server.exceptions`:
+**New code** in the following modules MUST NOT import from `ca.uhn.fhir.rest.server.exceptions`:
 
 - `cqf-fhir-cr`
 - `cqf-fhir-cql`
 - `cqf-fhir-utility`
 
 These modules are used by the CLI, by Android clients, and by other non-REST consumers. REST/HTTP concepts do not belong here.
+
+> **Note:** Existing code has legacy violations of this rule. These should be migrated over time but are not blockers for new contributions.
 
 ### Exception Handling Pattern
 

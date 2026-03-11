@@ -39,23 +39,4 @@ public final class CrExceptionTranslator {
             throw translated;
         }
     }
-
-    /**
-     * Execute a void operation and translate domain exceptions to REST exceptions.
-     *
-     * @param operation the operation to execute
-     * @throws InvalidRequestException if the operation throws {@link IllegalArgumentException}
-     * @throws NotImplementedOperationException if the operation throws {@link UnsupportedOperationException}
-     */
-    public static void executeVoid(Runnable operation) {
-        try {
-            operation.run();
-        } catch (IllegalArgumentException e) {
-            throw new InvalidRequestException(e.getMessage(), e);
-        } catch (UnsupportedOperationException e) {
-            var translated = new NotImplementedOperationException(e.getMessage());
-            translated.initCause(e);
-            throw translated;
-        }
-    }
 }

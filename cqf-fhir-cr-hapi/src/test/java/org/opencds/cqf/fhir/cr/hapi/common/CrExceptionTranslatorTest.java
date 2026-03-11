@@ -90,35 +90,6 @@ class CrExceptionTranslatorTest {
     }
 
     @Test
-    void executeVoid_completesOnSuccess() {
-        CrExceptionTranslator.executeVoid(() -> {});
-    }
-
-    @Test
-    void executeVoid_translatesIllegalArgumentToInvalidRequest() {
-        var cause = new IllegalArgumentException("bad void input");
-        var thrown = assertThrows(
-                InvalidRequestException.class,
-                () -> CrExceptionTranslator.executeVoid(() -> {
-                    throw cause;
-                }));
-        assertThat(thrown.getMessage(), containsString("bad void input"));
-        assertThat(thrown.getCause(), is(sameInstance(cause)));
-    }
-
-    @Test
-    void executeVoid_translatesUnsupportedOperationToNotImplemented() {
-        var cause = new UnsupportedOperationException("not supported void");
-        var thrown = assertThrows(
-                NotImplementedOperationException.class,
-                () -> CrExceptionTranslator.executeVoid(() -> {
-                    throw cause;
-                }));
-        assertThat(thrown.getMessage(), containsString("not supported void"));
-        assertThat(thrown.getCause(), is(sameInstance(cause)));
-    }
-
-    @Test
     void execute_preservesCauseType() {
         var cause = new IllegalArgumentException("test");
         var thrown = assertThrows(

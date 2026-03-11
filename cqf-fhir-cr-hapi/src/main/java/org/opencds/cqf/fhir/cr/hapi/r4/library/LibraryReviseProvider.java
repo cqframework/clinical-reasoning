@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_REVISE;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -29,6 +30,6 @@ public class LibraryReviseProvider {
             @OperationParam(name = "resource") IBaseResource resource, RequestDetails requestDetails)
             throws FHIRException {
 
-        return libraryProcessorFactory.create(requestDetails).reviseLibrary(resource);
+        return execute(() -> libraryProcessorFactory.create(requestDetails).reviseLibrary(resource));
     }
 }

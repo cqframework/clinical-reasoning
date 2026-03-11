@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.questionnaire;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -31,7 +32,8 @@ public class QuestionnaireDataRequirementsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)
     public IBaseResource getDataRequirements(@IdParam IdType id, RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return questionnaireFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null);
+        return execute(
+                () -> questionnaireFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null));
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = Questionnaire.class)
@@ -42,13 +44,13 @@ public class QuestionnaireDataRequirementsProvider {
             @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return questionnaireFactory
+        return execute(() -> questionnaireFactory
                 .create(requestDetails)
                 .dataRequirements(
                         Eithers.for3(
                                 getCanonicalType(fhirVersion, canonical, url, version),
                                 getIdType(fhirVersion, "Questionnaire", id),
                                 null),
-                        null);
+                        null));
     }
 }

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -56,13 +58,13 @@ public class CollectDataOperationProvider {
             @OperationParam(name = "subject") String subject,
             @OperationParam(name = "practitioner") String practitioner,
             RequestDetails requestDetails) {
-        return r4CollectDataServiceFactory
+        return execute(() -> r4CollectDataServiceFactory
                 .create(requestDetails)
                 .collectData(
                         id,
                         stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
                         stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
                         subject,
-                        practitioner);
+                        practitioner));
     }
 }

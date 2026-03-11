@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -31,7 +32,8 @@ public class GraphDefinitionDataRequirementsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = GraphDefinition.class)
     public IBaseResource getDataRequirements(@IdParam IdType id, RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return graphDefinitionProcessorFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null);
+        return execute(() ->
+                graphDefinitionProcessorFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null));
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = GraphDefinition.class)
@@ -42,13 +44,13 @@ public class GraphDefinitionDataRequirementsProvider {
             @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return graphDefinitionProcessorFactory
+        return execute(() -> graphDefinitionProcessorFactory
                 .create(requestDetails)
                 .dataRequirements(
                         Eithers.for3(
                                 getCanonicalType(fhirVersion, canonical, url, version),
                                 getIdType(fhirVersion, "GraphDefinition", id),
                                 null),
-                        null);
+                        null));
     }
 }

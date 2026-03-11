@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -43,7 +45,8 @@ public class InferManifestParametersProvider {
             shortDefinition = "$infer-manifest-parameters",
             value = "Infer manifest expansion parameters from a module-definition Library.")
     public Library inferManifestParameters(@IdParam IdType id, RequestDetails requestDetails) {
-        return r4InferManifestParametersServiceFactory.create(requestDetails).inferManifestParameters(id);
+        return execute(() ->
+                r4InferManifestParametersServiceFactory.create(requestDetails).inferManifestParameters(id));
     }
 
     /**
@@ -72,6 +75,7 @@ public class InferManifestParametersProvider {
             value = "Infer manifest expansion parameters from a module-definition Library.")
     public Library inferManifestParameters(
             @OperationParam(name = "library") Library library, RequestDetails requestDetails) {
-        return r4InferManifestParametersServiceFactory.create(requestDetails).inferManifestParameters(library);
+        return execute(() ->
+                r4InferManifestParametersServiceFactory.create(requestDetails).inferManifestParameters(library));
     }
 }

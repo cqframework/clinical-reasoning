@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.questionnaire;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
@@ -46,14 +47,14 @@ public class QuestionnairePackageProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
-        return (Bundle) questionnaireProcessorFactory
+        return execute(() -> (Bundle) questionnaireProcessorFactory
                 .create(requestDetails)
                 .packageQuestionnaire(
                         Eithers.forMiddle3(id),
                         packageParameters(
                                 fhirVersion,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
@@ -77,7 +78,7 @@ public class QuestionnairePackageProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
-        return (Bundle) questionnaireProcessorFactory
+        return execute(() -> (Bundle) questionnaireProcessorFactory
                 .create(requestDetails)
                 .packageQuestionnaire(
                         Eithers.for3(
@@ -87,6 +88,6 @@ public class QuestionnairePackageProvider {
                         packageParameters(
                                 fhirVersion,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

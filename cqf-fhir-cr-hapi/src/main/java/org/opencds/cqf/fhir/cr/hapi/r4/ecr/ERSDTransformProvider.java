@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.ecr;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -37,8 +38,8 @@ public class ERSDTransformProvider {
             @OperationParam(name = "bundle") IBaseResource maybeBundle,
             @OperationParam(name = "appAuthoritativeUrl") StringType appAuthoritativeUrl)
             throws UnprocessableEntityException, FhirResourceExistsException {
-        return ersdv2ImportServiceFactory
+        return execute(() -> ersdv2ImportServiceFactory
                 .create(requestDetails)
-                .eRSDV2ImportOperation(maybeBundle, getStringValue(appAuthoritativeUrl));
+                .eRSDV2ImportOperation(maybeBundle, getStringValue(appAuthoritativeUrl)));
     }
 }

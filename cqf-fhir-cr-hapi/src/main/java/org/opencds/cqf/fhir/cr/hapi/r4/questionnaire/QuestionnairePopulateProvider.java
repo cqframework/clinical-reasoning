@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.questionnaire;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringOrReferenceValue;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
@@ -81,7 +82,7 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return (QuestionnaireResponse) questionnaireProcessorFactory
+        return execute(() -> (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
                         Eithers.forMiddle3(id),
@@ -92,7 +93,7 @@ public class QuestionnairePopulateProvider {
                         isUseServerData(local, useServerData),
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 
     /**
@@ -140,7 +141,7 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return (QuestionnaireResponse) questionnaireProcessorFactory
+        return execute(() -> (QuestionnaireResponse) questionnaireProcessorFactory
                 .create(requestDetails)
                 .populate(
                         getQuestionnaireMonad(questionnaire, canonical, url, version),
@@ -151,7 +152,7 @@ public class QuestionnairePopulateProvider {
                         isUseServerData(local, useServerData),
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 
     private boolean isUseServerData(BooleanType local, BooleanType useServerData) {

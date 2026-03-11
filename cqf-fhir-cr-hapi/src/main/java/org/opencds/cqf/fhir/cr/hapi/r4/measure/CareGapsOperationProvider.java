@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -84,7 +86,7 @@ public class CareGapsOperationProvider {
             @OperationParam(name = "measureUrl") List<CanonicalType> measureUrl,
             @OperationParam(name = "nonDocument") BooleanType nonDocument) {
 
-        return r4CareGapsProcessorFactory
+        return execute(() -> r4CareGapsProcessorFactory
                 .create(requestDetails)
                 .getCareGapsReport(
                         stringTimePeriodHandler.getStartZonedDateTime(reriodStart, requestDetails),
@@ -98,6 +100,6 @@ public class CareGapsOperationProvider {
                         measureUrl,
                         Optional.ofNullable(nonDocument)
                                 .map(BooleanType::getValue)
-                                .orElse(false));
+                                .orElse(false)));
     }
 }

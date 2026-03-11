@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
+
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -38,6 +40,7 @@ public class DataRequirementsOperationProvider {
             @OperationParam(name = "periodStart") String periodStart,
             @OperationParam(name = "periodEnd") String periodEnd,
             RequestDetails requestDetails) {
-        return r4DataRequirementsServiceFactory.create(requestDetails).dataRequirements(id, periodStart, periodEnd);
+        return execute(() ->
+                r4DataRequirementsServiceFactory.create(requestDetails).dataRequirements(id, periodStart, periodEnd));
     }
 }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.activitydefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -90,7 +91,7 @@ public class ActivityDefinitionApplyProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return activityDefinitionProcessorFactory
+        return execute(() -> activityDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
                         Eithers.forMiddle3(id),
@@ -108,7 +109,7 @@ public class ActivityDefinitionApplyProvider {
                         data,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 
     /**
@@ -169,7 +170,7 @@ public class ActivityDefinitionApplyProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return activityDefinitionProcessorFactory
+        return execute(() -> activityDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(getCanonicalType(fhirVersion, canonical, url, version), null, activityDefinition),
@@ -187,6 +188,6 @@ public class ActivityDefinitionApplyProvider {
                         data,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.plandefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -31,7 +32,8 @@ public class PlanDefinitionDataRequirementsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = PlanDefinition.class)
     public IBaseResource getDataRequirements(@IdParam IdType id, RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null);
+        return execute(() ->
+                planDefinitionProcessorFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null));
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = PlanDefinition.class)
@@ -42,13 +44,13 @@ public class PlanDefinitionDataRequirementsProvider {
             @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
+        return execute(() -> planDefinitionProcessorFactory
                 .create(requestDetails)
                 .dataRequirements(
                         Eithers.for3(
                                 getCanonicalType(fhirVersion, canonical, url, version),
                                 getIdType(fhirVersion, "PlanDefinition", id),
                                 null),
-                        null);
+                        null));
     }
 }

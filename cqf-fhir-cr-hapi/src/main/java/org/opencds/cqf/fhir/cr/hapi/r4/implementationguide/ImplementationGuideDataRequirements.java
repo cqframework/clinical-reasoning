@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.implementationguide;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
@@ -63,10 +64,10 @@ public class ImplementationGuideDataRequirements {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return implementationGuideProcessorFactory
+        return execute(() -> implementationGuideProcessorFactory
                 .create(requestDetails)
                 .dataRequirements(
-                        Eithers.forMiddle3(id), buildParameters(artifactEndpointConfiguration, terminologyEndpoint));
+                        Eithers.forMiddle3(id), buildParameters(artifactEndpointConfiguration, terminologyEndpoint)));
     }
 
     /**
@@ -101,14 +102,14 @@ public class ImplementationGuideDataRequirements {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return implementationGuideProcessorFactory
+        return execute(() -> implementationGuideProcessorFactory
                 .create(requestDetails)
                 .dataRequirements(
                         Eithers.for3(
                                 getCanonicalType(fhirVersion, canonical, url, version),
                                 getIdType(fhirVersion, "ImplementationGuide", id),
                                 null),
-                        buildParameters(artifactEndpointConfiguration, terminologyEndpoint));
+                        buildParameters(artifactEndpointConfiguration, terminologyEndpoint)));
     }
 
     private IBaseParameters buildParameters(

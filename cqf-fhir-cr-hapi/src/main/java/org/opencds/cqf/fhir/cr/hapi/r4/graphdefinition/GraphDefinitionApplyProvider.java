@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -129,7 +130,8 @@ public class GraphDefinitionApplyProvider {
 
         var applyRequest = applyRequestBuilder.buildApplyRequest();
 
-        return graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest);
+        return execute(
+                () -> graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest));
     }
 
     /**
@@ -229,7 +231,8 @@ public class GraphDefinitionApplyProvider {
 
         var applyRequest = applyRequestBuilder.buildApplyRequest();
 
-        return graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest);
+        return execute(
+                () -> graphDefinitionProcessorFactory.create(requestDetails).apply(applyRequest));
     }
 
     protected ZonedDateTime getZonedStartDateTime(StringType start, RequestDetails requestDetails) {

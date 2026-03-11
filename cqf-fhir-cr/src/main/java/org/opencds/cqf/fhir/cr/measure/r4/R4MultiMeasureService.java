@@ -322,12 +322,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             subjectToUse = subject;
         }
 
-        final List<Measure> measures;
-        if (measure == null) {
-            measures = r4MeasureServiceUtilsToUse.getMeasures(measureId, measureIdentifier, measureUrl);
-        } else {
-            measures = List.of(R4MeasureServiceUtils.foldMeasure(measure, this.repository));
-        }
+        final List<Measure> measures =
+                getMeasures(measure, measureId, measureUrl, measureIdentifier, r4MeasureServiceUtilsToUse);
 
         log.debug("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
@@ -380,6 +376,18 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 evalType,
                 reporter,
                 productLine);
+    }
+
+    private List<Measure> getMeasures(
+            @Nullable Either3<CanonicalType, IdType, Measure> measureEither,
+            List<IdType> measureId,
+            List<String> measureUrl,
+            List<String> measureIdentifier,
+            R4MeasureServiceUtils r4MeasureServiceUtilsToUse) {
+        return Optional.ofNullable(measureEither)
+                .map(nonNullMeasureEither ->
+                        List.of(R4MeasureServiceUtils.foldMeasure(nonNullMeasureEither, this.repository)))
+                .orElse(r4MeasureServiceUtilsToUse.getMeasures(measureId, measureIdentifier, measureUrl));
     }
 
     private List<List<MeasureDefAndR4MeasureReport>> populationOrSingleMeasureReport(

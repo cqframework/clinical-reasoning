@@ -4,12 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.TokenParam;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -17,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
 /**
  * Tests the {@code ensureSearchParameters} flag on {@link MeasureEvaluationOptions}
@@ -58,8 +53,9 @@ class R4MultiMeasureServiceEnsureSearchParameterTest {
     }
 
     private static Bundle searchForSupplementalDataSearchParameter(InMemoryFhirRepository repository) {
-        Map<String, List<IQueryParameterType>> params = new HashMap<>();
-        params.put("code", Collections.singletonList(new TokenParam("supplemental-data")));
-        return repository.search(Bundle.class, SearchParameter.class, params);
+        return repository.search(
+                Bundle.class,
+                SearchParameter.class,
+                new SearchBuilder().withTokenParam("code", "supplemental-data").build());
     }
 }

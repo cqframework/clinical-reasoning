@@ -536,7 +536,7 @@ class EnginesTest {
 
     @ParameterizedTest
     @MethodSource("successfulParameters")
-    public void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String spName) {
+    void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String spName) {
         // test
         var results = retrieveResourcesWithin2000BySPName(resource, spName);
 
@@ -549,7 +549,7 @@ class EnginesTest {
 
     @ParameterizedTest
     @MethodSource("failureParameters")
-    public void retrieve_withValidDatesOutOfRange_failToRetrieve(IBaseResource resource, String spName) {
+    void retrieve_withValidDatesOutOfRange_failToRetrieve(IBaseResource resource, String spName) {
         // setup
         IParser parser = repository.fhirContext().newJsonParser();
 
@@ -591,7 +591,7 @@ class EnginesTest {
         var dateRange = new Interval(start, true, end, true);
 
         // Retrieve resources with period overlapping 2000
-        var results = dataProvider.retrieve(
+        return dataProvider.retrieve(
                 resourceType, // context
                 null, // contextPath
                 "pat1", // contextValue
@@ -605,12 +605,10 @@ class EnginesTest {
                 "period.end", // dateHighPath
                 dateRange // dateRange
                 );
-
-        return results;
     }
 
     @Test
-    public void dateFiltering() {
+    void dateFiltering() {
         // setup
         RetrieveSettings retrieveSettings = new RetrieveSettings();
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);

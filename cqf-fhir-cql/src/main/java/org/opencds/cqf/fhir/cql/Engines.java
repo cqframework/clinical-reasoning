@@ -95,9 +95,9 @@ public class Engines {
                 .ensureNamespaceRegistered(new NamespaceInfo("hl7.fhir.us.cql", "http://hl7.org/fhir/us/cql"));
 
         // Register any namespaces added to the settings
-        settings.getRegisteredNamespaces().forEach((name, uri) -> {
-            libraryManager.getNamespaceManager().ensureNamespaceRegistered(new NamespaceInfo(name, uri));
-        });
+        settings.getRegisteredNamespaces()
+                .forEach((name, uri) ->
+                        libraryManager.getNamespaceManager().ensureNamespaceRegistered(new NamespaceInfo(name, uri)));
 
         return new Environment(libraryManager, dataProviders, terminologyProvider);
     }

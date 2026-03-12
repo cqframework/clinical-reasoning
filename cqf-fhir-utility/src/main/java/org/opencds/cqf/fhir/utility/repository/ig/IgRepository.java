@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
@@ -711,15 +712,15 @@ public class IgRepository implements IRepository {
     }
 
     /**
-     * Processes a transaction bundle, supporting only POST (create) entries.
-     * Resources created via transaction are stored in an in-memory overlay and are not written
+     * Processes a transaction bundle, supporting PUT, POST, and DELETE entries.
+     * Resources modified via transaction are stored in an in-memory overlay and are not written
      * to the filesystem. They are visible to subsequent {@link #read} and {@link #search} calls.
      *
      * @param <B> the bundle type
      * @param transaction the transaction bundle to process
      * @param headers request headers
      * @return a response bundle with entry responses for each processed entry
-     * @throws NotImplementedOperationException if the transaction contains PUT or DELETE entries
+     * @throws NotImplementedOperationException if the transaction contains unsupported entry types
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -727,7 +728,15 @@ public class IgRepository implements IRepository {
         var version = transaction.getStructureFhirVersionEnum();
         var returnBundle = (B) BundleHelper.newBundle(version, "transaction-response");
         BundleHelper.getEntry(transaction).forEach(e -> {
-            if (BundleHelper.isEntryRequestPost(version, e)) {
+            if (BundleHelper.isEntryRequestPut(version, e)) {
+                var resource = BundleHelper.getEntryResource(version, e);
+                transactionResources.put(resource.getIdElement().toUnqualifiedVersionless(), resource);
+                var location = resource.getIdElement().getValue();
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestPost(version, e)) {
                 var resource = BundleHelper.getEntryResource(version, e);
                 if (!resource.getIdElement().hasIdPart()) {
                     resource.setId(java.util.UUID.randomUUID().toString());
@@ -738,9 +747,24 @@ public class IgRepository implements IRepository {
                         returnBundle,
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestDelete(version, e)) {
+                var requestId = BundleHelper.getEntryRequestId(version, e)
+                        .orElseThrow(() -> new ResourceNotFoundException("Trying to delete an entry without id"));
+                var requestUrl = BundleHelper.getEntryRequestUrl(version, e);
+                var resourceType = Canonicals.getResourceType(requestUrl);
+                var resourceClass =
+                        fhirContext.getResourceDefinition(resourceType).getImplementingClass();
+                var matchingKey = transactionResources.entrySet().stream()
+                        .filter(entry -> resourceClass.isInstance(entry.getValue())
+                                && entry.getKey().getIdPart().equals(requestId.getIdPart()))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Resource not found: " + resourceType + "/" + requestId.getIdPart()));
+                var removed = transactionResources.remove(matchingKey);
+                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(removed));
             } else {
-                throw new NotImplementedOperationException(
-                        "IgRepository transaction only supports POST (create) entries");
+                throw new NotImplementedOperationException("Transaction only supports PUT, POST, or DELETE");
             }
         });
         return returnBundle;

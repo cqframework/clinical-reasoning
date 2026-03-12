@@ -49,6 +49,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,22 +74,29 @@ public class CrR4Config {
     R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            RepositoryProxyFactory repositoryProxyFactory) {
         // We are effectively returning an R4MeasureEvaluatorSingle her
         return requestDetails -> new R4MultiMeasureService(
                 repositoryFactory.create(requestDetails),
                 evaluationOptions,
                 requestDetails.getFhirServerBase(),
-                measurePeriodValidator);
+                measurePeriodValidator,
+                repositoryProxyFactory);
     }
 
     @Bean
     R4MeasureEvaluatorMultipleFactory r4MeasureEvaluatorMultipleFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            RepositoryProxyFactory repositoryProxyFactory) {
         return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
+                repositoryFactory.create(rd),
+                evaluationOptions,
+                rd.getFhirServerBase(),
+                measurePeriodValidator,
+                repositoryProxyFactory);
     }
 
     @Bean
@@ -132,13 +140,15 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            RepositoryProxyFactory repositoryProxyFactory) {
         return rd -> new R4CareGapsService(
                 careGapsProperties,
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,
                 rd.getFhirServerBase(),
-                measurePeriodValidator);
+                measurePeriodValidator,
+                repositoryProxyFactory);
     }
 
     @Bean

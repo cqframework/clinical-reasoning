@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.plandefinition;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -35,6 +33,7 @@ import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 
 @SuppressWarnings({"squid:S107", "squid:S1172", "UnstableApiUsage"})
 public class PlanDefinitionProcessor {
@@ -47,22 +46,17 @@ public class PlanDefinitionProcessor {
     protected IRequestResolverFactory requestResolverFactory;
     protected IRepository repository;
     protected CrSettings crSettings;
-
-    public PlanDefinitionProcessor(IRepository repository) {
-        this(repository, CrSettings.getDefault());
-    }
-
-    public PlanDefinitionProcessor(IRepository repository, CrSettings crSettings) {
-        this(repository, crSettings, null, null);
-    }
+    protected final RepositoryProxyFactory repositoryProxyFactory;
 
     public PlanDefinitionProcessor(
             IRepository repository,
             CrSettings crSettings,
             IRequestResolverFactory requestResolverFactory,
-            List<? extends IOperationProcessor> operationProcessors) {
+            List<? extends IOperationProcessor> operationProcessors,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
         this.requestResolverFactory = requestResolverFactory;
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
@@ -96,7 +90,9 @@ public class PlanDefinitionProcessor {
                             ? requestResolverFactory
                             : IRequestResolverFactory.getDefault(fhirVersion));
         }
-        applyProcessor = applyProcessor != null ? applyProcessor : new ApplyProcessor(repository, activityProcessor);
+        applyProcessor = applyProcessor != null
+                ? applyProcessor
+                : new ApplyProcessor(repository, activityProcessor, crSettings, repositoryProxyFactory);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(
@@ -219,45 +215,8 @@ public class PlanDefinitionProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        return apply(
-                planDefinition,
-                subject,
-                encounter,
-                practitioner,
-                organization,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                data,
-                prefetchData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(
-            Either3<C, IIdType, R> planDefinition,
-            String subject,
-            String encounter,
-            String practitioner,
-            String organization,
-            IBaseDatatype userType,
-            IBaseDatatype userLanguage,
-            IBaseDatatype userTaskContext,
-            IBaseDatatype setting,
-            IBaseDatatype settingContext,
-            IBaseParameters parameters,
-            boolean useServerData,
-            IBaseBundle data,
-            List<? extends IBaseBackboneElement> prefetchData,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(
+                repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return apply(
                 planDefinition,
                 subject,
@@ -347,45 +306,8 @@ public class PlanDefinitionProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        return applyR5(
-                planDefinition,
-                subject,
-                encounter,
-                practitioner,
-                organization,
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                useServerData,
-                data,
-                prefetchData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters applyR5(
-            Either3<C, IIdType, R> planDefinition,
-            List<String> subject,
-            String encounter,
-            String practitioner,
-            String organization,
-            IBaseDatatype userType,
-            IBaseDatatype userLanguage,
-            IBaseDatatype userTaskContext,
-            IBaseDatatype setting,
-            IBaseDatatype settingContext,
-            IBaseParameters parameters,
-            boolean useServerData,
-            IBaseBundle data,
-            List<? extends IBaseBackboneElement> prefetchData,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(
+                repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return applyR5(
                 planDefinition,
                 subject,

@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.common.ReviseProcessor;
 import org.opencds.cqf.fhir.cr.common.WithdrawProcessor;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -47,7 +48,8 @@ class LibraryProcessorTests {
     void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-        var processor = new LibraryProcessor(repository);
+        var processor =
+                new LibraryProcessor(repository, CrSettings.getDefault(), null, new NoOpRepositoryProxyFactory());
         assertNotNull(processor.settings());
     }
 
@@ -76,7 +78,8 @@ class LibraryProcessorTests {
                         new RetireProcessor(repository),
                         new WithdrawProcessor(repository),
                         new ReviseProcessor(repository),
-                        new ArtifactDiffProcessor()));
+                        new ArtifactDiffProcessor()),
+                new NoOpRepositoryProxyFactory());
 
         assertNotNull(processor.settings());
         var result = processor.resolveLibrary(Eithers.forMiddle3(

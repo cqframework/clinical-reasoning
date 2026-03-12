@@ -31,15 +31,18 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestCql {
@@ -104,18 +107,18 @@ public class TestCql {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
-            return new CqlProcessor(repository, crSettings);
+            return new CqlProcessor(repository, crSettings, null, new NoOpRepositoryProxyFactory());
         }
 
         public When when() {
-            return new When(repository, buildProcessor(repository));
+            return new When(this, repository);
         }
     }
 
     @SuppressWarnings("UnstableApiUsage")
     public static class When {
+        private final Given given;
         private final IRepository repository;
-        private final CqlProcessor processor;
         private final IParser jsonParser;
 
         private String subject;
@@ -131,9 +134,9 @@ public class TestCql {
         private List<? extends IBaseBackboneElement> library;
         private String cqlContent;
 
-        public When(IRepository repository, CqlProcessor processor) {
+        public When(Given given, IRepository repository) {
+            this.given = given;
             this.repository = repository;
-            this.processor = processor;
             useServerData = true;
             jsonParser = repository.fhirContext().newJsonParser();
         }
@@ -230,6 +233,9 @@ public class TestCql {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
+            var proxiedRepo = Repositories.proxy(
+                    repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+            var processor = given.buildProcessor(proxiedRepo);
             return new Evaluation(
                     repository,
                     processor.evaluate(
@@ -237,13 +243,10 @@ public class TestCql {
                             expression,
                             parameters,
                             library,
-                            useServerData,
                             additionalData,
                             prefetchData,
                             cqlContent,
-                            dataRepository,
-                            contentRepository,
-                            terminologyRepository));
+                            new LibraryEngine(proxiedRepo, processor.settings().getEvaluationSettings())));
         }
     }
 

@@ -1,8 +1,6 @@
 package org.opencds.cqf.fhir.cr.cql;
 
 import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -21,28 +19,26 @@ import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationRequest;
 import org.opencds.cqf.fhir.cr.cql.evaluate.ICqlEvaluationProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CqlProcessor {
 
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
+    protected final RepositoryProxyFactory repositoryProxyFactory;
     protected ICqlEvaluationProcessor cqlEvaluationProcessor;
     protected IRepository repository;
     protected CrSettings crSettings;
 
-    public CqlProcessor(IRepository repository) {
-        this(repository, CrSettings.getDefault());
-    }
-
-    public CqlProcessor(IRepository repository, CrSettings crSettings) {
-        this(repository, crSettings, null);
-    }
-
     public CqlProcessor(
-            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
+            IRepository repository,
+            CrSettings crSettings,
+            List<? extends IOperationProcessor> operationProcessors,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
@@ -70,33 +66,8 @@ public class CqlProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        return evaluate(
-                subject,
-                expression,
-                parameters,
-                library,
-                useServerData,
-                data,
-                prefetchData,
-                content,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public IBaseParameters evaluate(
-            String subject,
-            String expression,
-            IBaseParameters parameters,
-            List<? extends IBaseBackboneElement> library,
-            boolean useServerData,
-            IBaseBundle data,
-            List<? extends IBaseBackboneElement> prefetchData,
-            String content,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(
+                repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return evaluate(
                 subject,
                 expression,

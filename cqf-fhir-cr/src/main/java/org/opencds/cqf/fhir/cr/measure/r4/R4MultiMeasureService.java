@@ -40,7 +40,7 @@ import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 
 /**
  * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
@@ -58,6 +58,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     private final R4RepositorySubjectProvider subjectProvider;
     private final R4MeasureProcessor r4MeasureProcessorStandardRepository;
     private final R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository;
+    private final RepositoryProxyFactory repositoryProxyFactory;
 
     private enum SingleOrMultiple {
         SINGLE,
@@ -68,11 +69,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             IRepository repository,
             MeasureEvaluationOptions measureEvaluationOptions,
             String serverBase,
-            MeasurePeriodValidator measurePeriodValidator) {
+            MeasurePeriodValidator measurePeriodValidator,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
+        this.repositoryProxyFactory = repositoryProxyFactory;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(repository, this.measureEvaluationOptions);
         this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
@@ -288,19 +291,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        final R4MeasureProcessor r4ProcessorToUse;
-        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse;
-        if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
-            var repositoryToUse =
-                    Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-
-            r4ProcessorToUse = new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions);
-
-            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
-        } else {
-            r4ProcessorToUse = r4MeasureProcessorStandardRepository;
-            r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository;
-        }
+        var repositoryToUse =
+                repositoryProxyFactory.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
+        var r4ProcessorToUse = r4MeasureProcessorStandardRepository.withRepository(repositoryToUse);
+        var r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository.withRepository(repositoryToUse);
 
         if (measureEvaluationOptions.isEnsureSearchParameters()) {
             r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();

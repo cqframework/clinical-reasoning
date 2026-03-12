@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.library;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -42,6 +40,7 @@ import org.opencds.cqf.fhir.cr.library.evaluate.IEvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LibraryProcessor {
@@ -59,19 +58,16 @@ public class LibraryProcessor {
 
     protected IRepository repository;
     protected CrSettings crSettings;
-
-    public LibraryProcessor(IRepository repository) {
-        this(repository, CrSettings.getDefault());
-    }
-
-    public LibraryProcessor(IRepository repository, CrSettings crSettings) {
-        this(repository, crSettings, null);
-    }
+    protected final RepositoryProxyFactory repositoryProxyFactory;
 
     public LibraryProcessor(
-            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
+            IRepository repository,
+            CrSettings crSettings,
+            List<? extends IOperationProcessor> operationProcessors,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
         modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
@@ -197,31 +193,8 @@ public class LibraryProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        return evaluate(
-                library,
-                subject,
-                expression,
-                parameters,
-                useServerData,
-                data,
-                prefetchData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters evaluate(
-            Either3<C, IIdType, R> library,
-            String subject,
-            List<String> expression,
-            IBaseParameters parameters,
-            boolean useServerData,
-            IBaseBundle data,
-            List<? extends IBaseBackboneElement> prefetchData,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(
+                repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return evaluate(
                 library,
                 subject,

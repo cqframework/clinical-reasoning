@@ -33,7 +33,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -58,7 +60,8 @@ class ActivityDefinitionProcessorTests {
     }
 
     private ActivityDefinitionProcessor createProcessor(IRepository repository) {
-        return new ActivityDefinitionProcessor(repository);
+        return new ActivityDefinitionProcessor(
+                repository, CrSettings.getDefault(), null, null, new NoOpRepositoryProxyFactory());
     }
 
     @BeforeAll

@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportE
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportGroup;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportReference;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 // consider rolling this entire thing into MultiMeasure with "single measure" assertions
@@ -89,6 +90,7 @@ public class Measure {
         private MeasureEvaluationOptions evaluationOptions;
         private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
+        private RepositoryProxyFactory repositoryProxyFactory;
 
         public Given(@Nullable Boolean applyScoringSetMembership) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
@@ -138,8 +140,18 @@ public class Measure {
             return this;
         }
 
+        public Given repositoryProxyFactory(RepositoryProxyFactory repositoryProxyFactory) {
+            this.repositoryProxyFactory = repositoryProxyFactory;
+            return this;
+        }
+
         private R4MultiMeasureService buildMultiMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+            return new R4MultiMeasureService(
+                    repository,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodValidator,
+                    repositoryProxyFactory != null ? repositoryProxyFactory : new NoOpRepositoryProxyFactory());
         }
 
         public When when() {

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 class CqlProcessorTests {
@@ -54,7 +55,7 @@ class CqlProcessorTests {
     void defaultSettings() {
         var repository =
                 new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
-        var processor = new CqlProcessor(repository);
+        var processor = new CqlProcessor(repository, CrSettings.getDefault(), null, new NoOpRepositoryProxyFactory());
         assertNotNull(processor.settings());
     }
 
@@ -65,7 +66,8 @@ class CqlProcessorTests {
         var processor = new CqlProcessor(
                 repository,
                 CrSettings.getDefault(),
-                List.of(new CqlEvaluationProcessor(repository, EvaluationSettings.getDefault())));
+                List.of(new CqlEvaluationProcessor(repository, EvaluationSettings.getDefault())),
+                new NoOpRepositoryProxyFactory());
 
         assertNotNull(processor.settings());
     }

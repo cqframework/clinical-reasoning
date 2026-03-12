@@ -20,6 +20,7 @@ public class EvaluationSettings {
     private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
     private Map<String, List<Code>> valueSetCache;
     private List<LibrarySourceProvider> librarySourceProviders;
+    private Map<String, String> registeredNamespaces;
 
     private CqlOptions cqlOptions;
 
@@ -40,6 +41,7 @@ public class EvaluationSettings {
         this.retrieveSettings = new RetrieveSettings();
         this.terminologySettings = new TerminologySettings();
         this.npmProcessor = null;
+        this.registeredNamespaces = new ConcurrentHashMap<>();
     }
 
     /**
@@ -56,6 +58,7 @@ public class EvaluationSettings {
         this.librarySourceProviders = new ArrayList<>(settings.librarySourceProviders);
         this.npmProcessor =
                 settings.npmProcessor != null ? new NpmProcessor(settings.npmProcessor.getIgContext()) : null;
+        this.registeredNamespaces = new ConcurrentHashMap<>(settings.registeredNamespaces);
     }
 
     public Map<ModelIdentifier, Model> getModelCache() {
@@ -159,6 +162,19 @@ public class EvaluationSettings {
 
     public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
         setNpmProcessor(npmProcessor);
+        return this;
+    }
+
+    public Map<String, String> getRegisteredNamespaces() {
+        return registeredNamespaces;
+    }
+
+    public void setRegisteredNamespaces(Map<String, String> namespaces) {
+        this.registeredNamespaces = namespaces;
+    }
+
+    public EvaluationSettings withRegisteredNamespaces(Map<String, String> namespaces) {
+        setRegisteredNamespaces(namespaces);
         return this;
     }
 }

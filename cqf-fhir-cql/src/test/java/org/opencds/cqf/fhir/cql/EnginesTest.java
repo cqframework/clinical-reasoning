@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
@@ -375,6 +376,22 @@ class EnginesTest {
     @Test
     void getCqlFhirParametersConverter() {
         assertNotNull(Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached()));
+    }
+
+    @Test
+    void additionalNamespacesRegistered() {
+        var name = "com.organization.common";
+        var uri = "http://com.organization.common";
+        var namespaces = new ConcurrentHashMap<String, String>();
+        namespaces.put(name, uri);
+        var settings = new EvaluationSettings().withRegisteredNamespaces(namespaces);
+        var engine = getEngine(settings);
+        assertEquals(
+                uri,
+                engine.getEnvironment()
+                        .getLibraryManager()
+                        .getNamespaceManager()
+                        .resolveNamespaceUri(name));
     }
 
     /**

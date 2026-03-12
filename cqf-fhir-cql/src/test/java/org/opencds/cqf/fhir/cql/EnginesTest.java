@@ -385,6 +385,9 @@ class EnginesTest {
         var namespaces = new ConcurrentHashMap<String, String>();
         namespaces.put(name, uri);
         var settings = new EvaluationSettings().withRegisteredNamespaces(namespaces);
+        var name2 = "com.smiledigitalhealth.greatreef";
+        var uri2 = "http://smile.org/greatreef";
+        settings.addRegisteredNamespace(name2, uri2);
         var engine = getEngine(settings);
         assertEquals(
                 uri,
@@ -392,6 +395,12 @@ class EnginesTest {
                         .getLibraryManager()
                         .getNamespaceManager()
                         .resolveNamespaceUri(name));
+        assertEquals(
+                uri2,
+                engine.getEnvironment()
+                        .getLibraryManager()
+                        .getNamespaceManager()
+                        .resolveNamespaceUri(name2));
     }
 
     /**

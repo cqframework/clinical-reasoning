@@ -46,7 +46,7 @@ public class EvaluationSettings {
 
     /**
      * Copy constructor for EvaluationSettings
-     * @param settings
+     * @param settings The EvaluationSettings being copied
      */
     public EvaluationSettings(EvaluationSettings settings) {
         this.modelCache = new ConcurrentHashMap<>(settings.modelCache);
@@ -165,16 +165,27 @@ public class EvaluationSettings {
         return this;
     }
 
+    /***
+     * Returns a map of the registered namespaces with the key being the name and the value being the uri of the namespace
+     * @return The map of registered namespaces
+     */
     public Map<String, String> getRegisteredNamespaces() {
         return registeredNamespaces;
     }
 
     public void setRegisteredNamespaces(Map<String, String> namespaces) {
-        this.registeredNamespaces = namespaces;
+        this.registeredNamespaces = new ConcurrentHashMap<>(namespaces);
     }
 
     public EvaluationSettings withRegisteredNamespaces(Map<String, String> namespaces) {
         setRegisteredNamespaces(namespaces);
+        return this;
+    }
+
+    public EvaluationSettings addRegisteredNamespace(String name, String uri) {
+        if (!registeredNamespaces.containsKey(name)) {
+            registeredNamespaces.put(name, uri);
+        }
         return this;
     }
 }

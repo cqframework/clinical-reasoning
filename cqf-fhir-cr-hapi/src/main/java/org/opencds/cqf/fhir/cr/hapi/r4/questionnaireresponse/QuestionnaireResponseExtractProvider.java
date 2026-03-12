@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.questionnaireresponse;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
+
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -47,14 +49,14 @@ public class QuestionnaireResponseExtractProvider {
             @OperationParam(name = "data") Bundle data,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return questionnaireResponseProcessorFactory
+        return execute(() -> questionnaireResponseProcessorFactory
                 .create(requestDetails)
                 .extract(
                         Eithers.forLeft(id),
                         questionnaire == null ? null : Eithers.forRight(questionnaire),
                         parameters,
                         data,
-                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue());
+                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue()));
     }
 
     /**
@@ -79,13 +81,13 @@ public class QuestionnaireResponseExtractProvider {
             @OperationParam(name = "data") Bundle data,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return questionnaireResponseProcessorFactory
+        return execute(() -> questionnaireResponseProcessorFactory
                 .create(requestDetails)
                 .extract(
                         Eithers.forRight(questionnaireResponse),
                         questionnaire == null ? null : Eithers.for2(null, questionnaire),
                         parameters,
                         data,
-                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue());
+                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue()));
     }
 }

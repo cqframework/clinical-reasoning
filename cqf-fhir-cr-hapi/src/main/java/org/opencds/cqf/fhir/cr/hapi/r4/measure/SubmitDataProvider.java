@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
+
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -55,6 +57,6 @@ public class SubmitDataProvider {
             @IdParam IdType id,
             @OperationParam(name = "measureReport", min = 1, max = 1) MeasureReport report,
             @OperationParam(name = "resource") List<IBaseResource> resources) {
-        return r4SubmitDataProcessorFactory.create(requestDetails).submitData(report, resources);
+        return execute(() -> r4SubmitDataProcessorFactory.create(requestDetails).submitData(report, resources));
     }
 }

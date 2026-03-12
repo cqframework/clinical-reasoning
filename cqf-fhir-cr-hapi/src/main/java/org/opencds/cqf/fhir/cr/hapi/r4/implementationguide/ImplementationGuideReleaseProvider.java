@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.implementationguide;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
@@ -57,7 +58,7 @@ public class ImplementationGuideReleaseProvider {
             @OperationParam(name = "releaseLabel") StringType releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        return implementationGuideProcessorFactory
+        return execute(() -> implementationGuideProcessorFactory
                 .create(requestDetails)
                 .releaseImplementationGuide(
                         Eithers.forMiddle3(id),
@@ -67,7 +68,7 @@ public class ImplementationGuideReleaseProvider {
                                 latestFromTxServer,
                                 requireNonExperimental,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                getStringValue(releaseLabel)));
+                                getStringValue(releaseLabel))));
     }
 
     @Operation(name = CRMI_OPERATION_RELEASE, idempotent = true, global = true, type = ImplementationGuide.class)
@@ -82,7 +83,7 @@ public class ImplementationGuideReleaseProvider {
             @OperationParam(name = "releaseLabel") StringType releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        return implementationGuideProcessorFactory
+        return execute(() -> implementationGuideProcessorFactory
                 .create(requestDetails)
                 .releaseImplementationGuide(
                         Eithers.forMiddle3(getIdType(fhirVersion, "ImplementationGuide", id)),
@@ -92,7 +93,7 @@ public class ImplementationGuideReleaseProvider {
                                 latestFromTxServer,
                                 requireNonExperimental,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                getStringValue(releaseLabel)));
+                                getStringValue(releaseLabel))));
     }
 
     private static Parameters getReleaseParameters(

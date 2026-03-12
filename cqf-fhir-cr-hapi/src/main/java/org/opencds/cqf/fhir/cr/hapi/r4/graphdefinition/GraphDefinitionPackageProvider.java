@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
@@ -49,14 +50,14 @@ public class GraphDefinitionPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return graphDefinitionProcessorFactory
+        return execute(() -> graphDefinitionProcessorFactory
                 .create(requestDetails)
                 .packageGraphDefinition(
                         Eithers.forMiddle3(id),
                         packageParameters(
                                 fhirVersion,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
@@ -81,7 +82,7 @@ public class GraphDefinitionPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return graphDefinitionProcessorFactory
+        return execute(() -> graphDefinitionProcessorFactory
                 .create(requestDetails)
                 .packageGraphDefinition(
                         Eithers.for3(
@@ -91,6 +92,6 @@ public class GraphDefinitionPackageProvider {
                         packageParameters(
                                 fhirVersion,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

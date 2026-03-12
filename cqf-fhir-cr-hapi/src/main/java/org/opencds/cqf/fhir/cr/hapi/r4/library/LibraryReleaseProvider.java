@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
@@ -56,7 +57,7 @@ public class LibraryReleaseProvider {
             @OperationParam(name = "releaseLabel") String releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        return libraryProcessorFactory
+        return execute(() -> libraryProcessorFactory
                 .create(requestDetails)
                 .releaseLibrary(
                         Eithers.forMiddle3(id),
@@ -66,7 +67,7 @@ public class LibraryReleaseProvider {
                                 latestFromTxServer,
                                 requireNonExperimental,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                releaseLabel));
+                                releaseLabel)));
     }
 
     @Operation(name = CRMI_OPERATION_RELEASE, idempotent = true, global = true, type = Library.class)
@@ -81,7 +82,7 @@ public class LibraryReleaseProvider {
             @OperationParam(name = "releaseLabel") String releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        return libraryProcessorFactory
+        return execute(() -> libraryProcessorFactory
                 .create(requestDetails)
                 .releaseLibrary(
                         Eithers.forMiddle3(getIdType(fhirVersion, "Library", id)),
@@ -91,7 +92,7 @@ public class LibraryReleaseProvider {
                                 latestFromTxServer,
                                 requireNonExperimental,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                releaseLabel));
+                                releaseLabel)));
     }
 
     private static Parameters getReleaseParameters(

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.newCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -125,7 +126,7 @@ public class LibraryEvaluateProvider {
         var dataEndpointParam = getEndpoint(fhirVersion, dataEndpoint);
         var contentEndpointParam = getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
-        return (Parameters) libraryProcessorFactory
+        return execute(() -> (Parameters) libraryProcessorFactory
                 .create(requestDetails)
                 .evaluate(
                         Eithers.forMiddle3(id),
@@ -141,7 +142,7 @@ public class LibraryEvaluateProvider {
                         prefetchData,
                         dataEndpointParam,
                         contentEndpointParam,
-                        terminologyEndpointParam);
+                        terminologyEndpointParam));
     }
 
     /**
@@ -237,7 +238,7 @@ public class LibraryEvaluateProvider {
             @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
-        return (Parameters) libraryProcessorFactory
+        return execute(() -> (Parameters) libraryProcessorFactory
                 .create(requestDetails)
                 .evaluate(
                         Eithers.for3(newCanonicalType(fhirVersion, getStringValue(url)), null, library),
@@ -253,6 +254,6 @@ public class LibraryEvaluateProvider {
                         prefetchData,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RELEASE;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
@@ -94,7 +95,7 @@ public class ReleaseProvider {
             @OperationParam(name = "releaseLabel") StringType releaseLabel,
             RequestDetails requestDetails)
             throws FHIRException {
-        return r4ReleaseServiceFactory
+        return execute(() -> r4ReleaseServiceFactory
                 .create(requestDetails)
                 .release(
                         id,
@@ -103,6 +104,6 @@ public class ReleaseProvider {
                         latestFromTxServer,
                         requireNonExperimental,
                         (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint),
-                        getStringValue(releaseLabel));
+                        getStringValue(releaseLabel)));
     }
 }

@@ -1,0 +1,33 @@
+{
+  "resourceType": "Encounter",
+  "id": "365ec5d9-07fd-43ac-98b2-f83be20d3b6fa",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+    ]
+  },
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "305824005",
+          "display": "Seen by palliative care medicine service (finding)"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/adb08da2-b4d0-4916-9b9c-7c2c86e1042b"
+  },
+  "period": {
+    "start": "2026-01-01T00:00:00.000+00:00",
+    "end": "2026-01-01T01:00:00.000+00:00"
+  }
+}

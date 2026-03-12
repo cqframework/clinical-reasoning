@@ -1,0 +1,928 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.118.12.1300-20200310",
+  "meta": {
+    "versionId": "12",
+    "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-10"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2020-03-10"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.12.1300",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.118.12.1300"
+    }
+  ],
+  "version": "20200310",
+  "name": "FrailtyDevice",
+  "title": "Frailty Device",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-03-03T18:46:01-05:00",
+  "publisher": "NCQA PHEMUR",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts of devices for durable medical equipment (DME) used by frail patients.),(Data Element Scope: This value set may use a model element related to Device.),(Inclusion Criteria: Includes concepts that represent  durable medical equipment (DME) or devices for frailty.),(Exclusion Criteria: No exclusions.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.118.11.1220"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:50026f4d-e181-4c54-ac69-591c22abeb25",
+    "timestamp": "2025-08-28T16:49:21-04:00",
+    "total": 121,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1142151007",
+        "display": "Oxygen composite cylinder (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1255320005",
+        "display": "Wheeled walker (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1256013004",
+        "display": "Gait rehabilitation electronic wheeled walker (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1256014005",
+        "display": "Basic non-foldable wheeled walker (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1256015006",
+        "display": "Basic foldable wheeled walker (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1256019000",
+        "display": "Wheeled non-foldable walking chair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1256020006",
+        "display": "Wheeled foldable walking chair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "1256022003",
+        "display": "Wheeled walking table (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "183240000",
+        "display": "Self-propelled wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "183241001",
+        "display": "Pedal powered wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "183248007",
+        "display": "Attendant powered wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "228869008",
+        "display": "Manual wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "23366006",
+        "display": "Motorized wheelchair device (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "23562009",
+        "display": "Household ventilator, device (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "261323006",
+        "display": "Portable oxygen cylinder (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "262177002",
+        "display": "Static oxygen cylinder (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "266731002",
+        "display": "Walking frame (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "336608004",
+        "display": "Oxygen cylinder (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "360006004",
+        "display": "Walking stick (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "360008003",
+        "display": "Commode (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "360299009",
+        "display": "Long cane (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "371786002",
+        "display": "Pressure support ventilator (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "37874008",
+        "display": "Continuing positive airway pressure unit, device (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391685000",
+        "display": "Oxygen gas cylinder DD (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391686004",
+        "display": "Oxygen gas cylinder HD (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391687008",
+        "display": "Oxygen gas cylinder RD (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391688003",
+        "display": "Oxygen gas cylinder DF (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391689006",
+        "display": "Oxygen gas cylinder HX (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391880008",
+        "display": "Oxygen gas cylinder F (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "391881007",
+        "display": "Oxygen gas cylinder AF (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "426160001",
+        "display": "Oxygen ventilator (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "464002006",
+        "display": "Portable ventilator, electric (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "464157006",
+        "display": "Multiple-base walking stick (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "464405003",
+        "display": "Multi-terrain sports wheelchair, attendant/occupant-driven (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "464443000",
+        "display": "Stand-up wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "464571009",
+        "display": "Multi-terrain sports wheelchair, electric-motor-driven (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "464752005",
+        "display": "Multi-terrain sports wheelchair, occupant-driven (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "465159000",
+        "display": "Stair-climbing wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "465556004",
+        "display": "Single-base walking stick (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "465565006",
+        "display": "Transport wheelchair, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "465921009",
+        "display": "Ventilation rocking bed (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466182009",
+        "display": "Wheelchair, occupant-driven, front-wheels-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466193006",
+        "display": "Wheelchair, power-assisted, occupant-controlled, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466213002",
+        "display": "Wheelchair, electric-motor-driven, occupant-controlled, manual-steering, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466229005",
+        "display": "Wheelchair, occupant-driven, bimanual-lever-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466284002",
+        "display": "Wheelchair, attendant/occupant-driven, bimanual-lever-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466316007",
+        "display": "Wheelchair, combustion-engine-driven, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466322003",
+        "display": "Wheelchair, power-assisted, attendant/occupant-controlled, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466331003",
+        "display": "Wheelchair, attendant/occupant-driven, single-rear-wheel-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466337004",
+        "display": "Wheelchair, attendant/occupant-driven, foot-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466340004",
+        "display": "Wheelchair, occupant-driven, bimanual-lever-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466344008",
+        "display": "Wheelchair, electric-motor-driven, occupant-controlled, powered-steering, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466364003",
+        "display": "Wheelchair, attendant/occupant-driven, rear-wheels-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466365002",
+        "display": "Wheelchair, electric-motor-driven, attendant/occupant-controlled, manual-steering, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466366001",
+        "display": "Wheelchair, attendant/occupant-driven, single-lever-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466378002",
+        "display": "Wheelchair, electric-motor-driven, occupant-controlled, powered-steering, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466381007",
+        "display": "Wheelchair, attendant-driven, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466382000",
+        "display": "Basic walking frame, non-foldable (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466407009",
+        "display": "Walking stick/seat (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466466002",
+        "display": "Wheelchair, occupant-driven, foot-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466473007",
+        "display": "Wheelchair, electric-motor-driven, attendant-controlled, manual-steering, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466477008",
+        "display": "Wheelchair, electric-motor-driven, occupant-controlled, manual-steering, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466486003",
+        "display": "Wheelchair, attendant/occupant-driven, bimanual-lever-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466494005",
+        "display": "Wheelchair, power-assisted, attendant-controlled, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466524001",
+        "display": "Wheelchair, attendant-driven, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466533004",
+        "display": "Wheelchair, attendant/occupant-driven, foot-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466538008",
+        "display": "Room humidifier (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466550002",
+        "display": "Wheelchair, attendant/occupant-driven, rear-wheels-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466553000",
+        "display": "Wheelchair, occupant-driven, single-lever-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466576002",
+        "display": "Wheelchair, occupant-driven, bimanual-chain-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466607002",
+        "display": "Wheelchair, attendant/occupant-driven, single-lever-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466616003",
+        "display": "Wheelchair, attendant/occupant-driven, single-rear-wheel-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466619005",
+        "display": "Wheelchair, attendant/occupant-driven, bimanual-chain-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466644002",
+        "display": "Wheelchair, occupant-driven, bimanual-chain-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466671002",
+        "display": "Wheelchair, combustion-engine-driven, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466695000",
+        "display": "Wheelchair, attendant/occupant-driven, single-front-wheel-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466699006",
+        "display": "Wheelchair, power-assisted, attendant/occupant-controlled, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466721007",
+        "display": "Wheelchair, power-assisted, attendant-controlled, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466739003",
+        "display": "Wheelchair, occupant-driven, front-wheels-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466758007",
+        "display": "Wheelchair, electric-motor-driven, attendant-controlled, manual-steering, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466786004",
+        "display": "Basic electric hospital bed (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466809001",
+        "display": "Wheelchair, attendant/occupant-driven, bimanual-chain-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466813008",
+        "display": "Wheelchair, electric-motor-driven, attendant-controlled, powered-steering, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466851008",
+        "display": "Wheelchair, attendant/occupant-driven, front-wheels-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466871004",
+        "display": "Wheelchair, electric-motor-driven, attendant/occupant-controlled, powered-steering, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466889003",
+        "display": "Wheelchair, attendant/occupant-driven, single-front-wheel-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466926008",
+        "display": "Wheelchair, occupant-driven, rear-wheels-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466927004",
+        "display": "Wheelchair, electric-motor-driven, attendant/occupant-controlled, powered-steering, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466938004",
+        "display": "Wheelchair, occupant-driven, single-rear-wheel-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466947007",
+        "display": "Wheelchair, occupant-driven, rear-wheels-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466966007",
+        "display": "Wheelchair, occupant-driven, foot-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466989004",
+        "display": "Wheelchair, attendant/occupant-driven, front-wheels-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "466999009",
+        "display": "Wheelchair, electric-motor-driven, attendant-controlled, powered-steering, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467018005",
+        "display": "Wheelchair, occupant-driven, single-lever-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467065004",
+        "display": "Wheelchair, occupant-driven, single-front-wheel-operated, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467068002",
+        "display": "Basic walking frame, foldable (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467077009",
+        "display": "Wheelchair, electric-motor-driven, attendant/occupant-controlled, manual-steering, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467095007",
+        "display": "Wheelchair, power-assisted, occupant-controlled, collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467137003",
+        "display": "Wheelchair, occupant-driven, single-rear-wheel-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "467163008",
+        "display": "Wheelchair, occupant-driven, single-front-wheel-operated, non-collapsible (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "469860004",
+        "display": "All-plastic conventional wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "470174002",
+        "display": "Heat/moisture exchanger insertable filter (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "58938008",
+        "display": "Wheelchair device (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "66435007",
+        "display": "Electric bed, device (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "700593005",
+        "display": "Heated respiratory humidifier (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "700705005",
+        "display": "Non-heated respiratory humidifier (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "700910000",
+        "display": "Ultrasonic respiratory humidifier (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "702172008",
+        "display": "Home continuous positive airway pressure unit (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "702173003",
+        "display": "Home bilevel positive airway pressure unit (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705419008",
+        "display": "Special-function wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705421003",
+        "display": "Sports wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705422005",
+        "display": "Power-driven wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705423000",
+        "display": "Electric-motor-driven wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705425007",
+        "display": "Attendant/occupant-controlled electric-motor-driven wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705426008",
+        "display": "Attendant-controlled electric-motor-driven wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705427004",
+        "display": "Power-assisted wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "705428009",
+        "display": "Manual-driven wheelchair (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "706180003",
+        "display": "Respiratory humidifier (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "714700001",
+        "display": "Bilevel positive airway pressure unit hand held (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "71545009",
+        "display": "Household humidifier, device (physical object)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "87405001",
+        "display": "Cane, device (physical object)"
+      }
+    ]
+  }
+}

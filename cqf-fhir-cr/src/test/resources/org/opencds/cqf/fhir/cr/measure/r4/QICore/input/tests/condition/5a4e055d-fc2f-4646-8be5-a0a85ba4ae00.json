@@ -1,0 +1,41 @@
+{
+  "resourceType": "Condition",
+  "id": "5a4e055d-fc2f-4646-8be5-a0a85ba4ae00",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-problems-health-concerns"
+    ]
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "problem-list-item",
+          "display": "Problem List Item"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "170935008",
+        "display": "Full care by hospice (finding)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/01c88972-84e2-4594-835b-924481b9990a"
+  },
+  "onsetDateTime": "2025-12-31T23:59:59.000+00:00"
+}

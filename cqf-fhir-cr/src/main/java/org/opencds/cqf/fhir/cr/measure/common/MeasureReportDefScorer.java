@@ -148,7 +148,7 @@ public class MeasureReportDefScorer {
 
                 final QuantityDef quantityDef = scoreContinuousVariable(measureObsPop);
 
-                // We want to record the aggregate result for later computation for continuous variable reports
+                // We want to record the aggregate result for later computation for continuous variable report
                 measureObsPop.setAggregationResult(quantityDef);
 
                 return quantityDef != null ? quantityDef.value() : null;

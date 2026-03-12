@@ -10,15 +10,19 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CAR
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
+import java.math.BigDecimal;
+import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Period;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.MeasureValidationUtils;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 
 public class SelectedMeasureReportGroup
         extends Selected<MeasureReport.MeasureReportGroupComponent, SelectedMeasureReport> {
@@ -32,13 +36,33 @@ public class SelectedMeasureReportGroup
         return this;
     }
 
+    public SelectedMeasureReportGroup hasMeasureScore(String score) {
+        return hasScore(score);
+    }
+
+    public SelectedMeasureReportGroup hasMeasureScore(boolean hasScore) {
+        assertEquals(hasScore, this.value().hasMeasureScore());
+        return this;
+    }
+
+    public SelectedMeasureReportGroup hasMeasureScore(double score) {
+        MeasureValidationUtils.validateGroupScore(this.value(), BigDecimal.valueOf(score));
+        return this;
+    }
+
     public SelectedMeasureReportGroup hasScore(String score) {
         MeasureValidationUtils.validateGroupScore(this.value(), score);
         return this;
     }
 
-    public SelectedMeasureReportGroup hasMeasureScore(boolean hasScore) {
-        assertEquals(hasScore, this.value().hasMeasureScore());
+    public SelectedMeasureReportGroup hasNullScore() {
+        return hasNoMeasureScore();
+    }
+
+    public SelectedMeasureReportGroup hasNoMeasureScore() {
+        assertFalse(
+                this.value().hasMeasureScore(),
+                "Expected no measure score but got: %s".formatted(this.value().getMeasureScore()));
         return this;
     }
 
@@ -85,6 +109,16 @@ public class SelectedMeasureReportGroup
                         && x.getCode().getCoding().get(0).getCode().equals(name))
                 .findFirst()
                 .get());
+    }
+
+    public SelectedMeasureReportPopulation populationByType(MeasurePopulationType populationType) {
+        final Optional<MeasureReportGroupPopulationComponent> optMatchingPopulation = value().getPopulation().stream()
+                .filter(population -> R4MeasureReportUtils.doesReportPopulationTypeMatch(population, populationType))
+                .findFirst();
+
+        assertTrue(optMatchingPopulation.isPresent(), "Population with type: %s not found".formatted(populationType));
+
+        return new SelectedMeasureReportPopulation(optMatchingPopulation.get(), this);
     }
 
     public SelectedMeasureReportPopulation populationId(String populationId) {

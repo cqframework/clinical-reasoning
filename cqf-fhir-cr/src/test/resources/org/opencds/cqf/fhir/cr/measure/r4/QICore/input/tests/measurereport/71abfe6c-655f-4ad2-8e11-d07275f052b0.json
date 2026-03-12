@@ -1,0 +1,109 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "71abfe6c-655f-4ad2-8e11-d07275f052b0",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Parameters",
+      "id": "d2637e61-7a40-4cf6-b39b-7b88577832dd-parameters",
+      "parameter": [
+        {
+          "name": "subject",
+          "valueString": "423a396b-7d81-476d-b2ea-bc8bba062ce2"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters",
+      "valueReference": {
+        "reference": "#d2637e61-7a40-4cf6-b39b-7b88577832dd-parameters"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-testCaseDescription",
+      "valueMarkdown": "Pt started in Observation, hypoglycemic administered during Observ stay. Pt transferred to inpatient but transfer occurred 1 hour + 1 minute after end of observation stay. Transfer must be within hour or less to meet IPP. "
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase",
+      "valueBoolean": true
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "https://madie.cms.gov/Measure/CMS816FHIRHHHypo",
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "group": [
+    {
+      "id": "Group_1",
+      "population": [
+        {
+          "id": "InitialPopulation_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 0
+        },
+        {
+          "id": "Denominator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 0
+        },
+        {
+          "id": "Numerator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 0
+        }
+      ],
+      "measureScore": {
+        "value": 0.0
+      }
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "Encounter/f18cf40d-ddc6-44d9-b3b7-4ab0416b636d"
+    },
+    {
+      "reference": "Encounter/917d4e22-a0c5-4e91-b819-d35d92f611f5"
+    },
+    {
+      "reference": "MedicationAdministration/eaddbcc1-c9d1-4c72-bc62-b22e61e807a8"
+    },
+    {
+      "reference": "Patient/423a396b-7d81-476d-b2ea-bc8bba062ce2"
+    }
+  ]
+}

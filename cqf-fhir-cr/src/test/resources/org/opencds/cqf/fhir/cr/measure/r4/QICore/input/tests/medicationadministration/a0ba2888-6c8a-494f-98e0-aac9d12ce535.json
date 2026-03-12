@@ -1,0 +1,26 @@
+{
+  "resourceType": "MedicationAdministration",
+  "id": "a0ba2888-6c8a-494f-98e0-aac9d12ce535",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationadministration"
+    ]
+  },
+  "status": "completed",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "1604539",
+        "display": "1.5 ML insulin glargine 300 UNT/ML Pen Injector"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/41c102cb-d7f0-421d-ac76-5ac1c8dbe56a"
+  },
+  "effectivePeriod": {
+    "start": "2026-11-11T08:20:00.000+00:00",
+    "end": "2026-11-11T08:25:00.000+00:00"
+  }
+}

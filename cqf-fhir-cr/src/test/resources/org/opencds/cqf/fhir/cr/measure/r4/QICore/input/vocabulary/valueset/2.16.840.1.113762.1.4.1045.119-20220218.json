@@ -1,0 +1,148 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.119-20220218",
+  "meta": {
+    "versionId": "34",
+    "lastUpdated": "2024-02-01T15:11:10.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Yale Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-12"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2022-02-18"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.119",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1045.119"
+    }
+  ],
+  "version": "20220218",
+  "name": "SodiumLabTest",
+  "title": "Sodium Lab Test",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-02-18T01:02:25-05:00",
+  "publisher": "Yale",
+  "description": "CCDE",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for laboratory tests measuring sodium in blood, serum, or plasma.),(Data Element Scope: This value set may use a model element related to Laboratory Test.),(Inclusion Criteria: Includes concepts that represent a laboratory test measuring sodium in the specimen source of blood, serum, or plasma.),(Exclusion Criteria: Excludes concepts that represent laboratory tests for sodium using the specimen source of capillary blood.)",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "2947-0",
+            "display": "Sodium [Moles/volume] in Blood"
+          },
+          {
+            "code": "2951-2",
+            "display": "Sodium [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "32717-1",
+            "display": "Sodium [Moles/volume] in Arterial blood"
+          },
+          {
+            "code": "39791-9",
+            "display": "Sodium [Moles/volume] in Venous blood"
+          },
+          {
+            "code": "41657-8",
+            "display": "Sodium [Moles/volume] in Mixed venous blood"
+          },
+          {
+            "code": "77139-4",
+            "display": "Sodium [Moles/volume] in Serum, Plasma or Blood"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:51ed8603-2fb7-456c-88f8-9156516ca7e5",
+    "timestamp": "2025-08-28T17:02:48-04:00",
+    "total": 6,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2947-0",
+        "display": "Sodium [Moles/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2951-2",
+        "display": "Sodium [Moles/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "32717-1",
+        "display": "Sodium [Moles/volume] in Arterial blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "39791-9",
+        "display": "Sodium [Moles/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "41657-8",
+        "display": "Sodium [Moles/volume] in Mixed venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "77139-4",
+        "display": "Sodium [Moles/volume] in Serum, Plasma or Blood"
+      }
+    ]
+  }
+}

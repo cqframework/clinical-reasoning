@@ -1,0 +1,103 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1147.197-20220415",
+  "meta": {
+    "versionId": "9",
+    "lastUpdated": "2024-02-22T15:25:57.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Mathematica PSI Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-01-27"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2022-04-15"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1147.197",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1147.197"
+    }
+  ],
+  "version": "20220415",
+  "name": "PresentOnAdmissionOrClinicallyUndetermined",
+  "title": "Present on Admission or Clinically Undetermined",
+  "status": "active",
+  "experimental": false,
+  "date": "2022-04-15T01:02:23-04:00",
+  "publisher": "Mathematica PSI Steward",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for indicating a diagnosis is present on admission (Y) or clinically undetermined on admission (W).),(Data Element Scope: This value set may use a model element related to Encounter diagnosis.),(Inclusion Criteria: Includes PresentOnAdmission concepts that represent diagnosis is present on admission (Y) or clinically undetermined (W)),(Exclusion Criteria: N/A)",
+  "compose": {
+    "include": [
+      {
+        "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding",
+        "concept": [
+          {
+            "code": "W",
+            "display": "Clinically undetermined"
+          },
+          {
+            "code": "Y",
+            "display": "Diagnosis was present at time of inpatient admission"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:ec7ff6fd-309f-4e9b-ab4b-7f52af4b9fe8",
+    "timestamp": "2025-08-28T16:49:57-04:00",
+    "total": 2,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding",
+        "inactive": false,
+        "version": "2021",
+        "code": "W",
+        "display": "Clinically undetermined"
+      },
+      {
+        "system": "https://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/HospitalAcqCond/Coding",
+        "inactive": false,
+        "version": "2021",
+        "code": "Y",
+        "display": "Diagnosis was present at time of inpatient admission"
+      }
+    ]
+  }
+}

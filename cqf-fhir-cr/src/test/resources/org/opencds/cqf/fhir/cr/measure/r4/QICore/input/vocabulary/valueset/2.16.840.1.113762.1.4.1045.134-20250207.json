@@ -1,0 +1,488 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.134-20250207",
+  "meta": {
+    "versionId": "40",
+    "lastUpdated": "2025-02-07T01:09:20.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Yale Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-02-07"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2025-02-07"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.134",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1045.134"
+    }
+  ],
+  "version": "20250207",
+  "name": "GlucoseLabTest",
+  "title": "Glucose Lab Test",
+  "status": "active",
+  "date": "2025-02-07T01:09:20-05:00",
+  "publisher": "Yale",
+  "description": "CCDE",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for laboratory tests measuring glucose.),(Data Element Scope: This value set may use a model element related to Laboratory Test.),(Inclusion Criteria: Includes concepts that represent a laboratory test measuring glucose in the specimen source of blood, serum, or plasma, including Point of Care (POC) testing.),(Exclusion Criteria: No exclusions.)",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "100746-7",
+            "display": "Glucose [Moles/volume] in Mixed venous blood"
+          },
+          {
+            "code": "101476-0",
+            "display": "Fasting glucose [Moles/volume] in Venous blood"
+          },
+          {
+            "code": "104597-0",
+            "display": "Glucose [Mass/volume] in Venous blood by Glucometer"
+          },
+          {
+            "code": "104598-8",
+            "display": "Glucose [Mass/volume] in Arterial blood by Glucometer"
+          },
+          {
+            "code": "104655-6",
+            "display": "Glucose [Mass/volume] in Mixed venous blood"
+          },
+          {
+            "code": "14743-9",
+            "display": "Glucose [Moles/volume] in Capillary blood by Glucometer"
+          },
+          {
+            "code": "14749-6",
+            "display": "Glucose [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "14768-6",
+            "display": "Glucose [Moles/volume] in Serum or Plasma --baseline"
+          },
+          {
+            "code": "14770-2",
+            "display": "Fasting glucose [Moles/volume] in Capillary blood by Glucometer"
+          },
+          {
+            "code": "14771-0",
+            "display": "Fasting glucose [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "15074-8",
+            "display": "Glucose [Moles/volume] in Blood"
+          },
+          {
+            "code": "1547-9",
+            "display": "Glucose [Mass/volume] in Serum or Plasma --baseline"
+          },
+          {
+            "code": "1556-0",
+            "display": "Fasting glucose [Mass/volume] in Capillary blood"
+          },
+          {
+            "code": "1557-8",
+            "display": "Fasting glucose [Mass/volume] in Venous blood"
+          },
+          {
+            "code": "1558-6",
+            "display": "Fasting glucose [Mass/volume] in Serum or Plasma"
+          },
+          {
+            "code": "2339-0",
+            "display": "Glucose [Mass/volume] in Blood"
+          },
+          {
+            "code": "2340-8",
+            "display": "Glucose [Mass/volume] in Blood by Automated test strip"
+          },
+          {
+            "code": "2341-6",
+            "display": "Glucose [Mass/volume] in Blood by Test strip manual"
+          },
+          {
+            "code": "2345-7",
+            "display": "Glucose [Mass/volume] in Serum or Plasma"
+          },
+          {
+            "code": "32016-8",
+            "display": "Glucose [Mass/volume] in Capillary blood"
+          },
+          {
+            "code": "35184-1",
+            "display": "Fasting glucose [Mass or Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "39480-9",
+            "display": "Glucose [Moles/volume] in Venous blood"
+          },
+          {
+            "code": "39481-7",
+            "display": "Glucose [Moles/volume] in Arterial blood"
+          },
+          {
+            "code": "40858-3",
+            "display": "Glucose [Mass/volume] in Capillary blood --baseline"
+          },
+          {
+            "code": "41604-0",
+            "display": "Fasting glucose [Mass/volume] in Capillary blood by Glucometer"
+          },
+          {
+            "code": "41651-1",
+            "display": "Glucose [Mass/volume] in Arterial blood"
+          },
+          {
+            "code": "41652-9",
+            "display": "Glucose [Mass/volume] in Venous blood"
+          },
+          {
+            "code": "41653-7",
+            "display": "Glucose [Mass/volume] in Capillary blood by Glucometer"
+          },
+          {
+            "code": "50206-2",
+            "display": "Glucose [Mass/volume] in Serum or Plasma --1st specimen"
+          },
+          {
+            "code": "50212-0",
+            "display": "Glucose [Mass/volume] in Serum or Plasma --2nd specimen"
+          },
+          {
+            "code": "51596-5",
+            "display": "Glucose [Moles/volume] in Capillary blood"
+          },
+          {
+            "code": "53049-3",
+            "display": "Glucose [Mass/volume] in Serum or Plasma --pre-meal"
+          },
+          {
+            "code": "72516-8",
+            "display": "Glucose [Moles/volume] in Blood by Automated test strip"
+          },
+          {
+            "code": "74774-1",
+            "display": "Glucose [Mass/volume] in Serum, Plasma or Blood"
+          },
+          {
+            "code": "76629-5",
+            "display": "Fasting glucose [Moles/volume] in Blood"
+          },
+          {
+            "code": "77135-2",
+            "display": "Glucose [Moles/volume] in Serum, Plasma or Blood"
+          },
+          {
+            "code": "77145-1",
+            "display": "Fasting glucose [Moles/volume] in Serum, Plasma or Blood"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:9dd35e31-d68a-4542-9009-280a55c8d610",
+    "timestamp": "2025-08-28T16:59:03-04:00",
+    "total": 37,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "100746-7",
+        "display": "Glucose [Moles/volume] in Mixed venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "101476-0",
+        "display": "Fasting glucose [Moles/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "104597-0",
+        "display": "Glucose [Mass/volume] in Venous blood by Glucometer"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "104598-8",
+        "display": "Glucose [Mass/volume] in Arterial blood by Glucometer"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "104655-6",
+        "display": "Glucose [Mass/volume] in Mixed venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "14743-9",
+        "display": "Glucose [Moles/volume] in Capillary blood by Glucometer"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "14749-6",
+        "display": "Glucose [Moles/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "14768-6",
+        "display": "Glucose [Moles/volume] in Serum or Plasma --baseline"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "14770-2",
+        "display": "Fasting glucose [Moles/volume] in Capillary blood by Glucometer"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "14771-0",
+        "display": "Fasting glucose [Moles/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "15074-8",
+        "display": "Glucose [Moles/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1547-9",
+        "display": "Glucose [Mass/volume] in Serum or Plasma --baseline"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1556-0",
+        "display": "Fasting glucose [Mass/volume] in Capillary blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1557-8",
+        "display": "Fasting glucose [Mass/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1558-6",
+        "display": "Fasting glucose [Mass/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2339-0",
+        "display": "Glucose [Mass/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2340-8",
+        "display": "Glucose [Mass/volume] in Blood by Automated test strip"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2341-6",
+        "display": "Glucose [Mass/volume] in Blood by Test strip manual"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2345-7",
+        "display": "Glucose [Mass/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "32016-8",
+        "display": "Glucose [Mass/volume] in Capillary blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "35184-1",
+        "display": "Fasting glucose [Mass or Moles/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "39480-9",
+        "display": "Glucose [Moles/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "39481-7",
+        "display": "Glucose [Moles/volume] in Arterial blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "40858-3",
+        "display": "Glucose [Mass/volume] in Capillary blood --baseline"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "41604-0",
+        "display": "Fasting glucose [Mass/volume] in Capillary blood by Glucometer"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "41651-1",
+        "display": "Glucose [Mass/volume] in Arterial blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "41652-9",
+        "display": "Glucose [Mass/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "41653-7",
+        "display": "Glucose [Mass/volume] in Capillary blood by Glucometer"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "50206-2",
+        "display": "Glucose [Mass/volume] in Serum or Plasma --1st specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "50212-0",
+        "display": "Glucose [Mass/volume] in Serum or Plasma --2nd specimen"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "51596-5",
+        "display": "Glucose [Moles/volume] in Capillary blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "53049-3",
+        "display": "Glucose [Mass/volume] in Serum or Plasma --pre-meal"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "72516-8",
+        "display": "Glucose [Moles/volume] in Blood by Automated test strip"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "74774-1",
+        "display": "Glucose [Mass/volume] in Serum, Plasma or Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "76629-5",
+        "display": "Fasting glucose [Moles/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "77135-2",
+        "display": "Glucose [Moles/volume] in Serum, Plasma or Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "77145-1",
+        "display": "Fasting glucose [Moles/volume] in Serum, Plasma or Blood"
+      }
+    ]
+  }
+}

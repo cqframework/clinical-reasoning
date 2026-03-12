@@ -1,0 +1,33 @@
+{
+  "resourceType": "Encounter",
+  "id": "fe1ea7ba-e9e2-434c-b00a-01032021fab7a",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-encounter"
+    ]
+  },
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "183921001",
+          "display": "Admission to hospice for respite (procedure)"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/4f10a0f7-bb14-40d5-beb2-c728eb88a30d"
+  },
+  "period": {
+    "start": "2025-12-31T23:59:59.000+00:00",
+    "end": "2026-01-01T01:00:00.000+00:00"
+  }
+}

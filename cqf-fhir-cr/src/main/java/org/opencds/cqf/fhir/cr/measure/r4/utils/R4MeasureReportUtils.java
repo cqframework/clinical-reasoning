@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -107,6 +108,21 @@ public class R4MeasureReportUtils {
         }
 
         return stratumText;
+    }
+
+    public static boolean doesReportPopulationTypeMatch(
+            MeasureReportGroupPopulationComponent groupPopulation, MeasurePopulationType populationType) {
+        return populationType
+                .toCode()
+                .equals(groupPopulation.getCode().getCodingFirstRep().getCode());
+    }
+
+    public static boolean doesStratumPopulationTypeMatch(
+            StratifierGroupPopulationComponent stratumPopulation, MeasurePopulationType populationType) {
+
+        return populationType
+                .toCode()
+                .equals(stratumPopulation.getCode().getCodingFirstRep().getCode());
     }
 
     /**

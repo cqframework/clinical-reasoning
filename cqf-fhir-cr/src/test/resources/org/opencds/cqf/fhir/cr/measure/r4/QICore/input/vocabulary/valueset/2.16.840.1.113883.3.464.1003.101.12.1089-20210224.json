@@ -1,0 +1,192 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1089-20210224",
+  "meta": {
+    "versionId": "10",
+    "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-02-03"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2021-02-24"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1089",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.101.12.1089"
+    }
+  ],
+  "version": "20210224",
+  "name": "VirtualEncounter",
+  "title": "Virtual Encounter",
+  "status": "active",
+  "experimental": false,
+  "date": "2021-02-24T01:00:28-05:00",
+  "publisher": "NCQA PHEMUR",
+  "description": "previously named Online Assessments",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: Includes concepts that represent an encounter using online modalities.),(Data Element Scope: This value set may use a model element related to Encounter.),(Inclusion Criteria: Includes concepts that represent an encounter using online modalities.),(Exclusion Criteria: Excludes concepts that represent encounters other than online.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1281"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1282"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:7cb6404e-68a4-4c7a-afb7-4d56a88fdf72",
+    "timestamp": "2025-08-28T17:00:39-04:00",
+    "total": 15,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98970",
+        "display": "Nonphysician qualified health care professional online digital assessment and management, for an established patient, for up to 7 days, cumulative time during the 7 days; 5-10 minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98971",
+        "display": "Nonphysician qualified health care professional online digital assessment and management, for an established patient, for up to 7 days, cumulative time during the 7 days; 11-20 minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98972",
+        "display": "Nonphysician qualified health care professional online digital assessment and management, for an established patient, for up to 7 days, cumulative time during the 7 days; 21 or more minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98980",
+        "display": "Remote therapeutic monitoring treatment management services, physician or other qualified health care professional time in a calendar month requiring at least one interactive communication with the patient or caregiver during the calendar month; first 20 minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98981",
+        "display": "Remote therapeutic monitoring treatment management services, physician or other qualified health care professional time in a calendar month requiring at least one interactive communication with the patient or caregiver during the calendar month; each additional 20 minutes (List separately in addition to code for primary procedure)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99421",
+        "display": "Online digital evaluation and management service, for an established patient, for up to 7 days, cumulative time during the 7 days; 5-10 minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99422",
+        "display": "Online digital evaluation and management service, for an established patient, for up to 7 days, cumulative time during the 7 days; 11-20 minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99423",
+        "display": "Online digital evaluation and management service, for an established patient, for up to 7 days, cumulative time during the 7 days; 21 or more minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99457",
+        "display": "Remote physiologic monitoring treatment management services, clinical staff/physician/other qualified health care professional time in a calendar month requiring interactive communication with the patient/caregiver during the month; first 20 minutes"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99458",
+        "display": "Remote physiologic monitoring treatment management services, clinical staff/physician/other qualified health care professional time in a calendar month requiring interactive communication with the patient/caregiver during the month; each additional 20 minutes (List separately in addition to code for primary procedure)"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G0071",
+        "display": "Payment for communication technology-based services for 5 minutes or more of a virtual (non-face-to-face) communication between an rural health clinic (rhc) or federally qualified health center (fqhc) practitioner and rhc or fqhc patient, or 5 minutes or more of remote evaluation of recorded video and/or images by an rhc or fqhc practitioner, occurring in lieu of an office visit; rhc or fqhc only"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G2010",
+        "display": "Remote evaluation of recorded video and/or images submitted by an established patient (e.g., store and forward), including interpretation with follow-up with the patient within 24 business hours, not originating from a related e/m service provided within the previous 7 days nor leading to an e/m service or procedure within the next 24 hours or soonest available appointment"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G2250",
+        "display": "Remote assessment of recorded video and/or images submitted by an established patient (e.g., store and forward), including interpretation with follow-up with the patient within 24 business hours, not originating from a related service provided within the previous 7 days nor leading to a service or procedure within the next 24 hours or soonest available appointment"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G2251",
+        "display": "Brief communication technology-based service, e.g. virtual check-in, by a qualified health care professional who cannot report evaluation and management services, provided to an established patient, not originating from a related service provided within the previous 7 days nor leading to a service or procedure within the next 24 hours or soonest available appointment; 5-10 minutes of clinical discussion"
+      },
+      {
+        "system": "http://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+        "inactive": false,
+        "version": "2025",
+        "code": "G2252",
+        "display": "Brief communication technology-based service, e.g. virtual check-in, by a physician or other qualified health care professional who can report evaluation and management services, provided to an established patient, not originating from a related e/m service provided within the previous 7 days nor leading to an e/m service or procedure within the next 24 hours or soonest available appointment; 11-20 minutes of medical discussion"
+      }
+    ]
+  }
+}

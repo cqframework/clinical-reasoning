@@ -1,0 +1,52 @@
+{
+  "resourceType": "Condition",
+  "id": "d279a7ea-65e7-4959-be21-db8bceb56609a",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+    ]
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "Encounter Diagnosis"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "248802009",
+        "display": "Absence of breast (finding)"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "24028007",
+          "display": "Right (qualifier value)"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/c6897181-bb69-4bda-a44d-7c07cf81fc1b"
+  },
+  "onsetDateTime": "2026-01-01T00:00:00.000+00:00"
+}

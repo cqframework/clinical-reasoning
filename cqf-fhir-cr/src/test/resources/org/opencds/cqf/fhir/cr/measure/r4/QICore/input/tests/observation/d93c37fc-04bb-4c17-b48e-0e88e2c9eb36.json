@@ -1,0 +1,44 @@
+{
+  "resourceType": "Observation",
+  "id": "d93c37fc-04bb-4c17-b48e-0e88e2c9eb36",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-clinical-result"
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "imaging"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "24604-1",
+        "display": "MG Breast Diagnostic Limited Views"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f4d00e60-e525-4644-a397-4d7d970bcfdb"
+  },
+  "effectivePeriod": {
+    "start": "2027-01-01T00:00:00.000+00:00",
+    "end": "2027-01-01T00:00:00.000+00:00"
+  },
+  "dataAbsentReason": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+        "valueCode": "unknown"
+      }
+    ]
+  }
+}

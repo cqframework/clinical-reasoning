@@ -1,0 +1,26 @@
+{
+  "resourceType": "MedicationAdministration",
+  "id": "4d7de7e0-2217-4cc8-9de1-6f412cf53217",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-medicationadministration"
+    ]
+  },
+  "status": "completed",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "1543202",
+        "display": "insulin, regular, human 4 UNT Inhalation Powder"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/3fdd92df-f418-45ef-93a6-920e3d813f32"
+  },
+  "effectivePeriod": {
+    "start": "2026-12-16T08:00:00.000+00:00",
+    "end": "2026-12-16T09:00:00.000+00:00"
+  }
+}

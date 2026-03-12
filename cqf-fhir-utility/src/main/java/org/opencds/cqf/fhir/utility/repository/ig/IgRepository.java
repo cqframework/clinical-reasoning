@@ -10,6 +10,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -31,6 +32,8 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.utility.BundleHelper;
+import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
@@ -692,6 +695,61 @@ public class IgRepository implements IRepository {
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
         return invokeOperation(id, id.getResourceType(), name, parameters);
+    }
+
+    /**
+     * Processes a transaction bundle, supporting PUT, POST, and DELETE entries.
+     * Resources are written to the filesystem via the standard {@link #create}, {@link #update},
+     * and {@link #delete} methods.
+     *
+     * @param <B> the bundle type
+     * @param transaction the transaction bundle to process
+     * @param headers request headers
+     * @return a response bundle with entry responses for each processed entry
+     * @throws NotImplementedOperationException if the transaction contains unsupported entry types
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
+        var version = transaction.getStructureFhirVersionEnum();
+        var returnBundle = (B) BundleHelper.newBundle(version, "transaction-response");
+        BundleHelper.getEntry(transaction).forEach(e -> {
+            if (BundleHelper.isEntryRequestPut(version, e)) {
+                var resource = BundleHelper.getEntryResource(version, e);
+                this.update(resource, headers);
+                var location = resource.getIdElement().getValue();
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestPost(version, e)) {
+                var resource = BundleHelper.getEntryResource(version, e);
+                if (!resource.getIdElement().hasIdPart()) {
+                    resource.setId(java.util.UUID.randomUUID().toString());
+                }
+                this.create(resource, headers);
+                var location = resource.getIdElement().getValue();
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
+            } else if (BundleHelper.isEntryRequestDelete(version, e)) {
+                var requestId = BundleHelper.getEntryRequestId(version, e)
+                        .orElseThrow(() -> new ResourceNotFoundException("Trying to delete an entry without id"));
+                var requestUrl = BundleHelper.getEntryRequestUrl(version, e);
+                var resourceType = Canonicals.getResourceType(requestUrl);
+                var resourceClass =
+                        fhirContext.getResourceDefinition(resourceType).getImplementingClass();
+                this.delete(resourceClass, requestId.withResourceType(resourceType), headers);
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, requestUrl)));
+            } else {
+                throw new NotImplementedOperationException("Transaction only supports PUT, POST, or DELETE");
+            }
+        });
+        return returnBundle;
     }
 
     protected <R extends IBaseResource> R invokeOperation(

@@ -371,9 +371,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                             bc, UUID.randomUUID().toString(), sde.id(), valueCoding, valueCount, concept);
                 }
 
-                bc.addCriteriaExtensionToSupplementalData(obs, sde.id());
+                bc.addCriteriaExtensionToSupplementalData(obs, sde.id(), sde.description());
             } else {
-                bc.addCriteriaExtensionToSupplementalData(resource, sde.id());
+                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
             }
         }
     }

@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4.selected.report;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_POPULATION_DESCRIPTION_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_REFERENCE_EXT_URL;
 
 import org.hl7.fhir.r4.model.Extension;
@@ -25,6 +28,19 @@ public class SelectedMeasureReportExtension extends Selected<Extension, Selected
                         .getExtensionByUrl(EXT_CRITERIA_REFERENCE_URL)
                         .getValue()
                         .toString());
+        return this;
+    }
+
+    public SelectedMeasureReportExtension extensionHasSDEDescription(String description) {
+        var descExt = value().getValue().getExtensionByUrl(EXT_POPULATION_DESCRIPTION_URL);
+        assertNotNull(descExt, "Expected populationDescription extension on SDE reference");
+        assertEquals(description, descExt.getValue().toString());
+        return this;
+    }
+
+    public SelectedMeasureReportExtension extensionHasNoSDEDescription() {
+        var descExt = value().getValue().getExtensionByUrl(EXT_POPULATION_DESCRIPTION_URL);
+        assertNull(descExt, "Expected no populationDescription extension on SDE reference");
         return this;
     }
 }

@@ -117,7 +117,7 @@
     }
   } ],
   "extension": [ {
-    "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+    "url": "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription",
     "valueString": "A proof of concept for using CQL to evaluate CMS-HCC Models"
   }, {
     "url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData",

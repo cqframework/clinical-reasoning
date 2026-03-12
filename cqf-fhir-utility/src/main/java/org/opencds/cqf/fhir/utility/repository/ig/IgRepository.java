@@ -119,7 +119,6 @@ public class IgRepository implements IRepository {
 
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
             CacheBuilder.newBuilder().maximumSize(5000).build();
-    private final Map<IIdType, IBaseResource> transactionResources = new ConcurrentHashMap<>();
     private final ResourcePathResolver pathResolver;
     private final CompartmentAssigner compartmentAssigner;
 
@@ -393,13 +392,6 @@ public class IgRepository implements IRepository {
             return validateResource(resourceType, resource.get(), id);
         }
 
-        for (var entry : transactionResources.entrySet()) {
-            if (resourceType.isInstance(entry.getValue())
-                    && entry.getKey().getIdPart().equals(id.getIdPart())) {
-                return resourceType.cast(entry.getValue());
-            }
-        }
-
         throw new ResourceNotFoundException(id);
     }
 
@@ -638,12 +630,6 @@ public class IgRepository implements IRepository {
         var directories = this.pathResolver.directories(resourceType, assignment);
         var resourceIdMap = this.readDirectoriesForResource(resourceType, directories);
 
-        for (var entry : transactionResources.entrySet()) {
-            if (resourceType.isInstance(entry.getValue())) {
-                resourceIdMap.put(entry.getKey(), resourceType.cast(entry.getValue()));
-            }
-        }
-
         var builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
         if (searchParameters == null || searchParameters.isEmpty()) {
@@ -713,8 +699,8 @@ public class IgRepository implements IRepository {
 
     /**
      * Processes a transaction bundle, supporting PUT, POST, and DELETE entries.
-     * Resources modified via transaction are stored in an in-memory overlay and are not written
-     * to the filesystem. They are visible to subsequent {@link #read} and {@link #search} calls.
+     * Resources are written to the filesystem via the standard {@link #create}, {@link #update},
+     * and {@link #delete} methods.
      *
      * @param <B> the bundle type
      * @param transaction the transaction bundle to process
@@ -730,7 +716,7 @@ public class IgRepository implements IRepository {
         BundleHelper.getEntry(transaction).forEach(e -> {
             if (BundleHelper.isEntryRequestPut(version, e)) {
                 var resource = BundleHelper.getEntryResource(version, e);
-                transactionResources.put(resource.getIdElement().toUnqualifiedVersionless(), resource);
+                this.update(resource, headers);
                 var location = resource.getIdElement().getValue();
                 BundleHelper.addEntry(
                         returnBundle,
@@ -741,7 +727,7 @@ public class IgRepository implements IRepository {
                 if (!resource.getIdElement().hasIdPart()) {
                     resource.setId(java.util.UUID.randomUUID().toString());
                 }
-                transactionResources.put(resource.getIdElement().toUnqualifiedVersionless(), resource);
+                this.create(resource, headers);
                 var location = resource.getIdElement().getValue();
                 BundleHelper.addEntry(
                         returnBundle,
@@ -754,15 +740,11 @@ public class IgRepository implements IRepository {
                 var resourceType = Canonicals.getResourceType(requestUrl);
                 var resourceClass =
                         fhirContext.getResourceDefinition(resourceType).getImplementingClass();
-                var matchingKey = transactionResources.entrySet().stream()
-                        .filter(entry -> resourceClass.isInstance(entry.getValue())
-                                && entry.getKey().getIdPart().equals(requestId.getIdPart()))
-                        .map(Map.Entry::getKey)
-                        .findFirst()
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                "Resource not found: " + resourceType + "/" + requestId.getIdPart()));
-                var removed = transactionResources.remove(matchingKey);
-                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(removed));
+                this.delete(resourceClass, requestId.withResourceType(resourceType), headers);
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, requestUrl)));
             } else {
                 throw new NotImplementedOperationException("Transaction only supports PUT, POST, or DELETE");
             }

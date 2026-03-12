@@ -10,6 +10,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -31,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
@@ -116,6 +118,7 @@ public class IgRepository implements IRepository {
 
     private final Cache<Path, Optional<IBaseResource>> resourceCache =
             CacheBuilder.newBuilder().maximumSize(5000).build();
+    private final Map<IIdType, IBaseResource> transactionResources = new ConcurrentHashMap<>();
     private final ResourcePathResolver pathResolver;
     private final CompartmentAssigner compartmentAssigner;
 
@@ -389,6 +392,13 @@ public class IgRepository implements IRepository {
             return validateResource(resourceType, resource.get(), id);
         }
 
+        for (var entry : transactionResources.entrySet()) {
+            if (resourceType.isInstance(entry.getValue())
+                    && entry.getKey().getIdPart().equals(id.getIdPart())) {
+                return resourceType.cast(entry.getValue());
+            }
+        }
+
         throw new ResourceNotFoundException(id);
     }
 
@@ -627,6 +637,12 @@ public class IgRepository implements IRepository {
         var directories = this.pathResolver.directories(resourceType, assignment);
         var resourceIdMap = this.readDirectoriesForResource(resourceType, directories);
 
+        for (var entry : transactionResources.entrySet()) {
+            if (resourceType.isInstance(entry.getValue())) {
+                resourceIdMap.put(entry.getKey(), resourceType.cast(entry.getValue()));
+            }
+        }
+
         var builder = new BundleBuilder(this.fhirContext);
         builder.setType("searchset");
         if (searchParameters == null || searchParameters.isEmpty()) {
@@ -692,6 +708,42 @@ public class IgRepository implements IRepository {
     public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
             I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
         return invokeOperation(id, id.getResourceType(), name, parameters);
+    }
+
+    /**
+     * Processes a transaction bundle, supporting only POST (create) entries.
+     * Resources created via transaction are stored in an in-memory overlay and are not written
+     * to the filesystem. They are visible to subsequent {@link #read} and {@link #search} calls.
+     *
+     * @param <B> the bundle type
+     * @param transaction the transaction bundle to process
+     * @param headers request headers
+     * @return a response bundle with entry responses for each processed entry
+     * @throws NotImplementedOperationException if the transaction contains PUT or DELETE entries
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
+        var version = transaction.getStructureFhirVersionEnum();
+        var returnBundle = (B) BundleHelper.newBundle(version, "transaction-response");
+        BundleHelper.getEntry(transaction).forEach(e -> {
+            if (BundleHelper.isEntryRequestPost(version, e)) {
+                var resource = BundleHelper.getEntryResource(version, e);
+                if (!resource.getIdElement().hasIdPart()) {
+                    resource.setId(java.util.UUID.randomUUID().toString());
+                }
+                transactionResources.put(resource.getIdElement().toUnqualifiedVersionless(), resource);
+                var location = resource.getIdElement().getValue();
+                BundleHelper.addEntry(
+                        returnBundle,
+                        BundleHelper.newEntryWithResponse(
+                                version, BundleHelper.newResponseWithLocation(version, location)));
+            } else {
+                throw new NotImplementedOperationException(
+                        "IgRepository transaction only supports POST (create) entries");
+            }
+        });
+        return returnBundle;
     }
 
     protected <R extends IBaseResource> R invokeOperation(

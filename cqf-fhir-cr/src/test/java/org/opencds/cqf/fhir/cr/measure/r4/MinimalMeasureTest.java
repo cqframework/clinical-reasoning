@@ -16,7 +16,9 @@ class MinimalMeasureTest {
     void evaluateSucceedsWithMinimalMeasure() {
         var when = GIVEN_MINIMAL_MEASURE_REPO.when().measureId("Minimal").evaluate();
 
-        var report = when.then().report();
+        var then = when.then();
+        then.hasSupplementalDataSearchParameter();
+        var report = then.report();
         assertNotNull(report);
         assertEquals(0, report.getGroup().size());
     }

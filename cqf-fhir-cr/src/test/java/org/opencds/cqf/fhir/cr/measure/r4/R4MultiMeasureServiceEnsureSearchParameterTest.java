@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
@@ -16,10 +15,6 @@ import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 /**
  * Tests the {@code ensureSearchParameters} flag on {@link MeasureEvaluationOptions}
  * to verify that the SDE SearchParameter is created (or not) based on the flag value.
- * <p/>
- * Note that {@link org.opencds.cqf.fhir.utility.repository.ig.IgRepository} does not support
- * {@link org.opencds.cqf.fhir.utility.repository.ig.IgRepository#transaction(IBaseBundle)}, which
- * means we can't assert ensure SDE at the Measure/MultiMeasure integration test level.
  */
 class R4MultiMeasureServiceEnsureSearchParameterTest {
 

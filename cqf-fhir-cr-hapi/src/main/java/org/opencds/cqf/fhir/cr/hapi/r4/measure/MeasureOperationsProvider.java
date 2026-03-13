@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -12,11 +13,15 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
@@ -70,39 +75,36 @@ public class MeasureOperationsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
     public MeasureReport evaluateMeasure(
             @IdParam IdType id,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
-            @OperationParam(name = "reportType") String reportType,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
-            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "reportType") StringType reportType,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "lastReceivedOn") StringType lastReceivedOn,
+            @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         return r4MeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
                         Eithers.forMiddle3(id),
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        lastReceivedOn,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        dataEndpointParam,
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(reportType),
+                        getStringValue(subject),
+                        getStringValue(lastReceivedOn),
+                        (Endpoint) getEndpoint(fhirVersion, contentEndpoint),
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint),
+                        (Endpoint) getEndpoint(fhirVersion, dataEndpoint),
                         additionalData,
                         parameters,
-                        productLine,
-                        practitioner);
+                        getStringValue(productLine),
+                        getStringValue(practitioner));
     }
 
     /**
@@ -135,43 +137,48 @@ public class MeasureOperationsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Measure.class)
     public Parameters evaluate(
             @OperationParam(name = "measureId") List<IdType> measureId,
-            @OperationParam(name = "measureUrl") List<String> measureUrl,
-            @OperationParam(name = "measureIdentifier") List<String> measureIdentifier,
-            @OperationParam(name = "measure") List<String> measure,
-            @OperationParam(name = "periodStart") String periodStart,
-            @OperationParam(name = "periodEnd") String periodEnd,
-            @OperationParam(name = "reportType") String reportType,
-            @OperationParam(name = "subject") String subject,
-            @OperationParam(name = "practitioner") String practitioner,
-            @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
-            @OperationParam(name = "productLine") String productLine,
+            @OperationParam(name = "measureUrl") List<StringType> measureUrl,
+            @OperationParam(name = "measureIdentifier") List<StringType> measureIdentifier,
+            @OperationParam(name = "measure") List<StringType> measure,
+            @OperationParam(name = "periodStart") DateType periodStart,
+            @OperationParam(name = "periodEnd") DateType periodEnd,
+            @OperationParam(name = "reportType") StringType reportType,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "practitioner") StringType practitioner,
+            @OperationParam(name = "lastReceivedOn") StringType lastReceivedOn,
+            @OperationParam(name = "productLine") StringType productLine,
             @OperationParam(name = "additionalData") Bundle additionalData,
-            @OperationParam(name = "contentEndpoint") Parameters.ParametersParameterComponent contentEndpoint,
-            @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
-            @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
-            @OperationParam(name = "reporter") String reporter,
+            @OperationParam(name = "reporter") StringType reporter,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         return r4MultiMeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
                         measureId, // List<IdType>
-                        measureUrl, // List<String>
-                        measureIdentifier, // List<Identifier>
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        dataEndpointParam,
+                        measureUrl == null
+                                ? null
+                                : measureUrl.stream()
+                                        .map(ParameterHelper::getStringValue)
+                                        .toList(), // List<String>
+                        measureIdentifier == null
+                                ? null
+                                : measureIdentifier.stream()
+                                        .map(ParameterHelper::getStringValue)
+                                        .toList(), // List<Identifier>
+                        stringTimePeriodHandler.getStartZonedDateTime(getStringValue(periodStart), requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(getStringValue(periodEnd), requestDetails),
+                        getStringValue(reportType),
+                        getStringValue(subject),
+                        (Endpoint) getEndpoint(fhirVersion, contentEndpoint),
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint),
+                        (Endpoint) getEndpoint(fhirVersion, dataEndpoint),
                         additionalData,
                         parameters,
-                        productLine,
-                        reporter);
+                        getStringValue(productLine),
+                        getStringValue(reporter));
     }
 }

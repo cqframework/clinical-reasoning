@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.r4.model.Basic;
+import org.hl7.fhir.r4.model.Bundle;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class DeleteVisitor extends BaseKnowledgeArtifactVisitor {
 
@@ -31,6 +34,17 @@ public class DeleteVisitor extends BaseKnowledgeArtifactVisitor {
         resToUpdate.add(rootAdapter.get());
 
         var resourcesToUpdate = getComponents(rootAdapter, repository, resToUpdate);
+
+        var resourceReference = rootAdapter.get().getIdElement().getResourceType() + "/"
+                + rootAdapter.get().getIdElement().getIdPart();
+        var searchParams = Searches.builder()
+                .withReferenceParam("artifact", resourceReference)
+                .build();
+        var searchResult = repository.search(Bundle.class, Basic.class, searchParams);
+        var basicResources = BundleHelper.getEntryResources(searchResult);
+        for (var basic : basicResources) {
+            resourcesToUpdate.add((IDomainResource) basic);
+        }
 
         for (var res : resourcesToUpdate) {
             var entry = PackageHelper.deleteEntry(res);

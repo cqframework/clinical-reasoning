@@ -50,7 +50,7 @@ class DeleteVisitorTests {
 
         var res = returnedBundle.getEntry();
 
-        assertEquals(4, res.size());
+        assertEquals(5, res.size());
     }
 
     @Test

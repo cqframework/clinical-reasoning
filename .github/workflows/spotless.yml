@@ -18,7 +18,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
       - name: spotlessCheck
         run: ./gradlew spotlessCheck
-      - uses: mshick/add-pr-comment@c96a9caed2a8cc0ed55e1f105725e383d63569d0 # v2
+      - uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
         if: always()
         with:
           message-success: |

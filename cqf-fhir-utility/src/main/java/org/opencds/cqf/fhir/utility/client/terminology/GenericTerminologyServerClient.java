@@ -120,13 +120,13 @@ public class GenericTerminologyServerClient extends BaseTerminologyProvider impl
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getCodeSystemClass())
-                .where(Searches.byCanonical(url))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
                 .execute());
     }
 
     @Override
     public java.util.Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url) {
-        var urlParams = Searches.byCanonical(url);
+        var urlParams = Searches.toFlattenedMap(Searches.byCanonical(url));
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getValueSetClass())
@@ -139,7 +139,7 @@ public class GenericTerminologyServerClient extends BaseTerminologyProvider impl
         return IKnowledgeArtifactAdapter.findLatestVersion(initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(getValueSetClass())
-                .where(Searches.byCanonical(url))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
                 .execute());
     }
 }

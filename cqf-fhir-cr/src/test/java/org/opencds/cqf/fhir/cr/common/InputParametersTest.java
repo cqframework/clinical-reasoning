@@ -13,7 +13,6 @@ import ca.uhn.fhir.repository.IRepository;
 import com.google.common.collect.Multimap;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -570,7 +569,7 @@ class InputParametersTest {
         var obsBundle = new Bundle().addEntry(new BundleEntryComponent().setResource(obs));
         doReturn(fhirContextR4).when(repository).fhirContext();
         doReturn(patient).when(repository).read(org.hl7.fhir.r4.model.Patient.class, patient.getIdElement());
-        doReturn(valueSetBundle).when(repository).search(eq(Bundle.class), eq(ValueSet.class), any(Map.class));
+        doReturn(valueSetBundle).when(repository).search(eq(Bundle.class), eq(ValueSet.class), any(Multimap.class));
         doReturn(obsBundle)
                 .when(repository)
                 .search(eq(Bundle.class), eq(Observation.class), any(Multimap.class), any());

@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.Resources.castOrThrow;
 
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import java.util.function.Function;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -15,6 +16,7 @@ import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
+@SuppressWarnings("UnstableApiUsage")
 public class ResourceResolver {
     final String invalidResourceType = "The resource passed in was not a valid instance of %s.class";
     final String resourceType;
@@ -50,7 +52,7 @@ public class ResourceResolver {
 
     protected <C extends IPrimitiveType<String>> IBaseResource resolveByUrl(C url) {
         var result = this.repository.search(bundleClazz, clazz, Searches.byCanonical(url.getValue()));
-        var iterator = new BundleMappingIterable<>(repository, result, p -> p.getResource()).iterator();
+        var iterator = new BundleMappingIterable<>(repository, result, BundleEntryParts::getResource).iterator();
         return iterator.hasNext() ? iterator.next() : null;
     }
 

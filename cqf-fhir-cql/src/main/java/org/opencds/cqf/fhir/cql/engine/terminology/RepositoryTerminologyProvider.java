@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * search, but found that the performance was reduced by ~33%. Please run the benchmarks to verify
  * that changes to this class do not result in significant performance degradation.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class RepositoryTerminologyProvider implements TerminologyProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);

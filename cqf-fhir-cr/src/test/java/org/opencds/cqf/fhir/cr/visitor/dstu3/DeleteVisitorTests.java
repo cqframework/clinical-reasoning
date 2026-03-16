@@ -1,29 +1,29 @@
-package org.opencds.cqf.fhir.cr.visitor.r4;
+package org.opencds.cqf.fhir.cr.visitor.dstu3;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.visitor.DeleteVisitor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class DeleteVisitorTests {
 
-    private final FhirContext fhirContext = FhirContext.forR4Cached();
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
     private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
 

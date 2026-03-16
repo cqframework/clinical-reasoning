@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -27,9 +28,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.search.Searches;
+import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
 class IgRepositoryTransactionTest {
+
+    private static final Map<String, String> HEADERS_EMPTY = Collections.emptyMap();
 
     private static IgRepository repository;
 
@@ -124,8 +127,10 @@ class IgRepositoryTransactionTest {
         var read = repository.read(fixture.resourceClass, Ids.newId(fixture.resourceClass, id));
         assertEquals(id, read.getIdElement().getIdPart());
 
-        var searchResult =
-                repository.search(Bundle.class, fixture.resourceClass, Searches.byUrl(fixture.urlPrefix + id));
+        var searchResult = repository.search(
+                Bundle.class,
+                fixture.resourceClass,
+                new SearchBuilder().withUriParam("url", fixture.urlPrefix + id).build());
         assertEquals(1, searchResult.getEntry().size());
     }
 
@@ -195,12 +200,20 @@ class IgRepositoryTransactionTest {
                 .setUrl(fixture.resourceType + "/" + id);
         repository.transaction(putBundle, Collections.emptyMap());
 
-        var searchV1 =
-                repository.search(Bundle.class, fixture.resourceClass, Searches.byUrl(fixture.urlPrefix + id + "-v1"));
+        var searchV1 = repository.search(
+                Bundle.class,
+                fixture.resourceClass,
+                new SearchBuilder()
+                        .withUriParam("url", fixture.urlPrefix + id + "-v1")
+                        .build());
         assertEquals(0, searchV1.getEntry().size());
 
-        var searchV2 =
-                repository.search(Bundle.class, fixture.resourceClass, Searches.byUrl(fixture.urlPrefix + id + "-v2"));
+        var searchV2 = repository.search(
+                Bundle.class,
+                fixture.resourceClass,
+                new SearchBuilder()
+                        .withUriParam("url", fixture.urlPrefix + id + "-v2")
+                        .build());
         assertEquals(1, searchV2.getEntry().size());
     }
 
@@ -229,8 +242,10 @@ class IgRepositoryTransactionTest {
         assertNotNull(result);
         assertEquals(1, result.getEntry().size());
 
-        var searchResult =
-                repository.search(Bundle.class, fixture.resourceClass, Searches.byUrl(fixture.urlPrefix + id));
+        var searchResult = repository.search(
+                Bundle.class,
+                fixture.resourceClass,
+                new SearchBuilder().withUriParam("url", fixture.urlPrefix + id).build());
         assertEquals(0, searchResult.getEntry().size());
     }
 
@@ -244,8 +259,7 @@ class IgRepositoryTransactionTest {
                 .setMethod(Bundle.HTTPVerb.DELETE)
                 .setUrl(fixture.resourceType + "/does-not-exist-" + fixture.label);
 
-        assertThrows(
-                ResourceNotFoundException.class, () -> repository.transaction(deleteBundle, Collections.emptyMap()));
+        assertThrows(ResourceNotFoundException.class, () -> repository.transaction(deleteBundle, HEADERS_EMPTY));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -301,11 +315,17 @@ class IgRepositoryTransactionTest {
         var searchRes1 = repository.search(
                 Bundle.class,
                 fixture.resourceClass,
-                Searches.byUrl(fixture.urlPrefix + "tx-mixed-1-" + suffix + "-updated"));
+                new SearchBuilder()
+                        .withUriParam("url", fixture.urlPrefix + "tx-mixed-1-" + suffix + "-updated")
+                        .build());
         assertEquals(1, searchRes1.getEntry().size());
 
         var searchRes2 = repository.search(
-                Bundle.class, fixture.resourceClass, Searches.byUrl(fixture.urlPrefix + "tx-mixed-2-" + suffix));
+                Bundle.class,
+                fixture.resourceClass,
+                new SearchBuilder()
+                        .withUriParam("url", fixture.urlPrefix + "tx-mixed-2-" + suffix)
+                        .build());
         assertEquals(0, searchRes2.getEntry().size());
 
         var readRes3 = repository.read(fixture.resourceClass, Ids.newId(fixture.resourceClass, "tx-mixed-3-" + suffix));
@@ -317,7 +337,6 @@ class IgRepositoryTransactionTest {
         var txBundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
         txBundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Library/123");
 
-        assertThrows(
-                NotImplementedOperationException.class, () -> repository.transaction(txBundle, Collections.emptyMap()));
+        assertThrows(NotImplementedOperationException.class, () -> repository.transaction(txBundle, HEADERS_EMPTY));
     }
 }

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.Map;
+import com.google.common.collect.Multimap;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -17,6 +17,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 
+@SuppressWarnings("UnstableApiUsage")
 class RepositoryTerminologyProviderTest {
 
     private static final String SYSTEM_FOR_CODES = "http://example.com/CodeSystem/Codes";
@@ -77,7 +78,7 @@ class RepositoryTerminologyProviderTest {
         when(mockRepository.fhirContext()).thenReturn(FhirContext.forR4Cached());
         Bundle bundle = new Bundle();
         bundle.addEntry().setFullUrl(valueSet.getUrl()).setResource(valueSet);
-        when(mockRepository.search(any(), any(), any(Map.class), isNull())).thenReturn(bundle);
+        when(mockRepository.search(any(), any(), any(Multimap.class), isNull())).thenReturn(bundle);
         return mockRepository;
     }
 

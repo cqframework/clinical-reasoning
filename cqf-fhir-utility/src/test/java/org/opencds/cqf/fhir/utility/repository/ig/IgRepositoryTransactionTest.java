@@ -247,9 +247,7 @@ class IgRepositoryTransactionTest {
                 .setMethod(Bundle.HTTPVerb.DELETE)
                 .setUrl(fixture.resourceType + "/does-not-exist-" + fixture.label);
 
-        assertThrows(
-                ResourceNotFoundException.class, () -> repository.transaction(deleteBundle,
-                HEADERS_EMPTY));
+        assertThrows(ResourceNotFoundException.class, () -> repository.transaction(deleteBundle, HEADERS_EMPTY));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -321,8 +319,6 @@ class IgRepositoryTransactionTest {
         var txBundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
         txBundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Library/123");
 
-        assertThrows(
-                NotImplementedOperationException.class, () -> repository.transaction(txBundle,
-                HEADERS_EMPTY));
+        assertThrows(NotImplementedOperationException.class, () -> repository.transaction(txBundle, HEADERS_EMPTY));
     }
 }

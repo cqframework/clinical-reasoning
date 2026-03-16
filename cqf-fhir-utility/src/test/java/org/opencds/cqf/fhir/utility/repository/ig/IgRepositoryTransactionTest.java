@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -30,6 +31,8 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 class IgRepositoryTransactionTest {
+
+    private static final Map<String, String> HEADERS_EMPTY = Collections.emptyMap();
 
     private static IgRepository repository;
 
@@ -117,7 +120,7 @@ class IgRepositoryTransactionTest {
                 .setMethod(Bundle.HTTPVerb.POST)
                 .setUrl(fixture.resourceType);
 
-        var result = repository.transaction(txBundle, Collections.emptyMap());
+        var result = repository.transaction(txBundle, HEADERS_EMPTY);
         assertNotNull(result);
         assertEquals(1, result.getEntry().size());
 
@@ -141,7 +144,7 @@ class IgRepositoryTransactionTest {
                 .setMethod(Bundle.HTTPVerb.POST)
                 .setUrl(fixture.resourceType);
 
-        repository.transaction(txBundle, Collections.emptyMap());
+        repository.transaction(txBundle, HEADERS_EMPTY);
 
         assertTrue(resource.getIdElement().hasIdPart());
         var read = repository.read(fixture.resourceClass, resource.getIdElement());
@@ -161,7 +164,7 @@ class IgRepositoryTransactionTest {
                 .setMethod(Bundle.HTTPVerb.PUT)
                 .setUrl(fixture.resourceType + "/" + id);
 
-        var result = repository.transaction(txBundle, Collections.emptyMap());
+        var result = repository.transaction(txBundle, HEADERS_EMPTY);
         assertNotNull(result);
         assertEquals(1, result.getEntry().size());
 
@@ -182,7 +185,7 @@ class IgRepositoryTransactionTest {
                 .getRequest()
                 .setMethod(Bundle.HTTPVerb.POST)
                 .setUrl(fixture.resourceType);
-        repository.transaction(postBundle, Collections.emptyMap());
+        repository.transaction(postBundle, HEADERS_EMPTY);
 
         var updated = fixture.create(id, id + "-v2");
 
@@ -193,7 +196,7 @@ class IgRepositoryTransactionTest {
                 .getRequest()
                 .setMethod(Bundle.HTTPVerb.PUT)
                 .setUrl(fixture.resourceType + "/" + id);
-        repository.transaction(putBundle, Collections.emptyMap());
+        repository.transaction(putBundle, HEADERS_EMPTY);
 
         var searchV1 =
                 repository.search(Bundle.class, fixture.resourceClass, Searches.byUrl(fixture.urlPrefix + id + "-v1"));
@@ -217,7 +220,7 @@ class IgRepositoryTransactionTest {
                 .getRequest()
                 .setMethod(Bundle.HTTPVerb.POST)
                 .setUrl(fixture.resourceType);
-        repository.transaction(postBundle, Collections.emptyMap());
+        repository.transaction(postBundle, HEADERS_EMPTY);
 
         var read = repository.read(fixture.resourceClass, Ids.newId(fixture.resourceClass, id));
         assertNotNull(read);
@@ -225,7 +228,7 @@ class IgRepositoryTransactionTest {
         var deleteBundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
         deleteBundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(fixture.resourceType + "/" + id);
 
-        var result = repository.transaction(deleteBundle, Collections.emptyMap());
+        var result = repository.transaction(deleteBundle, HEADERS_EMPTY);
         assertNotNull(result);
         assertEquals(1, result.getEntry().size());
 
@@ -245,7 +248,8 @@ class IgRepositoryTransactionTest {
                 .setUrl(fixture.resourceType + "/does-not-exist-" + fixture.label);
 
         assertThrows(
-                ResourceNotFoundException.class, () -> repository.transaction(deleteBundle, Collections.emptyMap()));
+                ResourceNotFoundException.class, () -> repository.transaction(deleteBundle,
+                HEADERS_EMPTY));
     }
 
     @ParameterizedTest(name = "{0}")
@@ -268,7 +272,7 @@ class IgRepositoryTransactionTest {
                 .getRequest()
                 .setMethod(Bundle.HTTPVerb.POST)
                 .setUrl(fixture.resourceType);
-        repository.transaction(postBundle, Collections.emptyMap());
+        repository.transaction(postBundle, HEADERS_EMPTY);
 
         var res1Updated = fixture.create("tx-mixed-1-" + suffix, "tx-mixed-1-" + suffix + "-updated");
         var res3 = fixture.create("tx-mixed-3-" + suffix, "tx-mixed-3-" + suffix);
@@ -292,7 +296,7 @@ class IgRepositoryTransactionTest {
                 .setMethod(Bundle.HTTPVerb.POST)
                 .setUrl(fixture.resourceType);
 
-        var result = repository.transaction(mixedBundle, Collections.emptyMap());
+        var result = repository.transaction(mixedBundle, HEADERS_EMPTY);
         assertEquals(3, result.getEntry().size());
 
         var readRes1 = repository.read(fixture.resourceClass, Ids.newId(fixture.resourceClass, "tx-mixed-1-" + suffix));
@@ -318,6 +322,7 @@ class IgRepositoryTransactionTest {
         txBundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Library/123");
 
         assertThrows(
-                NotImplementedOperationException.class, () -> repository.transaction(txBundle, Collections.emptyMap()));
+                NotImplementedOperationException.class, () -> repository.transaction(txBundle,
+                HEADERS_EMPTY));
     }
 }

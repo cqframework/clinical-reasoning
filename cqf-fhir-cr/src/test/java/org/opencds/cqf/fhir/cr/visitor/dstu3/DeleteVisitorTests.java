@@ -50,17 +50,17 @@ class DeleteVisitorTests {
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(deleteVisitor, params);
 
         var libraryEntries = BundleHelper.getEntryResources(returnedBundle).stream()
-            .filter(r -> r.fhirType().equals("Library"))
-            .toList();
+                .filter(r -> r.fhirType().equals("Library"))
+                .toList();
         var planDefEntries = BundleHelper.getEntryResources(returnedBundle).stream()
-            .filter(r -> r.fhirType().equals("PlanDefinition"))
-            .toList();
+                .filter(r -> r.fhirType().equals("PlanDefinition"))
+                .toList();
         var valueSetEntries = BundleHelper.getEntryResources(returnedBundle).stream()
-            .filter(r -> r.fhirType().equals("ValueSet"))
-            .toList();
+                .filter(r -> r.fhirType().equals("ValueSet"))
+                .toList();
         var basicEntries = BundleHelper.getEntryResources(returnedBundle).stream()
-            .filter(r -> r.fhirType().equals("Basic"))
-            .toList();
+                .filter(r -> r.fhirType().equals("Basic"))
+                .toList();
 
         assertEquals(2, libraryEntries.size());
         assertEquals(1, planDefEntries.size());

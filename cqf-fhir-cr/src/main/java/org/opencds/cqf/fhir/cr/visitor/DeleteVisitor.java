@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.cr.visitor;
 
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -53,20 +53,21 @@ public class DeleteVisitor extends BaseKnowledgeArtifactVisitor {
 
     private List<IBaseResource> retrieveApprovals(String resourceReference) {
         var searchParams = Searches.builder()
-            .withReferenceParam("artifact", resourceReference)
-            .build();
+                .withReferenceParam("artifact", resourceReference)
+                .build();
         return switch (fhirVersion()) {
-            case DSTU3 -> BundleHelper.getEntryResources(
-                repository.search(org.hl7.fhir.dstu3.model.Bundle.class,
-                    org.hl7.fhir.dstu3.model.Basic.class, searchParams));
-            case R4 -> BundleHelper.getEntryResources(
-                repository.search(org.hl7.fhir.r4.model.Bundle.class,
-                    org.hl7.fhir.r4.model.Basic.class, searchParams));
-            case R5 -> BundleHelper.getEntryResources(
-                repository.search(org.hl7.fhir.r5.model.Bundle.class,
-                    org.hl7.fhir.r5.model.Basic.class, searchParams));
-            default -> throw new UnprocessableEntityException("Unsupported version of FHIR: %s"
-                .formatted(fhirVersion().getFhirVersionString()));
+            case DSTU3 ->
+                BundleHelper.getEntryResources(repository.search(
+                        org.hl7.fhir.dstu3.model.Bundle.class, org.hl7.fhir.dstu3.model.Basic.class, searchParams));
+            case R4 ->
+                BundleHelper.getEntryResources(repository.search(
+                        org.hl7.fhir.r4.model.Bundle.class, org.hl7.fhir.r4.model.Basic.class, searchParams));
+            case R5 ->
+                BundleHelper.getEntryResources(repository.search(
+                        org.hl7.fhir.r5.model.Bundle.class, org.hl7.fhir.r5.model.Basic.class, searchParams));
+            default ->
+                throw new UnprocessableEntityException("Unsupported version of FHIR: %s"
+                        .formatted(fhirVersion().getFhirVersionString()));
         };
     }
 }

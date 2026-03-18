@@ -25,14 +25,16 @@ class SearchesTest {
         assertEquals(1, result.size());
         assertTrue(result.containsKey("_id"));
         assertEquals(1, result.get("_id").size());
-        assertTrue(result.get("_id").get(0) instanceof TokenParam);
+        assertEquals(1, result.get("_id").stream().toList().get(0).size());
+        assertTrue(result.get("_id").stream().toList().get(0).get(0) instanceof TokenParam);
     }
 
     @Test
     void byIdMultiple() {
         var result = Searches.byId("1", "2", "3");
         assertEquals(1, result.size());
-        assertEquals(3, result.get("_id").size());
+        assertEquals(1, result.get("_id").size());
+        assertEquals(3, result.get("_id").stream().toList().get(0).size());
     }
 
     @Test
@@ -40,7 +42,8 @@ class SearchesTest {
         var result = Searches.byProfile("http://example.org/profile");
         assertEquals(1, result.size());
         assertTrue(result.containsKey("_profile"));
-        assertTrue(result.get("_profile").get(0) instanceof UriParam);
+        assertEquals(1, result.get("_profile").stream().toList().get(0).size());
+        assertTrue(result.get("_profile").stream().toList().get(0).get(0) instanceof UriParam);
     }
 
     @Test
@@ -61,7 +64,7 @@ class SearchesTest {
     void byCodeAndSystem() {
         var result = Searches.byCodeAndSystem("test-code", "http://example.org");
         assertTrue(result.containsKey("code"));
-        var param = (TokenParam) result.get("code").get(0);
+        var param = (TokenParam) result.get("code").stream().toList().get(0).get(0);
         assertEquals("test-code", param.getValue());
         assertEquals("http://example.org", param.getSystem());
     }
@@ -70,7 +73,7 @@ class SearchesTest {
     void byUrl() {
         var result = Searches.byUrl("http://example.org/Library/test");
         assertTrue(result.containsKey("url"));
-        assertTrue(result.get("url").get(0) instanceof UriParam);
+        assertTrue(result.get("url").stream().toList().get(0).get(0) instanceof UriParam);
     }
 
     @Test
@@ -84,14 +87,14 @@ class SearchesTest {
     void byName() {
         var result = Searches.byName("TestLibrary");
         assertTrue(result.containsKey("name"));
-        assertTrue(result.get("name").get(0) instanceof StringParam);
+        assertTrue(result.get("name").stream().toList().get(0).get(0) instanceof StringParam);
     }
 
     @Test
     void byStatus() {
         var result = Searches.byStatus("active");
         assertTrue(result.containsKey("status"));
-        var param = (TokenParam) result.get("status").get(0);
+        var param = (TokenParam) result.get("status").stream().toList().get(0).get(0);
         assertEquals("active", param.getValue());
     }
 
@@ -99,7 +102,7 @@ class SearchesTest {
     void exceptStatus() {
         var result = Searches.exceptStatus("retired");
         assertTrue(result.containsKey("status"));
-        var param = (TokenParam) result.get("status").get(0);
+        var param = (TokenParam) result.get("status").stream().toList().get(0).get(0);
         assertEquals("retired", param.getValue());
         assertEquals(TokenParamModifier.NOT, param.getModifier());
     }

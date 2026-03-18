@@ -383,7 +383,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             checkId(s);
             checkSDEUsage(measure, s);
             var sdeDef = new SdeDef(
-                    s.getId(), conceptToConceptDef(s.getCode()), s.getCriteria().getExpression());
+                    s.getId(), conceptToConceptDef(s.getCode()), s.getCriteria().getExpression(), s.getDescription());
             sdes.add(sdeDef);
         }
         return sdes;

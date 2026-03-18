@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import com.google.common.collect.Multimap;
 import java.util.Collections;
 import java.util.Map;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -32,7 +33,7 @@ class VersionSpecificHelperTest {
         var vs = new ValueSet().setId("test-vs");
         var bundle = new Bundle();
         bundle.addEntry().setResource(vs);
-        when(repo.search(any(), any(), any(Map.class))).thenReturn(bundle);
+        when(repo.search(any(), any(), any(Multimap.class))).thenReturn(bundle);
         var result = SearchHelper.searchRepositoryByCanonical(
                 repo, new org.hl7.fhir.r4.model.CanonicalType("http://example.org/ValueSet/test"));
         assertEquals("test-vs", result.getIdElement().getIdPart());
@@ -44,7 +45,7 @@ class VersionSpecificHelperTest {
         var vs = new ValueSet().setId("test-vs");
         var bundle = new Bundle();
         bundle.addEntry().setResource(vs);
-        when(repo.search(any(), any(), any(Map.class))).thenReturn(bundle);
+        when(repo.search(any(), any(), any(Multimap.class))).thenReturn(bundle);
         var result = SearchHelper.searchRepositoryByCanonical(
                 repo, new org.hl7.fhir.r4.model.CanonicalType("http://example.org/ValueSet/test|1.0"));
         assertNotNull(result);
@@ -53,7 +54,7 @@ class VersionSpecificHelperTest {
     @Test
     void searchRepositoryByCanonicalNotFoundThrows() {
         var repo = mockR4Repo();
-        when(repo.search(any(), any(), any(Map.class))).thenReturn(new Bundle());
+        when(repo.search(any(), any(), any(Multimap.class))).thenReturn(new Bundle());
         assertThrows(
                 FHIRException.class,
                 () -> SearchHelper.searchRepositoryByCanonical(

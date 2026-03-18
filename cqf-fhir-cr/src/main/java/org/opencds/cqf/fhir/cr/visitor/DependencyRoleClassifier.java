@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
-import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,19 +36,19 @@ public class DependencyRoleClassifier {
      * @param dependency the dependency information
      * @param sourceArtifact the artifact that has this dependency
      * @param dependencyArtifact the artifact being depended on (may be null if not available)
-     * @param repository the repository for looking up additional information
+     * @param resolver the conformance resource resolver for looking up base StructureDefinitions
      * @return the list of role codes
      */
     public static List<String> classifyDependencyRoles(
             IDependencyInfo dependency,
             IKnowledgeArtifactAdapter sourceArtifact,
             IKnowledgeArtifactAdapter dependencyArtifact,
-            IRepository repository) {
+            ConformanceResourceResolver resolver) {
 
         List<String> roles = new ArrayList<>();
 
         // Check if this is a key dependency using standards-based analysis
-        if (isKeyDependency(dependency, sourceArtifact, dependencyArtifact, repository)) {
+        if (isKeyDependency(dependency, sourceArtifact, dependencyArtifact, resolver)) {
             roles.add("key");
         }
 
@@ -71,18 +71,18 @@ public class DependencyRoleClassifier {
      * @param dependency the dependency information
      * @param source the source artifact
      * @param dependencyArtifact the dependency artifact (may be null)
-     * @param repository the repository for resolving profiles
+     * @param resolver the conformance resource resolver
      * @return true if this is a key dependency according to standards-based criteria
      */
     private static boolean isKeyDependency(
             IDependencyInfo dependency,
             IKnowledgeArtifactAdapter source,
             IKnowledgeArtifactAdapter dependencyArtifact,
-            IRepository repository) {
+            ConformanceResourceResolver resolver) {
 
         // Only StructureDefinition sources have a formal key element procedure
         if (source != null && source.get().fhirType().equals("StructureDefinition")) {
-            return isKeyDependencyForProfile(dependency, source, repository);
+            return isKeyDependencyForProfile(dependency, dependencyArtifact, source, resolver);
         }
 
         // For all other artifact types, there is no standards-based definition of "key"
@@ -92,40 +92,40 @@ public class DependencyRoleClassifier {
     /**
      * Uses KeyElementAnalyzer to determine if a dependency is key for a StructureDefinition.
      * <p>
-     * This implements the formal FHIR key element procedure:
-     * <ul>
-     *   <li>Step A: Build seed set (mustSupport, differential, ancestors)</li>
-     *   <li>Step B: Expand downward (mandatory children, constrained, slices, modifiers)</li>
-     *   <li>Step C: Extract ValueSet bindings from key elements</li>
-     *   <li>Step D: Walk inheritance chain</li>
-     * </ul>
+     * This implements the formal FHIR key element procedure aligned with the IG Publisher's
+     * {@code scanForKeyElements()}.
      *
      * @param dependency the dependency information
+     * @param dependencyArtifact the resolved dependency artifact (may be null)
      * @param source the StructureDefinition source artifact
-     * @param repository the repository for resolving base definitions
+     * @param resolver the conformance resource resolver
      * @return true if the dependency is a ValueSet bound to a key element
      */
     private static boolean isKeyDependencyForProfile(
-            IDependencyInfo dependency, IKnowledgeArtifactAdapter source, IRepository repository) {
+            IDependencyInfo dependency,
+            IKnowledgeArtifactAdapter dependencyArtifact,
+            IKnowledgeArtifactAdapter source,
+            ConformanceResourceResolver resolver) {
 
-        if (repository == null) {
+        if (resolver == null) {
             return false;
         }
 
         try {
-            // Check if dependency is a ValueSet
-            String dependencyRef = dependency.getReference();
-            if (dependencyRef == null || !dependencyRef.contains("ValueSet")) {
+            // Check if dependency is a ValueSet using the resolved resource type
+            if (dependencyArtifact == null
+                    || !"ValueSet".equals(dependencyArtifact.get().fhirType())) {
                 return false;
             }
 
             // Use KeyElementAnalyzer to get ValueSets bound to key elements
-            KeyElementAnalyzer analyzer = new KeyElementAnalyzer(repository);
+            FhirVersionEnum fhirVersion = resolver.getFhirVersion();
+            KeyElementAnalyzer analyzer = new KeyElementAnalyzer(resolver, fhirVersion);
             IBaseResource structureDefinition = source.get();
             Set<String> keyValueSets = analyzer.getKeyElementValueSets(structureDefinition);
 
             // Check if this dependency's canonical is in the key ValueSets
-            String dependencyCanonical = getDependencyCanonical(dependencyRef);
+            String dependencyCanonical = getDependencyCanonical(dependency.getReference());
             for (String keyVs : keyValueSets) {
                 if (canonicalsMatch(keyVs, dependencyCanonical)) {
                     return true;

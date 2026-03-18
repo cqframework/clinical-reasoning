@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -18,7 +18,11 @@ public class MeasureSupportingEvidenceTest {
 
     private static final Given given = Measure.given().repositoryFor("MeasureTest");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-    ZoneId zone = ZoneId.systemDefault();
+    // CQL DateTime literals without a timezone offset use the evaluation request
+    // timestamp's offset (i.e., the current system offset). Use a fixed ZoneOffset
+    // rather than ZoneId to avoid DST-related mismatches when the current offset
+    // differs from the date-specific offset (e.g., MST vs MDT for January dates).
+    ZoneOffset zone = ZonedDateTime.now().getOffset();
 
     ZonedDateTime mpStart = ZonedDateTime.of(2024, 1, 1, 0, 0, 0, 0, zone);
     ZonedDateTime mpEnd = ZonedDateTime.of(2024, 12, 31, 23, 59, 59, 0, zone);

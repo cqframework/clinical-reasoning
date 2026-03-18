@@ -112,10 +112,28 @@ public class MeasureEvaluationResultHandler {
         // The goal here is to do each measure/library evaluation within the context of a single subject.
         // This means that we will not switch between subject contexts while evaluating measures.
         // Once we've switched to a different subject context, the previous expression cache is dropped.
+
+        final List<String> libraryIdentIds = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers().stream()
+                .map(VersionedIdentifier::getId)
+                .toList();
+
+        logger.debug(
+                "START: Evaluate measure for library idents: (count:{}): [{}], and subjects (count={}): [{}]",
+                libraryIdentIds.size(),
+                showSubsetOfTotal(libraryIdentIds, libraryIdentIds.size()),
+                subjectIds.size(),
+                showSubsetOfTotal(subjectIds, subjectIds.size()));
+
+        final long startAllLibrariesAllSubjects = System.currentTimeMillis();
         for (String subjectId : subjectIds) {
             if (subjectId == null) {
                 throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
+            logger.debug(
+                    "Evaluate measure for library idents: (count:{}): [{}], and single subject: {}",
+                    libraryIdentIds.size(),
+                    showSubsetOfTotal(libraryIdentIds, libraryIdentIds.size()),
+                    subjectId);
             Pair<String, String> subjectInfo = getSubjectTypeAndId(subjectId);
             String subjectTypePart = subjectInfo.getLeft();
             String subjectIdPart = subjectInfo.getRight();
@@ -123,6 +141,11 @@ public class MeasureEvaluationResultHandler {
             try {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
+                final long startPerLibraryPerSubject = System.currentTimeMillis();
+                logger.debug(
+                        "START CQL evaluating libraries: (count:{}): [{}]",
+                        libraryIdentIds.size(),
+                        showSubsetOfTotal(libraryIdentIds, libraryIdentIds.size()));
                 var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
                         .getLibraryEngine()
                         .getEvaluationResult(
@@ -135,8 +158,15 @@ public class MeasureEvaluationResultHandler {
                                 null,
                                 zonedMeasurementPeriod,
                                 context);
+                logger.debug(
+                        "END CQL evaluating libraries: : (count:{}): [{}] after: {}ms",
+                        libraryIdentIds.size(),
+                        showSubsetOfTotal(libraryIdentIds, libraryIdentIds.size()),
+                        (System.currentTimeMillis() - startPerLibraryPerSubject));
 
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
+                    logger.debug("GOT CQL results for library: {}", libraryVersionedIdentifier.getId());
+
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
 
@@ -175,7 +205,21 @@ public class MeasureEvaluationResultHandler {
             }
         }
 
+        logger.debug(
+                "END: Evaluate measure for library idents: (count:{}): [{}], and subjects (count={}): [{}] after: {}ms",
+                libraryIdentIds.size(),
+                showSubsetOfTotal(libraryIdentIds, libraryIdentIds.size()),
+                subjectIds.size(),
+                showSubsetOfTotal(subjectIds, subjectIds.size()),
+                (System.currentTimeMillis() - startAllLibrariesAllSubjects));
         return resultsBuilder.build();
+    }
+
+    private static String showSubsetOfTotal(List<String> subjectIds, int subjectCount) {
+        final int previewLimit = 5;
+        return subjectCount <= previewLimit
+                ? String.join(",", subjectIds)
+                : String.join(",", subjectIds.subList(0, previewLimit)) + ",...";
     }
 
     private static Pair<String, String> getSubjectTypeAndId(String subjectId) {

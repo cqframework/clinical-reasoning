@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.cql;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -127,7 +128,7 @@ public class CqlExecutionOperationProvider {
             @OperationParam(name = "contentEndpoint", max = 1) ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint", max = 1) ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "content", max = 1) StringType content) {
-        return cqlProcessorFactory
+        return execute(() -> cqlProcessorFactory
                 .create(requestDetails)
                 .evaluate(
                         getStringValue(subject),
@@ -140,6 +141,6 @@ public class CqlExecutionOperationProvider {
                         getStringValue(content),
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_RETIRE;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -36,6 +37,7 @@ public class LibraryRetireProvider {
     @Operation(name = CRMI_OPERATION_RETIRE, idempotent = true, global = true, type = Library.class)
     @Description(shortDefinition = CRMI_OPERATION_RETIRE, value = "Retire an existing active artifact")
     public IBaseBundle withdrawOperation(@IdParam IdType id, RequestDetails requestDetails) throws FHIRException {
-        return libraryProcessorFactory.create(requestDetails).retireLibrary(Eithers.forMiddle3(id), new Parameters());
+        return execute(() ->
+                libraryProcessorFactory.create(requestDetails).retireLibrary(Eithers.forMiddle3(id), new Parameters()));
     }
 }

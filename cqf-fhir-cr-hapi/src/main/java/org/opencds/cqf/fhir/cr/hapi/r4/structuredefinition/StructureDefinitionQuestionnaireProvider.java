@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.structuredefinition;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -53,7 +54,7 @@ public class StructureDefinitionQuestionnaireProvider {
             @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
-        return (Questionnaire) questionnaireProcessorFactory
+        return execute(() -> (Questionnaire) questionnaireProcessorFactory
                 .create(requestDetails)
                 .generateQuestionnaire(
                         Eithers.forMiddle3(id),
@@ -61,7 +62,7 @@ public class StructureDefinitionQuestionnaireProvider {
                         requiredOnly == null ? Boolean.FALSE : requiredOnly.booleanValue(),
                         getEndpoint(fhirVersion, contentEndpoint),
                         getEndpoint(fhirVersion, terminologyEndpoint),
-                        null);
+                        null));
     }
 
     /**
@@ -93,7 +94,7 @@ public class StructureDefinitionQuestionnaireProvider {
             @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails) {
-        return (Questionnaire) questionnaireProcessorFactory
+        return execute(() -> (Questionnaire) questionnaireProcessorFactory
                 .create(requestDetails)
                 .generateQuestionnaire(
                         Eithers.for3(getCanonicalType(fhirVersion, canonical, url, version), null, profile),
@@ -101,6 +102,6 @@ public class StructureDefinitionQuestionnaireProvider {
                         requiredOnly == null ? Boolean.FALSE : requiredOnly.booleanValue(),
                         getEndpoint(fhirVersion, contentEndpoint),
                         getEndpoint(fhirVersion, terminologyEndpoint),
-                        null);
+                        null));
     }
 }

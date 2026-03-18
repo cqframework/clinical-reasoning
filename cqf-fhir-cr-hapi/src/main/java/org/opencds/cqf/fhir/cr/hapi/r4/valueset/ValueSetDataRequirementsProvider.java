@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.valueset;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -31,7 +32,7 @@ public class ValueSetDataRequirementsProvider {
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = ValueSet.class)
     public IBaseResource getDataRequirements(@IdParam IdType id, RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return valueSetFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null);
+        return execute(() -> valueSetFactory.create(requestDetails).dataRequirements(Eithers.forMiddle3(id), null));
     }
 
     @Operation(name = ProviderConstants.CR_OPERATION_DATAREQUIREMENTS, idempotent = true, type = ValueSet.class)
@@ -42,13 +43,13 @@ public class ValueSetDataRequirementsProvider {
             @OperationParam(name = "version") StringType version,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return valueSetFactory
+        return execute(() -> valueSetFactory
                 .create(requestDetails)
                 .dataRequirements(
                         Eithers.for3(
                                 getCanonicalType(fhirVersion, canonical, url, version),
                                 getIdType(fhirVersion, "ValueSet", id),
                                 null),
-                        null);
+                        null));
     }
 }

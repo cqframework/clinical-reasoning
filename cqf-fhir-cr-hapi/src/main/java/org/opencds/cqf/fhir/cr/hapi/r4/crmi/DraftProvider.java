@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -43,6 +44,6 @@ public class DraftProvider {
     @Description(shortDefinition = "$draft", value = "Create a new draft version of the reference artifact.")
     public Bundle draftOperation(
             @IdParam IdType id, @OperationParam(name = "version") StringType version, RequestDetails requestDetails) {
-        return r4DraftServiceFactory.create(requestDetails).draft(id, getStringValue(version));
+        return execute(() -> r4DraftServiceFactory.create(requestDetails).draft(id, getStringValue(version)));
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.dstu3.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -72,7 +73,7 @@ public class MeasureOperationsProvider {
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        return dstu3MeasureProcessorFactory
+        return execute(() -> dstu3MeasureProcessorFactory
                 .create(requestDetails)
                 .evaluateMeasure(
                         id,
@@ -85,6 +86,6 @@ public class MeasureOperationsProvider {
                         productLine,
                         additionalData,
                         parameters,
-                        terminologyEndpointParam);
+                        terminologyEndpointParam));
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_APPROVE;
 
@@ -75,7 +76,7 @@ public class ApproveProvider {
             @OperationParam(name = "artifactAssessmentRelatedArtifact") CanonicalType artifactAssessmentRelatedArtifact,
             @OperationParam(name = "artifactAssessmentAuthor") Reference artifactAssessmentAuthor,
             RequestDetails requestDetails) {
-        return r4ApproveServiceFactory
+        return execute(() -> r4ApproveServiceFactory
                 .create(requestDetails)
                 .approve(
                         id,
@@ -84,6 +85,6 @@ public class ApproveProvider {
                         getStringValue(artifactAssessmentSummary),
                         artifactAssessmentTarget,
                         artifactAssessmentRelatedArtifact,
-                        artifactAssessmentAuthor);
+                        artifactAssessmentAuthor));
     }
 }

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.crmi;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.Constants.CRMI_OPERATION_PACKAGE;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
@@ -241,7 +242,7 @@ public class PackageProvider {
             @OperationParam(name = "terminologyEndpoint") Parameters.ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws FHIRException {
-        return r4PackageServiceFactory
+        return execute(() -> r4PackageServiceFactory
                 .create(requestDetails)
                 .packageOperation(
                         id,
@@ -262,6 +263,6 @@ public class PackageProvider {
                         getStringValue(bundleType),
                         packageOnly,
                         artifactEndpointConfiguration,
-                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint));
+                        (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 }

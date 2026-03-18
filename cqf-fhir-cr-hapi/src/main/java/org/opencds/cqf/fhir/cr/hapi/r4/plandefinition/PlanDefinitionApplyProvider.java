@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.hapi.r4.plandefinition;
 
 import static ca.uhn.fhir.rest.annotation.OperationParam.MAX_UNLIMITED;
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
@@ -96,7 +97,7 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
+        return execute(() -> planDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
                         Eithers.forMiddle3(id),
@@ -115,7 +116,7 @@ public class PlanDefinitionApplyProvider {
                         prefetchData,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 
     /**
@@ -179,7 +180,7 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
+        return execute(() -> planDefinitionProcessorFactory
                 .create(requestDetails)
                 .apply(
                         Eithers.for3(getCanonicalType(fhirVersion, canonical, url, version), null, planDefinition),
@@ -198,7 +199,7 @@ public class PlanDefinitionApplyProvider {
                         prefetchData,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 
     /**
@@ -256,7 +257,7 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
+        return execute(() -> planDefinitionProcessorFactory
                 .create(requestDetails)
                 .applyR5(
                         Eithers.forMiddle3(id),
@@ -275,7 +276,7 @@ public class PlanDefinitionApplyProvider {
                         prefetchData,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 
     /**
@@ -339,7 +340,7 @@ public class PlanDefinitionApplyProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
+        return execute(() -> planDefinitionProcessorFactory
                 .create(requestDetails)
                 .applyR5(
                         Eithers.for3(getCanonicalType(fhirVersion, canonical, url, version), null, planDefinition),
@@ -358,6 +359,6 @@ public class PlanDefinitionApplyProvider {
                         prefetchData,
                         getEndpoint(fhirVersion, dataEndpoint),
                         getEndpoint(fhirVersion, contentEndpoint),
-                        getEndpoint(fhirVersion, terminologyEndpoint));
+                        getEndpoint(fhirVersion, terminologyEndpoint)));
     }
 }

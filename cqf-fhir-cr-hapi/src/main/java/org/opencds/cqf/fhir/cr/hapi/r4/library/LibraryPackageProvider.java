@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.library;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
@@ -85,7 +86,7 @@ public class LibraryPackageProvider {
         List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
                 ? null
                 : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
-        return libraryProcessorFactory
+        return execute(() -> libraryProcessorFactory
                 .create(requestDetails)
                 .packageLibrary(
                         Eithers.forMiddle3(id),
@@ -102,7 +103,7 @@ public class LibraryPackageProvider {
                                                 .collect(Collectors.toList()),
                                 artifactEndpointConfigurationParam,
                                 terminologyEndpointParam,
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
@@ -155,7 +156,7 @@ public class LibraryPackageProvider {
         List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
                 ? null
                 : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
-        return libraryProcessorFactory
+        return execute(() -> libraryProcessorFactory
                 .create(requestDetails)
                 .packageLibrary(
                         Eithers.for3(
@@ -175,6 +176,6 @@ public class LibraryPackageProvider {
                                                 .collect(Collectors.toList()),
                                 artifactEndpointConfigurationParam,
                                 terminologyEndpointParam,
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

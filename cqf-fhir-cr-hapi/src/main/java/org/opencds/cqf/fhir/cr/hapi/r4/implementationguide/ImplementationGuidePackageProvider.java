@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.implementationguide;
 
 import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.getCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.cr.hapi.common.IdHelper.getIdType;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
@@ -51,14 +52,14 @@ public class ImplementationGuidePackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return implementationGuideProcessorFactory
+        return execute(() -> implementationGuideProcessorFactory
                 .create(requestDetails)
                 .packageImplementationGuide(
                         Eithers.forMiddle3(id),
                         packageParameters(
                                 fhirVersion,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
@@ -83,7 +84,7 @@ public class ImplementationGuidePackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return implementationGuideProcessorFactory
+        return execute(() -> implementationGuideProcessorFactory
                 .create(requestDetails)
                 .packageImplementationGuide(
                         Eithers.for3(
@@ -93,6 +94,6 @@ public class ImplementationGuidePackageProvider {
                         packageParameters(
                                 fhirVersion,
                                 getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+                                usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

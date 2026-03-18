@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CrExceptionTranslator.execute;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -87,7 +88,7 @@ public class MeasureOperationsProvider {
         var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
-        return r4MeasureServiceFactory
+        return execute(() -> r4MeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
                         Eithers.forMiddle3(id),
@@ -102,7 +103,7 @@ public class MeasureOperationsProvider {
                         additionalData,
                         parameters,
                         productLine,
-                        practitioner);
+                        practitioner));
     }
 
     /**
@@ -156,7 +157,7 @@ public class MeasureOperationsProvider {
         var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
-        return r4MultiMeasureServiceFactory
+        return execute(() -> r4MultiMeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
                         measureId, // List<IdType>
@@ -172,6 +173,6 @@ public class MeasureOperationsProvider {
                         additionalData,
                         parameters,
                         productLine,
-                        reporter);
+                        reporter));
     }
 }

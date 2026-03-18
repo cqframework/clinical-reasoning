@@ -232,39 +232,27 @@ public interface ResourceMatcher {
     }
 
     default boolean isMatchReference(IQueryParameterType param, IBase pathResult) {
+        var paramValue = ((ReferenceParam) param).getValue();
         if (pathResult instanceof IBaseReference reference1) {
-            String refVal = null;
-            if (reference1.getReferenceElement() != null
-                    && !isEmpty(reference1.getReferenceElement().getValue())) {
-                refVal = reference1.getReferenceElement().getValue();
-            } else if (reference1.getResource() != null) {
-                refVal = reference1.getResource().getIdElement().getValue();
-            } else {
-                throw new UnsupportedOperationException("No reference found");
-            }
-            return refVal.equals(((ReferenceParam) param).getValue());
+            return paramValue.equals(extractReferenceValue(reference1));
         } else if (pathResult instanceof IPrimitiveType<?> type1) {
-            return type1.getValueAsString().equals(((ReferenceParam) param).getValue());
-        } else if (pathResult instanceof Iterable<?> iterable) {
-            for (var element : iterable) {
-                if (element instanceof IBaseReference reference
-                        && reference.getReferenceElement().getValue().equals(((ReferenceParam) param).getValue())) {
-                    return true;
-                }
-                if (element instanceof IPrimitiveType<?> type
-                        && type.getValueAsString().equals(((ReferenceParam) param).getValue())) {
-                    return true;
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException(
-                    "Expected Reference element, found " + pathResult.getClass().getSimpleName());
+            return paramValue.equals(type1.getValueAsString());
         }
-        return false;
+        throw new UnsupportedOperationException(
+                "Expected Reference element, found " + pathResult.getClass().getSimpleName());
+    }
+
+    private static String extractReferenceValue(IBaseReference reference) {
+        if (reference.getReferenceElement() != null
+                && !isEmpty(reference.getReferenceElement().getValue())) {
+            return reference.getReferenceElement().getValue();
+        } else if (reference.getResource() != null) {
+            return reference.getResource().getIdElement().getValue();
+        }
+        throw new UnsupportedOperationException("No reference found");
     }
 
     default boolean isMatchDate(DateParam param, IBase pathResult) {
-        DateRangeParam dateRange;
         // date, dateTime and instant are PrimitiveType<Date>
         if (pathResult instanceof IPrimitiveType<?> type1) {
             var result = type1.getValue();
@@ -398,6 +386,9 @@ public interface ResourceMatcher {
     }
 
     default boolean isMatchUri(UriParam param, IBase pathResult) {
+        if (param.getValue() == null) {
+            return false;
+        }
         if (pathResult instanceof IPrimitiveType<?> type) {
             return param.getValue().equals(type.getValue());
         }

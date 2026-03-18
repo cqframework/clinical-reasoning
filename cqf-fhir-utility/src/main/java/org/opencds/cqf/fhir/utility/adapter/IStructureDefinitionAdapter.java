@@ -10,11 +10,23 @@ public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
         return resolvePathString(get(), "type");
     }
 
+    String getDerivation();
+
     IPrimitiveType<String> getBaseDefinition();
 
     boolean hasSnapshot();
 
     List<IElementDefinitionAdapter> getSnapshotElements();
+
+    /**
+     * Returns all snapshot elements including the root element.
+     */
+    List<IElementDefinitionAdapter> getAllSnapshotElements();
+
+    /**
+     * Returns all differential elements including the root element.
+     */
+    List<IElementDefinitionAdapter> getAllDifferentialElements();
 
     List<IElementDefinitionAdapter> getDifferentialElements();
 

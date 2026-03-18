@@ -45,8 +45,9 @@ public class CrProcessorConfig {
     }
 
     @Bean
-    IImplementationGuideProcessorFactory implementationGuideProcessorFactory(IRepositoryFactory repositoryFactory) {
-        return rd -> new ImplementationGuideProcessor(repositoryFactory.create(rd));
+    IImplementationGuideProcessorFactory implementationGuideProcessorFactory(
+            IRepositoryFactory repositoryFactory, CrSettings crSettings) {
+        return rd -> new ImplementationGuideProcessor(repositoryFactory.create(rd), crSettings);
     }
 
     @Bean

@@ -32,15 +32,16 @@ public class MeasureConstants {
             "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
     public static final String EXT_SUPPORTING_EVIDENCE_DEFINITION_URL =
             "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition";
-    // http://hl7.org/fhir/us/davinci-deqm/2023Jan/StructureDefinition-extension-criteriaReference.html
+    // DEQM STU5 deprecated extension-criteriaReference in favor of cqf-criteriaReference
     public static final String EXT_CRITERIA_REFERENCE_URL =
-            "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";
+            "http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference";
     public static final String EXT_SDE_DISAGGREGATE_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-Measure.supplementalDataElement.disaggregate";
     public static final String EXT_POPULATION_DESCRIPTION_URL =
-            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description";
+            "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription";
+    // DEQM STU5: R5 cross-version extension for MeasureReport.supplementalData
     public static final String EXT_SDE_REFERENCE_URL =
-            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData";
     public static final String EXT_OPERATION_OUTCOME_REFERENCE_URL =
             "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.operationOutcome.reference";
     public static final String MEASUREMENT_PERIOD_PARAMETER_NAME = "Measurement Period";

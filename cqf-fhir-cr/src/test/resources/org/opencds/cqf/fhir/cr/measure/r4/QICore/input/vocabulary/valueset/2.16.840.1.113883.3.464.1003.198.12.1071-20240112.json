@@ -1,0 +1,99 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.198.12.1071-20240112",
+  "meta": {
+    "versionId": "21",
+    "lastUpdated": "2024-01-12T01:09:53.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-10"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2024-01-12"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1071",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.198.12.1071"
+    }
+  ],
+  "version": "20240112",
+  "name": "UnilateralMastectomyUnspecifiedLaterality",
+  "title": "Unilateral Mastectomy, Unspecified Laterality",
+  "status": "active",
+  "date": "2024-01-12T01:09:53-05:00",
+  "publisher": "NCQA PHEMUR",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for a diagnosis of a unilateral mastectomy where the side was not specified.),(Data Element Scope: This value set may use a model element related to Diagnosis.),(Inclusion Criteria: Includes concepts that represent a diagnosis of a unilateral mastectomy where the side was unspecified.),(Exclusion Criteria: Excludes concepts that represent a diagnosis of a bilateral mastectomy or a unilateral mastectomy where the side is specified.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.11.1090"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.11.1089"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:b4f4017e-92b2-4da7-bdb4-0bab3ff28999",
+    "timestamp": "2025-08-28T16:57:07-04:00",
+    "total": 2,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "248802009",
+        "display": "Absence of breast (finding)"
+      },
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10-cm",
+        "inactive": false,
+        "version": "2025",
+        "code": "Z90.10",
+        "display": "Acquired absence of unspecified breast and nipple"
+      }
+    ]
+  }
+}

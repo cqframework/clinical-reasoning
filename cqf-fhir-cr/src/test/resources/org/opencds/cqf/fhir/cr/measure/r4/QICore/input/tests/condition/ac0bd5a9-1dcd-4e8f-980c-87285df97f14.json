@@ -1,0 +1,41 @@
+{
+  "resourceType": "Condition",
+  "id": "ac0bd5a9-1dcd-4e8f-980c-87285df97f14",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis"
+    ]
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis",
+          "display": "Encounter Diagnosis"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "217083007",
+        "display": "Fall on or from stairs or steps (event)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/14b87edd-7f1e-4f6a-9910-f905966ec904"
+  },
+  "onsetDateTime": "2025-06-30T23:59:59.000+00:00"
+}

@@ -1,0 +1,44 @@
+{
+  "resourceType": "Observation",
+  "id": "81b6370c-7cb9-4d9e-b83b-c4a7ebc07cfb",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-screening-assessment"
+    ]
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "survey"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "71007-9",
+        "display": "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/ffbb03e1-7188-42ef-8deb-c6cf3f790bfe"
+  },
+  "effectivePeriod": {
+    "start": "2023-12-31T23:59:59.000+00:00",
+    "end": "2023-12-31T23:59:59.000+00:00"
+  },
+  "dataAbsentReason": {
+    "extension": [
+      {
+        "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+        "valueCode": "unknown"
+      }
+    ]
+  }
+}

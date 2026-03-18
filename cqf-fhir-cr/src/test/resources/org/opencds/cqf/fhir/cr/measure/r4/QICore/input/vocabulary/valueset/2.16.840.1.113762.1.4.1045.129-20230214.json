@@ -1,0 +1,158 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.129-20230214",
+  "meta": {
+    "versionId": "31",
+    "lastUpdated": "2024-02-01T15:06:57.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Yale Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-12"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2023-02-14"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.129",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1045.129"
+    }
+  ],
+  "version": "20230214",
+  "name": "WhiteBloodCellsCountLabTest",
+  "title": "White Blood Cells Count Lab Test",
+  "status": "active",
+  "date": "2023-02-14T01:02:32-05:00",
+  "publisher": "Yale",
+  "description": "CCDE",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for laboratory tests measuring white blood cells.),(Data Element Scope: This value set may use a model element related to Laboratory Test.),(Inclusion Criteria: Includes concepts that represent a laboratory test measuring white blood cell count in the specimen source of blood.),(Exclusion Criteria: No exclusions.)",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "12227-5",
+            "display": "Leukocytes [#/volume] corrected for nucleated erythrocytes in Blood"
+          },
+          {
+            "code": "26464-8",
+            "display": "Leukocytes [#/volume] in Blood"
+          },
+          {
+            "code": "33256-9",
+            "display": "Leukocytes [#/volume] corrected for nucleated erythrocytes in Blood by Automated count"
+          },
+          {
+            "code": "49498-9",
+            "display": "Leukocytes [#/volume] in Blood by Estimate"
+          },
+          {
+            "code": "6690-2",
+            "display": "Leukocytes [#/volume] in Blood by Automated count"
+          },
+          {
+            "code": "804-5",
+            "display": "Leukocytes [#/volume] in Blood by Manual count"
+          },
+          {
+            "code": "92635-2",
+            "display": "Leukocytes [#/volume] in Buffy Coat"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:67d72230-6f3d-4f54-a6b3-d868c215ccc6",
+    "timestamp": "2025-08-28T17:01:40-04:00",
+    "total": 7,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "12227-5",
+        "display": "Leukocytes [#/volume] corrected for nucleated erythrocytes in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "26464-8",
+        "display": "Leukocytes [#/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "33256-9",
+        "display": "Leukocytes [#/volume] corrected for nucleated erythrocytes in Blood by Automated count"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "49498-9",
+        "display": "Leukocytes [#/volume] in Blood by Estimate"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "6690-2",
+        "display": "Leukocytes [#/volume] in Blood by Automated count"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "804-5",
+        "display": "Leukocytes [#/volume] in Blood by Manual count"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "92635-2",
+        "display": "Leukocytes [#/volume] in Buffy Coat"
+      }
+    ]
+  }
+}

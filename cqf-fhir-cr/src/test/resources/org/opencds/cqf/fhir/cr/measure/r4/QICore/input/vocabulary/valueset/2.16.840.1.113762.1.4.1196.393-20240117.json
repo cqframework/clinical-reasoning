@@ -1,0 +1,1092 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1196.393-20240117",
+  "meta": {
+    "versionId": "39",
+    "lastUpdated": "2024-02-22T15:25:56.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Mathematica PSI Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-02-05"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2024-01-17"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1196.393",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1196.393"
+    }
+  ],
+  "version": "20240117",
+  "name": "HypoglycemicsSevereHypoglycemia",
+  "title": "Hypoglycemics Severe Hypoglycemia",
+  "status": "active",
+  "date": "2024-01-17T01:08:53-05:00",
+  "publisher": "Mathematica PSI Steward",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for medications capable of causing severe hypoglycemia.),(Data Element Scope: This value set may use a model element related to Medication.),(Inclusion Criteria: Includes concepts that represent insulin, non-insulin injectable antidiabetics, and oral antidiabetic medication.),(Exclusion Criteria: Excludes concepts that represent medications used to treat diabetes mellitus but are not commonly associated with severe hypoglycemia.)",
+  "compose": {
+    "include": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "concept": [
+          {
+            "code": "1361493",
+            "display": "glimepiride 6 MG Oral Tablet"
+          },
+          {
+            "code": "1361495",
+            "display": "glimepiride 8 MG Oral Tablet"
+          },
+          {
+            "code": "153842",
+            "display": "glimepiride 3 MG Oral Tablet"
+          },
+          {
+            "code": "1543202",
+            "display": "insulin, regular, human 4 UNT Inhalation Powder"
+          },
+          {
+            "code": "1544488",
+            "display": "insulin, regular, human 8 UNT Inhalation Powder"
+          },
+          {
+            "code": "1551295",
+            "display": "0.5 ML dulaglutide 1.5 MG/ML Auto-Injector"
+          },
+          {
+            "code": "1551304",
+            "display": "0.5 ML dulaglutide 3 MG/ML Auto-Injector"
+          },
+          {
+            "code": "1604539",
+            "display": "1.5 ML insulin glargine 300 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1652239",
+            "display": "3 ML insulin lispro 200 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1652639",
+            "display": "3 ML insulin lispro 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1652644",
+            "display": "3 ML insulin lispro 100 UNT/ML Cartridge"
+          },
+          {
+            "code": "1653196",
+            "display": "3 ML insulin aspart, human 100 UNT/ML Cartridge"
+          },
+          {
+            "code": "1653202",
+            "display": "3 ML insulin aspart, human 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1654862",
+            "display": "3 ML insulin isophane, human 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1654910",
+            "display": "insulin, regular, human 12 UNT Inhalation Powder"
+          },
+          {
+            "code": "1670011",
+            "display": "3 ML insulin degludec 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1670021",
+            "display": "3 ML insulin degludec 200 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1731315",
+            "display": "3 ML insulin, regular, human 500 UNT/ML Pen Injector"
+          },
+          {
+            "code": "1798387",
+            "display": "{90 (insulin, regular, human 4 UNT Inhalation Powder) / 90 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+          },
+          {
+            "code": "1860167",
+            "display": "3 ML insulin degludec 100 UNT/ML / liraglutide 3.6 MG/ML Pen Injector"
+          },
+          {
+            "code": "1862101",
+            "display": "{60 (insulin, regular, human 12 UNT Inhalation Powder) / 60 (insulin, regular, human 4 UNT Inhalation Powder) / 60 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+          },
+          {
+            "code": "1926331",
+            "display": "0.5 UNT Doses 3 ML insulin lispro 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "197495",
+            "display": "chlorpropamide 100 MG Oral Tablet"
+          },
+          {
+            "code": "197496",
+            "display": "chlorpropamide 250 MG Oral Tablet"
+          },
+          {
+            "code": "197737",
+            "display": "glyburide 1.25 MG Oral Tablet"
+          },
+          {
+            "code": "198292",
+            "display": "tolazamide 250 MG Oral Tablet"
+          },
+          {
+            "code": "198293",
+            "display": "tolazamide 500 MG Oral Tablet"
+          },
+          {
+            "code": "198294",
+            "display": "tolbutamide 500 MG Oral Tablet"
+          },
+          {
+            "code": "199245",
+            "display": "glimepiride 1 MG Oral Tablet"
+          },
+          {
+            "code": "199246",
+            "display": "glimepiride 2 MG Oral Tablet"
+          },
+          {
+            "code": "199247",
+            "display": "glimepiride 4 MG Oral Tablet"
+          },
+          {
+            "code": "2002419",
+            "display": "3 ML insulin glargine 300 UNT/ML Pen Injector"
+          },
+          {
+            "code": "200256",
+            "display": "repaglinide 1 MG Oral Tablet"
+          },
+          {
+            "code": "200257",
+            "display": "repaglinide 0.5 MG Oral Tablet"
+          },
+          {
+            "code": "200258",
+            "display": "repaglinide 2 MG Oral Tablet"
+          },
+          {
+            "code": "2100028",
+            "display": "{90 (insulin, regular, human 12 UNT Inhalation Powder) / 90 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+          },
+          {
+            "code": "2107520",
+            "display": "insulin degludec 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "2179744",
+            "display": "100 ML insulin, regular, human 1 UNT/ML Injection"
+          },
+          {
+            "code": "2206090",
+            "display": "3 ML insulin, regular, human 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2268064",
+            "display": "Sensor 3 ML insulin glargine 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2380231",
+            "display": "insulin lispro-aabc 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "2380254",
+            "display": "3 ML insulin lispro-aabc 200 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2380259",
+            "display": "3 ML insulin lispro-aabc 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2380267",
+            "display": "Sensor 3 ML insulin lispro-aabc 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2395777",
+            "display": "0.5 ML dulaglutide 6 MG/ML Auto-Injector"
+          },
+          {
+            "code": "2395783",
+            "display": "0.5 ML dulaglutide 9 MG/ML Auto-Injector"
+          },
+          {
+            "code": "242120",
+            "display": "insulin lispro 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "249220",
+            "display": "insulin, regular, human 500 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "2563971",
+            "display": "3 ML insulin glargine-yfgn 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2563976",
+            "display": "insulin glargine-yfgn 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "2589008",
+            "display": "3 ML insulin glargine-aglr 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "259111",
+            "display": "insulin lispro 25 UNT/ML / insulin lispro protamine, human 75 UNT/ML Injectable Suspension"
+          },
+          {
+            "code": "260265",
+            "display": "insulin lispro 50 UNT/ML / insulin lispro protamine, human 50 UNT/ML Injectable Suspension"
+          },
+          {
+            "code": "2621571",
+            "display": "Sensor 3 ML insulin lispro 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "2642808",
+            "display": "1.6 ML insulin aspart, human 100 UNT/ML Cartridge"
+          },
+          {
+            "code": "2644768",
+            "display": "{9 (insulin, regular, human 12 UNT Inhalation Powder) / 9 (insulin, regular, human 4 UNT Inhalation Powder) / 9 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+          },
+          {
+            "code": "310488",
+            "display": "glipizide 10 MG Oral Tablet"
+          },
+          {
+            "code": "310489",
+            "display": "24 HR glipizide 2.5 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "310490",
+            "display": "glipizide 5 MG Oral Tablet"
+          },
+          {
+            "code": "310534",
+            "display": "glyburide 2.5 MG Oral Tablet"
+          },
+          {
+            "code": "310536",
+            "display": "glyburide 3 MG Oral Tablet"
+          },
+          {
+            "code": "310537",
+            "display": "glyburide 5 MG Oral Tablet"
+          },
+          {
+            "code": "310539",
+            "display": "glyburide 6 MG Oral Tablet"
+          },
+          {
+            "code": "311028",
+            "display": "insulin isophane, human 100 UNT/ML Injectable Suspension"
+          },
+          {
+            "code": "311034",
+            "display": "insulin, regular, human 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "311040",
+            "display": "insulin aspart, human 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "311041",
+            "display": "insulin glargine 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "311048",
+            "display": "insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Injectable Suspension"
+          },
+          {
+            "code": "311919",
+            "display": "nateglinide 120 MG Oral Tablet"
+          },
+          {
+            "code": "314000",
+            "display": "glyburide 1.5 MG Oral Tablet"
+          },
+          {
+            "code": "314006",
+            "display": "24 HR glipizide 5 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "314142",
+            "display": "nateglinide 60 MG Oral Tablet"
+          },
+          {
+            "code": "315107",
+            "display": "24 HR glipizide 10 MG Extended Release Oral Tablet"
+          },
+          {
+            "code": "351297",
+            "display": "insulin aspart protamine, human 70 UNT/ML / insulin aspart, human 30 UNT/ML Injectable Suspension"
+          },
+          {
+            "code": "379804",
+            "display": "glipizide 2.5 MG Oral Tablet"
+          },
+          {
+            "code": "484322",
+            "display": "insulin detemir 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "485210",
+            "display": "insulin glulisine, human 100 UNT/ML Injectable Solution"
+          },
+          {
+            "code": "647237",
+            "display": "glimepiride 2 MG / pioglitazone 30 MG Oral Tablet"
+          },
+          {
+            "code": "647239",
+            "display": "glimepiride 4 MG / pioglitazone 30 MG Oral Tablet"
+          },
+          {
+            "code": "847187",
+            "display": "3 ML insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Pen Injector"
+          },
+          {
+            "code": "847191",
+            "display": "3 ML insulin aspart protamine, human 70 UNT/ML / insulin aspart, human 30 UNT/ML Pen Injector"
+          },
+          {
+            "code": "847211",
+            "display": "3 ML insulin lispro 50 UNT/ML / insulin lispro protamine, human 50 UNT/ML Pen Injector"
+          },
+          {
+            "code": "847230",
+            "display": "3 ML insulin glargine 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "847239",
+            "display": "3 ML insulin detemir 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "847252",
+            "display": "3 ML insulin lispro 25 UNT/ML / insulin lispro protamine, human 75 UNT/ML Pen Injector"
+          },
+          {
+            "code": "847259",
+            "display": "3 ML insulin glulisine, human 100 UNT/ML Pen Injector"
+          },
+          {
+            "code": "861731",
+            "display": "glipizide 2.5 MG / metformin hydrochloride 250 MG Oral Tablet"
+          },
+          {
+            "code": "861736",
+            "display": "glipizide 2.5 MG / metformin hydrochloride 500 MG Oral Tablet"
+          },
+          {
+            "code": "861740",
+            "display": "glipizide 5 MG / metformin hydrochloride 500 MG Oral Tablet"
+          },
+          {
+            "code": "861743",
+            "display": "glyburide 1.25 MG / metformin hydrochloride 250 MG Oral Tablet"
+          },
+          {
+            "code": "861748",
+            "display": "glyburide 2.5 MG / metformin hydrochloride 500 MG Oral Tablet"
+          },
+          {
+            "code": "861753",
+            "display": "glyburide 5 MG / metformin hydrochloride 500 MG Oral Tablet"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:8e45e300-7e78-45a8-81ae-848dbeec1d95",
+    "timestamp": "2025-08-28T16:52:29-04:00",
+    "total": 92,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1361493",
+        "display": "glimepiride 6 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1361495",
+        "display": "glimepiride 8 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "153842",
+        "display": "glimepiride 3 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1543202",
+        "display": "insulin, regular, human 4 UNT Inhalation Powder"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1544488",
+        "display": "insulin, regular, human 8 UNT Inhalation Powder"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1551295",
+        "display": "0.5 ML dulaglutide 1.5 MG/ML Auto-Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1551304",
+        "display": "0.5 ML dulaglutide 3 MG/ML Auto-Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1604539",
+        "display": "1.5 ML insulin glargine 300 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1652239",
+        "display": "3 ML insulin lispro 200 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1652639",
+        "display": "3 ML insulin lispro 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1652644",
+        "display": "3 ML insulin lispro 100 UNT/ML Cartridge"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1653196",
+        "display": "3 ML insulin aspart, human 100 UNT/ML Cartridge"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1653202",
+        "display": "3 ML insulin aspart, human 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1654862",
+        "display": "3 ML insulin isophane, human 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1654910",
+        "display": "insulin, regular, human 12 UNT Inhalation Powder"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1670011",
+        "display": "3 ML insulin degludec 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1670021",
+        "display": "3 ML insulin degludec 200 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1731315",
+        "display": "3 ML insulin, regular, human 500 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1798387",
+        "display": "{90 (insulin, regular, human 4 UNT Inhalation Powder) / 90 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1860167",
+        "display": "3 ML insulin degludec 100 UNT/ML / liraglutide 3.6 MG/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1862101",
+        "display": "{60 (insulin, regular, human 12 UNT Inhalation Powder) / 60 (insulin, regular, human 4 UNT Inhalation Powder) / 60 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "1926331",
+        "display": "0.5 UNT Doses 3 ML insulin lispro 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "197495",
+        "display": "chlorpropamide 100 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "197496",
+        "display": "chlorpropamide 250 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "197737",
+        "display": "glyburide 1.25 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "198292",
+        "display": "tolazamide 250 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "198293",
+        "display": "tolazamide 500 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "198294",
+        "display": "tolbutamide 500 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "199245",
+        "display": "glimepiride 1 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "199246",
+        "display": "glimepiride 2 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "199247",
+        "display": "glimepiride 4 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2002419",
+        "display": "3 ML insulin glargine 300 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "200256",
+        "display": "repaglinide 1 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "200257",
+        "display": "repaglinide 0.5 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "200258",
+        "display": "repaglinide 2 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2100028",
+        "display": "{90 (insulin, regular, human 12 UNT Inhalation Powder) / 90 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2107520",
+        "display": "insulin degludec 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2179744",
+        "display": "100 ML insulin, regular, human 1 UNT/ML Injection"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2206090",
+        "display": "3 ML insulin, regular, human 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2268064",
+        "display": "Sensor 3 ML insulin glargine 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2380231",
+        "display": "insulin lispro-aabc 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2380254",
+        "display": "3 ML insulin lispro-aabc 200 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2380259",
+        "display": "3 ML insulin lispro-aabc 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2380267",
+        "display": "Sensor 3 ML insulin lispro-aabc 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2395777",
+        "display": "0.5 ML dulaglutide 6 MG/ML Auto-Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2395783",
+        "display": "0.5 ML dulaglutide 9 MG/ML Auto-Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "242120",
+        "display": "insulin lispro 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "249220",
+        "display": "insulin, regular, human 500 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2563971",
+        "display": "3 ML insulin glargine-yfgn 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2563976",
+        "display": "insulin glargine-yfgn 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2589008",
+        "display": "3 ML insulin glargine-aglr 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "259111",
+        "display": "insulin lispro 25 UNT/ML / insulin lispro protamine, human 75 UNT/ML Injectable Suspension"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "260265",
+        "display": "insulin lispro 50 UNT/ML / insulin lispro protamine, human 50 UNT/ML Injectable Suspension"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2621571",
+        "display": "Sensor 3 ML insulin lispro 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2642808",
+        "display": "1.6 ML insulin aspart, human 100 UNT/ML Cartridge"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "2644768",
+        "display": "{9 (insulin, regular, human 12 UNT Inhalation Powder) / 9 (insulin, regular, human 4 UNT Inhalation Powder) / 9 (insulin, regular, human 8 UNT Inhalation Powder) } Pack"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310488",
+        "display": "glipizide 10 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310489",
+        "display": "24 HR glipizide 2.5 MG Extended Release Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310490",
+        "display": "glipizide 5 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310534",
+        "display": "glyburide 2.5 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310536",
+        "display": "glyburide 3 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310537",
+        "display": "glyburide 5 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "310539",
+        "display": "glyburide 6 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "311028",
+        "display": "insulin isophane, human 100 UNT/ML Injectable Suspension"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "311034",
+        "display": "insulin, regular, human 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "311040",
+        "display": "insulin aspart, human 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "311041",
+        "display": "insulin glargine 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "311048",
+        "display": "insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Injectable Suspension"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "311919",
+        "display": "nateglinide 120 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "314000",
+        "display": "glyburide 1.5 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "314006",
+        "display": "24 HR glipizide 5 MG Extended Release Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "314142",
+        "display": "nateglinide 60 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "315107",
+        "display": "24 HR glipizide 10 MG Extended Release Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "351297",
+        "display": "insulin aspart protamine, human 70 UNT/ML / insulin aspart, human 30 UNT/ML Injectable Suspension"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "379804",
+        "display": "glipizide 2.5 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "484322",
+        "display": "insulin detemir 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "485210",
+        "display": "insulin glulisine, human 100 UNT/ML Injectable Solution"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "647237",
+        "display": "glimepiride 2 MG / pioglitazone 30 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "647239",
+        "display": "glimepiride 4 MG / pioglitazone 30 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847187",
+        "display": "3 ML insulin isophane, human 70 UNT/ML / insulin, regular, human 30 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847191",
+        "display": "3 ML insulin aspart protamine, human 70 UNT/ML / insulin aspart, human 30 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847211",
+        "display": "3 ML insulin lispro 50 UNT/ML / insulin lispro protamine, human 50 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847230",
+        "display": "3 ML insulin glargine 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847239",
+        "display": "3 ML insulin detemir 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847252",
+        "display": "3 ML insulin lispro 25 UNT/ML / insulin lispro protamine, human 75 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "847259",
+        "display": "3 ML insulin glulisine, human 100 UNT/ML Pen Injector"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "861731",
+        "display": "glipizide 2.5 MG / metformin hydrochloride 250 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "861736",
+        "display": "glipizide 2.5 MG / metformin hydrochloride 500 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "861740",
+        "display": "glipizide 5 MG / metformin hydrochloride 500 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "861743",
+        "display": "glyburide 1.25 MG / metformin hydrochloride 250 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "861748",
+        "display": "glyburide 2.5 MG / metformin hydrochloride 500 MG Oral Tablet"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "inactive": false,
+        "version": "01062025",
+        "code": "861753",
+        "display": "glyburide 5 MG / metformin hydrochloride 500 MG Oral Tablet"
+      }
+    ]
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1025-20170504",
+  "meta": {
+    "versionId": "17",
+    "lastUpdated": "2023-12-21T17:43:03.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-02-04"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2017-05-04"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.101.12.1025"
+    }
+  ],
+  "version": "20170504",
+  "name": "PreventiveCareServicesEstablishedOfficeVisit18AndUp",
+  "title": "Preventive Care Services Established Office Visit, 18 and Up",
+  "status": "active",
+  "experimental": false,
+  "date": "2017-05-04T01:00:13-04:00",
+  "publisher": "NCQA PHEMUR",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for encounters for preventive care.),(Data Element Scope: This value set may use a model element related to Encounter.),(Inclusion Criteria: Includes concepts that represent an encounter for comprehensive preventive medicine reevaluation and management of an established patient 18 years of age or over.),(Exclusion Criteria: Excludes initial visits for new patients.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1125"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:c6544b60-504c-4422-baf1-1fec2e0e4aac",
+    "timestamp": "2025-08-28T16:52:24-04:00",
+    "total": 3,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99395",
+        "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 18-39 years"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99396",
+        "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 40-64 years"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "99397",
+        "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 65 years and older"
+      }
+    ]
+  }
+}

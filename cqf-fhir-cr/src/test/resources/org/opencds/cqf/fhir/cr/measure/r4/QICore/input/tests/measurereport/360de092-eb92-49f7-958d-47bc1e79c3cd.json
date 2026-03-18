@@ -1,0 +1,367 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "360de092-eb92-49f7-958d-47bc1e79c3cd",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/test-case-cqfm"
+    ]
+  },
+  "contained": [
+    {
+      "resourceType": "Parameters",
+      "id": "433bcc97-81f7-4078-a8fc-8ba1b4b38e16-parameters",
+      "parameter": [
+        {
+          "name": "subject",
+          "valueString": "14193177-2f4e-4480-a471-87ff9d137a8b"
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters",
+      "valueReference": {
+        "reference": "#433bcc97-81f7-4078-a8fc-8ba1b4b38e16-parameters"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-testCaseDescription",
+      "valueMarkdown": "Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & a Palliative Care Observation that starts on 1/1 of the MP During Observation Interval."
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-isTestCase",
+      "valueBoolean": true
+    }
+  ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "https://madie.cms.gov/Measure/CMS125FHIRBreastCancerScreen",
+  "period": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "group": [
+    {
+      "id": "Group_1",
+      "population": [
+        {
+          "id": "InitialPopulation_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "Denominator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator",
+                "display": "Denominator"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "DenominatorExclusion_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "denominator-exclusion",
+                "display": "Denominator Exclusion"
+              }
+            ]
+          },
+          "count": 1
+        },
+        {
+          "id": "Numerator_1",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "numerator",
+                "display": "Numerator"
+              }
+            ]
+          },
+          "count": 0
+        }
+      ],
+      "measureScore": {
+        "value": 1.0
+      },
+      "stratifier": [
+        {
+          "id": "Stratification_1_1",
+          "stratum": [
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "id": "InitialPopulation_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "Denominator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "DenominatorExclusion_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "Numerator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 0
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "id": "InitialPopulation_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 1
+                },
+                {
+                  "id": "Denominator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 1
+                },
+                {
+                  "id": "DenominatorExclusion_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 1
+                },
+                {
+                  "id": "Numerator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "Stratification_1_2",
+          "stratum": [
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "id": "InitialPopulation_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 1
+                },
+                {
+                  "id": "Denominator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 1
+                },
+                {
+                  "id": "DenominatorExclusion_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 1
+                },
+                {
+                  "id": "Numerator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 0
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "id": "InitialPopulation_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "initial-population",
+                        "display": "Initial Population"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "Denominator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator",
+                        "display": "Denominator"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "DenominatorExclusion_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "denominator-exclusion",
+                        "display": "Denominator Exclusion"
+                      }
+                    ]
+                  },
+                  "count": 0
+                },
+                {
+                  "id": "Numerator_1",
+                  "code": {
+                    "coding": [
+                      {
+                        "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                        "code": "numerator",
+                        "display": "Numerator"
+                      }
+                    ]
+                  },
+                  "count": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "evaluatedResource": [
+    {
+      "reference": "Patient/14193177-2f4e-4480-a471-87ff9d137a8b"
+    },
+    {
+      "reference": "Encounter/7f45a961-1dc2-4880-bfc8-da63b47eeada"
+    },
+    {
+      "reference": "Observation/052d61a4-07ab-4cd1-93db-c3bdc08d29cc"
+    }
+  ]
+}

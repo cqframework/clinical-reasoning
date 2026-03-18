@@ -1,0 +1,42 @@
+{
+  "resourceType": "Observation",
+  "id": "2ccda1c6-329a-4080-8f5b-057d2450ddb1",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-lab"
+    ]
+  },
+  "status": "entered-in-error",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "1556-0",
+        "display": "Fasting glucose [Mass/volume] in Capillary blood"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/471f0895-69d0-4cd2-bae3-3e9872616cef"
+  },
+  "effectivePeriod": {
+    "start": "2026-07-11T08:05:00.000+00:00",
+    "end": "2026-07-11T08:05:00.000+00:00"
+  },
+  "issued": "2026-07-11T08:05:00.000+00:00",
+  "valueQuantity": {
+    "value": 80,
+    "unit": "mg/dL"
+  }
+}

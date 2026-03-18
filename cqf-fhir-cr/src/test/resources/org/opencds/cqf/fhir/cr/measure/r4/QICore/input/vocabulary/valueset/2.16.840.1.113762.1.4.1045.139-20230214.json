@@ -1,0 +1,356 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113762.1.4.1045.139-20230214",
+  "meta": {
+    "versionId": "33",
+    "lastUpdated": "2024-02-01T15:08:45.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "Yale Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-03-12"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2023-02-14"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1045.139",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113762.1.4.1045.139"
+    }
+  ],
+  "version": "20230214",
+  "name": "BicarbonateLabTest",
+  "title": "Bicarbonate Lab Test",
+  "status": "active",
+  "date": "2023-02-14T01:02:32-05:00",
+  "publisher": "Yale",
+  "description": "CCDE",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for laboratory tests measuring bicarbonate in blood, serum, or plasma.),(Data Element Scope: This value set may use a model element related to Laboratory Test.),(Inclusion Criteria: Includes concepts that represent a laboratory test measuring bicarbonate and carbon dioxide in the specimen source of blood, serum, or plasma.),(Exclusion Criteria: Excludes concepts that represent partial pressure laboratory tests and laboratory tests using the specimen source of capillary blood.)",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "14627-4",
+            "display": "Bicarbonate [Moles/volume] in Venous blood"
+          },
+          {
+            "code": "19223-7",
+            "display": "Carbon dioxide, total [Moles/volume] in Mixed venous blood"
+          },
+          {
+            "code": "19229-4",
+            "display": "Bicarbonate [Moles/volume] in Mixed venous blood"
+          },
+          {
+            "code": "19230-2",
+            "display": "Bicarbonate [Moles/volume] standard in Arterial blood"
+          },
+          {
+            "code": "19232-8",
+            "display": "Bicarbonate [Moles/volume] standard in Venous blood"
+          },
+          {
+            "code": "19233-6",
+            "display": "Bicarbonate [Moles/volume] standard in Mixed venous blood"
+          },
+          {
+            "code": "1959-6",
+            "display": "Bicarbonate [Moles/volume] in Blood"
+          },
+          {
+            "code": "1960-4",
+            "display": "Bicarbonate [Moles/volume] in Arterial blood"
+          },
+          {
+            "code": "1963-8",
+            "display": "Bicarbonate [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "2026-3",
+            "display": "Carbon dioxide, total [Moles/volume] in Arterial blood"
+          },
+          {
+            "code": "2027-1",
+            "display": "Carbon dioxide, total [Moles/volume] in Venous blood"
+          },
+          {
+            "code": "2028-9",
+            "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma"
+          },
+          {
+            "code": "20565-8",
+            "display": "Carbon dioxide, total [Moles/volume] in Blood"
+          },
+          {
+            "code": "41647-9",
+            "display": "Carbon dioxide, total [Moles/volume] in Arterial blood by calculation"
+          },
+          {
+            "code": "48391-7",
+            "display": "Carbon dioxide, total [Moles/volume] in Venous blood by calculation"
+          },
+          {
+            "code": "48631-6",
+            "display": "Bicarbonate [Moles/volume] in Serum --post dialysis"
+          },
+          {
+            "code": "54359-5",
+            "display": "Bicarbonate [Moles/volume] in Plasma --post dialysis"
+          },
+          {
+            "code": "57920-1",
+            "display": "Carbon dioxide, total [Moles/volume] in Mixed venous blood by calculation"
+          },
+          {
+            "code": "57922-7",
+            "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma by calculation"
+          },
+          {
+            "code": "69964-5",
+            "display": "Bicarbonate [Moles/volume] standard in Plasma"
+          },
+          {
+            "code": "74684-2",
+            "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma --post dialysis"
+          },
+          {
+            "code": "77143-6",
+            "display": "Carbon dioxide, total [Moles/volume] in Serum, Plasma or Blood"
+          },
+          {
+            "code": "97543-3",
+            "display": "Bicarbonate [Moles/volume] in Central venous blood"
+          },
+          {
+            "code": "97544-1",
+            "display": "Bicarbonate [Moles/volume] standard in Central venous blood"
+          },
+          {
+            "code": "97545-8",
+            "display": "Carbon dioxide, total [Moles/volume] in Central venous blood"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:c010e266-b6d3-4b69-859b-4b62b02bcb64",
+    "timestamp": "2025-08-28T16:59:01-04:00",
+    "total": 25,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "14627-4",
+        "display": "Bicarbonate [Moles/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "19223-7",
+        "display": "Carbon dioxide, total [Moles/volume] in Mixed venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "19229-4",
+        "display": "Bicarbonate [Moles/volume] in Mixed venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "19230-2",
+        "display": "Bicarbonate [Moles/volume] standard in Arterial blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "19232-8",
+        "display": "Bicarbonate [Moles/volume] standard in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "19233-6",
+        "display": "Bicarbonate [Moles/volume] standard in Mixed venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1959-6",
+        "display": "Bicarbonate [Moles/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1960-4",
+        "display": "Bicarbonate [Moles/volume] in Arterial blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "1963-8",
+        "display": "Bicarbonate [Moles/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2026-3",
+        "display": "Carbon dioxide, total [Moles/volume] in Arterial blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2027-1",
+        "display": "Carbon dioxide, total [Moles/volume] in Venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "2028-9",
+        "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "20565-8",
+        "display": "Carbon dioxide, total [Moles/volume] in Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "41647-9",
+        "display": "Carbon dioxide, total [Moles/volume] in Arterial blood by calculation"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "48391-7",
+        "display": "Carbon dioxide, total [Moles/volume] in Venous blood by calculation"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "48631-6",
+        "display": "Bicarbonate [Moles/volume] in Serum --post dialysis"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "54359-5",
+        "display": "Bicarbonate [Moles/volume] in Plasma --post dialysis"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "57920-1",
+        "display": "Carbon dioxide, total [Moles/volume] in Mixed venous blood by calculation"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "57922-7",
+        "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma by calculation"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "69964-5",
+        "display": "Bicarbonate [Moles/volume] standard in Plasma"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "74684-2",
+        "display": "Carbon dioxide, total [Moles/volume] in Serum or Plasma --post dialysis"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "77143-6",
+        "display": "Carbon dioxide, total [Moles/volume] in Serum, Plasma or Blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "97543-3",
+        "display": "Bicarbonate [Moles/volume] in Central venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "97544-1",
+        "display": "Bicarbonate [Moles/volume] standard in Central venous blood"
+      },
+      {
+        "system": "http://loinc.org",
+        "inactive": false,
+        "version": "2.78",
+        "code": "97545-8",
+        "display": "Carbon dioxide, total [Moles/volume] in Central venous blood"
+      }
+    ]
+  }
+}

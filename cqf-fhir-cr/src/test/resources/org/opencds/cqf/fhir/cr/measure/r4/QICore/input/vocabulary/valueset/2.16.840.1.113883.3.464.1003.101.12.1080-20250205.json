@@ -1,0 +1,197 @@
+{
+  "resourceType": "ValueSet",
+  "id": "2.16.840.1.113883.3.464.1003.101.12.1080-20250205",
+  "meta": {
+    "versionId": "23",
+    "lastUpdated": "2025-02-05T01:09:18.000-05:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-valueset-cqfm",
+      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/publishable-valueset-cqfm"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-author",
+      "valueContactDetail": {
+        "name": "NCQA PHEMUR Author"
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/resource-lastReviewDate",
+      "valueDate": "2025-02-05"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-effectiveDate",
+      "valueDate": "2025-02-05"
+    }
+  ],
+  "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1080",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.464.1003.101.12.1080"
+    }
+  ],
+  "version": "20250205",
+  "name": "TelephoneVisits",
+  "title": "Telephone Visits",
+  "status": "active",
+  "date": "2025-02-05T01:09:18-05:00",
+  "publisher": "NCQA PHEMUR",
+  "jurisdiction": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+          "valueCode": "unknown"
+        }
+      ]
+    }
+  ],
+  "purpose": "(Clinical Focus: The purpose of this value set is to represent concepts for encounters for telephone visits.),(Data Element Scope: This value set may use a model element related to Encounter.),(Inclusion Criteria: Includes concepts that represent an encounter for assessment, evaluation and management services to a patient by telephone.),(Exclusion Criteria: Excludes concepts that represent an encounter for telephone assessment, evaluation and management services that last for less than five minutes.)",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1260"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.11.1287"
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:a64323f4-a17b-4415-8a38-74d1cd1b9ed2",
+    "timestamp": "2025-08-28T16:52:44-04:00",
+    "total": 16,
+    "offset": 0,
+    "parameter": [
+      {
+        "name": "count",
+        "valueInteger": 1000
+      },
+      {
+        "name": "offset",
+        "valueInteger": 0
+      }
+    ],
+    "contains": [
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "185317003",
+        "display": "Telephone encounter (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "314849005",
+        "display": "Telephone contact by consultant (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "386472008",
+        "display": "Telephone consultation (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "386473003",
+        "display": "Telephone follow-up (procedure)"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "inactive": false,
+        "version": "http://snomed.info/sct/731000124108/version/20240901",
+        "code": "401267002",
+        "display": "Telephone triage encounter (procedure)"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98008",
+        "display": "Synchronous audio-only visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination, straightforward medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 15 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98009",
+        "display": "Synchronous audio-only visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination, low medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 30 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98010",
+        "display": "Synchronous audio-only visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination, moderate medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 45 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98011",
+        "display": "Synchronous audio-only visit for the evaluation and management of a new patient, which requires a medically appropriate history and/or examination, high medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 60 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98012",
+        "display": "Synchronous audio-only visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination, straightforward medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 10 minutes must be exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98013",
+        "display": "Synchronous audio-only visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination, low medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 20 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98014",
+        "display": "Synchronous audio-only visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination, moderate medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 30 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98015",
+        "display": "Synchronous audio-only visit for the evaluation and management of an established patient, which requires a medically appropriate history and/or examination, high medical decision making, and more than 10 minutes of medical discussion. When using total time on the date of the encounter for code selection, 40 minutes must be met or exceeded."
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98966",
+        "display": "Telephone assessment and management service provided by a nonphysician qualified health care professional to an established patient, parent, or guardian not originating from a related assessment and management service provided within the previous 7 days nor leading to an assessment and management service or procedure within the next 24 hours or soonest available appointment; 5-10 minutes of medical discussion"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98967",
+        "display": "Telephone assessment and management service provided by a nonphysician qualified health care professional to an established patient, parent, or guardian not originating from a related assessment and management service provided within the previous 7 days nor leading to an assessment and management service or procedure within the next 24 hours or soonest available appointment; 11-20 minutes of medical discussion"
+      },
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "inactive": false,
+        "version": "2025",
+        "code": "98968",
+        "display": "Telephone assessment and management service provided by a nonphysician qualified health care professional to an established patient, parent, or guardian not originating from a related assessment and management service provided within the previous 7 days nor leading to an assessment and management service or procedure within the next 24 hours or soonest available appointment; 21-30 minutes of medical discussion"
+      }
+    ]
+  }
+}

@@ -49,7 +49,7 @@ class MeasureScoringTypeProportionTest {
                 .population("numerator")
                 .hasCount(2)
                 .up()
-                .hasScore(0.3333333333333333)
+                .hasMeasureScore(0.3333333333333333)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -108,7 +108,7 @@ class MeasureScoringTypeProportionTest {
                 .population("numerator")
                 .hasCount(1)
                 .up()
-                .hasScore(1.0)
+                .hasMeasureScore(1.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -166,7 +166,7 @@ class MeasureScoringTypeProportionTest {
                 .population("numerator")
                 .hasCount(2)
                 .up()
-                .hasScore(0.3333333333333333)
+                .hasMeasureScore(0.3333333333333333)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -237,7 +237,7 @@ class MeasureScoringTypeProportionTest {
                 .population("numerator")
                 .hasCount(1)
                 .up()
-                .hasScore(1.0)
+                .hasMeasureScore(1.0)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
@@ -308,7 +308,7 @@ class MeasureScoringTypeProportionTest {
                 .population("numerator")
                 .hasCount(2)
                 .up()
-                .hasScore(0.3333333333333333)
+                .hasMeasureScore(0.3333333333333333)
                 .up()
                 .up()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output

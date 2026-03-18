@@ -1,0 +1,31 @@
+{
+  "resourceType": "Observation",
+  "id": "eec4c9af-4eec-4701-912c-525050d81083",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation-lab"
+    ]
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "1556-0",
+        "display": "Glucose Lab Test Mass Per Volume"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/2adf5469-46a1-4020-be3b-01f91f8acc9d"
+  },
+  "effectivePeriod": {
+    "start": "2026-02-04T10:00:00.000+00:00",
+    "end": "2026-02-04T10:00:00.000+00:00"
+  },
+  "issued": "2026-02-04T10:00:00.000+00:00",
+  "valueQuantity": {
+    "value": 39,
+    "unit": "mg/dL"
+  }
+}

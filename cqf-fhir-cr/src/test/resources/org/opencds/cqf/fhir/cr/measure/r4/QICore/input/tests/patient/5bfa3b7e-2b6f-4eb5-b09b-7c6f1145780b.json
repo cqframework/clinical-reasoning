@@ -1,0 +1,65 @@
+{
+  "resourceType": "Patient",
+  "id": "5bfa3b7e-2b6f-4eb5-b09b-7c6f1145780b",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+    ]
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2106-3",
+            "display": "White"
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "White"
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+      "extension": [
+        {
+          "url": "ombCategory",
+          "valueCoding": {
+            "system": "urn:oid:2.16.840.1.113883.6.238",
+            "code": "2135-2",
+            "display": "Hispanic or Latino"
+          }
+        },
+        {
+          "url": "text",
+          "valueString": "Hispanic or Latino"
+        }
+      ]
+    },
+    {
+      "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-sex",
+      "valueCode": "248153007"
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://hospital.smarthealthit.org",
+      "value": "999999999"
+    }
+  ],
+  "name": [
+    {
+      "family": "Example",
+      "given": [
+        "Patient"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "2000-07-11"
+}

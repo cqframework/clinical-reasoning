@@ -71,6 +71,18 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
         return new SelectedMeasureDefStratumPopulation<>(population, this);
     }
 
+    public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> populationByType(
+            MeasurePopulationType populationType) {
+        assertNotNull(value(), "StratumDef is null");
+        StratumPopulationDef population = value().stratumPopulations().stream()
+                .filter(stratumPopulationDef ->
+                        populationType == stratumPopulationDef.populationDef().type())
+                .findFirst()
+                .orElse(null);
+        assertNotNull(population, "No stratum population found with type: " + populationType);
+        return new SelectedMeasureDefStratumPopulation<>(population, this);
+    }
+
     /**
      * Navigate to a stratum population by ID.
      *

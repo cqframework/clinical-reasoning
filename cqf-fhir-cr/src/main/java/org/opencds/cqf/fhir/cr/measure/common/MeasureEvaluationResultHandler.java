@@ -16,6 +16,8 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.spi.LoggingEventBuilder;
+import org.slf4j.spi.NOPLoggingEventBuilder;
 
 /**
  * Exclusively responsible for calling CQL evaluation and collating the results among multiple
@@ -26,6 +28,7 @@ public class MeasureEvaluationResultHandler {
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluationResultHandler.class);
 
     private static final String EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE = "Exception for subjectId: %s, Message: %s";
+    private static final int SUBJECT_LOG_INTERVAL = 50;
 
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final MeasureEvaluator measureEvaluator;
@@ -127,14 +130,19 @@ public class MeasureEvaluationResultHandler {
                 .log();
 
         final long startAllLibrariesAllSubjects = System.currentTimeMillis();
-        for (String subjectId : subjectIds) {
+        final int lastIndex = subjectIds.size() - 1;
+        for (int subjectIndex = 0; subjectIndex < subjectIds.size(); subjectIndex++) {
+            String subjectId = subjectIds.get(subjectIndex);
             if (subjectId == null) {
                 throw new InternalErrorException("SubjectId is required in order to calculate.");
             }
-            logger.atDebug()
-                    .setMessage("Evaluate measure for library idents: (count:{}): [{}], and single subject: {}")
+            boolean shouldLog = subjectIndex % SUBJECT_LOG_INTERVAL == 0 || subjectIndex == lastIndex;
+            throttledDebug(shouldLog)
+                    .setMessage("Evaluate measure for library idents: (count:{}): [{}], and single subject [{}/{}]: {}")
                     .addArgument(libraryIdentIds::size)
                     .addArgument(() -> showSubsetOfTotal(libraryIdentIds))
+                    .addArgument(subjectIndex)
+                    .addArgument(lastIndex)
                     .addArgument(subjectId)
                     .log();
             Pair<String, String> subjectInfo = getSubjectTypeAndId(subjectId);
@@ -145,7 +153,7 @@ public class MeasureEvaluationResultHandler {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
                 final long startPerLibraryPerSubject = System.currentTimeMillis();
-                logger.atDebug()
+                throttledDebug(shouldLog)
                         .setMessage("START CQL evaluating libraries: (count:{}): [{}]")
                         .addArgument(libraryIdentIds::size)
                         .addArgument(() -> showSubsetOfTotal(libraryIdentIds))
@@ -162,7 +170,7 @@ public class MeasureEvaluationResultHandler {
                                 null,
                                 zonedMeasurementPeriod,
                                 context);
-                logger.atDebug()
+                throttledDebug(shouldLog)
                         .setMessage("END CQL evaluating libraries [[elapsed: {}ms]] : (count:{}): [{}]")
                         .addArgument(() -> System.currentTimeMillis() - startPerLibraryPerSubject)
                         .addArgument(libraryIdentIds::size)
@@ -170,8 +178,6 @@ public class MeasureEvaluationResultHandler {
                         .log();
 
                 for (var libraryVersionedIdentifier : libraryIdentifiers) {
-                    logger.debug("GOT CQL results for library: {}", libraryVersionedIdentifier.getId());
-
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
 
@@ -212,14 +218,21 @@ public class MeasureEvaluationResultHandler {
 
         logger.atDebug()
                 .setMessage(
-                        "END: Evaluate measure for library idents: [[elapsed: {}ms]]: (count:{}): [{}], and subjects (count={}): [{}]")
+                        "END: Evaluate measure for library idents: [[elapsed: {}ms, avgMs: {}]]: (count:{}): [{}], and subjects (count={}): [{}]")
                 .addArgument(() -> System.currentTimeMillis() - startAllLibrariesAllSubjects)
+                .addArgument(() -> subjectIds.isEmpty()
+                        ? 0
+                        : (System.currentTimeMillis() - startAllLibrariesAllSubjects) / subjectIds.size())
                 .addArgument(libraryIdentIds::size)
                 .addArgument(() -> showSubsetOfTotal(libraryIdentIds))
                 .addArgument(subjectIds::size)
                 .addArgument(() -> showSubsetOfTotal(subjectIds))
                 .log();
         return resultsBuilder.build();
+    }
+
+    private static LoggingEventBuilder throttledDebug(boolean shouldLog) {
+        return shouldLog ? logger.atDebug() : NOPLoggingEventBuilder.singleton();
     }
 
     private static String showSubsetOfTotal(List<String> subjectIds) {

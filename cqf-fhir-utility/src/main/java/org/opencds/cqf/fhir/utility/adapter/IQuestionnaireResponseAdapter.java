@@ -33,7 +33,9 @@ public interface IQuestionnaireResponseAdapter extends IResourceAdapter {
 
     boolean hasItem();
 
-    boolean hasItem(String linkId);
+    default boolean hasItem(String linkId) {
+        return !getItem(linkId).isEmpty();
+    }
 
     List<IQuestionnaireResponseItemComponentAdapter> getItem();
 

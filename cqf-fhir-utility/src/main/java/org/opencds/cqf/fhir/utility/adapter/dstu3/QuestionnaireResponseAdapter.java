@@ -99,11 +99,6 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     }
 
     @Override
-    public boolean hasItem(String linkId) {
-        return getQuestionnaireResponse().getItem().stream().anyMatch(i -> linkId.equals(i.getLinkId()));
-    }
-
-    @Override
     public List<IQuestionnaireResponseItemComponentAdapter> getItem() {
         return getQuestionnaireResponse().getItem().stream()
                 .map(adapterFactory::createQuestionnaireResponseItem)

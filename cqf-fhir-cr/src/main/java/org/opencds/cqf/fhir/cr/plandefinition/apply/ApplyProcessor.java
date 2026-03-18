@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -27,7 +27,6 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProces
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
-import org.opencds.cqf.fhir.utility.monad.Either;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,10 +125,10 @@ public class ApplyProcessor implements IApplyProcessor {
         // We will also add a warning to the result informing the user
         if (url != null) {
             var questionnaireUrl = url.replace("/PlanDefinition/", "/Questionnaire/");
-            // In the case of an adaptive Questionnaire it will be contained within the QuestionnaireResponse
+            // In the case of an adaptive Questionnaire it should be contained within the QuestionnaireResponse
             // We are assuming a single QuestionnaireResponse in this instance
             var questionnaireResponse = questionnaireResponses.stream()
-                    .filter(r -> r.getQuestionnaire().contains("#"))
+                    .filter(r -> r.hasQuestionnaire() && r.getQuestionnaire().contains("#"))
                     .findFirst()
                     .orElse(null);
             var containedQuestionnaire = getQuestionnaireFromContained(questionnaireResponse);
@@ -179,16 +178,19 @@ public class ApplyProcessor implements IApplyProcessor {
     }
 
     protected void extractQuestionnaireResponse(ApplyRequest request, List<IQuestionnaireResponseAdapter> responses) {
+        var questionnaireUrl = request.getQuestionnaireAdapter() != null
+                ? request.getQuestionnaireAdapter().getUrl()
+                : null;
         responses.forEach(questionnaireResponse -> {
             try {
-                Either<IIdType, IBaseResource> questionnaire = questionnaireResponse
-                                .getQuestionnaire()
-                                .equals(request.getQuestionnaireAdapter().getCanonical())
-                        ? Eithers.forRight(request.getQuestionnaire())
+                var questionnaire = StringUtils.isNotBlank(questionnaireUrl)
+                                && questionnaireResponse.hasQuestionnaire()
+                                && questionnaireResponse.getQuestionnaire().equals(questionnaireUrl)
+                        ? request.getQuestionnaire()
                         : null;
                 var extractBundle = extractProcessor.extract(
                         Eithers.forRight(questionnaireResponse.get()),
-                        questionnaire,
+                        Eithers.forRight(questionnaire),
                         request.getParameters(),
                         request.getData(),
                         request.getLibraryEngine());

@@ -29,10 +29,6 @@
                 "type": "depends-on",
                 "resource": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
               }
-            },
-            {
-              "type": "GraphDefinition",
-              "reference": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
             }
           ]
         },

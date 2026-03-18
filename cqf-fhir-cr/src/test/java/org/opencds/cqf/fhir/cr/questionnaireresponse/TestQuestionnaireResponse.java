@@ -21,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -75,7 +76,8 @@ public class TestQuestionnaireResponse {
         }
 
         private QuestionnaireResponseProcessor buildProcessor() {
-            return new QuestionnaireResponseProcessor(repository, CrSettings.getDefault(), operationProcessors);
+            return new QuestionnaireResponseProcessor(
+                    repository, CrSettings.getDefault(), operationProcessors, new NoOpRepositoryProxyFactory());
         }
 
         public When when() {

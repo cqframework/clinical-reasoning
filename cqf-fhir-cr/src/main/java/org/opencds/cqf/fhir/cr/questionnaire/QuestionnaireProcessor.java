@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.questionnaire;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -33,6 +31,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 
 @SuppressWarnings("UnstableApiUsage")
 public class QuestionnaireProcessor {
@@ -48,19 +47,16 @@ public class QuestionnaireProcessor {
     protected IPackageProcessor packageProcessor;
     protected IDataRequirementsProcessor dataRequirementsProcessor;
     protected IPopulateProcessor populateProcessor;
-
-    public QuestionnaireProcessor(IRepository repository) {
-        this(repository, CrSettings.getDefault());
-    }
-
-    public QuestionnaireProcessor(IRepository repository, CrSettings crSettings) {
-        this(repository, crSettings, null);
-    }
+    protected final RepositoryProxyFactory repositoryProxyFactory;
 
     public QuestionnaireProcessor(
-            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
+            IRepository repository,
+            CrSettings crSettings,
+            List<? extends IOperationProcessor> operationProcessors,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "evaluationSettings can not be null");
+        this.repositoryProxyFactory = requireNonNull(repositoryProxyFactory, "repositoryProxyFactory can not be null");
         this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
         this.structureDefResolver = new ResourceResolver("StructureDefinition", this.repository);
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
@@ -122,23 +118,7 @@ public class QuestionnaireProcessor {
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint,
             String id) {
-        return generateQuestionnaire(
-                profile,
-                supportedOnly,
-                requiredOnly,
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint),
-                id);
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile,
-            boolean supportedOnly,
-            boolean requiredOnly,
-            IRepository contentRepository,
-            IRepository terminologyRepository,
-            String id) {
-        repository = proxy(repository, true, null, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(repository, true, null, contentEndpoint, terminologyEndpoint);
         return generateQuestionnaire(profile, supportedOnly, requiredOnly, id);
     }
 
@@ -230,29 +210,8 @@ public class QuestionnaireProcessor {
             IBaseResource dataEndpoint,
             IBaseResource contentEndpoint,
             IBaseResource terminologyEndpoint) {
-        return populate(
-                questionnaire,
-                subjectId,
-                context,
-                launchContext,
-                data,
-                useServerData,
-                createRestRepository(repository.fhirContext(), dataEndpoint),
-                createRestRepository(repository.fhirContext(), contentEndpoint),
-                createRestRepository(repository.fhirContext(), terminologyEndpoint));
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(
-            Either3<C, IIdType, R> questionnaire,
-            String subjectId,
-            List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
-            IBaseBundle data,
-            boolean useServerData,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+        repository = repositoryProxyFactory.proxy(
+                repository, useServerData, dataEndpoint, contentEndpoint, terminologyEndpoint);
         return populate(
                 questionnaire,
                 subjectId,

@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
@@ -25,6 +26,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProces
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +57,16 @@ public class ApplyProcessor implements IApplyProcessor {
 
     public ApplyProcessor(
             IRepository repository,
-            org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
+            org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
         this.repository = repository;
         this.activityProcessor = activityProcessor;
         extensionProcessor = new ExtensionProcessor();
         generateProcessor = new GenerateProcessor(this.repository);
         populateProcessor = new PopulateProcessor();
-        extractProcessor = new QuestionnaireResponseProcessor(this.repository);
+        extractProcessor =
+                new QuestionnaireResponseProcessor(this.repository, crSettings, null, repositoryProxyFactory);
         processRequest = new ResponseBuilder(populateProcessor);
         processGoal = new ProcessGoal();
         processAction = new ProcessAction(this.repository, this, generateProcessor);

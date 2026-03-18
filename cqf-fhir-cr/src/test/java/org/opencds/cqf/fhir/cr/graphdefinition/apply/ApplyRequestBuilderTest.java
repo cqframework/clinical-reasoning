@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +32,8 @@ class ApplyRequestBuilderTest {
     void build_withoutSubject_throwsIllegalArgumentException() {
         when(repository.fhirContext()).thenReturn(fhirContext);
 
-        ApplyRequestBuilder builder = new ApplyRequestBuilder(repository, evaluationSettings);
+        ApplyRequestBuilder builder =
+                new ApplyRequestBuilder(repository, evaluationSettings, new NoOpRepositoryProxyFactory());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
         assertEquals("Missing required parameter: 'subject'", ex.getMessage());
@@ -41,8 +43,9 @@ class ApplyRequestBuilderTest {
     void build_withoutPractitioner_throwsIllegalArgumentException() {
         when(repository.fhirContext()).thenReturn(fhirContext);
 
-        ApplyRequestBuilder builder =
-                new ApplyRequestBuilder(repository, evaluationSettings).withSubject("Patient/123");
+        ApplyRequestBuilder builder = new ApplyRequestBuilder(
+                        repository, evaluationSettings, new NoOpRepositoryProxyFactory())
+                .withSubject("Patient/123");
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, builder::buildApplyRequest);
         assertEquals("Missing required parameter: 'practitioner'", ex.getMessage());
@@ -53,7 +56,8 @@ class ApplyRequestBuilderTest {
         IRepository localRepository = new InMemoryFhirRepository(fhirContext);
         IdType id = (IdType) localRepository.create(new GraphDefinition()).getId();
 
-        ApplyRequestBuilder builder = new ApplyRequestBuilder(localRepository, evaluationSettings)
+        ApplyRequestBuilder builder = new ApplyRequestBuilder(
+                        localRepository, evaluationSettings, new NoOpRepositoryProxyFactory())
                 .withGraphDefinitionId(id)
                 .withSubject("Patient/123")
                 .withPractitioner("Practitioner/456")

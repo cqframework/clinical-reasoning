@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.benchmark.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -53,7 +54,7 @@ public class TestQuestionnaire {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
-            return new QuestionnaireProcessor(repository, crSettings, null);
+            return new QuestionnaireProcessor(repository, crSettings, null, new NoOpRepositoryProxyFactory());
         }
 
         public When when() {

@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.fhir.benchmark.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -85,7 +86,12 @@ public class Measure {
         }
 
         private R4MultiMeasureService buildMultiMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+            return new R4MultiMeasureService(
+                    repository,
+                    evaluationOptions,
+                    serverBase,
+                    measurePeriodValidator,
+                    new NoOpRepositoryProxyFactory());
         }
 
         public When when() {

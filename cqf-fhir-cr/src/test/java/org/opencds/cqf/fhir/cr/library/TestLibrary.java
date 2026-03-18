@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -39,11 +40,13 @@ import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class TestLibrary {
@@ -108,18 +111,18 @@ public class TestLibrary {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
-            return new LibraryProcessor(repository, crSettings);
+            return new LibraryProcessor(repository, crSettings, null, new NoOpRepositoryProxyFactory());
         }
 
         public When when() {
-            return new When(repository, buildProcessor(repository));
+            return new When(this, repository);
         }
     }
 
     @SuppressWarnings("UnstableApiUsage")
     public static class When {
+        private final Given given;
         private final IRepository repository;
-        private final LibraryProcessor processor;
         private final IParser jsonParser;
 
         private String libraryId;
@@ -137,9 +140,12 @@ public class TestLibrary {
         private IBaseParameters parameters;
         private Boolean isPackagePut;
 
-        public When(IRepository repository, LibraryProcessor processor) {
+        private final LibraryProcessor processor;
+
+        public When(Given given, IRepository repository) {
+            this.given = given;
             this.repository = repository;
-            this.processor = processor;
+            this.processor = given.buildProcessor(repository);
             useServerData = true;
             jsonParser = repository.fhirContext().newJsonParser();
         }
@@ -257,9 +263,12 @@ public class TestLibrary {
             if (additionalDataId != null) {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
+            var proxiedRepo = Repositories.proxy(
+                    repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+            var evalProcessor = given.buildProcessor(proxiedRepo);
             return new Evaluation(
                     repository,
-                    processor.evaluate(
+                    evalProcessor.evaluate(
                             Eithers.for3(
                                     libraryUrl == null
                                             ? null
@@ -276,12 +285,10 @@ public class TestLibrary {
                             subjectId,
                             expression,
                             parameters,
-                            useServerData,
                             additionalData,
                             prefetchData,
-                            dataRepository,
-                            contentRepository,
-                            terminologyRepository));
+                            new LibraryEngine(
+                                    proxiedRepo, evalProcessor.settings().getEvaluationSettings())));
         }
     }
 

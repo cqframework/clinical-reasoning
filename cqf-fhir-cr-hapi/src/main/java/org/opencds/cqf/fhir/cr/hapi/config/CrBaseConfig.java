@@ -6,11 +6,18 @@ import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.repository.DefaultRepositoryProxyFactory;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CrBaseConfig {
+    @Bean
+    RepositoryProxyFactory repositoryProxyFactory() {
+        return new DefaultRepositoryProxyFactory();
+    }
+
     @Bean
     CrSettings settings(
             EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {

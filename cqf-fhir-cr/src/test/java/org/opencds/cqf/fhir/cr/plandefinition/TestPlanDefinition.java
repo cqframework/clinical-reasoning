@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -48,12 +49,14 @@ import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
+import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -120,16 +123,18 @@ public class TestPlanDefinition {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
-            return new PlanDefinitionProcessor(repository, crSettings, null, operationProcessors);
+            return new PlanDefinitionProcessor(
+                    repository, crSettings, null, operationProcessors, new NoOpRepositoryProxyFactory());
         }
 
         public When when() {
-            return new When(repository, buildProcessor(repository));
+            return new When(this, repository);
         }
     }
 
     @SuppressWarnings("UnstableApiUsage")
     public static class When {
+        private final Given given;
         private final IRepository repository;
         private final PlanDefinitionProcessor processor;
         private final IParser jsonParser;
@@ -150,9 +155,10 @@ public class TestPlanDefinition {
         private IBaseParameters parameters;
         private boolean isPackagePut;
 
-        public When(IRepository repository, PlanDefinitionProcessor processor) {
+        public When(Given given, IRepository repository) {
+            this.given = given;
             this.repository = repository;
-            this.processor = processor;
+            this.processor = given.buildProcessor(repository);
             useServerData = true;
             jsonParser = repository.fhirContext().newJsonParser();
         }
@@ -255,7 +261,10 @@ public class TestPlanDefinition {
             if (additionalDataId != null) {
                 additionalData(readRepository(repository, additionalDataId));
             }
-            var param = (IParametersAdapter) IAdapterFactory.createAdapterForResource(processor.applyR5(
+            var proxiedRepo = Repositories.proxy(
+                    repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+            var applyProcessor = given.buildProcessor(proxiedRepo);
+            var param = (IParametersAdapter) IAdapterFactory.createAdapterForResource(applyProcessor.applyR5(
                     Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
                     List.of(subjectId),
                     encounterId,
@@ -267,12 +276,9 @@ public class TestPlanDefinition {
                     null,
                     null,
                     parameters,
-                    useServerData,
                     additionalData,
                     prefetchData,
-                    dataRepository,
-                    contentRepository,
-                    terminologyRepository));
+                    new LibraryEngine(proxiedRepo, applyProcessor.settings().getEvaluationSettings())));
             return (IBaseBundle) param.getParameter().get(0).getResource();
         }
 
@@ -284,9 +290,12 @@ public class TestPlanDefinition {
             if (additionalDataId != null) {
                 additionalData(readRepository(repository, additionalDataId));
             }
+            var proxiedRepo = Repositories.proxy(
+                    repository, useServerData, dataRepository, contentRepository, terminologyRepository);
+            var applyProcessor = given.buildProcessor(proxiedRepo);
             return new GeneratedCarePlan(
                     repository,
-                    processor.apply(
+                    applyProcessor.apply(
                             Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "PlanDefinition", planDefinitionId)),
                             subjectId,
                             encounterId,
@@ -298,12 +307,10 @@ public class TestPlanDefinition {
                             null,
                             null,
                             parameters,
-                            useServerData,
                             additionalData,
                             prefetchData,
-                            dataRepository,
-                            contentRepository,
-                            terminologyRepository));
+                            new LibraryEngine(
+                                    proxiedRepo, applyProcessor.settings().getEvaluationSettings())));
         }
 
         public GeneratedPackage thenPackage() {

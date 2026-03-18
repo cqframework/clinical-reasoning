@@ -36,6 +36,7 @@ import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.IPackageProcessor;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.IGenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
@@ -116,7 +117,8 @@ public class TestQuestionnaire {
                         .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
-            return new QuestionnaireProcessor(repository, crSettings, operationProcessors);
+            return new QuestionnaireProcessor(
+                    repository, crSettings, operationProcessors, new NoOpRepositoryProxyFactory());
         }
 
         public When when() {

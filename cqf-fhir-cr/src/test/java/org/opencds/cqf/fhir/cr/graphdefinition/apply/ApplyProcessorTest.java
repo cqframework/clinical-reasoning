@@ -43,6 +43,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.measure.r4.NoOpRepositoryProxyFactory;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,8 @@ public class ApplyProcessorTest {
         String id = "eras-postop";
         IdType graphDefinitionId = new IdType("GraphDefinition", id);
 
-        ApplyRequestBuilder applyRequestBuilder = new ApplyRequestBuilder(repository, EvaluationSettings.getDefault());
+        ApplyRequestBuilder applyRequestBuilder =
+                new ApplyRequestBuilder(repository, EvaluationSettings.getDefault(), new NoOpRepositoryProxyFactory());
         applyRequestBuilder.withSubject("Patient/time-zero");
         applyRequestBuilder.withPractitioner("Practitioner/ordering-md-1");
         applyRequestBuilder.withGraphDefinitionId(graphDefinitionId);
@@ -98,7 +100,8 @@ public class ApplyProcessorTest {
         String id = "eras-postop";
         IdType graphDefinitionId = new IdType("GraphDefinition", id);
 
-        ApplyRequestBuilder applyRequestBuilder = new ApplyRequestBuilder(repository, EvaluationSettings.getDefault());
+        ApplyRequestBuilder applyRequestBuilder =
+                new ApplyRequestBuilder(repository, EvaluationSettings.getDefault(), new NoOpRepositoryProxyFactory());
         applyRequestBuilder.withSubject("Patient/time-zero");
         applyRequestBuilder.withPractitioner("Practitioner/ordering-md-1");
         applyRequestBuilder.withGraphDefinitionId(graphDefinitionId);

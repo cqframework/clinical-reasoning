@@ -508,6 +508,13 @@ public class R4MeasureProcessor {
         return parameterMap;
     }
 
+    public R4MeasureProcessor withRepository(IRepository repository) {
+        if (repository == this.repository) {
+            return this;
+        }
+        return new R4MeasureProcessor(repository, this.measureEvaluationOptions);
+    }
+
     public Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         Interval measurementPeriod = null;
         if (periodStart != null && periodEnd != null) {

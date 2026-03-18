@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor;
 import org.opencds.cqf.fhir.cr.valueset.ValueSetProcessor;
+import org.opencds.cqf.fhir.utility.repository.RepositoryProxyFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -34,14 +35,20 @@ import org.springframework.context.annotation.Import;
 @Import({CrBaseConfig.class})
 public class CrProcessorConfig {
     @Bean
-    ICqlProcessorFactory cqlProcessorFactory(IRepositoryFactory repositoryFactory, CrSettings crSettings) {
-        return rd -> new CqlProcessor(repositoryFactory.create(rd), crSettings);
+    ICqlProcessorFactory cqlProcessorFactory(
+            IRepositoryFactory repositoryFactory,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
+        return rd -> new CqlProcessor(repositoryFactory.create(rd), crSettings, null, repositoryProxyFactory);
     }
 
     @Bean
     IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory(
-            IRepositoryFactory repositoryFactory, CrSettings crSettings) {
-        return rd -> new ActivityDefinitionProcessor(repositoryFactory.create(rd), crSettings);
+            IRepositoryFactory repositoryFactory,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
+        return rd -> new ActivityDefinitionProcessor(
+                repositoryFactory.create(rd), crSettings, null, null, repositoryProxyFactory);
     }
 
     @Bean
@@ -52,27 +59,39 @@ public class CrProcessorConfig {
 
     @Bean
     IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
-            IRepositoryFactory repositoryFactory, CrSettings crSettings) {
-        return rd -> new PlanDefinitionProcessor(repositoryFactory.create(rd), crSettings);
+            IRepositoryFactory repositoryFactory,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
+        return rd -> new PlanDefinitionProcessor(
+                repositoryFactory.create(rd), crSettings, null, null, repositoryProxyFactory);
     }
 
     @Bean
     IQuestionnaireProcessorFactory questionnaireProcessorFactory(
-            IRepositoryFactory repositoryFactory, CrSettings crSettings) {
-        return rd -> new QuestionnaireProcessor(repositoryFactory.create(rd), crSettings);
+            IRepositoryFactory repositoryFactory,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
+        return rd -> new QuestionnaireProcessor(repositoryFactory.create(rd), crSettings, null, repositoryProxyFactory);
     }
 
     @Bean
     IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory(
-            IRepositoryFactory repositoryFactory, CrSettings crSettings) {
-        return rd -> new QuestionnaireResponseProcessor(repositoryFactory.create(rd), crSettings);
+            IRepositoryFactory repositoryFactory,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
+        return rd -> new QuestionnaireResponseProcessor(
+                repositoryFactory.create(rd), crSettings, null, repositoryProxyFactory);
     }
 
     @Bean
-    ILibraryProcessorFactory libraryProcessorFactory(IRepositoryFactory repositoryFactory, CrSettings crSettings) {
+    ILibraryProcessorFactory libraryProcessorFactory(
+            IRepositoryFactory repositoryFactory,
+            CrSettings crSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
         return rd -> {
             var repository = repositoryFactory.create(rd);
-            return new LibraryProcessor(repository, crSettings, List.of(new HapiArtifactDiffProcessor(repository)));
+            return new LibraryProcessor(
+                    repository, crSettings, List.of(new HapiArtifactDiffProcessor(repository)), repositoryProxyFactory);
         };
     }
 
@@ -89,8 +108,10 @@ public class CrProcessorConfig {
 
     @Bean
     IGraphDefinitionApplyRequestBuilderFactory graphDefinitionApplyRequestBuilderFactory(
-            IRepositoryFactory repositoryFactory, EvaluationSettings evaluationSettings) {
+            IRepositoryFactory repositoryFactory,
+            EvaluationSettings evaluationSettings,
+            RepositoryProxyFactory repositoryProxyFactory) {
 
-        return rd -> new ApplyRequestBuilder(repositoryFactory.create(rd), evaluationSettings);
+        return rd -> new ApplyRequestBuilder(repositoryFactory.create(rd), evaluationSettings, repositoryProxyFactory);
     }
 }

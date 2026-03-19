@@ -21,7 +21,6 @@ dependencies {
         exclude(group = "junit", module = "junit")
         exclude(group = "com.sun.activation", module = "jakarta.activation")
     }
-    implementation(libs.spring.security.core)
     compileOnly(libs.jakarta.servlet.api)
 
     // Test dependencies

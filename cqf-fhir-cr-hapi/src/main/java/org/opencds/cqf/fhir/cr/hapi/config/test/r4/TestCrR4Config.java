@@ -4,8 +4,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -16,7 +14,6 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
-import org.opencds.cqf.fhir.cr.hapi.common.CqlThreadFactory;
 import org.opencds.cqf.fhir.cr.hapi.config.r4.CrR4Config;
 import org.opencds.cqf.fhir.cr.hapi.config.test.TestCqlProperties;
 import org.opencds.cqf.fhir.cr.hapi.config.test.TestCrConfig;
@@ -27,8 +24,6 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
 /**
  * Common hapi-fhir clinical reasoning config specifically for R4 shared with downstream modules.
@@ -36,16 +31,6 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 @Configuration
 @Import({TestCrConfig.class, CrR4Config.class})
 public class TestCrR4Config {
-    @Primary
-    @Bean
-    public ExecutorService cqlExecutor() {
-        CqlThreadFactory factory = new CqlThreadFactory();
-        ExecutorService executor = Executors.newFixedThreadPool(2, factory);
-        executor = new DelegatingSecurityContextExecutorService(executor);
-
-        return executor;
-    }
-
     @Bean
     CareGapsProperties careGapsProperties() {
         var careGapsProperties = new CareGapsProperties();

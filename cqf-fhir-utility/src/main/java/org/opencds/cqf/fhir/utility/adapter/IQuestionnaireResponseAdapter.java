@@ -52,7 +52,7 @@ public interface IQuestionnaireResponseAdapter extends IResourceAdapter {
                 matchingItems.addAll(getItemsWithLinkId(
                         i.getItem().stream()
                                 .map(IQuestionnaireResponseItemComponentAdapter.class::cast)
-                                .collect(Collectors.toList()),
+                                .toList(),
                         linkId));
             }
         });

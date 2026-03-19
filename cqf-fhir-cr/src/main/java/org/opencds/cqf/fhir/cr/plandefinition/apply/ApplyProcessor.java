@@ -190,7 +190,7 @@ public class ApplyProcessor implements IApplyProcessor {
                         : null;
                 var extractBundle = extractProcessor.extract(
                         Eithers.forRight(questionnaireResponse.get()),
-                        Eithers.forRight(questionnaire),
+                        questionnaire == null ? null : Eithers.forRight(questionnaire),
                         request.getParameters(),
                         request.getData(),
                         request.getLibraryEngine());

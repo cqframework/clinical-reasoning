@@ -6,6 +6,7 @@ import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -44,7 +45,10 @@ public class CqlEvaluationProcessor implements ICqlEvaluationProcessor {
                                 request.getResourceVariable());
             }
 
-            var engine = Engines.forRepository(repository, evaluationSettings, null);
+            // Use a fresh library cache for inline content to ensure updated CQL is always recompiled
+            var requestSettings = new EvaluationSettings(evaluationSettings);
+            requestSettings.setLibraryCache(new ConcurrentHashMap<>());
+            var engine = Engines.forRepository(repository, requestSettings, null);
             var libraryManager = engine.getEnvironment().getLibraryManager();
             var libraryIdentifier = resolveLibraryIdentifier(request.getContent(), null, libraryManager);
 

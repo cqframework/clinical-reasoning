@@ -55,7 +55,7 @@ public class Helpers {
     }
 
     public static IBaseResource getQuestionnaireFromContained(IQuestionnaireResponseAdapter questionnaireResponse) {
-        return questionnaireResponse == null
+        return questionnaireResponse == null || !questionnaireResponse.hasQuestionnaire()
                 ? null
                 : questionnaireResponse.getContained().stream()
                         .filter(r -> r.fhirType().equals(QUESTIONNAIRE)

@@ -163,6 +163,7 @@ public class ApplyProcessor implements IApplyProcessor {
             if (questionnaireResponse == null) {
                 var canonical = questionnaire.getCanonical();
                 questionnaireResponse = questionnaireResponses.stream()
+                        .filter(IQuestionnaireResponseAdapter::hasQuestionnaire)
                         .filter(r -> r.getQuestionnaire().equals(canonical))
                         .findFirst()
                         .orElse(null);

@@ -7,8 +7,10 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
@@ -43,14 +45,34 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     }
 
     @Override
+    public boolean hasQuestionnaire() {
+        return get().hasQuestionnaire();
+    }
+
+    @Override
     public String getQuestionnaire() {
         return get().getQuestionnaire().getReference();
+    }
+
+    @Override
+    public StringType getQuestionnaireCanonical() {
+        return get().hasQuestionnaire() ? get().getQuestionnaire().getReferenceElement_() : null;
     }
 
     @Override
     public IQuestionnaireResponseAdapter setQuestionnaire(String canonical) {
         get().setQuestionnaire(new Reference(canonical));
         return this;
+    }
+
+    @Override
+    public boolean hasSubject() {
+        return get().hasSubject();
+    }
+
+    @Override
+    public IIdType getSubject() {
+        return Ids.newId(fhirVersion(), get().getSubject().getReference());
     }
 
     @Override

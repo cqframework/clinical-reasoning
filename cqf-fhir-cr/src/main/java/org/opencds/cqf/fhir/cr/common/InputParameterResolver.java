@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * This class provides functionality to resolve parameters passed into an operation as CQL Resource parameters
  * for evaluation. e.g. "%subject"
  */
+@SuppressWarnings("UnstableApiUsage")
 public class InputParameterResolver implements IInputParameterResolver {
     private static final Logger logger = LoggerFactory.getLogger(InputParameterResolver.class);
 
@@ -62,7 +63,7 @@ public class InputParameterResolver implements IInputParameterResolver {
     }
 
     protected final IRepository resolveRepository(IRepository serverRepository, IBaseBundle data) {
-        return data == null
+        return data == null || BundleHelper.getEntry(data).isEmpty()
                 ? serverRepository
                 : new FederatedRepository(
                         serverRepository, new InMemoryFhirRepository(serverRepository.fhirContext(), data));

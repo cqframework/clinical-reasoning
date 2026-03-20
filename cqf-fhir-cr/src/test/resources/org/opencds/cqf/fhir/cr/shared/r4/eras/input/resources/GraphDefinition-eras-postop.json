@@ -24,8 +24,11 @@
           "type": "GraphDefinition",
           "extension": [
             {
-              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition",
-              "valueCanonical": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
+              "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/artifact-relatedArtifact",
+              "valueRelatedArtifact": {
+                "type": "depends-on",
+                "resource": "http://example.org/cdosdh/demo/GraphDefinition/hgb-pathway-event"
+              }
             }
           ]
         },

@@ -89,7 +89,10 @@ public class ExtractProcessor implements IExtractProcessor {
                         .noneMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_RESPONSE_IS_SUBJECT))) {
                     var childPair = new ItemPair(
                             request.getQuestionnaireItem(
-                                    childResponseItem, item.getItem().getItem()),
+                                    childResponseItem,
+                                    item.getItem() == null
+                                            ? null
+                                            : item.getItem().getItem()),
                             childResponseItem);
                     if (childResponseItem.hasItem()) {
                         processGroupItem(request, childPair, questionnaireCodeMap, resources, groupSubject);

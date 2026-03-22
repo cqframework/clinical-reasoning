@@ -186,7 +186,9 @@ graph LR
     style ENT fill:#f5f5f5,stroke:#666
 ```
 
-Notice how the structure of the architecture mirrors the structure of the systems of systems that FHIR is designed to support. The transport layer corresponds to the various platforms and interfaces that interact with the system. The domain core corresponds to the business logic that operates on clinical concepts. The repository API abstracts away the data sources, which could be any of the constituent systems in an SoS. This design allows the clinical reasoning logic to be reusable across different platforms and data sources, as long as they can implement the Repository API. It's also an example of recursive architecture, where the same principles of modularity and separation of concerns apply at different levels of the system. This allows developers (and agents!) to reuse the same mental model and design patterns at multiple levels in the system. 
+Notice how the structure of the architecture mirrors the structure of the systems of systems that FHIR is designed to support. The transport layer corresponds to the various platforms and interfaces that interact with the system. The domain core corresponds to the business logic that operates on clinical concepts. The repository API abstracts away the data sources, which could be any of the constituent systems in an SoS.
+
+This design allows the clinical reasoning logic to be reusable across different platforms and data sources, as long as they can implement the Repository API. It's also an example of recursive architecture, where the same principles of modularity and separation of concerns apply at different levels of the system. This allows developers and agents to reuse the same mental model and design patterns at multiple levels in the system. 
 
 ### FHIR Repository
 
@@ -204,7 +206,7 @@ Because `IRepository` mirrors the FHIR REST API, repositories compose naturally.
 
 ### FHIR Operation Implementation Layers
 
-When implementing a FHIR operation (e.g., `$evaluate-measure`, `$apply`), the code follows a consistent pipeline through the hexagonal layers. Each operation implementation is an isolated **canister** of business logic that accepts FHIR at the top, operates on domain representations internally, and produces FHIR at the bottom. The Repository API provides FHIR translation on the data-access side.
+When implementing a FHIR operation (e.g., `$evaluate-measure`, `$apply`), the code follows a consistent pipeline through the hexagonal layers. Each operation implementation is an isolated **canister** of business logic that accepts FHIR at the top, operates on domain representations internally, and produces FHIR at the bottom. This self-contained unit can slot into (or between) any FHIR server. The Repository API provides FHIR translation on the data-access side.
 
 ```mermaid
 sequenceDiagram
@@ -251,7 +253,11 @@ sequenceDiagram
     deactivate Transport
 ```
 
-Note the recursive nature of the architecture in the above sequence diagram. The transport layer accepts FHIR, translates it to domain types, and then the domain logic operates on those types. When the domain logic needs to access data, it goes through the Repository API, which is a FHIR translation layer for data access. The results are then denormalized back to FHIR and returned to the client. This pattern applies to all operations implemented in this project, providing a consistent structure for development and maintenance.
+Note the recursive nature of the architecture in the above sequence diagram.
+
+The transport layer accepts FHIR, translates it to domain types, and then the domain logic operates on those types. When the domain logic needs to access data, it goes through the Repository API, which is a FHIR translation layer for data access. The results are then denormalized back to FHIR and returned to the client.
+
+This pattern applies to all operations implemented in this project, providing a consistent structure for development and maintenance.
 In the cases where a domain specific representation is not needed, the operation simply operates on FHIR resources.
 
 #### Layer Responsibilities

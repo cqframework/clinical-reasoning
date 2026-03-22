@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -37,8 +38,11 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
  */
 public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<GroupDef, P> {
 
-    public SelectedMeasureDefGroup(GroupDef value, P parent) {
+    private final MeasureEvaluationState state;
+
+    public SelectedMeasureDefGroup(GroupDef value, MeasureEvaluationState state, P parent) {
         super(value, parent);
+        this.state = state;
     }
 
     // ==================== Navigation Methods ====================
@@ -59,7 +63,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No population found with code: " + populationCode);
-        return new SelectedMeasureDefPopulation<>(population, this);
+        return new SelectedMeasureDefPopulation<>(population, state, this);
     }
 
     /**
@@ -76,7 +80,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
                 .findFirst()
                 .orElse(null);
         assertNotNull(population, "No population found with ID: " + id);
-        return new SelectedMeasureDefPopulation<>(population, this);
+        return new SelectedMeasureDefPopulation<>(population, state, this);
     }
 
     /**
@@ -88,7 +92,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
     public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> firstPopulation() {
         assertNotNull(value(), "GroupDef is null");
         assertFalse(value().populations().isEmpty(), "No populations found in GroupDef");
-        return new SelectedMeasureDefPopulation<>(value().populations().get(0), this);
+        return new SelectedMeasureDefPopulation<>(value().populations().get(0), state, this);
     }
 
     /**
@@ -105,7 +109,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
                 .findFirst()
                 .orElse(null);
         assertNotNull(stratifier, "No stratifier found with ID: " + stratifierId);
-        return new SelectedMeasureDefStratifier<>(stratifier, this);
+        return new SelectedMeasureDefStratifier<>(stratifier, state, this);
     }
 
     /**
@@ -117,7 +121,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
     public SelectedMeasureDefStratifier<SelectedMeasureDefGroup<P>> firstStratifier() {
         assertNotNull(value(), "GroupDef is null");
         assertFalse(value().stratifiers().isEmpty(), "No stratifiers found in GroupDef");
-        return new SelectedMeasureDefStratifier<>(value().stratifiers().get(0), this);
+        return new SelectedMeasureDefStratifier<>(value().stratifiers().get(0), state, this);
     }
 
     // ==================== Assertion Methods ====================
@@ -154,7 +158,7 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      */
     public SelectedMeasureDefGroup<P> hasScore(Double score) {
         assertNotNull(value(), "GroupDef is null");
-        assertEquals(score, value().getScore(), "Group score mismatch");
+        assertEquals(score, state.group(value()).getScore(), "Group score mismatch");
         return this;
     }
 
@@ -165,7 +169,10 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
      */
     public SelectedMeasureDefGroup<P> hasNullScore() {
         assertNotNull(value(), "GroupDef is null");
-        assertNull(value().getScore(), "Expected null score (pre-scoring), but found: " + value().getScore());
+        assertNull(
+                state.group(value()).getScore(),
+                "Expected null score (pre-scoring), but found: "
+                        + state.group(value()).getScore());
         return this;
     }
 

@@ -19,7 +19,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -56,6 +55,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -224,12 +224,12 @@ public class R4MeasureServiceUtils {
         if (bundle != null && !bundle.getEntry().isEmpty()) {
             if (bundle.getEntry().size() > 1) {
                 var msg = "Measure Identifier: %s, found more than one matching measure resource".formatted(identifier);
-                throw new InvalidRequestException(msg);
+                throw new MeasureValidationException(msg);
             }
             return (Measure) bundle.getEntryFirstRep().getResource();
         } else {
             var msg = "Measure Identifier: %s, found no matching measure resources".formatted(identifier);
-            throw new InvalidRequestException(msg);
+            throw new MeasureValidationException(msg);
         }
     }
 
@@ -305,7 +305,7 @@ public class R4MeasureServiceUtils {
             return getMeasureGroupScoringTypes(measure);
         } else {
             if (!measure.hasScoring()) {
-                throw new InvalidRequestException(
+                throw new MeasureValidationException(
                         "Measure: %s, does not have a defined Measure Scoring Type.".formatted(measure.getIdPart()));
             }
             return Collections.singletonList(MeasureScoring.fromCode(
@@ -315,7 +315,7 @@ public class R4MeasureServiceUtils {
 
     public void listThrowIllegalArgumentIfEmpty(List<String> value, String parameterName) {
         if (value == null || value.isEmpty()) {
-            throw new InvalidRequestException(parameterName + " parameter requires a value.");
+            throw new MeasureValidationException(parameterName + " parameter requires a value.");
         }
     }
 

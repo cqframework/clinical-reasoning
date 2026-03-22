@@ -4,7 +4,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.FHIR_ALL
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_DECREASE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IMPROVEMENT_NOTATION_SYSTEM_INCREASE;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -67,7 +67,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // This might not be the best behavior, but we want to ensure that the behavior is the same
         // between versions
         if (measureScoring == null && measure.hasGroup()) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "MeasureScoring must be specified on Measure: %s".formatted(measure.getUrl()));
         }
         List<GroupDef> groups = new ArrayList<>();
@@ -137,13 +137,13 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private void checkId(Element e) {
         if (e.getId() == null || StringUtils.isBlank(e.getId())) {
-            throw new InvalidRequestException("id is required on all Elements of type: " + e.fhirType());
+            throw new MeasureValidationException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private void checkId(Resource r) {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
-            throw new InvalidRequestException("id is required on all Resources of type: " + r.fhirType());
+            throw new MeasureValidationException("id is required on all Resources of type: " + r.fhirType());
         }
     }
 
@@ -171,7 +171,7 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 }
 
                 if (!seenPopulationIds.add(populationId)) {
-                    throw new InvalidRequestException("Duplicate population ID '%s' found in %s of Measure: %s"
+                    throw new MeasureValidationException("Duplicate population ID '%s' found in %s of Measure: %s"
                             .formatted(populationId, groupIdentifier, measureIdentifier));
                 }
             }

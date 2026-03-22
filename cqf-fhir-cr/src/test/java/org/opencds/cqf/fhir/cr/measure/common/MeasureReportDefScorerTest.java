@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -48,14 +49,16 @@ class MeasureReportDefScorerTest {
         // Score is null before scoring
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for all populations (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Score is set on GroupDef via mutation
-        assertEquals(0.75, groupDef.getScore(), 0.001);
+        assertEquals(0.75, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -93,17 +96,19 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 stringBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for all populations (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
-        assertNull(denExclusionPop.getAggregationResult());
-        assertNull(denExceptionPop.getAggregationResult());
-        assertNull(numExclusionPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
+        assertNull(state.population(denExclusionPop).getAggregationResult());
+        assertNull(state.population(denExceptionPop).getAggregationResult());
+        assertNull(state.population(numExclusionPop).getAggregationResult());
 
         // VERIFY: Score is set correctly
-        assertEquals(0.5, groupDef.getScore(), 0.001);
+        assertEquals(0.5, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -133,15 +138,17 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 dateBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for all populations (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
-        assertNull(denExclusionPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
+        assertNull(state.population(denExclusionPop).getAggregationResult());
 
         // VERIFY: Null score set for zero denominator
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -230,11 +237,12 @@ class MeasureReportDefScorerTest {
         assertNull(femaleStratum.getScore());
 
         // Execute
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for all populations (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Scores are set on each StratumDef via mutation
         assertEquals(0.6, maleStratum.getScore(), 0.001); // Male: 3/5
@@ -265,13 +273,15 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (basic RATIO without MEASUREOBSERVATION)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
-        assertEquals(0.5, groupDef.getScore(), 0.001);
+        assertEquals(0.5, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -323,18 +333,20 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for non-observation populations
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
 
         // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores SUM result)
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(60.0, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(60.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // VERIFY: SUM aggregation = 60.0
-        assertEquals(60.0, groupDef.getScore(), 0.001);
+        assertEquals(60.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -383,18 +395,20 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for non-observation populations
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
 
         // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores AVG result)
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(20.0, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(20.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // VERIFY: AVG aggregation = 20.0
-        assertEquals(20.0, groupDef.getScore(), 0.001);
+        assertEquals(20.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -443,18 +457,20 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for non-observation populations
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
 
         // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores MIN result)
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(10.0, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(10.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // VERIFY: MIN aggregation = 10.0
-        assertEquals(10.0, groupDef.getScore(), 0.001);
+        assertEquals(10.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -503,18 +519,20 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null for non-observation populations
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
 
         // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores MAX result)
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(30.0, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(30.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // VERIFY: MAX aggregation = 30.0
-        assertEquals(30.0, groupDef.getScore(), 0.001);
+        assertEquals(30.0, state.group(groupDef).getScore(), 0.001);
     }
 
     // ============================================================================
@@ -573,14 +591,16 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 encounterBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Score is 0/4 = 0.0
-        assertEquals(0.0, groupDef.getScore(), 0.001);
+        assertEquals(0.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -634,14 +654,16 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 dateBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Score is 3/4 = 0.75
-        assertEquals(0.75, groupDef.getScore(), 0.001);
+        assertEquals(0.75, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -666,14 +688,16 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("decrease"), // DECREASE notation
                 booleanBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: getMeasureScore returns (1 - score) = 0.25 for decrease notation
-        assertEquals(0.25, groupDef.getScore(), 0.001);
+        assertEquals(0.25, state.group(groupDef).getScore(), 0.001);
     }
 
     // ============================================================================
@@ -746,15 +770,16 @@ class MeasureReportDefScorerTest {
         assertEquals(3, denominatorPop.getCount()); // 3 subjects (patient1, patient2, patient3)
 
         // Execute scoring
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Score is based on unique subjects, NOT resources
         // 2 subjects / 3 subjects = 0.667
-        assertEquals(0.667, groupDef.getScore(), 0.001);
+        assertEquals(0.667, state.group(groupDef).getScore(), 0.001);
     }
 
     /**
@@ -825,15 +850,16 @@ class MeasureReportDefScorerTest {
         assertEquals(9, denominatorPop.getCount()); // 9 encounters (3 + 2 + 4)
 
         // Execute scoring
-        scorer.scoreGroup("http://example.com/Measure/test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Score is based on encounter count, NOT subject count
         // 5 encounters / 9 encounters = 0.556
-        assertEquals(0.556, groupDef.getScore(), 0.001);
+        assertEquals(0.556, state.group(groupDef).getScore(), 0.001);
     }
 
     // ============================================================================
@@ -864,13 +890,14 @@ class MeasureReportDefScorerTest {
         assertNull(groupDef.getScore());
 
         // Execute
-        scorer.scoreGroup("http://example.com/Measure/cohort-test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/cohort-test", groupDef, state);
 
         // VERIFY: aggregationResult is null (COHORT measure)
-        assertNull(initialPopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
 
         // VERIFY: Cohort measures do not have scores
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -893,8 +920,11 @@ class MeasureReportDefScorerTest {
                 booleanBasis);
 
         // Execute and verify exception
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
         Exception exception = assertThrows(
-                Exception.class, () -> scorer.scoreGroup("http://example.com/Measure/missing-scoring", groupDef));
+                Exception.class,
+                () -> scorer.scoreGroup("http://example.com/Measure/missing-scoring", groupDef, state));
 
         // Verify exception message contains useful information
         assertTrue(exception.getMessage().contains("scoring"));
@@ -990,25 +1020,26 @@ class MeasureReportDefScorerTest {
         assertNull(groupDef.getScore());
 
         // Execute
-        scorer.scoreGroup("http://example.com/Measure/ratio-obs-test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/ratio-obs-test", groupDef, state);
 
         // VERIFY: Non-observation populations should have null aggregationResult
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
-        assertNull(numeratorPop.getAggregationResult()); // Regular NUMERATOR
-        assertNull(denominatorPop.getAggregationResult()); // Regular DENOMINATOR
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult()); // Regular NUMERATOR
+        assertNull(state.population(denominatorPop).getAggregationResult()); // Regular DENOMINATOR
 
         // VERIFY: MEASUREOBSERVATION populations should have aggregationResult
-        assertEquals(3, numeratorMeasureObs.getCount());
-        assertNotNull(numeratorMeasureObs.getAggregationResult());
-        assertEquals(60.0, numeratorMeasureObs.getAggregationResult(), 0.001); // 10+20+30
+        assertEquals(3, state.population(numeratorMeasureObs).getCount());
+        assertNotNull(state.population(numeratorMeasureObs).getAggregationResult());
+        assertEquals(60.0, state.population(numeratorMeasureObs).getAggregationResult(), 0.001); // 10+20+30
 
-        assertEquals(3, denominatorMeasureObs.getCount());
-        assertNotNull(denominatorMeasureObs.getAggregationResult());
-        assertEquals(30.0, denominatorMeasureObs.getAggregationResult(), 0.001); // 5+10+15
+        assertEquals(3, state.population(denominatorMeasureObs).getCount());
+        assertNotNull(state.population(denominatorMeasureObs).getAggregationResult());
+        assertEquals(30.0, state.population(denominatorMeasureObs).getAggregationResult(), 0.001); // 5+10+15
 
         // VERIFY: Score is 60.0 / 30.0 = 2.0
-        assertEquals(2.0, groupDef.getScore(), 0.001);
+        assertEquals(2.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -1056,15 +1087,17 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 booleanBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/ratio-zero-obs", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-zero-obs", groupDef, state);
 
         // VERIFY: All have null aggregationResult when count is zero
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
-        assertNull(numeratorMeasureObs.getAggregationResult()); // Zero count
-        assertNull(denominatorMeasureObs.getAggregationResult()); // Zero count
-        assertNull(groupDef.getScore()); // Null score for zero denominator
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
+        assertNull(state.population(numeratorMeasureObs).getAggregationResult()); // Zero count
+        assertNull(state.population(denominatorMeasureObs).getAggregationResult()); // Zero count
+        assertNull(state.group(groupDef).getScore()); // Null score for zero denominator
     }
 
     @Test
@@ -1116,14 +1149,16 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/ratio-null-num", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-null-num", groupDef, state);
 
         // VERIFY: Denominator aggregation result IS set even though numerator is null
-        assertNotNull(denominatorMeasureObs.getAggregationResult());
-        assertEquals(30.0, denominatorMeasureObs.getAggregationResult(), 0.001); // 5+10+15
+        assertNotNull(state.population(denominatorMeasureObs).getAggregationResult());
+        assertEquals(30.0, state.population(denominatorMeasureObs).getAggregationResult(), 0.001); // 5+10+15
 
         // VERIFY: Score is null (because numerator is null)
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -1175,14 +1210,16 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/ratio-null-den", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-null-den", groupDef, state);
 
         // VERIFY: Numerator aggregation result IS set even though denominator is null
-        assertNotNull(numeratorMeasureObs.getAggregationResult());
-        assertEquals(60.0, numeratorMeasureObs.getAggregationResult(), 0.001); // 10+20+30
+        assertNotNull(state.population(numeratorMeasureObs).getAggregationResult());
+        assertEquals(60.0, state.population(numeratorMeasureObs).getAggregationResult(), 0.001); // 10+20+30
 
         // VERIFY: Score is null (because denominator is null)
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -1216,13 +1253,15 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/ratio-both-null", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-both-null", groupDef, state);
 
         // VERIFY: No aggregation results are set (both populations null)
-        assertNull(measureObs.getAggregationResult());
+        assertNull(state.population(measureObs).getAggregationResult());
 
         // VERIFY: Score is null
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -1278,17 +1317,19 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 booleanBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/ratio-null-num-agg", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-null-num-agg", groupDef, state);
 
         // VERIFY: Numerator aggregation result is null (no observations)
-        assertNull(numeratorMeasureObs.getAggregationResult());
+        assertNull(state.population(numeratorMeasureObs).getAggregationResult());
 
         // VERIFY: Denominator aggregation result IS set
-        assertNotNull(denominatorMeasureObs.getAggregationResult());
-        assertEquals(10.0, denominatorMeasureObs.getAggregationResult(), 0.001);
+        assertNotNull(state.population(denominatorMeasureObs).getAggregationResult());
+        assertEquals(10.0, state.population(denominatorMeasureObs).getAggregationResult(), 0.001);
 
         // VERIFY: Score is null (because numerator aggregate is null)
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -1374,25 +1415,29 @@ class MeasureReportDefScorerTest {
 
         assertNull(groupDef.getScore());
 
-        scorer.scoreGroup("http://example.com/Measure/ratio-avg-test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/ratio-avg-test", groupDef, state);
 
         // VERIFY: Non-observation populations have null aggregationResult
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: MEASUREOBSERVATION populations have AVG aggregationResult
-        assertEquals(3, numeratorMeasureObs.getCount());
-        assertNotNull(numeratorMeasureObs.getAggregationResult());
-        assertEquals(20.0, numeratorMeasureObs.getAggregationResult(), 0.001); // AVG: (10+20+30)/3 = 20.0
+        assertEquals(3, state.population(numeratorMeasureObs).getCount());
+        assertNotNull(state.population(numeratorMeasureObs).getAggregationResult());
+        assertEquals(
+                20.0, state.population(numeratorMeasureObs).getAggregationResult(), 0.001); // AVG: (10+20+30)/3 = 20.0
 
-        assertEquals(3, denominatorMeasureObs.getCount());
-        assertNotNull(denominatorMeasureObs.getAggregationResult());
-        assertEquals(10.0, denominatorMeasureObs.getAggregationResult(), 0.001); // AVG: (5+10+15)/3 = 10.0
+        assertEquals(3, state.population(denominatorMeasureObs).getCount());
+        assertNotNull(state.population(denominatorMeasureObs).getAggregationResult());
+        assertEquals(
+                10.0, state.population(denominatorMeasureObs).getAggregationResult(), 0.001); // AVG: (5+10+15)/3 = 10.0
 
         // VERIFY: Score is 20.0 / 10.0 = 2.0
-        assertEquals(2.0, groupDef.getScore(), 0.001);
+        assertEquals(2.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -1556,21 +1601,23 @@ class MeasureReportDefScorerTest {
         assertNull(femaleStratum.getScore());
 
         // Execute
-        scorer.scoreGroup("http://example.com/Measure/ratio-obs-stratified", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/ratio-obs-stratified", groupDef, state);
 
         // VERIFY: Group-level MEASUREOBSERVATION populations have aggregationResult
-        assertEquals(5, numeratorMeasureObs.getCount());
-        assertNotNull(numeratorMeasureObs.getAggregationResult());
-        assertEquals(70.0, numeratorMeasureObs.getAggregationResult(), 0.001); // 40+30 (both strata)
+        assertEquals(5, state.population(numeratorMeasureObs).getCount());
+        assertNotNull(state.population(numeratorMeasureObs).getAggregationResult());
+        assertEquals(70.0, state.population(numeratorMeasureObs).getAggregationResult(), 0.001); // 40+30 (both strata)
 
-        assertEquals(5, denominatorMeasureObs.getCount());
-        assertNotNull(denominatorMeasureObs.getAggregationResult());
-        assertEquals(30.0, denominatorMeasureObs.getAggregationResult(), 0.001); // 20+10 (both strata)
+        assertEquals(5, state.population(denominatorMeasureObs).getCount());
+        assertNotNull(state.population(denominatorMeasureObs).getAggregationResult());
+        assertEquals(
+                30.0, state.population(denominatorMeasureObs).getAggregationResult(), 0.001); // 20+10 (both strata)
 
         // VERIFY: Non-observation populations have null aggregationResult
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(numeratorPop.getAggregationResult()); // Regular NUMERATOR
-        assertNull(denominatorPop.getAggregationResult()); // Regular DENOMINATOR
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult()); // Regular NUMERATOR
+        assertNull(state.population(denominatorPop).getAggregationResult()); // Regular DENOMINATOR
 
         // VERIFY: Male stratum score = 40/20 = 2.0
         assertEquals(2.0, maleStratum.getScore(), 0.001);
@@ -1724,7 +1771,9 @@ class MeasureReportDefScorerTest {
         assertNull(femaleNumObs.getAggregationResult());
         assertNull(femaleDenObs.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/rcv-stratum-agg", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-stratum-agg", groupDef, state);
 
         // VERIFY: Stratum scores are correct
         assertEquals(2.0, maleStratum.getScore(), 0.001);
@@ -1849,7 +1898,9 @@ class MeasureReportDefScorerTest {
         assertNull(maleMsrObsPop.getAggregationResult());
         assertNull(femaleMsrObsPop.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/cv-stratum-agg", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/cv-stratum-agg", groupDef, state);
 
         // VERIFY: Stratum scores
         assertEquals(60.0, maleStratum.getScore(), 0.001);
@@ -1903,7 +1954,9 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 booleanBasis);
 
-        scorer.scoreGroup("http://example.com/Measure/proportion-no-agg", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/proportion-no-agg", groupDef, state);
 
         // VERIFY: Proportion stratum populations should NOT have aggregation results
         assertNull(stratumNumPop.getAggregationResult());
@@ -2065,11 +2118,12 @@ class MeasureReportDefScorerTest {
         assertNull(maleStratum.getScore());
 
         // Execute
-        scorer.scoreGroup("http://example.com/Measure/qualified-ids-test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+        scorer.scoreGroup("http://example.com/Measure/qualified-ids-test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: Scorer correctly matched qualified stratum IDs to unqualified population IDs
         // Female stratum: 2/2 = 1.0
@@ -2222,18 +2276,20 @@ class MeasureReportDefScorerTest {
         assertNull(groupDef.getScore());
         assertNull(measureObsPop.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/median-test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/median-test", groupDef, state);
 
         // VERIFY: aggregationResult is null for non-observation populations
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
 
         // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores MEDIAN result)
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(15.0, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(15.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // VERIFY: MEDIAN aggregation = 15.0
-        assertEquals(15.0, groupDef.getScore(), 0.001);
+        assertEquals(15.0, state.group(groupDef).getScore(), 0.001);
     }
 
     @Test
@@ -2286,18 +2342,20 @@ class MeasureReportDefScorerTest {
         assertNull(groupDef.getScore());
         assertNull(measureObsPop.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/count-test", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/count-test", groupDef, state);
 
         // VERIFY: aggregationResult is null for non-observation populations
-        assertNull(initialPopulation.getAggregationResult());
-        assertNull(measurePopulation.getAggregationResult());
+        assertNull(state.population(initialPopulation).getAggregationResult());
+        assertNull(state.population(measurePopulation).getAggregationResult());
 
         // VERIFY: aggregationResult IS set for MEASUREOBSERVATION population (stores COUNT result)
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(7.0, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(7.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // VERIFY: COUNT aggregation = 7.0
-        assertEquals(7.0, groupDef.getScore(), 0.001);
+        assertEquals(7.0, state.group(groupDef).getScore(), 0.001);
     }
 
     // ============================================================================
@@ -2402,7 +2460,9 @@ class MeasureReportDefScorerTest {
         assertNull(stratumNumObs.getAggregationResult());
         assertNull(stratumDenObs.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-num-only", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-num-only", groupDef, state);
 
         // VERIFY: Numerator aggregation result IS persisted (even though denominator is null)
         assertNotNull(
@@ -2516,7 +2576,9 @@ class MeasureReportDefScorerTest {
         assertNull(stratumNumObs.getAggregationResult());
         assertNull(stratumDenObs.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-den-only", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-den-only", groupDef, state);
 
         // VERIFY: Numerator aggregation result is null (no observations for stratum subjects)
         assertNull(
@@ -2626,7 +2688,9 @@ class MeasureReportDefScorerTest {
         assertNull(stratumNumObs.getAggregationResult());
         assertNull(stratumDenObs.getAggregationResult());
 
-        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-both", groupDef);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        scorer.scoreGroup("http://example.com/Measure/rcv-partial-null-both", groupDef, state);
 
         // VERIFY: Both aggregation results are null (no observations for stratum subjects)
         assertNull(
@@ -2638,5 +2702,32 @@ class MeasureReportDefScorerTest {
 
         // VERIFY: Stratum score is null
         assertNull(stratum.getScore(), "Stratum score should be null when neither side has observations");
+    }
+
+    /**
+     * Create MeasureEvaluationState for a single GroupDef by wrapping it in a MeasureDef
+     * and copying all subject resources and strata from Def objects to state.
+     */
+    private MeasureEvaluationState createStateForGroup(GroupDef groupDef) {
+        MeasureDef measureDef = new MeasureDef(
+                new IdType("Measure/test"), "http://example.com/Measure/test", "1.0", List.of(groupDef), List.of());
+        MeasureEvaluationState state = MeasureEvaluationState.create(measureDef);
+
+        // Copy subject resources from PopulationDef to PopulationState
+        for (PopulationDef pop : groupDef.populations()) {
+            for (Map.Entry<String, Set<Object>> entry :
+                    pop.getSubjectResources().entrySet()) {
+                for (Object resource : entry.getValue()) {
+                    state.population(pop).addResource(entry.getKey(), resource);
+                }
+            }
+        }
+
+        // Copy strata from StratifierDef to StratifierState
+        for (StratifierDef strat : groupDef.stratifiers()) {
+            state.stratifier(strat).addAllStrata(strat.getStratum());
+        }
+
+        return state;
     }
 }

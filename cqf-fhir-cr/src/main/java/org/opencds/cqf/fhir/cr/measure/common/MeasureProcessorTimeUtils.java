@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -136,8 +134,9 @@ public class MeasureProcessorTimeUtils {
             // User provided measurement period: validate/convert and add to parameters map
             var elmLibrary = context.getEnvironment().resolveLibrary(firstLibraryId);
             if (elmLibrary == null) {
-                throw new InternalErrorException("Could not resolve ELM library for identifier: %s, measure URLs: %s"
-                        .formatted(firstLibraryId.getId(), measureUrls));
+                throw new MeasureEvaluationException(
+                        "Could not resolve ELM library for identifier: %s, measure URLs: %s"
+                                .formatted(firstLibraryId.getId(), measureUrls));
             }
             var validatedPeriod = validateAndConvertMeasurementPeriod(measurementPeriodParams, elmLibrary, measureUrls);
             if (validatedPeriod != null) {
@@ -172,7 +171,7 @@ public class MeasureProcessorTimeUtils {
         }
 
         if (!(result instanceof Interval defaultPeriod)) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "\"Measurement Period\" default resolved to %s instead of Interval for library: %s"
                             .formatted(result.getClass().getSimpleName(), firstLibraryId.getId()));
         }
@@ -214,7 +213,7 @@ public class MeasureProcessorTimeUtils {
 
         if (!(intervalTypeSpecifier.getPointType() instanceof NamedTypeSpecifier pointType)
                 || pointType.getName() == null) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "\"Measurement Period\" parameter has unexpected type specifier for measure URLs: %s"
                             .formatted(measureUrls));
         }
@@ -246,7 +245,7 @@ public class MeasureProcessorTimeUtils {
     public static Interval convertInterval(Interval interval, String targetType, List<String> measureUrls) {
         var pointType = interval.getPointType();
         if (pointType == null) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "Measurement period interval has no point type for measure URLs: %s".formatted(measureUrls));
         }
         String sourceTypeQualified = pointType.getTypeName();
@@ -257,7 +256,7 @@ public class MeasureProcessorTimeUtils {
 
         if (sourceType.equals("DateTime") && targetType.equals("Date")) {
             if (interval.getLow() == null || interval.getHigh() == null) {
-                throw new InternalErrorException(
+                throw new MeasureEvaluationException(
                         "Interval has no low or high values for measure URLs: %s".formatted(measureUrls));
             }
             logger.debug(
@@ -269,7 +268,7 @@ public class MeasureProcessorTimeUtils {
                     interval.getHighClosed());
         }
 
-        throw new InvalidRequestException(
+        throw new MeasureValidationException(
                 "The interval type of %s did not match the expected type of %s and no conversion was possible for measure URLs (first 5 only shown): %s."
                         .formatted(
                                 sourceType,
@@ -280,7 +279,7 @@ public class MeasureProcessorTimeUtils {
     public static Date truncateDateTime(DateTime dateTime) {
         OffsetDateTime odt = dateTime.getDateTime();
         if (odt == null) {
-            throw new InternalErrorException("dateTime was null");
+            throw new MeasureEvaluationException("dateTime was null");
         }
         return new Date(odt.getYear(), odt.getMonthValue(), odt.getDayOfMonth());
     }

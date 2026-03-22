@@ -7,7 +7,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
@@ -23,6 +22,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 
 /**
@@ -48,7 +48,7 @@ public class R4MeasureUtils {
      *
      * @param measure the Measure resource
      * @return the MeasureScoring enum value
-     * @throws InvalidRequestException if scoring code is invalid
+     * @throws MeasureValidationException if scoring code is invalid
      */
     public static MeasureScoring getMeasureScoring(Measure measure) {
         var scoringCode = measure.getScoring().getCodingFirstRep().getCode();
@@ -61,14 +61,14 @@ public class R4MeasureUtils {
      * @param measureUrl the measure URL (for error messages)
      * @param scoringCode the scoring code to parse
      * @return the MeasureScoring enum value, or null if scoringCode is null
-     * @throws InvalidRequestException if scoring code is invalid
+     * @throws MeasureValidationException if scoring code is invalid
      */
     @Nullable
     public static MeasureScoring getMeasureScoring(String measureUrl, @Nullable String scoringCode) {
         if (scoringCode != null) {
             var code = MeasureScoring.fromCode(scoringCode);
             if (code == null) {
-                throw new InvalidRequestException(
+                throw new MeasureValidationException(
                         "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
                                 .formatted(scoringCode, measureUrl));
             } else {
@@ -84,7 +84,7 @@ public class R4MeasureUtils {
      * @param measureUrl the measure URL (for error messages)
      * @param measureGroup the MeasureGroupComponent
      * @return the group-level MeasureScoring, or null if no extension present
-     * @throws InvalidRequestException if scoring code is invalid
+     * @throws MeasureValidationException if scoring code is invalid
      */
     @Nullable
     public static MeasureScoring getGroupMeasureScoring(String measureUrl, MeasureGroupComponent measureGroup) {
@@ -97,7 +97,7 @@ public class R4MeasureUtils {
                 final MeasureScoring groupMeasureScoring = MeasureScoring.fromCode(scoringCode);
 
                 if (groupMeasureScoring == null) {
-                    throw new InvalidRequestException(
+                    throw new MeasureValidationException(
                             "Measure Scoring code: %s, is not a valid Measure Scoring Type for measure: %s."
                                     .formatted(scoringCode, measureUrl));
                 }
@@ -122,7 +122,7 @@ public class R4MeasureUtils {
     public static MeasureScoring computeScoring(
             String measureUrl, MeasureScoring measureScoring, MeasureScoring groupScoring) {
         if (groupScoring == null && measureScoring == null) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "MeasureScoring must be specified on Group or Measure for Measure: " + measureUrl);
         }
         if (groupScoring != null) {
@@ -149,7 +149,7 @@ public class R4MeasureUtils {
      * @param measure the Measure resource (for URL/validation)
      * @param measureGroup the MeasureGroupComponent
      * @return the CodeDef representing the improvement notation, or null if not present
-     * @throws InvalidRequestException if the improvement notation code is invalid
+     * @throws MeasureValidationException if the improvement notation code is invalid
      */
     @Nullable
     public static CodeDef getGroupImprovementNotation(Measure measure, MeasureGroupComponent measureGroup) {
@@ -187,7 +187,7 @@ public class R4MeasureUtils {
      *
      * @param measureUrl the measure URL (for error messages)
      * @param improvementNotation the CodeDef to validate
-     * @throws InvalidRequestException if the system or code is invalid
+     * @throws MeasureValidationException if the system or code is invalid
      */
     public static void validateImprovementNotationCode(String measureUrl, CodeDef improvementNotation) {
         var code = improvementNotation.code();
@@ -196,7 +196,7 @@ public class R4MeasureUtils {
         boolean hasValidCode =
                 IMPROVEMENT_NOTATION_SYSTEM_INCREASE.equals(code) || IMPROVEMENT_NOTATION_SYSTEM_DECREASE.equals(code);
         if (!hasValidCode || !hasValidSystem) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "ImprovementNotation Coding has invalid System: %s, code: %s, combination for Measure: %s"
                             .formatted(system, code, measureUrl));
         }
@@ -257,7 +257,7 @@ public class R4MeasureUtils {
 
             // check that method is accepted
             if (aggregateMethod == null) {
-                throw new InvalidRequestException("Aggregation method: %s is not a valid value for Measure: %s"
+                throw new MeasureValidationException("Aggregation method: %s is not a valid value for Measure: %s"
                         .formatted(aggregateMethodString, measureUrl));
             }
 

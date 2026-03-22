@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3.selected.def;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
 /**
@@ -12,10 +13,12 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
  */
 public class SelectedMeasureDefGroup<P> {
     protected final GroupDef groupDef;
+    protected final MeasureEvaluationState state;
     protected final P parent;
 
-    public SelectedMeasureDefGroup(GroupDef groupDef, P parent) {
+    public SelectedMeasureDefGroup(GroupDef groupDef, MeasureEvaluationState state, P parent) {
         this.groupDef = groupDef;
+        this.state = state;
         this.parent = parent;
     }
 
@@ -41,13 +44,13 @@ public class SelectedMeasureDefGroup<P> {
                                         ? pop.code().first().code()
                                         : "null")
                                 .toList()));
-        return new SelectedMeasureDefPopulation<>(found, this);
+        return new SelectedMeasureDefPopulation<>(found, state, this);
     }
 
     // Access first population
     public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> firstPopulation() {
         assertFalse(groupDef.populations().isEmpty(), "Expected at least one population but found none");
-        return new SelectedMeasureDefPopulation<>(groupDef.populations().get(0), this);
+        return new SelectedMeasureDefPopulation<>(groupDef.populations().get(0), state, this);
     }
 
     // Access population by index
@@ -56,7 +59,7 @@ public class SelectedMeasureDefGroup<P> {
                 index >= 0 && index < groupDef.populations().size(),
                 "Index " + index + " out of bounds for "
                         + groupDef.populations().size() + " populations");
-        return new SelectedMeasureDefPopulation<>(groupDef.populations().get(index), this);
+        return new SelectedMeasureDefPopulation<>(groupDef.populations().get(index), state, this);
     }
 
     // Assert stratifier count
@@ -81,7 +84,10 @@ public class SelectedMeasureDefGroup<P> {
 
     // Assert null score (pre-scoring)
     public SelectedMeasureDefGroup<P> hasNullScore() {
-        assertNull(groupDef.getScore(), "Expected null score (pre-scoring) but found: " + groupDef.getScore());
+        assertNull(
+                state.group(groupDef).getScore(),
+                "Expected null score (pre-scoring) but found: "
+                        + state.group(groupDef).getScore());
         return this;
     }
 }

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3.selected.def;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
 /**
@@ -11,10 +12,12 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
  */
 public class SelectedMeasureDefPopulation<P> {
     protected final PopulationDef populationDef;
+    protected final MeasureEvaluationState state;
     protected final P parent;
 
-    public SelectedMeasureDefPopulation(PopulationDef populationDef, P parent) {
+    public SelectedMeasureDefPopulation(PopulationDef populationDef, MeasureEvaluationState state, P parent) {
         this.populationDef = populationDef;
+        this.state = state;
         this.parent = parent;
     }
 
@@ -26,9 +29,9 @@ public class SelectedMeasureDefPopulation<P> {
         return parent;
     }
 
-    // Assert population count (delegates to PopulationDef.getCount())
+    // Assert population count (delegates to PopulationState.getCount())
     public SelectedMeasureDefPopulation<P> hasCount(int expected) {
-        int actualCount = populationDef.getCount();
+        int actualCount = state.population(populationDef).getCount();
         assertEquals(expected, actualCount, "Population count mismatch");
         return this;
     }
@@ -37,9 +40,9 @@ public class SelectedMeasureDefPopulation<P> {
     public SelectedMeasureDefPopulation<P> hasSubjectCount(int expected) {
         assertEquals(
                 expected,
-                populationDef.getSubjectResources().size(),
+                state.population(populationDef).getSubjectResources().size(),
                 "Expected " + expected + " subjects but found "
-                        + populationDef.getSubjectResources().size());
+                        + state.population(populationDef).getSubjectResources().size());
         return this;
     }
 
@@ -52,15 +55,16 @@ public class SelectedMeasureDefPopulation<P> {
     // Assert has no subjects
     public SelectedMeasureDefPopulation<P> hasNoSubjects() {
         assertTrue(
-                populationDef.getSubjectResources().isEmpty(),
+                state.population(populationDef).getSubjectResources().isEmpty(),
                 "Expected no subjects but found "
-                        + populationDef.getSubjectResources().size());
+                        + state.population(populationDef).getSubjectResources().size());
         return this;
     }
 
     // Assert has subjects
     public SelectedMeasureDefPopulation<P> hasSubjects() {
-        assertFalse(populationDef.getSubjectResources().isEmpty(), "Expected subjects but found none");
+        assertFalse(
+                state.population(populationDef).getSubjectResources().isEmpty(), "Expected subjects but found none");
         return this;
     }
 }

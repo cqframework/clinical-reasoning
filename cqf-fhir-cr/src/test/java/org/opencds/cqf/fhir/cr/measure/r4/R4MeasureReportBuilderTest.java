@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
@@ -42,6 +41,8 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureObservationStratumCache;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -67,9 +68,12 @@ class R4MeasureReportBuilderTest {
     void happyPathEmptySdes() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
+        var measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, Set.of(buildInterval()));
+        var state = MeasureEvaluationState.create(measureDef);
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, Set.of(buildInterval())),
+                measureDef,
+                state,
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -85,9 +89,12 @@ class R4MeasureReportBuilderTest {
     void happyPathEmptySdesAllResourcesAsNull() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
+        var measureDef = buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true, null);
+        var state = MeasureEvaluationState.create(measureDef);
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_2, MEASURE_URL_2, 2, 0),
-                buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true, null),
+                measureDef,
+                state,
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -106,9 +113,12 @@ class R4MeasureReportBuilderTest {
         var nulls = new ArrayList<>();
         nulls.add(null);
 
+        var measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls);
+        var state = MeasureEvaluationState.create(measureDef);
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
+                measureDef,
+                state,
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -124,9 +134,12 @@ class R4MeasureReportBuilderTest {
     void happyPathNonEmptySdes() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
+        var measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, true, Set.of());
+        var state = buildStateWithSdeData(measureDef, true, Set.of());
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, true, Set.of()),
+                measureDef,
+                state,
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -149,9 +162,12 @@ class R4MeasureReportBuilderTest {
     void happyPathNonEmptySdesCreateObservations() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
+        var measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of());
+        var state = buildStateWithSdeData(measureDef, false, Set.of());
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, null, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of()),
+                measureDef,
+                state,
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -178,9 +194,10 @@ class R4MeasureReportBuilderTest {
         final List<String> subjectIds = List.of();
 
         try {
-            r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
+            var state = MeasureEvaluationState.create(measureDef);
+            r4MeasureReportBuilder.build(measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
-        } catch (InternalErrorException exception) {
+        } catch (MeasureEvaluationException exception) {
             assertEquals(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: http://something.com/measure1",
                     exception.getMessage());
@@ -195,9 +212,10 @@ class R4MeasureReportBuilderTest {
         final List<String> subjectIds = List.of();
 
         try {
-            r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, subjectIds);
+            var state = MeasureEvaluationState.create(measureDef);
+            r4MeasureReportBuilder.build(measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, subjectIds);
             fail("expected failure");
-        } catch (InternalErrorException exception) {
+        } catch (MeasureEvaluationException exception) {
             assertEquals(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: http://something.com/measure1",
                     exception.getMessage());
@@ -209,9 +227,12 @@ class R4MeasureReportBuilderTest {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
         try {
+            var measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(new Patient()));
+            var state = MeasureEvaluationState.create(measureDef);
             r4MeasureReportBuilder.build(
                     buildMeasure(null, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(new Patient())),
+                    measureDef,
+                    state,
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -221,6 +242,27 @@ class R4MeasureReportBuilderTest {
     }
 
     @Nonnull
+    /**
+     * Creates a MeasureEvaluationState and populates SDE data on it (not on the Def objects).
+     * The state refactoring moved SDE results from SdeDef to SdeState.
+     */
+    private static MeasureEvaluationState buildStateWithSdeData(
+            MeasureDef measureDef, boolean isKeyResource, Collection<Object> evaluatedResources) {
+        var state = MeasureEvaluationState.create(measureDef);
+        for (SdeDef sde : measureDef.sdes()) {
+            if (evaluatedResources != null) {
+                state.sde(sde)
+                        .putResult(
+                                "subject",
+                                isKeyResource ? new Patient().setId(new IdType("Patient", "patient1")) : "nonResource",
+                                evaluatedResources.stream()
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toUnmodifiableSet()));
+            }
+        }
+        return state;
+    }
+
     private static MeasureDef buildMeasureDef(
             String id,
             String url,
@@ -373,8 +415,9 @@ class R4MeasureReportBuilderTest {
                 List.of(groupDef),
                 List.of());
 
+        var state = MeasureEvaluationState.create(measureDef);
         var measureReport =
-                r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.SUMMARY, null, List.of());
+                r4MeasureReportBuilder.build(measure, measureDef, state, MeasureReportType.SUMMARY, null, List.of());
 
         assertNotNull(measureReport);
         assertEquals(1, measureReport.getGroup().size());
@@ -484,8 +527,11 @@ class R4MeasureReportBuilderTest {
                 List.of());
 
         // Build report
+        var state = MeasureEvaluationState.create(measureDef);
+        // Populate state with stratifier strata (state refactoring moved strata from Def to State)
+        state.stratifier(stratifierDef).addAllStrata(List.of(stratumDef));
         var measureReport =
-                r4MeasureReportBuilder.build(measure, measureDef, MeasureReportType.SUMMARY, null, List.of());
+                r4MeasureReportBuilder.build(measure, measureDef, state, MeasureReportType.SUMMARY, null, List.of());
 
         // VERIFY: Report structure
         assertNotNull(measureReport);

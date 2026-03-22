@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.POPULATION_BASIS_URL;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collections;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -16,6 +15,7 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 
 class Dstu3MeasureDefBuilderTest {
 
@@ -30,7 +30,7 @@ class Dstu3MeasureDefBuilderTest {
     @Test
     void defBuilderThrowsWhenMeasureIdMissing() {
         var measure = new Measure();
-        var e = assertThrows(InvalidRequestException.class, () -> BUILDER.build(measure));
+        var e = assertThrows(MeasureValidationException.class, () -> BUILDER.build(measure));
         assertTrue(e.getMessage().contains("id is required on all Resources"));
     }
 
@@ -40,7 +40,7 @@ class Dstu3MeasureDefBuilderTest {
         measure.setId("123");
         measure.setScoring(new CodeableConcept().addCoding(new Coding().setCode("proportion")));
         measure.addGroup().addPopulation();
-        var e = assertThrows(InvalidRequestException.class, () -> BUILDER.build(measure));
+        var e = assertThrows(MeasureValidationException.class, () -> BUILDER.build(measure));
         assertTrue(e.getMessage().contains("id is required on all Elements"));
     }
 

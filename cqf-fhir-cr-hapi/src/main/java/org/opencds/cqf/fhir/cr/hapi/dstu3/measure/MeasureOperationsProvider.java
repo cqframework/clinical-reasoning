@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
@@ -17,7 +16,9 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.opencds.cqf.fhir.cr.hapi.common.MeasureExceptionMapper;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -70,21 +71,25 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
-            throws InternalErrorException, FHIRException {
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        return dstu3MeasureProcessorFactory
-                .create(requestDetails)
-                .evaluateMeasure(
-                        id,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        patient,
-                        practitioner,
-                        lastReceivedOn,
-                        productLine,
-                        additionalData,
-                        parameters,
-                        terminologyEndpointParam);
+            throws FHIRException {
+        try {
+            var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
+            return dstu3MeasureProcessorFactory
+                    .create(requestDetails)
+                    .evaluateMeasure(
+                            id,
+                            periodStart,
+                            periodEnd,
+                            reportType,
+                            patient,
+                            practitioner,
+                            lastReceivedOn,
+                            productLine,
+                            additionalData,
+                            parameters,
+                            terminologyEndpointParam);
+        } catch (MeasureException e) {
+            throw MeasureExceptionMapper.map(e);
+        }
     }
 }

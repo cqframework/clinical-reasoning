@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +20,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
@@ -81,7 +81,7 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
-        stratifierDef.getStratum().forEach(stratumDef -> {
+        bc.state().stratifier(stratifierDef).getStrata().forEach(stratumDef -> {
             var reportStratum = reportStratifier.addStratum();
 
             buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), populations, groupDef);
@@ -110,7 +110,7 @@ class R4StratifierBuilder {
             buildStratum(
                     bc,
                     stratifierDef,
-                    getOnlyStratumDef(stratifierDef),
+                    getOnlyStratumDef(bc, stratifierDef),
                     reportStratum,
                     stratValues,
                     populations,
@@ -123,7 +123,7 @@ class R4StratifierBuilder {
         // Stratum 2
         // Value: 'F'--> subjects: subject2
         // loop through each value key
-        for (StratumDef stratumDef : stratifierDef.getStratum()) {
+        for (StratumDef stratumDef : bc.state().stratifier(stratifierDef).getStrata()) {
             buildStratumOuter(bc, stratifierDef, stratumDef, reportStratifier, populations, groupDef);
         }
     }
@@ -205,18 +205,19 @@ class R4StratifierBuilder {
                     .filter(population -> population.getId().equals(stratumPopulationDef.id()))
                     .findFirst();
             if (optMgpc.isEmpty()) {
-                throw new InternalErrorException("could not find MeasureGroupPopulationComponent");
+                throw new MeasureEvaluationException("could not find MeasureGroupPopulationComponent");
             }
             var stratumPopulation = stratum.addPopulation();
             buildStratumPopulation(bc, stratumPopulationDef, stratumPopulation, optMgpc.get(), groupDef);
         }
     }
 
-    private static StratumDef getOnlyStratumDef(StratifierDef stratifierDef) {
-        final List<StratumDef> stratumDefs = stratifierDef.getStratum();
+    private static StratumDef getOnlyStratumDef(R4MeasureReportBuilderContext bc, StratifierDef stratifierDef) {
+        final List<StratumDef> stratumDefs =
+                bc.state().stratifier(stratifierDef).getStrata();
 
         if (stratumDefs.size() != 1) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "There must be one and only one stratum for this stratifier but there was: %s"
                             .formatted(stratumDefs.size()));
         }
@@ -254,7 +255,7 @@ class R4StratifierBuilder {
                 .orElse(null);
 
         if (populationDef == null) {
-            throw new InvalidRequestException("Invalid population definition for measure: %s since it's missing %s"
+            throw new MeasureValidationException("Invalid population definition for measure: %s since it's missing %s"
                     .formatted(
                             bc.getMeasureUrl(),
                             population.getCode().getCodingFirstRep().getCode()));

@@ -28,20 +28,27 @@ public class MeasureObservationHandler {
      * @param subjectId the subject ID
      * @param measurePopulationExclusionDef population containing resources to exclude (e.g., cancelled encounters)
      * @param measureObservationDef population containing observation maps to filter
+     * @param state the evaluation state holding per-population mutable data
      */
     static void removeObservationResourcesInPopulation(
-            String subjectId, PopulationDef measurePopulationExclusionDef, PopulationDef measureObservationDef) {
+            String subjectId,
+            PopulationDef measurePopulationExclusionDef,
+            PopulationDef measureObservationDef,
+            MeasureEvaluationState state) {
 
         if (measureObservationDef == null || measurePopulationExclusionDef == null) {
             return;
         }
 
-        final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
+        var exclusionState = state.population(measurePopulationExclusionDef);
+        var observationState = state.population(measureObservationDef);
+
+        final Set<Object> exclusionResources = exclusionState.getResourcesForSubject(subjectId);
         if (CollectionUtils.isEmpty(exclusionResources)) {
             return;
         }
 
-        final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
+        final Set<Object> observationResources = observationState.getResourcesForSubject(subjectId);
         if (CollectionUtils.isEmpty(observationResources)) {
             return;
         }
@@ -59,8 +66,7 @@ public class MeasureObservationHandler {
         // Iterate over observation resources (which are Maps) and remove matching keys
         for (Object observationResource : observationResourcesCopy) {
             if (observationResource instanceof Map<?, ?> observationMap) {
-                removeMatchingKeysFromObservationMap(
-                        observationMap, exclusionResources, measureObservationDef, subjectId);
+                removeMatchingKeysFromObservationMap(observationMap, exclusionResources, observationState, subjectId);
             }
         }
     }
@@ -74,13 +80,13 @@ public class MeasureObservationHandler {
      *
      * @param observationMap observation map containing Resource -> QuantityDef entries
      * @param exclusionResources set of resources to exclude
-     * @param measureObservationDef the observation population definition
+     * @param observationState the population state for the observation population
      * @param subjectId the subject ID
      */
     private static void removeMatchingKeysFromObservationMap(
             Map<?, ?> observationMap,
             Set<Object> exclusionResources,
-            PopulationDef measureObservationDef,
+            MeasureEvaluationState.PopulationState observationState,
             String subjectId) {
 
         // Find observation map keys that match any exclusion resource
@@ -94,9 +100,9 @@ public class MeasureObservationHandler {
                 logger.debug(
                         "Removing observation for excluded resource: {}",
                         EvaluationResultFormatter.formatResource(exclusionResource));
-                // Remove the entry from the inner map using the PopulationDef's removal method
+                // Remove the entry from the inner map using the PopulationState's removal method
                 // This ensures proper handling of the Map<String, Set<Map<Resource, QuantityDef>>> structure
-                measureObservationDef.removeExcludedMeasureObservationResource(subjectId, exclusionResource);
+                observationState.removeExcludedMeasureObservationResource(subjectId, exclusionResource);
             }
         }
     }

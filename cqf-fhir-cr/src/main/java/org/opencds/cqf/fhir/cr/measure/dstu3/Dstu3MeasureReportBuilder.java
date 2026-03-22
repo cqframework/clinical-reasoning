@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,7 +15,6 @@ import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
@@ -36,22 +34,23 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +82,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     public MeasureReport build(
             Measure measure,
             MeasureDef measureDef,
+            MeasureEvaluationState state,
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds) {
@@ -91,11 +91,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         this.measure = measure;
         this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
 
-        buildGroups(measure, measureDef);
-        processSdes(measure, measureDef, subjectIds);
+        buildGroups(measure, measureDef, state);
+        processSdes(measure, measureDef, state, subjectIds);
 
-        // Copy scores from Def objects (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
-        copyScoresFromDef(measureDef);
+        // Copy scores from state (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
+        copyScoresFromState(measureDef, state);
 
         // Only add evaluated resources to individual reports
         if (measureReportType == MeasureReportType.INDIVIDUAL) {
@@ -109,7 +109,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.report;
     }
 
-    protected void buildGroups(Measure measure, MeasureDef measureDef) {
+    protected void buildGroups(Measure measure, MeasureDef measureDef, MeasureEvaluationState state) {
         if (measure.getGroup().size() != measureDef.groups().size()) {
             // This is not a user error:
             throw new IllegalArgumentException(
@@ -123,6 +123,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             String groupKey = this.getKey("group", mgc.getId(), null, i);
             buildGroup(
                     measureDef,
+                    state,
                     groupKey,
                     mgc,
                     this.report.addGroup(),
@@ -132,6 +133,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected void buildGroup(
             MeasureDef measureDef,
+            MeasureEvaluationState state,
             String groupKey,
             MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
@@ -157,6 +159,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
             buildPopulation(
                     measureDef,
+                    state,
                     groupKey,
                     mgpc,
                     reportGroup.addPopulation(),
@@ -166,6 +169,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
             buildStratifier(
+                    state,
                     groupKey,
                     i,
                     measureGroup.getStratifier().get(i),
@@ -189,6 +193,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void buildStratifier(
+            MeasureEvaluationState state,
             String groupKey,
             Integer stratIndex,
             MeasureGroupStratifierComponent measureStratifier,
@@ -201,16 +206,17 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         String stratifierKey = this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
 
-        Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
+        Map<String, CriteriaResult> subjectValues =
+                state.stratifier(stratifierDef).getResults();
 
         // Because most of the types we're dealing with don't implement hashCode or
         // equals
-        // the ValueWrapper does it for them.
-        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
+        // the StratumValueWrapper does it for them.
+        Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
-                        x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
 
-        for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(
                     groupKey,
                     stratifierKey,
@@ -225,7 +231,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             String groupKey,
             String stratifierKey,
             StratifierGroupComponent stratum,
-            ValueWrapper value,
+            StratumValueWrapper value,
             List<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations) {
 
@@ -278,18 +284,21 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
     protected void buildPopulation(
             MeasureDef measureDef,
+            MeasureEvaluationState state,
             String groupKey,
             MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
             PopulationDef populationDef) {
 
+        var popState = state.population(populationDef);
+
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
-            reportPopulation.setCount(populationDef.getAllSubjectResources().size());
+            reportPopulation.setCount(popState.getAllSubjectResources().size());
         } else {
-            reportPopulation.setCount(populationDef.getSubjects().size());
+            reportPopulation.setCount(popState.getSubjects().size());
         }
 
         if (measurePopulation.hasDescription()) {
@@ -297,10 +306,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
         }
 
-        addResourceReferences(populationDef.type(), populationDef.getEvaluatedResources());
+        addResourceReferences(populationDef.type(), popState.getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
-        Set<String> populationSet = populationDef.getSubjects();
+        Set<String> populationSet = popState.getSubjects();
         measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior
@@ -323,7 +332,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // Population Type behavior
         switch (populationDef.type()) {
             case MEASUREOBSERVATION:
-                buildMeasureObservations(populationDef.expression(), populationDef.getAllSubjectResources());
+                buildMeasureObservations(populationDef.expression(), popState.getAllSubjectResources());
                 break;
             default:
                 break;
@@ -384,23 +393,24 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
     }
 
-    protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
+    protected void processSdes(
+            Measure measure, MeasureDef measureDef, MeasureEvaluationState state, List<String> subjectIds) {
         // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
         for (int i = 0; i < measure.getSupplementalData().size(); i++) {
             MeasureSupplementalDataComponent msdc =
                     measure.getSupplementalData().get(i);
             SdeDef sde = measureDef.sdes().get(i);
 
-            processSdeEvaluatedResourceExtension(sde);
+            processSdeEvaluatedResourceExtension(state, sde);
 
-            Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
+            Map<StratumValueWrapper, Long> accumulated = state.sde(sde).getResults().values().stream()
                     .flatMap(x -> ((List<Object>) Lists.newArrayList(x.iterableValue())).stream())
-                    .map(ValueWrapper::new)
+                    .map(StratumValueWrapper::new)
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
             String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);
             String sdeId = sde.id();
-            for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
+            for (Map.Entry<StratumValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
                 String valueCode = accumulator.getKey().getValueAsString();
                 String valueKey = accumulator.getKey().getKey();
@@ -451,8 +461,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        for (CriteriaResult r : sdeDef.getResults().values()) {
+    private void processSdeEvaluatedResourceExtension(MeasureEvaluationState state, SdeDef sdeDef) {
+        for (CriteriaResult r : state.sde(sdeDef).getResults().values()) {
             for (Object o : r.evaluatedResources()) {
                 if (o instanceof IBaseResource iBaseResource) {
                     // extension item
@@ -484,7 +494,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             Date dEnd = (Date) measurementPeriod.getEnd();
             return new Period().setStart(dStart.toJavaDate()).setEnd(dEnd.toJavaDate());
         } else {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Measurement period should be an interval of CQL DateTime or Date: " + measurementPeriod);
         }
     }
@@ -620,125 +630,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return value.toLowerCase().trim().replace(" ", "-").replace("_", "-");
     }
 
-    // This is some hackery because most of these objects don't implement
-    // hashCode or equals, meaning it's hard to detect distinct values;
-    class ValueWrapper {
-        protected Object value;
-
-        public ValueWrapper(Object value) {
-            this.value = value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.getKey().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null) return false;
-            if (this.getClass() != o.getClass()) return false;
-
-            ValueWrapper other = (ValueWrapper) o;
-
-            if (other.getValue() == null ^ this.getValue() == null) {
-                return false;
-            }
-
-            if (other.getValue() == null && this.getValue() == null) {
-                return true;
-            }
-
-            return this.getKey().equals(other.getKey());
-        }
-
-        public String getKey() {
-            String key = null;
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                // ASSUMPTION: We won't have different systems with the same code
-                // within a given stratifier / sde
-                key = joinValues("coding", c.getCode());
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                key = joinValues("codeable-concept", c.getCodingFirstRep().getCode());
-            } else if (value instanceof Code c) {
-                key = joinValues("code", c.getCode());
-            } else if (value instanceof Enum<?> e) {
-                key = joinValues("enum", e.toString());
-            } else if (value instanceof IPrimitiveType<?> p) {
-                key = joinValues("primitive", p.getValueAsString());
-            } else if (value instanceof Identifier identifier) {
-                key = identifier.getValue();
-            } else if (value instanceof Resource resource) {
-                key = resource.getIdElement().toVersionless().getValue();
-            } else if (value != null) {
-                key = value.toString();
-            }
-
-            if (key == null) {
-                throw new InvalidRequestException("found a null key for the wrapped value: %s".formatted(value));
-            }
-
-            return key;
-        }
-
-        public String getValueAsString() {
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                return c.getCode();
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                return c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code c) {
-                return c.getCode();
-            } else if (value instanceof Enum<?> e) {
-                return e.toString();
-            } else if (value instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (value != null) {
-                return value.toString();
-            } else {
-                return "<null>";
-            }
-        }
-
-        public String getDescription() {
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                return c.hasDisplay() ? c.getDisplay() : c.getCode();
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                return c.getCodingFirstRep().hasDisplay()
-                        ? c.getCodingFirstRep().getDisplay()
-                        : c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code c) {
-                return c.getDisplay() != null ? c.getDisplay() : c.getCode();
-            } else if (value instanceof Enum<?> e) {
-                return e.toString();
-            } else if (value instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (value != null) {
-                return value.toString();
-            } else {
-                return null;
-            }
-        }
-
-        public Object getValue() {
-            return this.value;
-        }
-
-        public Class<?> getValueClass() {
-            return this.value.getClass();
-        }
-
-        private String joinValues(String... elements) {
-            return String.join("-", elements);
-        }
-    }
-
     /**
      * Copy scores from MeasureDef to MeasureReport.
      * Part 1: Does nothing (MeasureDef scores are null - MeasureDefScorer not yet integrated).
@@ -748,7 +639,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
      *
      * @param measureDef the MeasureDef containing computed scores
      */
-    private void copyScoresFromDef(MeasureDef measureDef) {
+    private void copyScoresFromState(MeasureDef measureDef, MeasureEvaluationState state) {
         // Iterate through GroupDefs (drive from Def side)
         for (var groupDef : measureDef.groups()) {
             MeasureReportGroupComponent reportGroup = null;
@@ -771,13 +662,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             }
 
             // Copy group-level score (DSTU3 uses setMeasureScore(Double) directly)
-            Double groupScore = groupDef.getScore();
+            Double groupScore = state.group(groupDef).getScore();
             if (groupScore != null) {
                 reportGroup.setMeasureScore(groupScore);
             }
 
             // Copy stratifier scores
-            copyStratifierScores(reportGroup, groupDef);
+            copyStratifierScores(reportGroup, groupDef, state);
         }
     }
 
@@ -791,7 +682,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
      * @param reportGroup the MeasureReport group component
      * @param groupDef the GroupDef containing stratifier scores
      */
-    private void copyStratifierScores(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+    private void copyStratifierScores(
+            MeasureReportGroupComponent reportGroup, GroupDef groupDef, MeasureEvaluationState state) {
         // Iterate through StratifierDefs (drive from Def side)
         for (var stratifierDef : groupDef.stratifiers()) {
             // Find matching report stratifier by ID
@@ -806,8 +698,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                 continue;
             }
 
-            // Iterate through StratumDefs (drive from Def side)
-            for (var stratumDef : stratifierDef.getStratum()) {
+            // Iterate through StratumDefs (drive from state side)
+            for (var stratumDef : state.stratifier(stratifierDef).getStrata()) {
                 // Find matching report stratum by comparing value strings
                 var reportStratum = reportStratifier.getStratum().stream()
                         .filter(rs -> matchesStratumValue(rs, stratumDef))

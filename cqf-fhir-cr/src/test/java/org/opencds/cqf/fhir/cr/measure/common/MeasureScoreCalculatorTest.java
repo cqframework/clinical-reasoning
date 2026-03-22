@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -267,8 +266,8 @@ class MeasureScoreCalculatorTest {
     void testAggregateContinuousVariable_NoOpMethod() {
         List<QuantityDef> quantities = List.of(new QuantityDef(10.0));
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class,
+        MeasureScoringException exception = assertThrows(
+                MeasureScoringException.class,
                 () -> MeasureScoreCalculator.aggregateContinuousVariable(
                         quantities, ContinuousVariableObservationAggregateMethod.N_A));
 
@@ -635,8 +634,8 @@ class MeasureScoreCalculatorTest {
     void testAggregateContinuousVariableBigDecimal_NoOpMethod() {
         List<BigDecimal> values = List.of(BigDecimal.valueOf(10.0));
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class,
+        MeasureScoringException exception = assertThrows(
+                MeasureScoringException.class,
                 () -> MeasureScoreCalculator.aggregateContinuousVariableBigDecimal(
                         values, ContinuousVariableObservationAggregateMethod.N_A));
 

@@ -2,9 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings({"squid:S2699", "squid:S1135"})
@@ -313,7 +313,7 @@ class MeasureImprovementNotationTest {
                     .hasScore("0.6666666666666667") // inverse score of increase
                     .up()
                     .report();
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(

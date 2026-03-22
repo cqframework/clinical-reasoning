@@ -4,8 +4,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEO
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,11 +44,14 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -72,13 +73,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     public MeasureReport build(
             Measure measure,
             MeasureDef measureDef,
+            MeasureEvaluationState state,
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds) {
 
         var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
 
-        var bc = new R4MeasureReportBuilderContext(measure, measureDef, report);
+        var bc = new R4MeasureReportBuilderContext(measure, measureDef, state, report);
 
         // buildGroups must be run first to set up the builder context to be able to use
         // the evaluatedResource references for SDE processing
@@ -134,11 +136,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         var report = bc.report();
 
         if (measure.getGroup().size() != measureDef.groups().size()) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "The Measure has a different number of groups defined than the MeasureDef for Measure: "
                             + measure.getUrl());
         }
-
         // ASSUMPTION: The groups are in the same order in both the Measure and the
         // MeasureDef
         for (int i = 0; i < measure.getGroup().size(); i++) {
@@ -162,17 +163,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "The MeasureGroup has a different number of populations defined than the GroupDef for Measure: "
                             + bc.measure().getUrl());
         }
-
         if (measureGroup.getStratifier().size() != (groupDef.stratifiers().size())) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "The MeasureGroup has a different number of stratifiers defined than the GroupDef for Measure: "
                             + bc.measure().getUrl());
         }
-
         reportGroup.setCode(measureGroup.getCode());
         reportGroup.setId(measureGroup.getId());
         // Measure Level Extension
@@ -196,19 +195,22 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             // add extension to group for
             if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
                 var docPopDef = groupDef.findPopulationByType(DATEOFCOMPLIANCE);
-                if (docPopDef != null
-                        && docPopDef.getAllSubjectResources() != null
-                        && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue = docPopDef.getAllSubjectResources().iterator().next();
-                    if (docValue != null) {
-                        assert docValue instanceof Interval;
-                        Interval docInterval = (Interval) docValue;
+                if (docPopDef != null) {
+                    var docPopState = bc.state().population(docPopDef);
+                    if (docPopState.getAllSubjectResources() != null
+                            && !docPopState.getAllSubjectResources().isEmpty()) {
+                        var docValue =
+                                docPopState.getAllSubjectResources().iterator().next();
+                        if (docValue != null) {
+                            assert docValue instanceof Interval;
+                            Interval docInterval = (Interval) docValue;
 
-                        var helper = new R4DateHelper();
-                        reportGroup
-                                .addExtension()
-                                .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
-                                .setValue(helper.buildMeasurementPeriod((docInterval)));
+                            var helper = new R4DateHelper();
+                            reportGroup
+                                    .addExtension()
+                                    .setUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
+                                    .setValue(helper.buildMeasurementPeriod((docInterval)));
+                        }
                     }
                 }
             }
@@ -245,14 +247,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
-        reportPopulation.setCount(populationDef.getCount());
+        reportPopulation.setCount(bc.state().population(populationDef).getCount());
 
         // Supporting Evidence
         if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
                 && populationDef.getSupportingEvidenceDefs() != null
                 && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
             var extDefs = populationDef.getSupportingEvidenceDefs();
-            R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(reportPopulation, extDefs);
+            R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(reportPopulation, extDefs, bc.state());
         }
 
         if (measurePopulation.hasDescription()) {
@@ -261,17 +263,18 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     new StringType(measurePopulation.getDescription()));
         }
 
-        addEvaluatedResourceReferences(bc, populationDef.id(), populationDef.getEvaluatedResources());
+        addEvaluatedResourceReferences(
+                bc, populationDef.id(), bc.state().population(populationDef).getEvaluatedResources());
 
         // This is a temporary list carried forward to stratifiers
         // subjectResult set defined by basis of Measure
         Set<String> populationSet;
         if (groupDef.isBooleanBasis()) {
-            populationSet = populationDef.getSubjects().stream()
+            populationSet = bc.state().population(populationDef).getSubjects().stream()
                     .map(FhirResourceUtils::addPatientQualifier)
                     .collect(Collectors.toSet());
         } else {
-            populationSet = populationDef.getAllSubjectResources().stream()
+            populationSet = bc.state().population(populationDef).getAllSubjectResources().stream()
                     .filter(Resource.class::isInstance)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
@@ -338,18 +341,19 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         var report = bc.report();
 
         // No SDEs were calculated, do nothing
-        if (sde.getResults().isEmpty()) {
+        var sdeResults = bc.state().sde(sde).getResults();
+        if (sdeResults.isEmpty()) {
             return;
         }
 
         // Add all evaluated resources
-        for (var e : sde.getResults().entrySet()) {
+        for (var e : sdeResults.entrySet()) {
             addEvaluatedResourceReferences(bc, sde.id(), e.getValue().evaluatedResources());
         }
 
         CodeableConcept concept = conceptDefToConcept(sde.code());
 
-        Map<StratumValueWrapper, Long> accumulated = sde.getResults().values().stream()
+        Map<StratumValueWrapper, Long> accumulated = sdeResults.values().stream()
                 .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
                 .filter(Objects::nonNull)
                 .map(StratumValueWrapper::new)
@@ -591,22 +595,27 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             // Copy group-level score
-            Double groupScore = groupDef.getScore();
+            Double groupScore = bc.state().group(groupDef).getScore();
             if (groupScore != null) {
                 reportGroup.getMeasureScore().setValue(groupScore);
             }
 
-            copyPopulationAggregationResults(reportGroup, groupDef);
+            copyPopulationAggregationResults(bc, reportGroup, groupDef);
 
             // Copy stratifier scores
-            copyStratifierScores(reportGroup, groupDef);
+            copyStratifierScores(bc, reportGroup, groupDef);
         }
     }
 
-    private void copyPopulationAggregationResults(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+    private void copyPopulationAggregationResults(
+            R4MeasureReportBuilderContext bc, MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
         for (MeasureReportGroupPopulationComponent reportPopulation : reportGroup.getPopulation()) {
             var populationDef = groupDef.findPopulationById(reportPopulation.getId());
-            R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(reportPopulation, populationDef);
+            R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                    reportPopulation,
+                    populationDef.getAggregateMethod(),
+                    bc.state().population(populationDef).getAggregationResult(),
+                    populationDef.getCriteriaReference());
         }
     }
 
@@ -617,7 +626,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
      * @param reportGroup the MeasureReport group component
      * @param groupDef the GroupDef containing stratifier scores
      */
-    private void copyStratifierScores(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
+    private void copyStratifierScores(
+            R4MeasureReportBuilderContext bc, MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
         // Iterate through StratifierDefs (drive from Def side)
         for (var stratifierDef : groupDef.stratifiers()) {
             // Find matching report stratifier by ID
@@ -633,7 +643,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             }
 
             // Iterate through StratumDefs (drive from Def side)
-            for (var stratumDef : stratifierDef.getStratum()) {
+            for (var stratumDef : bc.state().stratifier(stratifierDef).getStrata()) {
                 // Find matching report stratum by comparing value strings
                 var reportStratum = reportStratifier.getStratum().stream()
                         .filter(rs -> matchesStratumValue(rs, stratumDef, stratifierDef))

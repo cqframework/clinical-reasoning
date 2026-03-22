@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -17,9 +16,11 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.hapi.common.MeasureExceptionMapper;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureException;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("java:S107")
@@ -83,26 +84,30 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "dataEndpoint") Parameters.ParametersParameterComponent dataEndpoint,
             @OperationParam(name = "parameters") Parameters parameters,
             RequestDetails requestDetails)
-            throws InternalErrorException, FHIRException {
-        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
-        return r4MeasureServiceFactory
-                .create(requestDetails)
-                .evaluate(
-                        Eithers.forMiddle3(id),
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        lastReceivedOn,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        dataEndpointParam,
-                        additionalData,
-                        parameters,
-                        productLine,
-                        practitioner);
+            throws FHIRException {
+        try {
+            var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
+            var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
+            var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
+            return r4MeasureServiceFactory
+                    .create(requestDetails)
+                    .evaluate(
+                            Eithers.forMiddle3(id),
+                            stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                            stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                            reportType,
+                            subject,
+                            lastReceivedOn,
+                            contentEndpointParam,
+                            terminologyEndpointParam,
+                            dataEndpointParam,
+                            additionalData,
+                            parameters,
+                            productLine,
+                            practitioner);
+        } catch (MeasureException e) {
+            throw MeasureExceptionMapper.map(e);
+        }
     }
 
     /**
@@ -152,26 +157,30 @@ public class MeasureOperationsProvider {
             @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "reporter") String reporter,
             RequestDetails requestDetails)
-            throws InternalErrorException, FHIRException {
-        var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
-        var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
-        var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
-        return r4MultiMeasureServiceFactory
-                .create(requestDetails)
-                .evaluate(
-                        measureId, // List<IdType>
-                        measureUrl, // List<String>
-                        measureIdentifier, // List<Identifier>
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        dataEndpointParam,
-                        additionalData,
-                        parameters,
-                        productLine,
-                        reporter);
+            throws FHIRException {
+        try {
+            var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
+            var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
+            var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
+            return r4MultiMeasureServiceFactory
+                    .create(requestDetails)
+                    .evaluate(
+                            measureId, // List<IdType>
+                            measureUrl, // List<String>
+                            measureIdentifier, // List<Identifier>
+                            stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                            stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                            reportType,
+                            subject,
+                            contentEndpointParam,
+                            terminologyEndpointParam,
+                            dataEndpointParam,
+                            additionalData,
+                            parameters,
+                            productLine,
+                            reporter);
+        } catch (MeasureException e) {
+            throw MeasureExceptionMapper.map(e);
+        }
     }
 }

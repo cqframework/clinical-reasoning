@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3.selected.def;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 
 /**
  * Fluent API for asserting on MeasureDef (pre-scoring internal state) from DSTU3 measure evaluation.
@@ -15,10 +16,12 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  */
 public class SelectedMeasureDef<P> {
     protected final MeasureDef measureDef;
+    protected final MeasureEvaluationState state;
     protected final P parent;
 
-    public SelectedMeasureDef(MeasureDef measureDef, P parent) {
+    public SelectedMeasureDef(MeasureDef measureDef, MeasureEvaluationState state, P parent) {
         this.measureDef = measureDef;
+        this.state = state;
         this.parent = parent;
     }
 
@@ -32,26 +35,26 @@ public class SelectedMeasureDef<P> {
 
     // Assert no errors
     public SelectedMeasureDef<P> hasNoErrors() {
-        assertTrue(measureDef.errors().isEmpty(), "Expected no errors in MeasureDef but found: " + measureDef.errors());
+        assertTrue(state.errors().isEmpty(), "Expected no errors in MeasureDef but found: " + state.errors());
         return this;
     }
 
     // Assert has errors
     public SelectedMeasureDef<P> hasErrors(int count) {
-        assertEquals(count, measureDef.errors().size(), "Error count mismatch");
+        assertEquals(count, state.errors().size(), "Error count mismatch");
         return this;
     }
 
     // Assert has any errors
     public SelectedMeasureDef<P> hasErrors() {
-        assertFalse(measureDef.errors().isEmpty(), "Expected errors in MeasureDef but found none");
+        assertFalse(state.errors().isEmpty(), "Expected errors in MeasureDef but found none");
         return this;
     }
 
     // Access first group
     public SelectedMeasureDefGroup<SelectedMeasureDef<P>> firstGroup() {
         assertFalse(measureDef.groups().isEmpty(), "Expected at least one group but found none");
-        return new SelectedMeasureDefGroup<>(measureDef.groups().get(0), this);
+        return new SelectedMeasureDefGroup<>(measureDef.groups().get(0), state, this);
     }
 
     // Access group by index
@@ -59,7 +62,7 @@ public class SelectedMeasureDef<P> {
         assertTrue(
                 index >= 0 && index < measureDef.groups().size(),
                 "Index " + index + " out of bounds for " + measureDef.groups().size() + " groups");
-        return new SelectedMeasureDefGroup<>(measureDef.groups().get(index), this);
+        return new SelectedMeasureDefGroup<>(measureDef.groups().get(index), state, this);
     }
 
     // Assert group count

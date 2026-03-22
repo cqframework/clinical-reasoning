@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 
 /**
  * Evaluation result containing both MeasureDef (internal model) and
@@ -23,4 +24,5 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  * @param measureReport The scored DSTU3 MeasureReport FHIR resource
  */
 @VisibleForTesting
-public record MeasureDefAndDstu3MeasureReport(MeasureDef measureDef, MeasureReport measureReport) {}
+public record MeasureDefAndDstu3MeasureReport(
+        MeasureDef measureDef, MeasureEvaluationState state, MeasureReport measureReport) {}

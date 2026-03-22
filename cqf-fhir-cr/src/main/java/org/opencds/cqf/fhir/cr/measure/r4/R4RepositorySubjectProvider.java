@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,6 +20,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
@@ -65,7 +65,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 Patient r = repository.read(Patient.class, id);
 
                 if (r == null) {
-                    throw new ResourceNotFoundException(id);
+                    throw new MeasureResolutionException("Resource not found: " + id.getValue());
                 }
 
                 subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
@@ -80,7 +80,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 Group r = repository.read(Group.class, id);
 
                 if (r == null) {
-                    throw new ResourceNotFoundException(id);
+                    throw new MeasureResolutionException("Resource not found: " + id.getValue());
                 }
                 // Group of Patients
                 if (r.getType().equals(GroupType.PERSON)) {

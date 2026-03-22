@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 
@@ -163,7 +163,7 @@ class MeasureStratifierTest {
         try {
             evaluate.then();
             fail("should throw a missing Id scenario");
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(e.getMessage().contains("id is required on all Elements of type: Measure.group.stratifier"));
         }
     }
@@ -178,7 +178,7 @@ class MeasureStratifierTest {
                     .measureId("CohortBooleanStratDifferentType")
                     .evaluate()
                     .then();
-        } catch (InvalidRequestException exception) {
+        } catch (MeasureValidationException exception) {
             assertEquals(
                     "stratifier expression criteria results for expression: [resource strat not finished] must fall within accepted types for boolean population basis: [boolean] for Measure: http://example.com/Measure/CohortBooleanStratDifferentType",
                     exception.getMessage());
@@ -311,7 +311,7 @@ class MeasureStratifierTest {
                     .measureId("InvalidStratifierTopLevelCriteriaEmptyComponent")
                     .evaluate()
                     .then();
-        } catch (InvalidRequestException exception) {
+        } catch (MeasureValidationException exception) {
             var exceptionMessage = exception.getMessage();
 
             assertEquals(
@@ -333,7 +333,7 @@ class MeasureStratifierTest {
         try {
             when.then();
             fail("should throw an exception");
-        } catch (InvalidRequestException exception) {
+        } catch (MeasureValidationException exception) {
             var exceptionMessage = exception.getMessage();
             assertEquals(
                     "Measure: http://example.com/Measure/CohortBooleanStratComponentInvalid with stratifier: stratifier-1, has both components and stratifier criteria expressions defined. Only one should be specified",
@@ -521,7 +521,7 @@ class MeasureStratifierTest {
                     .measureId("InvalidStratifierCriteriaAndComponentCriteria")
                     .evaluate()
                     .then();
-        } catch (InvalidRequestException exception) {
+        } catch (MeasureValidationException exception) {
             var exceptionMessage = exception.getMessage();
             assertEquals(
                     "Measure: http://example.com/Measure/InvalidStratifierCriteriaAndComponentCriteria with stratifier: stratifier-1, has both components and stratifier criteria expressions defined. Only one should be specified",

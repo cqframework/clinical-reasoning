@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 
@@ -138,7 +138,7 @@ class MeasureSDETest {
         try {
             evaluate.then();
             fail("should throw error");
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(

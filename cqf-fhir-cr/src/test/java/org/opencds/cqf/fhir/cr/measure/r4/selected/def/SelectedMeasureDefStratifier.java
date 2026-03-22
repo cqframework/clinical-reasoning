@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 
@@ -41,8 +42,11 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 public class SelectedMeasureDefStratifier<P>
         extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<StratifierDef, P> {
 
-    public SelectedMeasureDefStratifier(StratifierDef value, P parent) {
+    private final MeasureEvaluationState state;
+
+    public SelectedMeasureDefStratifier(StratifierDef value, MeasureEvaluationState state, P parent) {
         super(value, parent);
+        this.state = state;
     }
 
     // ==================== Navigation Methods ====================
@@ -57,10 +61,11 @@ public class SelectedMeasureDefStratifier<P>
     public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> stratum(int index) {
         assertNotNull(value(), "StratifierDef is null");
         assertTrue(
-                index >= 0 && index < value().getStratum().size(),
+                index >= 0 && index < state.stratifier(value()).getStrata().size(),
                 "Stratum index out of bounds: " + index + ", size: "
-                        + value().getStratum().size());
-        return new SelectedMeasureDefStratum<>(value().getStratum().get(index), this);
+                        + state.stratifier(value()).getStrata().size());
+        return new SelectedMeasureDefStratum<>(
+                state.stratifier(value()).getStrata().get(index), this);
     }
 
     /**
@@ -71,8 +76,9 @@ public class SelectedMeasureDefStratifier<P>
      */
     public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> firstStratum() {
         assertNotNull(value(), "StratifierDef is null");
-        assertFalse(value().getStratum().isEmpty(), "No strata found in StratifierDef");
-        return new SelectedMeasureDefStratum<>(value().getStratum().get(0), this);
+        assertFalse(state.stratifier(value()).getStrata().isEmpty(), "No strata found in StratifierDef");
+        return new SelectedMeasureDefStratum<>(
+                state.stratifier(value()).getStrata().get(0), this);
     }
 
     /**
@@ -84,7 +90,7 @@ public class SelectedMeasureDefStratifier<P>
      */
     public SelectedMeasureDefStratum<SelectedMeasureDefStratifier<P>> stratumByValue(String valueText) {
         assertNotNull(value(), "StratifierDef is null");
-        StratumDef stratum = value().getStratum().stream()
+        StratumDef stratum = state.stratifier(value()).getStrata().stream()
                 .filter(s -> s.valueDefs() != null
                         && s.valueDefs().stream()
                                 .anyMatch(vd -> valueText.equals(vd.value().getValueAsString())))
@@ -104,7 +110,7 @@ public class SelectedMeasureDefStratifier<P>
      */
     public SelectedMeasureDefStratifier<P> hasStratumCount(int count) {
         assertNotNull(value(), "StratifierDef is null");
-        assertEquals(count, value().getStratum().size(), "Stratum count mismatch");
+        assertEquals(count, state.stratifier(value()).getStrata().size(), "Stratum count mismatch");
         return this;
     }
 
@@ -151,7 +157,9 @@ public class SelectedMeasureDefStratifier<P>
      */
     public SelectedMeasureDefStratifier<P> hasResultForSubject(String subjectId) {
         assertNotNull(value(), "StratifierDef is null");
-        assertTrue(value().getResults().containsKey(subjectId), "No stratifier result found for subject: " + subjectId);
+        assertTrue(
+                state.stratifier(value()).getResults().containsKey(subjectId),
+                "No stratifier result found for subject: " + subjectId);
         return this;
     }
 
@@ -163,7 +171,7 @@ public class SelectedMeasureDefStratifier<P>
      */
     public SelectedMeasureDefStratifier<P> hasResultCount(int count) {
         assertNotNull(value(), "StratifierDef is null");
-        assertEquals(count, value().getResults().size(), "Stratifier result count mismatch");
+        assertEquals(count, state.stratifier(value()).getResults().size(), "Stratifier result count mismatch");
         return this;
     }
 

@@ -22,6 +22,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
@@ -53,21 +54,22 @@ public class R4SupportingEvidenceExtension {
      */
     public static void addSupportingEvidenceExtensions(
             MeasureReport.MeasureReportGroupPopulationComponent reportPopulation,
-            List<SupportingEvidenceDef> supportingEvidenceDefs) {
+            List<SupportingEvidenceDef> supportingEvidenceDefs,
+            MeasureEvaluationState state) {
 
         if (reportPopulation == null || supportingEvidenceDefs == null || supportingEvidenceDefs.isEmpty()) {
             return;
         }
 
         for (SupportingEvidenceDef def : supportingEvidenceDefs) {
-            Extension seExt = buildSupportingEvidenceExtension(def);
+            Extension seExt = buildSupportingEvidenceExtension(def, state);
             if (seExt != null) {
                 reportPopulation.addExtension(seExt);
             }
         }
     }
 
-    private static Extension buildSupportingEvidenceExtension(SupportingEvidenceDef def) {
+    private static Extension buildSupportingEvidenceExtension(SupportingEvidenceDef def, MeasureEvaluationState state) {
         if (def == null) {
             return null;
         }
@@ -98,7 +100,7 @@ public class R4SupportingEvidenceExtension {
         }
 
         // ---- value slice(s) ----
-        Object exprValue = resolveExpressionValue(def);
+        Object exprValue = resolveExpressionValue(def, state);
         addValues(seExt, exprValue);
 
         return seExt;
@@ -117,8 +119,9 @@ public class R4SupportingEvidenceExtension {
      * Fallback: if a single key exists, use it.
      */
     @Nullable
-    private static Object resolveExpressionValue(SupportingEvidenceDef def) {
-        Map<String, Set<Object>> subjectResources = def.getSubjectResources();
+    private static Object resolveExpressionValue(SupportingEvidenceDef def, MeasureEvaluationState state) {
+        Map<String, Set<Object>> subjectResources =
+                state.supportingEvidence(def).getSubjectResources();
         if (subjectResources == null || subjectResources.isEmpty()) {
             return null;
         }

@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +11,7 @@ import org.hl7.fhir.dstu3.model.Group.GroupMemberComponent;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -47,7 +47,7 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                 Patient r = repository.read(Patient.class, id);
 
                 if (r == null) {
-                    throw new ResourceNotFoundException(id);
+                    throw new MeasureResolutionException("Resource " + id.getValue() + " is not known");
                 }
 
                 subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
@@ -56,7 +56,7 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                 Group r = repository.read(Group.class, id);
 
                 if (r == null) {
-                    throw new ResourceNotFoundException(id);
+                    throw new MeasureResolutionException("Resource " + id.getValue() + " is not known");
                 }
 
                 for (GroupMemberComponent gmc : r.getMember()) {

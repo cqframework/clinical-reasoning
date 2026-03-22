@@ -3,13 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.Date;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 @SuppressWarnings({"java:S2699"})
@@ -1098,7 +1098,7 @@ class MultiMeasureServiceTest {
                 .reportType("population")
                 .evaluate();
 
-        var e = assertThrows(InvalidRequestException.class, when::then);
+        var e = assertThrows(MeasureValidationException.class, when::then);
         assertTrue(e.getMessage().contains("Duplicate population ID"));
         assertTrue(e.getMessage().contains("initial-population"));
     }

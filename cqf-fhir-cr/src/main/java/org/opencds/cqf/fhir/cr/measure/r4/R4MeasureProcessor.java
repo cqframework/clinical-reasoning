@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableListMultimap;
 import jakarta.annotation.Nonnull;
@@ -38,6 +36,8 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -181,18 +181,19 @@ public class R4MeasureProcessor {
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
         // Process Criteria Expression Results
-        measureEvaluationResultHandler.processResults(fhirContext, results, measureDef, evaluationType);
+        var state = measureEvaluationResultHandler.processResults(fhirContext, results, measureDef, evaluationType);
 
         // Build Measure Report with Results
         MeasureReport measureReport = new R4MeasureReportBuilder()
                 .build(
                         measure,
                         measureDef,
+                        state,
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
 
-        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndR4MeasureReport(measureDef, state, measureReport);
     }
 
     /**
@@ -233,7 +234,10 @@ public class R4MeasureProcessor {
         final Map<String, EvaluationResult> resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
-        measureEvaluationResultHandler.processResults(fhirContext, resultForThisMeasure, measureDef, evaluationType);
+        var state = measureEvaluationResultHandler.processResults(
+                fhirContext, resultForThisMeasure, measureDef, evaluationType);
+        // Transfer any errors added to measureDef by processMeasureForSuccessOrFailure to state
+        measureDef.errors().forEach(state::addError);
 
         var measurementPeriod = MeasureProcessorTimeUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
@@ -242,11 +246,12 @@ public class R4MeasureProcessor {
                 .build(
                         measure,
                         measureDef,
+                        state,
                         r4EvalTypeToReportType(evaluationType, measure),
                         measurementPeriod,
                         subjectIds);
 
-        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndR4MeasureReport(measureDef, state, measureReport);
     }
 
     /**
@@ -440,7 +445,7 @@ public class R4MeasureProcessor {
             case SUBJECTLIST -> MeasureReportType.SUBJECTLIST;
             case POPULATION -> MeasureReportType.SUMMARY;
             default ->
-                throw new InvalidRequestException("Unsupported MeasureEvalType: %s for Measure: %s"
+                throw new MeasureValidationException("Unsupported MeasureEvalType: %s for Measure: %s"
                         .formatted(measureEvalType.toCode(), measure.getUrl()));
         };
     }
@@ -453,11 +458,11 @@ public class R4MeasureProcessor {
     private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
 
         if (measure == null) {
-            throw new InvalidRequestException("Measure provided is null");
+            throw new MeasureValidationException("Measure provided is null");
         }
 
         if (!measure.hasLibrary() || measure.getLibrary().isEmpty()) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
 
@@ -466,14 +471,14 @@ public class R4MeasureProcessor {
         Bundle b = this.repository.search(Bundle.class, Library.class, Searches.byCanonical(url), null);
         if (b.getEntry().isEmpty()) {
             var errorMsg = "Unable to find Library with url: %s".formatted(url);
-            throw new ResourceNotFoundException(errorMsg);
+            throw new MeasureResolutionException(errorMsg);
         }
         return VersionedIdentifiers.forUrl(url);
     }
 
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
     }

@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.Given;
 
 // This class has tests that verify failure behavior for various types of invalid measures.
@@ -18,7 +18,7 @@ class InvalidMeasureTest {
     @Test
     void evaluateThrowsErrorWithEmptyMeasure() {
         var when = GIVEN_INVALID_MEASURE_REPO.when().measureId("Empty").evaluate();
-        var e = assertThrows(InvalidRequestException.class, when::then);
+        var e = assertThrows(MeasureValidationException.class, when::then);
         assertTrue(e.getMessage().contains("does not have a primary library"));
     }
 
@@ -47,7 +47,7 @@ class InvalidMeasureTest {
                 .when()
                 .measureId("DuplicatePopulationIds")
                 .evaluate();
-        var e = assertThrows(InvalidRequestException.class, when::then);
+        var e = assertThrows(MeasureValidationException.class, when::then);
         assertTrue(e.getMessage().contains("Duplicate population ID"));
         assertTrue(e.getMessage().contains("initial-population"));
         assertTrue(e.getMessage().contains("group-1"));

@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOM
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.INITIALPOPULATION;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMERATOR;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +33,7 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -316,7 +316,7 @@ class R4PopulationBasisValidatorTest {
         try {
             testSubject.validateGroupPopulations(MEASURE_DEF, groupDef, evaluationResult);
             fail("Expected this test to fail");
-        } catch (InvalidRequestException exception) {
+        } catch (MeasureValidationException exception) {
             assertEquals(testCase.expectedExceptionMessage(), exception.getMessage());
         }
     }
@@ -515,7 +515,7 @@ class R4PopulationBasisValidatorTest {
         try {
             testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
             fail("Expected this test to fail");
-        } catch (InvalidRequestException exception) {
+        } catch (MeasureValidationException exception) {
             assertEquals(expectedExceptionMessage, exception.getMessage());
         }
     }

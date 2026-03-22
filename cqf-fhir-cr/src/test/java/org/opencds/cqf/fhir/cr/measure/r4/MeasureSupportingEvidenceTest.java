@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.ZoneOffset;
@@ -12,6 +11,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 public class MeasureSupportingEvidenceTest {
@@ -329,7 +329,7 @@ public class MeasureSupportingEvidenceTest {
      */
     @Test
     void cohortSupportingEvidenceNoExpression() {
-        InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> {
+        MeasureValidationException ex = assertThrows(MeasureValidationException.class, () -> {
             given.when()
                     .measureId("CohortBooleanSupportingEvidenceNoExp")
                     .subject("patient-9")
@@ -346,7 +346,7 @@ public class MeasureSupportingEvidenceTest {
      */
     @Test
     void cohortSupportingEvidenceNoName() {
-        InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> {
+        MeasureValidationException ex = assertThrows(MeasureValidationException.class, () -> {
             given.when()
                     .measureId("CohortBooleanSupportingEvidenceNoName")
                     .subject("patient-9")
@@ -363,7 +363,7 @@ public class MeasureSupportingEvidenceTest {
      */
     @Test
     void cohortSupportingEvidenceBadExt() {
-        InvalidRequestException ex = assertThrows(InvalidRequestException.class, () -> {
+        MeasureValidationException ex = assertThrows(MeasureValidationException.class, () -> {
             given.when()
                     .measureId("CohortBooleanSupportingEvidenceBadExt")
                     .subject("patient-9")

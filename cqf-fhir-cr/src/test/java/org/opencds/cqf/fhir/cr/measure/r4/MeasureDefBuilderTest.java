@@ -12,7 +12,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.Arrays;
@@ -40,6 +39,7 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -392,7 +392,7 @@ class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, null, null, null, null, null, null, null, "boolean", null, null);
             fail("measureScoring needs to be defined");
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(e.getMessage().contains("MeasureScoring must be specified on Group or Measure"));
         }
     }
@@ -402,7 +402,7 @@ class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, null, null, null, null, null, null, null, "boolean", "attestation", null);
             fail("measureScoring needs to be defined");
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
@@ -415,7 +415,7 @@ class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, "attestation", null, null, null, "attestation", null, null, "boolean", null, null);
             fail("measureScoring needs to be defined");
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(
@@ -490,7 +490,7 @@ class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, "ratio", invalid, null, null, "proportion", invalid, null, "boolean", null, null);
             fail("invalid improvement Notation value");
-        } catch (InvalidRequestException e) {
+        } catch (MeasureValidationException e) {
             assertTrue(
                     e.getMessage()
                             .contains(

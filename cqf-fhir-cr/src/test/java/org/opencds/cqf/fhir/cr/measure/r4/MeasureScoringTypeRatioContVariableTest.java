@@ -3,11 +3,11 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -1323,7 +1323,7 @@ class MeasureScoringTypeRatioContVariableTest {
                 .measureId("RatioContVarResourceSumError")
                 .subject("Patient/patient-9")
                 .evaluate();
-        var exception = assertThrows(InvalidRequestException.class, when::then);
+        var exception = assertThrows(MeasureValidationException.class, when::then);
         assertTrue(exception
                 .getMessage()
                 .contains("Ratio Continuous Variable requires 2 Measure Observations defined, you have: 1"));
@@ -1337,7 +1337,7 @@ class MeasureScoringTypeRatioContVariableTest {
      */
     @Test
     void ratioContinuousVariableBadDenDef() {
-        var expectedException = assertThrows(InvalidRequestException.class, () -> given.when()
+        var expectedException = assertThrows(MeasureValidationException.class, () -> given.when()
                 .measureId("RatioContVarResourceSumError2")
                 .subject("Patient/patient-9")
                 .evaluate()

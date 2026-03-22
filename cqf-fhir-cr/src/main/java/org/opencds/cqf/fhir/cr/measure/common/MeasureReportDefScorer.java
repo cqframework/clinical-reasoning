@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
@@ -74,69 +73,78 @@ import org.slf4j.LoggerFactory;
  *   <li>StratumDef.getPopulationCount(PopulationDef) for stratum counts</li>
  * </ul>
  *
- * <p>This class computes scores and SETS them on Def objects using setScore() methods.
- * All methods are void. This makes Def classes the complete data model for measure scoring.
+ * <p>This class computes scores and SETS them on state objects using the
+ * {@link MeasureEvaluationState} rather than mutating Def objects directly.
  */
 public class MeasureReportDefScorer {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureReportDefScorer.class);
 
     /**
-     * Score all groups in a measure definition - MUTATES GroupDef objects.
+     * Score all groups in a measure definition.
      *
      * @param measureUrl the measure URL for error reporting
      * @param measureDef the measure definition containing groups to score
+     * @param state the mutable evaluation state
      */
-    public void score(String measureUrl, MeasureDef measureDef) {
-        // Def-first iteration: iterate over MeasureDef.groups()
+    public void score(String measureUrl, MeasureDef measureDef, MeasureEvaluationState state) {
         for (GroupDef groupDef : measureDef.groups()) {
-            scoreGroup(measureUrl, groupDef);
+            scoreGroup(measureUrl, groupDef, state);
         }
     }
 
     /**
-     * Score a single group including all its stratifiers - MUTATES GroupDef and StratumDef objects.
+     * Score a single group including all its stratifiers.
      *
      * @param measureUrl the measure URL for error reporting
-     * @param groupDef the group definition to score (will be mutated with setScore())
+     * @param groupDef the group definition to score
+     * @param state the mutable evaluation state
      */
-    public void scoreGroup(String measureUrl, GroupDef groupDef) {
+    public void scoreGroup(String measureUrl, GroupDef groupDef, MeasureEvaluationState state) {
         MeasureScoring measureScoring = checkMissingScoringType(measureUrl, groupDef.measureScoring());
 
         // Calculate group-level score
-        Double groupScore = calculateGroupScore(measureUrl, groupDef, measureScoring);
+        Double groupScore = calculateGroupScore(measureUrl, groupDef, measureScoring, state);
 
-        // MUTATE: Set score on GroupDef
-        groupDef.setScoreAndAdaptToImprovementNotation(groupScore);
+        // Inline the adaptation logic previously in GroupDef.setScoreAndAdaptToImprovementNotation
+        Double adaptedScore;
+        if ((MeasureScoring.RATIO == groupDef.measureScoring()
+                        && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
+                || MeasureScoring.PROPORTION == groupDef.measureScoring()) {
+            adaptedScore = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                    groupScore, groupDef.isIncreaseImprovementNotation());
+        } else {
+            adaptedScore = groupScore;
+        }
+        state.group(groupDef).setScore(adaptedScore);
 
-        // Score all stratifiers using Def-first iteration
-        // Modified from R4MeasureReportScorer to iterate over Def classes instead of FHIR components
+        // Score all stratifiers
         for (StratifierDef stratifierDef : groupDef.stratifiers()) {
-            scoreStratifier(measureUrl, groupDef, stratifierDef, measureScoring);
+            scoreStratifier(measureUrl, groupDef, stratifierDef, measureScoring, state);
         }
     }
 
     /**
      * Calculate score for a group based on its scoring type.
      */
-    private Double calculateGroupScore(String measureUrl, GroupDef groupDef, MeasureScoring measureScoring) {
+    private Double calculateGroupScore(
+            String measureUrl, GroupDef groupDef, MeasureScoring measureScoring, MeasureEvaluationState state) {
         switch (measureScoring) {
             case PROPORTION:
             case RATIO:
                 // Special case: RATIO with separate numerator/denominator observations
                 if (measureScoring == MeasureScoring.RATIO
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationGroup(groupDef);
+                    return scoreRatioMeasureObservationGroup(groupDef, state);
                 }
 
                 // Standard proportion/ratio scoring: (n - nx) / (d - dx - de)
-                // Delegate to MeasureScoreCalculator
                 return MeasureScoreCalculator.calculateProportionScore(
-                        groupDef.getPopulationCount(MeasurePopulationType.NUMERATOR),
-                        groupDef.getPopulationCount(MeasurePopulationType.NUMERATOREXCLUSION),
-                        groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOR),
-                        groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCLUSION),
-                        groupDef.getPopulationCount(MeasurePopulationType.DENOMINATOREXCEPTION));
+                        getPopulationCount(groupDef, MeasurePopulationType.NUMERATOR, state),
+                        getPopulationCount(groupDef, MeasurePopulationType.NUMERATOREXCLUSION, state),
+                        getPopulationCount(groupDef, MeasurePopulationType.DENOMINATOR, state),
+                        getPopulationCount(groupDef, MeasurePopulationType.DENOMINATOREXCLUSION, state),
+                        getPopulationCount(groupDef, MeasurePopulationType.DENOMINATOREXCEPTION, state));
 
             case CONTINUOUSVARIABLE:
                 // Continuous variable scoring - returns aggregate value
@@ -146,22 +154,18 @@ public class MeasureReportDefScorer {
                     return null;
                 }
 
-                final QuantityDef quantityDef = scoreContinuousVariable(measureObsPop);
+                final QuantityDef quantityDef = scoreContinuousVariable(measureObsPop, state);
 
-                // We want to record the aggregate result for later computation for continuous variable reports
-                measureObsPop.setAggregationResult(quantityDef);
+                // Record the aggregate result for later computation for continuous variable reports
+                state.population(measureObsPop).setAggregationResult(quantityDef);
 
                 return quantityDef != null ? quantityDef.value() : null;
 
             case COHORT:
                 // COHORT measures don't have scores by design
-                // They only report population counts (initial-population)
                 return null;
 
             default:
-                // Note: COMPOSITE measure scoring not yet implemented (enum value not defined in MeasureScoring)
-                // When COMPOSITE is added to MeasureScoring enum, add explicit case here
-                // Composite measures combine multiple component measures using different aggregation methods
                 logger.warn("Unsupported measure scoring type: {} for measure: {}", measureScoring, measureUrl);
                 return null;
         }
@@ -172,10 +176,11 @@ public class MeasureReportDefScorer {
      * Handles continuous variable ratio scoring where numerator and denominator have separate observations.
      *
      * @param groupDef the group definition
+     * @param state the mutable evaluation state
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationGroup(GroupDef groupDef) {
+    private Double scoreRatioMeasureObservationGroup(GroupDef groupDef, MeasureEvaluationState state) {
         // Get all MEASUREOBSERVATION populations
         var measureObservationPopulationDefs = groupDef.getPopulationDefs(MeasurePopulationType.MEASUREOBSERVATION);
 
@@ -187,14 +192,14 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate quantities for numerator and denominator
         final QuantityDef numeratorAggregate = calculateContinuousVariableAggregateQuantity(
-                numeratorPopulation, PopulationDef::getAllSubjectResources);
+                numeratorPopulation, pop -> state.population(pop).getAllSubjectResources());
         final QuantityDef denominatorAggregate = calculateContinuousVariableAggregateQuantity(
-                denominatorPopulation, PopulationDef::getAllSubjectResources);
+                denominatorPopulation, pop -> state.population(pop).getAllSubjectResources());
 
         // If there's no numerator or not denominator result, we still want to capture the
         // other result
-        setAggregateResultIfPopNonNull(numeratorPopulation, numeratorAggregate);
-        setAggregateResultIfPopNonNull(denominatorPopulation, denominatorAggregate);
+        setAggregateResultIfPopNonNull(numeratorPopulation, numeratorAggregate, state);
+        setAggregateResultIfPopNonNull(denominatorPopulation, denominatorAggregate, state);
 
         if (numeratorAggregate == null || denominatorAggregate == null) {
             return null;
@@ -205,62 +210,73 @@ public class MeasureReportDefScorer {
 
     /**
      * Score continuous variable measure - returns QuantityDef with aggregated value.
-     * Simplified version of R4MeasureReportScorer#scoreContinuousVariable that just
-     * returns the aggregate without setting it on a FHIR report.
      */
-    private QuantityDef scoreContinuousVariable(PopulationDef populationDef) {
-        return calculateContinuousVariableAggregateQuantity(populationDef, PopulationDef::getAllSubjectResources);
+    private QuantityDef scoreContinuousVariable(PopulationDef populationDef, MeasureEvaluationState state) {
+        return calculateContinuousVariableAggregateQuantity(
+                populationDef, pop -> state.population(pop).getAllSubjectResources());
     }
 
     /**
-     * Score all strata in a stratifier using Def-first iteration - MUTATES StratumDef objects.
-     * Modified copy of R4MeasureReportScorer#scoreStratifier without FHIR components.
+     * Score all strata in a stratifier.
      *
      * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition containing the stratifier
      * @param stratifierDef the stratifier definition
      * @param measureScoring the scoring type
+     * @param state the mutable evaluation state
      */
     private void scoreStratifier(
-            String measureUrl, GroupDef groupDef, StratifierDef stratifierDef, MeasureScoring measureScoring) {
+            String measureUrl,
+            GroupDef groupDef,
+            StratifierDef stratifierDef,
+            MeasureScoring measureScoring,
+            MeasureEvaluationState state) {
 
-        // Def-first iteration: iterate over StratifierDef.getStratum()
-        for (StratumDef stratumDef : stratifierDef.getStratum()) {
-            scoreStratum(measureUrl, groupDef, stratumDef, measureScoring);
+        // Read strata from state instead of StratifierDef
+        for (StratumDef stratumDef : state.stratifier(stratifierDef).getStrata()) {
+            scoreStratum(measureUrl, groupDef, stratumDef, measureScoring, state);
         }
     }
 
     /**
-     * Score a single stratum - MUTATES StratumDef object.
-     * Modified copy of R4MeasureReportScorer#scoreStratum without StratifierGroupComponent.
+     * Score a single stratum — StratumDef.score stays mutable (created fresh each evaluation).
      *
      * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition
      * @param stratumDef the stratum definition to score (will be mutated)
      * @param measureScoring the scoring type
+     * @param state the mutable evaluation state
      */
     private void scoreStratum(
-            String measureUrl, GroupDef groupDef, StratumDef stratumDef, MeasureScoring measureScoring) {
+            String measureUrl,
+            GroupDef groupDef,
+            StratumDef stratumDef,
+            MeasureScoring measureScoring,
+            MeasureEvaluationState state) {
 
-        Double score = getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring);
+        Double score = getStratumScoreOrNull(measureUrl, groupDef, stratumDef, measureScoring, state);
 
-        // MUTATE: Set score on StratumDef
+        // StratumDef.score stays mutable for now — it's created fresh each evaluation
         stratumDef.setScore(score);
     }
 
     /**
      * Calculate stratum score based on scoring type.
-     * Modified copy of R4MeasureReportScorer#getStratumScoreOrNull without StratifierGroupComponent.
      *
      * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition
      * @param stratumDef the stratum definition
      * @param measureScoring the scoring type
+     * @param state the mutable evaluation state
      * @return the calculated score or null
      */
     @Nullable
     private Double getStratumScoreOrNull(
-            String measureUrl, GroupDef groupDef, StratumDef stratumDef, MeasureScoring measureScoring) {
+            String measureUrl,
+            GroupDef groupDef,
+            StratumDef stratumDef,
+            MeasureScoring measureScoring,
+            MeasureEvaluationState state) {
 
         switch (measureScoring) {
             case PROPORTION:
@@ -268,13 +284,13 @@ public class MeasureReportDefScorer {
                 // Check for special RATIO continuous variable case
                 if (measureScoring.equals(MeasureScoring.RATIO)
                         && groupDef.hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION)) {
-                    return scoreRatioMeasureObservationStratum(measureUrl, stratumDef);
+                    return scoreRatioMeasureObservationStratum(measureUrl, stratumDef, state);
                 } else {
                     return scoreProportionRatioStratum(groupDef, stratumDef);
                 }
 
             case CONTINUOUSVARIABLE:
-                return scoreContinuousVariableStratum(measureUrl, groupDef, stratumDef);
+                return scoreContinuousVariableStratum(measureUrl, groupDef, stratumDef, state);
 
             default:
                 return null;
@@ -291,7 +307,8 @@ public class MeasureReportDefScorer {
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreRatioMeasureObservationStratum(String measureUrl, StratumDef stratumDef) {
+    private Double scoreRatioMeasureObservationStratum(
+            String measureUrl, StratumDef stratumDef, MeasureEvaluationState state) {
 
         if (stratumDef == null) {
             return null;
@@ -312,7 +329,7 @@ public class MeasureReportDefScorer {
         PopulationDef denPopDef = stratumPopulationDefDen.populationDef();
 
         return scoreRatioContVariableStratum(
-                measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef);
+                measureUrl, stratumPopulationDefNum, stratumPopulationDefDen, numPopDef, denPopDef, state);
     }
 
     /**
@@ -339,10 +356,12 @@ public class MeasureReportDefScorer {
      * @param measureUrl the measure URL for error reporting
      * @param groupDef the group definition
      * @param stratumDef the stratum definition
+     * @param state the mutable evaluation state
      * @return the calculated score or null
      */
     @Nullable
-    private Double scoreContinuousVariableStratum(String measureUrl, GroupDef groupDef, StratumDef stratumDef) {
+    private Double scoreContinuousVariableStratum(
+            String measureUrl, GroupDef groupDef, StratumDef stratumDef, MeasureEvaluationState state) {
 
         // Get the MEASUREOBSERVATION population from GroupDef
         PopulationDef measureObsPop = groupDef.getSingle(MeasurePopulationType.MEASUREOBSERVATION);
@@ -363,9 +382,10 @@ public class MeasureReportDefScorer {
 
         // Calculate aggregate using stratum-filtered resources
         QuantityDef quantityDef = calculateContinuousVariableAggregateQuantity(
-                measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef));
+                measureObsPop, populationDef -> getResultsForStratum(populationDef, stratumPopulationDef, state));
 
         // Persist per-stratum aggregation result for downstream aggregation
+        // StratumPopulationDef stays mutable (created fresh each evaluation)
         if (quantityDef != null && quantityDef.value() != null) {
             stratumPopulationDef.setAggregationResult(quantityDef.value());
         }
@@ -389,19 +409,20 @@ public class MeasureReportDefScorer {
             StratumPopulationDef measureObsNumStratum,
             StratumPopulationDef measureObsDenStratum,
             PopulationDef numPopDef,
-            PopulationDef denPopDef) {
+            PopulationDef denPopDef,
+            MeasureEvaluationState state) {
 
         // Calculate aggregate for numerator observations filtered by stratum
         QuantityDef aggregateNumQuantityDef = calculateContinuousVariableAggregateQuantity(
-                numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum));
+                numPopDef, populationDef -> getResultsForStratum(populationDef, measureObsNumStratum, state));
 
         // Calculate aggregate for denominator observations filtered by stratum
         QuantityDef aggregateDenQuantityDef = calculateContinuousVariableAggregateQuantity(
-                denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum));
+                denPopDef, populationDef -> getResultsForStratum(populationDef, measureObsDenStratum, state));
 
         // Persist per-stratum aggregation results BEFORE the null check so that
         // valid results are saved even when the other population has no observations.
-        // This mirrors the group-level pattern in scoreRatioMeasureObservationGroup().
+        // StratumPopulationDef stays mutable (created fresh each evaluation)
         if (aggregateNumQuantityDef != null && aggregateNumQuantityDef.value() != null) {
             measureObsNumStratum.setAggregationResult(aggregateNumQuantityDef.value());
         }
@@ -469,36 +490,27 @@ public class MeasureReportDefScorer {
     }
 
     /**
-     * Get results filtered for a specific stratum.
-     * Filters at the subject level (Map.Entry key) rather than observation Map keys.
-     * Aligned with BaseMeasureReportScorer pattern for correct stratification.
-     *
-     * <p><strong>CRITICAL:</strong> PopulationDef.subjectResources are keyed on UNQUALIFIED patient IDs
-     * (e.g., "patient-1965-female") but StratumPopulationDef may contain QUALIFIED IDs
-     * (e.g., "Patient/patient-1965-female"). This method uses getSubjectsUnqualified() to ensure
-     * proper matching between the two ID formats.
-     *
-     * <p>For NON_SUBJECT_VALUE stratifiers with resource basis, the stratum contains resource IDs
-     * (e.g., "Encounter/encounter-1") in resourceIdsForSubjectList, and we need to filter the
-     * observation resources by those IDs rather than by patient subjects.
-     *
-     * <p>Fixed in Part 1 (integrate-measure-def-scorer-part1-foundation) to prevent 14 test failures
-     * in CONTINUOUSVARIABLE measures when old scorers are removed in Part 2.
+     * Get results filtered for a specific stratum, reading subject resources from state.
      *
      * @param populationDef the population definition (MEASUREOBSERVATION)
      * @param stratumPopulationDef the stratum population to filter by
+     * @param state the mutable evaluation state
      * @return collection of resources belonging to this stratum
      */
     private static Collection<Object> getResultsForStratum(
-            PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
+            PopulationDef populationDef, StratumPopulationDef stratumPopulationDef, MeasureEvaluationState state) {
 
-        if (stratumPopulationDef == null || populationDef == null || populationDef.getSubjectResources() == null) {
+        if (stratumPopulationDef == null || populationDef == null) {
+            return List.of();
+        }
+
+        Map<String, Set<Object>> subjectResources =
+                state.population(populationDef).getSubjectResources();
+        if (subjectResources == null) {
             return List.of();
         }
 
         // For NON_SUBJECT_VALUE stratifiers with non-boolean basis, we must filter by resource IDs.
-        // An empty resourceIdsForSubjectList means "no qualifying resources" for this stratum,
-        // NO "fallback to subject-based stratification".
         if (stratumPopulationDef.measureStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE
                 && !stratumPopulationDef.isBooleanBasis()) {
 
@@ -507,13 +519,13 @@ public class MeasureReportDefScorer {
                 return List.of();
             }
 
-            return getResultsForStratumByResourceIds(populationDef, stratumPopulationDef);
+            return getResultsForStratumByResourceIds(subjectResources, populationDef, stratumPopulationDef);
         }
 
         // Subject-based stratification (VALUE stratifiers, boolean basis, etc.)
         Set<String> stratumSubjectsUnqualified = stratumPopulationDef.getSubjectsUnqualified();
 
-        return populationDef.getSubjectResources().entrySet().stream()
+        return subjectResources.entrySet().stream()
                 .filter(entry -> stratumSubjectsUnqualified.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .flatMap(Collection::stream)
@@ -524,15 +536,15 @@ public class MeasureReportDefScorer {
      * Get results filtered for a NON_SUBJECT_VALUE stratum by resource IDs.
      * For resource-basis stratifiers, the stratum contains specific resource IDs that should be included.
      *
-     * <p>For MEASUREOBSERVATION populations, the subjectResources contain Map&lt;inputResource, outputValue&gt;
-     * where we need to filter by the input resource IDs and return the output values (observations).
-     *
+     * @param subjectResources the subject resources map (from state or PopulationDef)
      * @param populationDef the population definition (MEASUREOBSERVATION)
      * @param stratumPopulationDef the stratum population containing resource IDs
      * @return collection of resources/observations matching the stratum's resource IDs
      */
     private static Collection<Object> getResultsForStratumByResourceIds(
-            PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
+            Map<String, Set<Object>> subjectResources,
+            PopulationDef populationDef,
+            StratumPopulationDef stratumPopulationDef) {
 
         Set<String> stratumResourceIds = stratumPopulationDef.resourceIdsAsSet();
 
@@ -540,7 +552,7 @@ public class MeasureReportDefScorer {
         // MeasureScoreCalculator.collectQuantities expects Map objects and extracts values from them.
         // We need to return filtered Maps (not the values directly) so collectQuantities can process them.
         if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
-            return populationDef.getSubjectResources().values().stream()
+            return subjectResources.values().stream()
                     .flatMap(Collection::stream)
                     .filter(Map.class::isInstance)
                     .map(m -> (Map<?, ?>) m)
@@ -566,7 +578,7 @@ public class MeasureReportDefScorer {
         }
 
         // For non-MEASUREOBSERVATION populations, filter resources directly
-        return populationDef.getSubjectResources().values().stream()
+        return subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(resource -> {
                     if (resource instanceof IBaseResource baseResource) {
@@ -615,9 +627,10 @@ public class MeasureReportDefScorer {
         return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
     }
 
-    private static void setAggregateResultIfPopNonNull(@Nullable PopulationDef populationDef, QuantityDef quantityDef) {
+    private static void setAggregateResultIfPopNonNull(
+            @Nullable PopulationDef populationDef, QuantityDef quantityDef, MeasureEvaluationState state) {
         Optional.ofNullable(populationDef).ifPresent(nonNullPopulationDef -> {
-            nonNullPopulationDef.setAggregationResult(quantityDef);
+            state.population(nonNullPopulationDef).setAggregationResult(quantityDef);
         });
     }
 
@@ -627,10 +640,28 @@ public class MeasureReportDefScorer {
      */
     protected MeasureScoring checkMissingScoringType(String measureUrl, MeasureScoring measureScoring) {
         if (measureScoring == null) {
-            throw new InvalidRequestException(
+            throw new MeasureScoringException(
                     "Measure does not have a scoring methodology defined. Add a \"scoring\" property to the measure definition or the group definition for measure: "
                             + measureUrl);
         }
         return measureScoring;
+    }
+
+    /**
+     * Look up a population count from state by iterating the group's populations.
+     * Replaces {@code groupDef.getPopulationCount(type)} which read from mutable PopulationDef fields.
+     *
+     * @param groupDef the group definition
+     * @param type the population type to find
+     * @param state the mutable evaluation state
+     * @return the count, or 0 if no matching population exists
+     */
+    private static int getPopulationCount(GroupDef groupDef, MeasurePopulationType type, MeasureEvaluationState state) {
+        for (PopulationDef pop : groupDef.populations()) {
+            if (pop.type() == type) {
+                return state.population(pop).getCount();
+            }
+        }
+        return 0;
     }
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 
@@ -35,8 +36,11 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 public class SelectedMeasureDefPopulation<P>
         extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<PopulationDef, P> {
 
-    public SelectedMeasureDefPopulation(PopulationDef value, P parent) {
+    private final MeasureEvaluationState state;
+
+    public SelectedMeasureDefPopulation(PopulationDef value, MeasureEvaluationState state, P parent) {
         super(value, parent);
+        this.state = state;
     }
 
     // ==================== Subject Assertions ====================
@@ -49,7 +53,7 @@ public class SelectedMeasureDefPopulation<P>
      */
     public SelectedMeasureDefPopulation<P> hasSubjectCount(int count) {
         assertNotNull(value(), "PopulationDef is null");
-        assertEquals(count, value().getSubjectResources().size(), "Subject count mismatch");
+        assertEquals(count, state.population(value()).getSubjectResources().size(), "Subject count mismatch");
         return this;
     }
 
@@ -63,9 +67,9 @@ public class SelectedMeasureDefPopulation<P>
         assertNotNull(value(), "PopulationDef is null");
         for (String subjectId : subjectIds) {
             assertTrue(
-                    value().getSubjectResources().containsKey(subjectId),
+                    state.population(value()).getSubjectResources().containsKey(subjectId),
                     "Subject not found in population: " + subjectId + ", available: "
-                            + value().getSubjectResources().keySet());
+                            + state.population(value()).getSubjectResources().keySet());
         }
         return this;
     }
@@ -79,7 +83,7 @@ public class SelectedMeasureDefPopulation<P>
     public SelectedMeasureDefPopulation<P> doesNotHaveSubject(String subjectId) {
         assertNotNull(value(), "PopulationDef is null");
         assertFalse(
-                value().getSubjectResources().containsKey(subjectId),
+                state.population(value()).getSubjectResources().containsKey(subjectId),
                 "Subject should not be in population: " + subjectId);
         return this;
     }
@@ -103,7 +107,7 @@ public class SelectedMeasureDefPopulation<P>
      */
     public SelectedMeasureDefPopulation<P> hasCount(int count) {
         assertNotNull(value(), "PopulationDef is null");
-        int actualCount = value().getCount();
+        int actualCount = state.population(value()).getCount();
         assertEquals(count, actualCount, "Population count mismatch");
         return this;
     }
@@ -114,7 +118,7 @@ public class SelectedMeasureDefPopulation<P>
 
     public SelectedMeasureDefPopulation<P> hasAggregationResult(Object expectedAggregationResult) {
         assertNotNull(value(), "PopulationDef is null");
-        final Double actualAggregationResult = value().getAggregationResult();
+        final Double actualAggregationResult = state.population(value()).getAggregationResult();
         assertEquals(expectedAggregationResult, actualAggregationResult, "Population aggregation result mismatch");
         return this;
     }
@@ -130,7 +134,8 @@ public class SelectedMeasureDefPopulation<P>
     public SelectedMeasureDefPopulation<P> hasAggregateMethod(
             ContinuousVariableObservationAggregateMethod expectedAggregateMethod) {
         assertNotNull(value(), "PopulationDef is null");
-        final ContinuousVariableObservationAggregateMethod actualAggregateMethod = value().getAggregateMethod();
+        final ContinuousVariableObservationAggregateMethod actualAggregateMethod =
+                state.population(value()).getAggregateMethod();
 
         if (null == expectedAggregateMethod) {
             assertNull(actualAggregateMethod, "PopulationDef aggregate method is not null");
@@ -150,7 +155,8 @@ public class SelectedMeasureDefPopulation<P>
      */
     public SelectedMeasureDefPopulation<P> hasEvaluatedResourceCount(int count) {
         assertNotNull(value(), "PopulationDef is null");
-        assertEquals(count, value().getEvaluatedResources().size(), "Evaluated resource count mismatch");
+        assertEquals(
+                count, state.population(value()).getEvaluatedResources().size(), "Evaluated resource count mismatch");
         return this;
     }
 
@@ -163,8 +169,11 @@ public class SelectedMeasureDefPopulation<P>
      */
     public SelectedMeasureDefPopulation<P> subjectHasResourceCount(String subjectId, int count) {
         assertNotNull(value(), "PopulationDef is null");
-        assertTrue(value().getSubjectResources().containsKey(subjectId), "Subject not found: " + subjectId);
-        java.util.Set<?> resources = value().getSubjectResources().get(subjectId);
+        assertTrue(
+                state.population(value()).getSubjectResources().containsKey(subjectId),
+                "Subject not found: " + subjectId);
+        java.util.Set<?> resources =
+                state.population(value()).getSubjectResources().get(subjectId);
         assertEquals(count, resources.size(), "Resource count mismatch for subject " + subjectId);
         return this;
     }
@@ -313,7 +322,7 @@ public class SelectedMeasureDefPopulation<P>
                 .filter(t -> t.getExpression().equals(expressionName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Expression not found"));
-        return new SelectedMeasureDefPopulationExtension<>(extDef, this);
+        return new SelectedMeasureDefPopulationExtension<>(extDef, state, this);
     }
 
     public SelectedMeasureDefPopulation<P> assertNoSupportingEvidenceResults() {
@@ -325,7 +334,7 @@ public class SelectedMeasureDefPopulation<P>
         }
 
         for (var def : defs) {
-            var subjectResources = def.getSubjectResources();
+            var subjectResources = state.supportingEvidence(def).getSubjectResources();
 
             if (subjectResources == null || subjectResources.isEmpty()) {
                 continue;

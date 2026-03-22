@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.Objects;
+
 public class CodeDef {
 
     private final String system;
@@ -32,5 +34,24 @@ public class CodeDef {
 
     public String display() {
         return this.display;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CodeDef)) return false;
+        CodeDef that = (CodeDef) o;
+        return Objects.equals(system, that.system) && Objects.equals(code, that.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(system, code);
+    }
+
+    /** Returns {@code system|code} per FHIR coding format. */
+    @Override
+    public String toString() {
+        return system + "|" + code;
     }
 }

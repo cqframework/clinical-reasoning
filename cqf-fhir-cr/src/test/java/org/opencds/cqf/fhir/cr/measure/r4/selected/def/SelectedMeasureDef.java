@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 
 /**
  * Fluent assertion API for MeasureDef objects.
@@ -39,8 +40,11 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  */
 public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<MeasureDef, P> {
 
-    public SelectedMeasureDef(MeasureDef value, P parent) {
+    private final MeasureEvaluationState state;
+
+    public SelectedMeasureDef(MeasureDef value, MeasureEvaluationState state, P parent) {
         super(value, parent);
+        this.state = state;
     }
 
     // ==================== Navigation Methods ====================
@@ -54,7 +58,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
     public SelectedMeasureDefGroup<SelectedMeasureDef<P>> firstGroup() {
         assertNotNull(value(), "MeasureDef is null");
         assertFalse(value().groups().isEmpty(), "No groups found in MeasureDef");
-        return new SelectedMeasureDefGroup<>(value().groups().get(0), this);
+        return new SelectedMeasureDefGroup<>(value().groups().get(0), state, this);
     }
 
     /**
@@ -71,7 +75,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
                 .findFirst()
                 .orElse(null);
         assertNotNull(group, "No group found with ID: " + id);
-        return new SelectedMeasureDefGroup<>(group, this);
+        return new SelectedMeasureDefGroup<>(group, state, this);
     }
 
     /**
@@ -87,7 +91,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
                 index >= 0 && index < value().groups().size(),
                 "Group index out of bounds: " + index + ", size: "
                         + value().groups().size());
-        return new SelectedMeasureDefGroup<>(value().groups().get(index), this);
+        return new SelectedMeasureDefGroup<>(value().groups().get(index), state, this);
     }
 
     // ==================== Assertion Methods ====================
@@ -112,7 +116,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      */
     public SelectedMeasureDef<P> hasErrors(int count) {
         assertNotNull(value(), "MeasureDef is null");
-        assertEquals(count, value().errors().size(), "Error count mismatch");
+        assertEquals(count, state.errors().size(), "Error count mismatch");
         return this;
     }
 
@@ -124,7 +128,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      */
     public SelectedMeasureDef<P> hasError(String errorSubstring) {
         assertNotNull(value(), "MeasureDef is null");
-        var actualErrorMessages = value().errors();
+        var actualErrorMessages = state.errors();
         var found = actualErrorMessages.stream().anyMatch(error -> error.contains(errorSubstring));
         assertTrue(found, "Expected error: %s, but instead got: %s".formatted(errorSubstring, actualErrorMessages));
         return this;
@@ -137,7 +141,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      */
     public SelectedMeasureDef<P> hasNoErrors() {
         assertNotNull(value(), "MeasureDef is null");
-        assertTrue(value().errors().isEmpty(), "Expected no errors, but found: " + value().errors());
+        assertTrue(state.errors().isEmpty(), "Expected no errors, but found: " + state.errors());
         return this;
     }
 

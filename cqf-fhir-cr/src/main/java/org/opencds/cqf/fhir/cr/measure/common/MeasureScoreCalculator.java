@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -221,7 +220,7 @@ public class MeasureScoreCalculator {
                         .divide(BigDecimal.valueOf(cleanList.size()), DIVISION_PRECISION);
 
             case N_A ->
-                throw new InvalidRequestException(
+                throw new MeasureScoringException(
                         "Aggregate method must be provided for continuous variable scoring, but is NO-OP.");
         };
     }

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +25,10 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
@@ -187,12 +188,13 @@ public class Dstu3MeasureProcessor {
                 MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
         // populate results from Library $evaluate
+        MeasureEvaluationState state = MeasureEvaluationState.create(measureDef);
         if (!subjects.isEmpty()) {
             var results = MeasureEvaluationResultHandler.getEvaluationResults(
                     subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails, parametersMap);
 
             // Process Criteria Expression Results
-            measureEvaluationResultHandler.processResults(
+            state = measureEvaluationResultHandler.processResults(
                     fhirContext, results.processMeasureForSuccessOrFailure(measureDef), measureDef, evalType);
         }
 
@@ -202,9 +204,9 @@ public class Dstu3MeasureProcessor {
 
         // Build Measure Report with Results
         MeasureReport measureReport = new Dstu3MeasureReportBuilder()
-                .build(measure, measureDef, evalTypeToReportType(evalType), measurementPeriod, subjects);
+                .build(measure, measureDef, state, evalTypeToReportType(evalType), measurementPeriod, subjects);
 
-        return new MeasureDefAndDstu3MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndDstu3MeasureReport(measureDef, state, measureReport);
     }
 
     private MultiLibraryIdMeasureEngineDetails buildLibraryIdEngineDetails(Measure measure) {
@@ -250,7 +252,7 @@ public class Dstu3MeasureProcessor {
 
     private void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Measure %s does not have a primary library specified".formatted(measure.getUrl()));
         }
     }

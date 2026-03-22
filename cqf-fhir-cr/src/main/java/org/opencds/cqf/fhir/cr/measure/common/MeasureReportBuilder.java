@@ -7,6 +7,7 @@ public interface MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> {
     MeasureReportT build(
             MeasureT measure,
             MeasureDef def,
+            MeasureEvaluationState state,
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds);

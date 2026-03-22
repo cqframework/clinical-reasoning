@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 
 /**
  * Multi-measure evaluation result containing MeasureDefs and Parameters with bundled MeasureReports.
@@ -35,4 +36,5 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  * @param parameters Parameters resource containing bundled R4 MeasureReports
  */
 @VisibleForTesting
-public record MeasureDefAndR4ParametersWithMeasureReports(List<MeasureDef> measureDefs, Parameters parameters) {}
+public record MeasureDefAndR4ParametersWithMeasureReports(
+        List<MeasureDef> measureDefs, List<MeasureEvaluationState> states, Parameters parameters) {}

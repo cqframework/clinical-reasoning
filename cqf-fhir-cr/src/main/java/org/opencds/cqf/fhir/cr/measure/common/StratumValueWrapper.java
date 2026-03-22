@@ -1,16 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 
 /**
@@ -86,28 +83,29 @@ public class StratumValueWrapper {
         }
 
         String key = null;
-        if (value instanceof Coding coding) {
+        if (value instanceof IBaseCoding coding) {
             // ASSUMPTION: We won't have different systems with the same code
             // within a given stratifier / sde
             key = joinValues("coding", coding.getCode());
-        } else if (value instanceof CodeableConcept concept) {
-            key = joinValues("codeable-concept", concept.getCodingFirstRep().getCode());
+        } else if (isCodeableConcept(value)) {
+            IBaseCoding coding = extractFirstCoding(value);
+            key = joinValues("codeable-concept", coding.getCode());
         } else if (value instanceof Code c) {
             key = joinValues("code", c.getCode());
         } else if (value instanceof Enum<?> e) {
             key = joinValues("enum", e.toString());
         } else if (value instanceof IPrimitiveType<?> p) {
             key = joinValues("primitive", p.getValueAsString());
-        } else if (value instanceof Identifier identifier) {
-            key = identifier.getValue();
-        } else if (value instanceof Resource resource) {
+        } else if (isIdentifier(value)) {
+            key = extractIdentifierValue(value);
+        } else if (value instanceof IBaseResource resource) {
             key = resource.getIdElement().toVersionless().getValue();
         } else {
             key = value.toString();
         }
 
         if (key == null) {
-            throw new InvalidRequestException("found a null key for the wrapped value: %s".formatted(value));
+            throw new MeasureEvaluationException("found a null key for the wrapped value: %s".formatted(value));
         }
 
         return key;
@@ -124,21 +122,22 @@ public class StratumValueWrapper {
         if (isEmptyCollection(value)) {
             return EMPTY_STRATUM_VALUE;
         }
-        if (value instanceof Coding coding) {
-            return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
-        } else if (value instanceof CodeableConcept concept) {
-            return concept.getCodingFirstRep().hasDisplay()
-                    ? concept.getCodingFirstRep().getDisplay()
-                    : concept.getCodingFirstRep().getCode();
+        if (value instanceof IBaseCoding coding) {
+            String display = coding.getDisplay();
+            return display != null && !display.isEmpty() ? display : coding.getCode();
+        } else if (isCodeableConcept(value)) {
+            IBaseCoding coding = extractFirstCoding(value);
+            String display = coding.getDisplay();
+            return display != null && !display.isEmpty() ? display : coding.getCode();
         } else if (value instanceof Code c) {
             return c.getDisplay() != null ? c.getDisplay() : c.getCode();
         } else if (value instanceof Enum<?> e) {
             return e.toString();
         } else if (value instanceof IPrimitiveType<?> p) {
             return p.getValueAsString();
-        } else if (value instanceof Identifier identifier) {
-            return identifier.getValue();
-        } else if (value instanceof Resource resource) {
+        } else if (isIdentifier(value)) {
+            return extractIdentifierValue(value);
+        } else if (value instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValue();
         } else {
             return value.toString();
@@ -186,19 +185,19 @@ public class StratumValueWrapper {
         if (isEmptyCollection(valueInner)) {
             return EMPTY_STRATUM_VALUE;
         }
-        if (valueInner instanceof Coding coding) {
+        if (valueInner instanceof IBaseCoding coding) {
             return coding.getCode();
-        } else if (valueInner instanceof CodeableConcept concept) {
-            return concept.getCodingFirstRep().getCode();
+        } else if (isCodeableConcept(valueInner)) {
+            return extractFirstCoding(valueInner).getCode();
         } else if (valueInner instanceof Code c) {
             return c.getCode();
         } else if (valueInner instanceof Enum<?> e) {
             return e.toString();
         } else if (valueInner instanceof IPrimitiveType<?> p) {
             return p.getValueAsString();
-        } else if (valueInner instanceof Identifier identifier) {
-            return identifier.getValue();
-        } else if (valueInner instanceof Resource resource) {
+        } else if (isIdentifier(valueInner)) {
+            return extractIdentifierValue(valueInner);
+        } else if (valueInner instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValue();
         } else if (valueInner instanceof Iterable<?> iterable) {
             return StreamSupport.stream(iterable.spliterator(), false)
@@ -207,6 +206,53 @@ public class StratumValueWrapper {
                     .collect(Collectors.joining(","));
         } else {
             return valueInner.toString();
+        }
+    }
+
+    /**
+     * Checks if the value is a CodeableConcept by class name, avoiding a direct dependency
+     * on any FHIR version-specific model type. All FHIR versions name this type "CodeableConcept".
+     */
+    private static boolean isCodeableConcept(Object value) {
+        return "CodeableConcept".equals(value.getClass().getSimpleName());
+    }
+
+    /**
+     * Checks if the value is an Identifier by class name, avoiding a direct dependency
+     * on any FHIR version-specific model type. All FHIR versions name this type "Identifier".
+     */
+    private static boolean isIdentifier(Object value) {
+        return "Identifier".equals(value.getClass().getSimpleName());
+    }
+
+    /**
+     * Extracts the first coding from a CodeableConcept-like object via reflection.
+     * Both R4 and DSTU3 CodeableConcept expose {@code getCodingFirstRep()} returning
+     * a type that implements {@link IBaseCoding}.
+     */
+    private static IBaseCoding extractFirstCoding(Object codeableConcept) {
+        try {
+            var method = codeableConcept.getClass().getMethod("getCodingFirstRep");
+            return (IBaseCoding) method.invoke(codeableConcept);
+        } catch (ReflectiveOperationException e) {
+            throw new MeasureEvaluationException(
+                    "Failed to extract coding from "
+                            + codeableConcept.getClass().getName(),
+                    e);
+        }
+    }
+
+    /**
+     * Extracts the string value from an Identifier-like object via reflection.
+     * Both R4 and DSTU3 Identifier expose {@code getValue()} returning a String.
+     */
+    private static String extractIdentifierValue(Object identifier) {
+        try {
+            var method = identifier.getClass().getMethod("getValue");
+            return (String) method.invoke(identifier);
+        } catch (ReflectiveOperationException e) {
+            throw new MeasureEvaluationException(
+                    "Failed to extract value from " + identifier.getClass().getName(), e);
         }
     }
 }

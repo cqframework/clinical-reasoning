@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -218,7 +216,7 @@ public class FunctionEvaluationHandler {
         }
 
         if (isExpressionFunctionRef(context, libraryIdentifier, expression)) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     ("%s stratifier expression '%s' must NOT be a CQL function definition for measure: %s. "
                                     + "Only NON_SUBJECT_VALUE stratifiers (non-boolean population basis with component criteria) "
                                     + "should use CQL function definitions.")
@@ -241,7 +239,7 @@ public class FunctionEvaluationHandler {
 
         if (populationDef.getCriteriaReference() == null) {
             // We screwed up building the PopulationDef, somehow
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "PopulationDef criteria reference is missing for continuous variable observation for measure: %s"
                             .formatted(measureUrl));
         }
@@ -354,7 +352,7 @@ public class FunctionEvaluationHandler {
 
         if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
             // We screwed up defining component correctly
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "StratifierDef component expression is missing for measure: %s.".formatted(measureUrl));
         }
         var stratifierExpression = componentDef.expression();
@@ -396,7 +394,7 @@ public class FunctionEvaluationHandler {
                     tryGetExpressionResult(populationExpressionName, evaluationResult);
 
             if (optExpressionResult.isEmpty()) {
-                throw new InternalErrorException("Expression result: %s is missing for measure %s"
+                throw new MeasureEvaluationException("Expression result: %s is missing for measure %s"
                         .formatted(populationExpressionName, measureUrl));
             }
             final ExpressionResult expressionResult = optExpressionResult.get();
@@ -441,7 +439,7 @@ public class FunctionEvaluationHandler {
      *
      * @param result the CQL evaluation result
      * @return QuantityDef containing the numeric value
-     * @throws InvalidRequestException if result cannot be converted to a number
+     * @throws MeasureScoringException if result cannot be converted to a number
      */
     private static QuantityDef convertCqlResultToQuantityDef(Object result) {
         if (result == null) {
@@ -458,14 +456,14 @@ public class FunctionEvaluationHandler {
             try {
                 return new QuantityDef(Double.parseDouble(s));
             } catch (NumberFormatException e) {
-                throw new InvalidRequestException("String is not a valid number: " + s, e);
+                throw new MeasureScoringException("String is not a valid number: " + s, e);
             }
         }
 
         // TODO: Handle CQL Quantity if needed (org.opencds.cqf.cql.engine.runtime.Quantity)
         // For now, unsupported
 
-        throw new InvalidRequestException("Cannot convert CQL result of type " + result.getClass() + " to QuantityDef. "
+        throw new MeasureScoringException("Cannot convert CQL result of type " + result.getClass() + " to QuantityDef. "
                 + "Expected Number or String.");
     }
 
@@ -479,7 +477,7 @@ public class FunctionEvaluationHandler {
 
         if (!(resolveExpressionRef(cqlEngine, libraryIdentifier, functionExpression)
                 instanceof FunctionDef functionDef)) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Measure observation %s does not reference a function definition".formatted(functionExpression));
         }
 
@@ -488,7 +486,7 @@ public class FunctionEvaluationHandler {
             final List<OperandDef> operands = functionDef.getOperand();
 
             if (operands.isEmpty()) {
-                throw new InternalErrorException(
+                throw new MeasureValidationException(
                         "Measure observation criteria expression: %s is missing a function parameter matching the population-basis"
                                 .formatted(functionExpression));
             }
@@ -525,9 +523,9 @@ public class FunctionEvaluationHandler {
 
         } catch (RuntimeException exception) {
             if (exception.getMessage().contains(DOES_NOT_HAVE_FUNCTION)) {
-                throw new InvalidRequestException(exceptionMessageIfNotFunction, exception);
+                throw new MeasureEvaluationException(exceptionMessageIfNotFunction, exception);
             } else {
-                throw new InvalidRequestException(
+                throw new MeasureEvaluationException(
                         "CQL Exception while evaluating function: %s".formatted(functionExpression), exception);
             }
         }
@@ -571,7 +569,7 @@ public class FunctionEvaluationHandler {
     private static Optional<ExpressionResult> tryGetExpressionResult(
             String expressionName, EvaluationResult evaluationResult) {
         if (expressionName == null) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "PopulationDef criteria reference: %s is missing for continuous variable observation"
                             .formatted(expressionName));
         }
@@ -583,7 +581,7 @@ public class FunctionEvaluationHandler {
         final Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
 
         if (!expressionResults.containsKey(expressionName)) {
-            throw new InvalidRequestException(
+            throw new MeasureEvaluationException(
                     "Could not find expression result for expression: %s. Available expressions: %s"
                             .formatted(expressionName, expressionResults.keySet()));
         }
@@ -599,7 +597,7 @@ public class FunctionEvaluationHandler {
                 var expressionResultForSubjectId = evaluationResult.get(subjectTypePart);
 
                 if (expressionResultForSubjectId == null) {
-                    throw new InternalErrorException(
+                    throw new MeasureEvaluationException(
                             "expression result is null for subject type: %s".formatted(subjectTypePart));
                 }
 
@@ -692,7 +690,7 @@ public class FunctionEvaluationHandler {
     private static boolean isExpressionFunctionRef(
             CqlEngine cqlEngine, VersionedIdentifier libraryIdentifier, String expressionName) {
         if (expressionName == null || expressionName.isBlank()) {
-            throw new InvalidRequestException("Expresion name is null or blank");
+            throw new MeasureValidationException("Expresion name is null or blank");
         }
 
         return isExpressionFunctionRef(resolveExpressionRef(cqlEngine, libraryIdentifier, expressionName));
@@ -711,7 +709,7 @@ public class FunctionEvaluationHandler {
         final Library library = cqlEngine.getEnvironment().resolveLibrary(libraryIdentifier);
 
         if (library == null) {
-            throw new InvalidRequestException("Could not resolve CQL library: %s".formatted(libraryIdentifier));
+            throw new MeasureResolutionException("Could not resolve CQL library: %s".formatted(libraryIdentifier));
         }
 
         return Libraries.resolveExpressionRef(expressionName, library);

@@ -10,7 +10,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RI
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_USAGE_CODE;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils.isBooleanPopulationBasis;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
@@ -40,8 +39,10 @@ import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggre
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilders;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
@@ -96,7 +97,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         checkIds(group);
         validateRatioContinuousVariableIfApplicable(measure, group, groupScoring, measureScoring);
 
-        var populationBasisDef = getPopulationBasisDef(measureBasis, groupBasis);
+        var populationBasisDef = MeasureDefBuilders.getPopulationBasisDef(measureBasis, groupBasis);
         var populationsWithCriteriaReference = group.getPopulation().stream()
                 .map(t -> buildPopulationDef(
                         t, group, measure.getUrl(), populationBasisDef, getSupportingEvidenceDefs(t)))
@@ -114,10 +115,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 group.getId(),
                 conceptToConceptDef(group.getCode()),
                 stratifiers,
-                mergePopulations(populationsWithCriteriaReference, optPopulationDefDateOfCompliance.orElse(null)),
+                MeasureDefBuilders.mergePopulations(
+                        populationsWithCriteriaReference, optPopulationDefDateOfCompliance.orElse(null)),
                 R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring),
                 hasGroupImpNotation,
-                getImprovementNotation(measureImpNotation, groupImpNotation),
+                MeasureDefBuilders.getImprovementNotation(measureImpNotation, groupImpNotation),
                 populationBasisDef);
     }
 
@@ -132,7 +134,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         for (Extension e : ext) {
 
             if (!(e.getValue() instanceof Expression expressionValue)) {
-                throw new InvalidRequestException("Extension does not contain valueExpression");
+                throw new MeasureValidationException("Extension does not contain valueExpression");
             }
 
             supportingEvidenceDefs.add(new SupportingEvidenceDef(
@@ -199,7 +201,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Validate exactly 2 measure observations
         if (measureObservations.size() != 2) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Ratio Continuous Variable requires 2 Measure Observations defined, you have: %s"
                             .formatted(measureObservations.size()));
         }
@@ -210,12 +212,12 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         // Both must have criteria references
         if (criteriaRef1 == null) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "MEASURE_OBSERVATION population with id '%s' is missing criteria reference extension for Measure: %s"
                             .formatted(measureObservations.get(0).getId(), measure.getUrl()));
         }
         if (criteriaRef2 == null) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "MEASURE_OBSERVATION population with id '%s' is missing criteria reference extension for Measure: %s"
                             .formatted(measureObservations.get(1).getId(), measure.getUrl()));
         }
@@ -239,7 +241,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.DENOMINATOR);
 
         if (!hasNumeratorRef || !hasDenominatorRef) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     ("Ratio Continuous Variable requires one MEASURE_OBSERVATION to reference '%s' "
                                     + "and one to reference '%s', but found criteria references: '%s' and '%s' for Measure: %s")
                             .formatted(
@@ -284,7 +286,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             CodeDef populationBasis) {
 
         if (group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL) == null
-                || checkPopulationForCode(populationDefs, DATEOFCOMPLIANCE) == null) {
+                || MeasureDefBuilders.checkPopulationForCode(populationDefs, DATEOFCOMPLIANCE) == null) {
             return Optional.empty();
         }
 
@@ -292,13 +294,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var expressionType = (Expression) group.getExtensionByUrl(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL)
                 .getValue();
         if (!expressionType.hasExpression()) {
-            throw new InvalidRequestException("no expression was listed for extension: %s for Measure: %s"
+            throw new MeasureValidationException("no expression was listed for extension: %s for Measure: %s"
                     .formatted(CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL, measureUrl));
         }
         var expression = expressionType.getExpression();
         var populateDefDateOfCompliance = new PopulationDef(
                 "dateOfCompliance",
-                totalConceptDefCreator(DATEOFCOMPLIANCE),
+                MeasureDefBuilders.totalConceptDefCreator(DATEOFCOMPLIANCE),
                 DATEOFCOMPLIANCE,
                 expression,
                 populationBasis,
@@ -319,7 +321,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         if (population == null) {
-            throw new InvalidRequestException("group.population is null");
+            throw new MeasureValidationException("group.population is null");
         }
         var populationCriteriaExt = population.getExtensionByUrl(EXT_CQFM_CRITERIA_REFERENCE);
         if (populationCriteriaExt != null) {
@@ -329,7 +331,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             String critReference = populationCriteriaExt.getValue().toString();
             // check that the reference exists in the GroupDef.populationId
             if (group.getPopulation().stream().map(Element::getId).noneMatch(id -> id.equals(critReference))) {
-                throw new InvalidRequestException(
+                throw new MeasureValidationException(
                         "no matching criteria reference was found for extension: %s for Measure: %s"
                                 .formatted(EXT_CQFM_CRITERIA_REFERENCE, measureUrl));
             }
@@ -359,7 +361,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         if (!components.isEmpty() && mgsc.getCriteria().getExpression() != null) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Measure: %s with stratifier: %s, has both components and stratifier criteria expressions defined. Only one should be specified"
                             .formatted(measureUrl, mgsc.getId()));
         }
@@ -404,13 +406,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 .anyMatch(MeasureGroupStratifierComponentComponent::hasCriteria);
 
         if (hasCriteria && hasAnyComponentCriteria) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Stratifier Cannot have both criteria: %s and any component criteria: %s for measure: %s"
                             .formatted(hasCriteria, hasAnyComponentCriteria, measureUrl));
         }
 
         if (!hasCriteria && !hasAnyComponentCriteria) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "Stratifier cannot have neither criteria nor component for measure: %s".formatted(measureUrl));
         }
 
@@ -451,7 +453,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 })
                 .toList();
         if (CollectionUtils.isEmpty(hasUsage)) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "SupplementalDataComponent usage is missing code: %s or %s for Measure: %s"
                             .formatted(SDE_USAGE_CODE, RISK_ADJUSTMENT_USAGE_CODE, measure.getUrl()));
         }
@@ -476,13 +478,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
     private static void checkId(Element e) {
         if (e.getId() == null || StringUtils.isBlank(e.getId())) {
-            throw new InvalidRequestException("id is required on all Elements of type: " + e.fhirType());
+            throw new MeasureValidationException("id is required on all Elements of type: " + e.fhirType());
         }
     }
 
     private static void checkId(Resource r) {
         if (r.getId() == null || StringUtils.isBlank(r.getId())) {
-            throw new InvalidRequestException("id is required on all Resources of type: " + r.fhirType());
+            throw new MeasureValidationException("id is required on all Resources of type: " + r.fhirType());
         }
     }
 
@@ -490,7 +492,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
      * Validates that all population IDs within each group are unique.
      *
      * @param measure the Measure to validate
-     * @throws InvalidRequestException if duplicate population IDs exist within a group
+     * @throws MeasureValidationException if duplicate population IDs exist within a group
      */
     private static void validateUniquePopulationIds(Measure measure) {
         String measureIdentifier = measure.hasUrl() ? measure.getUrl() : measure.getId();
@@ -510,7 +512,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 }
 
                 if (!seenPopulationIds.add(populationId)) {
-                    throw new InvalidRequestException("Duplicate population ID '%s' found in %s of Measure: %s"
+                    throw new MeasureValidationException("Duplicate population ID '%s' found in %s of Measure: %s"
                             .formatted(populationId, groupIdentifier, measureIdentifier));
                 }
             }

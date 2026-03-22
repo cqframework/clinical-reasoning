@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +16,8 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -95,7 +95,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                     .toList();
 
             if (resultMatchingClasses.size() != resultClasses.size()) {
-                throw new InvalidRequestException(
+                throw new MeasureValidationException(
                         "group expression criteria results for expression: [%s] and scoring: [%s] must fall within accepted types for population basis: [%s] for Measure: [%s] due to mismatch between total result classes: %s and matching result classes: %s"
                                 .formatted(
                                         populationExpression,
@@ -145,7 +145,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             if (resultClasses.stream()
                     .noneMatch(resultClass -> doesBasisMatchResource(resultClass, groupPopulationBasisCode))) {
 
-                throw new InvalidRequestException(
+                throw new MeasureValidationException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
                                 .formatted(expression, groupPopulationBasisCode, prettyClassNames(resultClasses), url));
             }
@@ -160,7 +160,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                 .toList();
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
-            throw new InvalidRequestException(
+            throw new MeasureValidationException(
                     "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total eval result classes: %s and matching result classes: %s"
                             .formatted(
                                     expression,
@@ -201,7 +201,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             try {
                 return Optional.of(Class.forName(optResourceClassName.get()));
             } catch (ClassNotFoundException exception) {
-                throw new InternalErrorException(exception);
+                throw new MeasureEvaluationException(exception.getMessage(), exception);
             }
         }
         return Optional.empty();

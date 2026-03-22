@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,10 +95,10 @@ public class SupportingEvidenceDef {
 
     private static String requireNonBlank(String value, String fieldName) {
         if (value == null) {
-            throw new InvalidRequestException(fieldName + " must not be null");
+            throw new MeasureValidationException(fieldName + " must not be null");
         }
         if (value.isBlank()) {
-            throw new InvalidRequestException(fieldName + " must not be blank");
+            throw new MeasureValidationException(fieldName + " must not be blank");
         }
         return value;
     }

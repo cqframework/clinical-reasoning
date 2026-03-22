@@ -2,8 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 
 @SuppressWarnings("squid:S2699")
 class DataRequirementsTest {
@@ -86,7 +86,7 @@ class DataRequirementsTest {
                 .periodEnd("2024-12-31")
                 .DataRequirements();
 
-        assertThrows(ResourceNotFoundException.class, when::then);
+        assertThrows(MeasureResolutionException.class, when::then);
     }
 
     @Test

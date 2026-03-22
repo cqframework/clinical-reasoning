@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_POPULATION_DESCRIPTION_URL;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.HashMap;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Element;
@@ -16,6 +15,8 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 
 /**
  * Package-private context class for building R4 MeasureReports.
@@ -24,15 +25,18 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 class R4MeasureReportBuilderContext {
     private final Measure measure;
     private final MeasureDef measureDef;
+    private final MeasureEvaluationState state;
     private final MeasureReport measureReport;
 
     private final HashMap<String, Reference> evaluatedResourceReferences = new HashMap<>();
     private final HashMap<String, Reference> supplementalDataReferences = new HashMap<>();
     private final Map<String, Resource> contained = new HashMap<>();
 
-    public R4MeasureReportBuilderContext(Measure measure, MeasureDef measureDef, MeasureReport measureReport) {
+    public R4MeasureReportBuilderContext(
+            Measure measure, MeasureDef measureDef, MeasureEvaluationState state, MeasureReport measureReport) {
         this.measure = measure;
         this.measureDef = measureDef;
+        this.state = state;
         this.measureReport = measureReport;
     }
 
@@ -59,6 +63,10 @@ class R4MeasureReportBuilderContext {
 
     public MeasureDef measureDef() {
         return this.measureDef;
+    }
+
+    public MeasureEvaluationState state() {
+        return this.state;
     }
 
     public Map<String, Reference> evaluatedResourceReferences() {
@@ -128,22 +136,22 @@ class R4MeasureReportBuilderContext {
     private void validateReference(String reference) {
         // Can't be null
         if (reference == null) {
-            throw new NullPointerException("validated reference is null");
+            throw new MeasureValidationException("validated reference is null");
         }
 
         // If it's a contained reference, must be just the Guid and nothing else
         if (reference.startsWith("#") && reference.contains("/")) {
-            throw new InvalidRequestException("Invalid contained reference: " + reference);
+            throw new MeasureValidationException("Invalid contained reference: " + reference);
         }
 
         // If it's a full reference, it must be type/id and that's it
         if (!reference.startsWith("#") && reference.split("/").length != 2) {
-            throw new InvalidRequestException("Invalid full reference: " + reference);
+            throw new MeasureValidationException("Invalid full reference: " + reference);
         }
     }
 
     public void addOperationOutcomes() {
-        var errorMsgs = this.measureDef.errors();
+        var errorMsgs = this.state.errors();
         for (var error : errorMsgs) {
             addContained(createOperationOutcome(error));
         }

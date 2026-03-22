@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import jakarta.annotation.Nonnull;
@@ -33,6 +32,8 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -152,7 +153,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 practitioner); // reporter is null in the single measure case
 
         if (resultsAsListOfList.size() != 1) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
                             .formatted(measure, subjectId));
         }
@@ -160,7 +161,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         final List<MeasureDefAndR4MeasureReport> measureDefAndR4MeasureReports = resultsAsListOfList.get(0);
 
         if (measureDefAndR4MeasureReports.size() != 1) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
                             .formatted(measure, subjectId));
         }
@@ -420,7 +421,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 reporter);
 
         if (listOfListOfMeasureEvalResults.size() != 1) {
-            throw new InternalErrorException("Expected only a single MeasureReport");
+            throw new MeasureEvaluationException("Expected only a single MeasureReport");
         }
 
         return listOfListOfMeasureEvalResults;
@@ -571,6 +572,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             List<List<MeasureDefAndR4MeasureReport>> results) {
 
         final List<MeasureDef> measureDefs = new ArrayList<>();
+        final List<MeasureEvaluationState> states = new ArrayList<>();
 
         // Create Parameters to hold the bundle(s)
         final Parameters parameters = new Parameters();
@@ -582,6 +584,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             Bundle bundle;
             for (MeasureDefAndR4MeasureReport measureDefAndR4MeasureReport : result) {
                 measureDefs.add(measureDefAndR4MeasureReport.measureDef());
+                states.add(measureDefAndR4MeasureReport.state());
 
                 // add report to bundle
                 final MeasureReport measureReport = measureDefAndR4MeasureReport.measureReport();
@@ -602,7 +605,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             }
         }
 
-        return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, parameters);
+        return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, states, parameters);
     }
 
     protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {

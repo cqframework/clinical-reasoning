@@ -1,8 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -49,11 +47,13 @@ public class MeasureEvaluationResultHandler {
      * @param measureDef            Measure defined objects
      * @param measureEvalType       the type of evaluation algorithm to apply to Criteria results
      */
-    public void processResults(
+    public MeasureEvaluationState processResults(
             FhirContext fhirContext,
             Map<String, EvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
             @Nonnull MeasureEvalType measureEvalType) {
+
+        var state = MeasureEvaluationState.create(measureDef);
 
         // Populate MeasureDef using MeasureEvaluator
         for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
@@ -71,25 +71,28 @@ public class MeasureEvaluationResultHandler {
                         subjectTypePart,
                         subjectIdPart,
                         evalResult,
-                        measureEvaluationOptions.getApplyScoringSetMembership());
+                        measureEvaluationOptions.getApplyScoringSetMembership(),
+                        state);
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
                 var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(subjectId, e.getMessage());
                 // Capture error for MeasureReportBuilder
-                measureDef.addError(error);
+                state.addError(error);
                 logger.error(error, e);
             }
         }
 
-        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef, state);
 
         // Score all groups and stratifiers using version-agnostic scorer
         // Populates scores in MeasureDef before builders run
         // Note: Scoring is always performed, independent of applyScoring flag
         // (applyScoring controls set membership filtering, not numeric scoring)
         logger.debug("Scoring MeasureDef using MeasureReportDefScorer for measure: {}", measureDef.url());
-        measureReportDefScorer.score(measureDef.url(), measureDef);
+        measureReportDefScorer.score(measureDef.url(), measureDef, state);
+
+        return state;
     }
 
     /**
@@ -134,7 +137,7 @@ public class MeasureEvaluationResultHandler {
         for (int subjectIndex = 0; subjectIndex < subjectIds.size(); subjectIndex++) {
             String subjectId = subjectIds.get(subjectIndex);
             if (subjectId == null) {
-                throw new InternalErrorException("SubjectId is required in order to calculate.");
+                throw new MeasureEvaluationException("SubjectId is required in order to calculate.");
             }
             boolean shouldLog = subjectIndex % SUBJECT_LOG_INTERVAL == 0 || subjectIndex == lastIndex;
             throttledDebug(shouldLog)
@@ -247,7 +250,7 @@ public class MeasureEvaluationResultHandler {
             String[] subjectIdParts = subjectId.split("/");
             return Pair.of(subjectIdParts[0], subjectIdParts[1]);
         } else {
-            throw new InvalidRequestException(
+            throw new MeasureScoringException(
                     "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)"
                             .formatted(subjectId));
         }
@@ -260,7 +263,7 @@ public class MeasureEvaluationResultHandler {
         var containsExceptions = evaluationResults.containsExceptionsFor(versionedIdentifierFromQuery);
 
         if (!containsResults && !containsExceptions) {
-            throw new InternalErrorException(
+            throw new MeasureEvaluationException(
                     "Evaluation result in versionless search not found for identifier with ID: %s"
                             .formatted(versionedIdentifierFromQuery.getId()));
         }

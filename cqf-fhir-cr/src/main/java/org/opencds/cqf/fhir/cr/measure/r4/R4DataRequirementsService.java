@@ -5,7 +5,6 @@ import static kotlinx.io.JvmCoreKt.asSource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +50,8 @@ import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvi
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.cr.measure.helper.SubjectContext;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -81,7 +82,7 @@ public class R4DataRequirementsService {
         Library library = getLibraryFromMeasure(measure);
 
         if (library == null) {
-            throw new ResourceNotFoundException(measure.getLibrary().get(0).asStringValue());
+            throw new MeasureResolutionException(measure.getLibrary().get(0).asStringValue());
         }
 
         Map<String, Object> parameters = new HashMap<>();
@@ -174,7 +175,7 @@ public class R4DataRequirementsService {
                         Libraries.getContent(library, "text/cql").get()),
                 libraryManager);
         if (!translator.getErrors().isEmpty()) {
-            throw new RuntimeException(translator.getErrors().get(0).getMessage());
+            throw new MeasureEvaluationException(translator.getErrors().get(0).getMessage());
         }
         return translator;
     }

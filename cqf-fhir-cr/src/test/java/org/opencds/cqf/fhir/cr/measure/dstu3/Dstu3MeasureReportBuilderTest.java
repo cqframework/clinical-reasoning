@@ -19,6 +19,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
@@ -52,12 +53,14 @@ class Dstu3MeasureReportBuilderTest {
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
         // Manually set a score on the first group
-        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(0.80);
+        // Set score on state (state refactoring moved score from GroupDef to GroupState)
+        var state = MeasureEvaluationState.create(measureDef);
+        state.group(measureDef.groups().get(0)).setScore(0.80);
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
-        var measureReport =
-                dstu3MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, List.of());
+        var measureReport = dstu3MeasureReportBuilder.build(
+                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: Group score should be copied to the report
         assertNotNull(measureReport);
@@ -81,8 +84,9 @@ class Dstu3MeasureReportBuilderTest {
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
-        var measureReport =
-                dstu3MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, List.of());
+        var state = MeasureEvaluationState.create(measureDef);
+        var measureReport = dstu3MeasureReportBuilder.build(
+                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: No score should be set in the report
         assertNotNull(measureReport);
@@ -102,8 +106,9 @@ class Dstu3MeasureReportBuilderTest {
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
-        var measureReport =
-                dstu3MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, List.of());
+        var state = MeasureEvaluationState.create(measureDef);
+        var measureReport = dstu3MeasureReportBuilder.build(
+                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: Negative score should not be copied (filtered by >= 0 check)
         assertNotNull(measureReport);
@@ -204,8 +209,9 @@ class Dstu3MeasureReportBuilderTest {
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
-        var measureReport =
-                dstu3MeasureReportBuilder.build(measure, measureDef, MeasureReportType.INDIVIDUAL, null, List.of());
+        var state = MeasureEvaluationState.create(measureDef);
+        var measureReport = dstu3MeasureReportBuilder.build(
+                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: DSTU3 MeasureReport should be created successfully
         // This verifies that the qualified/unqualified ID matching in MeasureDefScorer works correctly

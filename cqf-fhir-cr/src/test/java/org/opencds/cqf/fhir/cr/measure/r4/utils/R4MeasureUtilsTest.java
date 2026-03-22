@@ -14,7 +14,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.IM
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_EXTENSION;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM;
 
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.List;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -28,6 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 
 class R4MeasureUtilsTest {
 
@@ -123,8 +123,8 @@ class R4MeasureUtilsTest {
         String measureUrl = "http://example.com/Measure/test";
         String scoringCode = "invalid-code";
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class, () -> R4MeasureUtils.getMeasureScoring(measureUrl, scoringCode));
+        MeasureValidationException exception = assertThrows(
+                MeasureValidationException.class, () -> R4MeasureUtils.getMeasureScoring(measureUrl, scoringCode));
 
         assertTrue(exception.getMessage().contains("not a valid Measure Scoring Type"));
     }
@@ -173,8 +173,8 @@ class R4MeasureUtilsTest {
                                 .setSystem("http://terminology.hl7.org/CodeSystem/measure-scoring")
                                 .setCode("attestation")));
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class, () -> R4MeasureUtils.getGroupMeasureScoring(measure, group));
+        MeasureValidationException exception = assertThrows(
+                MeasureValidationException.class, () -> R4MeasureUtils.getGroupMeasureScoring(measure, group));
 
         assertTrue(exception.getMessage().contains("attestation"));
         assertTrue(exception.getMessage().contains("not a valid Measure Scoring Type"));
@@ -260,8 +260,8 @@ class R4MeasureUtilsTest {
         String measureUrl = "http://example.com/Measure/test";
         CodeDef codeDef = new CodeDef(MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM, "invalid-code");
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class,
+        MeasureValidationException exception = assertThrows(
+                MeasureValidationException.class,
                 () -> R4MeasureUtils.validateImprovementNotationCode(measureUrl, codeDef));
 
         assertTrue(exception.getMessage().contains("invalid System"));
@@ -272,8 +272,8 @@ class R4MeasureUtilsTest {
         String measureUrl = "http://example.com/Measure/test";
         CodeDef codeDef = new CodeDef("http://invalid-system.com", IMPROVEMENT_NOTATION_SYSTEM_INCREASE);
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class,
+        MeasureValidationException exception = assertThrows(
+                MeasureValidationException.class,
                 () -> R4MeasureUtils.validateImprovementNotationCode(measureUrl, codeDef));
 
         assertTrue(exception.getMessage().contains("invalid System"));
@@ -381,8 +381,8 @@ class R4MeasureUtilsTest {
     void testComputeScoring_BothNull_ThrowsException() {
         String measureUrl = "http://example.com/Measure/test";
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class, () -> R4MeasureUtils.computeScoring(measureUrl, null, null));
+        MeasureValidationException exception = assertThrows(
+                MeasureValidationException.class, () -> R4MeasureUtils.computeScoring(measureUrl, null, null));
 
         assertTrue(exception.getMessage().contains("MeasureScoring must be specified"));
         assertTrue(exception.getMessage().contains(measureUrl));
@@ -451,8 +451,8 @@ class R4MeasureUtilsTest {
         MeasureGroupComponent group = new MeasureGroupComponent();
         // No scoring extension on group
 
-        InvalidRequestException exception =
-                assertThrows(InvalidRequestException.class, () -> R4MeasureUtils.computeScoring(measure, group));
+        MeasureValidationException exception =
+                assertThrows(MeasureValidationException.class, () -> R4MeasureUtils.computeScoring(measure, group));
 
         assertTrue(exception.getMessage().contains("MeasureScoring must be specified"));
     }
@@ -575,8 +575,8 @@ class R4MeasureUtilsTest {
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
         population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("invalid-method"));
 
-        InvalidRequestException exception = assertThrows(
-                InvalidRequestException.class, () -> R4MeasureUtils.getAggregateMethod(measureUrl, population));
+        MeasureValidationException exception = assertThrows(
+                MeasureValidationException.class, () -> R4MeasureUtils.getAggregateMethod(measureUrl, population));
 
         assertTrue(exception.getMessage().contains("Aggregation method: invalid-method is not a valid value"));
         assertTrue(exception.getMessage().contains(measureUrl));

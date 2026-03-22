@@ -20,7 +20,7 @@ See the [Java Guidance](#java-guidance) section for more detailed information.
 
 ### Getting Started
 
-Java 11+ is required to build and run this project. You can build the project with `mvnw package`.
+Java 17+ is required to build and run this project. You can build the project with `mvnw package`.
 
 ### Licensing
 
@@ -70,6 +70,7 @@ The specific usage of each module is documented in the module-specific section o
 
 FHIR defines a dedicated [Clinical Reasoning module](https://build.fhir.org/clinicalreasoning-module.html) and that are numerous derivative "Implementation Guides" (IGs) that specify new uses based upon the core module, such as the [CQF Measures IG](https://build.fhir.org/ig/HL7/cqf-measures/) that describes how to use Quality Measures within the FHIR ecosystem.
 
+
 #### Systems of Systems
 
 Systems of Systems are collaborating systems that exhibit operational and managerial independence.
@@ -79,7 +80,18 @@ Systems of Systems are collaborating systems that exhibit operational and manage
 
 Within the healthcare space an example are the various Electronic Medical Record (EMR) systems, Healthcare Information Exchanges (HIE), and Public Health Authorities (PHA) that interoperate for various purposes such as public health reporting, exchanging patient data, and so on.
 
-![System of Systems](assets/diagrams/ref.fhir.clinical-reasoning.slides.sos.drawio.svg)
+```mermaid
+flowchart LR
+    A["EMR A"]
+    B["EMR B"]
+    C["EMR C"]
+    A <--> HIE["HIE"]
+    B <--> HIE
+    C <--> HIE
+    HIE <--> N["National PHA"]
+    HIE <--> R["Regional PHA"]
+    HIE <--> L["Local PHA"]
+```
 
 A common approach to scaling an SoS is to build a "platform". An SoS platform:
 
@@ -146,20 +158,172 @@ This project is designed to provide reusable Clinical Reasoning modules for any 
 
 ### Hexagonal Architecture
 
-Hexagonal architecture is an approach that abstracts the repository layer so that logic modules can be reused. This is a form of IoC, flipping the top-down dependencies that are common in layered architecture.
+This project follows [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/) (also called Ports & Adapters). The core idea: business logic lives at the center with no infrastructure dependencies. Adapters at the edges translate between the domain and the outside world. Dependencies always point inward.
 
-* Dependencies point outside-in instead of top-down
-* Common data model at the core (HAPI FHIR)
-* Repository abstraction allows multiple backends
-* Common in microservice architectures - Mini SoS!
+- **Domain Core** (center): Version-agnostic business logic. Operates on domain representations (e.g., `MeasureDef`, `GroupDef`). Has no knowledge of HTTP, FHIR versions, or data sources.
+- **FHIR Translation Layer** (middle ring): Translates between version-specific FHIR types and the domain model. On the inbound side, this normalizes FHIR resources into domain representations. On the outbound side, it denormalizes domain results back to FHIR resources. The **Repository API** is the driven-side FHIR translation layer for all data access.
+- **Transport / Infrastructure** (outer ring): Adapters that connect to the outside world. Driving adapters (REST, CLI, GraphQL) accept requests. Driven adapters (JPA, REST clients, filesystem) fulfill data access through the Repository API.
 
-![Hexagonal Architecture](assets/diagrams/ref.fhir.clinical-reasoning.slides.hexagonal.drawio.svg)
+```mermaid
+graph LR
+    REST["REST"] --> TL
+    CLI["CLI"] --> TL
+    GraphQL["GraphQL"] --> TL
 
-The modules in this project can be used on any platform that is able to implement the FHIR Repository API.
+    TL["Transport Layer"] --> INT["Interactors"]
+    INT --> ENT["Entities<br/>(FHIR Models)"]
+    ENT --> REPO["Repository API"]
+    REPO --> DS["Data Sources"]
+
+    DS --> JPA[("JPA")]
+    DS --> RC["REST Client"]
+    DS --> FS["Filesystem"]
+
+    style TL fill:#e1d5e7,stroke:#9673a6
+    style DS fill:#e1d5e7,stroke:#9673a6
+    style INT fill:#dae8fc,stroke:#6c8ebf
+    style REPO fill:#dae8fc,stroke:#6c8ebf
+    style ENT fill:#f5f5f5,stroke:#666
+```
+
+Notice how the structure of the architecture mirrors the structure of the systems of systems that FHIR is designed to support. The transport layer corresponds to the various platforms and interfaces that interact with the system. The domain core corresponds to the business logic that operates on clinical concepts. The repository API abstracts away the data sources, which could be any of the constituent systems in an SoS. This design allows the clinical reasoning logic to be reusable across different platforms and data sources, as long as they can implement the Repository API. It's also an example of recursive architecture, where the same principles of modularity and separation of concerns apply at different levels of the system. This allows developers (and agents!) to reuse the same mental model and design patterns at multiple levels in the system. 
 
 ### FHIR Repository
 
-The FHIR Repository API is essentially a Java projection of the FHIR REST API. This allows the composition of FHIR services (and in particular clinical reasoning services) because each layer looks the same to both the layer above and the layer below, much like how the Internet is a set of inter-connected services, some of which provide routing, proxying, caching, etc. It also gives a relatively small API surface that needs to be implemented in order to support clinical reasoning on a given platform. The API is specified [here](TODO).
+The FHIR Repository API (`IRepository`) is a Java projection of the FHIR REST API. It is the always-present driven adapter for all data access in this project. Every operation implementation accesses clinical data, terminology, and content exclusively through this interface.
+
+This design allows clinical reasoning operations to run on any platform that implements `IRepository`:
+
+- **HAPI JPA**: Connecting to a database via the HAPI persistence layer
+- **Android**: Connecting to SQLite via the Google FHIR SDK
+- **REST client**: Connecting to a remote FHIR server
+- **Filesystem**: Reading FHIR resources from test fixtures or bundles
+- **In-memory**: Using bundled data for standalone evaluation
+
+Because `IRepository` mirrors the FHIR REST API, repositories compose naturally. A `ProxyRepository` routes content, terminology, and data requests to different backing repositories. A `FederatedRepository` overlays additional data on top of a base repository. This composition happens in the FHIR translation layer, not in the domain core.
+
+### FHIR Operation Implementation Layers
+
+When implementing a FHIR operation (e.g., `$evaluate-measure`, `$apply`), the code follows a consistent pipeline through the hexagonal layers. Each operation implementation is an isolated **canister** of business logic that accepts FHIR at the top, operates on domain representations internally, and produces FHIR at the bottom. The Repository API provides FHIR translation on the data-access side.
+
+```mermaid
+sequenceDiagram
+    actor Client
+    box FHIR Gateway<br/>Auth, Validation, Routing
+    participant Transport
+    end
+    box Operation Implementation
+    participant OpProvider as Operation Provider<br/>Converts to FHIR types
+    participant FHIR as Domain Translation<br/>Converts to Domain types
+    end
+    box rgb(218,232,252) Domain Service
+    participant Domain as Measure Evaluation<br/>
+    end
+    box Data Store<br/>Search, CRUD, Transactions
+    participant Repo as Repository API
+    end
+    
+    Client->>Transport: HTTP $evaluate-measure
+    activate Transport
+    Transport->>OpProvider: parameters
+    Note over OpProvider: Parse REST params<br/>to typed values
+    
+    OpProvider->>FHIR: EvaluateMeasureRequest
+    activate FHIR
+    FHIR->>Repo: Resolve endpoints to repositories
+    FHIR->>Repo: Read Measure resource
+    Note over FHIR: Normalize:<br/>Measure → MeasureDef
+    FHIR->>Domain: MeasureDef + parameters
+    deactivate FHIR
+    
+    activate Domain
+    Domain->>Repo: CQL Engine evaluates<br/>(via Repository)
+    Note over Domain: Population membership<br/>Stratification<br/>Scoring
+    Domain-->>FHIR: Evaluated MeasureDef
+    deactivate Domain
+    
+    Note over FHIR: Denormalize:<br/>MeasureDef → MeasureReport
+    FHIR-->>OpProvider: MeasureReport
+    
+    Note over OpProvider: Translate domain<br/>exceptions → HTTP status
+    OpProvider-->Transport: MeasureReport or OperationOutcome
+    Transport-->>Client: HTTP Response
+    deactivate Transport
+```
+
+Note the recursive nature of the architecture in the above sequence diagram. The transport layer accepts FHIR, translates it to domain types, and then the domain logic operates on those types. When the domain logic needs to access data, it goes through the Repository API, which is a FHIR translation layer for data access. The results are then denormalized back to FHIR and returned to the client. This pattern applies to all operations implemented in this project, providing a consistent structure for development and maintenance.
+In the cases where a domain specific representation is not needed, the operation simply operates on FHIR resources.
+
+#### Layer Responsibilities
+
+Each layer has one job at one level of abstraction. If you need "and" to describe a layer's responsibility, it should be two layers.
+
+**1. Transport Adapter** (`cqf-fhir-cr-hapi` or `cqf-fhir-cr-cli`)
+
+- Accepts platform-specific input (HTTP `@OperationParam`, CLI arguments)
+- Converts to typed domain request objects
+- Delegates to the FHIR translation / operation facade
+- Translates domain exceptions to platform-appropriate responses (HTTP status codes, CLI exit codes)
+- This is the **only** layer that imports `ca.uhn.fhir.rest.server.exceptions.*`
+
+**2. FHIR Translation - Inbound (Normalization)**
+
+- Resolves the target resource (e.g., find the Measure by ID/URL/identifier via Repository)
+- Resolves environment (compose endpoint parameters into a single Repository via `Repositories.proxy()`)
+- Normalizes version-specific FHIR resources into version-agnostic domain representations (e.g., `R4MeasureDefBuilder` converts an R4 `Measure` to a `MeasureDef`)
+- This layer contains version-specific code (one implementation per FHIR version)
+
+**3. Domain Core (Operation Facade + Evaluator)**
+
+- Orchestrates the evaluation pipeline
+- Operates exclusively on domain representations (`MeasureDef`, `GroupDef`, `PopulationDef`, etc.)
+- May use extended domain representations for internal concerns (e.g., CQL evaluation results, stratification state)
+- Contains no version-specific FHIR imports
+- Throws domain exceptions, never HTTP exceptions
+- Lives in `common/` packages
+
+**4. FHIR Translation - Outbound (Denormalization)**
+
+- Converts evaluated domain representations back to version-specific FHIR resources (e.g., `R4MeasureReportBuilder` converts `MeasureDef` to an R4 `MeasureReport`)
+- Applies response decorations (reporter, extensions, bundling) that are FHIR-version-specific
+- This layer contains version-specific code (one implementation per FHIR version)
+
+**5. Repository API (Data Access)**
+
+- All data access goes through `IRepository`, which is a FHIR-native interface
+- The domain core accesses data via Repository without knowing whether the backend is JPA, REST, filesystem, or in-memory
+- Repository composition (proxy, federation) is configured in the inbound FHIR translation layer and injected into the domain core
+
+#### Example: Measure `$evaluate-measure`
+
+The `$evaluate-measure` operation demonstrates how these layers apply concretely:
+
+| Layer | Class(es) | Input | Output |
+|-------|-----------|-------|--------|
+| Transport Adapter | `MeasureOperationsProvider` | HTTP `@OperationParam` strings | `MeasureReport` (FHIR) |
+| Normalization | `R4MeasureDefBuilder` | R4 `Measure` resource | `MeasureDef` (domain) |
+| Domain Core | `MeasureEvaluator`, `MeasureMultiSubjectEvaluator`, `MeasureReportDefScorer` | `MeasureDef` + CQL results | `MeasureDef` (evaluated) |
+| Denormalization | `R4MeasureReportBuilder` | `MeasureDef` (evaluated) | R4 `MeasureReport` |
+| Data Access | `IRepository` (via `ProxyRepository`, `FederatedRepository`) | FHIR search/read calls | FHIR resources |
+
+#### Error Architecture
+
+Each layer should have layer-appropriate error abstractions:
+
+- **Domain core** throws domain exceptions (e.g., `MeasureValidationException`, `EvaluationException`). These carry structured information about what failed, not how to report it.
+- **FHIR translation** may throw domain exceptions for resolution failures (e.g., `MeasureResolutionException` if the Measure is not found).
+- **Transport adapter** catches domain exceptions and translates them to platform-appropriate errors (e.g., `MeasureResolutionException` becomes HTTP 404, `MeasureValidationException` becomes HTTP 400).
+- **Never** throw transport-layer exceptions (e.g., `InvalidRequestException`, `InternalErrorException`) from domain core or FHIR translation code. This couples business logic to a specific transport.
+
+#### Guiding Principles for Refactoring
+
+When modifying or creating operation implementations, work toward this layering rather than replicating existing patterns that may have diverged from it:
+
+- **One class, one layer.** A class that resolves endpoints AND evaluates measures AND formats responses is doing three jobs across three layers. Split it.
+- **Version-agnostic code stays version-agnostic.** If a class in `common/` imports from `r4/` or `dstu3/`, either the import belongs in `common/` (move it) or the class belongs in a version-specific package (move the class).
+- **Build domain representations once.** If the same FHIR resource is being parsed into a domain object multiple times in a single request, refactor to build it once and thread it through the pipeline.
+- **Request objects over parameter lists.** If a method takes more than 5-6 parameters, introduce a value object to carry them. This makes the pipeline stages composable and testable.
+- **Symmetric version support.** DSTU3 and R4 implementations should follow the same structural pattern, even if they differ in feature scope. The pipeline stages should happen at the same layer in both versions.
 
 ## Java Guidance
 
@@ -238,6 +402,8 @@ Most of the components and operations in this repository are built around an int
         * `ActivityDefinitionEngine`
 
 ### Design Conventions
+
+When making design trade-offs, bias towards explicit over implicit (no magic, no annotations), data transformations over stateful logic (data oriented), failing loudly over silent errors, composition over inheritance, first principles over pragmaticism. When uncertain about approaches, choose the one that's easier to delete (build it yourself rather than add a dependency). 
 
 ### Utilities
 

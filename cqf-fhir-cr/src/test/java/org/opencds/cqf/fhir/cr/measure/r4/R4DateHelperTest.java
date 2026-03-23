@@ -21,6 +21,7 @@ import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Precision;
+import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 class R4DateHelperTest {
@@ -105,8 +106,8 @@ class R4DateHelperTest {
     @ParameterizedTest(name = "{index} => testCase={0}")
     @MethodSource("zonedDateTimesParams")
     void zonedDateTimes(ZonedDateTimesParams testCase) {
-        final Interval interval = new R4DateHelper()
-                .buildMeasurementPeriodInterval(testCase.theZonedDateTime(), testCase.theZonedDateTime());
+        final Interval interval =
+                DateHelper.buildMeasurementPeriodInterval(testCase.theZonedDateTime(), testCase.theZonedDateTime());
         final Object start = interval.getStart();
         final Object end = interval.getEnd();
         assertInstanceOf(DateTime.class, start);

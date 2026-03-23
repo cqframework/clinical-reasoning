@@ -108,8 +108,8 @@ public class R4CareGapsBundleBuilder {
                     measureId,
                     null,
                     null,
-                    r4CareGapsParameters.getPeriodStart(),
-                    r4CareGapsParameters.getPeriodEnd(),
+                    r4CareGapsParameters.periodStart(),
+                    r4CareGapsParameters.periodEnd(),
                     MeasureEvalType.SUBJECT.toCode(),
                     subject,
                     null,
@@ -133,7 +133,7 @@ public class R4CareGapsBundleBuilder {
 
             // finalize patient Bundle results
             var bundle = makePatientBundle(
-                    entries, r4CareGapsParameters.getStatus(), patient, r4CareGapsParameters.isNotDocument());
+                    entries, r4CareGapsParameters.status(), patient, r4CareGapsParameters.notDocument());
 
             // add parameter with results
             if (bundle != null && bundle.hasEntry()) {

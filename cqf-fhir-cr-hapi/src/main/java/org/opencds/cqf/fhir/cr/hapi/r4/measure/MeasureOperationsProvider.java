@@ -21,7 +21,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureException;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
@@ -92,7 +91,7 @@ public class MeasureOperationsProvider {
             return r4MeasureServiceFactory
                     .create(requestDetails)
                     .evaluate(
-                            Eithers.forMiddle3(id),
+                            id,
                             stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
                             stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
                             reportType,

@@ -2,66 +2,26 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 
 /**
- * Parameters class to manage input parameters for care-gaps service
+ * Parameters for the care-gaps operation.
+ *
+ * @param periodStart measurement period starting interval
+ * @param periodEnd measurement period ending interval
+ * @param subject subject reference (Patient/{id}, Group/{id}, Practitioner/{id}, or null for all)
+ * @param status care-gap statuses to include in results
+ * @param measureId measures to resolve by FHIR resource id
+ * @param measureIdentifier measures to resolve by identifier value or system|value
+ * @param measureUrl measures to resolve by canonical URL
+ * @param notDocument if true, return summarized bundle with only DetectedIssue instead of document bundle
  */
-public class R4CareGapsParameters {
-    private ZonedDateTime periodStart;
-    private ZonedDateTime periodEnd;
-    private String subject;
-    private List<String> status;
-    private List<Either3<IdType, String, CanonicalType>> measure;
-    private boolean notDocument;
-
-    public void setPeriodStart(ZonedDateTime periodStart) {
-        this.periodStart = periodStart;
-    }
-
-    public ZonedDateTime getPeriodStart() {
-        return periodStart;
-    }
-
-    public void setPeriodEnd(ZonedDateTime periodEnd) {
-        this.periodEnd = periodEnd;
-    }
-
-    public ZonedDateTime getPeriodEnd() {
-        return periodEnd;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setNotDocument(boolean notDocument) {
-        this.notDocument = notDocument;
-    }
-
-    public boolean isNotDocument() {
-        return notDocument;
-    }
-
-    public void setMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
-        this.measure = measure;
-    }
-
-    public List<Either3<IdType, String, CanonicalType>> getMeasure() {
-        return measure;
-    }
-
-    public void setStatus(List<String> status) {
-        this.status = status;
-    }
-
-    public List<String> getStatus() {
-        return status;
-    }
-}
+public record R4CareGapsParameters(
+        ZonedDateTime periodStart,
+        ZonedDateTime periodEnd,
+        String subject,
+        List<String> status,
+        List<IdType> measureId,
+        List<String> measureIdentifier,
+        List<String> measureUrl,
+        boolean notDocument) {}

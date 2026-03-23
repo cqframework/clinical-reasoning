@@ -315,13 +315,6 @@ public class R4MeasureServiceUtils {
         }
     }
 
-    public static List<Measure> foldMeasures(
-            List<Either3<CanonicalType, IdType, Measure>> measures, IRepository repository) {
-        return measures.stream()
-                .map(measure -> foldMeasure(measure, repository))
-                .toList();
-    }
-
     public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
         return measure.fold(
                 measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),

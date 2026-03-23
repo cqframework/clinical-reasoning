@@ -18,7 +18,6 @@ import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
@@ -41,7 +40,6 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
@@ -92,7 +90,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @Override
     public MeasureReport evaluate(
-            Either3<CanonicalType, IdType, Measure> measure,
+            IdType measureId,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -107,7 +105,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             String practitioner) {
 
         return evaluateSingleMeasureCaptureDef(
-                        measure,
+                        measureId,
                         periodStart,
                         periodEnd,
                         reportType,
@@ -125,7 +123,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @VisibleForTesting
     MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
-            Either3<CanonicalType, IdType, Measure> measure,
+            IdType measureId,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -138,6 +136,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             Parameters parameters,
             String productLine,
             String practitioner) {
+
+        // Resolve the Measure from the IdType before entering the shared pipeline
+        final Measure measure = repository.read(Measure.class, measureId);
 
         final List<List<MeasureDefAndR4MeasureReport>> resultsAsListOfList = evaluateToListOfList(
                 false,
@@ -161,7 +162,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         if (resultsAsListOfList.size() != 1) {
             throw new MeasureEvaluationException(
                     "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
-                            .formatted(measure, subjectId));
+                            .formatted(measureId, subjectId));
         }
 
         final List<MeasureDefAndR4MeasureReport> measureDefAndR4MeasureReports = resultsAsListOfList.get(0);
@@ -169,7 +170,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         if (measureDefAndR4MeasureReports.size() != 1) {
             throw new MeasureEvaluationException(
                     "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
-                            .formatted(measure, subjectId));
+                            .formatted(measureId, subjectId));
         }
 
         return measureDefAndR4MeasureReports.get(0);
@@ -253,7 +254,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      */
     private List<List<MeasureDefAndR4MeasureReport>> evaluateToListOfList(
             boolean isMultiMeasureOperation,
-            @Nullable Either3<CanonicalType, IdType, Measure> measure,
+            @Nullable Measure measure,
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
@@ -415,14 +416,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     // ── Measure resolution helpers (version-specific) ──
 
     private List<Measure> getMeasures(
-            @Nullable Either3<CanonicalType, IdType, Measure> measureEither,
+            @Nullable Measure measure,
             List<IdType> measureId,
             List<String> measureUrl,
             List<String> measureIdentifier,
             R4MeasureServiceUtils serviceUtils) {
-        return Optional.ofNullable(measureEither)
-                .map(nonNullMeasureEither ->
-                        List.of(R4MeasureServiceUtils.foldMeasure(nonNullMeasureEither, this.repository)))
+        return Optional.ofNullable(measure)
+                .map(List::of)
                 .orElse(serviceUtils.getMeasures(measureId, measureIdentifier, measureUrl));
     }
 

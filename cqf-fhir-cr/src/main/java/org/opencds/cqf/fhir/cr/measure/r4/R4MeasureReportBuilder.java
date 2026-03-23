@@ -38,7 +38,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -55,6 +54,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ConceptDefs;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 import org.slf4j.Logger;
@@ -137,7 +137,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<MeasureRepor
     private void buildGroup(
             R4MeasureReportBuilderContext bc, MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
 
-        reportGroup.setCode(conceptDefToConcept(groupDef.code()));
+        reportGroup.setCode(R4ConceptDefs.toConcept(groupDef.code()));
         reportGroup.setId(groupDef.id());
         // Measure Level Extension
         addDescriptionExtension(reportGroup, groupDef.description());
@@ -196,7 +196,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<MeasureRepor
             PopulationDef populationDef,
             GroupDef groupDef) {
 
-        reportPopulation.setCode(conceptDefToConcept(populationDef.code()));
+        reportPopulation.setCode(R4ConceptDefs.toConcept(populationDef.code()));
         reportPopulation.setId(populationDef.id());
         reportPopulation.setCount(bc.state().population(populationDef).getCount());
 
@@ -296,7 +296,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<MeasureRepor
             addEvaluatedResourceReferences(bc, sde.id(), e.getValue().evaluatedResources());
         }
 
-        CodeableConcept concept = conceptDefToConcept(sde.code());
+        CodeableConcept concept = R4ConceptDefs.toConcept(sde.code());
 
         Map<StratumValueWrapper, Long> accumulated = sdeResults.values().stream()
                 .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
@@ -331,26 +331,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<MeasureRepor
         for (var sde : bc.measureDef().sdes()) {
             buildSDE(bc, sde);
         }
-    }
-
-    CodeableConcept conceptDefToConcept(ConceptDef c) {
-        if (c == null) return null;
-        var cc = new CodeableConcept().setText(c.text());
-        for (var cd : c.codes()) {
-            cc.addCoding(codeDefToCoding(cd));
-        }
-
-        return cc;
-    }
-
-    private Coding codeDefToCoding(CodeDef c) {
-        var cd = new Coding();
-        cd.setSystem(c.system());
-        cd.setCode(c.code());
-        cd.setVersion(c.version());
-        cd.setDisplay(c.display());
-
-        return cd;
     }
 
     private MeasureReport createMeasureReport(
@@ -662,6 +642,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<MeasureRepor
 
     private CodeableConcept improvementNotationToConcept(CodeDef impNot) {
         if (impNot == null) return null;
-        return new CodeableConcept().addCoding(codeDefToCoding(impNot));
+        return new CodeableConcept().addCoding(R4ConceptDefs.toCoding(impNot));
     }
 }

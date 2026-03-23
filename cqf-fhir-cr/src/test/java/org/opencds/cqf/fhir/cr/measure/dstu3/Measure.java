@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.cr.measure.dstu3.selected.def.SelectedMeasureDef;
@@ -171,7 +172,7 @@ public class Measure {
                 var service = new MeasureEvaluationService(
                         evaluationOptions,
                         FhirContext.forDstu3Cached(),
-                        new Dstu3PopulationBasisValidator(),
+                        PopulationBasisValidator.NOOP,
                         new MeasurePeriodValidator());
 
                 var measure = repository.read(org.hl7.fhir.dstu3.model.Measure.class, new IdType("Measure", measureId));

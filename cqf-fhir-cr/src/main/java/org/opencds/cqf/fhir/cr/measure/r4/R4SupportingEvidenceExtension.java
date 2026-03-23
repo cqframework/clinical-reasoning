@@ -10,7 +10,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -20,10 +19,9 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ConceptDefs;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
 /**
@@ -94,7 +92,7 @@ public class R4SupportingEvidenceExtension {
         }
 
         // ---- code slice (optional) ----
-        CodeableConcept codeConcept = conceptDefToConcept(def.getCode());
+        CodeableConcept codeConcept = R4ConceptDefs.toConcept(def.getCode());
         if (codeConcept != null && codeConcept.hasCoding()) {
             seExt.addExtension(new Extension("code", codeConcept));
         }
@@ -389,26 +387,5 @@ public class R4SupportingEvidenceExtension {
             return "(no-id)";
         }
         return id.toUnqualifiedVersionless().getValue();
-    }
-
-    @Nullable
-    private static CodeableConcept conceptDefToConcept(ConceptDef c) {
-        if (c == null) {
-            return null;
-        }
-        var cc = new CodeableConcept().setText(c.text());
-        for (var cd : c.codes()) {
-            cc.addCoding(codeDefToCoding(cd));
-        }
-        return cc;
-    }
-
-    private static Coding codeDefToCoding(CodeDef c) {
-        var cd = new Coding();
-        cd.setSystem(c.system());
-        cd.setCode(c.code());
-        cd.setVersion(c.version());
-        cd.setDisplay(c.display());
-        return cd;
     }
 }

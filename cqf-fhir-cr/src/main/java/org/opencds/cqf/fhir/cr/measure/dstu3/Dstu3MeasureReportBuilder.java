@@ -33,8 +33,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
-import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -238,7 +236,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<MeasureRe
             PopulationDef populationDef,
             Set<String> popSubjectIds) {
         if (populationDef.code() != null) {
-            sgpc.setCode(conceptDefToConcept(populationDef.code()));
+            sgpc.setCode(Dstu3ConceptDefs.toConcept(populationDef.code()));
         }
         sgpc.setId(populationDef.id());
 
@@ -276,7 +274,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<MeasureRe
         var popState = state.population(populationDef);
 
         if (populationDef.code() != null) {
-            reportPopulation.setCode(conceptDefToConcept(populationDef.code()));
+            reportPopulation.setCode(Dstu3ConceptDefs.toConcept(populationDef.code()));
         }
         reportPopulation.setId(populationDef.id());
 
@@ -515,26 +513,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<MeasureRe
             return url + "|" + measureDef.version();
         }
         return url;
-    }
-
-    private CodeableConcept conceptDefToConcept(ConceptDef c) {
-        if (c == null) {
-            return null;
-        }
-        var cc = new CodeableConcept().setText(c.text());
-        for (var cd : c.codes()) {
-            cc.addCoding(codeDefToCoding(cd));
-        }
-        return cc;
-    }
-
-    private Coding codeDefToCoding(CodeDef c) {
-        var cd = new Coding();
-        cd.setSystem(c.system());
-        cd.setCode(c.code());
-        cd.setVersion(c.version());
-        cd.setDisplay(c.display());
-        return cd;
     }
 
     protected Extension createStringExtension(String url, String value) {

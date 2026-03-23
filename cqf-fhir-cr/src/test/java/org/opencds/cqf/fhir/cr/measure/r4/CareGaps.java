@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DetectedIssue;
@@ -137,22 +136,22 @@ public class CareGaps {
             return this;
         }
 
-        private R4CareGapsService buildCareGapsService() {
-            return new R4CareGapsService(
+        private R4CareGapsProcessor buildCareGapsProcessor() {
+            return new R4CareGapsProcessor(
                     careGapsProperties, repository, evaluationOptions, serverBase, measurePeriodEvaluator);
         }
 
         public When when() {
-            return new When(buildCareGapsService());
+            return new When(buildCareGapsProcessor());
         }
     }
 
     public static class When {
 
-        private final R4CareGapsService service;
+        private final R4CareGapsProcessor processor;
 
-        When(R4CareGapsService service) {
-            this.service = service;
+        When(R4CareGapsProcessor processor) {
+            this.processor = processor;
         }
 
         private ZonedDateTime periodStart;
@@ -161,7 +160,7 @@ public class CareGaps {
         private List<String> status = new ArrayList<>();
         private List<IdType> measureId = new ArrayList<>();
         private List<String> measureIdentifier = new ArrayList<>();
-        private List<CanonicalType> measureUrl = new ArrayList<>();
+        private List<String> measureUrl = new ArrayList<>();
         private Supplier<Parameters> operation;
 
         private boolean notDocument;
@@ -192,7 +191,7 @@ public class CareGaps {
         }
 
         public CareGaps.When measureUrl(String measureUrl) {
-            this.measureUrl.add(new CanonicalType(measureUrl));
+            this.measureUrl.add(measureUrl);
             return this;
         }
 
@@ -207,7 +206,7 @@ public class CareGaps {
         }
 
         public CareGaps.When getCareGapsReport() {
-            this.operation = () -> service.getCareGapsReport(
+            this.operation = () -> processor.getCareGapsReport(
                     periodStart, periodEnd, subject, status, measureId, measureIdentifier, measureUrl, notDocument);
             return this;
         }

@@ -95,7 +95,11 @@ public class CareGapsOperationProvider {
                                 ? null
                                 : measureId.stream().map(IdType::new).toList(),
                         measureIdentifier,
-                        measureUrl,
+                        measureUrl == null
+                                ? null
+                                : measureUrl.stream()
+                                        .map(CanonicalType::getValueAsString)
+                                        .toList(),
                         Optional.ofNullable(nonDocument)
                                 .map(BooleanType::getValue)
                                 .orElse(false));

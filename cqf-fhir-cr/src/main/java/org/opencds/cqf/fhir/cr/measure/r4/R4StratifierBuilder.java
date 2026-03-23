@@ -26,6 +26,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
+import org.opencds.cqf.fhir.cr.measure.r4.utils.R4ConceptDefs;
 
 /**
  * Convenience class with functionality split out from {@link R4MeasureReportBuilder} to
@@ -222,7 +223,7 @@ class R4StratifierBuilder {
             PopulationDef populationDef,
             GroupDef groupDef) {
 
-        sgpc.setCode(conceptDefToConcept(populationDef.code()));
+        sgpc.setCode(R4ConceptDefs.toConcept(populationDef.code()));
         sgpc.setId(populationDef.id());
 
         if (populationDef.description() != null && !populationDef.description().isEmpty()) {
@@ -240,22 +241,6 @@ class R4StratifierBuilder {
         } else {
             buildResourceBasisStratumPopulation(bc, sgpc, stratumPopulationDef.resourceIdsForSubjectList());
         }
-    }
-
-    /**
-     * Convert a {@link ConceptDef} to a {@link CodeableConcept}, returning null for null input.
-     */
-    private static CodeableConcept conceptDefToConcept(ConceptDef c) {
-        if (c == null) return null;
-        var cc = new CodeableConcept().setText(c.text());
-        for (var cd : c.codes()) {
-            cc.addCoding(new Coding()
-                    .setSystem(cd.system())
-                    .setCode(cd.code())
-                    .setVersion(cd.version())
-                    .setDisplay(cd.display()));
-        }
-        return cc;
     }
 
     // Simplified by Claude Sonnet 4.5 to use pre-calculated counts from StratumPopulationDef

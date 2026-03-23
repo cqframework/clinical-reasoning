@@ -8,19 +8,19 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
@@ -31,14 +31,14 @@ import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Care Gaps Processor houses construction of result body with input of different Result Bodies, such as Document Bundle vs non-document bundle
+ * Care Gaps Processor: validates parameters, resolves measures and subjects,
+ * and delegates bundle construction to {@link R4CareGapsBundleBuilder}.
  */
-public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
+public class R4CareGapsProcessor {
 
     private static final Logger ourLog = LoggerFactory.getLogger(R4CareGapsProcessor.class);
     private final IRepository repository;
@@ -68,74 +68,83 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 
-    @Override
+    /**
+     * Calculate measures describing gaps in care.
+     *
+     * @param periodStart measurement period starting interval
+     * @param periodEnd measurement period ending interval
+     * @param subject subject reference (Patient/{id}, Group/{id}, Practitioner/{id}, or null for all)
+     * @param status care-gap statuses to include in results
+     * @param measureId measures to resolve by FHIR resource id
+     * @param measureIdentifier measures to resolve by identifier value or system|value
+     * @param measureUrl measures to resolve by canonical URL
+     * @param notDocument if true, return summarized bundle with only DetectedIssue instead of document bundle
+     * @return Parameters including zero to many document bundles with Care Gap Measure Reports
+     */
+    @SuppressWarnings("squid:S107")
     public Parameters getCareGapsReport(
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
-            String subject,
+            @Nullable String subject,
             List<String> status,
-            List<Either3<IdType, String, CanonicalType>> measure,
+            List<IdType> measureId,
+            List<String> measureIdentifier,
+            List<String> measureUrl,
             boolean notDocument) {
 
-        // set Parameters
-        R4CareGapsParameters r4CareGapsParams =
-                setCareGapParameters(periodStart, periodEnd, subject, status, measure, notDocument);
+        // Normalize nulls to empty lists
+        List<IdType> safeIds = sanitizeMeasureIds(measureId);
+        List<String> safeIdentifiers = nullToEmpty(measureIdentifier);
+        List<String> safeUrls = nullToEmpty(measureUrl);
+        validateMeasureParameters(safeIds, safeIdentifiers, safeUrls);
 
-        // validate and set required configuration resources for care-gaps
+        var params = new R4CareGapsParameters(
+                periodStart, periodEnd, subject, status, safeIds, safeIdentifiers, safeUrls, notDocument);
+
+        // Validate and set required configuration resources
         checkConfigurationReferences();
 
-        // validate required parameter values
-        checkValidStatusCode(measure, r4CareGapsParams.getStatus());
-        List<Measure> measures = resolveMeasure(r4CareGapsParams.getMeasure());
+        // Validate required parameter values
+        checkValidStatusCode(params.status());
+        List<Measure> measures = r4MeasureServiceUtils.getMeasures(safeIds, safeIdentifiers, safeUrls);
         measureCompatibilityCheck(measures);
 
-        // Subject Population for Report
-        List<String> subjects = getSubjects(r4CareGapsParams.getSubject());
+        // Subject population
+        List<String> subjects = getSubjects(params.subject());
 
-        // Build Results
+        // Build results
         Parameters result = initializeResult();
-
-        // Build Patient Bundles
-
         List<Parameters.ParametersParameterComponent> components = r4CareGapsBundleBuilder.makePatientBundles(
-                subjects,
-                r4CareGapsParams,
-                measures.stream().map(Resource::getIdElement).collect(Collectors.toList()));
+                subjects, params, measures.stream().map(Resource::getIdElement).collect(Collectors.toList()));
 
-        // Return Results with Bundles
         return result.setParameter(components);
     }
 
-    @Override
-    public R4CareGapsParameters setCareGapParameters(
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String subject,
-            List<String> status,
-            List<Either3<IdType, String, CanonicalType>> measure,
-            boolean notDocument) {
-        R4CareGapsParameters r4CareGapsParams = new R4CareGapsParameters();
-        r4CareGapsParams.setMeasure(measure);
-        r4CareGapsParams.setPeriodStart(periodStart);
-        r4CareGapsParams.setPeriodEnd(periodEnd);
-        r4CareGapsParams.setStatus(status);
-        r4CareGapsParams.setSubject(subject);
-        r4CareGapsParams.setNotDocument(notDocument);
-        return r4CareGapsParams;
+    /** Filters null entries and entries with null id parts. */
+    private static List<IdType> sanitizeMeasureIds(@Nullable List<IdType> measureId) {
+        return Optional.ofNullable(measureId).orElse(Collections.emptyList()).stream()
+                .filter(id -> id != null && id.getIdPart() != null)
+                .toList();
     }
 
-    @Override
-    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
-        return measure.stream()
-                .map(x -> x.fold(
-                        id -> repository.read(Measure.class, id),
-                        r4MeasureServiceUtils::resolveByIdentifier,
-                        canonical -> r4MeasureServiceUtils.resolveByUrl(canonical.asStringValue())))
-                .collect(Collectors.toList());
+    private static List<String> nullToEmpty(@Nullable List<String> list) {
+        return Optional.ofNullable(list).orElse(Collections.emptyList()).stream()
+                .filter(Objects::nonNull)
+                .toList();
     }
 
-    @Override
-    public List<String> getSubjects(String subject) {
+    /** Throws if no measure resolving parameter was provided across all three lists. */
+    private static void validateMeasureParameters(
+            List<IdType> measureId, List<String> measureIdentifier, List<String> measureUrl) {
+        if (measureId.isEmpty() && measureIdentifier.isEmpty() && measureUrl.isEmpty()) {
+            List<String> measureIdsAsStrings =
+                    measureId.stream().map(IdType::getIdPart).collect(Collectors.toList());
+            throw new InvalidRequestException(
+                    "no measure resolving parameter was specified for Measure: " + measureIdsAsStrings);
+        }
+    }
+
+    List<String> getSubjects(String subject) {
         var subjects = subjectProvider
                 .getSubjects(repository, subject)
                 .map(SubjectRef::qualified)
@@ -148,23 +157,16 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         return subjects;
     }
 
-    @Override
-    public void addConfiguredResource(String id, String key) {
-        // read resource from repository
+    void addConfiguredResource(String id, String key) {
         Resource resource = repository.read(Organization.class, new IdType(RESOURCE_TYPE_ORGANIZATION, id));
-
-        // validate resource
         checkNotNull(
                 resource,
                 "The %s Resource is configured as the %s but the Resource could not be read."
                         .formatted(careGapsProperties.getCareGapsReporter(), key));
-
-        // add resource to configured resources
         configuredResources.put(key, resource);
     }
 
-    @Override
-    public void checkMeasureImprovementNotation(Measure measure) {
+    void checkMeasureImprovementNotation(Measure measure) {
         if (!measure.hasImprovementNotation()) {
             ourLog.warn(
                     "Measure '{}' does not specify an improvement notation, defaulting to: '{}'.",
@@ -173,13 +175,11 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         }
     }
 
-    @Override
-    public Parameters initializeResult() {
+    Parameters initializeResult() {
         return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
     }
 
-    @Override
-    public void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses) {
+    void checkValidStatusCode(List<String> statuses) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
@@ -188,14 +188,12 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
                     && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)
                     && !CareGapsStatusCode.PROSPECTIVE_GAP.toString().equals(status)) {
                 throw new InvalidRequestException(
-                        "CareGap status parameter: %s, is not an accepted value for Measure: %s"
-                                .formatted(status, printEithers(measure)));
+                        "CareGap status parameter: %s, is not an accepted value".formatted(status));
             }
         }
     }
 
-    @Override
-    public void measureCompatibilityCheck(List<Measure> measures) {
+    void measureCompatibilityCheck(List<Measure> measures) {
         for (Measure measure : measures) {
             checkMeasureScoringType(measure);
             checkMeasureImprovementNotation(measure);
@@ -204,8 +202,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         }
     }
 
-    @Override
-    public void checkMeasureBasis(Measure measure) {
+    void checkMeasureBasis(Measure measure) {
         var msg = "CareGaps can't process Measure: %s, it is not Boolean basis.".formatted(measure.getIdPart());
         R4MeasureDefBuilder measureDefBuilder = new R4MeasureDefBuilder();
         var measureDef = measureDefBuilder.build(measure);
@@ -219,16 +216,11 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
     /**
      * MultiRate Measures require a unique 'id' per GroupComponent to uniquely identify results in Measure Report.
-     * This is helpful when creating DetectedIssues per GroupComponent so endUsers can attribute evidence of a Care-Gap to the specific MeasureReport result
-     * @param measure Measure resource
      */
-    @Override
-    public void checkMeasureGroupComponents(Measure measure) {
-        // if a Multi-rate Measure, enforce groupId to be populated
+    void checkMeasureGroupComponents(Measure measure) {
         if (measure.getGroup().size() > 1) {
             for (MeasureGroupComponent group : measure.getGroup()) {
-                if (measure.getGroup().size() > 1
-                        && (group.getId() == null || group.getId().isEmpty())) {
+                if (group.getId() == null || group.getId().isEmpty()) {
                     throw new InvalidRequestException(
                             "Multi-rate Measure resources require unique 'id' for GroupComponents to be populated for Measure: "
                                     + measure.getUrl());
@@ -237,8 +229,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         }
     }
 
-    @Override
-    public void checkMeasureScoringType(Measure measure) {
+    void checkMeasureScoringType(Measure measure) {
         List<MeasureScoring> scoringTypes = r4MeasureServiceUtils.getMeasureScoringDef(measure);
         for (MeasureScoring measureScoringType : scoringTypes) {
             if (!MeasureScoring.PROPORTION.equals(measureScoringType)
@@ -250,19 +241,12 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         }
     }
 
-    @Override
-    public void checkConfigurationReferences() {
+    void checkConfigurationReferences() {
         careGapsProperties.validateRequiredProperties();
 
         addConfiguredResource(careGapsProperties.getCareGapsReporter(), CareGapsConstants.CARE_GAPS_REPORTER_KEY);
         addConfiguredResource(
                 careGapsProperties.getCareGapsCompositionSectionAuthor(),
                 CareGapsConstants.CARE_GAPS_SECTION_AUTHOR_KEY);
-    }
-
-    private static List<String> printEithers(List<Either3<IdType, String, CanonicalType>> either) {
-        return either.stream()
-                .map(x -> x.fold(IdType::getIdPart, Function.identity(), PrimitiveType::asStringValue))
-                .collect(Collectors.toList());
     }
 }

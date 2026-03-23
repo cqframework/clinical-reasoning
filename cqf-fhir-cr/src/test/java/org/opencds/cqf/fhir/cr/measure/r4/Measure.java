@@ -32,7 +32,6 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportC
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportExtension;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportGroup;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportReference;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
@@ -228,7 +227,7 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
+                    new IdType("Measure", measureId),
                     periodStart,
                     periodEnd,
                     reportType,

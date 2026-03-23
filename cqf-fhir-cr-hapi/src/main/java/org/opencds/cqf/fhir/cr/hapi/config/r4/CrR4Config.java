@@ -43,7 +43,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.measure.SubmitDataProvider;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
@@ -134,7 +134,7 @@ public class CrR4Config {
             CareGapsProperties careGapsProperties,
             MeasureEvaluationOptions measureEvaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4CareGapsService(
+        return rd -> new R4CareGapsProcessor(
                 careGapsProperties,
                 repositoryFactory.create(rd),
                 measureEvaluationOptions,

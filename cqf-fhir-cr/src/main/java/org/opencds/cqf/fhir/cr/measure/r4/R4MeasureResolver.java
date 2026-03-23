@@ -53,6 +53,10 @@ public class R4MeasureResolver {
     /**
      * Converts a FHIR {@link Parameters} resource into a CQL parameter map.
      *
+     * <p>Symmetric with {@link org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureResolver#resolveParameterMap}.
+     * Not extracted because {@code Parameters.getParameter()} returns version-specific component types
+     * with no shared interface for {@code hasResource()/getValue()/getName()}.
+     *
      * @param parameters FHIR Parameters resource (may be null)
      * @return map of parameter name to resolved value; empty map if parameters is null
      */

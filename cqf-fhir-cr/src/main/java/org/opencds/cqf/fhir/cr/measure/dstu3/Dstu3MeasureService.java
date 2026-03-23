@@ -17,6 +17,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.ScoredMeasure;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 
@@ -44,7 +45,7 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
         this.evaluationService = new MeasureEvaluationService(
                 measureEvaluationOptions,
                 FhirContext.forDstu3Cached(),
-                new Dstu3PopulationBasisValidator(),
+                PopulationBasisValidator.NOOP,
                 measurePeriodValidator);
     }
 

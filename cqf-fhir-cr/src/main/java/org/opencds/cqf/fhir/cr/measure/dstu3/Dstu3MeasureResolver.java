@@ -42,6 +42,10 @@ public class Dstu3MeasureResolver {
 
     /**
      * Converts DSTU3 FHIR Parameters to a CQL parameter map.
+     *
+     * <p>Symmetric with {@link org.opencds.cqf.fhir.cr.measure.r4.R4MeasureResolver#resolveParameterMap}.
+     * Not extracted because {@code Parameters.getParameter()} returns version-specific component types
+     * with no shared interface for {@code hasResource()/getValue()/getName()}.
      */
     Map<String, Object> resolveParameterMap(Parameters parameters) {
         if (parameters == null) {

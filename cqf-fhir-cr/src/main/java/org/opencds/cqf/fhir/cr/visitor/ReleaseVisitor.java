@@ -59,12 +59,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
     protected final ITerminologyServerClient terminologyServerClient;
-    private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
+    protected IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
 
     // Hold on to terminology sever settings.
     // TerminologyProviderRouters don't keep a reference to the settings, those are for individual clients.
     // In the future allow for the ability to have unique settings for each client type.
-    private TerminologyServerClientSettings terminologyServerClientSettings;
+    protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
@@ -243,7 +243,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private static void updateMetadata(
+    protected static void updateMetadata(
             IKnowledgeArtifactAdapter artifactAdapter,
             String version,
             ICompositeType rootEffectivePeriod,
@@ -478,7 +478,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
+    protected Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
             IDependencyInfo dependency,
             IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
@@ -680,7 +680,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<String> getReleaseVersion(
+    protected Optional<String> getReleaseVersion(
             String version, Optional<String> versionBehavior, String existingVersion, FhirVersionEnum fhirVersion)
             throws UnprocessableEntityException {
         switch (fhirVersion) {
@@ -700,7 +700,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
+    protected void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
         if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource resource2) {
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.updateReleaseLabel(resource2, releaseLabel);
         } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource resource1) {
@@ -728,7 +728,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return Optional.empty();
     }
 
-    private void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
+    protected void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
             throws PreconditionFailedException {
         if (artifact == null) {
             throw new ResourceNotFoundException("Resource not found.");
@@ -753,7 +753,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private void checkReleaseVersion(String version, Optional<String> versionBehavior)
+    protected void checkReleaseVersion(String version, Optional<String> versionBehavior)
             throws UnprocessableEntityException {
         if (versionBehavior.isEmpty()) {
             throw new UnprocessableEntityException(

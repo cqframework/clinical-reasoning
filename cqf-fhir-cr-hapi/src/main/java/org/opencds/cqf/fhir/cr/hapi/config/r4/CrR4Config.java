@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
 import org.opencds.cqf.fhir.cr.crmi.R4InferManifestParametersService;
 import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
+import org.opencds.cqf.fhir.cr.crmi.R4ReleaseManifestService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
@@ -24,6 +25,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IERSDV2ImportServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IInferManifestParametersServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseManifestServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
@@ -33,6 +35,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.InferManifestParametersProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseManifestProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.ecr.ERSDTransformProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
@@ -198,6 +201,16 @@ public class CrR4Config {
     }
 
     @Bean
+    IReleaseManifestServiceFactory releaseManifestServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4ReleaseManifestService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    ReleaseManifestProvider r4ReleaseManifestProvider(IReleaseManifestServiceFactory r4ReleaseManifestServiceFactory) {
+        return new ReleaseManifestProvider(r4ReleaseManifestServiceFactory);
+    }
+
+    @Bean
     IInferManifestParametersServiceFactory inferManifestParametersServiceFactory(IRepositoryFactory repositoryFactory) {
         return rd -> new R4InferManifestParametersService(repositoryFactory.create(rd));
     }
@@ -241,6 +254,7 @@ public class CrR4Config {
                                 ERSDTransformProvider.class,
                                 PackageProvider.class,
                                 ReleaseProvider.class,
+                                ReleaseManifestProvider.class,
                                 InferManifestParametersProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);

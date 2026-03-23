@@ -446,7 +446,45 @@ Most of the components and operations in this repository are built around an int
 
 ### Design Conventions
 
-When making design trade-offs, bias towards explicit over implicit (no magic, no annotations), data transformations over stateful logic (data oriented), failing loudly over silent errors, composition over inheritance, first principles over pragmaticism. When uncertain about approaches, choose the one that's easier to delete (build it yourself rather than add a dependency). 
+See the [Coding Values](ARCHITECTURE.md#coding-values) section of the Architecture document for the full list. The values below are expanded with examples for day-to-day coding guidance.
+
+**Structure over validation ("parse, don't validate").** When data crosses a boundary (HTTP request, FHIR resource read, CQL result), parse it into a domain type that enforces its constraints structurally. After that point, code that receives the domain type should not need to re-check those constraints.
+
+Prefer:
+```java
+// MeasureDef requires groups at construction time
+var measureDef = MeasureDefBuilder.build(measure);
+// All downstream code can assume groups exist
+measureDef.groups().forEach(this::evaluateGroup);
+```
+
+Over:
+```java
+// Passing raw FHIR resource through the pipeline
+if (measure.getGroup() == null || measure.getGroup().isEmpty()) {
+    throw new IllegalArgumentException("Measure must have groups");
+}
+// ... same check repeated in three other methods
+```
+
+**Small conceptual surface per layer.** Each abstraction should encapsulate roughly 5 to 20 units of detail. That ratio applies recursively throughout the codebase: a module exposes a handful of packages, a package a handful of classes, a class a handful of methods, a method a handful of steps. Each step down should introduce a manageable new chunk of complexity, not an explosion. If you find yourself needing to understand 30 classes to work on one feature, the layer is too wide and should be split.
+
+**Domain-specific representations over generic ones.** Give names to things. Use the domain language to make code searchable, self-documenting, and precise.
+
+Prefer:
+```java
+throw new MeasureValidationException(
+    measureDef.url(), "Measure has no population criteria for group " + groupId);
+```
+
+Over:
+```java
+throw new UnsupportedOperationException("not supported");
+// or
+throw new IllegalArgumentException("invalid measure");
+```
+
+This applies to return types too. A `ResolvedMeasure` record that pairs a `MeasureDef` with its `VersionedIdentifier` is better than a `Pair<MeasureDef, VersionedIdentifier>`, because it has a name that communicates what it represents and can evolve independently.
 
 ### Utilities
 

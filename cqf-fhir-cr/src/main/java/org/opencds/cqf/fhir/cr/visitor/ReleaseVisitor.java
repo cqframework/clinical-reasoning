@@ -773,9 +773,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
         var pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
         var matcher = pattern.matcher(version);
-        boolean matchFound = matcher.find();
-        if (!matchFound) {
-            throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH");
+        if (!matcher.find()) {
+            logger.warn(
+                    "The version '{}' is not in the recommended semver format MAJOR.MINOR.PATCH. Semver is preferred but not required.",
+                    version);
         }
     }
 

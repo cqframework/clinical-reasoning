@@ -75,7 +75,15 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
 
         return new MeasureDef(
                 // We don't need either the version of the "Measure" qualifier here
-                measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, getSdeDefs(measure));
+                measure.getIdElement(),
+                measure.getUrl(),
+                measure.getVersion(),
+                groups,
+                getSdeDefs(measure),
+                measure.hasDescription() ? measure.getDescription() : null,
+                measure.hasLanguage() ? measure.getLanguage() : null,
+                measure.hasImplicitRules() ? measure.getImplicitRules() : null,
+                measureImpNotation);
     }
 
     private GroupDef buildGroupDef(
@@ -120,7 +128,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 R4MeasureUtils.computeScoring(measure.getUrl(), measureScoring, groupScoring),
                 hasGroupImpNotation,
                 MeasureDefBuilders.getImprovementNotation(measureImpNotation, groupImpNotation),
-                populationBasisDef);
+                populationBasisDef,
+                group.hasDescription() ? group.getDescription() : null);
     }
 
     private List<SupportingEvidenceDef> getSupportingEvidenceDefs(MeasureGroupPopulationComponent groupPopulation) {
@@ -274,7 +283,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 populationBasis,
                 criteriaReference,
                 aggregateMethod,
-                supportingEvidenceDefs);
+                supportingEvidenceDefs,
+                population.hasDescription() ? population.getDescription() : null);
     }
 
     // TODO: JM, DateOfCompliance can now be more simply exposed via supporting evidence instead of this current
@@ -371,7 +381,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                 conceptToConceptDef(mgsc.getCode()),
                 mgsc.getCriteria().getExpression(),
                 getStratifierType(measureUrl, mgsc, isBooleanBasis),
-                components);
+                components,
+                mgsc.hasDescription() ? mgsc.getDescription() : null);
     }
 
     public static void triggerFirstPassValidation(List<Measure> measures) {

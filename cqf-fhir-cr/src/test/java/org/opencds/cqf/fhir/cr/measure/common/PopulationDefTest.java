@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -16,45 +17,68 @@ import org.junit.jupiter.api.Test;
 
 class PopulationDefTest {
 
+    private static MeasureEvaluationState stateFor(PopulationDef... populations) {
+        var group = new GroupDef(
+                "group-1",
+                null,
+                List.of(),
+                List.of(populations),
+                MeasureScoring.PROPORTION,
+                false,
+                new CodeDef("http://hl7.org/fhir/measure-improvement-notation", "increase"),
+                new CodeDef("http://hl7.org/fhir/fhir-types", "boolean"));
+        var measureDef = new MeasureDef(new IdType("Measure/test"), "http://test", "1.0", List.of(group), List.of());
+        return MeasureEvaluationState.create(measureDef);
+    }
+
     @Test
     void setHandlingStrings() {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, stringBasis, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, stringBasis, null);
+        final PopulationDef popDef1 =
+                new PopulationDef("one", null, MeasurePopulationType.INITIALPOPULATION, null, stringBasis, null);
+        final PopulationDef popDef2 =
+                new PopulationDef("two", null, MeasurePopulationType.INITIALPOPULATION, null, stringBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
 
-        popDef1.addResource("subj1", "string1");
-        popDef2.addResource("subj1", "string1");
+        state.population(popDef1).addResource("subj1", "string1");
+        state.population(popDef2).addResource("subj1", "string1");
 
-        popDef1.retainAllResources("subj1", popDef2);
-        assertEquals(1, popDef1.getAllSubjectResources().size());
-        assertTrue(popDef1.getAllSubjectResources().contains("string1"));
+        state.population(popDef1).retainAllResources("subj1", state.population(popDef2));
+        assertEquals(1, state.population(popDef1).getAllSubjectResources().size());
+        assertTrue(state.population(popDef1).getAllSubjectResources().contains("string1"));
     }
 
     @Test
     void setHandlingIntegers() {
         CodeDef integerBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "integer");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, integerBasis, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, integerBasis, null);
+        final PopulationDef popDef1 =
+                new PopulationDef("one", null, MeasurePopulationType.INITIALPOPULATION, null, integerBasis, null);
+        final PopulationDef popDef2 =
+                new PopulationDef("two", null, MeasurePopulationType.INITIALPOPULATION, null, integerBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
 
-        popDef1.addResource("subj1", 123);
-        popDef2.addResource("subj1", 123);
+        state.population(popDef1).addResource("subj1", 123);
+        state.population(popDef2).addResource("subj1", 123);
 
-        popDef1.retainAllResources("subj1", popDef2);
-        assertEquals(1, popDef1.getAllSubjectResources().size());
-        assertTrue(popDef1.getAllSubjectResources().contains(123));
+        state.population(popDef1).retainAllResources("subj1", state.population(popDef2));
+        assertEquals(1, state.population(popDef1).getAllSubjectResources().size());
+        assertTrue(state.population(popDef1).getAllSubjectResources().contains(123));
     }
 
     @Test
     void setHandlingEncounters() {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
-        final PopulationDef popDef1 = new PopulationDef("one", null, null, null, encounterBasis, null);
-        final PopulationDef popDef2 = new PopulationDef("two", null, null, null, encounterBasis, null);
+        final PopulationDef popDef1 =
+                new PopulationDef("one", null, MeasurePopulationType.INITIALPOPULATION, null, encounterBasis, null);
+        final PopulationDef popDef2 =
+                new PopulationDef("two", null, MeasurePopulationType.INITIALPOPULATION, null, encounterBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
@@ -62,19 +86,21 @@ class PopulationDefTest {
         final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
         final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
 
-        popDef1.addResource("subj1", enc1a);
-        popDef2.addResource("subj1", enc1b);
+        state.population(popDef1).addResource("subj1", enc1a);
+        state.population(popDef2).addResource("subj1", enc1b);
 
-        popDef1.retainAllResources("subj1", popDef2);
+        state.population(popDef1).retainAllResources("subj1", state.population(popDef2));
 
-        assertEquals(1, popDef1.getAllSubjectResources().size());
+        assertEquals(1, state.population(popDef1).getAllSubjectResources().size());
 
-        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1a));
-        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1b));
+        assertTrue(
+                getResourcesDistinctAcrossAllSubjects(state.population(popDef1)).contains(enc1a));
+        assertTrue(
+                getResourcesDistinctAcrossAllSubjects(state.population(popDef1)).contains(enc1b));
     }
 
-    private Set<Object> getResourcesDistinctAcrossAllSubjects(PopulationDef popDef) {
-        return new HashSetForFhirResourcesAndCqlTypes<>(popDef.getSubjectResources().values().stream()
+    private Set<Object> getResourcesDistinctAcrossAllSubjects(MeasureEvaluationState.PopulationState popState) {
+        return new HashSetForFhirResourcesAndCqlTypes<>(popState.getSubjectResources().values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet()));
@@ -123,15 +149,16 @@ class PopulationDefTest {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        var state = stateFor(popDef);
 
         // Add 3 unique subjects
-        popDef.addResource("Patient/1", true);
-        popDef.addResource("Patient/2", true);
-        popDef.addResource("Patient/3", true);
+        state.population(popDef).addResource("Patient/1", true);
+        state.population(popDef).addResource("Patient/2", true);
+        state.population(popDef).addResource("Patient/3", true);
 
         assertTrue(popDef.isBooleanBasis());
-        assertEquals(3, popDef.getCount(), "Boolean basis should count unique subjects");
-        assertEquals(3, popDef.getSubjects().size());
+        assertEquals(3, state.population(popDef).getCount(), "Boolean basis should count unique subjects");
+        assertEquals(3, state.population(popDef).getSubjects().size());
     }
 
     /**
@@ -142,18 +169,19 @@ class PopulationDefTest {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        var state = stateFor(popDef);
 
         // Subject 1 has 2 encounters
-        popDef.addResource("Patient/1", new Encounter().setId("Encounter/1"));
-        popDef.addResource("Patient/1", new Encounter().setId("Encounter/2"));
+        state.population(popDef).addResource("Patient/1", new Encounter().setId("Encounter/1"));
+        state.population(popDef).addResource("Patient/1", new Encounter().setId("Encounter/2"));
         // Subject 2 has 3 encounters
-        popDef.addResource("Patient/2", new Encounter().setId("Encounter/3"));
-        popDef.addResource("Patient/2", new Encounter().setId("Encounter/4"));
-        popDef.addResource("Patient/2", new Encounter().setId("Encounter/5"));
+        state.population(popDef).addResource("Patient/2", new Encounter().setId("Encounter/3"));
+        state.population(popDef).addResource("Patient/2", new Encounter().setId("Encounter/4"));
+        state.population(popDef).addResource("Patient/2", new Encounter().setId("Encounter/5"));
 
         assertFalse(popDef.isBooleanBasis());
-        assertEquals(5, popDef.getCount(), "Encounter basis should count all resources");
-        assertEquals(2, popDef.getSubjects().size(), "Should have 2 unique subjects");
+        assertEquals(5, state.population(popDef).getCount(), "Encounter basis should count all resources");
+        assertEquals(2, state.population(popDef).getSubjects().size(), "Should have 2 unique subjects");
     }
 
     /**
@@ -164,16 +192,18 @@ class PopulationDefTest {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef popDef =
                 new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+        var state = stateFor(popDef);
 
         // Add string values for different subjects
         // Even if the same string value appears for different subjects, count all
-        popDef.addResource("Patient/1", "value1");
-        popDef.addResource("Patient/2", "value2");
-        popDef.addResource("Patient/3", "value1"); // Duplicate value but different subject
+        state.population(popDef).addResource("Patient/1", "value1");
+        state.population(popDef).addResource("Patient/2", "value2");
+        state.population(popDef).addResource("Patient/3", "value1"); // Duplicate value but different subject
 
         assertFalse(popDef.isBooleanBasis());
-        assertEquals(3, popDef.getCount(), "String basis should count all resources including duplicates");
-        assertEquals(3, popDef.getSubjects().size());
+        assertEquals(
+                3, state.population(popDef).getCount(), "String basis should count all resources including duplicates");
+        assertEquals(3, state.population(popDef).getSubjects().size());
     }
 
     /**
@@ -184,15 +214,16 @@ class PopulationDefTest {
         CodeDef dateBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "date");
         PopulationDef popDef =
                 new PopulationDef("pop-1", null, MeasurePopulationType.DENOMINATOR, "Denominator", dateBasis, null);
+        var state = stateFor(popDef);
 
         // Add date values for subjects
-        popDef.addResource("Patient/1", "2024-01-01");
-        popDef.addResource("Patient/2", "2024-01-02");
-        popDef.addResource("Patient/3", "2024-01-01"); // Duplicate date value
+        state.population(popDef).addResource("Patient/1", "2024-01-01");
+        state.population(popDef).addResource("Patient/2", "2024-01-02");
+        state.population(popDef).addResource("Patient/3", "2024-01-01"); // Duplicate date value
 
         assertFalse(popDef.isBooleanBasis());
-        assertEquals(3, popDef.getCount(), "Date basis should count all resources");
-        assertEquals(3, popDef.getSubjects().size());
+        assertEquals(3, state.population(popDef).getCount(), "Date basis should count all resources");
+        assertEquals(3, state.population(popDef).getSubjects().size());
     }
 
     /**
@@ -203,6 +234,7 @@ class PopulationDefTest {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
                 "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, "MeasureObservation", booleanBasis, null);
+        var state = stateFor(popDef);
 
         // Add observations (Maps) for subjects
         // Each observation is a Map with key-value pairs
@@ -210,12 +242,12 @@ class PopulationDefTest {
         Map<String, Object> obs2 = Map.of("value", 20.0, "unit", "mg");
         Map<String, Object> obs3 = Map.of("value", 30.0);
 
-        popDef.addResource("Patient/1", obs1);
-        popDef.addResource("Patient/2", obs2);
-        popDef.addResource("Patient/3", obs3);
+        state.population(popDef).addResource("Patient/1", obs1);
+        state.population(popDef).addResource("Patient/2", obs2);
+        state.population(popDef).addResource("Patient/3", obs3);
 
         // For MEASUREOBSERVATION, getCount() should count subjects
-        assertEquals(3, popDef.getCount(), "MEASUREOBSERVATION should count observation entries");
+        assertEquals(3, state.population(popDef).getCount(), "MEASUREOBSERVATION should count observation entries");
     }
 
     /**
@@ -235,6 +267,7 @@ class PopulationDefTest {
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
+        var state = stateFor(popDef);
 
         // Create observation maps with encounters as keys
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
@@ -244,32 +277,38 @@ class PopulationDefTest {
         // Add observations for three subjects
         Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap1.put(enc1, new QuantityDef(100.0));
-        popDef.addResource("Patient/1", obsMap1);
+        state.population(popDef).addResource("Patient/1", obsMap1);
 
         Map<Object, Object> obsMap2 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap2.put(enc2, new QuantityDef(200.0));
-        popDef.addResource("Patient/2", obsMap2);
+        state.population(popDef).addResource("Patient/2", obsMap2);
 
         Map<Object, Object> obsMap3 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap3.put(enc3, new QuantityDef(300.0));
-        popDef.addResource("Patient/3", obsMap3);
+        state.population(popDef).addResource("Patient/3", obsMap3);
 
         // Initial count should be 3
-        assertEquals(3, popDef.getCount(), "Should have 3 observations before removal");
-        assertEquals(3, popDef.getSubjects().size(), "Should have 3 subjects");
+        assertEquals(3, state.population(popDef).getCount(), "Should have 3 observations before removal");
+        assertEquals(3, state.population(popDef).getSubjects().size(), "Should have 3 subjects");
 
         // Remove enc1 from Patient/1 - this should empty Patient/1's inner map
-        popDef.removeExcludedMeasureObservationResource("Patient/1", enc1);
+        state.population(popDef).removeExcludedMeasureObservationResource("Patient/1", enc1);
 
         // After removal, Patient/1's inner map should be empty and purged
         // Count should now be 2 (only Patient/2 and Patient/3 remain)
-        assertEquals(2, popDef.getCount(), "Should have 2 observations after removing Patient/1's only entry");
-        assertEquals(2, popDef.getSubjects().size(), "Should have 2 subjects after empty map removal");
+        assertEquals(
+                2,
+                state.population(popDef).getCount(),
+                "Should have 2 observations after removing Patient/1's only entry");
+        assertEquals(
+                2, state.population(popDef).getSubjects().size(), "Should have 2 subjects after empty map removal");
 
         // Patient/1 should no longer be in the subjects
-        assertFalse(popDef.getSubjects().contains("Patient/1"), "Patient/1 should not be counted after removal");
-        assertTrue(popDef.getSubjects().contains("Patient/2"), "Patient/2 should still be counted");
-        assertTrue(popDef.getSubjects().contains("Patient/3"), "Patient/3 should still be counted");
+        assertFalse(
+                state.population(popDef).getSubjects().contains("Patient/1"),
+                "Patient/1 should not be counted after removal");
+        assertTrue(state.population(popDef).getSubjects().contains("Patient/2"), "Patient/2 should still be counted");
+        assertTrue(state.population(popDef).getSubjects().contains("Patient/3"), "Patient/3 should still be counted");
     }
 
     /**
@@ -289,6 +328,7 @@ class PopulationDefTest {
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
+        var state = stateFor(popDef);
 
         // Create observation maps with multiple encounters for one subject
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
@@ -298,25 +338,25 @@ class PopulationDefTest {
         Map<Object, Object> obsMapSubject1 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMapSubject1.put(enc1, new QuantityDef(100.0));
         obsMapSubject1.put(enc2, new QuantityDef(200.0));
-        popDef.addResource("Patient/1", obsMapSubject1);
+        state.population(popDef).addResource("Patient/1", obsMapSubject1);
 
         Map<Object, Object> obsMapSubject2 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMapSubject2.put(enc3, new QuantityDef(300.0));
-        popDef.addResource("Patient/2", obsMapSubject2);
+        state.population(popDef).addResource("Patient/2", obsMapSubject2);
 
         // Initial: Patient/1 has 2 entries, Patient/2 has 1 entry = 3 total
-        assertEquals(3, popDef.getCount(), "Should have 3 observations before removal");
+        assertEquals(3, state.population(popDef).getCount(), "Should have 3 observations before removal");
 
         // Remove one entry from Patient/1's map (enc1)
-        popDef.removeExcludedMeasureObservationResource("Patient/1", enc1);
+        state.population(popDef).removeExcludedMeasureObservationResource("Patient/1", enc1);
 
         // Patient/1's map should still have 1 entry (enc2), so count should be 2
-        assertEquals(2, popDef.getCount(), "Should have 2 observations after removing one entry");
-        assertEquals(2, popDef.getSubjects().size(), "Should still have 2 subjects");
+        assertEquals(2, state.population(popDef).getCount(), "Should have 2 observations after removing one entry");
+        assertEquals(2, state.population(popDef).getSubjects().size(), "Should still have 2 subjects");
 
         // Both subjects should still be present
-        assertTrue(popDef.getSubjects().contains("Patient/1"), "Patient/1 should still be counted");
-        assertTrue(popDef.getSubjects().contains("Patient/2"), "Patient/2 should still be counted");
+        assertTrue(state.population(popDef).getSubjects().contains("Patient/1"), "Patient/1 should still be counted");
+        assertTrue(state.population(popDef).getSubjects().contains("Patient/2"), "Patient/2 should still be counted");
     }
 
     /**
@@ -335,6 +375,7 @@ class PopulationDefTest {
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.COUNT,
                 null);
+        var state = stateFor(popDef);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
@@ -343,23 +384,24 @@ class PopulationDefTest {
         Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap1.put(enc1, new QuantityDef(100.0));
         obsMap1.put(enc2, new QuantityDef(200.0));
-        popDef.addResource("Patient/1", obsMap1);
+        state.population(popDef).addResource("Patient/1", obsMap1);
 
-        assertEquals(2, popDef.getCount(), "Should have 2 observations initially");
-        assertEquals(1, popDef.getSubjects().size(), "Should have 1 subject");
+        assertEquals(2, state.population(popDef).getCount(), "Should have 2 observations initially");
+        assertEquals(1, state.population(popDef).getSubjects().size(), "Should have 1 subject");
 
         // Remove first entry
-        popDef.removeExcludedMeasureObservationResource("Patient/1", enc1);
-        assertEquals(1, popDef.getCount(), "Should have 1 observation after first removal");
-        assertEquals(1, popDef.getSubjects().size(), "Should still have 1 subject");
+        state.population(popDef).removeExcludedMeasureObservationResource("Patient/1", enc1);
+        assertEquals(1, state.population(popDef).getCount(), "Should have 1 observation after first removal");
+        assertEquals(1, state.population(popDef).getSubjects().size(), "Should still have 1 subject");
 
         // Remove second entry - now the inner map should be empty and purged
-        popDef.removeExcludedMeasureObservationResource("Patient/1", enc2);
-        assertEquals(0, popDef.getCount(), "Should have 0 observations after removing all entries");
-        assertEquals(0, popDef.getSubjects().size(), "Should have 0 subjects after empty map removal");
+        state.population(popDef).removeExcludedMeasureObservationResource("Patient/1", enc2);
+        assertEquals(0, state.population(popDef).getCount(), "Should have 0 observations after removing all entries");
+        assertEquals(
+                0, state.population(popDef).getSubjects().size(), "Should have 0 subjects after empty map removal");
 
         assertFalse(
-                popDef.getSubjects().contains("Patient/1"),
+                state.population(popDef).getSubjects().contains("Patient/1"),
                 "Patient/1 should not be counted after all observations removed");
     }
 
@@ -373,25 +415,26 @@ class PopulationDefTest {
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
         PopulationDef popDef2 =
                 new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         // popDef1 has subjects 1, 2, 3
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
-        popDef1.addResource("Patient/3", true);
+        state.population(popDef1).addResource("Patient/1", true);
+        state.population(popDef1).addResource("Patient/2", true);
+        state.population(popDef1).addResource("Patient/3", true);
 
         // popDef2 has subjects 2, 3, 4
-        popDef2.addResource("Patient/2", true);
-        popDef2.addResource("Patient/3", true);
-        popDef2.addResource("Patient/4", true);
+        state.population(popDef2).addResource("Patient/2", true);
+        state.population(popDef2).addResource("Patient/3", true);
+        state.population(popDef2).addResource("Patient/4", true);
 
         // Retain only common subjects (2 and 3)
-        popDef1.retainAllSubjects(popDef2);
+        state.population(popDef1).retainAllSubjects(state.population(popDef2));
 
-        assertEquals(2, popDef1.getSubjects().size(), "Should have 2 common subjects");
-        assertFalse(popDef1.getSubjects().contains("Patient/1"), "Patient/1 should be removed");
-        assertTrue(popDef1.getSubjects().contains("Patient/2"), "Patient/2 should be retained");
-        assertTrue(popDef1.getSubjects().contains("Patient/3"), "Patient/3 should be retained");
-        assertFalse(popDef1.getSubjects().contains("Patient/4"), "Patient/4 was not in popDef1");
+        assertEquals(2, state.population(popDef1).getSubjects().size(), "Should have 2 common subjects");
+        assertFalse(state.population(popDef1).getSubjects().contains("Patient/1"), "Patient/1 should be removed");
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/2"), "Patient/2 should be retained");
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/3"), "Patient/3 should be retained");
+        assertFalse(state.population(popDef1).getSubjects().contains("Patient/4"), "Patient/4 was not in popDef1");
     }
 
     /**
@@ -404,19 +447,20 @@ class PopulationDefTest {
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
         PopulationDef popDef2 =
                 new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         // popDef1 has subjects 1, 2
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        state.population(popDef1).addResource("Patient/1", true);
+        state.population(popDef1).addResource("Patient/2", true);
 
         // popDef2 has subjects 3, 4
-        popDef2.addResource("Patient/3", true);
-        popDef2.addResource("Patient/4", true);
+        state.population(popDef2).addResource("Patient/3", true);
+        state.population(popDef2).addResource("Patient/4", true);
 
         // Retain only common subjects (none)
-        popDef1.retainAllSubjects(popDef2);
+        state.population(popDef1).retainAllSubjects(state.population(popDef2));
 
-        assertEquals(0, popDef1.getSubjects().size(), "Should have no subjects after retention");
+        assertEquals(0, state.population(popDef1).getSubjects().size(), "Should have no subjects after retention");
     }
 
     /**
@@ -429,19 +473,20 @@ class PopulationDefTest {
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
         PopulationDef popDef2 =
                 new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         // Both have the same subjects
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        state.population(popDef1).addResource("Patient/1", true);
+        state.population(popDef1).addResource("Patient/2", true);
 
-        popDef2.addResource("Patient/1", true);
-        popDef2.addResource("Patient/2", true);
+        state.population(popDef2).addResource("Patient/1", true);
+        state.population(popDef2).addResource("Patient/2", true);
 
-        popDef1.retainAllSubjects(popDef2);
+        state.population(popDef1).retainAllSubjects(state.population(popDef2));
 
-        assertEquals(2, popDef1.getSubjects().size(), "Should still have 2 subjects");
-        assertTrue(popDef1.getSubjects().contains("Patient/1"));
-        assertTrue(popDef1.getSubjects().contains("Patient/2"));
+        assertEquals(2, state.population(popDef1).getSubjects().size(), "Should still have 2 subjects");
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/1"));
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/2"));
     }
 
     /**
@@ -459,28 +504,33 @@ class PopulationDefTest {
                 "DenominatorExclusion",
                 encounterBasis,
                 null);
+        var state = stateFor(popDef1, popDef2);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
         // popDef1 Patient/1 has encounters 1, 2, 3
-        popDef1.addResource("Patient/1", enc1);
-        popDef1.addResource("Patient/1", enc2);
-        popDef1.addResource("Patient/1", enc3);
+        state.population(popDef1).addResource("Patient/1", enc1);
+        state.population(popDef1).addResource("Patient/1", enc2);
+        state.population(popDef1).addResource("Patient/1", enc3);
 
         // popDef2 Patient/1 has encounters 2, 3 (exclusions)
         Encounter enc2b = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3b = (Encounter) new Encounter().setId("Encounter/3");
-        popDef2.addResource("Patient/1", enc2b);
-        popDef2.addResource("Patient/1", enc3b);
+        state.population(popDef2).addResource("Patient/1", enc2b);
+        state.population(popDef2).addResource("Patient/1", enc3b);
 
         // Remove encounters that are in both (2 and 3)
-        popDef1.removeAllResources("Patient/1", popDef2);
+        state.population(popDef1).removeAllResources("Patient/1", state.population(popDef2));
 
-        assertEquals(1, popDef1.getResourcesForSubject("Patient/1").size(), "Should have 1 resource remaining");
+        assertEquals(
+                1,
+                state.population(popDef1).getResourcesForSubject("Patient/1").size(),
+                "Should have 1 resource remaining");
         assertTrue(
-                getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1), "Encounter/1 should remain in popDef1");
+                getResourcesDistinctAcrossAllSubjects(state.population(popDef1)).contains(enc1),
+                "Encounter/1 should remain in popDef1");
     }
 
     /**
@@ -498,21 +548,27 @@ class PopulationDefTest {
                 "DenominatorExclusion",
                 encounterBasis,
                 null);
+        var state = stateFor(popDef1, popDef2);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
 
         // popDef1 Patient/1 has encounter 1
-        popDef1.addResource("Patient/1", enc1);
+        state.population(popDef1).addResource("Patient/1", enc1);
 
         // popDef2 Patient/1 has encounter 2
-        popDef2.addResource("Patient/1", enc2);
+        state.population(popDef2).addResource("Patient/1", enc2);
 
         // Remove resources that are in both (none)
-        popDef1.removeAllResources("Patient/1", popDef2);
+        state.population(popDef1).removeAllResources("Patient/1", state.population(popDef2));
 
-        assertEquals(1, popDef1.getResourcesForSubject("Patient/1").size(), "Should still have 1 resource");
-        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(enc1), "Encounter/1 should remain");
+        assertEquals(
+                1,
+                state.population(popDef1).getResourcesForSubject("Patient/1").size(),
+                "Should still have 1 resource");
+        assertTrue(
+                getResourcesDistinctAcrossAllSubjects(state.population(popDef1)).contains(enc1),
+                "Encounter/1 should remain");
     }
 
     /**
@@ -530,23 +586,27 @@ class PopulationDefTest {
                 "DenominatorExclusion",
                 encounterBasis,
                 null);
+        var state = stateFor(popDef1, popDef2);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
 
         // Both have the same encounters for Patient/1
-        popDef1.addResource("Patient/1", enc1);
-        popDef1.addResource("Patient/1", enc2);
+        state.population(popDef1).addResource("Patient/1", enc1);
+        state.population(popDef1).addResource("Patient/1", enc2);
 
         Encounter enc1b = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2b = (Encounter) new Encounter().setId("Encounter/2");
-        popDef2.addResource("Patient/1", enc1b);
-        popDef2.addResource("Patient/1", enc2b);
+        state.population(popDef2).addResource("Patient/1", enc1b);
+        state.population(popDef2).addResource("Patient/1", enc2b);
 
         // Remove all common resources
-        popDef1.removeAllResources("Patient/1", popDef2);
+        state.population(popDef1).removeAllResources("Patient/1", state.population(popDef2));
 
-        assertEquals(0, popDef1.getResourcesForSubject("Patient/1").size(), "Should have no resources remaining");
+        assertEquals(
+                0,
+                state.population(popDef1).getResourcesForSubject("Patient/1").size(),
+                "Should have no resources remaining");
     }
 
     /**
@@ -559,23 +619,24 @@ class PopulationDefTest {
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
         PopulationDef popDef2 = new PopulationDef(
                 "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         // popDef1 has subjects 1, 2, 3
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
-        popDef1.addResource("Patient/3", true);
+        state.population(popDef1).addResource("Patient/1", true);
+        state.population(popDef1).addResource("Patient/2", true);
+        state.population(popDef1).addResource("Patient/3", true);
 
         // popDef2 has subjects 2, 3 (exclusions)
-        popDef2.addResource("Patient/2", true);
-        popDef2.addResource("Patient/3", true);
+        state.population(popDef2).addResource("Patient/2", true);
+        state.population(popDef2).addResource("Patient/3", true);
 
         // Remove subjects that are in both (2 and 3)
-        popDef1.removeAllSubjects(popDef2);
+        state.population(popDef1).removeAllSubjects(state.population(popDef2));
 
-        assertEquals(1, popDef1.getSubjects().size(), "Should have 1 subject remaining");
-        assertTrue(popDef1.getSubjects().contains("Patient/1"), "Patient/1 should remain");
-        assertFalse(popDef1.getSubjects().contains("Patient/2"), "Patient/2 should be removed");
-        assertFalse(popDef1.getSubjects().contains("Patient/3"), "Patient/3 should be removed");
+        assertEquals(1, state.population(popDef1).getSubjects().size(), "Should have 1 subject remaining");
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/1"), "Patient/1 should remain");
+        assertFalse(state.population(popDef1).getSubjects().contains("Patient/2"), "Patient/2 should be removed");
+        assertFalse(state.population(popDef1).getSubjects().contains("Patient/3"), "Patient/3 should be removed");
     }
 
     /**
@@ -588,21 +649,22 @@ class PopulationDefTest {
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
         PopulationDef popDef2 = new PopulationDef(
                 "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         // popDef1 has subjects 1, 2
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        state.population(popDef1).addResource("Patient/1", true);
+        state.population(popDef1).addResource("Patient/2", true);
 
         // popDef2 has subjects 3, 4
-        popDef2.addResource("Patient/3", true);
-        popDef2.addResource("Patient/4", true);
+        state.population(popDef2).addResource("Patient/3", true);
+        state.population(popDef2).addResource("Patient/4", true);
 
         // Remove subjects that are in both (none)
-        popDef1.removeAllSubjects(popDef2);
+        state.population(popDef1).removeAllSubjects(state.population(popDef2));
 
-        assertEquals(2, popDef1.getSubjects().size(), "Should still have 2 subjects");
-        assertTrue(popDef1.getSubjects().contains("Patient/1"));
-        assertTrue(popDef1.getSubjects().contains("Patient/2"));
+        assertEquals(2, state.population(popDef1).getSubjects().size(), "Should still have 2 subjects");
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/1"));
+        assertTrue(state.population(popDef1).getSubjects().contains("Patient/2"));
     }
 
     /**
@@ -615,18 +677,19 @@ class PopulationDefTest {
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
         PopulationDef popDef2 = new PopulationDef(
                 "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+        var state = stateFor(popDef1, popDef2);
 
         // Both have the same subjects
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        state.population(popDef1).addResource("Patient/1", true);
+        state.population(popDef1).addResource("Patient/2", true);
 
-        popDef2.addResource("Patient/1", true);
-        popDef2.addResource("Patient/2", true);
+        state.population(popDef2).addResource("Patient/1", true);
+        state.population(popDef2).addResource("Patient/2", true);
 
         // Remove all common subjects
-        popDef1.removeAllSubjects(popDef2);
+        state.population(popDef1).removeAllSubjects(state.population(popDef2));
 
-        assertEquals(0, popDef1.getSubjects().size(), "Should have no subjects remaining");
+        assertEquals(0, state.population(popDef1).getSubjects().size(), "Should have no subjects remaining");
     }
 
     /**
@@ -637,16 +700,17 @@ class PopulationDefTest {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        var state = stateFor(popDef);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
-        popDef.addResource("Patient/1", enc1);
-        popDef.addResource("Patient/1", enc2);
-        popDef.addResource("Patient/2", enc3);
+        state.population(popDef).addResource("Patient/1", enc1);
+        state.population(popDef).addResource("Patient/1", enc2);
+        state.population(popDef).addResource("Patient/2", enc3);
 
-        assertEquals(3, popDef.getAllSubjectResources().size(), "Should have 3 total resources");
+        assertEquals(3, state.population(popDef).getAllSubjectResources().size(), "Should have 3 total resources");
     }
 
     /**
@@ -657,14 +721,15 @@ class PopulationDefTest {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef popDef =
                 new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+        var state = stateFor(popDef);
 
-        popDef.addResource("Patient/1", "common-value");
-        popDef.addResource("Patient/2", "common-value");
+        state.population(popDef).addResource("Patient/1", "common-value");
+        state.population(popDef).addResource("Patient/2", "common-value");
 
-        assertEquals(2, popDef.getSubjects().size(), "Should have 2 subjects");
+        assertEquals(2, state.population(popDef).getSubjects().size(), "Should have 2 subjects");
         assertEquals(
                 2,
-                popDef.getAllSubjectResources().size(),
+                state.population(popDef).getAllSubjectResources().size(),
                 "Should count both occurrences of same value for different subjects");
     }
 
@@ -683,6 +748,7 @@ class PopulationDefTest {
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
+        var state = stateFor(popDef);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
@@ -692,14 +758,20 @@ class PopulationDefTest {
         Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap1.put(enc1, new QuantityDef(100.0));
         obsMap1.put(enc2, new QuantityDef(200.0));
-        popDef.addResource("Patient/1", obsMap1);
+        state.population(popDef).addResource("Patient/1", obsMap1);
 
         // Patient/2 has 1 observation
         Map<Object, Object> obsMap2 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap2.put(enc3, new QuantityDef(300.0));
-        popDef.addResource("Patient/2", obsMap2);
+        state.population(popDef).addResource("Patient/2", obsMap2);
 
-        assertEquals(3, popDef.countObservations(), "Should count all observation entries across all maps");
-        assertEquals(3, popDef.getCount(), "getCount() should match countObservations() for MEASUREOBSERVATION");
+        assertEquals(
+                3,
+                state.population(popDef).countObservations(),
+                "Should count all observation entries across all maps");
+        assertEquals(
+                3,
+                state.population(popDef).getCount(),
+                "getCount() should match countObservations() for MEASUREOBSERVATION");
     }
 }

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
@@ -23,7 +22,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
  * Extracted from R4MeasureReportBuilder inner class.
  */
 class R4MeasureReportBuilderContext {
-    private final Measure measure;
     private final MeasureDef measureDef;
     private final MeasureEvaluationState state;
     private final MeasureReport measureReport;
@@ -33,8 +31,7 @@ class R4MeasureReportBuilderContext {
     private final Map<String, Resource> contained = new HashMap<>();
 
     public R4MeasureReportBuilderContext(
-            Measure measure, MeasureDef measureDef, MeasureEvaluationState state, MeasureReport measureReport) {
-        this.measure = measure;
+            MeasureDef measureDef, MeasureEvaluationState state, MeasureReport measureReport) {
         this.measureDef = measureDef;
         this.state = state;
         this.measureReport = measureReport;
@@ -42,7 +39,7 @@ class R4MeasureReportBuilderContext {
 
     // For error messages:
     public String getMeasureUrl() {
-        return this.measure.getUrl();
+        return this.measureDef.url();
     }
 
     public Map<String, Resource> contained() {
@@ -51,10 +48,6 @@ class R4MeasureReportBuilderContext {
 
     public void addContained(Resource r) {
         this.contained.putIfAbsent(this.getId(r), r);
-    }
-
-    public Measure measure() {
-        return this.measure;
     }
 
     public MeasureReport report() {

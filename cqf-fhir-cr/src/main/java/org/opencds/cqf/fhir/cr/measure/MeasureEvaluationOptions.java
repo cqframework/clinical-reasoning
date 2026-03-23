@@ -12,7 +12,7 @@ public class MeasureEvaluationOptions {
         return options;
     }
 
-    private boolean applyScoringSetMembership = true;
+    private boolean enforceSubsetRules = true;
     private boolean isValidationEnabled = false;
     private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
     private SubjectProviderOptions subjectProviderOptions;
@@ -54,13 +54,13 @@ public class MeasureEvaluationOptions {
         return subjectProviderOptions;
     }
 
-    public MeasureEvaluationOptions setApplyScoringSetMembership(boolean applyScoringSetMembership) {
-        this.applyScoringSetMembership = applyScoringSetMembership;
+    public MeasureEvaluationOptions setEnforceSubsetRules(boolean enforceSubsetRules) {
+        this.enforceSubsetRules = enforceSubsetRules;
         return this;
     }
 
-    public boolean getApplyScoringSetMembership() {
-        return this.applyScoringSetMembership;
+    public boolean getEnforceSubsetRules() {
+        return this.enforceSubsetRules;
     }
 
     public boolean isEnsureSearchParameters() {

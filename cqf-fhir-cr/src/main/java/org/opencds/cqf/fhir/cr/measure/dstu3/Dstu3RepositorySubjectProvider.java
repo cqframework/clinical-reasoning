@@ -13,18 +13,19 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class Dstu3RepositorySubjectProvider implements SubjectProvider {
 
     @Override
-    public Stream<String> getSubjects(IRepository repository, String subjectId) {
+    public Stream<SubjectRef> getSubjects(IRepository repository, String subjectId) {
         return getSubjects(repository, Collections.singletonList(subjectId));
     }
 
     @Override
-    public Stream<String> getSubjects(IRepository repository, List<String> subjectIds) {
+    public Stream<SubjectRef> getSubjects(IRepository repository, List<String> subjectIds) {
         if (subjectIds == null
                 || subjectIds.isEmpty()
                 || subjectIds.get(0) == null
@@ -34,10 +35,11 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                             .getIdElement()
                             .toUnqualifiedVersionless()
                             .getValue())
-                    .toStream();
+                    .toStream()
+                    .map(SubjectRef::fromQualified);
         }
 
-        List<String> subjects = new ArrayList<>();
+        List<SubjectRef> subjects = new ArrayList<>();
         subjectIds.forEach(subjectId -> {
             if (subjectId.indexOf("/") == -1) {
                 subjectId = "Patient/".concat(subjectId);
@@ -50,7 +52,8 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
                     throw new MeasureResolutionException("Resource " + id.getValue() + " is not known");
                 }
 
-                subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
+                subjects.add(SubjectRef.fromQualified(
+                        r.getIdElement().toUnqualifiedVersionless().getValue()));
             } else if (subjectId.startsWith("Group")) {
                 IdType id = new IdType(subjectId);
                 Group r = repository.read(Group.class, id);
@@ -61,7 +64,7 @@ public class Dstu3RepositorySubjectProvider implements SubjectProvider {
 
                 for (GroupMemberComponent gmc : r.getMember()) {
                     IIdType ref = gmc.getEntity().getReferenceElement();
-                    subjects.add(ref.getResourceType() + "/" + ref.getIdPart());
+                    subjects.add(new SubjectRef(ref.getResourceType(), ref.getIdPart()));
                 }
 
             } else {

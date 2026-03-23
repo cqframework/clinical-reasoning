@@ -86,7 +86,10 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                         populationType,
                         pop.getCriteria(),
                         populationBasisDef,
-                        null));
+                        null,
+                        null,
+                        null,
+                        pop.hasDescription() ? pop.getDescription() : null));
             }
 
             // Stratifiers
@@ -111,11 +114,20 @@ public class Dstu3MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     measureScoring,
                     false, // no group scoring
                     getImprovementNotation(measureImpNotation),
-                    populationBasisDef);
+                    populationBasisDef,
+                    group.hasDescription() ? group.getDescription() : null);
             groups.add(groupDef);
         }
 
-        return new MeasureDef(measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, sdes);
+        return new MeasureDef(
+                measure.getIdElement(),
+                measure.getUrl(),
+                measure.getVersion(),
+                groups,
+                sdes,
+                measure.hasDescription() ? measure.getDescription() : null,
+                measure.hasLanguage() ? measure.getLanguage() : null,
+                measure.hasImplicitRules() ? measure.getImplicitRules() : null);
     }
 
     private ConceptDef conceptToConceptDef(CodeableConcept codeable) {

@@ -111,8 +111,9 @@ public class CrR4Config {
     ICollectDataServiceFactory collectDataServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions measureEvaluationOptions,
-            R4MeasureServiceUtilsFactory r4MeasureServiceUtilsFactory) {
-        return rd -> new R4CollectDataService(repositoryFactory.create(rd), measureEvaluationOptions);
+            MeasurePeriodValidator measurePeriodValidator) {
+        return rd -> new R4CollectDataService(
+                repositoryFactory.create(rd), measureEvaluationOptions, measurePeriodValidator);
     }
 
     @Bean

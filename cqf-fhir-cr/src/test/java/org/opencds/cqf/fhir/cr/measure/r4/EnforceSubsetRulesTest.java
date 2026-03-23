@@ -7,7 +7,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
  * the purpose of this test is to validate the output and required fields for evaluating a Measure with population basis that is neither resourceType or boolean
  */
 @SuppressWarnings("squid:S2699")
-class ApplyScoringSetMembershipTest {
+class EnforceSubsetRulesTest {
     // req'd populations
     // exception works
     // exclusion works

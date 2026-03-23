@@ -10,12 +10,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
- * Equivalent to the FHIR stratum population.
- *
- * This is meant to be the source of truth for all data points regarding stratum populations.
- * <p/>
- * Converted from record to class to support mutable aggregationResult field
- * for persisting per-stratum observation aggregates needed by downstream aggregation.
+ * Per-stratum population evaluation result, created during measure evaluation.
+ * <p>
+ * Like {@link StratumDef}, instances are ephemeral: created per-evaluation, not part of the
+ * immutable {@link MeasureDef} tree. The mutable {@code aggregationResult} field holds
+ * per-stratum observation aggregates set by scoring strategies and read by report builders.
  */
 public class StratumPopulationDef {
 
@@ -30,7 +29,7 @@ public class StratumPopulationDef {
     private final MeasureStratifierType measureStratifierType;
     private final CodeDef populationBasis;
 
-    // Mutable field for per-stratum aggregation result
+    // Mutable: set by scoring strategies (ContinuousVariable, RatioContinuousVariable)
     private Double aggregationResult;
 
     public StratumPopulationDef(
@@ -107,7 +106,6 @@ public class StratumPopulationDef {
         return Set.copyOf(resourceIdsForSubjectList);
     }
 
-    // Enhanced by Claude Sonnet 4.5 to properly handle count calculation for all stratifier types
     public int getCount() {
         // For criteria stratifiers, use the intersection count
         if (MeasureStratifierType.CRITERIA == measureStratifierType) {
@@ -124,10 +122,7 @@ public class StratumPopulationDef {
     }
 
     /**
-     * Get the per-stratum aggregation result computed during scoring.
-     * This is the intermediate observation aggregate needed for downstream distributed aggregation.
-     *
-     * @return the aggregation result, or null if not computed
+     * @return the per-stratum aggregation result, or null if not computed
      */
     @Nullable
     public Double getAggregationResult() {
@@ -135,10 +130,6 @@ public class StratumPopulationDef {
     }
 
     /**
-     * Set the per-stratum aggregation result.
-     * Called by MeasureReportDefScorer to persist intermediate observation aggregates
-     * that would otherwise be discarded.
-     *
      * @param aggregationResult the computed aggregation result
      */
     public void setAggregationResult(@Nullable Double aggregationResult) {

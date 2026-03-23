@@ -21,12 +21,10 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.Element;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
-import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -44,14 +42,12 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -64,23 +60,21 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
+public class R4MeasureReportBuilder implements MeasureReportBuilder<MeasureReport> {
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportBuilder.class);
-    protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
 
     @Override
     public MeasureReport build(
-            Measure measure,
             MeasureDef measureDef,
             MeasureEvaluationState state,
             MeasureReportType measureReportType,
             Interval measurementPeriod,
             List<String> subjectIds) {
 
-        var report = this.createMeasureReport(measure, measureDef, measureReportType, subjectIds, measurementPeriod);
+        var report = this.createMeasureReport(measureDef, measureReportType, subjectIds, measurementPeriod);
 
-        var bc = new R4MeasureReportBuilderContext(measure, measureDef, state, report);
+        var bc = new R4MeasureReportBuilderContext(measureDef, state, report);
 
         // buildGroups must be run first to set up the builder context to be able to use
         // the evaluatedResource references for SDE processing
@@ -131,60 +125,28 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void buildGroups(R4MeasureReportBuilderContext bc) {
-        var measure = bc.measure();
         var measureDef = bc.measureDef();
         var report = bc.report();
 
-        if (measure.getGroup().size() != measureDef.groups().size()) {
-            throw new MeasureEvaluationException(
-                    "The Measure has a different number of groups defined than the MeasureDef for Measure: "
-                            + measure.getUrl());
-        }
-        // ASSUMPTION: The groups are in the same order in both the Measure and the
-        // MeasureDef
-        for (int i = 0; i < measure.getGroup().size(); i++) {
-            var measureGroup = measure.getGroup().get(i);
-            var defGroup = measureDef.groups().get(i);
+        for (var defGroup : measureDef.groups()) {
             var reportGroup = report.addGroup();
-            buildGroup(bc, measureGroup, reportGroup, defGroup);
+            buildGroup(bc, reportGroup, defGroup);
         }
     }
 
     private void buildGroup(
-            R4MeasureReportBuilderContext bc,
-            MeasureGroupComponent measureGroup,
-            MeasureReportGroupComponent reportGroup,
-            GroupDef groupDef) {
+            R4MeasureReportBuilderContext bc, MeasureReportGroupComponent reportGroup, GroupDef groupDef) {
 
-        var groupDefSizeDiff = 0;
-        if (groupDef.hasPopulationType(MeasurePopulationType.DATEOFCOMPLIANCE)) {
-            // dateOfNonCompliance is another population not calculated
-            groupDefSizeDiff = 1;
-        }
-
-        if ((measureGroup.getPopulation().size()) != (groupDef.populations().size() - groupDefSizeDiff)) {
-            throw new MeasureValidationException(
-                    "The MeasureGroup has a different number of populations defined than the GroupDef for Measure: "
-                            + bc.measure().getUrl());
-        }
-        if (measureGroup.getStratifier().size() != (groupDef.stratifiers().size())) {
-            throw new MeasureValidationException(
-                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef for Measure: "
-                            + bc.measure().getUrl());
-        }
-        reportGroup.setCode(measureGroup.getCode());
-        reportGroup.setId(measureGroup.getId());
+        reportGroup.setCode(conceptDefToConcept(groupDef.code()));
+        reportGroup.setId(groupDef.id());
         // Measure Level Extension
-        addMeasureDescription(reportGroup, measureGroup);
+        addDescriptionExtension(reportGroup, groupDef.description());
         R4MeasureReportUtils.addExtensionImprovementNotation(reportGroup, groupDef);
 
-        for (int i = 0; i < measureGroup.getPopulation().size(); i++) {
-            // Report Population Component
-            var measurePop = measureGroup.getPopulation().get(i);
-            // Groups can have more than one of the same PopulationType, we need a Unique value to bind on
-            PopulationDef defPop = groupDef.findPopulationById(measurePop.getId());
+        for (PopulationDef defPop : groupDef.populations()) {
+            if (defPop.type() == MeasurePopulationType.DATEOFCOMPLIANCE) continue;
             var reportPop = reportGroup.addPopulation();
-            buildPopulation(bc, measurePop, reportPop, defPop, groupDef);
+            buildPopulation(bc, reportPop, defPop, groupDef);
         }
 
         // add extension to group for totalDenominator and totalNumerator
@@ -215,19 +177,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 }
             }
         }
-        for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
-            var groupStrat = measureGroup.getStratifier().get(i);
+        for (var defStrat : groupDef.stratifiers()) {
             var reportStrat = reportGroup.addStratifier();
-            var defStrat = groupDef.stratifiers().get(i);
-            R4StratifierBuilder.buildStratifier(
-                    bc, groupStrat, reportStrat, defStrat, measureGroup.getPopulation(), groupDef);
-        }
-    }
-
-    private void addMeasureDescription(MeasureReportGroupComponent reportGroup, MeasureGroupComponent measureGroup) {
-        if (measureGroup.hasDescription()) {
-            reportGroup.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measureGroup.getDescription()));
+            R4StratifierBuilder.buildStratifier(bc, reportStrat, defStrat, groupDef);
         }
     }
 
@@ -240,13 +192,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private void buildPopulation(
             R4MeasureReportBuilderContext bc,
-            MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
             PopulationDef populationDef,
             GroupDef groupDef) {
 
-        reportPopulation.setCode(measurePopulation.getCode());
-        reportPopulation.setId(measurePopulation.getId());
+        reportPopulation.setCode(conceptDefToConcept(populationDef.code()));
+        reportPopulation.setId(populationDef.id());
         reportPopulation.setCount(bc.state().population(populationDef).getCount());
 
         // Supporting Evidence
@@ -257,11 +208,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(reportPopulation, extDefs, bc.state());
         }
 
-        if (measurePopulation.hasDescription()) {
-            reportPopulation.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL,
-                    new StringType(measurePopulation.getDescription()));
-        }
+        addDescriptionExtension(reportPopulation, populationDef.description());
 
         addEvaluatedResourceReferences(
                 bc, populationDef.id(), bc.state().population(populationDef).getEvaluatedResources());
@@ -279,8 +226,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }
-
-        measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
 
         // Report Type behavior
         if (Objects.requireNonNull(bc.report().getType()) == MeasureReport.MeasureReportType.SUBJECTLIST
@@ -383,16 +328,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void buildSDEs(R4MeasureReportBuilderContext bc) {
-        var measure = bc.measure();
-        var measureDef = bc.measureDef();
-        // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
-        for (int i = 0; i < measure.getSupplementalData().size(); i++) {
-            var sde = measureDef.sdes().get(i);
+        for (var sde : bc.measureDef().sdes()) {
             buildSDE(bc, sde);
         }
     }
 
-    private CodeableConcept conceptDefToConcept(ConceptDef c) {
+    CodeableConcept conceptDefToConcept(ConceptDef c) {
+        if (c == null) return null;
         var cc = new CodeableConcept().setText(c.text());
         for (var cd : c.codes()) {
             cc.addCoding(codeDefToCoding(cd));
@@ -412,11 +354,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private MeasureReport createMeasureReport(
-            Measure measure,
-            MeasureDef measureDef,
-            MeasureReportType type,
-            List<String> subjectIds,
-            Interval measurementPeriod) {
+            MeasureDef measureDef, MeasureReportType type, List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.COMPLETE);
         report.setType(org.hl7.fhir.r4.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
@@ -429,18 +367,20 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             report.setPeriod(helper.buildMeasurementPeriod((measurementPeriod)));
         }
 
-        report.setMeasure(getMeasure(measure));
+        report.setMeasure(getMeasureReference(measureDef));
         report.setDate(new java.util.Date());
-        report.setImplicitRules(measure.getImplicitRules());
+        report.setImplicitRules(measureDef.implicitRules());
         if (measureDef.groups().isEmpty() || !measureDef.groups().get(0).isGroupImprovementNotation()) {
-            // if true, all group components have the same improvement Notation
-            report.setImprovementNotation(measure.getImprovementNotation());
+            // Use the measure-level improvement notation if explicitly set (null means not set)
+            if (measureDef.measureImprovementNotation() != null) {
+                report.setImprovementNotation(improvementNotationToConcept(measureDef.measureImprovementNotation()));
+            }
         }
-        report.setLanguage(measure.getLanguage());
+        report.setLanguage(measureDef.language());
 
-        if (measure.hasDescription()) {
+        if (measureDef.description() != null && !measureDef.description().isEmpty()) {
             report.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measure.getDescription()));
+                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(measureDef.description()));
         }
 
         return report;
@@ -457,11 +397,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         return obsExtension;
     }
 
-    private String getMeasure(Measure measure) {
-        if (StringUtils.isNotBlank(measure.getUrl()) && !measure.getUrl().contains("|") && measure.hasVersion()) {
-            return measure.getUrl() + "|" + measure.getVersion();
+    private String getMeasureReference(MeasureDef measureDef) {
+        if (StringUtils.isNotBlank(measureDef.url())
+                && !measureDef.url().contains("|")
+                && StringUtils.isNotBlank(measureDef.version())) {
+            return measureDef.url() + "|" + measureDef.version();
         }
-        return measure.getUrl();
+        return measureDef.url();
     }
 
     private Coding supplementalDataCoding;
@@ -534,15 +476,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private Observation createObservation(R4MeasureReportBuilderContext bc, String id, String populationId) {
-        var measure = bc.measure();
+        var measureUrl = bc.measureDef().url();
+        var measureId = bc.measureDef().id();
         MeasureInfo measureInfo = new MeasureInfo()
                 .withMeasure(
-                        measure.hasUrl()
-                                ? measure.getUrl()
-                                : (measure.hasId()
-                                        ? MeasureInfo.MEASURE_PREFIX
-                                                + measure.getIdElement().getIdPart()
-                                        : ""))
+                        StringUtils.isNotBlank(measureUrl)
+                                ? measureUrl
+                                : (StringUtils.isNotBlank(measureId) ? MeasureInfo.MEASURE_PREFIX + measureId : ""))
                 .withPopulationId(populationId);
 
         Observation obs = new Observation();
@@ -712,5 +652,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private boolean matchesStratumValue(
             StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
         return R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef);
+    }
+
+    private void addDescriptionExtension(Element target, String description) {
+        if (description != null && !description.isEmpty()) {
+            target.addExtension(MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(description));
+        }
+    }
+
+    private CodeableConcept improvementNotationToConcept(CodeDef impNot) {
+        if (impNot == null) return null;
+        return new CodeableConcept().addCoding(codeDefToCoding(impNot));
     }
 }

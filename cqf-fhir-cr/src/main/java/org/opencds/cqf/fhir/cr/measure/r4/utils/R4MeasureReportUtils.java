@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.Type;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
@@ -127,16 +126,6 @@ public class R4MeasureReportUtils {
         String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
         String defText = getStratumDefText(stratifierDef, stratumDef);
         return Objects.equals(reportText, defText);
-    }
-
-    public static void addAggregationResultMethodAndCriteriaRef(
-            MeasureReportGroupPopulationComponent reportPopulation, PopulationDef populationDef) {
-
-        addAggregationResultMethodAndCriteriaRef(
-                reportPopulation,
-                populationDef.getAggregateMethod(),
-                populationDef.getAggregationResult(),
-                populationDef.getCriteriaReference());
     }
 
     public static void addExtensionImprovementNotation(MeasureReportGroupComponent reportGroup, GroupDef groupDef) {

@@ -25,4 +25,8 @@ public class MeasureConfiguration {
     R4MeasureProcessor r4MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
         return new R4MeasureProcessor(repository, measureEvaluationOptions);
     }
+
+    // TODO: Move ensureSupplementalDataElementSearchParameter() here as a @PostConstruct
+    // or SmartLifecycle hook. Currently removed from per-evaluation call in services.
+    // See R4MeasureServiceUtils.ensureSupplementalDataElementSearchParameter()
 }

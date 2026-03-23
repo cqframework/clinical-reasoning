@@ -76,7 +76,7 @@ public class MeasureCommand implements Callable<Integer> {
 
         // Create measure processor once
         R4MeasureProcessor processor = getR4MeasureProcessor(
-                bundle.evaluationSettings(), bundle.repository(), Boolean.parseBoolean(args.applyScoring));
+                bundle.evaluationSettings(), bundle.repository(), Boolean.parseBoolean(args.enforceSubsetRules));
 
         // Parse period dates once
         var start = args.periodStart != null
@@ -152,10 +152,10 @@ public class MeasureCommand implements Callable<Integer> {
 
     @Nonnull
     private static R4MeasureProcessor getR4MeasureProcessor(
-            EvaluationSettings evaluationSettings, IRepository repository, boolean applyScoring) {
+            EvaluationSettings evaluationSettings, IRepository repository, boolean enforceSubsetRules) {
 
         MeasureEvaluationOptions evaluationOptions = new MeasureEvaluationOptions();
-        evaluationOptions.setApplyScoringSetMembership(applyScoring);
+        evaluationOptions.setEnforceSubsetRules(enforceSubsetRules);
         evaluationOptions.setEvaluationSettings(evaluationSettings);
 
         return new R4MeasureProcessor(repository, evaluationOptions);

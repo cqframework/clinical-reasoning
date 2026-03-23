@@ -30,8 +30,9 @@ public class MeasureCommandArgument {
     public String reportPath;
 
     @Option(
-            names = {"--apply-scoring"},
+            names = {"--enforce-subset-rules"},
             defaultValue = "true",
-            description = "Tells evaluation to apply scoring algorithm to returned results.")
-    public String applyScoring;
+            description =
+                    "Enforces population subset containment rules (e.g. numerator \u2286 denominator). Set to false to see raw CQL results without set-algebra filtering.")
+    public String enforceSubsetRules;
 }

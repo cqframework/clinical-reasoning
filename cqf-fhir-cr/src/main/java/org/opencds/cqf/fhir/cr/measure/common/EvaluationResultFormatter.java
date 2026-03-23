@@ -184,12 +184,13 @@ public class EvaluationResultFormatter {
         return INDENT.repeat(Math.max(0, level));
     }
 
-    public static Object printSubjectResources(PopulationDef populationDef, String subjectId) {
-        if (populationDef == null) {
+    public static Object printSubjectResources(
+            MeasureEvaluationState.PopulationState populationState, String subjectId) {
+        if (populationState == null) {
             return "{empty}";
         }
 
-        final Set<Object> resources = populationDef.getSubjectResources().get(subjectId);
+        final Set<Object> resources = populationState.getSubjectResources().get(subjectId);
 
         if (CollectionUtils.isEmpty(resources)) {
             return subjectId + ": {empty}";

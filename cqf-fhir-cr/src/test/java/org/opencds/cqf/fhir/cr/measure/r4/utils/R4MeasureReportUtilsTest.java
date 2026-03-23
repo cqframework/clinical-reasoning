@@ -360,12 +360,10 @@ class R4MeasureReportUtilsTest {
             testaddAggregationResultAndMethodAndCriteriaReference_FromPopulationDef_WithAggregationResultAndCriteriaReference() {
         MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
         PopulationDef populationDef = createPopulationDef(
-                MeasurePopulationType.NUMERATOR,
-                null,
-                ContinuousVariableObservationAggregateMethod.SUM,
-                BigDecimal.valueOf(42.5));
+                MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.SUM);
 
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, populationDef);
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                population, populationDef.getAggregateMethod(), 42.5, populationDef.getCriteriaReference());
 
         // Assert both extensions are set
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
@@ -383,10 +381,10 @@ class R4MeasureReportUtilsTest {
     @Test
     void testAddAggregationResultAndMethod_FromPopulationDef_WithNullMethodAndCriteriaReference() {
         MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
-        PopulationDef populationDef =
-                createPopulationDef(MeasurePopulationType.NUMERATOR, null, null, BigDecimal.valueOf(10.0));
+        PopulationDef populationDef = createPopulationDef(MeasurePopulationType.NUMERATOR, null, null);
 
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, populationDef);
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                population, populationDef.getAggregateMethod(), 10.0, populationDef.getCriteriaReference());
 
         // Assert neither extension is set when method is null
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
@@ -399,12 +397,10 @@ class R4MeasureReportUtilsTest {
     void testAddAggregationResultAndMethod_AndCriteriaReference_FromPopulationDef_WithN_A() {
         MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
         PopulationDef populationDef = createPopulationDef(
-                MeasurePopulationType.NUMERATOR,
-                null,
-                ContinuousVariableObservationAggregateMethod.N_A,
-                BigDecimal.valueOf(10.0));
+                MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.N_A);
 
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, populationDef);
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                population, populationDef.getAggregateMethod(), 10.0, populationDef.getCriteriaReference());
 
         // Assert neither extension is set when method is N_A
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
@@ -417,9 +413,10 @@ class R4MeasureReportUtilsTest {
     void testAddAggregationResultAndMethod_FromPopulationDef_WithNullResultAndCriteriaReference() {
         MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
         PopulationDef populationDef = createPopulationDef(
-                MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.AVG, null);
+                MeasurePopulationType.NUMERATOR, null, ContinuousVariableObservationAggregateMethod.AVG);
 
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, populationDef);
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                population, populationDef.getAggregateMethod(), null, populationDef.getCriteriaReference());
 
         // Assert neither extension is set when result is null
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
@@ -628,10 +625,10 @@ class R4MeasureReportUtilsTest {
         PopulationDef populationDef = createPopulationDef(
                 MeasurePopulationType.MEASUREOBSERVATION,
                 "Numerator",
-                ContinuousVariableObservationAggregateMethod.MIN,
-                BigDecimal.valueOf(15.5));
+                ContinuousVariableObservationAggregateMethod.MIN);
 
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, populationDef);
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                population, populationDef.getAggregateMethod(), 15.5, populationDef.getCriteriaReference());
 
         // Assert all three extensions are set
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
@@ -651,12 +648,10 @@ class R4MeasureReportUtilsTest {
     void testAddAggregationResultMethodAndCriteriaRef_FromPopulationDef_WithNullCriteriaReference() {
         MeasureReportGroupPopulationComponent population = new MeasureReportGroupPopulationComponent();
         PopulationDef populationDef = createPopulationDef(
-                MeasurePopulationType.MEASUREOBSERVATION,
-                null,
-                ContinuousVariableObservationAggregateMethod.MAX,
-                BigDecimal.valueOf(88.8));
+                MeasurePopulationType.MEASUREOBSERVATION, null, ContinuousVariableObservationAggregateMethod.MAX);
 
-        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(population, populationDef);
+        R4MeasureReportUtils.addAggregationResultMethodAndCriteriaRef(
+                population, populationDef.getAggregateMethod(), 88.8, populationDef.getCriteriaReference());
 
         // Assert method and result extensions are set, but not criteriaReference
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
@@ -698,24 +693,16 @@ class R4MeasureReportUtilsTest {
     // ========================================
 
     /**
-     * Helper to create a PopulationDef for testing with an aggregationResult.
+     * Helper to create a PopulationDef for testing.
      */
     private PopulationDef createPopulationDef(
             MeasurePopulationType type,
             String criteriaReference,
-            ContinuousVariableObservationAggregateMethod aggregateMethod,
-            BigDecimal aggregationResult) {
+            ContinuousVariableObservationAggregateMethod aggregateMethod) {
         ConceptDef code = new ConceptDef(List.of(new CodeDef("system", type.toCode())), null);
         CodeDef populationBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
-        PopulationDef populationDef = new PopulationDef(
+        return new PopulationDef(
                 "pop1", code, type, "TestExpression", populationBasis, criteriaReference, aggregateMethod, List.of());
-
-        // Set aggregation result if provided (convert BigDecimal to Double)
-        if (aggregationResult != null) {
-            populationDef.setAggregationResult(aggregationResult.doubleValue());
-        }
-
-        return populationDef;
     }
 
     // ========================================

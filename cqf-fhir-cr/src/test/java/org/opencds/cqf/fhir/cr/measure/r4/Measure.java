@@ -79,8 +79,8 @@ public class Measure {
         }
     }
 
-    public static Given given(@Nullable Boolean applyScoringSetMembership) {
-        return new Given(applyScoringSetMembership);
+    public static Given given(@Nullable Boolean enforceSubsetRules) {
+        return new Given(enforceSubsetRules);
     }
 
     public static Given given() {
@@ -93,11 +93,11 @@ public class Measure {
         private String serverBase;
         private final MeasurePeriodValidator measurePeriodValidator;
 
-        public Given(@Nullable Boolean applyScoringSetMembership) {
+        public Given(@Nullable Boolean enforceSubsetRules) {
             this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();
-            if (applyScoringSetMembership != null && !applyScoringSetMembership) {
+            if (enforceSubsetRules != null && !enforceSubsetRules) {
                 MeasureEvaluationOptions options = MeasureEvaluationOptions.defaultOptions();
-                options.setApplyScoringSetMembership(false);
+                options.setEnforceSubsetRules(false);
                 this.evaluationOptions = options;
             } else {
                 this.evaluationOptions = MeasureEvaluationOptions.defaultOptions();

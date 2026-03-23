@@ -1,40 +1,26 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 
 /**
- * Multi-measure evaluation result containing MeasureDefs and Parameters with bundled MeasureReports.
+ * Multi-measure evaluation result pairing {@link MeasureDef}s with a {@link Parameters}
+ * resource containing bundled {@link org.hl7.fhir.r4.model.MeasureReport}s.
  *
- * <p><strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong></p>
- *
- * <p>This record is used by R4 multi-measure test frameworks to assert on:</p>
- * <ul>
- *   <li><strong>measureDefs</strong>: List of pre-scoring internal state for all evaluated measures</li>
- *   <li><strong>parameters</strong>: Parameters resource containing bundled MeasureReports</li>
- * </ul>
+ * <p>Used by tests to assert on both pre-scoring internal state and the post-scoring FHIR
+ * resource. Also used internally by {@code R4MultiMeasureService} during report packaging.</p>
  *
  * <p>Unlike {@link MeasureDefAndR4MeasureReport} which pairs a single MeasureDef with a single
- * MeasureReport, this record supports multi-measure evaluation where:</p>
- * <ul>
- *   <li>Multiple measures are evaluated (one MeasureDef per measure)</li>
- *   <li>MeasureReports are bundled in Parameters based on evaluation type:
- *     <ul>
- *       <li><strong>Population/SubjectList</strong>: ONE bundle with all MeasureReports</li>
- *       <li><strong>Patient/Subject</strong>: ONE bundle PER SUBJECT with their MeasureReports</li>
- *     </ul>
- *   </li>
- * </ul>
+ * MeasureReport, this record supports multi-measure evaluation where multiple measures produce
+ * MeasureReports bundled in Parameters based on evaluation type.</p>
  *
  * <p><strong>Thread Safety:</strong> Assumes synchronous, single-threaded evaluation.
- * MeasureDefs are mutable and safe only because test assertions run after evaluation completes.</p>
+ * MeasureDefs are mutable and safe only because assertions run after evaluation completes.</p>
  *
  * @param measureDefs List of populated MeasureDefs after processResults (mutable references)
  * @param parameters Parameters resource containing bundled R4 MeasureReports
  */
-@VisibleForTesting
 public record MeasureDefAndR4ParametersWithMeasureReports(
         List<MeasureDef> measureDefs, List<MeasureEvaluationState> states, Parameters parameters) {}

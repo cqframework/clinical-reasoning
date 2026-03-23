@@ -14,6 +14,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,14 +41,22 @@ import org.slf4j.LoggerFactory;
  * @see <a href=
  *      "http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97">http://www.hl7.org/implement/standards/product_brief.cfm?product_id=97</a>
  */
-@SuppressWarnings({"squid:S1135", "squid:S3776"})
 public class MeasureEvaluator {
     private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluator.class);
 
-    private final PopulationBasisValidator populationBasisValidator;
+    private static final Map<MeasureEvalType, MeasureReportType> EVAL_TO_REPORT = Map.of(
+            MeasureEvalType.PATIENT, MeasureReportType.INDIVIDUAL,
+            MeasureEvalType.SUBJECT, MeasureReportType.INDIVIDUAL,
+            MeasureEvalType.SUBJECTLIST, MeasureReportType.SUBJECTLIST,
+            MeasureEvalType.PATIENTLIST, MeasureReportType.PATIENTLIST,
+            MeasureEvalType.POPULATION, MeasureReportType.SUMMARY);
 
-    public MeasureEvaluator(PopulationBasisValidator populationBasisValidator) {
+    private final PopulationBasisValidator populationBasisValidator;
+    private final boolean enforceSubsetRules;
+
+    public MeasureEvaluator(PopulationBasisValidator populationBasisValidator, boolean enforceSubsetRules) {
         this.populationBasisValidator = populationBasisValidator;
+        this.enforceSubsetRules = enforceSubsetRules;
     }
 
     public MeasureDef evaluate(
@@ -56,50 +65,13 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             EvaluationResult evaluationResult,
-            boolean applyScoring,
             MeasureEvaluationState state) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
 
-        return switch (measureEvalType) {
-            case PATIENT, SUBJECT ->
-                this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.INDIVIDUAL,
-                        evaluationResult,
-                        applyScoring,
-                        state);
-            case SUBJECTLIST ->
-                this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.SUBJECTLIST,
-                        evaluationResult,
-                        applyScoring,
-                        state);
-            case PATIENTLIST ->
-                // DSTU3 Only
-                this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.PATIENTLIST,
-                        evaluationResult,
-                        applyScoring,
-                        state);
-            case POPULATION ->
-                this.evaluateSubject(
-                        measureDef,
-                        subjectType,
-                        subjectId,
-                        MeasureReportType.SUMMARY,
-                        evaluationResult,
-                        applyScoring,
-                        state);
-        };
+        var reportType = Objects.requireNonNull(
+                EVAL_TO_REPORT.get(measureEvalType), "Unsupported MeasureEvalType: " + measureEvalType);
+        return evaluateSubject(measureDef, subjectType, subjectId, reportType, evaluationResult, state);
     }
 
     protected MeasureDef evaluateSubject(
@@ -108,12 +80,10 @@ public class MeasureEvaluator {
             String subjectId,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
-            boolean applyScoring,
             MeasureEvaluationState state) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult, state);
         for (GroupDef groupDef : measureDef.groups()) {
-            evaluateGroup(
-                    measureDef, groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring, state);
+            evaluateGroup(measureDef, groupDef, subjectType, subjectId, reportType, evaluationResult, state);
         }
         return measureDef;
     }
@@ -250,13 +220,12 @@ public class MeasureEvaluator {
         }
     }
 
-    protected void evaluateProportion(
+    protected void evaluateProportionOrRatio(
             GroupDef groupDef,
             String subjectType,
             String subjectId,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
-            boolean applyScoring,
             MeasureEvaluationState state) {
         // check populations
         ScoringTypePopulations.validateScoringTypePopulations(
@@ -297,7 +266,7 @@ public class MeasureEvaluator {
                     evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult, state);
         }
         // Apply set-algebra rules (subset enforcement, exclusions, exceptions)
-        PopulationSetAlgebra.applyProportionRules(subjectId, groupDef, applyScoring, state);
+        PopulationSetAlgebra.applyProportionRules(subjectId, groupDef, this.enforceSubsetRules, state);
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             state.population(dateOfCompliance).addResource(subjectId, doc);
@@ -374,7 +343,6 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             EvaluationResult evaluationResult,
-            boolean applyScoring,
             MeasureReportType reportType,
             MeasureEvaluationState state) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
@@ -395,7 +363,7 @@ public class MeasureEvaluator {
                     subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult, state);
         }
         // Apply set-algebra rules (subset enforcement, exclusions)
-        PopulationSetAlgebra.applyContinuousVariableRules(subjectId, groupDef, applyScoring, state);
+        PopulationSetAlgebra.applyContinuousVariableRules(subjectId, groupDef, this.enforceSubsetRules, state);
         if (measurePopulationObservation != null) {
             // only Measure Population resources need to be removed
             var expressionName = measurePopulationObservation.getCriteriaReference() + "-"
@@ -408,7 +376,7 @@ public class MeasureEvaluator {
                     evaluationResult,
                     expressionName,
                     state);
-            if (applyScoring && measurePopulation != null) {
+            if (this.enforceSubsetRules && measurePopulation != null) {
                 // only measureObservations that intersect with measureObservation should be retained
                 ObservationAligner.retainObservationResourcesInPopulation(
                         subjectId, measurePopulation, measurePopulationObservation, state);
@@ -457,7 +425,6 @@ public class MeasureEvaluator {
             String subjectId,
             MeasureReportType reportType,
             EvaluationResult evaluationResult,
-            boolean applyScoring,
             MeasureEvaluationState state) {
 
         populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
@@ -468,11 +435,10 @@ public class MeasureEvaluator {
         var scoring = groupDef.measureScoring();
         switch (scoring) {
             case PROPORTION, RATIO:
-                evaluateProportion(groupDef, subjectType, subjectId, reportType, evaluationResult, applyScoring, state);
+                evaluateProportionOrRatio(groupDef, subjectType, subjectId, reportType, evaluationResult, state);
                 break;
             case CONTINUOUSVARIABLE:
-                evaluateContinuousVariable(
-                        groupDef, subjectType, subjectId, evaluationResult, applyScoring, reportType, state);
+                evaluateContinuousVariable(groupDef, subjectType, subjectId, evaluationResult, reportType, state);
                 break;
             case COHORT:
                 evaluateCohort(groupDef, subjectType, subjectId, evaluationResult, reportType, state);

@@ -95,7 +95,7 @@ class MultiLibEvalComplexCqlTest {
 
     private static MeasureEvaluationOptions getEvaluationOptions() {
         return MeasureEvaluationOptions.defaultOptions()
-                .setApplyScoringSetMembership(false)
+                .setEnforceSubsetRules(false)
                 .setEvaluationSettings(getEvaluationSettings());
     }
 

@@ -22,6 +22,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureScoreCalculator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
@@ -59,8 +60,8 @@ class Dstu3MeasureReportBuilderTest {
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
-        var measureReport = dstu3MeasureReportBuilder.build(
-                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
+        var measureReport =
+                dstu3MeasureReportBuilder.build(measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: Group score should be copied to the report
         assertNotNull(measureReport);
@@ -79,14 +80,13 @@ class Dstu3MeasureReportBuilderTest {
         var dstu3MeasureDefBuilder = new Dstu3MeasureDefBuilder();
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
-        // Explicitly set null score (or just don't set it)
-        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(null);
+        // Don't set score — null is the default in GroupState
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
         var state = MeasureEvaluationState.create(measureDef);
-        var measureReport = dstu3MeasureReportBuilder.build(
-                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
+        var measureReport =
+                dstu3MeasureReportBuilder.build(measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: No score should be set in the report
         assertNotNull(measureReport);
@@ -101,14 +101,17 @@ class Dstu3MeasureReportBuilderTest {
         var dstu3MeasureDefBuilder = new Dstu3MeasureDefBuilder();
         MeasureDef measureDef = dstu3MeasureDefBuilder.build(measure);
 
-        // Set negative score
-        measureDef.groups().get(0).setScoreAndAdaptToImprovementNotation(-1.0);
+        // Apply adaptation that filters negative scores (same logic as scorer uses)
+        var state = MeasureEvaluationState.create(measureDef);
+        var groupDef = measureDef.groups().get(0);
+        Double adaptedScore = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                -1.0, groupDef.isIncreaseImprovementNotation());
+        state.group(groupDef).setScore(adaptedScore);
 
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
-        var state = MeasureEvaluationState.create(measureDef);
-        var measureReport = dstu3MeasureReportBuilder.build(
-                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
+        var measureReport =
+                dstu3MeasureReportBuilder.build(measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: Negative score should not be copied (filtered by >= 0 check)
         assertNotNull(measureReport);
@@ -210,8 +213,8 @@ class Dstu3MeasureReportBuilderTest {
         // When: Build the MeasureReport
         var dstu3MeasureReportBuilder = new Dstu3MeasureReportBuilder();
         var state = MeasureEvaluationState.create(measureDef);
-        var measureReport = dstu3MeasureReportBuilder.build(
-                measure, measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
+        var measureReport =
+                dstu3MeasureReportBuilder.build(measureDef, state, MeasureReportType.INDIVIDUAL, null, List.of());
 
         // Then: DSTU3 MeasureReport should be created successfully
         // This verifies that the qualified/unqualified ID matching in MeasureDefScorer works correctly
@@ -276,23 +279,12 @@ class Dstu3MeasureReportBuilderTest {
                 "numerator");
         PopulationDef numeratorPop =
                 new PopulationDef("num-1", numCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
-        // Add resources with UNQUALIFIED IDs
-        numeratorPop.addResource("patient-1", true);
-        numeratorPop.addResource("patient-2", true);
-        numeratorPop.addResource("patient-3", true);
-        numeratorPop.addResource("patient-4", true);
 
         ConceptDef denCode = new ConceptDef(
                 List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "denominator")),
                 "denominator");
         PopulationDef denominatorPop = new PopulationDef(
                 "den-1", denCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
-        // Add resources with UNQUALIFIED IDs
-        denominatorPop.addResource("patient-1", true);
-        denominatorPop.addResource("patient-2", true);
-        denominatorPop.addResource("patient-3", true);
-        denominatorPop.addResource("patient-4", true);
-        denominatorPop.addResource("patient-5", true);
 
         // Create stratum populations with QUALIFIED subject IDs (e.g., "Patient/patient-1")
         StratumPopulationDef stratumNumPop = new StratumPopulationDef(

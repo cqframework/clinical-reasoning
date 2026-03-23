@@ -7,7 +7,8 @@ import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -23,6 +24,10 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.cr.measure.dstu3.selected.def.SelectedMeasureDef;
@@ -30,6 +35,12 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/dstu3";
+
+    /** Test-only record pairing internal model with FHIR resource for rich assertions. */
+    record MeasureDefAndDstu3MeasureReport(
+            org.opencds.cqf.fhir.cr.measure.common.MeasureDef measureDef,
+            org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState state,
+            MeasureReport measureReport) {}
 
     @FunctionalInterface
     interface Validator<T> {
@@ -88,26 +99,22 @@ public class Measure {
             return this;
         }
 
-        private Dstu3MeasureProcessor buildProcessor() {
-            return new Dstu3MeasureProcessor(repository, evaluationOptions, new Dstu3RepositorySubjectProvider());
-        }
-
         public IRepository getRepository() {
             return repository;
         }
 
         public When when() {
-            return new When(buildProcessor(), repository);
+            return new When(repository, evaluationOptions);
         }
     }
 
     public static class When {
-        private final Dstu3MeasureProcessor processor;
         private final IRepository repository;
+        private final MeasureEvaluationOptions evaluationOptions;
 
-        When(Dstu3MeasureProcessor processor, IRepository repository) {
-            this.processor = processor;
+        When(IRepository repository, MeasureEvaluationOptions evaluationOptions) {
             this.repository = repository;
+            this.evaluationOptions = evaluationOptions;
         }
 
         private String measureId;
@@ -159,14 +166,47 @@ public class Measure {
         }
 
         public When evaluate() {
-            this.operation = () -> processor.evaluateMeasureCaptureDefs(
-                    new IdType("Measure", measureId),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    Collections.singletonList(this.subjectId),
-                    additionalData,
-                    parameters);
+            this.operation = () -> {
+                var resolver = new Dstu3MeasureResolver(repository);
+                var service = new MeasureEvaluationService(
+                        evaluationOptions,
+                        FhirContext.forDstu3Cached(),
+                        new Dstu3PopulationBasisValidator(),
+                        new MeasurePeriodValidator());
+
+                var measure = repository.read(org.hl7.fhir.dstu3.model.Measure.class, new IdType("Measure", measureId));
+                var resolved = resolver.buildResolvedMeasure(measure);
+                var params = parameters != null ? resolver.resolveParameterMap(parameters) : Map.<String, Object>of();
+
+                var start = periodStart != null
+                        ? org.opencds.cqf.fhir.cr.measure.helper.DateHelper.toZonedDateTime(periodStart, true)
+                        : null;
+                var end = periodEnd != null
+                        ? org.opencds.cqf.fhir.cr.measure.helper.DateHelper.toZonedDateTime(periodEnd, false)
+                        : null;
+
+                var request = new MeasureEvaluationRequest(start, end, reportType, subjectId, null, null, null);
+                var environment = new MeasureEnvironment(null, null, null, additionalData);
+
+                var results = service.evaluate(
+                        repository,
+                        List.of(resolved),
+                        request,
+                        environment,
+                        params,
+                        new Dstu3RepositorySubjectProvider());
+
+                var scored = results.scoredMeasures().get(0);
+                var report = new Dstu3MeasureReportBuilder()
+                        .build(
+                                scored.measureDef(),
+                                scored.state(),
+                                resolver.evalTypeToReportType(results.evalType()),
+                                results.measurementPeriod(),
+                                scored.subjects());
+
+                return new MeasureDefAndDstu3MeasureReport(scored.measureDef(), scored.state(), report);
+            };
             return this;
         }
 

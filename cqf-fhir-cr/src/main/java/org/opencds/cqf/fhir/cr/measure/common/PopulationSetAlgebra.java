@@ -28,7 +28,7 @@ public final class PopulationSetAlgebra {
      * for all relevant populations (IP, D, N, DX, NX, DE).
      */
     public static void applyProportionRules(
-            String subjectId, GroupDef groupDef, boolean applyScoring, MeasureEvaluationState state) {
+            String subjectId, GroupDef groupDef, boolean enforceSubsetRules, MeasureEvaluationState state) {
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef numerator = groupDef.getSingle(NUMERATOR);
@@ -37,7 +37,7 @@ public final class PopulationSetAlgebra {
         PopulationDef denominatorException = groupDef.getSingle(DENOMINATOREXCEPTION);
         PopulationDef numeratorExclusion = groupDef.getSingle(NUMERATOREXCLUSION);
 
-        if (applyScoring) {
+        if (enforceSubsetRules) {
             // remove denominator values not in IP
             state.population(denominator).retainAllResources(subjectId, state.population(initialPopulation));
             state.population(denominator).retainAllSubjects(state.population(initialPopulation));
@@ -49,7 +49,7 @@ public final class PopulationSetAlgebra {
         // Apply Exclusions and Exceptions
         if (groupDef.isBooleanBasis()) {
             // Remove Subject and Resource Exclusions
-            if (denominatorExclusion != null && applyScoring) {
+            if (denominatorExclusion != null && enforceSubsetRules) {
                 // numerator should not include den-exclusions
                 state.population(numerator).removeAllSubjects(state.population(denominatorExclusion));
 
@@ -57,12 +57,12 @@ public final class PopulationSetAlgebra {
                 state.population(denominatorExclusion).retainAllResources(subjectId, state.population(denominator));
                 state.population(denominatorExclusion).retainAllSubjects(state.population(denominator));
             }
-            if (numeratorExclusion != null && applyScoring) {
+            if (numeratorExclusion != null && enforceSubsetRules) {
                 // verify results are in Numerator
                 state.population(numeratorExclusion).retainAllResources(subjectId, state.population(numerator));
                 state.population(numeratorExclusion).retainAllSubjects(state.population(numerator));
             }
-            if (denominatorException != null && applyScoring) {
+            if (denominatorException != null && enforceSubsetRules) {
                 // Remove Subjects Exceptions that are present in Numerator
                 state.population(denominatorException).removeAllSubjects(state.population(numerator));
                 state.population(denominatorException).removeAllResources(subjectId, state.population(numerator));
@@ -75,17 +75,17 @@ public final class PopulationSetAlgebra {
             // Remove Only Resource Exclusions
             // * Multiple resources can be from one subject and represented in multiple populations
             // * This is why we only remove resources and not subjects too for `Resource Basis`.
-            if (denominatorExclusion != null && applyScoring) {
+            if (denominatorExclusion != null && enforceSubsetRules) {
                 // remove any denominator-exclusion subjects/resources found in Numerator
                 state.population(numerator).removeAllResources(subjectId, state.population(denominatorExclusion));
                 // verify exclusion results are found in denominator
                 state.population(denominatorExclusion).retainAllResources(subjectId, state.population(denominator));
             }
-            if (numeratorExclusion != null && applyScoring) {
+            if (numeratorExclusion != null && enforceSubsetRules) {
                 // verify exclusion results are found in numerator results, otherwise remove
                 state.population(numeratorExclusion).retainAllResources(subjectId, state.population(numerator));
             }
-            if (denominatorException != null && applyScoring) {
+            if (denominatorException != null && enforceSubsetRules) {
                 // Remove Resource Exceptions that are present in Numerator
                 state.population(denominatorException).removeAllResources(subjectId, state.population(numerator));
                 // verify exception results are found in denominator
@@ -101,19 +101,19 @@ public final class PopulationSetAlgebra {
      * for IP, MP, and optionally MPE.
      */
     public static void applyContinuousVariableRules(
-            String subjectId, GroupDef groupDef, boolean applyScoring, MeasureEvaluationState state) {
+            String subjectId, GroupDef groupDef, boolean enforceSubsetRules, MeasureEvaluationState state) {
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         PopulationDef measurePopulation = groupDef.getSingle(MEASUREPOPULATION);
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
 
-        if (measurePopulation != null && initialPopulation != null && applyScoring) {
+        if (measurePopulation != null && initialPopulation != null && enforceSubsetRules) {
             // verify initial-population are in measure-population
             state.population(measurePopulation).retainAllResources(subjectId, state.population(initialPopulation));
             state.population(measurePopulation).retainAllSubjects(state.population(initialPopulation));
         }
 
-        if (measurePopulationExclusion != null && applyScoring && measurePopulation != null) {
+        if (measurePopulationExclusion != null && enforceSubsetRules && measurePopulation != null) {
             // verify exclusions are in measure-population
             state.population(measurePopulationExclusion)
                     .retainAllResources(subjectId, state.population(measurePopulation));

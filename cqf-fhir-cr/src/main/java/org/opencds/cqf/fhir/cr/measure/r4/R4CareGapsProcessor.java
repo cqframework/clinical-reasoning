@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -135,7 +136,10 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
     @Override
     public List<String> getSubjects(String subject) {
-        var subjects = subjectProvider.getSubjects(repository, subject).collect(Collectors.toList());
+        var subjects = subjectProvider
+                .getSubjects(repository, subject)
+                .map(SubjectRef::qualified)
+                .collect(Collectors.toList());
         if (!subjects.isEmpty()) {
             ourLog.info("care-gaps report requested for: %s subjects.".formatted(subjects.size()));
         } else {

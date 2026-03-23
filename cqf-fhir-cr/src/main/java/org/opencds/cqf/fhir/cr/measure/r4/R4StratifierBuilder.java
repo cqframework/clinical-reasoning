@@ -3,15 +3,12 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ListResource;
-import org.hl7.fhir.r4.model.Measure.MeasureGroupPopulationComponent;
-import org.hl7.fhir.r4.model.Measure.MeasureGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
@@ -19,9 +16,10 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationException;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
+import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
@@ -42,35 +40,31 @@ class R4StratifierBuilder {
 
     static void buildStratifier(
             R4MeasureReportBuilderContext bc,
-            MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
-            List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         // the top level stratifier 'id' and 'code'
-        reportStratifier.setCode(getCodeForReportStratifier(stratifierDef, measureStratifier));
-        reportStratifier.setId(measureStratifier.getId());
+        reportStratifier.setCode(getCodeForReportStratifier(stratifierDef));
+        reportStratifier.setId(stratifierDef.id());
         // if description is defined, add to MeasureReport
-        if (measureStratifier.hasDescription()) {
+        if (stratifierDef.description() != null && !stratifierDef.description().isEmpty()) {
             reportStratifier.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL,
-                    new StringType(measureStratifier.getDescription()));
+                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(stratifierDef.description()));
         }
 
-        buildMultipleStratum(bc, reportStratifier, stratifierDef, populations, groupDef);
+        buildMultipleStratum(bc, reportStratifier, stratifierDef, groupDef);
     }
 
     private static void buildMultipleStratum(
             R4MeasureReportBuilderContext bc,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
-            List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
         if (stratifierDef.isCriteriaStratifier()) {
-            criteriaStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
+            criteriaStratifier(bc, stratifierDef, reportStratifier, groupDef);
         } else {
-            valueOrNonSubjectValueStratifier(bc, stratifierDef, reportStratifier, populations, groupDef);
+            valueOrNonSubjectValueStratifier(bc, stratifierDef, reportStratifier, groupDef);
         }
     }
 
@@ -78,13 +72,12 @@ class R4StratifierBuilder {
             R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
-            List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
         bc.state().stratifier(stratifierDef).getStrata().forEach(stratumDef -> {
             var reportStratum = reportStratifier.addStratum();
 
-            buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), populations, groupDef);
+            buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), groupDef);
         });
     }
 
@@ -92,7 +85,6 @@ class R4StratifierBuilder {
             R4MeasureReportBuilderContext bc,
             StratifierDef stratifierDef,
             MeasureReportGroupStratifierComponent reportStratifier,
-            List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
         // nonComponent stratifiers will have a single expression that can generate results, instead of grouping
@@ -107,14 +99,7 @@ class R4StratifierBuilder {
             // Seems to be irrelevant for criteria based stratifiers
             var stratValues = Set.<StratumValueDef>of();
 
-            buildStratum(
-                    bc,
-                    stratifierDef,
-                    getOnlyStratumDef(bc, stratifierDef),
-                    reportStratum,
-                    stratValues,
-                    populations,
-                    groupDef);
+            buildStratum(bc, stratifierDef, getOnlyStratumDef(bc, stratifierDef), reportStratum, stratValues, groupDef);
             return; // short-circuit so we don't process non-criteria logic
         }
 
@@ -124,7 +109,7 @@ class R4StratifierBuilder {
         // Value: 'F'--> subjects: subject2
         // loop through each value key
         for (StratumDef stratumDef : bc.state().stratifier(stratifierDef).getStrata()) {
-            buildStratumOuter(bc, stratifierDef, stratumDef, reportStratifier, populations, groupDef);
+            buildStratumOuter(bc, stratifierDef, stratumDef, reportStratifier, groupDef);
         }
     }
 
@@ -133,12 +118,11 @@ class R4StratifierBuilder {
             StratifierDef stratifierDef,
             StratumDef stratumDef,
             MeasureReportGroupStratifierComponent reportStratifier,
-            List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
 
         var reportStratum = reportStratifier.addStratum();
 
-        buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), populations, groupDef);
+        buildStratum(bc, stratifierDef, stratumDef, reportStratum, stratumDef.valueDefs(), groupDef);
     }
 
     private static void buildStratum(
@@ -147,7 +131,6 @@ class R4StratifierBuilder {
             StratumDef stratumDef,
             StratifierGroupComponent stratum,
             Set<StratumValueDef> values,
-            List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
         for (StratumValueDef valuePair : values) {
@@ -200,15 +183,13 @@ class R4StratifierBuilder {
         // ** stratum.population
         // ** ** initial-population: subject2
         for (StratumPopulationDef stratumPopulationDef : stratumDef.stratumPopulations()) {
-            // This is nasty, and ideally, we ought to be driving this logic entirely off StratumPopulationDef
-            final Optional<MeasureGroupPopulationComponent> optMgpc = populations.stream()
-                    .filter(population -> population.getId().equals(stratumPopulationDef.id()))
-                    .findFirst();
-            if (optMgpc.isEmpty()) {
-                throw new MeasureEvaluationException("could not find MeasureGroupPopulationComponent");
+            var populationDef = groupDef.findPopulationById(stratumPopulationDef.id());
+            if (populationDef == null) {
+                throw new MeasureEvaluationException(
+                        "could not find PopulationDef with id: " + stratumPopulationDef.id());
             }
             var stratumPopulation = stratum.addPopulation();
-            buildStratumPopulation(bc, stratumPopulationDef, stratumPopulation, optMgpc.get(), groupDef);
+            buildStratumPopulation(bc, stratumPopulationDef, stratumPopulation, populationDef, groupDef);
         }
     }
 
@@ -238,27 +219,15 @@ class R4StratifierBuilder {
             R4MeasureReportBuilderContext bc,
             StratumPopulationDef stratumPopulationDef,
             StratifierGroupPopulationComponent sgpc,
-            MeasureGroupPopulationComponent population,
+            PopulationDef populationDef,
             GroupDef groupDef) {
 
-        sgpc.setCode(population.getCode());
-        sgpc.setId(population.getId());
+        sgpc.setCode(conceptDefToConcept(populationDef.code()));
+        sgpc.setId(populationDef.id());
 
-        if (population.hasDescription()) {
+        if (populationDef.description() != null && !populationDef.description().isEmpty()) {
             sgpc.addExtension(
-                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(population.getDescription()));
-        }
-
-        var populationDef = groupDef.populations().stream()
-                .filter(t -> t.id().equals(population.getId()))
-                .findFirst()
-                .orElse(null);
-
-        if (populationDef == null) {
-            throw new MeasureValidationException("Invalid population definition for measure: %s since it's missing %s"
-                    .formatted(
-                            bc.getMeasureUrl(),
-                            population.getCode().getCodingFirstRep().getCode()));
+                    MeasureConstants.EXT_POPULATION_DESCRIPTION_URL, new StringType(populationDef.description()));
         }
 
         // Use the calculated count from StratumPopulationDef
@@ -271,6 +240,22 @@ class R4StratifierBuilder {
         } else {
             buildResourceBasisStratumPopulation(bc, sgpc, stratumPopulationDef.resourceIdsForSubjectList());
         }
+    }
+
+    /**
+     * Convert a {@link ConceptDef} to a {@link CodeableConcept}, returning null for null input.
+     */
+    private static CodeableConcept conceptDefToConcept(ConceptDef c) {
+        if (c == null) return null;
+        var cc = new CodeableConcept().setText(c.text());
+        for (var cd : c.codes()) {
+            cc.addCoding(new Coding()
+                    .setSystem(cd.system())
+                    .setCode(cd.code())
+                    .setVersion(cd.version())
+                    .setDisplay(cd.display()));
+        }
+        return cc;
     }
 
     // Simplified by Claude Sonnet 4.5 to use pre-calculated counts from StratumPopulationDef
@@ -326,21 +311,22 @@ class R4StratifierBuilder {
         return null;
     }
 
-    // TODO: LD:  move this to MeasureEvaluator
-    private static List<CodeableConcept> getCodeForReportStratifier(
-            StratifierDef stratifierDef, MeasureGroupStratifierComponent measureStratifier) {
-
-        final Expression criteria = measureStratifier.getCriteria();
-
-        if (stratifierDef.isCriteriaStratifier()
-                && criteria != null
-                && criteria.hasLanguage()
-                && "text/cql.identifier".equals(criteria.getLanguage())) {
-            final CodeableConcept codableConcept = new CodeableConcept();
-            codableConcept.setText(criteria.getExpression());
-            return Collections.singletonList(codableConcept);
+    // Use StratifierDef only to derive the code for the report stratifier
+    private static List<CodeableConcept> getCodeForReportStratifier(StratifierDef stratifierDef) {
+        if (stratifierDef.isCriteriaStratifier() && stratifierDef.expression() != null) {
+            return Collections.singletonList(new CodeableConcept().setText(stratifierDef.expression()));
         }
 
-        return Collections.singletonList(measureStratifier.getCode());
+        ConceptDef code = stratifierDef.code();
+        if (code == null) return Collections.emptyList();
+        var cc = new CodeableConcept().setText(code.text());
+        for (var cd : code.codes()) {
+            cc.addCoding(new Coding()
+                    .setSystem(cd.system())
+                    .setCode(cd.code())
+                    .setVersion(cd.version())
+                    .setDisplay(cd.display()));
+        }
+        return Collections.singletonList(cc);
     }
 }

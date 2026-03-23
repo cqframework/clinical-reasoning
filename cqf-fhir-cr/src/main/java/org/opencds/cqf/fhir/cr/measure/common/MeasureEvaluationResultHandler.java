@@ -6,7 +6,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -35,7 +34,8 @@ public class MeasureEvaluationResultHandler {
     public MeasureEvaluationResultHandler(
             MeasureEvaluationOptions measureEvaluationOptions, PopulationBasisValidator populationBasisValidator) {
         this.measureEvaluationOptions = measureEvaluationOptions;
-        this.measureEvaluator = new MeasureEvaluator(populationBasisValidator);
+        this.measureEvaluator =
+                new MeasureEvaluator(populationBasisValidator, measureEvaluationOptions.getEnforceSubsetRules());
     }
 
     /**
@@ -59,20 +59,12 @@ public class MeasureEvaluationResultHandler {
         for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
             // subject
             String subjectId = entry.getKey();
-            var sub = getSubjectTypeAndId(subjectId);
-            var subjectIdPart = sub.getRight();
-            var subjectTypePart = sub.getLeft();
+            var subjectRef = SubjectRef.fromQualified(subjectId);
             EvaluationResult evalResult = entry.getValue();
             try {
                 // populate CQL results into MeasureDef
                 measureEvaluator.evaluate(
-                        measureDef,
-                        measureEvalType,
-                        subjectTypePart,
-                        subjectIdPart,
-                        evalResult,
-                        measureEvaluationOptions.getApplyScoringSetMembership(),
-                        state);
+                        measureDef, measureEvalType, subjectRef.type(), subjectRef.id(), evalResult, state);
             } catch (Exception e) {
                 // Catch Exceptions from evaluation per subject, but allow rest of subjects to be processed (if
                 // applicable)
@@ -87,8 +79,8 @@ public class MeasureEvaluationResultHandler {
 
         // Score all groups and stratifiers using version-agnostic scorer
         // Populates scores in MeasureDef before builders run
-        // Note: Scoring is always performed, independent of applyScoring flag
-        // (applyScoring controls set membership filtering, not numeric scoring)
+        // Note: Scoring is always performed, independent of enforceSubsetRules
+        // (enforceSubsetRules controls population containment filtering, not numeric scoring)
         logger.debug("Scoring MeasureDef using MeasureReportDefScorer for measure: {}", measureDef.url());
         measureReportDefScorer.score(measureDef.url(), measureDef, state);
 
@@ -98,14 +90,14 @@ public class MeasureEvaluationResultHandler {
     /**
      * method used to execute generate CQL results via Library $evaluate, $evaluate-measure, etc
      *
-     * @param subjectIds subjects to generate results for
+     * @param subjectRefs subjects to generate results for
      * @param zonedMeasurementPeriod offset defined measurement period for evaluation
      * @param context cql engine context
      * @param multiLibraryIdMeasureEngineDetails container for engine, library and measure IDs
      * @return CQL results for Library defined in the Measure resource
      */
     public static CompositeEvaluationResultsPerMeasure getEvaluationResults(
-            List<String> subjectIds,
+            List<SubjectRef> subjectRefs,
             ZonedDateTime zonedMeasurementPeriod,
             CqlEngine context,
             MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
@@ -123,22 +115,26 @@ public class MeasureEvaluationResultHandler {
                 .map(VersionedIdentifier::getId)
                 .toList();
 
+        final List<String> subjectIdStrings =
+                subjectRefs.stream().map(SubjectRef::qualified).toList();
+
         logger.atDebug()
                 .setMessage(
                         "START: Evaluate measure for library idents: (count:{}): [{}], and subjects (count={}): [{}]")
                 .addArgument(libraryIdentIds::size)
                 .addArgument(() -> showSubsetOfTotal(libraryIdentIds))
-                .addArgument(subjectIds::size)
-                .addArgument(() -> showSubsetOfTotal(subjectIds))
+                .addArgument(subjectIdStrings::size)
+                .addArgument(() -> showSubsetOfTotal(subjectIdStrings))
                 .log();
 
         final long startAllLibrariesAllSubjects = System.currentTimeMillis();
-        final int lastIndex = subjectIds.size() - 1;
-        for (int subjectIndex = 0; subjectIndex < subjectIds.size(); subjectIndex++) {
-            String subjectId = subjectIds.get(subjectIndex);
-            if (subjectId == null) {
+        final int lastIndex = subjectRefs.size() - 1;
+        for (int subjectIndex = 0; subjectIndex < subjectRefs.size(); subjectIndex++) {
+            SubjectRef subjectRef = subjectRefs.get(subjectIndex);
+            if (subjectRef == null) {
                 throw new MeasureEvaluationException("SubjectId is required in order to calculate.");
             }
+            String subjectId = subjectRef.qualified();
             boolean shouldLog = subjectIndex % SUBJECT_LOG_INTERVAL == 0 || subjectIndex == lastIndex;
             throttledDebug(shouldLog)
                     .setMessage("Evaluate measure for library idents: (count:{}): [{}], and single subject [{}/{}]: {}")
@@ -148,10 +144,7 @@ public class MeasureEvaluationResultHandler {
                     .addArgument(lastIndex)
                     .addArgument(subjectId)
                     .log();
-            Pair<String, String> subjectInfo = getSubjectTypeAndId(subjectId);
-            String subjectTypePart = subjectInfo.getLeft();
-            String subjectIdPart = subjectInfo.getRight();
-            context.getState().setContextValue(subjectTypePart, subjectIdPart);
+            context.getState().setContextValue(subjectRef.type(), subjectRef.id());
             try {
                 var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
@@ -196,7 +189,7 @@ public class MeasureEvaluationResultHandler {
                                     measureDefs,
                                     libraryVersionedIdentifier,
                                     evaluationResult,
-                                    subjectTypePart);
+                                    subjectRef.type());
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, functionEvaluationResults);
 
@@ -223,13 +216,13 @@ public class MeasureEvaluationResultHandler {
                 .setMessage(
                         "END: Evaluate measure for library idents: [[elapsed: {}ms, avgMs: {}]]: (count:{}): [{}], and subjects (count={}): [{}]")
                 .addArgument(() -> System.currentTimeMillis() - startAllLibrariesAllSubjects)
-                .addArgument(() -> subjectIds.isEmpty()
+                .addArgument(() -> subjectRefs.isEmpty()
                         ? 0
-                        : (System.currentTimeMillis() - startAllLibrariesAllSubjects) / subjectIds.size())
+                        : (System.currentTimeMillis() - startAllLibrariesAllSubjects) / subjectRefs.size())
                 .addArgument(libraryIdentIds::size)
                 .addArgument(() -> showSubsetOfTotal(libraryIdentIds))
-                .addArgument(subjectIds::size)
-                .addArgument(() -> showSubsetOfTotal(subjectIds))
+                .addArgument(subjectIdStrings::size)
+                .addArgument(() -> showSubsetOfTotal(subjectIdStrings))
                 .log();
         return resultsBuilder.build();
     }
@@ -243,17 +236,6 @@ public class MeasureEvaluationResultHandler {
         return subjectIds.size() <= previewLimit
                 ? String.join(",", subjectIds)
                 : String.join(",", subjectIds.subList(0, previewLimit)) + ",...";
-    }
-
-    private static Pair<String, String> getSubjectTypeAndId(String subjectId) {
-        if (subjectId.contains("/")) {
-            String[] subjectIdParts = subjectId.split("/");
-            return Pair.of(subjectIdParts[0], subjectIdParts[1]);
-        } else {
-            throw new MeasureScoringException(
-                    "Unable to determine Subject type for id: %s. SubjectIds must be in the format {subjectType}/{subjectId} (e.g. Patient/123)"
-                            .formatted(subjectId));
-        }
     }
 
     private static void validateEvaluationResultExistsForIdentifier(

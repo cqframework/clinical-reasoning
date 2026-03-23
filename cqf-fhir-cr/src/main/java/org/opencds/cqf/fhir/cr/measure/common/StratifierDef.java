@@ -23,6 +23,9 @@ public class StratifierDef {
     private final List<StratumDef> stratum = new ArrayList<>();
 
     @Nullable
+    private final String description;
+
+    @Nullable
     private Map<String, CriteriaResult> results;
 
     public StratifierDef(String id, ConceptDef code, String expression, MeasureStratifierType stratifierType) {
@@ -35,11 +38,22 @@ public class StratifierDef {
             String expression,
             MeasureStratifierType stratifierType,
             List<StratifierComponentDef> components) {
+        this(id, code, expression, stratifierType, components, null);
+    }
+
+    public StratifierDef(
+            String id,
+            ConceptDef code,
+            String expression,
+            MeasureStratifierType stratifierType,
+            List<StratifierComponentDef> components,
+            @Nullable String description) {
         this.id = id;
         this.code = code;
         this.expression = expression;
         this.stratifierType = stratifierType;
         this.components = components;
+        this.description = description;
     }
 
     public boolean isCriteriaStratifier() {
@@ -98,6 +112,11 @@ public class StratifierDef {
 
     public MeasureStratifierType getStratifierType() {
         return stratifierType;
+    }
+
+    @Nullable
+    public String description() {
+        return this.description;
     }
 
     private Set<Object> toSet(Object value) {

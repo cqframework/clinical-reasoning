@@ -19,9 +19,8 @@ public class GroupDef {
     private final CodeDef improvementNotation;
     private final Map<MeasurePopulationType, List<PopulationDef>> populationIndex;
 
-    // Added by Claude Sonnet 4.5 on 2025-12-03
-    // Mutable score field for version-agnostic scoring
-    private Double score;
+    @Nullable
+    private final String description;
 
     public GroupDef(
             String id,
@@ -32,6 +31,28 @@ public class GroupDef {
             boolean isGroupImprovementNotation,
             CodeDef improvementNotation,
             CodeDef populationBasis) {
+        this(
+                id,
+                code,
+                stratifiers,
+                populations,
+                measureScoring,
+                isGroupImprovementNotation,
+                improvementNotation,
+                populationBasis,
+                null);
+    }
+
+    public GroupDef(
+            String id,
+            ConceptDef code,
+            List<StratifierDef> stratifiers,
+            List<PopulationDef> populations,
+            MeasureScoring measureScoring,
+            boolean isGroupImprovementNotation,
+            CodeDef improvementNotation,
+            CodeDef populationBasis,
+            @Nullable String description) {
         //
         this.id = id;
         this.code = code;
@@ -42,6 +63,7 @@ public class GroupDef {
         this.isGroupImpNotation = isGroupImprovementNotation;
         this.improvementNotation = improvementNotation;
         this.populationBasis = populationBasis;
+        this.description = description;
     }
 
     public String id() {
@@ -178,39 +200,8 @@ public class GroupDef {
         return this.improvementNotation;
     }
 
-    /**
-     * Added by Claude Sonnet 4.5 on 2025-12-02
-     * Get the count for a specific population type in this group.
-     * Moved from R4MeasureReportScorer to make it reusable across FHIR versions.
-     *
-     * @param populationType the MeasurePopulationType to find
-     * @return the count for the population, or 0 if not found
-     */
-    public int getPopulationCount(MeasurePopulationType populationType) {
-        return this.populations.stream()
-                .filter(pop -> pop.type() == populationType)
-                .findFirst()
-                .map(PopulationDef::getCount)
-                .orElse(0);
-    }
-
-    /**
-     * Get the computed score for this group.
-     * Used by version-agnostic MeasureDefScorer.
-     *
-     * @return the score, or null if not yet computed
-     */
-    public Double getScore() {
-        return this.score;
-    }
-
-    public void setScoreAndAdaptToImprovementNotation(Double originalScore) {
-        if ((MeasureScoring.RATIO == measureScoring && hasPopulationType(MeasurePopulationType.MEASUREOBSERVATION))
-                || MeasureScoring.PROPORTION == measureScoring) {
-            this.score = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
-                    originalScore, isIncreaseImprovementNotation());
-        } else {
-            this.score = originalScore;
-        }
+    @Nullable
+    public String description() {
+        return this.description;
     }
 }

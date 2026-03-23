@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 @SuppressWarnings({"squid:S125", "squid:S1135"})
@@ -235,6 +236,7 @@ class R4RepositorySubjectProviderTest {
     void getSubjects(GetSubjectsParams testCase) {
         final List<String> actualSubjects = testCase.testSubject()
                 .getSubjects(repository, testCase.subjectIds())
+                .map(SubjectRef::qualified)
                 .toList();
 
         assertThat(

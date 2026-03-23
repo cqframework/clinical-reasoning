@@ -2,7 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +25,16 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 class MeasureReportDefScorerTest {
 
     private final MeasureReportDefScorer scorer = new MeasureReportDefScorer();
+
+    /**
+     * Staging area for resources that will be applied to PopulationState during createStateForGroup.
+     * Allows addResource calls before state creation (when building test fixtures).
+     */
+    private final Map<PopulationDef, java.util.List<Object[]>> pendingResources = new LinkedHashMap<>();
+
+    private void addPendingResource(PopulationDef pop, String key, Object value) {
+        pendingResources.computeIfAbsent(pop, k -> new ArrayList<>()).add(new Object[] {key, value});
+    }
 
     @Test
     void testScoreGroup_SetsScoreOnGroupDef() {
@@ -45,9 +57,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 encounterBasis);
-
-        // Score is null before scoring
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -271,8 +280,6 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 stringBasis);
 
-        assertNull(groupDef.getScore());
-
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
         scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
@@ -311,15 +318,15 @@ class MeasureReportDefScorerTest {
         // Add QuantityDef observations for each subject
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
 
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
 
         Map<String, QuantityDef> obs3 = new HashMap<>();
         obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        addPendingResource(measureObsPop, "p3", obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -330,8 +337,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 dateBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -373,15 +378,15 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
 
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
 
         Map<String, QuantityDef> obs3 = new HashMap<>();
         obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        addPendingResource(measureObsPop, "p3", obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -392,8 +397,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -435,15 +438,15 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
 
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
 
         Map<String, QuantityDef> obs3 = new HashMap<>();
         obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        addPendingResource(measureObsPop, "p3", obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -454,8 +457,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 encounterBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -497,15 +498,15 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
 
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
 
         Map<String, QuantityDef> obs3 = new HashMap<>();
         obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        addPendingResource(measureObsPop, "p3", obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -516,8 +517,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 stringBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -561,12 +560,14 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 dateBasis);
 
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
         // VERIFY: aggregationResult is null (no scoring performed)
-        assertNull(numeratorPop.getAggregationResult());
-        assertNull(denominatorPop.getAggregationResult());
+        assertNull(state.population(numeratorPop).getAggregationResult());
+        assertNull(state.population(denominatorPop).getAggregationResult());
 
         // VERIFY: getMeasureScore returns null when score is null
-        assertNull(groupDef.getScore());
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -625,11 +626,16 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 stringBasis);
 
-        // Manually set negative score to simulate strange value scenario
-        groupDef.setScoreAndAdaptToImprovementNotation(-0.5);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
 
-        // VERIFY: getMeasureScore returns null for negative scores
-        assertNull(groupDef.getScore());
+        // Apply the adaptation that filters negative scores (this logic moved from
+        // GroupDef.setScoreAndAdaptToImprovementNotation to MeasureReportDefScorer)
+        Double adaptedScore = MeasureScoreCalculator.scoreGroupAccordingToIncreaseImprovementNotation(
+                -0.5, groupDef.isIncreaseImprovementNotation());
+        state.group(groupDef).setScore(adaptedScore);
+
+        // VERIFY: adapted score is null for negative inputs
+        assertNull(state.group(groupDef).getScore());
     }
 
     @Test
@@ -724,13 +730,13 @@ class MeasureReportDefScorerTest {
                 "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
 
         // Patient1: 3 encounters in numerator
-        numeratorPop.addResource("patient1", "Encounter/enc1");
-        numeratorPop.addResource("patient1", "Encounter/enc2");
-        numeratorPop.addResource("patient1", "Encounter/enc3");
+        addPendingResource(numeratorPop, "patient1", "Encounter/enc1");
+        addPendingResource(numeratorPop, "patient1", "Encounter/enc2");
+        addPendingResource(numeratorPop, "patient1", "Encounter/enc3");
 
         // Patient2: 2 encounters in numerator
-        numeratorPop.addResource("patient2", "Encounter/enc4");
-        numeratorPop.addResource("patient2", "Encounter/enc5");
+        addPendingResource(numeratorPop, "patient2", "Encounter/enc4");
+        addPendingResource(numeratorPop, "patient2", "Encounter/enc5");
 
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
@@ -739,19 +745,19 @@ class MeasureReportDefScorerTest {
                 "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis2, null);
 
         // Patient1: 3 encounters in denominator
-        denominatorPop.addResource("patient1", "Encounter/enc1");
-        denominatorPop.addResource("patient1", "Encounter/enc2");
-        denominatorPop.addResource("patient1", "Encounter/enc3");
+        addPendingResource(denominatorPop, "patient1", "Encounter/enc1");
+        addPendingResource(denominatorPop, "patient1", "Encounter/enc2");
+        addPendingResource(denominatorPop, "patient1", "Encounter/enc3");
 
         // Patient2: 2 encounters in denominator
-        denominatorPop.addResource("patient2", "Encounter/enc4");
-        denominatorPop.addResource("patient2", "Encounter/enc5");
+        addPendingResource(denominatorPop, "patient2", "Encounter/enc4");
+        addPendingResource(denominatorPop, "patient2", "Encounter/enc5");
 
         // Patient3: 4 encounters in denominator (NOT in numerator)
-        denominatorPop.addResource("patient3", "Encounter/enc6");
-        denominatorPop.addResource("patient3", "Encounter/enc7");
-        denominatorPop.addResource("patient3", "Encounter/enc8");
-        denominatorPop.addResource("patient3", "Encounter/enc9");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc6");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc7");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc8");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc9");
 
         // CRITICAL: Use boolean basis
         GroupDef groupDef = new GroupDef(
@@ -764,13 +770,14 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 createPopulationBasisCode("boolean"));
 
-        // Verify counts BEFORE scoring
-        // Boolean basis: count unique subjects, NOT resources
-        assertEquals(2, numeratorPop.getCount()); // 2 subjects (patient1, patient2)
-        assertEquals(3, denominatorPop.getCount()); // 3 subjects (patient1, patient2, patient3)
-
         // Execute scoring
         MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        // Verify counts BEFORE scoring
+        // Boolean basis: count unique subjects, NOT resources
+        assertEquals(2, state.population(numeratorPop).getCount()); // 2 subjects (patient1, patient2)
+        assertEquals(3, state.population(denominatorPop).getCount()); // 3 subjects (patient1, patient2, patient3)
+
         scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
@@ -805,13 +812,13 @@ class MeasureReportDefScorerTest {
                 "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis, null);
 
         // Patient1: 3 encounters in numerator
-        numeratorPop.addResource("patient1", "Encounter/enc1");
-        numeratorPop.addResource("patient1", "Encounter/enc2");
-        numeratorPop.addResource("patient1", "Encounter/enc3");
+        addPendingResource(numeratorPop, "patient1", "Encounter/enc1");
+        addPendingResource(numeratorPop, "patient1", "Encounter/enc2");
+        addPendingResource(numeratorPop, "patient1", "Encounter/enc3");
 
         // Patient2: 2 encounters in numerator
-        numeratorPop.addResource("patient2", "Encounter/enc4");
-        numeratorPop.addResource("patient2", "Encounter/enc5");
+        addPendingResource(numeratorPop, "patient2", "Encounter/enc4");
+        addPendingResource(numeratorPop, "patient2", "Encounter/enc5");
 
         // Create denominator with 3 subjects, each having multiple resources
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
@@ -819,19 +826,19 @@ class MeasureReportDefScorerTest {
                 "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", encounterBasis, null);
 
         // Patient1: 3 encounters in denominator
-        denominatorPop.addResource("patient1", "Encounter/enc1");
-        denominatorPop.addResource("patient1", "Encounter/enc2");
-        denominatorPop.addResource("patient1", "Encounter/enc3");
+        addPendingResource(denominatorPop, "patient1", "Encounter/enc1");
+        addPendingResource(denominatorPop, "patient1", "Encounter/enc2");
+        addPendingResource(denominatorPop, "patient1", "Encounter/enc3");
 
         // Patient2: 2 encounters in denominator
-        denominatorPop.addResource("patient2", "Encounter/enc4");
-        denominatorPop.addResource("patient2", "Encounter/enc5");
+        addPendingResource(denominatorPop, "patient2", "Encounter/enc4");
+        addPendingResource(denominatorPop, "patient2", "Encounter/enc5");
 
         // Patient3: 4 encounters in denominator (NOT in numerator)
-        denominatorPop.addResource("patient3", "Encounter/enc6");
-        denominatorPop.addResource("patient3", "Encounter/enc7");
-        denominatorPop.addResource("patient3", "Encounter/enc8");
-        denominatorPop.addResource("patient3", "Encounter/enc9");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc6");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc7");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc8");
+        addPendingResource(denominatorPop, "patient3", "Encounter/enc9");
 
         // CRITICAL: Use Encounter basis (non-boolean)
         GroupDef groupDef = new GroupDef(
@@ -844,13 +851,14 @@ class MeasureReportDefScorerTest {
                 createImprovementNotationCode("increase"),
                 encounterBasis);
 
-        // Verify counts BEFORE scoring
-        // Encounter basis: count ALL resources, not just unique subjects
-        assertEquals(5, numeratorPop.getCount()); // 5 encounters (3 + 2)
-        assertEquals(9, denominatorPop.getCount()); // 9 encounters (3 + 2 + 4)
-
         // Execute scoring
         MeasureEvaluationState state = createStateForGroup(groupDef);
+
+        // Verify counts BEFORE scoring
+        // Encounter basis: count ALL resources, not just unique subjects
+        assertEquals(5, state.population(numeratorPop).getCount()); // 5 encounters (3 + 2)
+        assertEquals(9, state.population(denominatorPop).getCount()); // 9 encounters (3 + 2 + 4)
+
         scorer.scoreGroup("http://example.com/Measure/test", groupDef, state);
 
         // VERIFY: aggregationResult is null (PROPORTION measure)
@@ -885,9 +893,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        // Verify score is null before scoring
-        assertNull(groupDef.getScore());
 
         // Execute
         MeasureEvaluationState state = createStateForGroup(groupDef);
@@ -964,15 +969,15 @@ class MeasureReportDefScorerTest {
         // Add numerator observations
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("obs-num-1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        addPendingResource(numeratorMeasureObs, "p1", numObs1);
 
         Map<String, QuantityDef> numObs2 = new HashMap<>();
         numObs2.put("obs-num-2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        addPendingResource(numeratorMeasureObs, "p2", numObs2);
 
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("obs-num-3", new QuantityDef(30.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
 
         // Create denominator MEASUREOBSERVATION with criteriaReference to denominator
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -989,15 +994,15 @@ class MeasureReportDefScorerTest {
         // Add denominator observations
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("obs-den-1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
 
         Map<String, QuantityDef> denObs2 = new HashMap<>();
         denObs2.put("obs-den-2", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        addPendingResource(denominatorMeasureObs, "p2", denObs2);
 
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("obs-den-3", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
 
         // Create GroupDef with RATIO scoring
         GroupDef groupDef = new GroupDef(
@@ -1015,9 +1020,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        // Verify score is null before scoring
-        assertNull(groupDef.getScore());
 
         // Execute
         MeasureEvaluationState state = createStateForGroup(groupDef);
@@ -1127,15 +1129,15 @@ class MeasureReportDefScorerTest {
         // Add denominator observations
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("obs-den-1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
 
         Map<String, QuantityDef> denObs2 = new HashMap<>();
         denObs2.put("obs-den-2", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        addPendingResource(denominatorMeasureObs, "p2", denObs2);
 
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("obs-den-3", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1146,8 +1148,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -1188,15 +1188,15 @@ class MeasureReportDefScorerTest {
         // Add numerator observations
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("obs-num-1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        addPendingResource(numeratorMeasureObs, "p1", numObs1);
 
         Map<String, QuantityDef> numObs2 = new HashMap<>();
         numObs2.put("obs-num-2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        addPendingResource(numeratorMeasureObs, "p2", numObs2);
 
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("obs-num-3", new QuantityDef(30.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1207,8 +1207,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -1250,8 +1248,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -1305,7 +1301,7 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("obs-den-1", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1363,15 +1359,15 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("obs-num-1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        addPendingResource(numeratorMeasureObs, "p1", numObs1);
 
         Map<String, QuantityDef> numObs2 = new HashMap<>();
         numObs2.put("obs-num-2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        addPendingResource(numeratorMeasureObs, "p2", numObs2);
 
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("obs-num-3", new QuantityDef(30.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
 
         // Create denominator MEASUREOBSERVATION with AVG aggregation
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -1387,15 +1383,15 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("obs-den-1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
 
         Map<String, QuantityDef> denObs2 = new HashMap<>();
         denObs2.put("obs-den-2", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        addPendingResource(denominatorMeasureObs, "p2", denObs2);
 
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("obs-den-3", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1412,8 +1408,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        assertNull(groupDef.getScore());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -1471,24 +1465,24 @@ class MeasureReportDefScorerTest {
         // Male numerator observations: 10 + 15 + 15 = 40
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("p1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        addPendingResource(numeratorMeasureObs, "p1", numObs1);
 
         Map<String, QuantityDef> numObs2 = new HashMap<>();
         numObs2.put("p2", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        addPendingResource(numeratorMeasureObs, "p2", numObs2);
 
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("p3", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
 
         // Female numerator observations: 10 + 20 = 30
         Map<String, QuantityDef> numObs4 = new HashMap<>();
         numObs4.put("p4", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p4", numObs4);
+        addPendingResource(numeratorMeasureObs, "p4", numObs4);
 
         Map<String, QuantityDef> numObs5 = new HashMap<>();
         numObs5.put("p5", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p5", numObs5);
+        addPendingResource(numeratorMeasureObs, "p5", numObs5);
 
         // Create denominator MEASUREOBSERVATION
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -1505,24 +1499,24 @@ class MeasureReportDefScorerTest {
         // Male denominator observations: 5 + 7 + 8 = 20
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("p1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
 
         Map<String, QuantityDef> denObs2 = new HashMap<>();
         denObs2.put("p2", new QuantityDef(7.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        addPendingResource(denominatorMeasureObs, "p2", denObs2);
 
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("p3", new QuantityDef(8.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
 
         // Female denominator observations: 4 + 6 = 10
         Map<String, QuantityDef> denObs4 = new HashMap<>();
         denObs4.put("p4", new QuantityDef(4.0));
-        denominatorMeasureObs.addResource("p4", denObs4);
+        addPendingResource(denominatorMeasureObs, "p4", denObs4);
 
         Map<String, QuantityDef> denObs5 = new HashMap<>();
         denObs5.put("p5", new QuantityDef(6.0));
-        denominatorMeasureObs.addResource("p5", denObs5);
+        addPendingResource(denominatorMeasureObs, "p5", denObs5);
 
         // Create stratum populations for Male stratum
         // Male stratum - MEASUREOBSERVATION populations
@@ -1659,19 +1653,19 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("p1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        addPendingResource(numeratorMeasureObs, "p1", numObs1);
         Map<String, QuantityDef> numObs2 = new HashMap<>();
         numObs2.put("p2", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        addPendingResource(numeratorMeasureObs, "p2", numObs2);
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("p3", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
         Map<String, QuantityDef> numObs4 = new HashMap<>();
         numObs4.put("p4", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p4", numObs4);
+        addPendingResource(numeratorMeasureObs, "p4", numObs4);
         Map<String, QuantityDef> numObs5 = new HashMap<>();
         numObs5.put("p5", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p5", numObs5);
+        addPendingResource(numeratorMeasureObs, "p5", numObs5);
 
         // Denominator MEASUREOBSERVATION with SUM
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -1687,19 +1681,19 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("p1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
         Map<String, QuantityDef> denObs2 = new HashMap<>();
         denObs2.put("p2", new QuantityDef(7.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        addPendingResource(denominatorMeasureObs, "p2", denObs2);
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("p3", new QuantityDef(8.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
         Map<String, QuantityDef> denObs4 = new HashMap<>();
         denObs4.put("p4", new QuantityDef(4.0));
-        denominatorMeasureObs.addResource("p4", denObs4);
+        addPendingResource(denominatorMeasureObs, "p4", denObs4);
         Map<String, QuantityDef> denObs5 = new HashMap<>();
         denObs5.put("p5", new QuantityDef(6.0));
-        denominatorMeasureObs.addResource("p5", denObs5);
+        addPendingResource(denominatorMeasureObs, "p5", denObs5);
 
         // Male stratum populations
         StratumPopulationDef maleNumObs = new StratumPopulationDef(
@@ -1819,21 +1813,21 @@ class MeasureReportDefScorerTest {
         // Male observations: 10, 20, 30
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
         Map<String, QuantityDef> obs3 = new HashMap<>();
         obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        addPendingResource(measureObsPop, "p3", obs3);
 
         // Female observations: 5, 15
         Map<String, QuantityDef> obs4 = new HashMap<>();
         obs4.put("obs-4", new QuantityDef(5.0));
-        measureObsPop.addResource("p4", obs4);
+        addPendingResource(measureObsPop, "p4", obs4);
         Map<String, QuantityDef> obs5 = new HashMap<>();
         obs5.put("obs-5", new QuantityDef(15.0));
-        measureObsPop.addResource("p5", obs5);
+        addPendingResource(measureObsPop, "p5", obs5);
 
         // Male stratum
         StratumPopulationDef maleIpPop = new StratumPopulationDef(
@@ -1979,9 +1973,9 @@ class MeasureReportDefScorerTest {
         ConceptDef code = createMeasurePopulationConcept(type);
         PopulationDef pop = new PopulationDef(id, code, type, "expression", populationBasis, null);
 
-        // Add subjects to population
+        // Stage subjects for later application to PopulationState
         for (String subject : subjects) {
-            pop.addResource(subject, true); // For boolean basis, resource is just boolean true
+            addPendingResource(pop, subject, true);
         }
 
         return pop;
@@ -2134,12 +2128,12 @@ class MeasureReportDefScorerTest {
     }
 
     // ============================================================================
-    // PopulationDef.setAggregationResult() Tests
+    // PopulationState.setAggregationResult() Tests
     // ============================================================================
 
     @Test
     void testPopulationDef_SetAggregationResultWithQuantityDef() {
-        // Test the new setAggregationResult(QuantityDef) overload added in latest changes
+        // Test the setAggregationResult(QuantityDef) overload on PopulationState
         CodeDef booleanBasis = createBooleanBasisCode();
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
@@ -2152,21 +2146,32 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Test Group"),
+                List.of(),
+                List.of(measureObsPop),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
         // Initially null
-        assertNull(measureObsPop.getAggregationResult());
+        assertNull(state.population(measureObsPop).getAggregationResult());
 
         // Set using QuantityDef overload
         QuantityDef quantityDef = new QuantityDef(42.5);
-        measureObsPop.setAggregationResult(quantityDef);
+        state.population(measureObsPop).setAggregationResult(quantityDef);
 
         // Verify value is extracted and set
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(42.5, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(42.5, state.population(measureObsPop).getAggregationResult(), 0.001);
     }
 
     @Test
     void testPopulationDef_SetAggregationResultWithNullQuantityDef() {
-        // Test the setAggregationResult(QuantityDef) overload with null
+        // Test the setAggregationResult(QuantityDef) overload with null on PopulationState
         CodeDef booleanBasis = createBooleanBasisCode();
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
@@ -2179,20 +2184,31 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null);
 
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Test Group"),
+                List.of(),
+                List.of(measureObsPop),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
         // Set to a value first
-        measureObsPop.setAggregationResult(100.0);
-        assertEquals(100.0, measureObsPop.getAggregationResult(), 0.001);
+        state.population(measureObsPop).setAggregationResult(100.0);
+        assertEquals(100.0, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // Set to null using QuantityDef overload
-        measureObsPop.setAggregationResult((QuantityDef) null);
+        state.population(measureObsPop).setAggregationResult((QuantityDef) null);
 
         // Verify it's null
-        assertNull(measureObsPop.getAggregationResult());
+        assertNull(state.population(measureObsPop).getAggregationResult());
     }
 
     @Test
     void testPopulationDef_SetAggregationResultWithDouble() {
-        // Test the existing setAggregationResult(Double) method still works
+        // Test the setAggregationResult(Double) method on PopulationState
         CodeDef booleanBasis = createBooleanBasisCode();
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
@@ -2205,19 +2221,30 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.MEDIAN,
                 null);
 
+        GroupDef groupDef = new GroupDef(
+                "group-1",
+                createTextOnlyConcept("Test Group"),
+                List.of(),
+                List.of(measureObsPop),
+                MeasureScoring.CONTINUOUSVARIABLE,
+                false,
+                createImprovementNotationCode("increase"),
+                booleanBasis);
+        MeasureEvaluationState state = createStateForGroup(groupDef);
+
         // Initially null
-        assertNull(measureObsPop.getAggregationResult());
+        assertNull(state.population(measureObsPop).getAggregationResult());
 
         // Set using Double
-        measureObsPop.setAggregationResult(99.9);
+        state.population(measureObsPop).setAggregationResult(99.9);
 
         // Verify value is set
-        assertNotNull(measureObsPop.getAggregationResult());
-        assertEquals(99.9, measureObsPop.getAggregationResult(), 0.001);
+        assertNotNull(state.population(measureObsPop).getAggregationResult());
+        assertEquals(99.9, state.population(measureObsPop).getAggregationResult(), 0.001);
 
         // Can also set to null
-        measureObsPop.setAggregationResult((Double) null);
-        assertNull(measureObsPop.getAggregationResult());
+        state.population(measureObsPop).setAggregationResult((Double) null);
+        assertNull(state.population(measureObsPop).getAggregationResult());
     }
 
     @Test
@@ -2245,23 +2272,23 @@ class MeasureReportDefScorerTest {
         // Add observations in non-sorted order
         Map<String, QuantityDef> obs1 = new HashMap<>();
         obs1.put("obs-1", new QuantityDef(20.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
 
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-2", new QuantityDef(5.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
 
         Map<String, QuantityDef> obs3 = new HashMap<>();
         obs3.put("obs-3", new QuantityDef(25.0));
-        measureObsPop.addResource("p3", obs3);
+        addPendingResource(measureObsPop, "p3", obs3);
 
         Map<String, QuantityDef> obs4 = new HashMap<>();
         obs4.put("obs-4", new QuantityDef(10.0));
-        measureObsPop.addResource("p4", obs4);
+        addPendingResource(measureObsPop, "p4", obs4);
 
         Map<String, QuantityDef> obs5 = new HashMap<>();
         obs5.put("obs-5", new QuantityDef(15.0));
-        measureObsPop.addResource("p5", obs5);
+        addPendingResource(measureObsPop, "p5", obs5);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -2272,9 +2299,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 booleanBasis);
-
-        assertNull(groupDef.getScore());
-        assertNull(measureObsPop.getAggregationResult());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -2320,14 +2344,14 @@ class MeasureReportDefScorerTest {
         obs1.put("obs-2", new QuantityDef(20.0));
         obs1.put("obs-3", new QuantityDef(30.0));
         obs1.put("obs-4", new QuantityDef(40.0));
-        measureObsPop.addResource("p1", obs1);
+        addPendingResource(measureObsPop, "p1", obs1);
 
         // Patient 2 has 3 observations
         Map<String, QuantityDef> obs2 = new HashMap<>();
         obs2.put("obs-5", new QuantityDef(50.0));
         obs2.put("obs-6", new QuantityDef(60.0));
         obs2.put("obs-7", new QuantityDef(70.0));
-        measureObsPop.addResource("p2", obs2);
+        addPendingResource(measureObsPop, "p2", obs2);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -2338,9 +2362,6 @@ class MeasureReportDefScorerTest {
                 false,
                 createImprovementNotationCode("increase"),
                 encounterBasis);
-
-        assertNull(groupDef.getScore());
-        assertNull(measureObsPop.getAggregationResult());
 
         MeasureEvaluationState state = createStateForGroup(groupDef);
 
@@ -2393,10 +2414,10 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> numObs1 = new HashMap<>();
         numObs1.put("p1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        addPendingResource(numeratorMeasureObs, "p1", numObs1);
         Map<String, QuantityDef> numObs2 = new HashMap<>();
         numObs2.put("p2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        addPendingResource(numeratorMeasureObs, "p2", numObs2);
 
         // Denominator MEASUREOBSERVATION with NO observations for p1 or p2
         // (observations exist for other subjects, e.g. p3, but not in this stratum)
@@ -2414,7 +2435,7 @@ class MeasureReportDefScorerTest {
         // Only add denominator obs for p3 (NOT in this stratum)
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("p3", new QuantityDef(50.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
 
         // Stratum populations: subjects p1, p2
         StratumPopulationDef stratumNumObs = new StratumPopulationDef(
@@ -2511,7 +2532,7 @@ class MeasureReportDefScorerTest {
         // Only add numerator obs for p3 (NOT in this stratum)
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("p3", new QuantityDef(99.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
 
         // Denominator MEASUREOBSERVATION with observations for p1 and p2
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -2527,10 +2548,10 @@ class MeasureReportDefScorerTest {
 
         Map<String, QuantityDef> denObs1 = new HashMap<>();
         denObs1.put("p1", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        addPendingResource(denominatorMeasureObs, "p1", denObs1);
         Map<String, QuantityDef> denObs2 = new HashMap<>();
         denObs2.put("p2", new QuantityDef(25.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        addPendingResource(denominatorMeasureObs, "p2", denObs2);
 
         // Stratum populations: subjects p1, p2
         StratumPopulationDef stratumNumObs = new StratumPopulationDef(
@@ -2625,7 +2646,7 @@ class MeasureReportDefScorerTest {
         // Only add numerator obs for p3 (NOT in stratum)
         Map<String, QuantityDef> numObs3 = new HashMap<>();
         numObs3.put("p3", new QuantityDef(99.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        addPendingResource(numeratorMeasureObs, "p3", numObs3);
 
         // Denominator MEASUREOBSERVATION with NO observations for stratum subjects
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -2642,7 +2663,7 @@ class MeasureReportDefScorerTest {
         // Only add denominator obs for p3 (NOT in stratum)
         Map<String, QuantityDef> denObs3 = new HashMap<>();
         denObs3.put("p3", new QuantityDef(50.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        addPendingResource(denominatorMeasureObs, "p3", denObs3);
 
         // Stratum populations: subjects p1, p2
         StratumPopulationDef stratumNumObs = new StratumPopulationDef(
@@ -2713,15 +2734,13 @@ class MeasureReportDefScorerTest {
                 new IdType("Measure/test"), "http://example.com/Measure/test", "1.0", List.of(groupDef), List.of());
         MeasureEvaluationState state = MeasureEvaluationState.create(measureDef);
 
-        // Copy subject resources from PopulationDef to PopulationState
-        for (PopulationDef pop : groupDef.populations()) {
-            for (Map.Entry<String, Set<Object>> entry :
-                    pop.getSubjectResources().entrySet()) {
-                for (Object resource : entry.getValue()) {
-                    state.population(pop).addResource(entry.getKey(), resource);
-                }
+        // Apply pending resources to PopulationState
+        for (Map.Entry<PopulationDef, java.util.List<Object[]>> entry : pendingResources.entrySet()) {
+            for (Object[] args : entry.getValue()) {
+                state.population(entry.getKey()).addResource((String) args[0], args[1]);
             }
         }
+        pendingResources.clear();
 
         // Copy strata from StratifierDef to StratifierState
         for (StratifierDef strat : groupDef.stratifiers()) {

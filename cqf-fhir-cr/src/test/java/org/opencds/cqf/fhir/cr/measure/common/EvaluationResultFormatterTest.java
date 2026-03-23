@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -845,8 +846,19 @@ class EvaluationResultFormatterTest {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef populationDef = new PopulationDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+        var groupDef = new GroupDef(
+                "group-1",
+                null,
+                List.of(),
+                List.of(populationDef),
+                MeasureScoring.PROPORTION,
+                false,
+                new CodeDef(null, "increase"),
+                booleanBasis);
+        var measureDef = new MeasureDef(new IdType("Measure/test"), "http://test", "1.0", List.of(groupDef), List.of());
+        var state = MeasureEvaluationState.create(measureDef);
 
-        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        Object result = EvaluationResultFormatter.printSubjectResources(state.population(populationDef), "Patient/1");
         assertEquals("Patient/1: {empty}", result);
     }
 
@@ -855,12 +867,23 @@ class EvaluationResultFormatterTest {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef populationDef = new PopulationDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        var groupDef = new GroupDef(
+                "group-1",
+                null,
+                List.of(),
+                List.of(populationDef),
+                MeasureScoring.PROPORTION,
+                false,
+                new CodeDef(null, "increase"),
+                encounterBasis);
+        var measureDef = new MeasureDef(new IdType("Measure/test"), "http://test", "1.0", List.of(groupDef), List.of());
+        var state = MeasureEvaluationState.create(measureDef);
 
         Encounter encounter = new Encounter();
         encounter.setId("Encounter/encounter-1");
-        populationDef.addResource("Patient/1", encounter);
+        state.population(populationDef).addResource("Patient/1", encounter);
 
-        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        Object result = EvaluationResultFormatter.printSubjectResources(state.population(populationDef), "Patient/1");
         assertEquals("Patient/1: Encounter/encounter-1", result);
     }
 
@@ -869,16 +892,27 @@ class EvaluationResultFormatterTest {
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef populationDef = new PopulationDef(
                 "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+        var groupDef = new GroupDef(
+                "group-1",
+                null,
+                List.of(),
+                List.of(populationDef),
+                MeasureScoring.PROPORTION,
+                false,
+                new CodeDef(null, "increase"),
+                encounterBasis);
+        var measureDef = new MeasureDef(new IdType("Measure/test"), "http://test", "1.0", List.of(groupDef), List.of());
+        var state = MeasureEvaluationState.create(measureDef);
 
         Encounter encounter1 = new Encounter();
         encounter1.setId("Encounter/encounter-1");
         Encounter encounter2 = new Encounter();
         encounter2.setId("Encounter/encounter-2");
 
-        populationDef.addResource("Patient/1", encounter1);
-        populationDef.addResource("Patient/1", encounter2);
+        state.population(populationDef).addResource("Patient/1", encounter1);
+        state.population(populationDef).addResource("Patient/1", encounter2);
 
-        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        Object result = EvaluationResultFormatter.printSubjectResources(state.population(populationDef), "Patient/1");
         String resultStr = result.toString();
         assertTrue(resultStr.startsWith("Patient/1: "));
         assertTrue(resultStr.contains("Encounter/encounter-1"));
@@ -890,11 +924,22 @@ class EvaluationResultFormatterTest {
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef populationDef =
                 new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+        var groupDef = new GroupDef(
+                "group-1",
+                null,
+                List.of(),
+                List.of(populationDef),
+                MeasureScoring.PROPORTION,
+                false,
+                new CodeDef(null, "increase"),
+                stringBasis);
+        var measureDef = new MeasureDef(new IdType("Measure/test"), "http://test", "1.0", List.of(groupDef), List.of());
+        var state = MeasureEvaluationState.create(measureDef);
 
-        populationDef.addResource("Patient/1", "value1");
-        populationDef.addResource("Patient/1", "value2");
+        state.population(populationDef).addResource("Patient/1", "value1");
+        state.population(populationDef).addResource("Patient/1", "value2");
 
-        Object result = EvaluationResultFormatter.printSubjectResources(populationDef, "Patient/1");
+        Object result = EvaluationResultFormatter.printSubjectResources(state.population(populationDef), "Patient/1");
         String resultStr = result.toString();
         assertTrue(resultStr.startsWith("Patient/1: "));
         assertTrue(resultStr.contains("value1"));

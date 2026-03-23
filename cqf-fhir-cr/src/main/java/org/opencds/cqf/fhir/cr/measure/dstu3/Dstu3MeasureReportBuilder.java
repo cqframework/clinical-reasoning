@@ -10,17 +10,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ListResource;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -37,6 +33,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
+import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -55,11 +53,10 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
+public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<MeasureReport> {
 
     private static final Logger logger = LoggerFactory.getLogger(Dstu3MeasureReportBuilder.class);
 
-    protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
     protected static final String EXT_POPULATION_DESCRIPTION_URL =
             "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription";
     // DEQM STU5: R5 cross-version extension for MeasureReport.supplementalData
@@ -68,19 +65,18 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     protected static final String POPULATION_BASIS_URL =
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis";
 
-    protected Measure measure = null;
+    protected MeasureDef measureDef = null;
     protected MeasureReport report = null;
     protected HashMap<String, Reference> evaluatedResourceReferences = null;
 
     protected void reset() {
-        this.measure = null;
+        this.measureDef = null;
         this.report = null;
         this.evaluatedResourceReferences = null;
     }
 
     @Override
     public MeasureReport build(
-            Measure measure,
             MeasureDef measureDef,
             MeasureEvaluationState state,
             MeasureReportType measureReportType,
@@ -88,11 +84,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             List<String> subjectIds) {
         this.reset();
 
-        this.measure = measure;
-        this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
+        this.measureDef = measureDef;
+        this.report = this.createMeasureReport(measureDef, measureReportType, subjectIds, measurementPeriod);
 
-        buildGroups(measure, measureDef, state);
-        processSdes(measure, measureDef, state, subjectIds);
+        buildGroups(measureDef, state);
+        processSdes(measureDef, state, subjectIds);
 
         // Copy scores from state (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
         copyScoresFromState(measureDef, state);
@@ -109,25 +105,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.report;
     }
 
-    protected void buildGroups(Measure measure, MeasureDef measureDef, MeasureEvaluationState state) {
-        if (measure.getGroup().size() != measureDef.groups().size()) {
-            // This is not a user error:
-            throw new IllegalArgumentException(
-                    "The Measure has a different number of groups defined than the MeasureDef");
-        }
-
-        // ASSUMPTION: The groups are in the same order in both the Measure and the
-        // MeasureDef
-        for (int i = 0; i < measure.getGroup().size(); i++) {
-            MeasureGroupComponent mgc = measure.getGroup().get(i);
-            String groupKey = this.getKey("group", mgc.getId(), null, i);
-            buildGroup(
-                    measureDef,
-                    state,
-                    groupKey,
-                    mgc,
-                    this.report.addGroup(),
-                    measureDef.groups().get(i));
+    protected void buildGroups(MeasureDef measureDef, MeasureEvaluationState state) {
+        for (int i = 0; i < measureDef.groups().size(); i++) {
+            GroupDef groupDef = measureDef.groups().get(i);
+            String groupKey = this.getKey("group", groupDef.id(), null, i);
+            buildGroup(measureDef, state, groupKey, this.report.addGroup(), groupDef);
         }
     }
 
@@ -135,47 +117,39 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             MeasureDef measureDef,
             MeasureEvaluationState state,
             String groupKey,
-            MeasureGroupComponent measureGroup,
             MeasureReportGroupComponent reportGroup,
             GroupDef groupDef) {
-        if (measureGroup.getPopulation().size() != (groupDef.populations().size())) {
-            // This is not a user error:
-            throw new IllegalArgumentException(
-                    "The MeasureGroup has a different number of populations defined than the GroupDef");
-        }
 
-        if (measureGroup.getStratifier().size() != groupDef.stratifiers().size()) {
-            throw new IllegalArgumentException(
-                    "The MeasureGroup has a different number of stratifiers defined than the GroupDef");
-        }
+        reportGroup.setId(groupDef.id());
 
-        reportGroup.setId(measureGroup.getId());
-
-        if (measureGroup.hasDescription()) {
+        if (groupDef.description() != null && !groupDef.description().isEmpty()) {
             reportGroup.addExtension(
-                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measureGroup.getDescription()));
+                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, groupDef.description()));
         }
 
-        for (MeasureGroupPopulationComponent mgpc : measureGroup.getPopulation()) {
-            buildPopulation(
-                    measureDef,
-                    state,
-                    groupKey,
-                    mgpc,
-                    reportGroup.addPopulation(),
-                    groupDef.getSingle(MeasurePopulationType.fromCode(
-                            mgpc.getCode().getCodingFirstRep().getCode())));
+        // Build populations and collect subject sets for stratifier use
+        Map<String, Set<String>> populationSubjectSets = new HashMap<>();
+        Map<String, PopulationDef> populationsByCode = new HashMap<>();
+
+        for (PopulationDef populationDef : groupDef.populations()) {
+            buildPopulation(measureDef, state, groupKey, reportGroup.addPopulation(), populationDef);
+
+            // Carry subject sets for stratifier building
+            String popCode = populationDef.type().toCode();
+            Set<String> populationSet = state.population(populationDef).getSubjects();
+            populationSubjectSets.put(popCode, populationSet);
+            populationsByCode.put(popCode, populationDef);
         }
 
-        for (int i = 0; i < measureGroup.getStratifier().size(); i++) {
+        for (int i = 0; i < groupDef.stratifiers().size(); i++) {
             buildStratifier(
                     state,
                     groupKey,
                     i,
-                    measureGroup.getStratifier().get(i),
                     reportGroup.addStratifier(),
                     groupDef.stratifiers().get(i),
-                    measureGroup.getPopulation());
+                    groupDef.populations(),
+                    populationSubjectSets);
         }
     }
 
@@ -196,15 +170,15 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             MeasureEvaluationState state,
             String groupKey,
             Integer stratIndex,
-            MeasureGroupStratifierComponent measureStratifier,
             MeasureReportGroupStratifierComponent reportStratifier,
             StratifierDef stratifierDef,
-            List<MeasureGroupPopulationComponent> populations) {
-        reportStratifier.setId(measureStratifier.getId());
+            List<PopulationDef> populations,
+            Map<String, Set<String>> populationSubjectSets) {
+        reportStratifier.setId(stratifierDef.id());
 
         // NOTE: DSTU3 does not support descriptions
 
-        String stratifierKey = this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
+        String stratifierKey = this.getKey("stratifier", stratifierDef.id(), null, stratIndex);
 
         Map<String, CriteriaResult> subjectValues =
                 state.stratifier(stratifierDef).getResults();
@@ -223,7 +197,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     reportStratifier.addStratum(),
                     stratValue.getKey(),
                     stratValue.getValue(),
-                    populations);
+                    populations,
+                    populationSubjectSets);
         }
     }
 
@@ -233,34 +208,43 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             StratifierGroupComponent stratum,
             StratumValueWrapper value,
             List<String> subjectIds,
-            List<MeasureGroupPopulationComponent> populations) {
+            List<PopulationDef> populations,
+            Map<String, Set<String>> populationSubjectSets) {
 
         String stratumKey = this.escapeForFhirId(value.getKey());
 
         stratum.setValue(value.getValueAsString());
 
-        for (MeasureGroupPopulationComponent mgpc : populations) {
-            buildStratumPopulation(groupKey, stratifierKey, stratumKey, stratum.addPopulation(), subjectIds, mgpc);
+        for (PopulationDef populationDef : populations) {
+            String popCode = populationDef.type().toCode();
+            Set<String> popSubjectIds = populationSubjectSets.get(popCode);
+            buildStratumPopulation(
+                    groupKey,
+                    stratifierKey,
+                    stratumKey,
+                    stratum.addPopulation(),
+                    subjectIds,
+                    populationDef,
+                    popSubjectIds);
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void buildStratumPopulation(
             String groupKey,
             String stratifierKey,
             String stratumKey,
             StratifierGroupPopulationComponent sgpc,
             List<String> subjectIds,
-            MeasureGroupPopulationComponent population) {
-        sgpc.setCode(population.getCode());
-        sgpc.setId(population.getId());
-
-        if (population.hasDescription()) {
-            sgpc.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, population.getDescription()));
+            PopulationDef populationDef,
+            Set<String> popSubjectIds) {
+        if (populationDef.code() != null) {
+            sgpc.setCode(conceptDefToConcept(populationDef.code()));
         }
+        sgpc.setId(populationDef.id());
 
-        // This is a temporary resource that was carried by the population component
-        Set<String> popSubjectIds = (Set<String>) population.getUserData(POPULATION_SUBJECT_SET);
+        if (populationDef.description() != null && !populationDef.description().isEmpty()) {
+            sgpc.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, populationDef.description()));
+        }
 
         if (popSubjectIds == null) {
             sgpc.setCount(0);
@@ -275,7 +259,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                 && this.report.getType() == org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.PATIENTLIST) {
             ListResource popSubjectList = this.createIdList(
                     "subject-list-" + groupKey + "-" + stratifierKey + "-" + "stratum-" + stratumKey + "-"
-                            + population.getCode().getCodingFirstRep().getCode(),
+                            + populationDef.type().toCode(),
                     intersection);
             this.report.addContained(popSubjectList);
             sgpc.setPatients(new Reference().setReference("#" + popSubjectList.getId()));
@@ -286,14 +270,15 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             MeasureDef measureDef,
             MeasureEvaluationState state,
             String groupKey,
-            MeasureGroupPopulationComponent measurePopulation,
             MeasureReportGroupPopulationComponent reportPopulation,
             PopulationDef populationDef) {
 
         var popState = state.population(populationDef);
 
-        reportPopulation.setCode(measurePopulation.getCode());
-        reportPopulation.setId(measurePopulation.getId());
+        if (populationDef.code() != null) {
+            reportPopulation.setCode(conceptDefToConcept(populationDef.code()));
+        }
+        reportPopulation.setId(populationDef.id());
 
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
             reportPopulation.setCount(popState.getAllSubjectResources().size());
@@ -301,18 +286,15 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             reportPopulation.setCount(popState.getSubjects().size());
         }
 
-        if (measurePopulation.hasDescription()) {
+        if (populationDef.description() != null && !populationDef.description().isEmpty()) {
             reportPopulation.addExtension(
-                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measurePopulation.getDescription()));
+                    this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, populationDef.description()));
         }
 
         addResourceReferences(populationDef.type(), popState.getEvaluatedResources());
 
-        // This is a temporary list carried forward to stratifiers
-        Set<String> populationSet = popState.getSubjects();
-        measurePopulation.setUserData(POPULATION_SUBJECT_SET, populationSet);
-
         // Report Type behavior
+        Set<String> populationSet = popState.getSubjects();
         switch (this.report.getType()) {
             case PATIENTLIST:
                 if (populationSet.size() > 0) {
@@ -393,12 +375,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
     }
 
-    protected void processSdes(
-            Measure measure, MeasureDef measureDef, MeasureEvaluationState state, List<String> subjectIds) {
-        // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
-        for (int i = 0; i < measure.getSupplementalData().size(); i++) {
-            MeasureSupplementalDataComponent msdc =
-                    measure.getSupplementalData().get(i);
+    @SuppressWarnings("unchecked")
+    protected void processSdes(MeasureDef measureDef, MeasureEvaluationState state, List<String> subjectIds) {
+        for (int i = 0; i < measureDef.sdes().size(); i++) {
             SdeDef sde = measureDef.sdes().get(i);
 
             processSdeEvaluatedResourceExtension(state, sde);
@@ -408,7 +387,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                     .map(StratumValueWrapper::new)
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);
+            String sdeKey = this.getKey("sde-observation", sde.id(), null, i);
             String sdeId = sde.id();
             for (Map.Entry<StratumValueWrapper, Long> accumulator : accumulated.entrySet()) {
 
@@ -500,7 +479,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected MeasureReport createMeasureReport(
-            Measure measure, MeasureReportType type, List<String> subjectIds, Interval measurementPeriod) {
+            MeasureDef measureDef, MeasureReportType type, List<String> subjectIds, Interval measurementPeriod) {
         MeasureReport report = new MeasureReport();
         report.setStatus(MeasureReport.MeasureReportStatus.fromCode("complete"));
         report.setType(org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportType.fromCode(type.toCode()));
@@ -513,19 +492,49 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             report.setPeriod(getPeriod(measurementPeriod));
         }
 
-        report.setMeasure(new Reference(measure.getId()));
+        // DSTU3 setMeasure takes a Reference
+        String measureUrl = getMeasureReference(measureDef);
+        report.setMeasure(new Reference(measureUrl));
         report.setDate(new java.util.Date());
-        report.setImplicitRules(measure.getImplicitRules());
-        report.setLanguage(measure.getLanguage());
+        report.setImplicitRules(measureDef.implicitRules());
+        report.setLanguage(measureDef.language());
 
-        if (measure.hasDescription()) {
-            report.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measure.getDescription()));
+        if (measureDef.description() != null && !measureDef.description().isEmpty()) {
+            report.addExtension(this.createStringExtension(EXT_POPULATION_DESCRIPTION_URL, measureDef.description()));
         }
 
         // TODO: Allow a way to pass in or set a default reporter
         // report.setReporter(value)
 
         return report;
+    }
+
+    private String getMeasureReference(MeasureDef measureDef) {
+        String url = measureDef.url();
+        if (StringUtils.isNotBlank(url) && !url.contains("|") && StringUtils.isNotBlank(measureDef.version())) {
+            return url + "|" + measureDef.version();
+        }
+        return url;
+    }
+
+    private CodeableConcept conceptDefToConcept(ConceptDef c) {
+        if (c == null) {
+            return null;
+        }
+        var cc = new CodeableConcept().setText(c.text());
+        for (var cd : c.codes()) {
+            cc.addCoding(codeDefToCoding(cd));
+        }
+        return cc;
+    }
+
+    private Coding codeDefToCoding(CodeDef c) {
+        var cd = new Coding();
+        cd.setSystem(c.system());
+        cd.setCode(c.code());
+        cd.setVersion(c.version());
+        cd.setDisplay(c.display());
+        return cd;
     }
 
     protected Extension createStringExtension(String url, String value) {
@@ -596,13 +605,13 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected Observation createObservation(String id, String populationId) {
+        String url = this.measureDef.url();
         MeasureInfo measureInfo = new MeasureInfo()
                 .withMeasure(
-                        this.measure.hasUrl()
-                                ? measure.getUrl()
-                                : (measure.hasId()
-                                        ? MeasureInfo.MEASURE_PREFIX
-                                                + measure.getIdElement().getIdPart()
+                        StringUtils.isNotBlank(url)
+                                ? url
+                                : (StringUtils.isNotBlank(this.measureDef.id())
+                                        ? MeasureInfo.MEASURE_PREFIX + this.measureDef.id()
                                         : ""))
                 .withPopulationId(populationId);
 

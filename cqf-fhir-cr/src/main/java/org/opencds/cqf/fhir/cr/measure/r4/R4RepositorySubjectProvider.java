@@ -22,6 +22,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
+import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -34,12 +35,12 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
     }
 
     @Override
-    public Stream<String> getSubjects(IRepository repository, @Nullable String subjectId) {
+    public Stream<SubjectRef> getSubjects(IRepository repository, @Nullable String subjectId) {
         return getSubjects(repository, Collections.singletonList(subjectId));
     }
 
     @Override
-    public Stream<String> getSubjects(IRepository repository, List<String> subjectIds) {
+    public Stream<SubjectRef> getSubjects(IRepository repository, List<String> subjectIds) {
         // All patients in system
         if (subjectIds == null
                 || subjectIds.isEmpty()
@@ -50,10 +51,11 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                             .getIdElement()
                             .toUnqualifiedVersionless()
                             .getValue())
-                    .toStream();
+                    .toStream()
+                    .map(SubjectRef::fromQualified);
         }
 
-        List<String> subjects = new ArrayList<>();
+        List<SubjectRef> subjects = new ArrayList<>();
         subjectIds.forEach(subjectId -> {
             // add resource reference if missing
             if (!subjectId.contains("/")) {
@@ -68,7 +70,8 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                     throw new MeasureResolutionException("Resource not found: " + id.getValue());
                 }
 
-                subjects.add(r.getIdElement().toUnqualifiedVersionless().getValue());
+                subjects.add(SubjectRef.fromQualified(
+                        r.getIdElement().toUnqualifiedVersionless().getValue()));
                 // Single Practitioner
             } else if (subjectId.startsWith("Practitioner")) {
 
@@ -86,7 +89,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 if (r.getType().equals(GroupType.PERSON)) {
                     for (GroupMemberComponent gmc : r.getMember()) {
                         IIdType ref = gmc.getEntity().getReferenceElement();
-                        subjects.add(ref.getResourceType() + "/" + ref.getIdPart());
+                        subjects.add(new SubjectRef(ref.getResourceType(), ref.getIdPart()));
                     }
                 }
                 // Group of Practitioners
@@ -119,7 +122,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return members;
     }
 
-    public void addPractitionerSubjectIds(String practitioner, IRepository repository, List<String> patients) {
+    public void addPractitionerSubjectIds(String practitioner, IRepository repository, List<SubjectRef> patients) {
         Map<String, List<IQueryParameterType>> map = new HashMap<>();
 
         map.put(
@@ -132,13 +135,12 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
 
         while (iterator.hasNext()) {
             var patient = iterator.next().getResource();
-            var refString = patient.getIdElement().getResourceType() + "/"
-                    + patient.getIdElement().getIdPart();
-            patients.add(refString);
+            var idElement = patient.getIdElement();
+            patients.add(new SubjectRef(idElement.getResourceType(), idElement.getIdPart()));
         }
     }
 
-    private List<String> getOrganizationSubjectIds(String organization, IRepository repository) {
+    private List<SubjectRef> getOrganizationSubjectIds(String organization, IRepository repository) {
 
         return Stream.concat(
                         getManagingOrganizationSubjectIds(organization, repository),
@@ -146,7 +148,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 .collect(Collectors.toList());
     }
 
-    private Stream<String> getManagingOrganizationSubjectIds(String organization, IRepository repository) {
+    private Stream<SubjectRef> getManagingOrganizationSubjectIds(String organization, IRepository repository) {
         final Map<String, List<IQueryParameterType>> searchParams = new HashMap<>();
 
         searchParams.put("organization", Collections.singletonList(new ReferenceParam(organization)));
@@ -154,7 +156,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return handlePatientBundle(repository, searchParams);
     }
 
-    private Stream<String> getPartOfSubjectIds(String organization, IRepository repository) {
+    private Stream<SubjectRef> getPartOfSubjectIds(String organization, IRepository repository) {
 
         if (!subjectProviderOptions.isPartOfEnabled()) {
             return Stream.empty();
@@ -169,7 +171,7 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         return handlePatientBundle(repository, searchParam);
     }
 
-    private static Stream<String> handlePatientBundle(
+    private static Stream<SubjectRef> handlePatientBundle(
             IRepository repository, Map<String, List<IQueryParameterType>> searchParam) {
         var bundle = repository.search(Bundle.class, Patient.class, searchParam);
 
@@ -180,12 +182,12 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
         }
 
         var iterator = new BundleIterator<>(repository, bundle);
-        var patientIds = new ArrayList<String>();
+        var patientIds = new ArrayList<SubjectRef>();
 
         iterator.forEachRemaining(item -> {
             var resource = item.getResource();
             var idElement = resource.getIdElement();
-            patientIds.add(ResourceType.Patient + "/" + idElement.getIdPart());
+            patientIds.add(new SubjectRef(ResourceType.Patient.name(), idElement.getIdPart()));
         });
 
         return patientIds.stream();

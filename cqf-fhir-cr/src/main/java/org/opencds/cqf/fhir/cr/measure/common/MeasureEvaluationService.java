@@ -87,8 +87,8 @@ public class MeasureEvaluationService {
         var evalType = MeasureEvalType.getEvalType(null, request.reportType(), subjectIdAsList);
 
         // 6. Resolve subjects from repository
-        var subjects = subjectProvider.getSubjects(federatedRepo, subjectId).toList();
-
+        var subjectRefs = subjectProvider.getSubjects(federatedRepo, subjectId).toList();
+        var subjects = subjectRefs.stream().map(SubjectRef::qualified).toList();
         // 7. CQL engine creation
         var additionalData = (IBaseBundle) environment.additionalData();
         CqlEngine context = Engines.forRepository(effectiveRepo, options.getEvaluationSettings(), additionalData);
@@ -118,7 +118,7 @@ public class MeasureEvaluationService {
         var zonedMeasurementPeriod = MeasureProcessorTimeUtils.getZonedTimeZoneForEval(
                 MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
         var compositeResults = MeasureEvaluationResultHandler.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, engineDetails, paramsMap);
+                subjectRefs, zonedMeasurementPeriod, context, engineDetails, paramsMap);
 
         // 12. Score each measure (one score per ResolvedMeasure, covering all subjects)
         var scoredMeasures = measures.stream()
@@ -172,6 +172,17 @@ public class MeasureEvaluationService {
                     environment.dataEndpoint(),
                     environment.contentEndpoint(),
                     environment.terminologyEndpoint());
+        }
+        // Warn if some but not all endpoints are configured — partial config is likely unintentional
+        if (environment.dataEndpoint() != null
+                || environment.contentEndpoint() != null
+                || environment.terminologyEndpoint() != null) {
+            log.warn(
+                    "Partial endpoint configuration detected: dataEndpoint={}, contentEndpoint={}, terminologyEndpoint={}. "
+                            + "All three endpoints must be configured for proxy repository setup. Falling back to base repository.",
+                    environment.dataEndpoint() != null ? "set" : "null",
+                    environment.contentEndpoint() != null ? "set" : "null",
+                    environment.terminologyEndpoint() != null ? "set" : "null");
         }
         return base;
     }

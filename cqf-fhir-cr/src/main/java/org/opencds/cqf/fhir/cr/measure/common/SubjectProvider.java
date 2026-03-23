@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public interface SubjectProvider {
-    Stream<String> getSubjects(IRepository repository, String subjectId);
+    Stream<SubjectRef> getSubjects(IRepository repository, String subjectId);
 
-    Stream<String> getSubjects(IRepository repository, List<String> subjectIds);
+    Stream<SubjectRef> getSubjects(IRepository repository, List<String> subjectIds);
 }

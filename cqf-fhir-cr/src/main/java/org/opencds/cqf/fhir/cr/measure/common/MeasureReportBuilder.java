@@ -3,9 +3,8 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.List;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 
-public interface MeasureReportBuilder<MeasureT, MeasureReportT, SubjectT> {
+public interface MeasureReportBuilder<MeasureReportT> {
     MeasureReportT build(
-            MeasureT measure,
             MeasureDef def,
             MeasureEvaluationState state,
             MeasureReportType measureReportType,

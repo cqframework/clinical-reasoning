@@ -43,8 +43,12 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class R4MeasureProcessor {
+    private static final Logger log = LoggerFactory.getLogger(R4MeasureProcessor.class);
+
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
@@ -266,7 +270,6 @@ public class R4MeasureProcessor {
      * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
      */
     @VisibleForTesting
-    // LUKETODO: generate tests for this since this is used downstream
     MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
             Either3<CanonicalType, IdType, Measure> measure,
             @Nullable ZonedDateTime periodStart,
@@ -288,7 +291,6 @@ public class R4MeasureProcessor {
                 compositeEvaluationResultsPerMeasure);
     }
 
-    // LUKETODO: generate tests for this since this is used downstream
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
             Either3<CanonicalType, IdType, Measure> measureEither,
@@ -306,7 +308,6 @@ public class R4MeasureProcessor {
                 context);
     }
 
-    // LUKETODO: generate tests for this since this is used downstream
     public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(
             List<String> subjects,
             IIdType measureId,
@@ -362,6 +363,19 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             CqlEngine context) {
+
+        log.info(
+                "Evaluating CQL for SINGLE/MULITPLE: {} measure(s): {}, subjectCount: {}, periodStart: {}, periodEnd: {}",
+                measures.size() > 1 ? "MULTIPLE" : "SINGLE",
+                measures.stream()
+                        .map(m -> "%s (id=%s)"
+                                .formatted(
+                                        m.getUrl() != null ? m.getUrl() : "unknown-url",
+                                        m.getIdPart() != null ? m.getIdPart() : "unknown-id"))
+                        .toList(),
+                subjects.size(),
+                periodStart,
+                periodEnd);
 
         measures.forEach(this::checkMeasureLibrary);
 

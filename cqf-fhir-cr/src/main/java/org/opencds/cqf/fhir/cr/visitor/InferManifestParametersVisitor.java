@@ -391,16 +391,13 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
         boolean hasKeyRole = false;
 
         for (Object ext : extensions) {
-            if (!(ext instanceof IBaseExtension<?, ?> baseExt)) {
-                continue;
-            }
-            if (!Constants.CRMI_DEPENDENCY_ROLE.equals(baseExt.getUrl())) {
-                continue;
-            }
-            hasDependencyRoleExt = true;
-            if (baseExt.getValue() instanceof IPrimitiveType<?> primitive
-                    && "key".equals(primitive.getValueAsString())) {
-                hasKeyRole = true;
+            if (ext instanceof IBaseExtension<?, ?> baseExt
+                    && Constants.CRMI_DEPENDENCY_ROLE.equals(baseExt.getUrl())) {
+                hasDependencyRoleExt = true;
+                if (baseExt.getValue() instanceof IPrimitiveType<?> primitive
+                        && "key".equals(primitive.getValueAsString())) {
+                    hasKeyRole = true;
+                }
             }
         }
 

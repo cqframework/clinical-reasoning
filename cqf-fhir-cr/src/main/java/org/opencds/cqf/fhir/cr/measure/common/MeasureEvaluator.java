@@ -22,7 +22,6 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -263,7 +262,7 @@ public class MeasureEvaluator {
             boolean applyScoring,
             MeasureEvaluationState state) {
         // check populations
-        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+        ScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), groupDef.measureScoring());
 
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
@@ -438,7 +437,7 @@ public class MeasureEvaluator {
         PopulationDef measurePopulationExclusion = groupDef.getSingle(MEASUREPOPULATIONEXCLUSION);
         PopulationDef measurePopulationObservation = groupDef.getSingle(MEASUREOBSERVATION);
         // Validate Required Populations are Present
-        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+        ScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.CONTINUOUSVARIABLE);
 
         initialPopulation =
@@ -659,7 +658,7 @@ public class MeasureEvaluator {
             MeasureEvaluationState state) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
-        R4MeasureScoringTypePopulations.validateScoringTypePopulations(
+        ScoringTypePopulations.validateScoringTypePopulations(
                 groupDef.populations().stream().map(PopulationDef::type).toList(), MeasureScoring.COHORT);
         // Evaluate Population
         evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult, state);

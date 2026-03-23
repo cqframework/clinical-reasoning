@@ -91,11 +91,11 @@ class R4MeasureProcessorTest {
                 cqlEngine);
 
         assertNotNull(results);
-        var evaluationResults = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
+        var outcome = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
 
-        assertNotNull(evaluationResults);
+        assertNotNull(outcome);
 
-        var evaluationResult = evaluationResults.get(SUBJECT_ID);
+        var evaluationResult = outcome.results().get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
         var expressionResults = evaluationResult.getExpressionResults();
@@ -119,10 +119,10 @@ class R4MeasureProcessorTest {
                 List.of(SUBJECT_ID), new IdType("Measure", MEASURE_ID), null, null, new Parameters(), cqlEngine);
 
         assertNotNull(results);
-        var evaluationResults = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
-        assertNotNull(evaluationResults);
+        var outcome = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
+        assertNotNull(outcome);
 
-        var evaluationResult = evaluationResults.get(SUBJECT_ID);
+        var evaluationResult = outcome.results().get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
         var expressionResult = evaluationResult.getExpressionResults().get("Initial Population");
@@ -143,10 +143,10 @@ class R4MeasureProcessorTest {
                 List.of(SUBJECT_ID), measureEither, null, null, new Parameters(), cqlEngine);
 
         assertNotNull(results);
-        var evaluationResults = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
-        assertNotNull(evaluationResults);
+        var outcome = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
+        assertNotNull(outcome);
 
-        var evaluationResult = evaluationResults.get(SUBJECT_ID);
+        var evaluationResult = outcome.results().get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
         var expressionResult = evaluationResult.getExpressionResults().get("Initial Population");

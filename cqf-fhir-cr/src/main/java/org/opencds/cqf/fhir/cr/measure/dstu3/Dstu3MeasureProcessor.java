@@ -194,8 +194,9 @@ public class Dstu3MeasureProcessor {
                     subjectIds, zonedMeasurementPeriod, context, measureLibraryIdEngineDetails, parametersMap);
 
             // Process Criteria Expression Results
-            state = measureEvaluationResultHandler.processResults(
-                    fhirContext, results.processMeasureForSuccessOrFailure(measureDef), measureDef, evalType);
+            var outcome = results.processMeasureForSuccessOrFailure(measureDef);
+            state = measureEvaluationResultHandler.processResults(fhirContext, outcome.results(), measureDef, evalType);
+            outcome.errors().forEach(state::addError);
         }
 
         // extract measurement Period from parameters or CQL to pass to report Builder

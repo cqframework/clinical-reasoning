@@ -39,6 +39,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureResolutionException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.common.ResolvedMeasure;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.monad.Either3;
@@ -231,13 +232,11 @@ public class R4MeasureProcessor {
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
-        final Map<String, EvaluationResult> resultForThisMeasure =
-                compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
+        var outcome = compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         var state = measureEvaluationResultHandler.processResults(
-                fhirContext, resultForThisMeasure, measureDef, evaluationType);
-        // Transfer any errors added to measureDef by processMeasureForSuccessOrFailure to state
-        measureDef.errors().forEach(state::addError);
+                fhirContext, outcome.results(), measureDef, evaluationType);
+        outcome.errors().forEach(state::addError);
 
         var measurementPeriod = MeasureProcessorTimeUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
@@ -476,6 +475,19 @@ public class R4MeasureProcessor {
         return VersionedIdentifiers.forUrl(url);
     }
 
+    /**
+     * Builds a version-agnostic {@link ResolvedMeasure} from an R4 Measure resource.
+     * Validates the measure (library, unique IDs, SDEs), builds the MeasureDef, and resolves
+     * the library identifier.
+     */
+    ResolvedMeasure buildResolvedMeasure(Measure measure) {
+        checkMeasureLibrary(measure);
+        R4MeasureDefBuilder.triggerFirstPassValidation(List.of(measure));
+        var measureDef = new R4MeasureDefBuilder().build(measure);
+        var libraryId = getLibraryVersionIdentifier(measure);
+        return new ResolvedMeasure(measureDef, libraryId, measure.getUrl());
+    }
+
     protected void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new MeasureValidationException(
@@ -488,7 +500,7 @@ public class R4MeasureProcessor {
      * @param parameters resource used to store cql parameters
      * @return mapped parameters
      */
-    private Map<String, Object> resolveParameterMap(Parameters parameters) {
+    Map<String, Object> resolveParameterMap(Parameters parameters) {
         if (parameters == null) {
             return Map.of();
         }

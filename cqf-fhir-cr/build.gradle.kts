@@ -21,6 +21,7 @@ dependencies {
     testImplementation(libs.reflections)
     testImplementation(libs.hamcrest)
     testImplementation(libs.slf4j.test)
+    testImplementation(libs.archunit.junit5)
 }
 
 // Test JAR for downstream modules

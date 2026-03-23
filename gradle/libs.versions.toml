@@ -14,6 +14,7 @@ hamcrest = "3.0"
 jsonassert = "1.5.3"
 equalsverifier = "4.3.1"
 reflections = "0.10.2"
+archunit = "1.4.0"
 slf4j-test = "3.0.3"
 
 sonarqube = "7.2.2.6593"
@@ -86,6 +87,7 @@ mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.
 jsonassert = { module = "org.skyscreamer:jsonassert", version.ref = "jsonassert" }
 equalsverifier = { module = "nl.jqno.equalsverifier:equalsverifier", version.ref = "equalsverifier" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 
 # JMH
 jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }

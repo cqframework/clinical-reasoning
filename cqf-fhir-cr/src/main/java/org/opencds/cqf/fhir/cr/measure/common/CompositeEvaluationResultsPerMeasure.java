@@ -17,7 +17,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
  * </ol>
  * These data points are not mutually exclusive, meaning a measure may have both successful results and errors.
  * <p/>
- * This class also allows the caller to mutate a {@link MeasureDef} with the errors that occurred during the evaluation
+ * This class also provides a method to retrieve the results and errors for a given measure as a {@link MeasureOutcome}.
  */
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
@@ -37,19 +37,24 @@ public class CompositeEvaluationResultsPerMeasure {
     }
 
     /**
-     * Retrieves results and populates errors for a given measure.
-     * This method uses direct map lookups for efficient data retrieval.
+     * A pairing of evaluation results and errors for a single measure.
      *
-     * @param measureDef the MeasureDef to populate with errors
-     *
-     * @return a map of evaluation results per subject, or an empty map if none exist
+     * @param results evaluation results per subject, or an empty map if none exist
+     * @param errors  errors that occurred during evaluation, or an empty list if none
      */
-    public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(MeasureDef measureDef) {
-        errorsPerMeasure.getOrDefault(measureDef, List.of()).forEach(measureDef::addError);
+    public record MeasureOutcome(Map<String, EvaluationResult> results, List<String> errors) {}
 
-        // We are explicitly maintaining the logic of accepting the lack of any sort of results,
-        // either errors or successes, and returning an empty map.
-        return resultsPerMeasure.getOrDefault(measureDef, Map.of());
+    /**
+     * Retrieves results and errors for a given measure.
+     *
+     * @param measureDef the measure to look up
+     * @return a {@link MeasureOutcome} containing the results and any errors for the measure
+     */
+    public MeasureOutcome processMeasureForSuccessOrFailure(MeasureDef measureDef) {
+        var results = resultsPerMeasure.getOrDefault(measureDef, Map.of());
+        var errors = errorsPerMeasure.getOrDefault(measureDef, List.of());
+
+        return new MeasureOutcome(results, errors);
     }
 
     /**

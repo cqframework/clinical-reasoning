@@ -38,6 +38,7 @@ public class ConformanceResourceResolver {
     private final IRepository federatedRepository;
     private final DefaultProfileValidationSupport coreSupport;
     private Map<String, IBaseResource> packageCache; // lazy, built on first SD miss
+    private Map<String, IBaseResource> resourceCache; // lazy, built on first VS/CS miss
 
     public ConformanceResourceResolver(IRepository repository) {
         this(repository, Collections.emptyList(), Collections.emptyList());
@@ -179,6 +180,97 @@ public class ConformanceResourceResolver {
             }
         } catch (Exception e) {
             logger.debug("Error loading StructureDefinition from package {}: {}", npmPackage.id(), filename, e);
+        }
+    }
+
+    /**
+     * Resolve a resource by canonical URL and resource type.
+     * Resolution order: federated repository → NPM resource cache → core FHIR
+     */
+    public IBaseResource resolveResource(String canonicalUrl, String resourceType) {
+        if (canonicalUrl == null || canonicalUrl.isEmpty() || resourceType == null) {
+            return null;
+        }
+
+        // Tier 1: Federated repository (search by canonical)
+        try {
+            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(federatedRepository, canonicalUrl);
+            if (bundle != null) {
+                var entries = org.opencds.cqf.fhir.utility.BundleHelper.getEntry(bundle);
+                if (entries != null && !entries.isEmpty()) {
+                    var resource = org.opencds.cqf.fhir.utility.BundleHelper.getEntryResource(
+                            fhirContext.getVersion().getVersion(), entries.get(0));
+                    if (resource != null && resource.fhirType().equals(resourceType)) {
+                        return resource;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Could not resolve {} from repository: {}", resourceType, canonicalUrl, e);
+        }
+
+        // Tier 2: NPM resource cache (lazy-built)
+        var cached = resolveFromResourceCache(canonicalUrl, resourceType);
+        if (cached != null) {
+            return cached;
+        }
+
+        // Tier 3: Core FHIR (for base spec resources)
+        try {
+            var resourceClass = fhirContext.getResourceDefinition(resourceType).getImplementingClass();
+            return coreSupport.fetchResource(resourceClass, canonicalUrl);
+        } catch (Exception e) {
+            logger.debug("Could not resolve {} from core support: {}", resourceType, canonicalUrl, e);
+        }
+        return null;
+    }
+
+    private IBaseResource resolveFromResourceCache(String canonicalUrl, String resourceType) {
+        var key = resourceType + "|" + canonicalUrl;
+        if (resourceCache == null) {
+            resourceCache = buildResourceCache(npmRepository.getLoadedPackages());
+        }
+        return resourceCache.get(key);
+    }
+
+    private Map<String, IBaseResource> buildResourceCache(List<NpmPackage> packages) {
+        Map<String, IBaseResource> cache = new HashMap<>();
+        if (packages == null || packages.isEmpty()) {
+            return cache;
+        }
+        var parser = fhirContext.newJsonParser();
+        for (var npmPackage : packages) {
+            for (var resType : List.of("ValueSet", "CodeSystem")) {
+                try {
+                    var files = npmPackage.listResources(resType);
+                    for (var filename : files) {
+                        try (InputStream is = npmPackage.load("package", filename)) {
+                            var resource = parser.parseResource(is);
+                            var url = extractUrl(resource);
+                            if (url != null) {
+                                cache.putIfAbsent(resType + "|" + url, resource);
+                            }
+                        } catch (Exception e) {
+                            logger.debug("Error loading {} from package {}: {}", resType, npmPackage.id(), filename, e);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.debug("Error listing {} from package {}", resType, npmPackage.id(), e);
+                }
+            }
+        }
+        logger.debug("Built resource cache with {} entries", cache.size());
+        return cache;
+    }
+
+    private String extractUrl(IBaseResource resource) {
+        try {
+            var adapter = IAdapterFactory.forFhirVersion(
+                            fhirContext.getVersion().getVersion())
+                    .createKnowledgeArtifactAdapter((org.hl7.fhir.instance.model.api.IDomainResource) resource);
+            return adapter.getUrl();
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -415,6 +415,15 @@ class InferManifestParametersVisitorTest {
                 composedOfRas.get(0).getResource());
         assertEquals("My IG", composedOfRas.get(0).getDisplay());
 
+        // Verify the manifest also has the depends-on RA
+        var dependsOnRas = result.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .toList();
+        assertEquals(1, dependsOnRas.size());
+        assertEquals(
+                "http://example.org/CodeSystem/test-cs|1.0.0",
+                dependsOnRas.get(0).getResource());
+
         // Verify parameters were also created for the depends-on entry
         assertEquals(1, result.getContained().size());
         var parameters = (Parameters) result.getContained().get(0);
@@ -447,6 +456,44 @@ class InferManifestParametersVisitorTest {
         assertEquals(
                 RelatedArtifact.RelatedArtifactType.COMPOSEDOF,
                 result.getRelatedArtifact().get(0).getType());
+    }
+
+    @Test
+    void inferManifestParameters_DependsOnPropagatedToManifest() {
+        var repository = new InMemoryFhirRepository(fhirContext);
+
+        var moduleDefinition = createModuleDefinition();
+
+        // Add depends-on entries for ValueSets and CodeSystems
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://hl7.org/fhir/us/core/ValueSet/detailed-ethnicity|6.1.0");
+
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://hl7.org/fhir/us/core/ValueSet/detailed-race|6.1.0");
+
+        moduleDefinition
+                .addRelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource("http://example.org/Library/helper|2.0.0");
+
+        // Run $infer-manifest-parameters
+        var visitor = new InferManifestParametersVisitor(repository);
+        var adapter = adapterFactory.createKnowledgeArtifactAdapter(moduleDefinition);
+        var result = (Library) visitor.visit(adapter, null);
+
+        // Verify all depends-on entries are propagated to the manifest
+        var dependsOnRas = result.getRelatedArtifact().stream()
+                .filter(ra -> ra.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .toList();
+        assertEquals(3, dependsOnRas.size());
+
+        // Verify expansion parameters are only created for terminology resources
+        var parameters = (Parameters) result.getContained().get(0);
+        assertEquals(2, parameters.getParameter().size());
     }
 
     @Test

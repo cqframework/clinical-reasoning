@@ -121,10 +121,10 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                     new org.hl7.fhir.dstu3.model.Reference(EXPANSION_PARAMETERS_REF));
         }
 
-        // Copy composed-of relatedArtifacts to manifest
+        // Copy composed-of and depends-on relatedArtifacts to manifest
         for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
             String raType = extractRelatedArtifactType(relatedArtifact);
-            if (COMPOSED_OF.equals(raType)) {
+            if (COMPOSED_OF.equals(raType) || DEPENDS_ON.equals(raType)) {
                 manifest.addRelatedArtifact((org.hl7.fhir.dstu3.model.RelatedArtifact) relatedArtifact);
             }
         }
@@ -165,10 +165,10 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                     Constants.CQF_EXPANSION_PARAMETERS, new org.hl7.fhir.r4.model.Reference(EXPANSION_PARAMETERS_REF));
         }
 
-        // Copy composed-of relatedArtifacts to manifest
+        // Copy composed-of and depends-on relatedArtifacts to manifest
         for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
             String raType = extractRelatedArtifactType(relatedArtifact);
-            if (COMPOSED_OF.equals(raType)) {
+            if (COMPOSED_OF.equals(raType) || DEPENDS_ON.equals(raType)) {
                 manifest.addRelatedArtifact((org.hl7.fhir.r4.model.RelatedArtifact) relatedArtifact);
             }
         }
@@ -209,10 +209,10 @@ public class InferManifestParametersVisitor extends BaseKnowledgeArtifactVisitor
                     Constants.CQF_EXPANSION_PARAMETERS, new org.hl7.fhir.r5.model.Reference(EXPANSION_PARAMETERS_REF));
         }
 
-        // Copy composed-of relatedArtifacts to manifest
+        // Copy composed-of and depends-on relatedArtifacts to manifest
         for (var relatedArtifact : inputLibrary.getRelatedArtifact()) {
             String raType = extractRelatedArtifactType(relatedArtifact);
-            if (COMPOSED_OF.equals(raType)) {
+            if (COMPOSED_OF.equals(raType) || DEPENDS_ON.equals(raType)) {
                 manifest.addRelatedArtifact((org.hl7.fhir.r5.model.RelatedArtifact) relatedArtifact);
             }
         }

@@ -13,10 +13,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 
 import jakarta.annotation.Nullable;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
@@ -286,14 +283,6 @@ public class MeasureEvaluator {
                 evaluatePopulationMembership(subjectType, subjectId, initialPopulation, evaluationResult, state);
         denominator = evaluatePopulationMembership(subjectType, subjectId, denominator, evaluationResult, state);
         numerator = evaluatePopulationMembership(subjectType, subjectId, numerator, evaluationResult, state);
-        if (applyScoring) {
-            // remove denominator values not in IP
-            state.population(denominator).retainAllResources(subjectId, state.population(initialPopulation));
-            state.population(denominator).retainAllSubjects(state.population(initialPopulation));
-            // remove numerator values if not in Denominator
-            state.population(numerator).retainAllSubjects(state.population(denominator));
-            state.population(numerator).retainAllResources(subjectId, state.population(denominator));
-        }
         // Evaluate Exclusions and Exception Populations
         if (denominatorExclusion != null) {
             denominatorExclusion =
@@ -307,52 +296,8 @@ public class MeasureEvaluator {
             numeratorExclusion =
                     evaluatePopulationMembership(subjectType, subjectId, numeratorExclusion, evaluationResult, state);
         }
-        // Apply Exclusions and Exceptions
-        if (groupDef.isBooleanBasis()) {
-            // Remove Subject and Resource Exclusions
-            if (denominatorExclusion != null && applyScoring) {
-                // numerator should not include den-exclusions
-                state.population(numerator).removeAllSubjects(state.population(denominatorExclusion));
-
-                // verify exclusion results are found in denominator
-                state.population(denominatorExclusion).retainAllResources(subjectId, state.population(denominator));
-                state.population(denominatorExclusion).retainAllSubjects(state.population(denominator));
-            }
-            if (numeratorExclusion != null && applyScoring) {
-                // verify results are in Numerator
-                state.population(numeratorExclusion).retainAllResources(subjectId, state.population(numerator));
-                state.population(numeratorExclusion).retainAllSubjects(state.population(numerator));
-            }
-            if (denominatorException != null && applyScoring) {
-                // Remove Subjects Exceptions that are present in Numerator
-                state.population(denominatorException).removeAllSubjects(state.population(numerator));
-                state.population(denominatorException).removeAllResources(subjectId, state.population(numerator));
-
-                // verify exception results are found in denominator
-                state.population(denominatorException).retainAllResources(subjectId, state.population(denominator));
-                state.population(denominatorException).retainAllSubjects(state.population(denominator));
-            }
-        } else {
-            // Remove Only Resource Exclusions
-            // * Multiple resources can be from one subject and represented in multiple populations
-            // * This is why we only remove resources and not subjects too for `Resource Basis`.
-            if (denominatorExclusion != null && applyScoring) {
-                // remove any denominator-exclusion subjects/resources found in Numerator
-                state.population(numerator).removeAllResources(subjectId, state.population(denominatorExclusion));
-                // verify exclusion results are found in denominator
-                state.population(denominatorExclusion).retainAllResources(subjectId, state.population(denominator));
-            }
-            if (numeratorExclusion != null && applyScoring) {
-                // verify exclusion results are found in numerator results, otherwise remove
-                state.population(numeratorExclusion).retainAllResources(subjectId, state.population(numerator));
-            }
-            if (denominatorException != null && applyScoring) {
-                // Remove Resource Exceptions that are present in Numerator
-                state.population(denominatorException).removeAllResources(subjectId, state.population(numerator));
-                // verify exception results are found in denominator
-                state.population(denominatorException).retainAllResources(subjectId, state.population(denominator));
-            }
-        }
+        // Apply set-algebra rules (subset enforcement, exclusions, exceptions)
+        PopulationSetAlgebra.applyProportionRules(subjectId, groupDef, applyScoring, state);
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
             state.population(dateOfCompliance).addResource(subjectId, doc);
@@ -368,12 +313,12 @@ public class MeasureEvaluator {
             evaluatePopulationMembership(
                     subjectType, subjectId, observationNum, evaluationResult, expressionNameNum, state);
             // Align to Numerator
-            retainObservationResourcesInPopulation(subjectId, numerator, observationNum, state);
-            retainObservationSubjectResourcesInPopulation(
+            ObservationAligner.retainObservationResourcesInPopulation(subjectId, numerator, observationNum, state);
+            ObservationAligner.retainObservationSubjectResourcesInPopulation(
                     state.population(numerator), state.population(observationNum));
             // remove Numerator Exclusions
             if (numeratorExclusion != null) {
-                removeObservationSubjectResourcesInPopulation(
+                ObservationAligner.removeObservationSubjectResourcesInPopulation(
                         state.population(numeratorExclusion), state.population(observationNum));
                 MeasureObservationHandler.removeObservationResourcesInPopulation(
                         subjectId, numeratorExclusion, observationNum, state);
@@ -384,12 +329,12 @@ public class MeasureEvaluator {
             evaluatePopulationMembership(
                     subjectType, subjectId, observationDen, evaluationResult, expressionNameDen, state);
             // align to Denominator Results
-            retainObservationResourcesInPopulation(subjectId, denominator, observationDen, state);
-            retainObservationSubjectResourcesInPopulation(
+            ObservationAligner.retainObservationResourcesInPopulation(subjectId, denominator, observationDen, state);
+            ObservationAligner.retainObservationSubjectResourcesInPopulation(
                     state.population(denominator), state.population(observationDen));
             // remove Denominator Exclusions
             if (denominatorExclusion != null) {
-                removeObservationSubjectResourcesInPopulation(
+                ObservationAligner.removeObservationSubjectResourcesInPopulation(
                         state.population(denominatorExclusion), state.population(observationDen));
                 MeasureObservationHandler.removeObservationResourcesInPopulation(
                         subjectId, denominatorExclusion, observationDen, state);
@@ -445,22 +390,12 @@ public class MeasureEvaluator {
         // Evaluate Population Expressions
         measurePopulation =
                 evaluatePopulationMembership(subjectType, subjectId, measurePopulation, evaluationResult, state);
-        if (measurePopulation != null && initialPopulation != null && applyScoring) {
-            // verify initial-population are in measure-population
-            state.population(measurePopulation).retainAllResources(subjectId, state.population(initialPopulation));
-            state.population(measurePopulation).retainAllSubjects(state.population(initialPopulation));
-        }
-
         if (measurePopulationExclusion != null) {
             evaluatePopulationMembership(
                     subjectType, subjectId, groupDef.getSingle(MEASUREPOPULATIONEXCLUSION), evaluationResult, state);
-            if (applyScoring && measurePopulation != null) {
-                // verify exclusions are in measure-population
-                state.population(measurePopulationExclusion)
-                        .retainAllResources(subjectId, state.population(measurePopulation));
-                state.population(measurePopulationExclusion).retainAllSubjects(state.population(measurePopulation));
-            }
         }
+        // Apply set-algebra rules (subset enforcement, exclusions)
+        PopulationSetAlgebra.applyContinuousVariableRules(subjectId, groupDef, applyScoring, state);
         if (measurePopulationObservation != null) {
             // only Measure Population resources need to be removed
             var expressionName = measurePopulationObservation.getCriteriaReference() + "-"
@@ -475,16 +410,16 @@ public class MeasureEvaluator {
                     state);
             if (applyScoring && measurePopulation != null) {
                 // only measureObservations that intersect with measureObservation should be retained
-                retainObservationResourcesInPopulation(
+                ObservationAligner.retainObservationResourcesInPopulation(
                         subjectId, measurePopulation, measurePopulationObservation, state);
-                retainObservationSubjectResourcesInPopulation(
+                ObservationAligner.retainObservationSubjectResourcesInPopulation(
                         state.population(measurePopulation), state.population(measurePopulationObservation));
                 // measure observations also need to make sure they remove measure-population-exclusions
                 if (measurePopulationExclusion != null) {
 
                     MeasureObservationHandler.removeObservationResourcesInPopulation(
                             subjectId, measurePopulationExclusion, measurePopulationObservation, state);
-                    removeObservationSubjectResourcesInPopulation(
+                    ObservationAligner.removeObservationSubjectResourcesInPopulation(
                             state.population(measurePopulationExclusion),
                             state.population(measurePopulationObservation));
                 }
@@ -492,160 +427,6 @@ public class MeasureEvaluator {
         }
         for (PopulationDef p : groupDef.populations()) {
             populateSupportingEvidence(p, reportType, evaluationResult, subjectId, state);
-        }
-    }
-    /**
-     * Keeps Measure-Observation values found in measurePopulation
-     * are not found in the corresponding measurePopulation set.
-     */
-    @SuppressWarnings("unchecked")
-    public void retainObservationSubjectResourcesInPopulation(
-            MeasureEvaluationState.PopulationState measurePopulationState,
-            MeasureEvaluationState.PopulationState measureObservationState) {
-
-        Map<String, Set<Object>> measurePopulation = measurePopulationState.getSubjectResources();
-        Map<String, Set<Object>> measureObservation = measureObservationState.getSubjectResources();
-
-        if (measurePopulation == null || measureObservation == null) {
-            return;
-        }
-
-        for (Iterator<Map.Entry<String, Set<Object>>> it =
-                        measureObservation.entrySet().iterator();
-                it.hasNext(); ) {
-            Map.Entry<String, Set<Object>> entry = it.next();
-            String subjectId = entry.getKey();
-
-            // Cast subject's observation set to the expected type
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
-
-            // get valid population values for this subject
-            Set<Object> validPopulation = measurePopulation.get(subjectId);
-
-            if (validPopulation == null || validPopulation.isEmpty()) {
-                // no population for this subject -> drop the whole subject
-                it.remove();
-                continue;
-            }
-
-            // remove observations not matching population values
-            obsSet.removeIf(obsMap -> {
-                for (Object key : obsMap.keySet()) {
-                    if (!validPopulation.contains(key)) {
-                        return true; // remove this observation map
-                    }
-                }
-                return false;
-            });
-
-            // if no observations remain for this subject, remove it entirely
-            if (obsSet.isEmpty()) {
-                it.remove();
-            }
-        }
-    }
-
-    protected void retainObservationResourcesInPopulation(
-            String subjectId,
-            //        MeasurePopulationType.MEASUREPOPULATION
-            PopulationDef measurePopulationDef,
-            //        MeasurePopulationType.MEASUREOBSERVATION
-            PopulationDef measureObservationDef,
-            MeasureEvaluationState state) {
-
-        var obsState = state.population(measureObservationDef);
-        for (Object populationResource : obsState.getResourcesForSubject(subjectId)) {
-            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
-                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
-                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
-                    if (measurePopulationDef != null) {
-                        final Set<Object> measurePopulationResourcesForSubject =
-                                state.population(measurePopulationDef).getResourcesForSubject(subjectId);
-                        if (!measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
-                            // remove observation results not found in measure population
-                            obsState.getResourcesForSubject(subjectId).remove(populationResource);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * @param measurePopulationState population results that you would like to exclude from measureObservation
-     * @param measureObservationState population results that will have items excluded from it, if found in measurePopulation
-     */
-    @SuppressWarnings("unchecked")
-    public void removeObservationSubjectResourcesInPopulation(
-            MeasureEvaluationState.PopulationState measurePopulationState,
-            MeasureEvaluationState.PopulationState measureObservationState) {
-
-        Map<String, Set<Object>> measurePopulation = measurePopulationState.getSubjectResources();
-        Map<String, Set<Object>> measureObservation = measureObservationState.getSubjectResources();
-
-        if (measurePopulation == null || measureObservation == null) {
-            return;
-        }
-
-        for (Iterator<Map.Entry<String, Set<Object>>> it =
-                        measureObservation.entrySet().iterator();
-                it.hasNext(); ) {
-
-            Map.Entry<String, Set<Object>> entry = it.next();
-            String subjectId = entry.getKey();
-
-            final Set<?> entryValue = entry.getValue();
-
-            if (CollectionUtils.isEmpty(entryValue)) {
-                continue;
-            }
-
-            removeObservatorySubjectResource(measurePopulation, entryValue, subjectId, it);
-        }
-    }
-
-    private void removeObservatorySubjectResource(
-            Map<String, Set<Object>> measurePopulation,
-            Set<?> entryValue,
-            String subjectId,
-            Iterator<Entry<String, Set<Object>>> iterator) {
-        if (entryValue.isEmpty()) {
-            // Nothing to do
-            return;
-        }
-        final Object firstEntryValue = entryValue.iterator().next();
-
-        if (!(firstEntryValue instanceof Map<?, ?>)) {
-            throw new MeasureEvaluationException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
-        }
-
-        @SuppressWarnings("unchecked")
-        Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
-
-        // population values for this subject
-        Set<Object> populationValues = measurePopulation.get(subjectId);
-
-        // If there is no population for this subject, there is nothing "to remove because iterator matches",
-        // so leave the observation set as-is.
-        if (populationValues == null || populationValues.isEmpty()) {
-            return;
-        }
-
-        // Remove observations that *do* match population values
-        obsSet.removeIf(obsMap -> {
-            for (Object key : obsMap.keySet()) {
-                if (populationValues.contains(key)) {
-                    // This observation map is backed by a population resource -> remove iterator
-                    return true;
-                }
-            }
-            return false;
-        });
-
-        // If no observations remain for this subject, remove the subject entry entirely
-        if (obsSet.isEmpty()) {
-            iterator.remove();
         }
     }
 

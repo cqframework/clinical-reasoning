@@ -33,7 +33,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.ScoredMeasure;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 
@@ -156,17 +155,9 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
                         fhirMeasure,
                         scored.measureDef(),
                         scored.state(),
-                        toReportType(evalType),
+                        processor.evalTypeToReportType(evalType),
                         measurementPeriod,
                         scored.subjects());
-    }
-
-    private static MeasureReportType toReportType(MeasureEvalType evalType) {
-        return switch (evalType) {
-            case PATIENT, SUBJECT -> MeasureReportType.INDIVIDUAL;
-            case PATIENTLIST, SUBJECTLIST -> MeasureReportType.PATIENTLIST;
-            case POPULATION -> MeasureReportType.SUMMARY;
-        };
     }
 
     protected void ensureSupplementalDataElementSearchParameter() {

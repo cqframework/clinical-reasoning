@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
 
@@ -26,8 +27,8 @@ class MeasureReportTypeInvalidTest {
         try {
             evaluate.then();
             fail("'summary' is not a valid value and should fail");
-        } catch (UnsupportedOperationException e) {
-            assertTrue(e.getMessage().contains("ReportType: summary, is not an accepted R4 EvalType value."));
+        } catch (MeasureValidationException e) {
+            assertTrue(e.getMessage().contains("ReportType: summary, is not an accepted EvalType value."));
         }
     }
 

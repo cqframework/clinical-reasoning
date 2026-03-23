@@ -36,8 +36,6 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResults;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.ResolvedMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.ScoredMeasure;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -281,7 +279,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         // ── Version-specific: validate R4 report type values ──
         if (reportType != null) {
-            R4MeasureEvalType.fromCode(reportType);
+            var evalType = MeasureEvalType.fromCode(reportType);
+            if (evalType.isPresent()
+                    && (evalType.get() == MeasureEvalType.PATIENT || evalType.get() == MeasureEvalType.PATIENTLIST)) {
+                throw new UnsupportedOperationException(
+                        "ReportType: %s, is not an accepted R4 EvalType value.".formatted(reportType));
+            }
         }
 
         // ── Version-specific: ensure search parameters ──
@@ -417,20 +420,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         fhirMeasure,
                         scored.measureDef(),
                         scored.state(),
-                        toReportType(evalType, fhirMeasure),
+                        r4MeasureProcessor.r4EvalTypeToReportType(evalType, fhirMeasure),
                         measurementPeriod,
                         subjects);
-    }
-
-    private static MeasureReportType toReportType(MeasureEvalType evalType, Measure measure) {
-        return switch (evalType) {
-            case SUBJECT -> MeasureReportType.INDIVIDUAL;
-            case SUBJECTLIST -> MeasureReportType.SUBJECTLIST;
-            case POPULATION -> MeasureReportType.SUMMARY;
-            default ->
-                throw new MeasureValidationException("Unsupported MeasureEvalType: %s for Measure: %s"
-                        .formatted(evalType.toCode(), measure.getUrl()));
-        };
     }
 
     private static void applyReporter(R4MeasureServiceUtils serviceUtils, MeasureReport report, String reporter) {

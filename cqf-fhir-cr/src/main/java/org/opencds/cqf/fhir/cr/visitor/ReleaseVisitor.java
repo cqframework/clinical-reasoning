@@ -193,11 +193,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             if (isDistinct) {
                 distinctResolvedRelatedArtifacts.add(resolvedRelatedArtifact);
                 // preserve Extensions if found
+                var resolvedUrl = Canonicals.getUrl(relatedArtifactReference);
                 originalDependenciesWithExtensions.stream()
-                        .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
-                                        .equals(Canonicals.getUrl(relatedArtifactReference))
-                                && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
+                        .filter(originalDep ->
+                                Objects.equals(Canonicals.getUrl(originalDep.getReference()), resolvedUrl)
+                                        && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
+                                                .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())

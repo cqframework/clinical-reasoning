@@ -3,7 +3,6 @@ hapi = "8.8.0"
 cql = "4.4.0"
 junit = "5.14.3"
 slf4j = "2.0.17"
-spring-security = "6.4.13"
 spring-boot = "3.4.11"
 picocli = "4.7.7"
 jmh = "1.37"
@@ -64,7 +63,6 @@ jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api" }
 # Spring
 spring-context = { module = "org.springframework:spring-context" }
 spring-test = { module = "org.springframework:spring-test" }
-spring-security-core = { module = "org.springframework.security:spring-security-core", version.ref = "spring-security" }
 
 # Logging
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

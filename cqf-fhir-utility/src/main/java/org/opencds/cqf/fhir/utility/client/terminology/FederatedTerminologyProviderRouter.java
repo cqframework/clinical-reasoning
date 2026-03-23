@@ -136,7 +136,7 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
         return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(client.getCodeSystemClass())
-                .where(Searches.byCanonical(url))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
                 .execute());
     }
 
@@ -154,7 +154,7 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
         return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(client.getValueSetClass())
-                .where(Searches.byCanonical(url))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
                 .execute());
     }
 
@@ -181,7 +181,7 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
         return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
                 .search()
                 .forResource(client.getValueSetClass())
-                .where(Searches.byCanonical(url))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
                 .execute());
     }
 

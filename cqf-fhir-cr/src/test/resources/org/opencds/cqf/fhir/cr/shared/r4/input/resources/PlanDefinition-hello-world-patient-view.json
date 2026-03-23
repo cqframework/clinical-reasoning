@@ -56,7 +56,7 @@
   "usage": "This is to be used in conjunction with a patient-facing FHIR application.",
   "copyright": "© CDC 2016+.",
   "library": [
-    "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld"
+    "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld|1.0.0"
   ],
   "action": [
     {

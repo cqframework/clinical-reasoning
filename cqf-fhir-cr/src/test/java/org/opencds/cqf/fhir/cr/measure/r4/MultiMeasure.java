@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -40,6 +41,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
@@ -49,6 +51,7 @@ import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
 @SuppressWarnings("squid:S1135")
 class MultiMeasure {
@@ -323,6 +326,17 @@ class MultiMeasure {
 
         public MultiMeasure.SelectedMeasureReport getFirstMeasureReport() {
             return report().getFirstMeasureReport();
+        }
+
+        public MultiMeasure.Then hasSupplementalDataSearchParameter() {
+            var result = repository.search(
+                    Bundle.class,
+                    SearchParameter.class,
+                    new SearchBuilder()
+                            .withTokenParam("code", "supplemental-data")
+                            .build());
+            assertFalse(result.getEntry().isEmpty(), "Expected supplemental-data SearchParameter in repository");
+            return this;
         }
     }
 

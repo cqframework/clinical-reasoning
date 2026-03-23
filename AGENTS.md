@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file provides guidance to coding agents when working with code in this repository.
-
 ## Project Overview
 
 This is the CQF Clinical Reasoning on FHIR repository, which provides JVM-based, FHIR-enabled clinical reasoning components. The project implements FHIR Clinical Reasoning operations like Measure evaluation (`$evaluate-measure`), PlanDefinition application (`$apply`), and CQL evaluation capabilities.
+
+See the [ARCHITECTURE.md](ARCHITECTURE.md) document for a detailed overview of the vision, architecture, design patterns, and coding standards used in this project.
 
 ## Build and Test Commands
 
@@ -91,10 +91,6 @@ cd docs/src/doc
 pip3 install -r requirements.txt
 mkdocs serve  # Browse at http://127.0.0.1:8000/
 ```
-
-## Architecture, Design Patterns, and Code Style
-
-See the [Developer Guide](docs/src/doc/docs/developer-guide.md) for a detailed overview of the architecture, design patterns, and coding standards used in this project.
 
 ## Branch and PR Workflow
 

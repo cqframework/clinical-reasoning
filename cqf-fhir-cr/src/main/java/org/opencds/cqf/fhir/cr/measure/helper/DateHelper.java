@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.helper;
 
+import jakarta.annotation.Nullable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -109,6 +110,22 @@ public class DateHelper {
         // TODO: Seems like we might want set the precision appropriately here?
         var offset = calendar.toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime();
         return new DateTime(offset);
+    }
+
+    /**
+     * Converts a date string to {@link ZonedDateTime}, using the system default timezone when
+     * no offset is specified. Returns null when the input is null.
+     *
+     * @param date  date string in any format accepted by {@link #resolveRequestDate}
+     * @param start true for start-of-range padding (Jan 1, 00:00:00), false for end-of-range
+     * @return the resolved ZonedDateTime, or null if input is null
+     */
+    @Nullable
+    public static ZonedDateTime toZonedDateTime(@Nullable String date, boolean start) {
+        if (date == null) {
+            return null;
+        }
+        return resolveRequestDate(date, start).getDateTime().toZonedDateTime();
     }
 
     public static Interval buildMeasurementPeriodInterval(ZonedDateTime periodStart, ZonedDateTime periodEnd) {

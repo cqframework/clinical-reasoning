@@ -8,6 +8,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.ME
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.util.BundleBuilder;
 import java.util.Collections;
@@ -21,19 +22,47 @@ import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.ScoredMeasure;
+import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 
+/**
+ * DSTU3 inbound/outbound adapter around {@link MeasureEvaluationService}.
+ *
+ * <p>Handles version-specific concerns: DSTU3 measure resolution, string-to-ZonedDateTime date
+ * parsing, DSTU3 parameter conversion, and DSTU3 MeasureReport building from scored results.
+ * All domain logic — period validation, subject resolution, CQL execution, scoring — is
+ * delegated to the service.</p>
+ */
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
+    private final Dstu3MeasureProcessor processor;
+    private final MeasureEvaluationService evaluationService;
 
-    public Dstu3MeasureService(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
+    public Dstu3MeasureService(
+            IRepository repository,
+            MeasureEvaluationOptions measureEvaluationOptions,
+            MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
+        this.processor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
+        this.evaluationService = new MeasureEvaluationService(
+                measureEvaluationOptions,
+                FhirContext.forDstu3Cached(),
+                new Dstu3PopulationBasisValidator(),
+                measurePeriodValidator);
     }
 
     public static final List<ContactDetail> CQI_CONTACT_DETAIL = Collections.singletonList(new ContactDetail()
@@ -67,32 +96,6 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
             .setTitle("Supplemental Data")
             .setId("deqm-measurereport-supplemental-data");
 
-    /**
-     * Get The details (such as tenant) of this request. Usually auto-populated HAPI.
-     *
-     */
-
-    /**
-     * Implements the <a href=
-     * "https://www.hl7.org/fhir/operation-measure-evaluate-measure.html">$evaluate-measure</a>
-     * operation found in the
-     * <a href="http://www.hl7.org/fhir/clinicalreasoning-module.html">FHIR Clinical
-     * Reasoning Module</a>. This implementation aims to be compatible with the CQF
-     * IG.
-     *
-     * @param id                  the Id of the Measure to evaluate
-     * @param periodStart         The start of the reporting period
-     * @param periodEnd           The end of the reporting period
-     * @param reportType          The type of MeasureReport to generate
-     * @param practitioner        the practitioner to use for the evaluation
-     * @param lastReceivedOn      the date the results of this measure were last
-     *                               received.
-     * @param productLine         the productLine (e.g. Medicare, Medicaid, etc) to use
-     *                               for the evaluation. This is a non-standard parameter.
-     * @param additionalData      the data bundle containing additional data
-     * @param terminologyEndpoint the endpoint of terminology services for your measure valuesets
-     * @return the calculated MeasureReport
-     */
     @Override
     public MeasureReport evaluateMeasure(
             IdType id,
@@ -109,10 +112,29 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
 
         ensureSupplementalDataElementSearchParameter();
 
-        var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
+        // Version-specific: read measure
+        var measure = repository.read(Measure.class, id);
 
-        MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
-                id, periodStart, periodEnd, reportType, Collections.singletonList(subject), additionalData, parameters);
+        // Version-specific: resolve to domain types
+        var resolved = processor.buildResolvedMeasure(measure);
+        var params = processor.resolveParameterMap(parameters);
+
+        // Version-specific: parse string dates to ZonedDateTime
+        var start = DateHelper.toZonedDateTime(periodStart, true);
+        var end = DateHelper.toZonedDateTime(periodEnd, false);
+
+        // Build domain request and environment
+        var request = new MeasureEvaluationRequest(start, end, reportType, subject, null, lastReceivedOn, productLine);
+
+        var environment = new MeasureEnvironment(null, terminologyEndpoint, null, additionalData);
+
+        // Delegate to version-agnostic service
+        var results = evaluationService.evaluate(
+                repository, List.of(resolved), request, environment, params, new Dstu3RepositorySubjectProvider());
+
+        // Version-specific: build DSTU3 MeasureReport from scored results
+        var scored = results.scoredMeasures().get(0);
+        var report = buildMeasureReport(scored, measure, results.evalType(), results.measurementPeriod());
 
         if (productLine != null) {
             Extension ext = new Extension();
@@ -122,6 +144,29 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
         }
 
         return report;
+    }
+
+    private MeasureReport buildMeasureReport(
+            ScoredMeasure scored,
+            Measure fhirMeasure,
+            MeasureEvalType evalType,
+            org.opencds.cqf.cql.engine.runtime.Interval measurementPeriod) {
+        return new Dstu3MeasureReportBuilder()
+                .build(
+                        fhirMeasure,
+                        scored.measureDef(),
+                        scored.state(),
+                        toReportType(evalType),
+                        measurementPeriod,
+                        scored.subjects());
+    }
+
+    private static MeasureReportType toReportType(MeasureEvalType evalType) {
+        return switch (evalType) {
+            case PATIENT, SUBJECT -> MeasureReportType.INDIVIDUAL;
+            case PATIENTLIST, SUBJECTLIST -> MeasureReportType.PATIENTLIST;
+            case POPULATION -> MeasureReportType.SUMMARY;
+        };
     }
 
     protected void ensureSupplementalDataElementSearchParameter() {

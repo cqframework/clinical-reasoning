@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.common.ResolvedMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectProvider;
 import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -251,6 +252,17 @@ public class Dstu3MeasureProcessor {
                                 : MeasureEvalType.SUBJECT);
     }
 
+    /**
+     * Builds a version-agnostic {@link ResolvedMeasure} from a DSTU3 Measure resource.
+     * Package-visible so that {@link Dstu3MeasureService} can use it for service delegation.
+     */
+    ResolvedMeasure buildResolvedMeasure(Measure measure) {
+        checkMeasureLibrary(measure);
+        var measureDef = new Dstu3MeasureDefBuilder().build(measure);
+        var libraryId = getLibraryVersionIdentifier(measure);
+        return new ResolvedMeasure(measureDef, libraryId, measure.getUrl());
+    }
+
     private void checkMeasureLibrary(Measure measure) {
         if (!measure.hasLibrary()) {
             throw new MeasureValidationException(
@@ -258,7 +270,7 @@ public class Dstu3MeasureProcessor {
         }
     }
 
-    private Map<String, Object> resolveParameterMap(Parameters parameters) {
+    Map<String, Object> resolveParameterMap(Parameters parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
         Dstu3FhirModelResolver modelResolver = new Dstu3FhirModelResolver();
         parameters.getParameter().forEach(param -> {

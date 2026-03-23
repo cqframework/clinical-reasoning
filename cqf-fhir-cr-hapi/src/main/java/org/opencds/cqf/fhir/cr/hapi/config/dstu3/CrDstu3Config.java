@@ -12,6 +12,7 @@ import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.measure.MeasureOperationsProvider;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Dstu3MeasureService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -25,8 +26,10 @@ public class CrDstu3Config {
 
     @Bean
     IMeasureServiceFactory dstu3MeasureServiceFactory(
-            IRepositoryFactory repositoryFactory, MeasureEvaluationOptions evaluationOptions) {
-        return rd -> new Dstu3MeasureService(repositoryFactory.create(rd), evaluationOptions);
+            IRepositoryFactory repositoryFactory,
+            MeasureEvaluationOptions evaluationOptions,
+            MeasurePeriodValidator measurePeriodValidator) {
+        return rd -> new Dstu3MeasureService(repositoryFactory.create(rd), evaluationOptions, measurePeriodValidator);
     }
 
     @Bean

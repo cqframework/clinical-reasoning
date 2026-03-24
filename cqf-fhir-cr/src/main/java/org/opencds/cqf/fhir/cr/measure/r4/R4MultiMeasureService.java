@@ -1,5 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_LOCATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER_ROLE;
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -15,15 +20,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
@@ -326,8 +335,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 evaluationService.evaluate(repository, resolvedMeasures, request, environment, params, subjectProvider);
 
         // ── Version-specific: build reports from results ──
-        return buildReportsFromResults(
-                results, isMultiMeasureOperation, utilsForResolution, reporter, subject, productLine);
+        return buildReportsFromResults(results, isMultiMeasureOperation, reporter, subject, productLine);
     }
 
     /**
@@ -340,7 +348,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     private List<List<MeasureDefAndR4MeasureReport>> buildReportsFromResults(
             MeasureEvaluationResults results,
             boolean isMultiMeasureOperation,
-            R4MeasureServiceUtils serviceUtils,
             String reporter,
             String subjectParam,
             String productLine) {
@@ -362,9 +369,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 var report = buildMeasureReport(scored, evalType, measurementPeriod, scored.subjects());
 
                 // Post-process: add subject reference for non-individual report types
-                serviceUtils.addSubjectReference(report, null, subjectParam);
+                addSubjectReference(report, null, subjectParam);
 
-                applyReporter(serviceUtils, report, reporter);
+                applyReporter(report, reporter);
                 initializeReport(report);
 
                 resultList.add(new MeasureDefAndR4MeasureReport(scored.measureDef(), scored.state(), report));
@@ -379,9 +386,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                     var report = buildMeasureReport(scored, evalType, measurementPeriod, List.of(subjectId));
 
                     // Post-process: add product line extension for per-subject reports
-                    serviceUtils.addProductLineExtension(report, productLine);
+                    addProductLineExtension(report, productLine);
 
-                    applyReporter(serviceUtils, report, reporter);
+                    applyReporter(report, reporter);
                     initializeReport(report);
 
                     resultList.add(new MeasureDefAndR4MeasureReport(scored.measureDef(), scored.state(), report));
@@ -407,9 +414,58 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         subjects);
     }
 
-    private static void applyReporter(R4MeasureServiceUtils serviceUtils, MeasureReport report, String reporter) {
+    // ── Report post-processing (inlined from R4MeasureServiceUtils — single call-site) ──
+
+    private static void applyReporter(MeasureReport report, String reporter) {
         if (reporter != null && !reporter.isEmpty()) {
-            serviceUtils.getReporter(reporter).ifPresent(report::setReporter);
+            resolveReporter(reporter).ifPresent(report::setReporter);
+        }
+    }
+
+    private static Optional<Reference> resolveReporter(String reporter) {
+        if (!reporter.contains("/")) {
+            throw new IllegalArgumentException(
+                    "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
+        }
+        Reference reference;
+        if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
+            reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER_ROLE));
+        } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
+            reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER));
+        } else if (reporter.startsWith(RESOURCE_TYPE_ORGANIZATION)) {
+            reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_ORGANIZATION));
+        } else if (reporter.startsWith(RESOURCE_TYPE_LOCATION)) {
+            reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_LOCATION));
+        } else {
+            throw new IllegalArgumentException("MeasureReport.reporter does not accept ResourceType: " + reporter);
+        }
+        return Optional.of(reference);
+    }
+
+    private static void addSubjectReference(MeasureReport measureReport, String practitioner, String subjectId) {
+        if ((StringUtils.isNotBlank(practitioner) || StringUtils.isNotBlank(subjectId))
+                && (measureReport.getType().name().equals("SUMMARY")
+                        || measureReport.getType().name().equals("SUBJECTLIST"))) {
+            if (StringUtils.isNotBlank(practitioner)) {
+                if (!practitioner.contains("/")) {
+                    practitioner = "Practitioner/".concat(practitioner);
+                }
+                measureReport.setSubject(new Reference(practitioner));
+            } else {
+                if (!subjectId.contains("/")) {
+                    subjectId = "Patient/".concat(subjectId);
+                }
+                measureReport.setSubject(new Reference(subjectId));
+            }
+        }
+    }
+
+    private static void addProductLineExtension(MeasureReport measureReport, String productLine) {
+        if (productLine != null) {
+            Extension ext = new Extension();
+            ext.setUrl(MEASUREREPORT_PRODUCT_LINE_EXT_URL);
+            ext.setValue(new StringType(productLine));
+            measureReport.addExtension(ext);
         }
     }
 

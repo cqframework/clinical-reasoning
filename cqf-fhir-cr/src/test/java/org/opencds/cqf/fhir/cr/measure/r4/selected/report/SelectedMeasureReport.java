@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_DAVINCI_DEQM_EXT_URL;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.SDE_REFERENCE_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CRITERIA_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -238,7 +238,7 @@ public class SelectedMeasureReport extends Selected<MeasureReport, Then> {
     public SelectedMeasureReportExtension extension(String supplementalDataId) {
         return this.extension(t -> getExtensions(t).stream()
                 .filter(x -> x.getValue()
-                        .getExtensionByUrl(SDE_DAVINCI_DEQM_EXT_URL)
+                        .getExtensionByUrl(EXT_CRITERIA_REFERENCE_URL)
                         .getValue()
                         .toString()
                         .equals(supplementalDataId))
@@ -318,7 +318,7 @@ public class SelectedMeasureReport extends Selected<MeasureReport, Then> {
                 .map(Resource::getIdPart)
                 .collect(Collectors.toSet());
 
-        Set<String> extIds = value().getExtensionsByUrl(SDE_REFERENCE_EXT_URL).stream()
+        Set<String> extIds = value().getExtensionsByUrl(EXT_SDE_REFERENCE_URL).stream()
                 .map(x -> (Reference) x.getValue())
                 .map(t -> t.getReference().replace("#", ""))
                 .collect(Collectors.toSet());

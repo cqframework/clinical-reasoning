@@ -2,16 +2,11 @@ package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_SCORING_EXT_URL;
+import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.COUNTRY_CODING_SYSTEM_CODE;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_PRODUCT_LINE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_DEFINITION_DATE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_VERSION;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_LOCATION;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_ORGANIZATION;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER;
-import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.RESOURCE_TYPE_PRACTITIONER_ROLE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_CODE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.US_COUNTRY_DISPLAY;
 
@@ -27,11 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -43,14 +36,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -64,16 +52,6 @@ public class R4MeasureServiceUtils {
 
     public R4MeasureServiceUtils(IRepository repository) {
         this.repository = repository;
-    }
-
-    public MeasureReport addProductLineExtension(MeasureReport measureReport, String productLine) {
-        if (productLine != null) {
-            Extension ext = new Extension();
-            ext.setUrl(MEASUREREPORT_PRODUCT_LINE_EXT_URL);
-            ext.setValue(new StringType(productLine));
-            measureReport.addExtension(ext);
-        }
-        return measureReport;
     }
 
     public static final List<ContactDetail> CQI_CONTACTDETAIL = Collections.singletonList(new ContactDetail()
@@ -94,15 +72,13 @@ public class R4MeasureServiceUtils {
             .setContact(CQI_CONTACTDETAIL)
             .setDescription(
                     "Returns resources (supplemental data) from references on extensions on the MeasureReport with urls matching %s."
-                            .formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+                            .formatted(EXT_SDE_REFERENCE_URL))
             .setJurisdiction(US_JURISDICTION_CODING)
             .addBase("MeasureReport")
             .setCode("supplemental-data")
             .setType(Enumerations.SearchParamType.REFERENCE)
-            .setExpression(
-                    "MeasureReport.extension('%s').value".formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
-            .setXpath("f:MeasureReport/f:extension[@url='%s'].value"
-                    .formatted(MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION))
+            .setExpression("MeasureReport.extension('%s').value".formatted(EXT_SDE_REFERENCE_URL))
+            .setXpath("f:MeasureReport/f:extension[@url='%s'].value".formatted(EXT_SDE_REFERENCE_URL))
             .setXpathUsage(SearchParameter.XPathUsageType.NORMAL)
             .setTitle("Supplemental Data")
             .setId("deqm-measurereport-supplemental-data");
@@ -132,50 +108,6 @@ public class R4MeasureServiceUtils {
                     "Error creating supplemental data search parameter. This may be due to the server not supporting transactions.",
                     e);
         }
-    }
-
-    public MeasureReport addSubjectReference(MeasureReport measureReport, String practitioner, String subjectId) {
-        if ((StringUtils.isNotBlank(practitioner) || StringUtils.isNotBlank(subjectId))
-                && (measureReport.getType().name().equals(MeasureReportType.SUMMARY.name())
-                        || measureReport.getType().name().equals(MeasureReportType.SUBJECTLIST.name()))) {
-            if (StringUtils.isNotBlank(practitioner)) {
-                if (!practitioner.contains("/")) {
-                    practitioner = "Practitioner/".concat(practitioner);
-                }
-                measureReport.setSubject(new Reference(practitioner));
-            } else {
-                if (!subjectId.contains("/")) {
-                    subjectId = "Patient/".concat(subjectId);
-                }
-                measureReport.setSubject(new Reference(subjectId));
-            }
-        }
-        return measureReport;
-    }
-
-    public Optional<Reference> getReporter(String reporter) {
-        if (reporter != null && !reporter.isEmpty() && !reporter.contains("/")) {
-            // This value may come from configuration, not a user request
-            throw new IllegalArgumentException(
-                    "R4MultiMeasureService requires '[ResourceType]/[ResourceId]' format to set MeasureReport.reporter reference.");
-        }
-        Reference reference = null;
-        if (reporter != null && !reporter.isEmpty()) {
-            if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER_ROLE)) {
-                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER_ROLE));
-            } else if (reporter.startsWith(RESOURCE_TYPE_PRACTITIONER)) {
-                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_PRACTITIONER));
-            } else if (reporter.startsWith(RESOURCE_TYPE_ORGANIZATION)) {
-                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_ORGANIZATION));
-            } else if (reporter.startsWith(RESOURCE_TYPE_LOCATION)) {
-                reference = new Reference(Ids.ensureIdType(reporter, RESOURCE_TYPE_LOCATION));
-            } else {
-                // This value may come from configuration, not a user request
-                throw new IllegalArgumentException("MeasureReport.reporter does not accept ResourceType: " + reporter);
-            }
-        }
-
-        return Optional.ofNullable(reference);
     }
 
     public Measure resolveById(IdType id) {

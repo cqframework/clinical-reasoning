@@ -27,7 +27,7 @@ import org.opencds.cqf.fhir.utility.search.Searches;
  * converts FHIR Parameters to CQL parameter maps, and maps evaluation types to report types.
  *
  * <p>Extracted from {@link R4MeasureProcessor} so that services needing only resolution
- * (e.g. {@link R4MultiMeasureService}) do not depend on the full processor.</p>
+ * (e.g. {@link R4MeasureService}) do not depend on the full processor.</p>
  */
 public class R4MeasureResolver {
 

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.measure;
 
+import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import java.util.HashMap;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
@@ -18,25 +20,21 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.MeasureExceptionMapper;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
-import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
-import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceFactory;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
 
-    private final R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory;
-    private final R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory;
+    private final R4MeasureServiceFactory r4MeasureServiceFactory;
     private final StringTimePeriodHandler stringTimePeriodHandler;
     private final FhirVersionEnum fhirVersion;
 
     public MeasureOperationsProvider(
-            R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
-            R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
-            StringTimePeriodHandler stringTimePeriodHandler) {
+            R4MeasureServiceFactory r4MeasureServiceFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         this.r4MeasureServiceFactory = r4MeasureServiceFactory;
-        this.r4MultiMeasureServiceFactory = r4MultiMeasureServiceFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
         fhirVersion = FhirVersionEnum.R4;
     }
@@ -89,22 +87,27 @@ public class MeasureOperationsProvider {
             var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
             var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
             var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
-            return r4MeasureServiceFactory
-                    .create(requestDetails)
-                    .evaluate(
-                            id,
-                            stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                            stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                            reportType,
-                            subject,
-                            lastReceivedOn,
-                            contentEndpointParam,
-                            terminologyEndpointParam,
-                            dataEndpointParam,
-                            additionalData,
-                            parameters,
-                            productLine,
-                            practitioner);
+
+            var service = r4MeasureServiceFactory.create(requestDetails);
+            var reports = service.evaluate(
+                    List.of(new MeasureReference.ById(id)),
+                    stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                    stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                    reportType,
+                    subject,
+                    practitioner,
+                    contentEndpointParam,
+                    terminologyEndpointParam,
+                    dataEndpointParam,
+                    additionalData,
+                    parameters);
+
+            var report = reports.get(0);
+
+            // HAPI-specific decoration: productLine extension
+            R4MeasureService.addProductLineExtension(report, productLine);
+
+            return report;
         } catch (MeasureException e) {
             throw MeasureExceptionMapper.map(e);
         }
@@ -163,23 +166,53 @@ public class MeasureOperationsProvider {
             var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
             var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
             var measureRefs = MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl);
-            return r4MultiMeasureServiceFactory
-                    .create(requestDetails)
-                    .evaluate(
-                            measureRefs,
-                            stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                            stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                            reportType,
-                            subject,
-                            contentEndpointParam,
-                            terminologyEndpointParam,
-                            dataEndpointParam,
-                            additionalData,
-                            parameters,
-                            productLine,
-                            reporter);
+
+            var service = r4MeasureServiceFactory.create(requestDetails);
+            var reports = service.evaluate(
+                    measureRefs,
+                    stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                    stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                    reportType,
+                    subject,
+                    practitioner,
+                    contentEndpointParam,
+                    terminologyEndpointParam,
+                    dataEndpointParam,
+                    additionalData,
+                    parameters);
+
+            // HAPI-specific decoration: reporter and product line on each report
+            for (var report : reports) {
+                R4MeasureService.applyReporter(report, reporter);
+                R4MeasureService.addProductLineExtension(report, productLine);
+            }
+
+            return packageAsParameters(reports, service.getServerBase());
         } catch (MeasureException e) {
             throw MeasureExceptionMapper.map(e);
         }
+    }
+
+    /**
+     * Packages a flat list of MeasureReports into the Parameters structure expected by the
+     * $evaluate operation: one "return" parameter per subject, each containing a searchset Bundle
+     * with that subject's MeasureReports.
+     */
+    private static Parameters packageAsParameters(List<MeasureReport> reports, String serverBase) {
+        var outputParameters = new Parameters();
+        var bundleBySubject = new HashMap<String, Bundle>();
+
+        for (var report : reports) {
+            var subject = report.getSubject().getReference();
+            var bundle = bundleBySubject.computeIfAbsent(subject, key -> {
+                var newBundle = new Bundle();
+                newBundle.setType(Bundle.BundleType.SEARCHSET);
+                outputParameters.addParameter().setName("return").setResource(newBundle);
+                return newBundle;
+            });
+            bundle.addEntry().setResource(report).setFullUrl(getFullUrl(serverBase, report));
+        }
+
+        return outputParameters;
     }
 }

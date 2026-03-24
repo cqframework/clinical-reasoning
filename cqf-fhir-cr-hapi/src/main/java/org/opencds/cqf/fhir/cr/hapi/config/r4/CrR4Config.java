@@ -26,8 +26,7 @@ import org.opencds.cqf.fhir.cr.hapi.r4.IInferManifestParametersServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
-import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
-import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
@@ -46,7 +45,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsProcessor;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.springframework.context.ApplicationContext;
@@ -70,25 +69,15 @@ import org.springframework.context.annotation.Import;
 public class CrR4Config {
 
     @Bean
-    R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory(
+    R4MeasureServiceFactory r4MeasureServiceFactory(
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        // We are effectively returning an R4MeasureEvaluatorSingle her
-        return requestDetails -> new R4MultiMeasureService(
+        return requestDetails -> new R4MeasureService(
                 repositoryFactory.create(requestDetails),
                 evaluationOptions,
                 requestDetails.getFhirServerBase(),
                 measurePeriodValidator);
-    }
-
-    @Bean
-    R4MeasureEvaluatorMultipleFactory r4MeasureEvaluatorMultipleFactory(
-            IRepositoryFactory repositoryFactory,
-            MeasureEvaluationOptions evaluationOptions,
-            MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
     }
 
     @Bean
@@ -216,11 +205,8 @@ public class CrR4Config {
 
     @Bean
     MeasureOperationsProvider r4MeasureOperationsProvider(
-            R4MeasureEvaluatorSingleFactory r4MeasureServiceFactory,
-            R4MeasureEvaluatorMultipleFactory r4MultiMeasureServiceFactory,
-            StringTimePeriodHandler stringTimePeriodHandler) {
-        return new MeasureOperationsProvider(
-                r4MeasureServiceFactory, r4MultiMeasureServiceFactory, stringTimePeriodHandler);
+            R4MeasureServiceFactory r4MeasureServiceFactory, StringTimePeriodHandler stringTimePeriodHandler) {
+        return new MeasureOperationsProvider(r4MeasureServiceFactory, stringTimePeriodHandler);
     }
 
     @Bean

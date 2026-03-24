@@ -12,6 +12,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,6 +26,11 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport;
@@ -39,6 +45,9 @@ import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
 public class Measure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
+
+    /** Test-only evaluation result capturing both MeasureDef and MeasureReport. */
+    record EvalResult(MeasureDef measureDef, MeasureEvaluationState state, MeasureReport measureReport) {}
 
     @FunctionalInterface
     public interface Validator<T> {
@@ -140,20 +149,20 @@ public class Measure {
             return this;
         }
 
-        private R4MultiMeasureService buildMultiMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+        private R4MeasureService buildMeasureService() {
+            return new R4MeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public When when() {
-            return new When(buildMultiMeasureService());
+            return new When(buildMeasureService());
         }
     }
 
     public static class When {
-        private final R4MultiMeasureService multiMeasureService;
+        private final R4MeasureService service;
 
-        When(R4MultiMeasureService multiMeasureService) {
-            this.multiMeasureService = multiMeasureService;
+        When(R4MeasureService service) {
+            this.service = service;
         }
 
         private String measureId;
@@ -164,7 +173,7 @@ public class Measure {
         private Bundle additionalData;
         private Parameters parameters;
 
-        private Supplier<MeasureDefAndR4MeasureReport> operation;
+        private Supplier<EvalResult> operation;
         private String practitioner;
         private String productLine;
 
@@ -226,20 +235,59 @@ public class Measure {
         }
 
         public When evaluate() {
-            this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
-                    new IdType("Measure", measureId),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    parameters,
-                    productLine,
-                    practitioner);
+            this.operation = () -> {
+                // Validate R4 report types (same as R4MeasureService.evaluate)
+                if (reportType != null) {
+                    var evalTypeOpt = MeasureEvalType.fromCode(reportType);
+                    if (evalTypeOpt.isPresent()
+                            && (evalTypeOpt.get() == MeasureEvalType.PATIENT
+                                    || evalTypeOpt.get() == MeasureEvalType.PATIENTLIST)) {
+                        throw new UnsupportedOperationException(
+                                "ReportType: %s, is not an accepted R4 EvalType value.".formatted(reportType));
+                    }
+                }
+
+                // Run pipeline directly to capture MeasureDef alongside MeasureReport
+                var resolver = service.resolver();
+                var fhirMeasure = service.getRepository()
+                        .read(org.hl7.fhir.r4.model.Measure.class, new IdType("Measure", measureId));
+                var resolved = resolver.buildResolvedMeasure(fhirMeasure);
+                var params = resolver.resolveParameterMap(parameters);
+
+                var request = new MeasureEvaluationRequest(
+                        periodStart, periodEnd, reportType, subject, practitioner, null, null);
+                var environment = new MeasureEnvironment(null, null, null, additionalData);
+
+                var results = service.evaluationService()
+                        .evaluate(
+                                service.getRepository(),
+                                List.of(resolved),
+                                request,
+                                environment,
+                                params,
+                                service.subjectProvider());
+
+                var scored = results.scoredMeasures().get(0);
+                var evalType = results.evalType();
+
+                // Single-measure: build one report with all subjects (matches old $evaluate-measure behavior)
+                var report = new R4MeasureReportBuilder()
+                        .build(
+                                scored.measureDef(),
+                                scored.state(),
+                                resolver.evalTypeToReportType(
+                                        evalType, scored.measureDef().url()),
+                                results.measurementPeriod(),
+                                scored.subjects());
+
+                if (evalType != MeasureEvalType.SUBJECT) {
+                    R4MeasureService.addSubjectReference(report, subject);
+                }
+                R4MeasureService.addProductLineExtension(report, productLine);
+                service.initializeReport(report);
+
+                return new EvalResult(scored.measureDef(), scored.state(), report);
+            };
             return this;
         }
 
@@ -249,15 +297,15 @@ public class Measure {
                         "No operation was selected as part of 'when'. Choose an operation to invoke by adding one, such as 'evaluate' to the method chain.");
             }
 
-            return new Then(this.operation.get(), this.multiMeasureService.getRepository());
+            return new Then(this.operation.get(), this.service.getRepository());
         }
     }
 
     public static class Then {
-        private final MeasureDefAndR4MeasureReport evaluation;
+        private final EvalResult evaluation;
         private final IRepository repository;
 
-        Then(MeasureDefAndR4MeasureReport evaluation, IRepository repository) {
+        Then(EvalResult evaluation, IRepository repository) {
             this.evaluation = evaluation;
             this.repository = repository;
         }

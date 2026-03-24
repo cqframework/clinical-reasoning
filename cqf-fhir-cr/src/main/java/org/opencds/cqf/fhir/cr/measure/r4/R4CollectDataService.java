@@ -80,7 +80,9 @@ public class R4CollectDataService {
         var resolved = resolver.buildResolvedMeasure(fhirMeasure);
 
         // 2. Resolve subjects (practitioner overrides subject)
-        var effectiveSubject = resolvePractitionerOverride(subject, practitioner);
+        var effectiveSubject = StringUtils.isNotBlank(practitioner)
+                ? (practitioner.contains("/") ? practitioner : "Practitioner/".concat(practitioner))
+                : subject;
         var subjects = subjectProvider
                 .getSubjects(repository, effectiveSubject)
                 .map(SubjectRef::qualified)
@@ -144,14 +146,6 @@ public class R4CollectDataService {
         if (!report.getEvaluatedResource().isEmpty()) {
             populateEvaluatedResources(report, parameters, reportSubjectId);
         }
-    }
-
-    @Nullable
-    private static String resolvePractitionerOverride(@Nullable String subject, @Nullable String practitioner) {
-        if (StringUtils.isNotBlank(practitioner)) {
-            return practitioner.contains("/") ? practitioner : "Practitioner/".concat(practitioner);
-        }
-        return subject;
     }
 
     /**

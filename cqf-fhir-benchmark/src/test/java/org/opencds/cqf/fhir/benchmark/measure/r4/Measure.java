@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -15,9 +16,9 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
-import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class Measure {
@@ -84,19 +85,19 @@ public class Measure {
             return this;
         }
 
-        private R4MultiMeasureService buildMultiMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+        private R4MeasureService buildMeasureService() {
+            return new R4MeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public When when() {
-            return new When(buildMultiMeasureService());
+            return new When(buildMeasureService());
         }
     }
 
     public static class When {
-        private final R4MultiMeasureService service;
+        private final R4MeasureService service;
 
-        When(R4MultiMeasureService service) {
+        When(R4MeasureService service) {
             this.service = service;
         }
 
@@ -141,19 +142,18 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> service.evaluate(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    null,
-                    null,
-                    null);
+                            List.of(new MeasureReference.ById(new IdType("Measure", measureId))),
+                            periodStart,
+                            periodEnd,
+                            reportType,
+                            subject,
+                            null,
+                            null,
+                            null,
+                            null,
+                            additionalData,
+                            null)
+                    .get(0);
             return this;
         }
 

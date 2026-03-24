@@ -46,8 +46,14 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.ResolvedMeasure;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
@@ -57,6 +63,9 @@ import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 @SuppressWarnings("squid:S1135")
 class MultiMeasure {
     public static final String CLASS_PATH = "org/opencds/cqf/fhir/cr/measure/r4";
+
+    /** Test-only evaluation result capturing MeasureDefs alongside the Parameters output. */
+    record MultiEvalResult(List<MeasureDef> measureDefs, List<MeasureEvaluationState> states, Parameters parameters) {}
 
     @FunctionalInterface
     public interface Validator<T> {
@@ -156,8 +165,8 @@ class MultiMeasure {
             return this.repository;
         }
 
-        private R4MultiMeasureService buildMeasureService() {
-            return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
+        private R4MeasureService buildMeasureService() {
+            return new R4MeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public MultiMeasure.When when() {
@@ -166,10 +175,10 @@ class MultiMeasure {
     }
 
     public static class When {
-        private final R4MultiMeasureService service;
+        private final R4MeasureService service;
         private final IRepository repository;
 
-        When(R4MultiMeasureService service, IRepository repository) {
+        When(R4MeasureService service, IRepository repository) {
             this.service = service;
             this.repository = repository;
         }
@@ -184,7 +193,7 @@ class MultiMeasure {
         private Bundle additionalData;
         private Parameters parameters;
 
-        private Supplier<MeasureDefAndR4ParametersWithMeasureReports> operation;
+        private Supplier<MultiEvalResult> operation;
         private String productLine;
         private String reporter;
 
@@ -246,19 +255,99 @@ class MultiMeasure {
         }
 
         public MultiMeasure.When evaluate() {
-            this.operation = () -> service.evaluateWithDefs(
-                    MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
-                    null,
-                    null,
-                    additionalData,
-                    parameters,
-                    productLine,
-                    reporter);
+            this.operation = () -> {
+                // Run pipeline directly to capture MeasureDefs alongside Parameters output
+                var measureRefs = MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl);
+                var resolver = service.resolver();
+
+                // Resolve measures
+                var utilsForResolution =
+                        new org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils(service.getRepository());
+                var resolvedMeasureList = utilsForResolution.getMeasures(measureRefs);
+                var resolvedMeasures = new ArrayList<ResolvedMeasure>();
+                for (var m : resolvedMeasureList) {
+                    resolvedMeasures.add(resolver.buildResolvedMeasure(m));
+                }
+
+                var params = resolver.resolveParameterMap(parameters);
+                var request =
+                        new MeasureEvaluationRequest(periodStart, periodEnd, reportType, subject, null, null, null);
+                var environment = new MeasureEnvironment(null, null, null, additionalData);
+
+                var results = service.evaluationService()
+                        .evaluate(
+                                service.getRepository(),
+                                resolvedMeasures,
+                                request,
+                                environment,
+                                params,
+                                service.subjectProvider());
+
+                // Build reports and capture defs
+                var measureDefs = new ArrayList<MeasureDef>();
+                var states = new ArrayList<MeasureEvaluationState>();
+                var reports = new ArrayList<MeasureReport>();
+                var evalType = results.evalType();
+                var period = results.measurementPeriod();
+
+                if (evalType == MeasureEvalType.SUBJECT) {
+                    for (var scored : results.scoredMeasures()) {
+                        for (var subjectId : scored.subjects()) {
+                            measureDefs.add(scored.measureDef());
+                            states.add(scored.state());
+                            var report = new R4MeasureReportBuilder()
+                                    .build(
+                                            scored.measureDef(),
+                                            scored.state(),
+                                            resolver.evalTypeToReportType(
+                                                    evalType,
+                                                    scored.measureDef().url()),
+                                            period,
+                                            List.of(subjectId));
+                            R4MeasureService.addProductLineExtension(report, productLine);
+                            R4MeasureService.applyReporter(report, reporter);
+                            service.initializeReport(report);
+                            reports.add(report);
+                        }
+                    }
+                } else {
+                    for (var scored : results.scoredMeasures()) {
+                        measureDefs.add(scored.measureDef());
+                        states.add(scored.state());
+                        var report = new R4MeasureReportBuilder()
+                                .build(
+                                        scored.measureDef(),
+                                        scored.state(),
+                                        resolver.evalTypeToReportType(
+                                                evalType, scored.measureDef().url()),
+                                        period,
+                                        scored.subjects());
+                        R4MeasureService.addSubjectReference(report, subject);
+                        R4MeasureService.applyReporter(report, reporter);
+                        service.initializeReport(report);
+                        reports.add(report);
+                    }
+                }
+
+                // Package into Parameters (same as HAPI provider does)
+                var outputParameters = new Parameters();
+                var bundleBySubject = new java.util.HashMap<String, Bundle>();
+                for (var report : reports) {
+                    var subjectRef = report.getSubject().getReference();
+                    var bundle = bundleBySubject.computeIfAbsent(subjectRef, key -> {
+                        var newBundle = new Bundle();
+                        newBundle.setType(Bundle.BundleType.SEARCHSET);
+                        outputParameters.addParameter().setName("return").setResource(newBundle);
+                        return newBundle;
+                    });
+                    bundle.addEntry()
+                            .setResource(report)
+                            .setFullUrl(org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl(
+                                    service.getServerBase(), report));
+                }
+
+                return new MultiEvalResult(measureDefs, states, outputParameters);
+            };
             return this;
         }
 
@@ -273,10 +362,10 @@ class MultiMeasure {
     }
 
     public static class Then {
-        private final MeasureDefAndR4ParametersWithMeasureReports evaluation;
+        private final MultiEvalResult evaluation;
         private final IRepository repository;
 
-        Then(MeasureDefAndR4ParametersWithMeasureReports evaluation, IRepository repository) {
+        Then(MultiEvalResult evaluation, IRepository repository) {
             this.evaluation = evaluation;
             this.repository = repository;
         }

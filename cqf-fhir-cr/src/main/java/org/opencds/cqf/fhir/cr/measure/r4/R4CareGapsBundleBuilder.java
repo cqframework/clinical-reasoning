@@ -19,7 +19,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +75,7 @@ public class R4CareGapsBundleBuilder {
     private final CareGapsProperties careGapsProperties;
     private final String serverBase;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
-    private final R4MultiMeasureService r4MultiMeasureService;
+    private final R4MeasureService r4MeasureService;
 
     public R4CareGapsBundleBuilder(
             CareGapsProperties careGapsProperties,
@@ -91,8 +90,8 @@ public class R4CareGapsBundleBuilder {
         this.configuredResources = configuredResources;
 
         r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
-        r4MultiMeasureService =
-                new R4MultiMeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
+        r4MeasureService =
+                new R4MeasureService(repository, measureEvaluationOptions, serverBase, measurePeriodValidator);
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
@@ -105,7 +104,7 @@ public class R4CareGapsBundleBuilder {
 
         for (String subject : subjects) {
             // Measure Reports
-            var result = r4MultiMeasureService.evaluate(
+            var reports = r4MeasureService.evaluate(
                     measureRefs,
                     r4CareGapsParameters.periodStart(),
                     r4CareGapsParameters.periodEnd(),
@@ -116,15 +115,15 @@ public class R4CareGapsBundleBuilder {
                     null,
                     null,
                     null,
-                    null,
-                    reporter);
+                    null);
 
-            var entries = result.getParameter().stream()
-                    .map(ParametersParameterComponent::getResource)
-                    .filter(Bundle.class::isInstance)
-                    .map(Bundle.class::cast)
-                    .map(Bundle::getEntry)
-                    .flatMap(Collection::stream)
+            // Apply reporter to each report
+            for (var report : reports) {
+                R4MeasureService.applyReporter(report, reporter);
+            }
+
+            var entries = reports.stream()
+                    .map(report -> new BundleEntryComponent().setResource(report))
                     .toList();
 
             // Patient, subject comes in as format "ResourceType/[id]", no resourceType required to be specified.

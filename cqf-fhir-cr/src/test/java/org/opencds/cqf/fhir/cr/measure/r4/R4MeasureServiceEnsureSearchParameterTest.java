@@ -16,7 +16,7 @@ import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
  * Tests the {@code ensureSearchParameters} flag on {@link MeasureEvaluationOptions}
  * to verify that the SDE SearchParameter is created (or not) based on the flag value.
  */
-class R4MultiMeasureServiceEnsureSearchParameterTest {
+class R4MeasureServiceEnsureSearchParameterTest {
 
     @Test
     void ensureSearchParameters_true_createsSearchParameter() {
@@ -35,7 +35,7 @@ class R4MultiMeasureServiceEnsureSearchParameterTest {
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         var options = MeasureEvaluationOptions.defaultOptions().setEnsureSearchParameters(false);
 
-        // Guard with the flag check, mirroring R4MultiMeasureService behavior
+        // Guard with the flag check, mirroring R4MeasureService behavior
         if (options.isEnsureSearchParameters()) {
             var utils = new R4MeasureServiceUtils(repository);
             utils.ensureSupplementalDataElementSearchParameter();

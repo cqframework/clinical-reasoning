@@ -47,6 +47,7 @@ import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -95,7 +96,7 @@ public class R4CareGapsBundleBuilder {
     }
 
     public List<Parameters.ParametersParameterComponent> makePatientBundles(
-            List<String> subjects, R4CareGapsParameters r4CareGapsParameters, List<IdType> measureId) {
+            List<String> subjects, R4CareGapsParameters r4CareGapsParameters, List<MeasureReference> measureRefs) {
 
         // retrieve reporter from configuration
         String reporter = RESOURCE_TYPE_ORGANIZATION.concat("/" + careGapsProperties.getCareGapsReporter());
@@ -105,9 +106,7 @@ public class R4CareGapsBundleBuilder {
         for (String subject : subjects) {
             // Measure Reports
             var result = r4MultiMeasureService.evaluate(
-                    measureId,
-                    null,
-                    null,
+                    measureRefs,
                     r4CareGapsParameters.periodStart(),
                     r4CareGapsParameters.periodEnd(),
                     MeasureEvalType.SUBJECT.toCode(),

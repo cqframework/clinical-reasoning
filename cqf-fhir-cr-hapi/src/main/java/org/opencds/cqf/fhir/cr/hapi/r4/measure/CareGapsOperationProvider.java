@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.ICareGapsServiceFactory;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 @SuppressWarnings("java:S107")
 public class CareGapsOperationProvider {
@@ -84,6 +85,12 @@ public class CareGapsOperationProvider {
             @OperationParam(name = "measureUrl") List<CanonicalType> measureUrl,
             @OperationParam(name = "nonDocument") BooleanType nonDocument) {
 
+        var measureUrls = measureUrl == null
+                ? null
+                : measureUrl.stream().map(CanonicalType::getValueAsString).toList();
+        var measureIds =
+                measureId == null ? null : measureId.stream().map(IdType::new).toList();
+        var measureRefs = MeasureReference.fromOperationParams(measureIds, measureIdentifier, measureUrls);
         return r4CareGapsProcessorFactory
                 .create(requestDetails)
                 .getCareGapsReport(
@@ -91,15 +98,7 @@ public class CareGapsOperationProvider {
                         stringTimePeriodHandler.getEndZonedDateTime(reriodEnd, requestDetails),
                         subject,
                         status,
-                        measureId == null
-                                ? null
-                                : measureId.stream().map(IdType::new).toList(),
-                        measureIdentifier,
-                        measureUrl == null
-                                ? null
-                                : measureUrl.stream()
-                                        .map(CanonicalType::getValueAsString)
-                                        .toList(),
+                        measureRefs,
                         Optional.ofNullable(nonDocument)
                                 .map(BooleanType::getValue)
                                 .orElse(false));

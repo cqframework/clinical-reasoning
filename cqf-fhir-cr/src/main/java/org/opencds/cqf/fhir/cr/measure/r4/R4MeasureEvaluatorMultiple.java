@@ -5,8 +5,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 /**
  * Interface for {@link R4MultiMeasureService} and any other concrete classes that implement the same
@@ -15,9 +15,7 @@ import org.hl7.fhir.r4.model.Parameters;
 public interface R4MeasureEvaluatorMultiple {
 
     Parameters evaluate(
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
+            List<MeasureReference> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,

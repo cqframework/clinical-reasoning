@@ -39,6 +39,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -161,31 +162,23 @@ public class R4MeasureServiceUtils {
         }
     }
 
+    public List<Measure> getMeasures(List<MeasureReference> refs) {
+        var measures = new ArrayList<Measure>();
+        for (var ref : refs) {
+            if (ref instanceof MeasureReference.ById byId) {
+                measures.add(resolveById((IdType) byId.id()));
+            } else if (ref instanceof MeasureReference.ByIdentifier byIdent) {
+                measures.add(resolveByIdentifier(byIdent.identifier()));
+            } else if (ref instanceof MeasureReference.ByCanonicalUrl byUrl) {
+                measures.add(resolveByUrl(byUrl.url()));
+            }
+        }
+        return distinctByKey(measures, Measure::getUrl);
+    }
+
     public List<Measure> getMeasures(
             List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
-        List<Measure> measures = new ArrayList<>();
-        if (measureIds != null && !measureIds.isEmpty()) {
-            for (IdType measureId : measureIds) {
-                Measure measureById = resolveById(measureId);
-                measures.add(measureById);
-            }
-        }
-
-        if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
-            for (String measureCanonical : measureCanonicals) {
-                Measure measureByUrl = resolveByUrl(measureCanonical);
-                measures.add(measureByUrl);
-            }
-        }
-
-        if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
-            for (String measureIdentifier : measureIdentifiers) {
-                Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
-                measures.add(measureByIdentifier);
-            }
-        }
-
-        return distinctByKey(measures, Measure::getUrl);
+        return getMeasures(MeasureReference.fromOperationParams(measureIds, measureIdentifiers, measureCanonicals));
     }
 
     public static <T, K> List<T> distinctByKey(List<T> list, Function<T, K> keyExtractor) {

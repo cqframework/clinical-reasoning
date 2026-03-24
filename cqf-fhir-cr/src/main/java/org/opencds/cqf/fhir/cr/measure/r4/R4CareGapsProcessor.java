@@ -8,12 +8,9 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.hl7.fhir.r4.model.IdType;
@@ -26,6 +23,7 @@ import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
@@ -75,9 +73,7 @@ public class R4CareGapsProcessor {
      * @param periodEnd measurement period ending interval
      * @param subject subject reference (Patient/{id}, Group/{id}, Practitioner/{id}, or null for all)
      * @param status care-gap statuses to include in results
-     * @param measureId measures to resolve by FHIR resource id
-     * @param measureIdentifier measures to resolve by identifier value or system|value
-     * @param measureUrl measures to resolve by canonical URL
+     * @param measureRefs measures to evaluate, as typed references
      * @param notDocument if true, return summarized bundle with only DetectedIssue instead of document bundle
      * @return Parameters including zero to many document bundles with Care Gap Measure Reports
      */
@@ -87,26 +83,21 @@ public class R4CareGapsProcessor {
             @Nullable ZonedDateTime periodEnd,
             @Nullable String subject,
             List<String> status,
-            List<IdType> measureId,
-            List<String> measureIdentifier,
-            List<String> measureUrl,
+            List<MeasureReference> measureRefs,
             boolean notDocument) {
 
-        // Normalize nulls to empty lists
-        List<IdType> safeIds = sanitizeMeasureIds(measureId);
-        List<String> safeIdentifiers = nullToEmpty(measureIdentifier);
-        List<String> safeUrls = nullToEmpty(measureUrl);
-        validateMeasureParameters(safeIds, safeIdentifiers, safeUrls);
+        if (measureRefs.isEmpty()) {
+            throw new InvalidRequestException("no measure resolving parameter was specified for care-gaps");
+        }
 
-        var params = new R4CareGapsParameters(
-                periodStart, periodEnd, subject, status, safeIds, safeIdentifiers, safeUrls, notDocument);
+        var params = new R4CareGapsParameters(periodStart, periodEnd, subject, status, measureRefs, notDocument);
 
         // Validate and set required configuration resources
         checkConfigurationReferences();
 
         // Validate required parameter values
-        checkValidStatusCode(params.status());
-        List<Measure> measures = r4MeasureServiceUtils.getMeasures(safeIds, safeIdentifiers, safeUrls);
+        checkValidStatusCode(params.status(), measureRefs);
+        List<Measure> measures = r4MeasureServiceUtils.getMeasures(measureRefs);
         measureCompatibilityCheck(measures);
 
         // Subject population
@@ -114,34 +105,10 @@ public class R4CareGapsProcessor {
 
         // Build results
         Parameters result = initializeResult();
-        List<Parameters.ParametersParameterComponent> components = r4CareGapsBundleBuilder.makePatientBundles(
-                subjects, params, measures.stream().map(Resource::getIdElement).collect(Collectors.toList()));
+        List<Parameters.ParametersParameterComponent> components =
+                r4CareGapsBundleBuilder.makePatientBundles(subjects, params, measureRefs);
 
         return result.setParameter(components);
-    }
-
-    /** Filters null entries and entries with null id parts. */
-    private static List<IdType> sanitizeMeasureIds(@Nullable List<IdType> measureId) {
-        return Optional.ofNullable(measureId).orElse(Collections.emptyList()).stream()
-                .filter(id -> id != null && id.getIdPart() != null)
-                .toList();
-    }
-
-    private static List<String> nullToEmpty(@Nullable List<String> list) {
-        return Optional.ofNullable(list).orElse(Collections.emptyList()).stream()
-                .filter(Objects::nonNull)
-                .toList();
-    }
-
-    /** Throws if no measure resolving parameter was provided across all three lists. */
-    private static void validateMeasureParameters(
-            List<IdType> measureId, List<String> measureIdentifier, List<String> measureUrl) {
-        if (measureId.isEmpty() && measureIdentifier.isEmpty() && measureUrl.isEmpty()) {
-            List<String> measureIdsAsStrings =
-                    measureId.stream().map(IdType::getIdPart).collect(Collectors.toList());
-            throw new InvalidRequestException(
-                    "no measure resolving parameter was specified for Measure: " + measureIdsAsStrings);
-        }
     }
 
     List<String> getSubjects(String subject) {
@@ -179,7 +146,7 @@ public class R4CareGapsProcessor {
         return newResource(Parameters.class, "care-gaps-report-" + UUID.randomUUID());
     }
 
-    void checkValidStatusCode(List<String> statuses) {
+    void checkValidStatusCode(List<String> statuses, List<MeasureReference> measureRefs) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
@@ -187,8 +154,11 @@ public class R4CareGapsProcessor {
                     && !CareGapsStatusCode.OPEN_GAP.toString().equals(status)
                     && !CareGapsStatusCode.NOT_APPLICABLE.toString().equals(status)
                     && !CareGapsStatusCode.PROSPECTIVE_GAP.toString().equals(status)) {
+                var displays =
+                        measureRefs.stream().map(MeasureReference::display).collect(Collectors.toList());
                 throw new InvalidRequestException(
-                        "CareGap status parameter: %s, is not an accepted value".formatted(status));
+                        "CareGap status parameter: %s, is not an accepted value for Measure: %s"
+                                .formatted(status, displays));
             }
         }
     }

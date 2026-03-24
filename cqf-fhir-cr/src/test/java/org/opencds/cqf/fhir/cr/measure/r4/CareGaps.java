@@ -38,6 +38,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -186,17 +187,23 @@ public class CareGaps {
         }
 
         public CareGaps.When measureId(String measureId) {
-            this.measureId.add(new IdType("Measure", measureId));
+            if (measureId != null) {
+                this.measureId.add(new IdType("Measure", measureId));
+            }
             return this;
         }
 
         public CareGaps.When measureUrl(String measureUrl) {
-            this.measureUrl.add(measureUrl);
+            if (measureUrl != null) {
+                this.measureUrl.add(measureUrl);
+            }
             return this;
         }
 
         public CareGaps.When measureIdentifier(String measureIdentifier) {
-            this.measureIdentifier.add(measureIdentifier);
+            if (measureIdentifier != null) {
+                this.measureIdentifier.add(measureIdentifier);
+            }
             return this;
         }
 
@@ -207,7 +214,12 @@ public class CareGaps {
 
         public CareGaps.When getCareGapsReport() {
             this.operation = () -> processor.getCareGapsReport(
-                    periodStart, periodEnd, subject, status, measureId, measureIdentifier, measureUrl, notDocument);
+                    periodStart,
+                    periodEnd,
+                    subject,
+                    status,
+                    MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl),
+                    notDocument);
             return this;
         }
 

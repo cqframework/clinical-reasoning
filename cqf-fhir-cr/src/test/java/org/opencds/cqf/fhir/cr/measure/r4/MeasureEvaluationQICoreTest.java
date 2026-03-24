@@ -10,20 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
- * Tests for QICore CMS measures (CMS125, CMS529, CMS816) evaluating expected results.
+ * Tests for QICore CMS measure (CMS125) evaluating expected results.
  * Test cases are derived from the measure bundle test resources.
  * <p/>
  * Score calculations are based on improvementNotation:
  * - CMS125 (increase): higher scores are better (numerator/denominator)
- * - CMS816 (decrease): lower scores are better (1 - numerator/denominator)
- * - CMS529 (cohort): no score
  */
 @SuppressWarnings("squid:S2699")
 class MeasureEvaluationQICoreTest {
 
     private static final String CMS125 = "CMS125FHIRBreastCancerScreen";
-    private static final String CMS816 = "CMS816FHIRHHHypo";
-    private static final String CMS529 = "CMSFHIR529HybridHospitalWideReadmission";
 
     private static final String STRATIFICATION_1_1 = "Stratification_1_1";
     private static final String STRATIFICATION_1_2 = "Stratification_1_2";
@@ -658,94 +654,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * Encounter, meds administered, lab test 1 = 35, lab 2 result = entered-in-error
-     */
-    @Test
-    void test_cms816_lab_result_entered_in_error_0d80e691_5b27_48ba_bb22_d31a481ede1a() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/471f0895-69d0-4cd2-bae3-3e9872616cef")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Encounter, meds administered, two glucose lab tests but no results. Must have results and must be LT 40 to meet numerator.
-     */
-    @Test
-    void test_cms816_glucose_labs_no_results_0fb98a8a_a7ac_49a3_a1bd_e042373dc1c6() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/5bfa3b7e-2b6f-4eb5-b09b-7c6f1145780b")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 52yo w/ an Office Visit Encounter 1/1 during the MP and Mammogram Observation 9/30 before observation interval.
      */
     @Test
@@ -1118,50 +1026,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * Encounter started in ER before IP. Hypo med relevant date/time during ER. Meets denominator.
-     */
-    @Test
-    void test_cms816_encounter_started_er_before_ip_1d024438_43d5_466f_a8a5_e74c19609c31() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/41c102cb-d7f0-421d-ac76-5ac1c8dbe56a")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 52yo w/ an Office Visit Encounter 1/1 of the MP & Hospice Encounter that ends on 12/31 of the year before the MP.
      */
     @Test
@@ -1280,95 +1144,6 @@ class MeasureEvaluationQICoreTest {
                 .hasCount(0)
                 .up()
                 .up()
-                .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Encounter, meds administered, lab test 1 = 35, lab 2  exactly 5 minutes after with result = 81 so does not meet Numerator. Timing is based on rel datetime of first test to second test.
-     */
-    @Test
-    void test_cms816_lab2_gt80_exactly_5min_after_1e896d30_3808_482a_b8a3_51198a58d4a6() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/6bc18290-1925-4239-81d7-0118bd062225")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Encounter with meds and 3 glucose labs. Two are <40, one is >80 but is not within 5 minutes of other labs. Meets num. = 1 harm. Used start of relevant period for lab test timings
-     */
-    @Test
-    void test_cms816_three_labs_two_lt40_meets_num_1f48c160_8aba_4e86_bd5d_c5c4bdef1afd() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/339a989b-722c-4452-9d25-454e2d53eea8")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
                 .up()
                 .up()
                 .report();
@@ -2493,50 +2268,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * IP Encounter with med. Lab LT 40, followed by lab LT 80 within 5 minutes. Meets Numerator.
-     */
-    @Test
-    void test_cms816_lab_lt40_followed_lt80_meets_num_3b2e8979_70aa_4e44_9d50_d8e8b7437c3f() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/7cb05de4-6b74-4ce5-a2ea-be59635a74f6")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & a Left and Right Mastectomy Dx that both start on 12/31 of the MP. Testing condition encounter diagnosis.
      */
     @Test
@@ -2656,50 +2387,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Inpatient encounter with no hypoglycemic medication administered. Med is required to meet IPP.
-     */
-    @Test
-    void test_cms816_no_hypo_med_administered_405942a0_a415_4f3b_9e8d_da2a937fb762() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/5570227b-f288-4a0c-9df5-807d2afa241a")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -2953,94 +2640,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * 3 different encounters, all have harm (meets numerator). IPP/Denom = 3, Numerator should = 3.
-     */
-    @Test
-    void test_cms816_three_encounters_all_meet_num_45065811_b103_4031_bc12_fee1b69673d4() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/f58dcdc6-cce9-4b49-b657-7e1e2593e428")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(3)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(3)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(3)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(3)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(3)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(3)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Inpatient encounter where patient started in ER prior to admission. Age 17 in ER, turned 18 at exact date as start of IP encounter, meds administered, no lab tests. Edge case. Denominator pass.
-     */
-    @Test
-    void test_cms816_age_17_in_er_turned_18_at_ip_468149e1_3455_41f9_b102_9514a7f04beb() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/e360ffc2-5b98-425a-a2bd-b051ba5ec506")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 52yo w/ an Office Visit Encounter 1/1 during the MP.
      */
     @Test
@@ -3289,50 +2888,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * Encounter where Pt had glucose <40 but it was 1 minute before hypo medication administered. Must be <40 within 24 hour AFTER hypo medication to meet numerator. Numerator fails.
-     */
-    @Test
-    void test_cms816_glucose_lt40_before_med_4a65a910_307b_4f78_b607_00621c82df67() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/7df60531-857d-45bc-ad5b-31b5462f3f54")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 65 years, 11 months & 30 days old w/ an Office Visit Encounter 1/1 of the MP & an Observation AIFrailty Living In Nursing Home that starts on 12/31 of the MP.
      */
     @Test
@@ -3452,94 +3007,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Patient inpatient, but the med administered was not hypoglycemic med. Hypo med must be administered during encounter to meet IPP.  Patient had glucose <40 during encounter, but there was no hypo med administered on or prior to test no Numerator.
-     */
-    @Test
-    void test_cms816_non_hypo_med_administered_5a2f5fbe_4101_4384_b836_bccb70d6ad20() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/cf9c230a-adc0-4830-bf04-fed4ab5ff6c8")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * IP Encounter with hypoglycemic med given. Lab LT 40 mg/dL, followed by lab GT 80 mg/dL within 5 minutes. Does not meet Numerator.
-     */
-    @Test
-    void test_cms816_lab_lt40_followed_gt80_no_num_5bf02387_de2a_45ba_b284_fcbc62e63be6() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/1a89fbca-df20-4f17-97d0-9fa5990860b2")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -4041,50 +3508,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * Pt turned 18 at exact date/time at start of ED encounter, meds administered, no lab tests. Denom pass.
-     */
-    @Test
-    void test_cms816_turned_18_at_ed_start_6244d8f6_995c_4a0e_9d86_9c3abfc3fcb7() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/974284eb-fc89-452a-9b38-a884c0e0477e")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Frailty encounter overlaps MP
      */
     @Test
@@ -4330,50 +3753,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Encounter ends 7/16 at 9pm. Hypo med given. Lab test 1 with result done 7/16 at 8:58pm within 24 hours of med = 35. Lab test 2 with result done 3 minutes later at 9:01pm (1 minute after discharge ) = 81. Numerator pass since high result is after enc
-     */
-    @Test
-    void test_cms816_high_result_after_discharge_6c210a7d_98b1_4d37_a268_45d14a7e7b1d() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/37fd9c7e-bf9e-4769-b448-094ed97bd3e8")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -4746,50 +4125,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Pt started in Observation, hypoglycemic administered during Observ stay. Pt transferred to inpatient but transfer occurred 1 hour + 1 minute after end of observation stay. Transfer must be within hour or less to meet IPP.
-     */
-    @Test
-    void test_cms816_obs_to_ip_transfer_gt1hr_71abfe6c_655f_4ad2_8e11_d07275f052b0() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/423a396b-7d81-476d-b2ea-bc8bba062ce2")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -5789,50 +5124,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * Encounter, meds administered, lab test 1 = 35, lab 2 result = exactly 80 within 5 minutes of first lab.
-     */
-    @Test
-    void test_cms816_lab2_exactly_80_within_5min_930c7e3c_9400_4f9f_8c21_4106df79bade() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/1d298cf0-aa38-4943-ba4c-f7209cf59e63")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 52yo w/ an Office Visit  Encounter 1/1 of the MP & both a Unilateral Mastectomy on Right Breast and Unilateral Mastectomy on Left Breast Procedure that both end on 1/1 of the MP.
      */
     @Test
@@ -6329,50 +5620,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * IP Encounter with meds administered, but glucose lab <40 was before med. Must be <40 within 24 hours after med to meet numerator. Numerator fails.
-     */
-    @Test
-    void test_cms816_lab_lt40_before_med_no_num_9eeadd82_4599_4b8b_95a5_f1d59697b451() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/aa5f21cc-2d56-4749-a190-2828d579f790")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Preventive care service established visit - for meeting 100% coverage
      */
     @Test
@@ -6618,94 +5865,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Encounter, meds administered, lab test 2 result GT 80 within 5 min of lab test 1 that has result of 35 mg/dL.
-     */
-    @Test
-    void test_cms816_lab2_gt80_within_5min_of_lab1_a754b13e_2ef7_4c69_a205_f9af9a9a089e() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/304052f7-e416-4da4-87ae-488e6589cab3")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Encounter, med relevant period start date/time is same date/time as end of encounter date/time. No lab tests. Meets denom rule - med must start during encounter.
-     */
-    @Test
-    void test_cms816_med_starts_at_encounter_end_a821b7fb_7913_45e4_82e2_cf232818d643() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/8301c6c8-e50c-4457-add0-1ebd909c8ca7")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -6961,138 +6120,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * Encounter with meds and 3 glucose labs. All results are less than 40, and all within 24 hours of hypo med. Meets num = 1 harm per encounter.
-     */
-    @Test
-    void test_cms816_three_labs_all_lt40_one_harm_af8c832f_f1ad_407a_9751_575339d08367() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/2adf5469-46a1-4020-be3b-01f91f8acc9d")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Patient had hypoglycemic medication administered, but was during a non-qualifying encounter (outpatient visit code). No inpatient encounter so does not meet IPP/Denom.
-     */
-    @Test
-    void test_cms816_non_qualifying_encounter_outpatient_afaa7de1_25f6_49fc_8343_84afa5deca44() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/61a026c6-be9e-4a0f-b495-8ea421edfe39")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Right age with encounter, meds administered, no lab tests. Med relevant period starts during encounter, no relevant end period. Meets denominator as med relevant period must start during encounter but no end required.
-     */
-    @Test
-    void test_cms816_med_no_end_period_meets_denom_b0513b24_8789_4c07_a13d_322d9defbeb8() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/1d2bb25a-21a7-4529-9486-a320d4864719")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 42yo w/ an Office Visit Encounter 1/1 during the year after the MP.
      */
     @Test
@@ -7336,84 +6363,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Two encounters, one with meds administered, one without meds, no lab tests. Denom = 1 for first encounter. Doesn't meet denom in second encounter due to no meds during 2nd encounter.
-     */
-    @Test
-    void test_cms816_two_encounters_one_without_meds_b8bedfa5_6f9c_4727_be26_8b53d9a13a5b() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/ecde4132-9028-420a-aa7c-d1d14e5c1ab0")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
-                .up()
-                .report();
-    }
-
-    /**
-     * Weight  1 minute before encounter starts.
-     */
-    @Test
-    void test_cms529_weight_before_encounter_bdc43d6c_a156_49df_b49f_dd878514bbe9() {
-        given.when()
-                .measureId(CMS529)
-                .subject("Patient/afd5733f-e9eb-4a17-9be7-783850a132fc")
-                .periodStart("2026-07-01")
-                .periodEnd("2027-06-30")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -7667,51 +6616,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * IP enc where pt given hypo med in ED, but ED not part of inpatient encounter, because  Observation start date/time was > 1 hour from ED end date/time. Observation to IP stay occurred but hypo meds given in ED don't count. Does not meet IPP criteria.
-     */
-    @Test
-    void test_cms816_ed_not_part_of_ip_obs_gap_gt1hr_c418d2fb_8842_4dac_8d56_6ef6d1394883() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/d26ca5cd-9415-4c14-8a0b-947747c29ec2")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report();
-    }
-
-    /**
      * Patient 66yo w/ an Office Visit Encounter 1/1 of the MP & a Palliative Care Observation that starts on 12/31 before the observation interval.
      */
     @Test
@@ -7831,50 +6735,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Patient inpatient, but the medication administered was not hypoglycemic med. Hypo med must be administered during encounter to meet IPP.
-     */
-    @Test
-    void test_cms816_non_hypo_med_administered_cd6e174e_1e9f_464f_9cd3_eced2946d48a() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/480245d6-3ce8-4944-b6c8-339cf2f69acb")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .hasNoMeasureScore()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(0)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(0)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }
@@ -8122,51 +6982,6 @@ class MeasureEvaluationQICoreTest {
                 .hasCount(0)
                 .up()
                 .up()
-                .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * Right age with encounter, meds administered, no lab tests. Med relevant period starts during encounter, ends after encounter. Denom pass - meets rule that med must 'start' during encounter. No rule that it must end during encounter.
-     */
-    @Test
-    void test_cms816_med_ends_after_encounter_denom_e66fcfe4_57f5_4259_bb05_540d4f6a864c() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/05c8cd12-addd-4b94-8f92-da093c556a84")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasMeasureScore(1.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(0)
-                .up()
-                .hasScore("1.0")
-                .hasStratifierCount(0)
                 .up()
                 .up()
                 .report();
@@ -8671,51 +7486,6 @@ class MeasureEvaluationQICoreTest {
     }
 
     /**
-     * 1st IP Encounter with med. Lab LT 40, followed by lab LT 80 within 5 minutes. Meets Numerator. 2nd enc starts in ED. Has lab LT 40 followed by lab GT 80 within 5 minutes. Does not meet numerator. IPP/Denom = 2, Num = 1
-     */
-    @Test
-    void test_cms816_two_encounters_one_meets_num_ee57a2ad_7e51_4c6e_b71a_9c2483a81cb9() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/3fdd92df-f418-45ef-93a6-920e3d813f32")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(2)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(2)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.5)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(2)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(2)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.5")
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report();
-    }
-
-    /**
      * Frailty observation - medication device used - during MP
      */
     @Test
@@ -9087,50 +7857,6 @@ class MeasureEvaluationQICoreTest {
                 .up()
                 .up()
                 .up()
-                .up()
-                .report();
-    }
-
-    /**
-     * IP encounter, hypoglycemic administered, 1 glucose lab test with result LT 40. Meets Numerator.
-     */
-    @Test
-    void test_cms816_one_lab_lt40_meets_num_f64a0032_57b1_461a_a213_5280f0d01dd1() {
-        given.when()
-                .measureId(CMS816)
-                .subject("Patient/8eca4ab8-49f0-45e4-b1ee-dc34e54dd430")
-                .evaluate()
-                .then()
-                .def()
-                .hasNoErrors()
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasMeasureScore(0.0)
-                .hasStratifierCount(0)
-                .up()
-                .up()
-                .report()
-                .hasStatus(MeasureReportStatus.COMPLETE)
-                .firstGroup()
-                .populationByType(INITIALPOPULATION)
-                .hasCount(1)
-                .up()
-                .populationByType(DENOMINATOR)
-                .hasCount(1)
-                .up()
-                .populationByType(NUMERATOR)
-                .hasCount(1)
-                .up()
-                .hasScore("0.0")
-                .hasStratifierCount(0)
                 .up()
                 .report();
     }

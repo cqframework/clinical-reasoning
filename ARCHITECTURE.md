@@ -157,10 +157,13 @@ Separating them keeps the domain core focused on clinical logic and makes it tes
 When making design trade-offs, prefer:
 
 - **First principles over pragmatism.** Understand why a pattern exists before applying it. Don't copy existing code that may have drifted from the intended architecture.
-- **Explicit over implicit.** No magic, no annotations-as-logic. Declare and enforce invariants. If behavior isn't obvious from reading the code, make it obvious.
+- **Structure over validation.** Parse inputs into domain types that make invalid states unrepresentable. A `MeasureDef` that requires a non-empty list of `GroupDef` is better than a `Measure` that you null-check repeatedly. Push validation to the boundary where data enters the system; after that point, the type system carries the guarantees.
 - **Data transformation over stateful logic.** Model operations as pipelines that transform data in, results out. Avoid mutable state in services and utilities.
+- **Domain-specific representations over generic ones.** Give names to things. A `MeasureValidationException` is better than an `IllegalArgumentException` with a message string. A `ResolvedMeasure` record is better than a `Pair<MeasureDef, VersionedIdentifier>`. Generic types and exceptions hide intent and make code harder to search, test, and evolve.
+- **Small conceptual surface per layer.** Each abstraction should encapsulate roughly 5 to 20 units of detail. That ratio should apply recursively: a module exposes a handful of packages, a package a handful of classes, a class a handful of methods, a method a handful of steps. If navigating one level down reveals an explosion of complexity, the layer is doing too much and should be split.
+- **Explicit over implicit.** No magic, no annotations-as-logic. Declare and enforce invariants. If behavior isn't obvious from reading the code, make it obvious.
 - **Locality over distribution.** Keep related code together. Avoid the need to jump between packages or modules to understand a feature.
-- **Fail loudly over silent errors.** Throw domain exceptions with structured information. Never swallow errors or return nulls to signal failure.
+- **Fail loudly over silent errors.** Define result types or throw domain exceptions with structured information. Never swallow errors or return nulls to signal failure.
 - **Easier to delete over easier to extend.** When uncertain, choose the approach that's simpler to remove later. Build it yourself rather than add a dependency.
 - **Tests as documentation.** Tests should clearly demonstrate how the code is intended to be used and what the expected behavior is. They are a critical part of the codebase, not an afterthought.
 

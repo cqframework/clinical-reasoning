@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
@@ -23,11 +24,10 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResults;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.common.ResolvedMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 /**
  * Implements the <a href="http://hl7.org/fhir/R4/measure-operation-collect-data.html">$collect-data</a>
@@ -40,7 +40,7 @@ public class R4CollectDataService {
 
     private final IRepository repository;
     private final R4MeasureResolver resolver;
-    private final R4RepositorySubjectProvider subjectProvider;
+    private final RepositorySubjectProvider subjectProvider;
     private final MeasureEvaluationService evaluationService;
 
     public R4CollectDataService(
@@ -49,7 +49,7 @@ public class R4CollectDataService {
             MeasurePeriodValidator measurePeriodValidator) {
         this.repository = repository;
         this.resolver = new R4MeasureResolver(repository);
-        this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.subjectProvider = new RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.evaluationService = new MeasureEvaluationService(
                 measureEvaluationOptions,
                 FhirContext.forR4Cached(),
@@ -76,7 +76,7 @@ public class R4CollectDataService {
             String practitioner) {
 
         // 1. Resolve the Measure and build domain types
-        var fhirMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
+        var fhirMeasure = repository.read(Measure.class, measureId);
         var resolved = resolver.buildResolvedMeasure(fhirMeasure);
 
         // 2. Resolve subjects (practitioner overrides subject)

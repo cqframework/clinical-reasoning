@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
+import org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
@@ -44,7 +45,7 @@ public class R4CareGapsProcessor {
     private final Map<String, Resource> configuredResources = new HashMap<>();
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final R4CareGapsBundleBuilder r4CareGapsBundleBuilder;
-    private final R4RepositorySubjectProvider subjectProvider;
+    private final RepositorySubjectProvider subjectProvider;
 
     public R4CareGapsProcessor(
             CareGapsProperties careGapsProperties,
@@ -63,7 +64,7 @@ public class R4CareGapsProcessor {
                 serverBase,
                 configuredResources,
                 measurePeriodValidator);
-        subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        subjectProvider = new RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
     }
 
     /**

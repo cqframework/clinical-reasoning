@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.cr.measure.SubjectProviderOptions;
+import org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
@@ -44,10 +45,10 @@ class R4RepositorySubjectProviderTest {
 
     private static final List<String> LIST_SINGLE_NULL = Collections.singletonList(null);
 
-    private static final R4RepositorySubjectProvider TEST_SUBJECT_ENABLE_PART_OF =
-            new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(true));
-    private static final R4RepositorySubjectProvider TEST_SUBJECT_DISABLE_PART_OF =
-            new R4RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(false));
+    private static final RepositorySubjectProvider TEST_SUBJECT_ENABLE_PART_OF =
+            new RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(true));
+    private static final RepositorySubjectProvider TEST_SUBJECT_DISABLE_PART_OF =
+            new RepositorySubjectProvider(new SubjectProviderOptions().setPartOfEnabled(false));
 
     private final IRepository repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
 
@@ -107,7 +108,7 @@ class R4RepositorySubjectProviderTest {
     }
 
     private record GetSubjectsParams(
-            R4RepositorySubjectProvider testSubject, List<String> subjectIds, List<String> expectedSubjects) {}
+            RepositorySubjectProvider testSubject, List<String> subjectIds, List<String> expectedSubjects) {}
 
     public static Stream<GetSubjectsParams> getSubjectsParams() {
         return Stream.of(

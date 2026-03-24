@@ -29,6 +29,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
+import org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.dstu3.Measure.SelectedGroup.SelectedReference;
 import org.opencds.cqf.fhir.cr.measure.dstu3.selected.def.SelectedMeasureDef;
@@ -195,7 +196,7 @@ public class Measure {
                         request,
                         environment,
                         params,
-                        new Dstu3RepositorySubjectProvider());
+                        new RepositorySubjectProvider(evaluationOptions.getSubjectProviderOptions()));
 
                 var scored = results.scoredMeasures().get(0);
                 var report = new Dstu3MeasureReportBuilder()

@@ -18,6 +18,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
+import org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.common.ScoredMeasure;
 import org.opencds.cqf.fhir.cr.measure.helper.DateHelper;
 
@@ -80,7 +81,12 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
 
         // Delegate to version-agnostic service
         var results = evaluationService.evaluate(
-                repository, List.of(resolved), request, environment, params, new Dstu3RepositorySubjectProvider());
+                repository,
+                List.of(resolved),
+                request,
+                environment,
+                params,
+                new RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions()));
 
         // Version-specific: build DSTU3 MeasureReport from scored results
         var scored = results.scoredMeasures().get(0);

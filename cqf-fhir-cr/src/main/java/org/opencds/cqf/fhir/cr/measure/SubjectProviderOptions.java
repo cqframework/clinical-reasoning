@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.cr.measure;
 
 /**
  * All options that are pertinent to {@link org.opencds.cqf.fhir.cr.measure.common.SubjectProvider}
- * implementations, such as {@link org.opencds.cqf.fhir.cr.measure.r4.R4RepositorySubjectProvider}.
+ * implementations, such as {@link org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider}.
  */
 public class SubjectProviderOptions {
 

@@ -30,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
@@ -42,9 +41,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
@@ -238,20 +235,6 @@ public class R4MeasureServiceUtils {
         if (value == null || value.isEmpty()) {
             throw new MeasureValidationException(parameterName + " parameter requires a value.");
         }
-    }
-
-    public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
-        return measure.fold(
-                measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
-                measureIdType -> resolveById(measureIdType, repository),
-                Function.identity());
-    }
-
-    private static Measure resolveByUrl(CanonicalType url, IRepository repository) {
-        var parts = Canonicals.getParts(url);
-        var result = repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        return (Measure) result.getEntryFirstRep().getResource();
     }
 
     public static List<Measure> resolveByIds(List<? extends IIdType> ids, IRepository repository) {

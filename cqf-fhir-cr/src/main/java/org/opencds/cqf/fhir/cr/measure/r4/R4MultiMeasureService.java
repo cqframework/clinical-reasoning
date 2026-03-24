@@ -44,6 +44,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationState;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.RepositorySubjectProvider;
 import org.opencds.cqf.fhir.cr.measure.common.ResolvedMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.ScoredMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.SubjectRef;
@@ -69,7 +70,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     private final IRepository repository;
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final String serverBase;
-    private final R4RepositorySubjectProvider subjectProvider;
+    private final RepositorySubjectProvider subjectProvider;
     private final R4MeasureServiceUtils r4MeasureServiceUtils;
     private final MeasureEvaluationService evaluationService;
 
@@ -83,7 +84,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         this.repository = repository;
         this.measureEvaluationOptions = measureEvaluationOptions;
         this.serverBase = serverBase;
-        this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
+        this.subjectProvider = new RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
         this.r4MeasureResolver = new R4MeasureResolver(repository);
         this.r4MeasureServiceUtils = new R4MeasureServiceUtils(repository);
         this.evaluationService = new MeasureEvaluationService(
@@ -510,7 +511,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     @Nonnull
-    protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {
+    protected List<String> getSubjects(RepositorySubjectProvider subjectProvider, String subjectId) {
         return subjectProvider
                 .getSubjects(repository, subjectId)
                 .map(SubjectRef::qualified)

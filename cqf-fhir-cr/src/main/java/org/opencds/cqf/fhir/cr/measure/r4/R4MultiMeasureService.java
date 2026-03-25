@@ -54,8 +54,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     private final MeasurePeriodValidator measurePeriodValidator;
     private final String serverBase;
     private final R4RepositorySubjectProvider subjectProvider;
-    private final R4MeasureProcessor r4MeasureProcessorStandardRepository;
-    private final R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository;
 
     private enum SingleOrMultiple {
         SINGLE,
@@ -72,8 +70,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(repository, this.measureEvaluationOptions);
-        this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
     }
 
     // We should eliminate this if/when we eliminate the Measure test class
@@ -240,12 +236,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         var resolvedRepo = resolveRepository(environment);
-        final R4MeasureProcessor r4ProcessorToUse = resolvedRepo == repository
-                ? r4MeasureProcessorStandardRepository
-                : new R4MeasureProcessor(resolvedRepo, this.measureEvaluationOptions);
-        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse = resolvedRepo == repository
-                ? r4MeasureServiceUtilsStandardRepository
-                : new R4MeasureServiceUtils(resolvedRepo);
+        var r4ProcessorToUse = new R4MeasureProcessor(resolvedRepo, this.measureEvaluationOptions);
+        var r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(resolvedRepo);
 
         if (measureEvaluationOptions.isEnsureSearchParameters()) {
             r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();

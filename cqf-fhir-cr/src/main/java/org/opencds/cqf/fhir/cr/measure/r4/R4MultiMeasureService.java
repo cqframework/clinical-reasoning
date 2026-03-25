@@ -239,14 +239,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        var effectiveRepo = resolveRepository(environment);
-        var subjectRepo = federateWithAdditionalData(effectiveRepo, environment);
-        final R4MeasureProcessor r4ProcessorToUse = effectiveRepo == repository
+        var resolvedRepo = resolveRepository(environment);
+        final R4MeasureProcessor r4ProcessorToUse = resolvedRepo == repository
                 ? r4MeasureProcessorStandardRepository
-                : new R4MeasureProcessor(effectiveRepo, this.measureEvaluationOptions);
-        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse = effectiveRepo == repository
+                : new R4MeasureProcessor(resolvedRepo, this.measureEvaluationOptions);
+        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse = resolvedRepo == repository
                 ? r4MeasureServiceUtilsStandardRepository
-                : new R4MeasureServiceUtils(effectiveRepo);
+                : new R4MeasureServiceUtils(resolvedRepo);
 
         if (measureEvaluationOptions.isEnsureSearchParameters()) {
             r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
@@ -276,14 +275,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         var subjects =
                 switch (singleOrMultiple) {
-                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, subjectRepo);
+                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, resolvedRepo);
                     case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
                 };
 
-        var context = Engines.forRepository(
-                r4ProcessorToUse.getRepository(),
-                this.measureEvaluationOptions.getEvaluationSettings(),
-                environment.additionalData());
+        var context = Engines.forRepository(resolvedRepo, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
@@ -562,28 +558,25 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     /**
-     * Federates the base repository with additional data so subjects in the bundle
-     * are discoverable during subject resolution.
+     * Fully resolves the repository from the environment: applies the three-endpoint proxy if all
+     * endpoints are configured, then overlays any additional data bundle via federation.
      */
-    private IRepository federateWithAdditionalData(IRepository base, MeasureEnvironment environment) {
-        if (environment.additionalData() != null) {
-            return new FederatedRepository(
-                    base, new InMemoryFhirRepository(base.fhirContext(), environment.additionalData()));
-        }
-        return base;
-    }
-
     private IRepository resolveRepository(MeasureEnvironment environment) {
+        IRepository repo = repository;
         if (environment.dataEndpoint() != null
                 && environment.contentEndpoint() != null
                 && environment.terminologyEndpoint() != null) {
-            return Repositories.proxy(
-                    repository,
+            repo = Repositories.proxy(
+                    repo,
                     true,
                     environment.dataEndpoint(),
                     environment.contentEndpoint(),
                     environment.terminologyEndpoint());
         }
-        return repository;
+        if (environment.additionalData() != null) {
+            repo = new FederatedRepository(
+                    repo, new InMemoryFhirRepository(repo.fhirContext(), environment.additionalData()));
+        }
+        return repo;
     }
 }

@@ -29,16 +29,12 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
  * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
@@ -85,7 +81,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             String reportType,
             String subjectId,
             String lastReceivedOn,
-            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String practitioner) {
@@ -97,7 +92,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         reportType,
                         subjectId,
                         lastReceivedOn,
-                        environment,
+                        repository,
                         parameters,
                         productLine,
                         null) // reporter is null in the single measure case
@@ -112,7 +107,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             String reportType,
             String subjectId,
             String lastReceivedOn,
-            MeasureEnvironment environment,
+            IRepository resolvedRepo,
             Parameters parameters,
             String productLine,
             String practitioner) {
@@ -124,7 +119,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 periodEnd,
                 reportType,
                 subjectId,
-                environment,
+                resolvedRepo,
                 parameters,
                 productLine,
                 null,
@@ -154,7 +149,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
-            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String reporter) {
@@ -165,7 +159,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         periodEnd,
                         reportType,
                         subject,
-                        environment,
+                        repository,
                         parameters,
                         productLine,
                         reporter)
@@ -188,7 +182,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report
      * @param subject the subject ID (or practitioner)
-     * @param environment         endpoint and supplemental data configuration
+     * @param resolvedRepo fully configured repository (endpoints proxied, data federated)
      * @param parameters CQL parameters
      * @param productLine product line
      * @param reporter reporter ID
@@ -201,7 +195,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject,
-            MeasureEnvironment environment,
+            IRepository resolvedRepo,
             Parameters parameters,
             String productLine,
             String reporter) {
@@ -213,7 +207,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 periodEnd,
                 reportType,
                 subject,
-                environment,
+                resolvedRepo,
                 parameters,
                 productLine,
                 reporter,
@@ -227,7 +221,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject,
-            MeasureEnvironment environment,
+            IRepository resolvedRepo,
             Parameters parameters,
             String productLine,
             String reporter,
@@ -235,7 +229,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        var resolvedRepo = resolveRepository(environment);
         var r4ProcessorToUse = new R4MeasureProcessor(resolvedRepo, this.measureEvaluationOptions);
         var r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(resolvedRepo);
 
@@ -547,28 +540,5 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         subjectRepo,
                         Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
-    }
-
-    /**
-     * Fully resolves the repository from the environment: applies the three-endpoint proxy if all
-     * endpoints are configured, then overlays any additional data bundle via federation.
-     */
-    private IRepository resolveRepository(MeasureEnvironment environment) {
-        IRepository repo = repository;
-        if (environment.dataEndpoint() != null
-                && environment.contentEndpoint() != null
-                && environment.terminologyEndpoint() != null) {
-            repo = Repositories.proxy(
-                    repo,
-                    true,
-                    environment.dataEndpoint(),
-                    environment.contentEndpoint(),
-                    environment.terminologyEndpoint());
-        }
-        if (environment.additionalData() != null) {
-            repo = new FederatedRepository(
-                    repo, new InMemoryFhirRepository(repo.fhirContext(), environment.additionalData()));
-        }
-        return repo;
     }
 }

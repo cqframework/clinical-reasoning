@@ -14,7 +14,6 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
@@ -148,7 +147,6 @@ public class Measure {
                     reportType,
                     subject,
                     null,
-                    new MeasureEnvironment(null, null, null, additionalData),
                     null,
                     null,
                     null);

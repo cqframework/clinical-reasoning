@@ -257,7 +257,7 @@ class MultiMeasure {
                     periodEnd,
                     reportType,
                     subject,
-                    new MeasureEnvironment(null, null, null, additionalData),
+                    new MeasureEnvironment(null, null, null, additionalData).resolve(service.getRepository()),
                     parameters,
                     productLine,
                     reporter);

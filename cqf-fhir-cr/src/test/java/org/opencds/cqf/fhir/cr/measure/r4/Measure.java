@@ -235,7 +235,8 @@ public class Measure {
                     reportType,
                     subject,
                     null,
-                    new MeasureEnvironment(null, null, null, additionalData),
+                    new MeasureEnvironment(null, null, null, additionalData)
+                            .resolve(multiMeasureService.getRepository()),
                     parameters,
                     productLine,
                     practitioner);

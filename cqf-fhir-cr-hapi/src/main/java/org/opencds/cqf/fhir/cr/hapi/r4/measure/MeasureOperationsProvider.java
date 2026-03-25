@@ -91,7 +91,7 @@ public class MeasureOperationsProvider {
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
         return r4MeasureServiceFactory
-                .create(requestDetails)
+                .create(requestDetails, environment)
                 .evaluate(
                         new MeasureReference.ById(id),
                         stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
@@ -99,7 +99,6 @@ public class MeasureOperationsProvider {
                         reportType,
                         subject,
                         lastReceivedOn,
-                        environment,
                         parameters,
                         productLine,
                         practitioner);
@@ -160,14 +159,13 @@ public class MeasureOperationsProvider {
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
         return r4MultiMeasureServiceFactory
-                .create(requestDetails)
+                .create(requestDetails, environment)
                 .evaluate(
                         measureRefs,
                         stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
                         stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
                         reportType,
                         subject,
-                        environment,
                         parameters,
                         productLine,
                         reporter);

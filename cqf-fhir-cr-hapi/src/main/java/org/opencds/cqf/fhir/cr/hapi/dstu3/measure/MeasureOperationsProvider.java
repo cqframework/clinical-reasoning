@@ -75,7 +75,7 @@ public class MeasureOperationsProvider {
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var environment = new MeasureEnvironment(null, terminologyEndpointParam, null, additionalData);
         return dstu3MeasureProcessorFactory
-                .create(requestDetails)
+                .create(requestDetails, environment)
                 .evaluateMeasure(
                         id,
                         periodStart,
@@ -85,7 +85,6 @@ public class MeasureOperationsProvider {
                         practitioner,
                         lastReceivedOn,
                         productLine,
-                        environment,
                         parameters);
     }
 }

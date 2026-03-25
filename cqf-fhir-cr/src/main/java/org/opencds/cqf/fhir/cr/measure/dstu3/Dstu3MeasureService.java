@@ -24,7 +24,6 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final IRepository repository;
@@ -101,7 +100,6 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
             String practitioner,
             String lastReceivedOn,
             String productLine,
-            MeasureEnvironment environment,
             Parameters parameters) {
 
         ensureSupplementalDataElementSearchParameter();
@@ -109,13 +107,7 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
         var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
 
         MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
-                id,
-                periodStart,
-                periodEnd,
-                reportType,
-                Collections.singletonList(subject),
-                environment.additionalData(),
-                parameters);
+                id, periodStart, periodEnd, reportType, Collections.singletonList(subject), null, parameters);
 
         if (productLine != null) {
             Extension ext = new Extension();

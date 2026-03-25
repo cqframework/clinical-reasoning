@@ -20,7 +20,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -37,11 +36,11 @@ import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasu
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +69,7 @@ public class R4MeasureProcessor {
     }
 
     public MeasureReport evaluateMeasure(
-            Either3<CanonicalType, IdType, Measure> measure,
+            MeasureReference measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -79,7 +78,7 @@ public class R4MeasureProcessor {
             CqlEngine context,
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
         return this.evaluateMeasure(
-                R4MeasureServiceUtils.foldMeasure(measure, this.repository),
+                resolveMeasure(measure),
                 periodStart,
                 periodEnd,
                 reportType,
@@ -255,11 +254,11 @@ public class R4MeasureProcessor {
      * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
      * </p>
      * <p>
-     * This overload accepts Either3 for flexible measure resolution (by URL, ID, or resource)
-     * and delegates to the Measure-based overload after resolution.
+     * This overload accepts a MeasureReference for flexible measure resolution (by ID, identifier,
+     * or canonical URL) and delegates to the Measure-based overload after resolution.
      * </p>
      *
-     * @param measure Either canonical URL, ID, or Measure resource
+     * @param measure a MeasureReference (ById, ByIdentifier, or ByCanonicalUrl)
      * @param periodStart start date of Measurement Period
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report that defines MeasureReport Type
@@ -271,7 +270,7 @@ public class R4MeasureProcessor {
      */
     @VisibleForTesting
     MeasureDefAndR4MeasureReport evaluateMeasureCaptureDef(
-            Either3<CanonicalType, IdType, Measure> measure,
+            MeasureReference measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
@@ -281,7 +280,7 @@ public class R4MeasureProcessor {
             CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure) {
 
         return evaluateMeasureCaptureDef(
-                R4MeasureServiceUtils.foldMeasure(measure, this.repository),
+                resolveMeasure(measure),
                 periodStart,
                 periodEnd,
                 reportType,
@@ -293,19 +292,26 @@ public class R4MeasureProcessor {
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureWithCqlEngine(
             List<String> subjects,
-            Either3<CanonicalType, IdType, Measure> measureEither,
+            MeasureReference measureRef,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             Parameters parameters,
             CqlEngine context) {
 
         return evaluateMultiMeasuresWithCqlEngine(
-                subjects,
-                List.of(R4MeasureServiceUtils.foldMeasure(measureEither, repository)),
-                periodStart,
-                periodEnd,
-                parameters,
-                context);
+                subjects, List.of(resolveMeasure(measureRef)), periodStart, periodEnd, parameters, context);
+    }
+
+    private Measure resolveMeasure(MeasureReference ref) {
+        var utils = new R4MeasureServiceUtils(this.repository);
+        if (ref instanceof MeasureReference.ById byId) {
+            return utils.resolveById((IdType) byId.id());
+        } else if (ref instanceof MeasureReference.ByIdentifier byIdent) {
+            return utils.resolveByIdentifier(byIdent.identifier());
+        } else if (ref instanceof MeasureReference.ByCanonicalUrl byUrl) {
+            return utils.resolveByUrl(byUrl.url());
+        }
+        throw new IllegalArgumentException("Unknown MeasureReference type: " + ref.getClass());
     }
 
     public CompositeEvaluationResultsPerMeasure evaluateMeasureIdWithCqlEngine(

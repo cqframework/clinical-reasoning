@@ -2,9 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
-import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 /**
  * Parameters class to manage input parameters for care-gaps service
@@ -14,7 +12,7 @@ public class R4CareGapsParameters {
     private ZonedDateTime periodEnd;
     private String subject;
     private List<String> status;
-    private List<Either3<IdType, String, CanonicalType>> measure;
+    private List<MeasureReference> measure;
     private boolean notDocument;
 
     public void setPeriodStart(ZonedDateTime periodStart) {
@@ -49,11 +47,11 @@ public class R4CareGapsParameters {
         return notDocument;
     }
 
-    public void setMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
+    public void setMeasure(List<MeasureReference> measure) {
         this.measure = measure;
     }
 
-    public List<Either3<IdType, String, CanonicalType>> getMeasure() {
+    public List<MeasureReference> getMeasure() {
         return measure;
     }
 

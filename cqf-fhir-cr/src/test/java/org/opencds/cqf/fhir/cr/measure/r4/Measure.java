@@ -26,13 +26,13 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportContained;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportExtension;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportGroup;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportReference;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
@@ -228,7 +228,7 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
+                    new MeasureReference.ById(new IdType("Measure", measureId)),
                     periodStart,
                     periodEnd,
                     reportType,

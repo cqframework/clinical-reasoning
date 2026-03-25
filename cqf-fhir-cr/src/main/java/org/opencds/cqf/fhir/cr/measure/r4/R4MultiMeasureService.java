@@ -17,7 +17,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -241,6 +240,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
         var effectiveRepo = resolveRepository(environment);
+        var subjectRepo = federateWithAdditionalData(effectiveRepo, environment);
         final R4MeasureProcessor r4ProcessorToUse = effectiveRepo == repository
                 ? r4MeasureProcessorStandardRepository
                 : new R4MeasureProcessor(effectiveRepo, this.measureEvaluationOptions);
@@ -274,12 +274,9 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subjectToUse);
 
-        // another flex point between single and multi measures
         var subjects =
                 switch (singleOrMultiple) {
-                    case SINGLE ->
-                        getSubjectsForEvaluateSingle(
-                                subjectToUse, r4ProcessorToUse.getRepository(), environment.additionalData());
+                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, subjectRepo);
                     case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
                 };
 
@@ -556,21 +553,24 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     @Nonnull
-    private List<String> getSubjectsForEvaluateSingle(
-            String subjectId, IRepository proxyRepoForMeasureProcessor, IBaseBundle additionalData) {
-        final IRepository repoToUseForSubjectProvider;
-        if (additionalData != null) {
-            repoToUseForSubjectProvider = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-        } else {
-            repoToUseForSubjectProvider = proxyRepoForMeasureProcessor;
-        }
-
+    private List<String> getSubjectsForEvaluateSingle(String subjectId, IRepository subjectRepo) {
         return subjectProvider
                 .getSubjects(
-                        repoToUseForSubjectProvider,
+                        subjectRepo,
                         Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
+    }
+
+    /**
+     * Federates the base repository with additional data so subjects in the bundle
+     * are discoverable during subject resolution.
+     */
+    private IRepository federateWithAdditionalData(IRepository base, MeasureEnvironment environment) {
+        if (environment.additionalData() != null) {
+            return new FederatedRepository(
+                    base, new InMemoryFhirRepository(base.fhirContext(), environment.additionalData()));
+        }
+        return base;
     }
 
     private IRepository resolveRepository(MeasureEnvironment environment) {

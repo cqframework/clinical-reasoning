@@ -333,10 +333,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     // add sde reference with criteria reference extension for each resource
     // if not an evaluated resource, add to contained
     private void buildSDE(R4MeasureReportBuilderContext bc, SdeDef sde) {
-        if (!sde.isAccumulated()) {
-            return;
-        }
-
         var report = bc.report();
 
         // Add evaluated resources (pre-aggregated by MeasureMultiSubjectEvaluator)

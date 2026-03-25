@@ -86,7 +86,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         this.report = this.createMeasureReport(measure, measureReportType, subjectIds, measurementPeriod);
 
         buildGroups(measure, measureDef);
-        processSdes(measure, measureDef, subjectIds);
+        processSdes(measureDef);
 
         // Copy scores from Def objects (populated by MeasureReportDefScorer in MeasureEvaluationResultHandler)
         copyScoresFromDef(measureDef);
@@ -378,12 +378,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return this.getEvaluatedResourceReferences().computeIfAbsent(id, x -> new Reference(id));
     }
 
-    protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
+    protected void processSdes(MeasureDef measureDef) {
         for (SdeDef sde : measureDef.sdes()) {
-            if (!sde.isAccumulated()) {
-                continue;
-            }
-
             // DSTU3-specific: evaluated resource extensions
             processSdeEvaluatedResourceExtension(sde);
 

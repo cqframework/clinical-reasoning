@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -29,7 +28,6 @@ class MeasureMultiSubjectEvaluatorTest {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
-        assertFalse(sde.isAccumulated());
         assertTrue(sde.getAccumulatedValues().isEmpty());
         assertTrue(sde.getAllEvaluatedResources().isEmpty());
     }
@@ -41,7 +39,6 @@ class MeasureMultiSubjectEvaluatorTest {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
-        assertTrue(sde.isAccumulated());
         assertEquals(1, sde.getAccumulatedValues().size());
 
         var entry = sde.getAccumulatedValues().entrySet().iterator().next();
@@ -58,7 +55,6 @@ class MeasureMultiSubjectEvaluatorTest {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
-        assertTrue(sde.isAccumulated());
         assertEquals(1, sde.getAccumulatedValues().size());
         assertEquals(3L, sde.getAccumulatedValues().values().iterator().next());
     }
@@ -72,7 +68,6 @@ class MeasureMultiSubjectEvaluatorTest {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
-        assertTrue(sde.isAccumulated());
         assertEquals(2, sde.getAccumulatedValues().size());
 
         Map<StratumValueWrapper, Long> accumulated = sde.getAccumulatedValues();
@@ -89,7 +84,6 @@ class MeasureMultiSubjectEvaluatorTest {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
-        assertTrue(sde.isAccumulated());
         assertEquals(1, sde.getAccumulatedValues().size());
         assertEquals(2L, sde.getAccumulatedValues().values().iterator().next());
     }
@@ -101,7 +95,6 @@ class MeasureMultiSubjectEvaluatorTest {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
-        assertTrue(sde.isAccumulated());
         // Only "male" and "female" should be accumulated (null filtered)
         assertEquals(2, sde.getAccumulatedValues().size());
     }
@@ -136,9 +129,6 @@ class MeasureMultiSubjectEvaluatorTest {
         sde2.putResult("Patient/p2", "male", Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde1, sde2));
-
-        assertTrue(sde1.isAccumulated());
-        assertTrue(sde2.isAccumulated());
 
         // sde1: 2 distinct values
         assertEquals(2, sde1.getAccumulatedValues().size());

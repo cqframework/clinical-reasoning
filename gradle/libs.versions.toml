@@ -1,5 +1,5 @@
 [versions]
-hapi = "8.8.0"
+hapi = "8.8.1"
 cql = "4.6.0"
 junit = "5.14.3"
 slf4j = "2.0.17"

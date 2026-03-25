@@ -10,4 +10,9 @@ public interface ICodeableConceptAdapter extends IAdapter<IBase> {
     List<ICodingAdapter> getCoding();
 
     boolean hasCoding(String code);
+
+    default ICodingAdapter getCodingFirstRep() {
+        List<ICodingAdapter> codings = getCoding();
+        return codings.isEmpty() ? null : codings.get(0);
+    }
 }

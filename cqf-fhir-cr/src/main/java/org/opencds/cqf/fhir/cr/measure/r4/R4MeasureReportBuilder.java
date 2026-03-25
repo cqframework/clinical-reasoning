@@ -339,12 +339,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         var report = bc.report();
 
-        // Add evaluated resources (pre-aggregated by SdeDefAccumulator)
+        // Add evaluated resources (pre-aggregated by MeasureMultiSubjectEvaluator)
         addEvaluatedResourceReferences(bc, sde.id(), sde.getAllEvaluatedResources());
 
         CodeableConcept concept = conceptDefToConcept(sde.code());
 
-        // Read pre-accumulated values (computed by SdeDefAccumulator)
+        // Read pre-accumulated values (computed by MeasureMultiSubjectEvaluator)
         for (Map.Entry<StratumValueWrapper, Long> accumulator :
                 sde.getAccumulatedValues().entrySet()) {
 

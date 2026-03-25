@@ -84,10 +84,6 @@ public class MeasureEvaluationResultHandler {
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
 
-        // LUKETODOE
-        // Accumulate SDE results across subjects (version-agnostic)
-        //        SdeDefAccumulator.accumulate(measureDef);
-
         // Score all groups and stratifiers using version-agnostic scorer
         // Populates scores in MeasureDef before builders run
         // Note: Scoring is always performed, independent of applyScoring flag

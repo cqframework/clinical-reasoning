@@ -17,7 +17,7 @@ public class SdeDef {
     private final String description;
     private final Map<String, CriteriaResult> results = new HashMap<>();
 
-    // Pre-accumulated state (populated by SdeDefAccumulator)
+    // Pre-accumulated state (populated by MeasureMultiSubjectEvaluator)
     private Map<StratumValueWrapper, Long> accumulatedValues;
     private Set<Object> allEvaluatedResources;
 

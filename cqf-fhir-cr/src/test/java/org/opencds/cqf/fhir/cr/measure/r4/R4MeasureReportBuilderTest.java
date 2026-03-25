@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -42,13 +43,13 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureMultiSubjectEvaluator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureObservationStratumCache;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
-import org.opencds.cqf.fhir.cr.measure.common.SdeDefAccumulator;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -239,8 +240,8 @@ class R4MeasureReportBuilderTest {
                 IntStream.range(0, numSdes)
                         .mapToObj(num -> buildSdes("sde_" + num, isKeyResource, evaluatedResources))
                         .toList());
-        // Simulate the production pipeline where SdeDefAccumulator runs before the builder
-        SdeDefAccumulator.accumulate(measureDef);
+        // Simulate the production pipeline where postEvaluationMultiSubject runs before the builder
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FhirContext.forR4Cached(), measureDef);
         return measureDef;
     }
 

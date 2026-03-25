@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -13,15 +14,20 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
 
-class SdeDefAccumulatorTest {
+class MeasureMultiSubjectEvaluatorTest {
+
+    private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
+
+    private static MeasureDef measureDefWith(SdeDef... sdes) {
+        return new MeasureDef(
+                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sdes));
+    }
 
     @Test
     void emptyResults_notAccumulated() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         assertFalse(sde.isAccumulated());
         assertTrue(sde.getAccumulatedValues().isEmpty());
@@ -32,10 +38,8 @@ class SdeDefAccumulatorTest {
     void singleSubject_singlePrimitiveValue() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
         sde.putResult("Patient/p1", "male", Set.of());
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         assertTrue(sde.isAccumulated());
         assertEquals(1, sde.getAccumulatedValues().size());
@@ -51,10 +55,8 @@ class SdeDefAccumulatorTest {
         sde.putResult("Patient/p1", "male", Set.of());
         sde.putResult("Patient/p2", "male", Set.of());
         sde.putResult("Patient/p3", "male", Set.of());
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         assertTrue(sde.isAccumulated());
         assertEquals(1, sde.getAccumulatedValues().size());
@@ -67,10 +69,8 @@ class SdeDefAccumulatorTest {
         sde.putResult("Patient/p1", "male", Set.of());
         sde.putResult("Patient/p2", "female", Set.of());
         sde.putResult("Patient/p3", "male", Set.of());
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         assertTrue(sde.isAccumulated());
         assertEquals(2, sde.getAccumulatedValues().size());
@@ -86,10 +86,8 @@ class SdeDefAccumulatorTest {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
         sde.putResult("Patient/p1", patient, Set.of());
         sde.putResult("Patient/p2", patient, Set.of());
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         assertTrue(sde.isAccumulated());
         assertEquals(1, sde.getAccumulatedValues().size());
@@ -100,10 +98,8 @@ class SdeDefAccumulatorTest {
     void nullValues_filteredOut() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
         sde.putResult("Patient/p1", Arrays.asList("male", null, "female"), Set.of());
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         assertTrue(sde.isAccumulated());
         // Only "male" and "female" should be accumulated (null filtered)
@@ -119,10 +115,8 @@ class SdeDefAccumulatorTest {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
         sde.putResult("Patient/p1", "male", Set.of(res1, res2));
         sde.putResult("Patient/p2", "female", Set.of(res2, res3));
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde));
 
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
         // All unique evaluated resources should be aggregated
         assertEquals(3, sde.getAllEvaluatedResources().size());
@@ -141,10 +135,7 @@ class SdeDefAccumulatorTest {
         sde2.putResult("Patient/p1", "male", Set.of());
         sde2.putResult("Patient/p2", "male", Set.of());
 
-        var measureDef = new MeasureDef(
-                new IdType(ResourceType.Measure.name(), "m1"), "http://test", null, List.of(), List.of(sde1, sde2));
-
-        SdeDefAccumulator.accumulate(measureDef);
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde1, sde2));
 
         assertTrue(sde1.isAccumulated());
         assertTrue(sde2.isAccumulated());

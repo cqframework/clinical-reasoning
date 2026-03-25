@@ -664,6 +664,9 @@ public class MeasureEvaluator {
     protected void evaluateSdes(String subjectId, List<SdeDef> sdes, EvaluationResult evaluationResult) {
         for (SdeDef sde : sdes) {
             var expressionResult = evaluationResult.get(sde.expression());
+            if (expressionResult == null) {
+                throw new ExpressionResultNotFoundException("SDE", sde.expression());
+            }
             Object result = expressionResult.getValue();
             // TODO: This is a hack-around for an cql engine bug. Need to investigate.
             if ((result instanceof List<?> list) && (list.size() == 1) && list.get(0) == null) {

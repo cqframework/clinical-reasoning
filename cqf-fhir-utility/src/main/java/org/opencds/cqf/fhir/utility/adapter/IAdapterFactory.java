@@ -149,6 +149,14 @@ public interface IAdapterFactory {
     ICodingAdapter createCoding(IBase coding);
 
     /**
+     * Creates an adapter that exposes common Identifier operations across multiple versions of FHIR
+     *
+     * @param identifier a FHIR Identifier object
+     * @return an adapter exposing common api calls
+     */
+    IIdentifierAdapter createIdentifier(IBase identifier);
+
+    /**
      * Creates an adapter that exposes common ElementDefinition operations across multiple versions of FHIR
      *
      * @param element a FHIR ElementDefinition object

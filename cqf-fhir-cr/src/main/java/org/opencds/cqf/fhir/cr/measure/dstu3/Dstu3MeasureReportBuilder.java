@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,20 +8,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupPopulationComponent;
 import org.hl7.fhir.dstu3.model.Measure.MeasureGroupStratifierComponent;
-import org.hl7.fhir.dstu3.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.dstu3.model.MeasureReport.MeasureReportGroupPopulationComponent;
@@ -36,12 +32,9 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cr.measure.common.CriteriaResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
@@ -52,6 +45,7 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,16 +195,16 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
 
         String stratifierKey = this.getKey("stratifier", measureStratifier.getId(), null, stratIndex);
 
-        Map<String, CriteriaResult> subjectValues = stratifierDef.getResults();
+        var subjectValues = stratifierDef.getResults();
 
         // Because most of the types we're dealing with don't implement hashCode or
         // equals
-        // the ValueWrapper does it for them.
-        Map<ValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
+        // the StratumValueWrapper does it for them.
+        Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
-                        x -> new ValueWrapper(subjectValues.get(x).rawValue())));
+                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
 
-        for (Map.Entry<ValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
+        for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(
                     groupKey,
                     stratifierKey,
@@ -225,7 +219,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
             String groupKey,
             String stratifierKey,
             StratifierGroupComponent stratum,
-            ValueWrapper value,
+            StratumValueWrapper value,
             List<String> subjectIds,
             List<MeasureGroupPopulationComponent> populations) {
 
@@ -385,22 +379,18 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     protected void processSdes(Measure measure, MeasureDef measureDef, List<String> subjectIds) {
-        // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
-        for (int i = 0; i < measure.getSupplementalData().size(); i++) {
-            MeasureSupplementalDataComponent msdc =
-                    measure.getSupplementalData().get(i);
-            SdeDef sde = measureDef.sdes().get(i);
+        for (SdeDef sde : measureDef.sdes()) {
+            if (!sde.isAccumulated()) {
+                continue;
+            }
 
+            // DSTU3-specific: evaluated resource extensions
             processSdeEvaluatedResourceExtension(sde);
 
-            Map<ValueWrapper, Long> accumulated = sde.getResults().values().stream()
-                    .flatMap(x -> ((List<Object>) Lists.newArrayList(x.iterableValue())).stream())
-                    .map(ValueWrapper::new)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-            String sdeKey = this.getKey("sde-observation", msdc.getId(), null, i);
             String sdeId = sde.id();
-            for (Map.Entry<ValueWrapper, Long> accumulator : accumulated.entrySet()) {
+            String sdeKey = "sde-observation-" + this.escapeForFhirId(sdeId);
+            for (Map.Entry<StratumValueWrapper, Long> accumulator :
+                    sde.getAccumulatedValues().entrySet()) {
 
                 String valueCode = accumulator.getKey().getValueAsString();
                 String valueKey = accumulator.getKey().getKey();
@@ -413,27 +403,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
                 valueKey = this.escapeForFhirId(valueKey);
 
                 Coding valueCoding = new Coding().setCode(valueCode);
-                if (!sdeId.equalsIgnoreCase("sde-sex")) {
-                    // /**
-                    // * Match up the category part of our SDE key (e.g. sde-race has a category of
-                    // * race) with a patient extension of the same category (e.g.
-                    // * http://hl7.org/fhir/us/core/StructureDefinition/us-core-race) and the same
-                    // * code as sdeAccumulatorKey (aka the value extracted from the CQL expression
-                    // * named in the Measure SDE metadata) and then record the coding details.
-                    // *
-                    // * We know that at least one patient matches the sdeAccumulatorKey or else it
-                    // * wouldn't show up in the map.
-                    // */
-
-                    // String coreCategory = sdeCode
-                    // .substring(sdeCode.lastIndexOf('-') >= 0 ? sdeCode.lastIndexOf('-') + 1 : 0);
-                    // for (DomainResource pt : subjectIds) {
-                    // valueCoding = getExtensionCoding(pt, coreCategory, valueCode);
-                    // if (valueCoding != null) {
-                    // break;
-                    // }
-                    // }
-                }
 
                 DomainResource obs = null;
                 switch (this.report.getType()) {
@@ -452,22 +421,20 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        for (CriteriaResult r : sdeDef.getResults().values()) {
-            for (Object o : r.evaluatedResources()) {
-                if (o instanceof IBaseResource iBaseResource) {
-                    // extension item
-                    Extension extension = new Extension(MeasureConstants.EXT_SDE_URL);
+        for (Object o : sdeDef.getAllEvaluatedResources()) {
+            if (o instanceof IBaseResource iBaseResource) {
+                // extension item
+                Extension extension = new Extension(MeasureConstants.EXT_SDE_URL);
 
-                    // adding value to extension
-                    extension.setValue(new StringType(
-                            new StringBuilder(iBaseResource.getIdElement().getResourceType())
-                                    .append("/")
-                                    .append(iBaseResource.getIdElement().getIdPart())
-                                    .toString()));
+                // adding value to extension
+                extension.setValue(new StringType(
+                        new StringBuilder(iBaseResource.getIdElement().getResourceType())
+                                .append("/")
+                                .append(iBaseResource.getIdElement().getIdPart())
+                                .toString()));
 
-                    // adding item extension to MR extension list
-                    report.getExtension().add(extension);
-                }
+                // adding item extension to MR extension list
+                report.getExtension().add(extension);
             }
         }
     }
@@ -618,125 +585,6 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
 
         return value.toLowerCase().trim().replace(" ", "-").replace("_", "-");
-    }
-
-    // This is some hackery because most of these objects don't implement
-    // hashCode or equals, meaning it's hard to detect distinct values;
-    class ValueWrapper {
-        protected Object value;
-
-        public ValueWrapper(Object value) {
-            this.value = value;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.getKey().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null) return false;
-            if (this.getClass() != o.getClass()) return false;
-
-            ValueWrapper other = (ValueWrapper) o;
-
-            if (other.getValue() == null ^ this.getValue() == null) {
-                return false;
-            }
-
-            if (other.getValue() == null && this.getValue() == null) {
-                return true;
-            }
-
-            return this.getKey().equals(other.getKey());
-        }
-
-        public String getKey() {
-            String key = null;
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                // ASSUMPTION: We won't have different systems with the same code
-                // within a given stratifier / sde
-                key = joinValues("coding", c.getCode());
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                key = joinValues("codeable-concept", c.getCodingFirstRep().getCode());
-            } else if (value instanceof Code c) {
-                key = joinValues("code", c.getCode());
-            } else if (value instanceof Enum<?> e) {
-                key = joinValues("enum", e.toString());
-            } else if (value instanceof IPrimitiveType<?> p) {
-                key = joinValues("primitive", p.getValueAsString());
-            } else if (value instanceof Identifier identifier) {
-                key = identifier.getValue();
-            } else if (value instanceof Resource resource) {
-                key = resource.getIdElement().toVersionless().getValue();
-            } else if (value != null) {
-                key = value.toString();
-            }
-
-            if (key == null) {
-                throw new InvalidRequestException("found a null key for the wrapped value: %s".formatted(value));
-            }
-
-            return key;
-        }
-
-        public String getValueAsString() {
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                return c.getCode();
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                return c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code c) {
-                return c.getCode();
-            } else if (value instanceof Enum<?> e) {
-                return e.toString();
-            } else if (value instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (value != null) {
-                return value.toString();
-            } else {
-                return "<null>";
-            }
-        }
-
-        public String getDescription() {
-            if (value instanceof Coding coding) {
-                Coding c = coding;
-                return c.hasDisplay() ? c.getDisplay() : c.getCode();
-            } else if (value instanceof CodeableConcept concept) {
-                CodeableConcept c = concept;
-                return c.getCodingFirstRep().hasDisplay()
-                        ? c.getCodingFirstRep().getDisplay()
-                        : c.getCodingFirstRep().getCode();
-            } else if (value instanceof Code c) {
-                return c.getDisplay() != null ? c.getDisplay() : c.getCode();
-            } else if (value instanceof Enum<?> e) {
-                return e.toString();
-            } else if (value instanceof IPrimitiveType<?> p) {
-                return p.getValueAsString();
-            } else if (value != null) {
-                return value.toString();
-            } else {
-                return null;
-            }
-        }
-
-        public Object getValue() {
-            return this.value;
-        }
-
-        public Class<?> getValueClass() {
-            return this.value.getClass();
-        }
-
-        private String joinValues(String... elements) {
-            return String.join("-", elements);
-        }
     }
 
     /**

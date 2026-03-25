@@ -48,6 +48,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
+import org.opencds.cqf.fhir.cr.measure.common.SdeDefAccumulator;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
@@ -228,7 +229,7 @@ class R4MeasureReportBuilderTest {
             int numSdes,
             boolean isKeyResource,
             Collection<Object> evaluatedResources) {
-        return new MeasureDef(
+        var measureDef = new MeasureDef(
                 new IdType(ResourceType.Measure.name(), id),
                 url,
                 null,
@@ -238,6 +239,9 @@ class R4MeasureReportBuilderTest {
                 IntStream.range(0, numSdes)
                         .mapToObj(num -> buildSdes("sde_" + num, isKeyResource, evaluatedResources))
                         .toList());
+        // Simulate the production pipeline where SdeDefAccumulator runs before the builder
+        SdeDefAccumulator.accumulate(measureDef);
+        return measureDef;
     }
 
     private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Object> evaluatedResources) {

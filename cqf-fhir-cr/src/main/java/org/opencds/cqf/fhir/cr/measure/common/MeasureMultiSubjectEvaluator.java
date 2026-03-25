@@ -119,6 +119,11 @@ public class MeasureMultiSubjectEvaluator {
                 stratifierDef.addAllStratum(stratumDefs);
             }
         }
+
+        // Accumulate SDE results across subjects (version-agnostic)
+        for (SdeDef sde : measureDef.sdes()) {
+            sde.accumulate();
+        }
     }
 
     private static List<StratumDef> buildCriteriaStrata(

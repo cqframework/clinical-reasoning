@@ -1,8 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class SdeDef {
 
@@ -10,7 +15,11 @@ public class SdeDef {
     private final ConceptDef code;
     private final String expression;
     private final String description;
-    private Map<String, CriteriaResult> results;
+    private final Map<String, CriteriaResult> results = new HashMap<>();
+
+    // Pre-accumulated state (populated by SdeDefAccumulator)
+    private Map<StratumValueWrapper, Long> accumulatedValues;
+    private Set<Object> allEvaluatedResources;
 
     public SdeDef(String id, ConceptDef code, String expression) {
         this(id, code, expression, null);
@@ -44,10 +53,50 @@ public class SdeDef {
     }
 
     public Map<String, CriteriaResult> getResults() {
-        if (this.results == null) {
-            this.results = new HashMap<>();
+        return this.results;
+    }
+
+    public void setAccumulatedValues(Map<StratumValueWrapper, Long> accumulatedValues) {
+        this.accumulatedValues = accumulatedValues;
+    }
+
+    public Map<StratumValueWrapper, Long> getAccumulatedValues() {
+        return this.accumulatedValues != null ? this.accumulatedValues : Collections.emptyMap();
+    }
+
+    public void setAllEvaluatedResources(Set<Object> allEvaluatedResources) {
+        this.allEvaluatedResources = allEvaluatedResources;
+    }
+
+    public Set<Object> getAllEvaluatedResources() {
+        return this.allEvaluatedResources != null ? this.allEvaluatedResources : Collections.emptySet();
+    }
+
+    public boolean isAccumulated() {
+        return this.accumulatedValues != null;
+    }
+
+    public boolean hasResults() {
+        return getResults() != null && !getResults().isEmpty();
+    }
+
+    public void accumulate() {
+        if (!hasResults()) {
+            return;
         }
 
-        return this.results;
+        // Aggregate evaluated resources across all subjects
+        Set<Object> allEvaluatedResources = getResults().values().stream()
+                .flatMap(criteriaResult -> criteriaResult.evaluatedResources().stream())
+                .collect(Collectors.toSet());
+        setAllEvaluatedResources(allEvaluatedResources);
+
+        // Accumulate values by grouping with count
+        Map<StratumValueWrapper, Long> accumulated = getResults().values().stream()
+                .flatMap(criteriaResult -> Lists.newArrayList(criteriaResult.iterableValue()).stream())
+                .filter(Objects::nonNull)
+                .map(StratumValueWrapper::new)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        setAccumulatedValues(accumulated);
     }
 }

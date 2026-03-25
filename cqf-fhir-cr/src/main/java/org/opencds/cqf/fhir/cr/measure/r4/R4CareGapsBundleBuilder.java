@@ -45,6 +45,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
@@ -111,10 +112,7 @@ public class R4CareGapsBundleBuilder {
                     r4CareGapsParameters.getPeriodEnd(),
                     MeasureEvalType.SUBJECT.toCode(),
                     subject,
-                    null,
-                    null,
-                    null,
-                    null,
+                    MeasureEnvironment.EMPTY,
                     null,
                     null,
                     reporter);

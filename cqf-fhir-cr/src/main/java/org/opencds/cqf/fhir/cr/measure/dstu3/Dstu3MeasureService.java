@@ -12,12 +12,10 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.util.BundleBuilder;
 import java.util.Collections;
 import java.util.List;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.ContactDetail;
 import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -26,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final IRepository repository;
@@ -89,8 +88,7 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
      *                               received.
      * @param productLine         the productLine (e.g. Medicare, Medicaid, etc) to use
      *                               for the evaluation. This is a non-standard parameter.
-     * @param additionalData      the data bundle containing additional data
-     * @param terminologyEndpoint the endpoint of terminology services for your measure valuesets
+     * @param environment         endpoint and supplemental data configuration
      * @return the calculated MeasureReport
      */
     @Override
@@ -103,16 +101,21 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
             String practitioner,
             String lastReceivedOn,
             String productLine,
-            Bundle additionalData,
-            Parameters parameters,
-            Endpoint terminologyEndpoint) {
+            MeasureEnvironment environment,
+            Parameters parameters) {
 
         ensureSupplementalDataElementSearchParameter();
 
         var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
 
         MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
-                id, periodStart, periodEnd, reportType, Collections.singletonList(subject), additionalData, parameters);
+                id,
+                periodStart,
+                periodEnd,
+                reportType,
+                Collections.singletonList(subject),
+                environment.additionalData(),
+                parameters);
 
         if (productLine != null) {
             Extension ext = new Extension();

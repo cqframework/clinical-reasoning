@@ -3,9 +3,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 /**
@@ -20,10 +19,7 @@ public interface R4MeasureEvaluatorMultiple {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String reporter);

@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 @SuppressWarnings("java:S107")
@@ -87,6 +88,8 @@ public class MeasureOperationsProvider {
         var contentEndpointParam = (Endpoint) getEndpoint(fhirVersion, contentEndpoint);
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
+        var environment = new MeasureEnvironment(
+                contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
         return r4MeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
@@ -96,10 +99,7 @@ public class MeasureOperationsProvider {
                         reportType,
                         subject,
                         lastReceivedOn,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        dataEndpointParam,
-                        additionalData,
+                        environment,
                         parameters,
                         productLine,
                         practitioner);
@@ -157,6 +157,8 @@ public class MeasureOperationsProvider {
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         var measureRefs = MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl);
+        var environment = new MeasureEnvironment(
+                contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
         return r4MultiMeasureServiceFactory
                 .create(requestDetails)
                 .evaluate(
@@ -165,10 +167,7 @@ public class MeasureOperationsProvider {
                         stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
                         reportType,
                         subject,
-                        contentEndpointParam,
-                        terminologyEndpointParam,
-                        dataEndpointParam,
-                        additionalData,
+                        environment,
                         parameters,
                         productLine,
                         reporter);

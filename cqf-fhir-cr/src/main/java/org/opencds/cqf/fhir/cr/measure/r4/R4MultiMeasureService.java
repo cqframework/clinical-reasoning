@@ -17,10 +17,10 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
@@ -89,10 +90,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             String reportType,
             String subjectId,
             String lastReceivedOn,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String practitioner) {
@@ -104,10 +102,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         reportType,
                         subjectId,
                         lastReceivedOn,
-                        contentEndpoint,
-                        terminologyEndpoint,
-                        dataEndpoint,
-                        additionalData,
+                        environment,
                         parameters,
                         productLine,
                         null) // reporter is null in the single measure case
@@ -122,10 +117,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             String reportType,
             String subjectId,
             String lastReceivedOn,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String practitioner) {
@@ -137,10 +129,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 periodEnd,
                 reportType,
                 subjectId,
-                contentEndpoint,
-                terminologyEndpoint,
-                dataEndpoint,
-                additionalData,
+                environment,
                 parameters,
                 productLine,
                 null,
@@ -170,10 +159,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String reporter) {
@@ -184,10 +170,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         periodEnd,
                         reportType,
                         subject,
-                        contentEndpoint,
-                        terminologyEndpoint,
-                        dataEndpoint,
-                        additionalData,
+                        environment,
                         parameters,
                         productLine,
                         reporter)
@@ -210,10 +193,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report
      * @param subject the subject ID (or practitioner)
-     * @param contentEndpoint content endpoint
-     * @param terminologyEndpoint terminology endpoint
-     * @param dataEndpoint data endpoint
-     * @param additionalData additional data bundle
+     * @param environment         endpoint and supplemental data configuration
      * @param parameters CQL parameters
      * @param productLine product line
      * @param reporter reporter ID
@@ -226,10 +206,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String reporter) {
@@ -241,10 +218,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 periodEnd,
                 reportType,
                 subject,
-                contentEndpoint,
-                terminologyEndpoint,
-                dataEndpoint,
-                additionalData,
+                environment,
                 parameters,
                 productLine,
                 reporter,
@@ -258,10 +232,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            MeasureEnvironment environment,
             Parameters parameters,
             String productLine,
             String reporter,
@@ -269,19 +240,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        final R4MeasureProcessor r4ProcessorToUse;
-        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse;
-        if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
-            var repositoryToUse =
-                    Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-
-            r4ProcessorToUse = new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions);
-
-            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
-        } else {
-            r4ProcessorToUse = r4MeasureProcessorStandardRepository;
-            r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository;
-        }
+        var effectiveRepo = resolveRepository(environment);
+        final R4MeasureProcessor r4ProcessorToUse = effectiveRepo == repository
+                ? r4MeasureProcessorStandardRepository
+                : new R4MeasureProcessor(effectiveRepo, this.measureEvaluationOptions);
+        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse = effectiveRepo == repository
+                ? r4MeasureServiceUtilsStandardRepository
+                : new R4MeasureServiceUtils(effectiveRepo);
 
         if (measureEvaluationOptions.isEnsureSearchParameters()) {
             r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
@@ -312,14 +277,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         // another flex point between single and multi measures
         var subjects =
                 switch (singleOrMultiple) {
-                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, repository, additionalData);
+                    case SINGLE ->
+                        getSubjectsForEvaluateSingle(
+                                subjectToUse, r4ProcessorToUse.getRepository(), environment.additionalData());
                     case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
                 };
 
         var context = Engines.forRepository(
                 r4ProcessorToUse.getRepository(),
                 this.measureEvaluationOptions.getEvaluationSettings(),
-                additionalData);
+                environment.additionalData());
 
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
@@ -590,7 +557,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @Nonnull
     private List<String> getSubjectsForEvaluateSingle(
-            String subjectId, IRepository proxyRepoForMeasureProcessor, Bundle additionalData) {
+            String subjectId, IRepository proxyRepoForMeasureProcessor, IBaseBundle additionalData) {
         final IRepository repoToUseForSubjectProvider;
         if (additionalData != null) {
             repoToUseForSubjectProvider = new FederatedRepository(
@@ -604,5 +571,19 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         repoToUseForSubjectProvider,
                         Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
+    }
+
+    private IRepository resolveRepository(MeasureEnvironment environment) {
+        if (environment.dataEndpoint() != null
+                && environment.contentEndpoint() != null
+                && environment.terminologyEndpoint() != null) {
+            return Repositories.proxy(
+                    repository,
+                    true,
+                    environment.dataEndpoint(),
+                    environment.contentEndpoint(),
+                    environment.terminologyEndpoint());
+        }
+        return repository;
     }
 }

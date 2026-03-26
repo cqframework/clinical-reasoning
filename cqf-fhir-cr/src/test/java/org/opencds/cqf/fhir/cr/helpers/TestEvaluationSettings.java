@@ -7,8 +7,6 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 
 public class TestEvaluationSettings {
 
-    public TestEvaluationSettings() {}
-
     public static EvaluationSettings defaultTestEvaluationSettings() {
         var evaluationSettings = EvaluationSettings.getDefault();
         evaluationSettings

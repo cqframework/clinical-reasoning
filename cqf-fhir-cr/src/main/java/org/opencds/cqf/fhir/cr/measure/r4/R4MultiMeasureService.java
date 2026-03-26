@@ -116,8 +116,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 .measureReport();
     }
 
-    @VisibleForTesting
-    MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
+    public MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
             Either3<CanonicalType, IdType, Measure> measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,

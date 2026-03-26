@@ -3,12 +3,14 @@ package org.opencds.cqf.fhir.cql;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.StringJoiner;
+import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 
 // TODO: Eventually, the cql-engine needs to expose these itself.
 public class CqlEngineOptions {
     private Set<CqlEngine.Options> options = EnumSet.noneOf(CqlEngine.Options.class);
     private boolean isDebugLoggingEnabled = false;
+    private DebugMap debugMap;
     private boolean shouldExpandValueSets = false;
     private Integer pageSize;
     private Integer maxCodesPerQuery;
@@ -29,6 +31,62 @@ public class CqlEngineOptions {
 
     public void setDebugLoggingEnabled(boolean isDebugLoggingEnabled) {
         this.isDebugLoggingEnabled = isDebugLoggingEnabled;
+    }
+
+    public DebugMap getDebugMap() {
+        return this.debugMap;
+    }
+
+    public void setDebugMap(DebugMap debugMap) {
+        this.debugMap = debugMap;
+    }
+
+    public boolean isProfilingEnabled() {
+        return this.options.contains(CqlEngine.Options.EnableProfiling);
+    }
+
+    public void setProfilingEnabled(boolean enabled) {
+        if (enabled) {
+            this.options.add(CqlEngine.Options.EnableProfiling);
+        } else {
+            this.options.remove(CqlEngine.Options.EnableProfiling);
+        }
+    }
+
+    public boolean isTracingEnabled() {
+        return this.options.contains(CqlEngine.Options.EnableTracing);
+    }
+
+    public void setTracingEnabled(boolean enabled) {
+        if (enabled) {
+            this.options.add(CqlEngine.Options.EnableTracing);
+        } else {
+            this.options.remove(CqlEngine.Options.EnableTracing);
+        }
+    }
+
+    public boolean isCoverageEnabled() {
+        return this.options.contains(CqlEngine.Options.EnableCoverageCollection);
+    }
+
+    public void setCoverageEnabled(boolean enabled) {
+        if (enabled) {
+            this.options.add(CqlEngine.Options.EnableCoverageCollection);
+        } else {
+            this.options.remove(CqlEngine.Options.EnableCoverageCollection);
+        }
+    }
+
+    public boolean isDetailedTracingEnabled() {
+        return this.options.contains(CqlEngine.Options.EnableDetailedTracing);
+    }
+
+    public void setDetailedTracingEnabled(boolean enabled) {
+        if (enabled) {
+            this.options.add(CqlEngine.Options.EnableDetailedTracing);
+        } else {
+            this.options.remove(CqlEngine.Options.EnableDetailedTracing);
+        }
     }
 
     public boolean shouldExpandValueSets() {
@@ -82,6 +140,7 @@ public class CqlEngineOptions {
         return new StringJoiner(", ", CqlEngineOptions.class.getSimpleName() + "[", "]")
                 .add("options=" + options)
                 .add("isDebugLoggingEnabled=" + isDebugLoggingEnabled)
+                .add("debugMap=" + (debugMap != null ? "configured" : "null"))
                 .add("shouldExpandValueSets=" + shouldExpandValueSets)
                 .add("pageSize=" + pageSize)
                 .add("maxCodesPerQuery=" + maxCodesPerQuery)

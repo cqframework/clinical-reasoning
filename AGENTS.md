@@ -94,8 +94,8 @@ mkdocs serve  # Browse at http://127.0.0.1:8000/
 
 ## Branch and PR Workflow
 
-- **Main Branch**: `master` (target branch for PRs)
-- **Feature Branches**: Create from `master` with descriptive names
+- **Main Branch**: `main` (target branch for PRs)
+- **Feature Branches**: Create from `main` with descriptive names
 - **PR Requirements**:
   - Must pass CI build
   - Must pass spotlessCheck formatting

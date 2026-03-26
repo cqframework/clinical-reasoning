@@ -39,9 +39,9 @@ This project uses [Palantir Java Format](https://github.com/palantir/palantir-ja
 
 ### Branch Policy
 
-All new development takes place on `<feature>` branches off `master`. Once feature development on the branch is complete, the feature branch is submitted to `master` as a PR. The PR is reviewed by maintainers and regression testing by the CI build occurs.
+All new development takes place on `<feature>` branches off `main`. Once feature development on the branch is complete, the feature branch is submitted to `main` as a PR. The PR is reviewed by maintainers and regression testing by the CI build occurs.
 
-Changes to the `master` branch must be done through an approved PR. Delete branches after merging to keep the repository clean.
+Changes to the `main` branch must be done through an approved PR. Delete branches after merging to keep the repository clean.
 
 See Release Process for related information.
 

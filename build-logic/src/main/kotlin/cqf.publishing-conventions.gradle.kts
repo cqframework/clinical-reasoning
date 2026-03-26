@@ -37,7 +37,7 @@ mavenPublishing {
         scm {
             connection = "scm:git:git://github.com/cqframework/clinical-reasoning.git"
             developerConnection = "scm:git:ssh://github.com:cqframework/clinical-reasoning.git"
-            url = "https://github.com/cqframework/clinical-reasoning/tree/master"
+            url = "https://github.com/cqframework/clinical-reasoning/tree/main"
         }
     }
 }

@@ -199,9 +199,13 @@ public class Engines {
     }
 
     private static CqlEngine createEngine(Environment environment, EvaluationSettings settings) {
-        var engine = new CqlEngine(
-                environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-        if (settings.getCqlOptions().getCqlEngineOptions().isDebugLoggingEnabled()) {
+        var engineOptions = settings.getCqlOptions().getCqlEngineOptions();
+        var engine = new CqlEngine(environment, engineOptions.getOptions());
+
+        // Precedence: explicit debugMap > isDebugLoggingEnabled > none
+        if (engineOptions.getDebugMap() != null) {
+            engine.getState().setDebugMap(engineOptions.getDebugMap());
+        } else if (engineOptions.isDebugLoggingEnabled()) {
             var map = new DebugMap();
             map.setLoggingEnabled(true);
             engine.getState().setDebugMap(map);

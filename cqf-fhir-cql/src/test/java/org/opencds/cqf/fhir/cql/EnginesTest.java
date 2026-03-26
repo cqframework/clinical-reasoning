@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -53,6 +54,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.data.SystemDataProvider;
+import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -189,6 +191,38 @@ class EnginesTest {
         settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(false);
         var engine = getEngine(settings);
         assertNull(engine.getState().getDebugMap());
+
+        assertDataProviders(engine);
+    }
+
+    @Test
+    void debugMapExplicit() {
+        var settings = EvaluationSettings.getDefault();
+        var customDebugMap = new DebugMap();
+        customDebugMap.setLoggingEnabled(true);
+        customDebugMap.setCoverageEnabled(true);
+        settings.getCqlOptions().getCqlEngineOptions().setDebugMap(customDebugMap);
+        var engine = getEngine(settings);
+        assertSame(customDebugMap, engine.getState().getDebugMap());
+        assertTrue(engine.getState().getDebugMap().isLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isCoverageEnabled());
+
+        assertDataProviders(engine);
+    }
+
+    @Test
+    void debugMapTakesPrecedenceOverDebugLoggingEnabled() {
+        var settings = EvaluationSettings.getDefault();
+        var customDebugMap = new DebugMap();
+        customDebugMap.setLoggingEnabled(false);
+        customDebugMap.setCoverageEnabled(true);
+        settings.getCqlOptions().getCqlEngineOptions().setDebugMap(customDebugMap);
+        settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(true);
+        var engine = getEngine(settings);
+        // The explicit debug map should win, even though isDebugLoggingEnabled is true
+        assertSame(customDebugMap, engine.getState().getDebugMap());
+        assertFalse(engine.getState().getDebugMap().isLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isCoverageEnabled());
 
         assertDataProviders(engine);
     }

@@ -1,26 +1,32 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Map;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 
 /**
- * Evaluation result containing both MeasureDef (internal model) and
- * MeasureReport (FHIR R4 resource).
+ * Evaluation result containing MeasureDef (internal model), MeasureReport (FHIR R4 resource),
+ * and the raw CQL EvaluationResult objects keyed by subject ID.
  *
- * <p><strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong></p>
- *
- * <p>This record is used by R4 test frameworks to assert on both:</p>
- * <ul>
- *   <li><strong>MeasureDef</strong>: Pre-scoring internal state</li>
- *   <li><strong>MeasureReport</strong>: Post-scoring FHIR resource</li>
- * </ul>
- *
- * <p><strong>Thread Safety:</strong> Assumes synchronous, single-threaded evaluation.
- * MeasureDef is mutable and safe only because test assertions run after evaluation completes.</p>
+ * <p>The {@code evaluationResults} map holds one {@link EvaluationResult} per evaluated subject.
+ * When debug logging is enabled on the CQL engine, each result's
+ * {@link EvaluationResult#getDebugResult()} contains per-library, per-expression debug entries
+ * and {@link EvaluationResult#getTrace()} contains the execution trace.</p>
  *
  * @param measureDef The populated MeasureDef after processResults (mutable reference)
  * @param measureReport The scored R4 MeasureReport FHIR resource
+ * @param evaluationResults The raw CQL evaluation results per subject ID
  */
 @VisibleForTesting
-public record MeasureDefAndR4MeasureReport(MeasureDef measureDef, MeasureReport measureReport) {}
+public record MeasureDefAndR4MeasureReport(
+        MeasureDef measureDef, MeasureReport measureReport, Map<String, EvaluationResult> evaluationResults) {
+
+    /**
+     * Backwards-compatible constructor for callers that do not need evaluation results.
+     */
+    public MeasureDefAndR4MeasureReport(MeasureDef measureDef, MeasureReport measureReport) {
+        this(measureDef, measureReport, Map.of());
+    }
+}

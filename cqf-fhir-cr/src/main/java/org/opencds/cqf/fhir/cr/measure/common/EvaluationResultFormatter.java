@@ -31,7 +31,9 @@ public class EvaluationResultFormatter {
 
     /**
      * Formats an EvaluationResult into a human-readable, indented string.
-     * Ignores debugResults and formats expression results with proper indentation.
+     * Formats expression results with proper indentation. Debug results and trace
+     * information are not included; use {@link #format(EvaluationResult, int, boolean)}
+     * with {@code includeDebugInfo=true} to include them.
      *
      * @param evaluationResult the EvaluationResult to format
      * @param baseIndent the base indentation level (number of indent units)
@@ -79,6 +81,37 @@ public class EvaluationResultFormatter {
             Object value = expressionResult.getValue();
             sb.append(indent(baseIndent + 1)).append("Value: ");
             sb.append(formatValue(value)).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Formats an EvaluationResult into a human-readable string, including debug
+     * results and trace information when present and requested.
+     *
+     * @param evaluationResult the EvaluationResult to format
+     * @param baseIndent the base indentation level (number of indent units)
+     * @param includeDebugInfo whether to include debug result and trace information
+     * @return formatted string representation
+     */
+    public static String format(EvaluationResult evaluationResult, int baseIndent, boolean includeDebugInfo) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(format(evaluationResult, baseIndent));
+
+        if (includeDebugInfo && evaluationResult != null) {
+            if (evaluationResult.getDebugResult() != null) {
+                sb.append(indent(baseIndent))
+                        .append("Debug Result: ")
+                        .append(evaluationResult.getDebugResult())
+                        .append("\n");
+            }
+            if (evaluationResult.getTrace() != null) {
+                sb.append(indent(baseIndent))
+                        .append("Trace: ")
+                        .append(evaluationResult.getTrace())
+                        .append("\n");
+            }
         }
 
         return sb.toString();

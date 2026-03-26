@@ -192,7 +192,7 @@ public class R4MeasureProcessor {
                         measurementPeriod,
                         subjectIds);
 
-        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndR4MeasureReport(measureDef, measureReport, results);
     }
 
     /**
@@ -246,7 +246,7 @@ public class R4MeasureProcessor {
                         measurementPeriod,
                         subjectIds);
 
-        return new MeasureDefAndR4MeasureReport(measureDef, measureReport);
+        return new MeasureDefAndR4MeasureReport(measureDef, measureReport, resultForThisMeasure);
     }
 
     /**

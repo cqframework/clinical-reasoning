@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.cr.helpers.TestEvaluationSettings.defaultTestEvaluationSettings;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.CLASS_PATH;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestQuestionnaire.given;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -18,6 +19,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.IdType;
@@ -379,7 +381,12 @@ class QuestionnaireProcessorTests {
 
     @Test
     void testGMTPQuestionnaire() {
+        var namespaceMap = new HashMap<String, String>();
+        namespaceMap.put("hl7.fhir.uv.cql", "http://hl7.org/fhir/uv/cql");
+        namespaceMap.put("hl7.fhir.us.cql", "http://hl7.org/fhir/us/cql");
+        var evaluationSettings = defaultTestEvaluationSettings().withRegisteredNamespaces(namespaceMap);
         given().repositoryFor(fhirContextR4, "r4/gmtp-questionnaire")
+                .evaluationSettings(evaluationSettings)
                 .when()
                 .questionnaireUrl(canonicalTypeForVersion(
                         FhirVersionEnum.R4, "http://hl7.org/fhir/us/cql/Questionnaire/GMTPQuestionnaire"))

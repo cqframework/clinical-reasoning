@@ -86,6 +86,9 @@ public class Engines {
         registerModelInfoProviders(settings, modelManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
 
+        // This allows for namespaces to be manually registered downstream.
+        // Ideally we don't need to do this at all and can determine what namespaces are required from the library.
+        // This will require more work in the CQL engine to accommodate.
         settings.getRegisteredNamespaces()
                 .forEach((name, uri) ->
                         libraryManager.getNamespaceManager().ensureNamespaceRegistered(new NamespaceInfo(name, uri)));

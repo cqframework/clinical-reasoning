@@ -38,16 +38,16 @@ public record MeasureEnvironment(
     /**
      * Resolves this environment against a base repository.
      *
-     * <p>If all three endpoints are present, wraps {@code base} in a proxy repository.
-     * If {@code additionalData} is present, federates the result with an in-memory repository
-     * seeded from that bundle.
+     * <p>If any endpoint is present, wraps {@code base} in a {@code ProxyRepository}; null
+     * endpoints fall back to {@code base}. If {@code additionalData} is present, federates
+     * the result with an in-memory repository seeded from that bundle.
      *
      * @param base the base repository to build on top of
      * @return the resolved repository, possibly wrapped
      */
     public IRepository resolve(IRepository base) {
         IRepository repo = base;
-        if (dataEndpoint() != null && contentEndpoint() != null && terminologyEndpoint() != null) {
+        if (dataEndpoint() != null || contentEndpoint() != null || terminologyEndpoint() != null) {
             repo = Repositories.proxy(repo, true, dataEndpoint(), contentEndpoint(), terminologyEndpoint());
         }
         if (additionalData() != null) {

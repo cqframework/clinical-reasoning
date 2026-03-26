@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -152,6 +153,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public ICodingAdapter createCoding(IBase coding) {
         return new CodingAdapter(coding);
+    }
+
+    @Override
+    public IIdentifierAdapter createIdentifier(IBase identifier) {
+        return new IdentifierAdapter(identifier);
     }
 
     @Override

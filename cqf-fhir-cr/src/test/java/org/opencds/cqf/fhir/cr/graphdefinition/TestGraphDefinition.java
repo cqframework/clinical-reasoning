@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.graphdefinition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.opencds.cqf.fhir.cr.helpers.TestEvaluationSettings.defaultTestEvaluationSettings;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
@@ -22,9 +23,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
@@ -84,15 +82,7 @@ public class TestGraphDefinition {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
-                evaluationSettings = EvaluationSettings.getDefault();
-                evaluationSettings
-                        .getRetrieveSettings()
-                        .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
-                        .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
-
-                evaluationSettings
-                        .getTerminologySettings()
-                        .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+                evaluationSettings = defaultTestEvaluationSettings();
             }
 
             return new GraphDefinitionProcessor(repository);

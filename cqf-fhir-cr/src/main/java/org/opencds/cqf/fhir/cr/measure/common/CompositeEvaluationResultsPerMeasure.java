@@ -207,6 +207,14 @@ public class CompositeEvaluationResultsPerMeasure {
                 evaluationResult.set(new EvaluationExpressionRef(e.getKey()), e.getValue());
             });
 
+            // Preserve debug information from the original evaluation result
+            if (origEvaluationResult.getDebugResult() != null) {
+                evaluationResult.setDebugResult(origEvaluationResult.getDebugResult());
+            }
+            if (origEvaluationResult.getTrace() != null) {
+                evaluationResult.setTrace(origEvaluationResult.getTrace());
+            }
+
             return evaluationResult;
         }
     }

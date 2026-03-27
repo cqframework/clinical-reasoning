@@ -6,8 +6,14 @@ plugins {
 fun Provider<PluginDependency>.asDep() =
     map { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" }
 
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}
+
 dependencies {
     implementation(libs.plugins.spotless.asDep())
+    implementation(libs.plugins.kotlin.jvm.asDep())
     implementation(libs.plugins.errorprone.asDep())
     implementation(libs.plugins.animalsniffer.asDep())
     implementation(libs.plugins.vanniktech.publish.asDep())
@@ -22,4 +28,5 @@ buildConfig {
     buildConfigField("JACOCO", libs.versions.jacoco)
     buildConfigField("PALANTIR_FORMAT", libs.versions.palantir.format)
     buildConfigField("GUMMY_BEARS", libs.versions.gummy.bears)
+    buildConfigField("KTFMT", libs.versions.ktfmt)
 }

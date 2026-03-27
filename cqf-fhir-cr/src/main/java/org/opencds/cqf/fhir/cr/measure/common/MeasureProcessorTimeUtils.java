@@ -52,7 +52,7 @@ public class MeasureProcessorTimeUtils {
         return getDefaultMeasurementPeriod(buildMeasurementPeriod(periodStart, periodEnd), context);
     }
 
-    private static Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+    public static Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         if (periodStart == null && periodEnd == null) {
             return null;
         }

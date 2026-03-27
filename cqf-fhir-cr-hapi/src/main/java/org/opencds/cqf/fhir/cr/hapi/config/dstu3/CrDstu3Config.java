@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.List;
 import java.util.Map;
+import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
@@ -31,8 +32,9 @@ public class CrDstu3Config {
     }
 
     @Bean
-    MeasureOperationsProvider dstu3MeasureOperationsProvider(IMeasureServiceFactory dstu3MeasureProcessorFactory) {
-        return new MeasureOperationsProvider(dstu3MeasureProcessorFactory);
+    MeasureOperationsProvider dstu3MeasureOperationsProvider(
+            IMeasureServiceFactory dstu3MeasureProcessorFactory, StringTimePeriodHandler stringTimePeriodHandler) {
+        return new MeasureOperationsProvider(dstu3MeasureProcessorFactory, stringTimePeriodHandler);
     }
 
     @Bean

@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DetectedIssue;
@@ -39,6 +38,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 public class CareGaps {
@@ -159,9 +159,7 @@ public class CareGaps {
         private ZonedDateTime periodEnd;
         private String subject;
         private List<String> status = new ArrayList<>();
-        private List<IdType> measureId = new ArrayList<>();
-        private List<String> measureIdentifier = new ArrayList<>();
-        private List<CanonicalType> measureUrl = new ArrayList<>();
+        private List<MeasureReference> measureRefs = new ArrayList<>();
         private Supplier<Parameters> operation;
 
         private boolean notDocument;
@@ -187,17 +185,23 @@ public class CareGaps {
         }
 
         public CareGaps.When measureId(String measureId) {
-            this.measureId.add(new IdType("Measure", measureId));
+            if (measureId != null) {
+                this.measureRefs.add(new MeasureReference.ById(new IdType("Measure", measureId)));
+            }
             return this;
         }
 
         public CareGaps.When measureUrl(String measureUrl) {
-            this.measureUrl.add(new CanonicalType(measureUrl));
+            if (measureUrl != null) {
+                this.measureRefs.add(new MeasureReference.ByCanonicalUrl(measureUrl));
+            }
             return this;
         }
 
         public CareGaps.When measureIdentifier(String measureIdentifier) {
-            this.measureIdentifier.add(measureIdentifier);
+            if (measureIdentifier != null) {
+                this.measureRefs.add(new MeasureReference.ByIdentifier(measureIdentifier));
+            }
             return this;
         }
 
@@ -207,8 +211,8 @@ public class CareGaps {
         }
 
         public CareGaps.When getCareGapsReport() {
-            this.operation = () -> service.getCareGapsReport(
-                    periodStart, periodEnd, subject, status, measureId, measureIdentifier, measureUrl, notDocument);
+            this.operation =
+                    () -> service.getCareGapsReport(periodStart, periodEnd, subject, status, measureRefs, notDocument);
             return this;
         }
 

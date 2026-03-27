@@ -37,10 +37,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactDetail;
@@ -54,13 +51,11 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class R4MeasureServiceUtils {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(R4MeasureServiceUtils.class);
@@ -186,6 +181,13 @@ public class R4MeasureServiceUtils {
         return this.repository.read(Measure.class, id);
     }
 
+    /**
+     * Resolves a Measure by resource ID. Static convenience for callers that have a repository in scope.
+     */
+    public static Measure resolveById(IIdType id, IRepository repository) {
+        return repository.read(Measure.class, id);
+    }
+
     public Measure resolveByUrl(String url) {
         Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
         if (url.contains("|")) {
@@ -233,30 +235,17 @@ public class R4MeasureServiceUtils {
         }
     }
 
-    public List<Measure> getMeasures(
-            List<IdType> measureIds, List<String> measureIdentifiers, List<String> measureCanonicals) {
-        List<Measure> measures = new ArrayList<>();
-        if (measureIds != null && !measureIds.isEmpty()) {
-            for (IdType measureId : measureIds) {
-                Measure measureById = resolveById(measureId);
-                measures.add(measureById);
+    public List<Measure> getMeasures(List<MeasureReference> refs) {
+        var measures = new ArrayList<Measure>();
+        for (var ref : refs) {
+            if (ref instanceof MeasureReference.ById byId) {
+                measures.add(resolveById((IdType) byId.id()));
+            } else if (ref instanceof MeasureReference.ByIdentifier byIdent) {
+                measures.add(resolveByIdentifier(byIdent.identifier()));
+            } else if (ref instanceof MeasureReference.ByCanonicalUrl byUrl) {
+                measures.add(resolveByUrl(byUrl.url()));
             }
         }
-
-        if (measureCanonicals != null && !measureCanonicals.isEmpty()) {
-            for (String measureCanonical : measureCanonicals) {
-                Measure measureByUrl = resolveByUrl(measureCanonical);
-                measures.add(measureByUrl);
-            }
-        }
-
-        if (measureIdentifiers != null && !measureIdentifiers.isEmpty()) {
-            for (String measureIdentifier : measureIdentifiers) {
-                Measure measureByIdentifier = resolveByIdentifier(measureIdentifier);
-                measures.add(measureByIdentifier);
-            }
-        }
-
         return distinctByKey(measures, Measure::getUrl);
     }
 
@@ -347,41 +336,5 @@ public class R4MeasureServiceUtils {
 
     public boolean isSubjectListEffectivelyEmpty(List<String> subjectIds) {
         return subjectIds == null || subjectIds.isEmpty() || subjectIds.get(0) == null;
-    }
-
-    public static List<Measure> foldMeasures(
-            List<Either3<CanonicalType, IdType, Measure>> measures, IRepository repository) {
-        return measures.stream()
-                .map(measure -> foldMeasure(measure, repository))
-                .toList();
-    }
-
-    public static Measure foldMeasure(Either3<CanonicalType, IdType, Measure> measure, IRepository repository) {
-        return measure.fold(
-                measureCanonicalType -> resolveByUrl(measureCanonicalType, repository),
-                measureIdType -> resolveById(measureIdType, repository),
-                Function.identity());
-    }
-
-    private static Measure resolveByUrl(CanonicalType url, IRepository repository) {
-        var parts = Canonicals.getParts(url);
-        var result = repository.search(
-                Bundle.class, Measure.class, Searches.byNameAndVersion(parts.idPart(), parts.version()));
-        return (Measure) result.getEntryFirstRep().getResource();
-    }
-
-    public static List<Measure> resolveByIds(List<? extends IIdType> ids, IRepository repository) {
-        var idStringArray = ids.stream().map(IPrimitiveType::getValueAsString).toArray(String[]::new);
-        var searchParameters = Searches.byId(idStringArray);
-
-        return repository.search(Bundle.class, Measure.class, searchParameters).getEntry().stream()
-                .map(BundleEntryComponent::getResource)
-                .filter(Measure.class::isInstance)
-                .map(Measure.class::cast)
-                .toList();
-    }
-
-    public static Measure resolveById(IIdType id, IRepository repository) {
-        return repository.read(Measure.class, id);
     }
 }

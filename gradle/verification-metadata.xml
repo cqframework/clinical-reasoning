@@ -9,6 +9,7 @@
          <trust file=".*-sources\.jar" regex="true"/>
          <trust group="org.jetbrains.kotlin" name=".*" regex="true"/>
          <trust group="org.jetbrains.kotlinx" name=".*" regex="true"/>
+         <trust group="org.jetbrains.kotlin.jvm" name=".*" regex="true"/>
       </trusted-artifacts>
    </configuration>
    <components>

@@ -1,5 +1,5 @@
 plugins {
-    id("cqf.java-conventions")
+    id("cqf.kotlin-conventions")
     id("cqf.spotless-conventions")
     id("cqf.jacoco-conventions")
     id("cqf.animal-sniffer-conventions")

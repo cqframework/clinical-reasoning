@@ -6,8 +6,6 @@ plugins {
     id("cqf.spotless-conventions")
 }
 
-
-
 dependencies {
     implementation(project(":cqf-fhir-cr"))
     implementation(project(":cqf-fhir-test"))
@@ -27,6 +25,4 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 // Benchmarks have no JUnit tests, only JMH benchmarks
-tasks.withType<Test>().configureEach {
-    failOnNoDiscoveredTests = false
-}
+tasks.withType<Test>().configureEach { failOnNoDiscoveredTests = false }

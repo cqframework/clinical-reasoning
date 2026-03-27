@@ -8,12 +8,8 @@ plugins {
 
 dependencies {
     api(project(":cqf-fhir-utility"))
-    api(libs.cql.cqf.fhir) {
-        exclude(group = "junit", module = "junit")
-    }
-    api(libs.cql.cqf.fhir.npm) {
-        exclude(group = "junit", module = "junit")
-    }
+    api(libs.cql.cqf.fhir) { exclude(group = "junit", module = "junit") }
+    api(libs.cql.cqf.fhir.npm) { exclude(group = "junit", module = "junit") }
     api(libs.cql.quick)
 
     // Test dependencies

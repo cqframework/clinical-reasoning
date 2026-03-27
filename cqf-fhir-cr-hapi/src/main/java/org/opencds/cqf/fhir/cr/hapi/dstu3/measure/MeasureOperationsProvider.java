@@ -18,6 +18,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -72,8 +73,9 @@ public class MeasureOperationsProvider {
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
+        var environment = new MeasureEnvironment(null, terminologyEndpointParam, null, additionalData);
         return dstu3MeasureProcessorFactory
-                .create(requestDetails)
+                .create(requestDetails, environment)
                 .evaluateMeasure(
                         id,
                         periodStart,
@@ -83,8 +85,6 @@ public class MeasureOperationsProvider {
                         practitioner,
                         lastReceivedOn,
                         productLine,
-                        additionalData,
-                        parameters,
-                        terminologyEndpointParam);
+                        parameters);
     }
 }

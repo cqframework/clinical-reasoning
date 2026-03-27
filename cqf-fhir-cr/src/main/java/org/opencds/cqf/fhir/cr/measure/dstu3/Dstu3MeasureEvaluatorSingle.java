@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -21,7 +19,5 @@ public interface Dstu3MeasureEvaluatorSingle {
             String practitioner,
             String lastReceivedOn,
             String productLine,
-            Bundle additionalData,
-            Parameters parameters,
-            Endpoint terminologyEndpoint);
+            Parameters parameters);
 }

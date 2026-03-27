@@ -149,10 +149,6 @@ public class Measure {
                     null,
                     null,
                     null,
-                    null,
-                    additionalData,
-                    null,
-                    null,
                     null);
             return this;
         }

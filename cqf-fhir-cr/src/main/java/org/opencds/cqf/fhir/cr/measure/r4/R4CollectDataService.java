@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
@@ -20,9 +21,8 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
-import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("squid:S107")
 public class R4CollectDataService {
@@ -71,7 +71,7 @@ public class R4CollectDataService {
         var context =
                 Engines.forRepository(this.repository, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
-        var foldedMeasure = R4MeasureServiceUtils.foldMeasure(Eithers.forMiddle3(measureId), repository);
+        var foldedMeasure = repository.read(Measure.class, measureId);
 
         if (!subjectList.isEmpty()) {
             for (String patient : subjectList) {
@@ -118,7 +118,7 @@ public class R4CollectDataService {
             CompositeEvaluationResultsPerMeasure evaluateMeasureResults) {
 
         MeasureReport report = processor.evaluateMeasure(
-                Eithers.forMiddle3(measureId),
+                new MeasureReference.ById(measureId),
                 periodStart,
                 periodEnd,
                 MeasureEvalType.SUBJECT.toCode(),

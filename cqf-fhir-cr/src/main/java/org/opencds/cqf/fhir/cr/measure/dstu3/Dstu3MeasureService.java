@@ -24,6 +24,7 @@ import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 
 public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
     private final IRepository repository;
@@ -91,28 +92,24 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
      * @return the calculated MeasureReport
      */
     @Override
-    public MeasureReport evaluateMeasure(
-            IdType id,
-            String periodStart,
-            String periodEnd,
-            String reportType,
-            String subject,
-            String practitioner,
-            String lastReceivedOn,
-            String productLine,
-            Parameters parameters) {
-
+    public MeasureReport evaluateMeasure(IdType id, MeasureEvaluationRequest request, Parameters parameters) {
         ensureSupplementalDataElementSearchParameter();
 
-        var dstu3MeasureProcessor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
+        var processor = new Dstu3MeasureProcessor(repository, measureEvaluationOptions);
 
-        MeasureReport report = dstu3MeasureProcessor.evaluateMeasure(
-                id, periodStart, periodEnd, reportType, Collections.singletonList(subject), null, parameters);
+        MeasureReport report = processor.evaluateMeasure(
+                id,
+                request.periodStart(),
+                request.periodEnd(),
+                request.reportType(),
+                Collections.singletonList(request.subjectId()),
+                null,
+                parameters);
 
-        if (productLine != null) {
+        if (request.productLine() != null) {
             Extension ext = new Extension();
             ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");
-            ext.setValue(new StringType(productLine));
+            ext.setValue(new StringType(request.productLine()));
             report.addExtension(ext);
         }
 

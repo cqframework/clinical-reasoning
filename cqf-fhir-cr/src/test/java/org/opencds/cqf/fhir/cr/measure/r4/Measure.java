@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportContained;
@@ -230,16 +231,18 @@ public class Measure {
         public When evaluate() {
             this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
                     new MeasureReference.ById(new IdType("Measure", measureId)),
-                    periodStart,
-                    periodEnd,
-                    reportType,
-                    subject,
-                    null,
+                    new MeasureEvaluationRequest(
+                            periodStart,
+                            periodEnd,
+                            reportType,
+                            subject,
+                            practitioner,
+                            null,
+                            productLine,
+                            null),
                     new MeasureEnvironment(null, null, null, additionalData)
                             .resolve(multiMeasureService.getRepository()),
-                    parameters,
-                    productLine,
-                    practitioner);
+                    parameters);
             return this;
         }
 

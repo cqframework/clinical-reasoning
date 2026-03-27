@@ -21,6 +21,7 @@ import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 @SuppressWarnings("java:S107")
@@ -90,18 +91,18 @@ public class MeasureOperationsProvider {
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
+        var request = new MeasureEvaluationRequest(
+                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                reportType,
+                subject,
+                practitioner,
+                lastReceivedOn,
+                productLine,
+                null);
         return r4MeasureServiceFactory
                 .create(requestDetails, environment)
-                .evaluate(
-                        new MeasureReference.ById(id),
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        lastReceivedOn,
-                        parameters,
-                        productLine,
-                        practitioner);
+                .evaluate(new MeasureReference.ById(id), request, parameters);
     }
 
     /**
@@ -158,16 +159,17 @@ public class MeasureOperationsProvider {
         var measureRefs = MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl);
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
+        var request = new MeasureEvaluationRequest(
+                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                reportType,
+                subject,
+                practitioner,
+                lastReceivedOn,
+                productLine,
+                reporter);
         return r4MultiMeasureServiceFactory
                 .create(requestDetails, environment)
-                .evaluate(
-                        measureRefs,
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        parameters,
-                        productLine,
-                        reporter);
+                .evaluate(measureRefs, request, parameters);
     }
 }

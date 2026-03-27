@@ -17,18 +17,24 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.springframework.stereotype.Component;
 
 @Component
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
     private final IMeasureServiceFactory dstu3MeasureProcessorFactory;
+    private final StringTimePeriodHandler stringTimePeriodHandler;
     private final FhirVersionEnum fhirVersion;
 
-    public MeasureOperationsProvider(IMeasureServiceFactory dstu3MeasureProcessorFactory) {
+    public MeasureOperationsProvider(
+            IMeasureServiceFactory dstu3MeasureProcessorFactory,
+            StringTimePeriodHandler stringTimePeriodHandler) {
         this.dstu3MeasureProcessorFactory = dstu3MeasureProcessorFactory;
+        this.stringTimePeriodHandler = stringTimePeriodHandler;
         fhirVersion = FhirVersionEnum.DSTU3;
     }
 
@@ -74,17 +80,17 @@ public class MeasureOperationsProvider {
             throws InternalErrorException, FHIRException {
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var environment = new MeasureEnvironment(null, terminologyEndpointParam, null, additionalData);
+        var request = new MeasureEvaluationRequest(
+                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                reportType,
+                patient,
+                practitioner,
+                lastReceivedOn,
+                productLine,
+                null);
         return dstu3MeasureProcessorFactory
                 .create(requestDetails, environment)
-                .evaluateMeasure(
-                        id,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        patient,
-                        practitioner,
-                        lastReceivedOn,
-                        productLine,
-                        parameters);
+                .evaluateMeasure(id, request, parameters);
     }
 }

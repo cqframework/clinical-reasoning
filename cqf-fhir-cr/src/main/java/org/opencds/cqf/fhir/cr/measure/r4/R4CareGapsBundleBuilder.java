@@ -48,6 +48,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -107,13 +108,16 @@ public class R4CareGapsBundleBuilder {
             // Measure Reports
             var result = r4MultiMeasureService.evaluate(
                     measureRefs,
-                    r4CareGapsParameters.getPeriodStart(),
-                    r4CareGapsParameters.getPeriodEnd(),
-                    MeasureEvalType.SUBJECT.toCode(),
-                    subject,
-                    null,
-                    null,
-                    reporter);
+                    new MeasureEvaluationRequest(
+                            r4CareGapsParameters.getPeriodStart(),
+                            r4CareGapsParameters.getPeriodEnd(),
+                            MeasureEvalType.SUBJECT.toCode(),
+                            subject,
+                            null,
+                            null,
+                            null,
+                            reporter),
+                    null);
 
             var entries = result.getParameter().stream()
                     .map(ParametersParameterComponent::getResource)

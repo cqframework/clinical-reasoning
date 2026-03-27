@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -337,25 +335,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     private void buildSDE(R4MeasureReportBuilderContext bc, SdeDef sde) {
         var report = bc.report();
 
-        // No SDEs were calculated, do nothing
-        if (sde.getResults().isEmpty()) {
-            return;
-        }
-
-        // Add all evaluated resources
-        for (var e : sde.getResults().entrySet()) {
-            addEvaluatedResourceReferences(bc, sde.id(), e.getValue().evaluatedResources());
-        }
+        // Add evaluated resources (pre-aggregated by MeasureMultiSubjectEvaluator)
+        addEvaluatedResourceReferences(bc, sde.id(), sde.getAllEvaluatedResources());
 
         CodeableConcept concept = conceptDefToConcept(sde.code());
 
-        Map<StratumValueWrapper, Long> accumulated = sde.getResults().values().stream()
-                .flatMap(x -> Lists.newArrayList(x.iterableValue()).stream())
-                .filter(Objects::nonNull)
-                .map(StratumValueWrapper::new)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-        for (Map.Entry<StratumValueWrapper, Long> accumulator : accumulated.entrySet()) {
+        // Read pre-accumulated values (computed by MeasureMultiSubjectEvaluator)
+        for (Map.Entry<StratumValueWrapper, Long> accumulator :
+                sde.getAccumulatedValues().entrySet()) {
 
             Resource obs;
             if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
@@ -379,11 +366,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void buildSDEs(R4MeasureReportBuilderContext bc) {
-        var measure = bc.measure();
         var measureDef = bc.measureDef();
-        // ASSUMPTION: Measure SDEs are in the same order as MeasureDef SDEs
-        for (int i = 0; i < measure.getSupplementalData().size(); i++) {
-            var sde = measureDef.sdes().get(i);
+        for (SdeDef sde : measureDef.sdes()) {
             buildSDE(bc, sde);
         }
     }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -42,6 +43,7 @@ import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureMultiSubjectEvaluator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureObservationStratumCache;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
@@ -228,7 +230,7 @@ class R4MeasureReportBuilderTest {
             int numSdes,
             boolean isKeyResource,
             Collection<Object> evaluatedResources) {
-        return new MeasureDef(
+        var measureDef = new MeasureDef(
                 new IdType(ResourceType.Measure.name(), id),
                 url,
                 null,
@@ -238,6 +240,9 @@ class R4MeasureReportBuilderTest {
                 IntStream.range(0, numSdes)
                         .mapToObj(num -> buildSdes("sde_" + num, isKeyResource, evaluatedResources))
                         .toList());
+        // Simulate the production pipeline where postEvaluationMultiSubject runs before the builder
+        MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FhirContext.forR4Cached(), measureDef);
+        return measureDef;
     }
 
     private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Object> evaluatedResources) {

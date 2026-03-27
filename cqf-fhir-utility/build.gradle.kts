@@ -9,9 +9,7 @@ plugins {
 dependencies {
     // CQL Engine - api scope since types are used by downstream modules
     api(libs.cql.engine)
-    api(libs.cql.engine.fhir) {
-        exclude(group = "junit", module = "junit")
-    }
+    api(libs.cql.engine.fhir) { exclude(group = "junit", module = "junit") }
     api(libs.cql.to.elm.jvm)
     api(libs.cql.ucum)
     api(libs.cql.elm.fhir)

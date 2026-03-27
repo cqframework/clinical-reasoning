@@ -24,85 +24,82 @@ dependencies {
 }
 
 // Test JAR for downstream modules
-val testJar by tasks.registering(Jar::class) {
-    archiveClassifier = "tests"
-    from(sourceSets.test.get().output)
-}
-
-configurations {
-    create("testArtifacts") {
-        extendsFrom(configurations.testImplementation.get())
+val testJar by
+    tasks.registering(Jar::class) {
+        archiveClassifier = "tests"
+        from(sourceSets.test.get().output)
     }
-}
 
-artifacts {
-    add("testArtifacts", testJar)
-}
+configurations { create("testArtifacts") { extendsFrom(configurations.testImplementation.get()) } }
+
+artifacts { add("testArtifacts", testJar) }
 
 // Add test JAR to publishing
 afterEvaluate {
-    publishing {
-        publications {
-            named<MavenPublication>("maven") {
-                artifact(testJar)
-            }
-        }
-    }
+    publishing { publications { named<MavenPublication>("maven") { artifact(testJar) } } }
 }
 
 // Generate build properties
-val generateBuildProperties by tasks.registering {
-    val outputDir = layout.buildDirectory.dir("generated-sources/properties")
-    val propsFile = outputDir.map { it.file("org/opencds/cqf/fhir/cqf-fhir-cr-build.properties") }
-    val projectVersion = project.version.toString()
+val generateBuildProperties by
+    tasks.registering {
+        val outputDir = layout.buildDirectory.dir("generated-sources/properties")
+        val propsFile =
+            outputDir.map { it.file("org/opencds/cqf/fhir/cqf-fhir-cr-build.properties") }
+        val projectVersion = project.version.toString()
 
-    outputs.dir(outputDir)
+        outputs.dir(outputDir)
 
-    doLast {
-        val gitCommit = try {
-            providers.exec {
-                commandLine("git", "rev-parse", "HEAD")
-            }.standardOutput.asText.get().trim()
-        } catch (_: Exception) {
-            "UNKNOWN"
-        }
+        doLast {
+            val gitCommit =
+                try {
+                    providers
+                        .exec { commandLine("git", "rev-parse", "HEAD") }
+                        .standardOutput
+                        .asText
+                        .get()
+                        .trim()
+                } catch (_: Exception) {
+                    "UNKNOWN"
+                }
 
-        val gitBranch = try {
-            providers.exec {
-                commandLine("git", "rev-parse", "--abbrev-ref", "HEAD")
-            }.standardOutput.asText.get().trim()
-        } catch (_: Exception) {
-            "UNKNOWN"
-        }
+            val gitBranch =
+                try {
+                    providers
+                        .exec { commandLine("git", "rev-parse", "--abbrev-ref", "HEAD") }
+                        .standardOutput
+                        .asText
+                        .get()
+                        .trim()
+                } catch (_: Exception) {
+                    "UNKNOWN"
+                }
 
-        val timestamp = OffsetDateTime.now().format(
-            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX")
-        )
+            val timestamp =
+                OffsetDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SXXX"))
 
-        val timestampRegex = Regex("clinicalreasoning\\.timestamp=.*\\n")
-        val content = buildString {
-            appendLine("clinicalreasoning.buildnumber=$gitCommit")
-            appendLine("clinicalreasoning.timestamp=$timestamp")
-            appendLine("clinicalreasoning.version=$projectVersion")
-            appendLine("scmBranch=$gitBranch")
-        }
-
-        // Only write if meaningful content changed (ignoring the timestamp)
-        // to avoid triggering IDE file-watcher rebuild loops.
-        val file = propsFile.get().asFile
-        file.parentFile.mkdirs()
-        if (file.exists()) {
-            val existing = file.readText()
-            if (existing.replace(timestampRegex, "") == content.replace(timestampRegex, "")) {
-                return@doLast
+            val timestampRegex = Regex("clinicalreasoning\\.timestamp=.*\\n")
+            val content = buildString {
+                appendLine("clinicalreasoning.buildnumber=$gitCommit")
+                appendLine("clinicalreasoning.timestamp=$timestamp")
+                appendLine("clinicalreasoning.version=$projectVersion")
+                appendLine("scmBranch=$gitBranch")
             }
+
+            // Only write if meaningful content changed (ignoring the timestamp)
+            // to avoid triggering IDE file-watcher rebuild loops.
+            val file = propsFile.get().asFile
+            file.parentFile.mkdirs()
+            if (file.exists()) {
+                val existing = file.readText()
+                if (existing.replace(timestampRegex, "") == content.replace(timestampRegex, "")) {
+                    return@doLast
+                }
+            }
+            file.writeText(content)
         }
-        file.writeText(content)
     }
-}
 
 sourceSets.main { resources.srcDir(generateBuildProperties.map { it.outputs.files.singleFile }) }
 
-tasks.named("processResources") {
-    dependsOn(generateBuildProperties)
-}
+tasks.named("processResources") { dependsOn(generateBuildProperties) }

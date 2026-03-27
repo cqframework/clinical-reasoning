@@ -7,9 +7,10 @@ spotless {
         palantirJavaFormat(BuildConfig.PALANTIR_FORMAT)
     }
     kotlin {
-        ktfmt(BuildConfig.KTFMT)
+        ktfmt(BuildConfig.KTFMT).kotlinlangStyle()
     }
+
     kotlinGradle {
-        ktfmt(BuildConfig.KTFMT)
+        ktfmt(BuildConfig.KTFMT).kotlinlangStyle()
     }
 }

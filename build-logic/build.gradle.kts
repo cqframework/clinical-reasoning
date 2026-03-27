@@ -6,6 +6,11 @@ plugins {
 fun Provider<PluginDependency>.asDep() =
     map { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" }
 
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
+}
+
 dependencies {
     implementation(libs.plugins.spotless.asDep())
     implementation(libs.plugins.kotlin.jvm.asDep())

@@ -9,7 +9,9 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome
  */
 object OperationOutcomes {
 
-    /** Returns a new OperationOutcome resource for the given FHIR version, or null if unsupported. */
+    /**
+     * Returns a new OperationOutcome resource for the given FHIR version, or null if unsupported.
+     */
     @JvmStatic
     fun newOperationOutcome(fhirVersion: FhirVersionEnum): IBaseOperationOutcome? =
         when (fhirVersion) {

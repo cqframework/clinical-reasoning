@@ -9,9 +9,7 @@ plugins {
 
 // No animal-sniffer for this module
 
-application {
-    mainClass = "org.opencds.cqf.fhir.cr.cli.Main"
-}
+application { mainClass = "org.opencds.cqf.fhir.cr.cli.Main" }
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     mainClass = "org.opencds.cqf.fhir.cr.cli.Main"

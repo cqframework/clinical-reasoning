@@ -34,6 +34,22 @@ public class InMemoryRepositoryTest {
     }
 
     @Test
+    void readPlainIdWithRelativeReference() {
+        // Issue #945: resource stored with plain ID should be found via relative reference
+        repository.update(new Library().setId("test-lib"));
+        IBaseResource res = repository.read(Library.class, new IdType("Library/test-lib"), null);
+        assertEquals("test-lib", res.getIdElement().getIdPart());
+    }
+
+    @Test
+    void readRelativeReferenceWithPlainId() {
+        // Issue #945: resource stored with relative reference should be found via plain ID
+        repository.update(new Library().setId("Library/test-lib2"));
+        IBaseResource res = repository.read(Library.class, new IdType("test-lib2"), null);
+        assertEquals("test-lib2", res.getIdElement().getIdPart());
+    }
+
+    @Test
     void searchWithId() {
 
         var search = Searches.byId("example1");

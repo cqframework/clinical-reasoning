@@ -26,9 +26,9 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportContained;
@@ -232,14 +232,7 @@ public class Measure {
             this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
                     new MeasureReference.ById(new IdType("Measure", measureId)),
                     new MeasureEvaluationRequest(
-                            periodStart,
-                            periodEnd,
-                            reportType,
-                            subject,
-                            practitioner,
-                            null,
-                            productLine,
-                            null),
+                            periodStart, periodEnd, reportType, subject, practitioner, null, productLine, null),
                     new MeasureEnvironment(null, null, null, additionalData)
                             .resolve(multiMeasureService.getRepository()),
                     parameters);

@@ -47,9 +47,9 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FIL
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
@@ -255,14 +255,7 @@ class MultiMeasure {
             this.operation = () -> service.evaluateWithDefs(
                     measureRefs,
                     new MeasureEvaluationRequest(
-                            periodStart,
-                            periodEnd,
-                            reportType,
-                            subject,
-                            null,
-                            null,
-                            productLine,
-                            reporter),
+                            periodStart, periodEnd, reportType, subject, null, null, productLine, reporter),
                     new MeasureEnvironment(null, null, null, additionalData).resolve(service.getRepository()),
                     parameters);
             return this;

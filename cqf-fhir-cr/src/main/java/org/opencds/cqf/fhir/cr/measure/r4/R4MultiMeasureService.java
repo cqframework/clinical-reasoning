@@ -30,9 +30,9 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
-import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -76,7 +76,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @Override
     public MeasureReport evaluate(MeasureReference measure, MeasureEvaluationRequest request, Parameters parameters) {
-        return evaluateSingleMeasureCaptureDef(measure, request, repository, parameters).measureReport();
+        return evaluateSingleMeasureCaptureDef(measure, request, repository, parameters)
+                .measureReport();
     }
 
     /**
@@ -93,7 +94,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      */
     @VisibleForTesting
     MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
-            MeasureReference measure, MeasureEvaluationRequest request, IRepository resolvedRepo, Parameters parameters) {
+            MeasureReference measure,
+            MeasureEvaluationRequest request,
+            IRepository resolvedRepo,
+            Parameters parameters) {
 
         final List<List<MeasureDefAndR4MeasureReport>> resultsAsListOfList =
                 evaluateToListOfList(SingleOrMultiple.SINGLE, List.of(measure), request, resolvedRepo, parameters);

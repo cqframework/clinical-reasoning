@@ -31,8 +31,7 @@ public class MeasureOperationsProvider {
     private final FhirVersionEnum fhirVersion;
 
     public MeasureOperationsProvider(
-            IMeasureServiceFactory dstu3MeasureProcessorFactory,
-            StringTimePeriodHandler stringTimePeriodHandler) {
+            IMeasureServiceFactory dstu3MeasureProcessorFactory, StringTimePeriodHandler stringTimePeriodHandler) {
         this.dstu3MeasureProcessorFactory = dstu3MeasureProcessorFactory;
         this.stringTimePeriodHandler = stringTimePeriodHandler;
         fhirVersion = FhirVersionEnum.DSTU3;

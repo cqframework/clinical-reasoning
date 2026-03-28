@@ -8,7 +8,6 @@ import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -442,11 +441,13 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
                 throw new InternalErrorException("resolved search parameter definition is null");
             }
 
-            // a date range is a search && condition - so we'll use a composite
+            // a date range is a search AND condition — each put() on the Multimap
+            // adds a separate AND clause (one for >= start, one for <= end)
             DateParam gte = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);
             DateParam lte = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end);
 
-            searchParams.put(sp.getName(), List.of(new CompositeParam<>(gte, lte)));
+            searchParams.put(sp.getName(), makeMutableSingleElementList(gte));
+            searchParams.put(sp.getName(), makeMutableSingleElementList(lte));
         } else if (StringUtils.isNotBlank(dateLowPath)) {
             List<IQueryParameterType> dateRangeParam = new ArrayList<>();
             DateParam dateParam = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start);

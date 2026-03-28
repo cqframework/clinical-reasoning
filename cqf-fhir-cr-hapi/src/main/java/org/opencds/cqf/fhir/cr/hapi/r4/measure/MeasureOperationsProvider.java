@@ -21,8 +21,10 @@ import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationParameters;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureSubject;
 
 @SuppressWarnings("java:S107")
 public class MeasureOperationsProvider {
@@ -91,15 +93,21 @@ public class MeasureOperationsProvider {
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
+        String effectiveSubject;
+        if (practitioner != null && !practitioner.isBlank()) {
+            effectiveSubject = practitioner.contains("/") ? practitioner : "Practitioner/" + practitioner;
+        } else {
+            effectiveSubject = subject;
+        }
         var request = new MeasureEvaluationRequest(
-                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                reportType,
-                subject,
-                practitioner,
-                lastReceivedOn,
-                productLine,
-                null);
+                new MeasureSubject(effectiveSubject),
+                new MeasureEvaluationParameters(
+                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                        reportType,
+                        lastReceivedOn,
+                        productLine,
+                        null));
         return r4MeasureServiceFactory
                 .create(requestDetails, environment)
                 .evaluate(new MeasureReference.ById(id), request, parameters);
@@ -159,15 +167,21 @@ public class MeasureOperationsProvider {
         var measureRefs = MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl);
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
+        String effectiveSubject;
+        if (practitioner != null && !practitioner.isBlank()) {
+            effectiveSubject = practitioner.contains("/") ? practitioner : "Practitioner/" + practitioner;
+        } else {
+            effectiveSubject = subject;
+        }
         var request = new MeasureEvaluationRequest(
-                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                reportType,
-                subject,
-                practitioner,
-                lastReceivedOn,
-                productLine,
-                reporter);
+                new MeasureSubject(effectiveSubject),
+                new MeasureEvaluationParameters(
+                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                        reportType,
+                        lastReceivedOn,
+                        productLine,
+                        reporter));
         return r4MultiMeasureServiceFactory
                 .create(requestDetails, environment)
                 .evaluate(measureRefs, request, parameters);

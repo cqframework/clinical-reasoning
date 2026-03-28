@@ -20,7 +20,9 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.dstu3.IMeasureServiceFactory;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationParameters;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureSubject;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -79,15 +81,17 @@ public class MeasureOperationsProvider {
             throws InternalErrorException, FHIRException {
         var terminologyEndpointParam = (Endpoint) getEndpoint(fhirVersion, terminologyEndpoint);
         var environment = new MeasureEnvironment(null, terminologyEndpointParam, null, additionalData);
+        var parsedStart = stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails);
+        var parsedEnd = stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails);
+        String effectiveSubject;
+        if (practitioner != null && !practitioner.isBlank()) {
+            effectiveSubject = practitioner.contains("/") ? practitioner : "Practitioner/" + practitioner;
+        } else {
+            effectiveSubject = patient;
+        }
         var request = new MeasureEvaluationRequest(
-                stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                reportType,
-                patient,
-                practitioner,
-                lastReceivedOn,
-                productLine,
-                null);
+                new MeasureSubject(effectiveSubject),
+                new MeasureEvaluationParameters(parsedStart, parsedEnd, reportType, lastReceivedOn, productLine, null));
         return dstu3MeasureProcessorFactory
                 .create(requestDetails, environment)
                 .evaluateMeasure(id, request, parameters);

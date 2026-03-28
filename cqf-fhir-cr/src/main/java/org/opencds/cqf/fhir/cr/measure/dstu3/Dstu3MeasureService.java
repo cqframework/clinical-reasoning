@@ -99,17 +99,17 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
 
         MeasureReport report = processor.evaluateMeasure(
                 id,
-                request.periodStart(),
-                request.periodEnd(),
-                request.reportType(),
-                Collections.singletonList(request.subjectId()),
+                request.parameters().periodStart(),
+                request.parameters().periodEnd(),
+                request.parameters().reportType(),
+                Collections.singletonList(request.subject().id()),
                 null,
                 parameters);
 
-        if (request.productLine() != null) {
+        if (request.parameters().productLine() != null) {
             Extension ext = new Extension();
             ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");
-            ext.setValue(new StringType(request.productLine()));
+            ext.setValue(new StringType(request.parameters().productLine()));
             report.addExtension(ext);
         }
 

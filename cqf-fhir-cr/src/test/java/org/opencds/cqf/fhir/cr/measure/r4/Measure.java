@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
@@ -234,10 +235,8 @@ public class Measure {
                     reportType,
                     subject,
                     null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
+                    new MeasureEnvironment(null, null, null, additionalData)
+                            .resolve(multiMeasureService.getRepository()),
                     parameters,
                     productLine,
                     practitioner);

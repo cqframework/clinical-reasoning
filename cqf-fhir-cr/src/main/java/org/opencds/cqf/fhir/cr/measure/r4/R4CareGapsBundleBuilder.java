@@ -113,10 +113,6 @@ public class R4CareGapsBundleBuilder {
                     subject,
                     null,
                     null,
-                    null,
-                    null,
-                    null,
-                    null,
                     reporter);
 
             var entries = result.getParameter().stream()

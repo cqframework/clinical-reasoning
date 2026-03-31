@@ -26,6 +26,7 @@ class DataRequirementCodeFilterAdapterTest {
         assertNotNull(adapter);
         assertEquals(codeFilter, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirContext().getVersion().getVersion());
+        assertNotNull(adapter.fhirTerser());
     }
 
     @Test

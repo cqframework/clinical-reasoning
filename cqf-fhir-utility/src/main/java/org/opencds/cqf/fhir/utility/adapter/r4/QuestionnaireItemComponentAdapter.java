@@ -14,11 +14,14 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.utility.adapter.*;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 
-public class QuestionnaireItemComponentAdapter extends BaseElementAdapter
-        implements IQuestionnaireItemComponentAdapter {
+public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQuestionnaireItemComponentAdapter {
 
     private final QuestionnaireItemComponent item;
 

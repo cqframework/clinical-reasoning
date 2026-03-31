@@ -32,6 +32,7 @@ class QuestionnaireResponseAdapterTest {
         assertNotNull(adapter);
         assertEquals(response, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirVersion());
+        assertNotNull(adapter.fhirTerser());
         assertNotNull(adapter.getAdapterFactory());
         adapter.setId("test");
         var canonical = "test.com/Questionnaire/test";

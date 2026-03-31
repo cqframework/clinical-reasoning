@@ -4,7 +4,9 @@ import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.collect.Sets;
+import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;

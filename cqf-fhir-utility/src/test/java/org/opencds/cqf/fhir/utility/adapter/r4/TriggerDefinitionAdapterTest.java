@@ -26,6 +26,7 @@ class TriggerDefinitionAdapterTest {
         assertNotNull(adapter);
         assertEquals(triggerDef, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirContext().getVersion().getVersion());
+        assertNotNull(adapter.fhirTerser());
     }
 
     @Test

@@ -3,12 +3,12 @@ package org.opencds.cqf.fhir.utility.adapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -37,6 +37,8 @@ public interface IAdapter<T extends IBase> {
 
     FhirContext fhirContext();
 
+    FhirTerser fhirTerser();
+
     default FhirVersionEnum fhirVersion() {
         return fhirContext().getVersion().getVersion();
     }
@@ -60,6 +62,9 @@ public interface IAdapter<T extends IBase> {
         }
         return null;
     }
+
+
+//    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
 
     default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
         try {

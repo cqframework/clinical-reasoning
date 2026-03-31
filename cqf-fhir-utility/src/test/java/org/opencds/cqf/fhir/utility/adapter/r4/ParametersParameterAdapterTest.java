@@ -37,6 +37,7 @@ class ParametersParameterAdapterTest {
         assertNotNull(adapter);
         assertEquals(parameters, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirContext().getVersion().getVersion());
+        assertNotNull(adapter.fhirTerser());
     }
 
     @Test

@@ -1,33 +1,33 @@
-// package org.opencds.cqf.fhir.utility.model;
+//package org.opencds.cqf.fhir.utility.model;
 //
-// import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-// import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-// import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-// import ca.uhn.fhir.context.FhirContext;
-// import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
-// import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-// import java.util.ArrayList;
-// import java.util.List;
-// import java.util.regex.Pattern;
-// import org.apache.commons.lang3.StringUtils;
-// import org.hl7.fhir.instance.model.api.IAnyResource;
-// import org.hl7.fhir.instance.model.api.IBase;
-// import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-// import org.hl7.fhir.instance.model.api.IBaseElement;
-// import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
-// import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-// import org.hl7.fhir.instance.model.api.IBaseExtension;
-// import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-// import org.hl7.fhir.instance.model.api.ICompositeType;
-// import org.hl7.fhir.instance.model.api.IPrimitiveType;
-// import org.opencds.cqf.cql.engine.fhir.exception.UnknownType;
-// import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-// import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
-// import org.opencds.cqf.cql.engine.model.ModelResolver;
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
+//import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+//import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+//import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+//import ca.uhn.fhir.context.FhirContext;
+//import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
+//import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.regex.Pattern;
+//import org.apache.commons.lang3.StringUtils;
+//import org.hl7.fhir.instance.model.api.IAnyResource;
+//import org.hl7.fhir.instance.model.api.IBase;
+//import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+//import org.hl7.fhir.instance.model.api.IBaseElement;
+//import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
+//import org.hl7.fhir.instance.model.api.IBaseEnumeration;
+//import org.hl7.fhir.instance.model.api.IBaseExtension;
+//import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+//import org.hl7.fhir.instance.model.api.ICompositeType;
+//import org.hl7.fhir.instance.model.api.IPrimitiveType;
+//import org.opencds.cqf.cql.engine.fhir.exception.UnknownType;
+//import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+//import org.opencds.cqf.cql.engine.model.CachingModelResolverDecorator;
+//import org.opencds.cqf.cql.engine.model.ModelResolver;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 //
-// public class DynamicModelResolver extends CachingModelResolverDecorator {
+//public class DynamicModelResolver extends CachingModelResolverDecorator {
 //    protected static final Logger logger = LoggerFactory.getLogger(DynamicModelResolver.class);
 //
 //    private static final String CANONICAL = "CanonicalType";
@@ -377,4 +377,4 @@
 //        }
 //        return retVal;
 //    }
-// }
+//}

@@ -400,11 +400,17 @@ class EnginesTest {
 
         var federatedDataProvider = (FederatedDataProvider) dataProvider1;
 
-        var retrievedPatients = retrieve(Patient.class, federatedDataProvider);
+        var retrievedPatients = new ArrayList<>();
+        federatedDataProvider
+                .retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null)
+                .forEach(retrievedPatients::add);
         assertThat(retrievedPatients, hasSize(1));
 
-        var retrieveEncounters = retrieve(Encounter.class, federatedDataProvider);
-        assertThat(retrieveEncounters, hasSize(1));
+        var retrievedEncounters = new ArrayList<>();
+        federatedDataProvider
+                .retrieve(null, null, null, "Encounter", null, null, null, null, null, null, null, null)
+                .forEach(retrievedEncounters::add);
+        assertThat(retrievedEncounters, hasSize(1));
     }
 
     @Test
@@ -712,9 +718,11 @@ class EnginesTest {
 
         var federatedDataProvider = (FederatedDataProvider) dataProvider1;
 
-        var retrievedPatients = retrieve(Patient.class, federatedDataProvider);
-
-        assertThat(retrievedPatients, hasSize(1));
+        var retrieved = new ArrayList<>();
+        federatedDataProvider
+                .retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null)
+                .forEach(retrieved::add);
+        assertThat(retrieved, hasSize(1));
     }
 
     private static class NpmProcessorWithDupeNamespaces extends NpmProcessor {

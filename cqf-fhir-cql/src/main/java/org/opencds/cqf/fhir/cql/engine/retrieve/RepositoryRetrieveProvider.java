@@ -18,6 +18,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -74,8 +75,12 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
 
         var resources = this.repository.search(bt, resourceType, config.searchParams, headers);
 
+        var modelResolver = FhirModelResolverCache.resolverForVersion(fhirContext.getVersion().getVersion());
         var iter = new BundleMappingIterable<>(repository, resources, p -> p.getResource());
-        return iter.toStream().filter(config.filter).collect(Collectors.toList());
+        return iter.toStream()
+                .filter(config.filter)
+                .map(r -> (Object) modelResolver.toCqlValue(r, false))
+                .collect(Collectors.toList());
     }
 
     // Create headers for the FHIR compartment search (e.g. X-FHIR-Compartment: Patient/123)

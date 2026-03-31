@@ -23,7 +23,6 @@ import org.springframework.data.util.StreamUtils;
 class HapiCreateChangelogProcessorTest {
 
     public HapiCreateChangelogProcessor createChangelogProcessor;
-    public InMemoryFhirRepository repository;
 
     @Test
     void create_changelog_pages() {

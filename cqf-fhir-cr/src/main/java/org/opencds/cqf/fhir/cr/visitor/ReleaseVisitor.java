@@ -229,7 +229,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private void captureInputExpansionParams(
+    protected void captureInputExpansionParams(
             IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(

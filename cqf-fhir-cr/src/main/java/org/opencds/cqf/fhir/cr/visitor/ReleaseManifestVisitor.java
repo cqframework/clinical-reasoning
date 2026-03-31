@@ -167,18 +167,4 @@ public class ReleaseManifestVisitor extends ReleaseVisitor {
 
         adapter.setParameter(new java.util.ArrayList<>(filtered));
     }
-
-    private void captureInputExpansionParams(
-            IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
-        if (this.fhirVersion().equals(ca.uhn.fhir.context.FhirVersionEnum.DSTU3)) {
-            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(
-                    inputExpansionParams, rootAdapter);
-        } else if (this.fhirVersion().equals(ca.uhn.fhir.context.FhirVersionEnum.R4)) {
-            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.captureInputExpansionParams(
-                    inputExpansionParams, rootAdapter);
-        } else if (this.fhirVersion().equals(ca.uhn.fhir.context.FhirVersionEnum.R5)) {
-            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.captureInputExpansionParams(
-                    inputExpansionParams, rootAdapter);
-        }
-    }
 }

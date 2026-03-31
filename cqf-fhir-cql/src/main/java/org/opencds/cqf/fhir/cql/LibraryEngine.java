@@ -28,11 +28,13 @@ import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams.LibraryParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +47,14 @@ public class LibraryEngine {
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
     protected final IAdapterFactory adapterFactory;
+    protected final FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver;
 
     public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
+        modelResolver = FhirModelResolverCache.resolverForVersion(fhirContext.getVersion().getVersion());
     }
 
     public IRepository getRepository() {
@@ -149,11 +153,11 @@ public class LibraryEngine {
         if (contextParameter != null) {
             var contextType = getModelName(contextParameter);
             cqlParameters.add(new CqlParameterDefinition("%context", contextType, false));
-            evaluationParameters.put("%context", contextParameter);
+            evaluationParameters.put("%context", modelResolver.toCqlValue(contextParameter, false));
 
             var resourceType = resourceParameter == null ? contextType : getModelName(resourceParameter);
             cqlParameters.add(new CqlParameterDefinition("%resource", resourceType, false));
-            evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
+            evaluationParameters.put("%resource", modelResolver.toCqlValue(resourceParameter == null ? contextParameter : resourceParameter, false));
         }
         if (rawParameters != null) {
             rawParameters.forEach((k, v) -> {

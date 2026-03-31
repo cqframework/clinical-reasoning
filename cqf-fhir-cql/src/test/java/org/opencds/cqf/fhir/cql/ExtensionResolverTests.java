@@ -27,11 +27,12 @@ class ExtensionResolverTests {
     void extensionResolution() {
         var repository = new InMemoryFhirRepository(FhirContext.forR4Cached());
         var libraryEngine = new LibraryEngine(repository, EvaluationSettings.getDefault());
-        var subjectId = Ids.newId(repository.fhirContext().getVersion().getVersion(), "Patient/Patient1");
+        var patientId = "Patient/Patient1";
+        var subjectId = Ids.newId(repository.fhirContext().getVersion().getVersion(), patientId);
 
         var params = parameters();
-        params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
-        params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael"))));
+        params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice")).setId(patientId)));
+        params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael")).setId("Practitioner1")));
         var extensionValue = new MarkdownType();
         extensionValue.addExtension(expressionExtension);
         var extensions = Collections.singletonList(new Extension(EXTENSION_URL, extensionValue));

@@ -24,11 +24,13 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.slf4j.LoggerFactory;
 
 public class CqlFhirParametersConverter {
@@ -38,6 +40,7 @@ public class CqlFhirParametersConverter {
     protected IAdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
     protected FhirContext fhirContext;
+    protected FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver;
     protected IFhirPath fhirPath;
 
     /*
@@ -48,6 +51,7 @@ public class CqlFhirParametersConverter {
         this.fhirContext = requireNonNull(fhirContext);
         this.adapterFactory = requireNonNull(adapterFactory);
         this.fhirTypeConverter = requireNonNull(fhirTypeConverter);
+        this.modelResolver = FhirModelResolverCache.resolverForVersion(this.fhirContext.getVersion().getVersion());
         this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
@@ -338,7 +342,7 @@ public class CqlFhirParametersConverter {
         if (ppca.hasValue()) {
             return this.fhirTypeConverter.toCqlType(ppca.getValue());
         } else if (ppca.hasResource()) {
-            return ppca.getResource();
+            return modelResolver.toCqlValue(ppca.getResource(), false);
         } else if (ppca.hasPart()) {
             logger.debug("Ignored {} parameter sub-parts", ppca.getPart().size());
         }

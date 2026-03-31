@@ -53,8 +53,8 @@ class LibraryEngineTests {
     void fhirPath() {
         var patientId = "Patient/Patient1";
         var params = parameters();
-        params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice"))));
-        params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael"))));
+        params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice")).setId(patientId)));
+        params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael")).setId("Practitioner1")));
         var expression = new CqfExpression(
                 "text/fhirpath",
                 "'Greeting: Hello! ' + %subject.name.given.first() + ' Message: Test message Practitioner: ' + %practitioner.name.given.first()",

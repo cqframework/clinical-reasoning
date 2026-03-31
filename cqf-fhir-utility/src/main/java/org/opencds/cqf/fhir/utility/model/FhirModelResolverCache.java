@@ -7,9 +7,9 @@ import java.util.EnumMap;
 import java.util.Map;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu2FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R5FhirModelResolver;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 
 public class FhirModelResolverCache {
 
@@ -17,12 +17,12 @@ public class FhirModelResolverCache {
         // intentionally empty
     }
 
-    private static final Map<FhirVersionEnum, ModelResolver> cache = new EnumMap<>(FhirVersionEnum.class);
+    private static final Map<FhirVersionEnum, FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?>> cache = new EnumMap<>(FhirVersionEnum.class);
 
-    public static ModelResolver resolverForVersion(FhirVersionEnum fhirVersionEnum) {
+    public static FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> resolverForVersion(FhirVersionEnum fhirVersionEnum) {
         requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
         if (!cache.containsKey(fhirVersionEnum)) {
-            ModelResolver resolver = switch (fhirVersionEnum) {
+            var resolver = switch (fhirVersionEnum) {
                 case DSTU2 -> new Dstu2FhirModelResolver();
                 case DSTU3 -> new Dstu3FhirModelResolver();
                 case R4 -> new R4FhirModelResolver();

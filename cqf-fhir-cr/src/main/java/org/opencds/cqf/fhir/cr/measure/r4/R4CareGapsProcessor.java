@@ -12,25 +12,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Measure.MeasureGroupComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.constant.CareGapsConstants;
 import org.opencds.cqf.fhir.cr.measure.enumeration.CareGapsStatusCode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
-import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,18 +70,21 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
             @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> status,
-            List<Either3<IdType, String, CanonicalType>> measure,
+            List<MeasureReference> measureRefs,
             boolean notDocument) {
 
         // set Parameters
         R4CareGapsParameters r4CareGapsParams =
-                setCareGapParameters(periodStart, periodEnd, subject, status, measure, notDocument);
+                setCareGapParameters(periodStart, periodEnd, subject, status, measureRefs, notDocument);
 
         // validate and set required configuration resources for care-gaps
         checkConfigurationReferences();
 
         // validate required parameter values
-        checkValidStatusCode(measure, r4CareGapsParams.getStatus());
+        if (measureRefs.isEmpty()) {
+            throw new InvalidRequestException("no measure resolving parameter was specified for care-gaps");
+        }
+        checkValidStatusCode(measureRefs, r4CareGapsParams.getStatus());
         List<Measure> measures = resolveMeasure(r4CareGapsParams.getMeasure());
         measureCompatibilityCheck(measures);
 
@@ -96,10 +96,8 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
 
         // Build Patient Bundles
 
-        List<Parameters.ParametersParameterComponent> components = r4CareGapsBundleBuilder.makePatientBundles(
-                subjects,
-                r4CareGapsParams,
-                measures.stream().map(Resource::getIdElement).collect(Collectors.toList()));
+        List<Parameters.ParametersParameterComponent> components =
+                r4CareGapsBundleBuilder.makePatientBundles(subjects, r4CareGapsParams, measureRefs);
 
         // Return Results with Bundles
         return result.setParameter(components);
@@ -111,10 +109,10 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
             @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> status,
-            List<Either3<IdType, String, CanonicalType>> measure,
+            List<MeasureReference> measureRefs,
             boolean notDocument) {
         R4CareGapsParameters r4CareGapsParams = new R4CareGapsParameters();
-        r4CareGapsParams.setMeasure(measure);
+        r4CareGapsParams.setMeasure(measureRefs);
         r4CareGapsParams.setPeriodStart(periodStart);
         r4CareGapsParams.setPeriodEnd(periodEnd);
         r4CareGapsParams.setStatus(status);
@@ -124,12 +122,18 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     }
 
     @Override
-    public List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure) {
-        return measure.stream()
-                .map(x -> x.fold(
-                        id -> repository.read(Measure.class, id),
-                        r4MeasureServiceUtils::resolveByIdentifier,
-                        canonical -> r4MeasureServiceUtils.resolveByUrl(canonical.asStringValue())))
+    public List<Measure> resolveMeasure(List<MeasureReference> measureRefs) {
+        return measureRefs.stream()
+                .map(ref -> {
+                    if (ref instanceof MeasureReference.ById byId) {
+                        return repository.read(Measure.class, byId.id());
+                    } else if (ref instanceof MeasureReference.ByIdentifier byIdent) {
+                        return r4MeasureServiceUtils.resolveByIdentifier(byIdent.identifier());
+                    } else if (ref instanceof MeasureReference.ByCanonicalUrl byUrl) {
+                        return r4MeasureServiceUtils.resolveByUrl(byUrl.url());
+                    }
+                    throw new IllegalArgumentException("Unknown MeasureReference type: " + ref.getClass());
+                })
                 .collect(Collectors.toList());
     }
 
@@ -175,7 +179,7 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
     }
 
     @Override
-    public void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses) {
+    public void checkValidStatusCode(List<MeasureReference> measureRefs, List<String> statuses) {
         r4MeasureServiceUtils.listThrowIllegalArgumentIfEmpty(statuses, "status");
 
         for (String status : statuses) {
@@ -185,7 +189,11 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
                     && !CareGapsStatusCode.PROSPECTIVE_GAP.toString().equals(status)) {
                 throw new InvalidRequestException(
                         "CareGap status parameter: %s, is not an accepted value for Measure: %s"
-                                .formatted(status, printEithers(measure)));
+                                .formatted(
+                                        status,
+                                        measureRefs.stream()
+                                                .map(MeasureReference::display)
+                                                .collect(Collectors.toList())));
             }
         }
     }
@@ -254,11 +262,5 @@ public class R4CareGapsProcessor implements R4CareGapsProcessorInterface {
         addConfiguredResource(
                 careGapsProperties.getCareGapsCompositionSectionAuthor(),
                 CareGapsConstants.CARE_GAPS_SECTION_AUTHOR_KEY);
-    }
-
-    private static List<String> printEithers(List<Either3<IdType, String, CanonicalType>> either) {
-        return either.stream()
-                .map(x -> x.fold(IdType::getIdPart, Function.identity(), PrimitiveType::asStringValue))
-                .collect(Collectors.toList());
     }
 }

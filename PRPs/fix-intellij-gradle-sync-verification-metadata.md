@@ -5,7 +5,7 @@
 - **Status**: Implemented
 - **Priority**: High (Developer Experience)
 - **Estimated Effort**: 0.25 days
-- **Target Branch**: master
+- **Target Branch**: main
 - **Implementation Date**: 2026-03-03
 
 ## Problem Statement

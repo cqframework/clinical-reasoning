@@ -36,6 +36,22 @@ public class ReleaseManifestProvider {
      * pre-computed depends-on entries. Unlike $release, this operation does not re-discover
      * dependencies through component traversal. Instead, it resolves unversioned dependency
      * references using the terminology endpoint and updates manifest metadata for release.
+     * <p>
+     * This operation is designed to be used as part of the following workflow:
+     * <ol>
+     *   <li>{@code ImplementationGuide/$data-requirements} — analyzes an IG and produces a
+     *       module-definition Library with all dependencies, including key element classification
+     *       and ValueSet compose chain walking</li>
+     *   <li>{@code Library/$infer-manifest-parameters} — converts the module-definition Library
+     *       into an asset-collection manifest with expansion parameters and depends-on entries</li>
+     *   <li>{@code Library/$release-manifest} — releases the manifest by resolving unversioned
+     *       dependencies via the terminology endpoint and updating metadata (version, status, date)</li>
+     * </ol>
+     * <p>
+     * The {@code terminologyEndpoint} parameter should provide an {@link org.hl7.fhir.r4.model.Endpoint}
+     * with authentication headers for resolving terminology resources (e.g., VSAC). Set
+     * {@code latestFromTxServer=true} to enable terminology server resolution of unversioned
+     * ValueSet and CodeSystem references.
      */
     @Operation(name = CRMI_OPERATION_RELEASE_MANIFEST, idempotent = true, type = Library.class)
     @Description(

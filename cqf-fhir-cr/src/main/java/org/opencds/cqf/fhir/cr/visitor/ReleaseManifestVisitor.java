@@ -25,11 +25,20 @@ import org.slf4j.LoggerFactory;
 /**
  * Visitor that implements the $release-manifest operation for manifest Libraries (asset-collection).
  * <p>
+ * This visitor is designed to be used as part of the manifest release workflow:
+ * <ol>
+ *   <li>{@code ImplementationGuide/$data-requirements} — produces a module-definition Library
+ *       with all dependencies classified as key/default</li>
+ *   <li>{@code Library/$infer-manifest-parameters} — converts the module-definition Library into
+ *       an asset-collection manifest with expansion parameters and depends-on entries</li>
+ *   <li>{@code Library/$release-manifest} (this visitor) — releases the manifest by resolving
+ *       unversioned dependencies and updating metadata</li>
+ * </ol>
+ * <p>
  * Unlike the standard {@link ReleaseVisitor} which discovers dependencies by recursively walking
  * the component tree, this visitor operates on manifest Libraries that already have pre-computed
- * depends-on entries (typically produced by $data-requirements followed by $infer-manifest-parameters).
- * It resolves unversioned dependency references using the terminology endpoint and updates the
- * manifest metadata for release.
+ * depends-on entries. It resolves unversioned dependency references using the terminology endpoint
+ * and updates the manifest metadata for release.
  * <p>
  * This separation exists because the standard $release operation intentionally discards and
  * re-discovers depends-on entries through component traversal, which requires the referenced

@@ -26,7 +26,7 @@ class CodingAdapterTest {
         assertNotNull(adapter);
         assertEquals(coding, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.getModelResolver());
+        assertNotNull(adapter.fhirTerser());
     }
 
     @Test

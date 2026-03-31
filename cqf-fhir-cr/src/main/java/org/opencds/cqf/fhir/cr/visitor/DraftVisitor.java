@@ -236,7 +236,6 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
                         .ifPresent(resource -> {
                             int indexOfDraftInIdList = resourceListWithOriginalIds.indexOf(resource);
                             newResource
-                                    .getModelResolver()
                                     .setValue(
                                             useContext,
                                             "value",

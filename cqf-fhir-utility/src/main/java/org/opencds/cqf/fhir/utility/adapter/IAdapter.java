@@ -3,18 +3,17 @@ package org.opencds.cqf.fhir.utility.adapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,18 +35,20 @@ public interface IAdapter<T extends IBase> {
 
     FhirContext fhirContext();
 
+    FhirTerser fhirTerser();
+
     default FhirVersionEnum fhirVersion() {
         return fhirContext().getVersion().getVersion();
     }
 
     IAdapterFactory getAdapterFactory();
 
-    ModelResolver getModelResolver();
+//    <E extends IBaseExtension<?, ?>> void setExtension(List<E> extensions);
 
     default void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         try {
-            getModelResolver().setValue(get(), "extension", null);
-            getModelResolver().setValue(get(), "extension", extensions);
+            setValue(get(), "extension", null);
+            setValue(get(), "extension", extensions);
         } catch (Exception e) {
             // Do nothing
             logger.debug(MISSING_EXTENSION, get().fhirType());
@@ -56,9 +57,12 @@ public interface IAdapter<T extends IBase> {
 
     <E extends IBaseExtension<?, ?>> E addExtension();
 
+
+//    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
+
     default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
         try {
-            getModelResolver().setValue(get(), "extension", Collections.singletonList(extension));
+            setValue(get(), "extension", Collections.singletonList(extension));
         } catch (Exception e) {
             // Do nothing
             logger.debug(MISSING_EXTENSION, get().fhirType());
@@ -118,10 +122,12 @@ public interface IAdapter<T extends IBase> {
         return getExtension(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
-    @SuppressWarnings("unchecked")
     default List<IBase> resolvePathList(IBase base, String path) {
-        var pathResult = getModelResolver().resolvePath(base, path);
-        return pathResult instanceof List ? (List<IBase>) pathResult : new ArrayList<>();
+        try {
+            return fhirTerser().getValues(base, path);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -146,13 +152,16 @@ public interface IAdapter<T extends IBase> {
     }
 
     default IBase resolvePath(IBase base, String path) {
-        return (IBase) getModelResolver().resolvePath(base, path);
+        var pathResult = resolvePathList(base, path);
+        return pathResult.isEmpty() ? null : pathResult.get(0);
     }
 
     @SuppressWarnings("unchecked")
     default <B extends IBase> B resolvePath(IBase base, String path, Class<B> clazz) {
         return (B) resolvePath(base, path);
     }
+
+    void setValue(IBase base, String path, Object value);
 
     @SuppressWarnings("unchecked")
     static <T extends ICompositeType> T newPeriod(FhirVersionEnum version) {

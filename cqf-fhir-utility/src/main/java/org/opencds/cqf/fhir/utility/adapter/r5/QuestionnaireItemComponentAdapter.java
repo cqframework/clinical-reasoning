@@ -41,16 +41,6 @@ public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQ
     }
 
     @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
-    }
-
-    @Override
     public String getLinkId() {
         return item.getLinkId();
     }

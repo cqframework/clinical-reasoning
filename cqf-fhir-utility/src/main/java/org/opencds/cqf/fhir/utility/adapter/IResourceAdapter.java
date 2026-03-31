@@ -63,9 +63,10 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
     }
 
     default void addContained(IBaseResource base) {
-        var res = resolvePathList(get(), "contained", IBaseResource.class);
-        res.add(base);
-        getModelResolver().setValue(get(), "contained", res);
+        resolvePathList(get(), "contained").add(base);
+//        var res = resolvePathList(get(), "contained", IBaseResource.class);
+//        res.add(base);
+//        setValue(get(), "contained", res);
     }
 
     default boolean hasProperty(String propertyName) {

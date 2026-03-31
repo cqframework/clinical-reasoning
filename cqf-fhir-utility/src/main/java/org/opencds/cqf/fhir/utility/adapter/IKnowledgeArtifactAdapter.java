@@ -4,8 +4,6 @@ import static java.util.stream.Collectors.toMap;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateTimeType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newPeriod;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -21,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -37,6 +36,7 @@ import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     public static final Logger logger = LoggerFactory.getLogger(IKnowledgeArtifactAdapter.class);
     static final String DEPENDSON = "depends-on";
@@ -62,7 +62,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setName(String name) {
-        getModelResolver().setValue(get(), "name", newStringType(get().getStructureFhirVersionEnum(), name));
+        fhirTerser().setElement(get(), "name", name);
     }
 
     default boolean hasTitle() {
@@ -74,7 +74,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setTitle(String title) {
-        getModelResolver().setValue(get(), "title", newStringType(get().getStructureFhirVersionEnum(), title));
+        fhirTerser().setElement(get(), "title", title);
     }
 
     default String getDescriptor() {
@@ -94,7 +94,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setUrl(String url) {
-        getModelResolver().setValue(get(), "url", newUriType(get().getStructureFhirVersionEnum(), url));
+        fhirTerser().setElement(get(), "url", url);
     }
 
     default boolean hasVersion() {
@@ -106,7 +106,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setVersion(String version) {
-        getModelResolver().setValue(get(), "version", newStringType(get().getStructureFhirVersionEnum(), version));
+        fhirTerser().setElement(get(), "version", version);
     }
 
     /**
@@ -146,9 +146,12 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setApprovalDate(Date approvalDate) {
+        setApprovalDateElement(newDateType(get().getStructureFhirVersionEnum(), approvalDate));
+    }
+
+    default void setApprovalDateElement(IPrimitiveType<Date> approvalDate) {
         try {
-            getModelResolver()
-                    .setValue(get(), "approvalDate", newDateType(get().getStructureFhirVersionEnum(), approvalDate));
+            setValue(get(), "approvalDate", approvalDate);
         } catch (Exception e) {
             // Do nothing
             logger.debug("Field 'approvalDate' does not exist on Resource type {}", get().fhirType());
@@ -162,11 +165,11 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setDate(Date date) {
-        getModelResolver().setValue(get(), "date", newDateTimeType(get().getStructureFhirVersionEnum(), date));
+        setDateElement(newDateTimeType(get().getStructureFhirVersionEnum(), date));
     }
 
     default void setDateElement(IPrimitiveType<Date> date) {
-        getModelResolver().setValue(get(), "date", date);
+        setValue(get(), "date", date);
     }
 
     default String getPurpose() {
@@ -186,7 +189,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     default void setEffectivePeriod(ICompositeType period) {
         try {
-            getModelResolver().setValue(get(), "effectivePeriod", period);
+            setValue(get(), "effectivePeriod", period);
         } catch (Exception e) {
             // Do nothing
             logger.debug("Field 'effectivePeriod' does not exist on Resource type {}", get().fhirType());
@@ -282,7 +285,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     default <T extends ICompositeType & IBaseHasExtensions> void addRelatedArtifact(T relatedArtifact) {
         try {
-            getModelResolver().setValue(get(), "relatedArtifact", List.of(relatedArtifact));
+            setValue(get(), "relatedArtifact", List.of(relatedArtifact));
         } catch (Exception e) {
             // Do nothing
             logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
@@ -291,8 +294,8 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     default <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
         try {
-            getModelResolver().setValue(get(), "relatedArtifact", null);
-            getModelResolver().setValue(get(), "relatedArtifact", relatedArtifacts);
+            setValue(get(), "relatedArtifact", null);
+            setValue(get(), "relatedArtifact", relatedArtifacts);
         } catch (Exception e) {
             // Do nothing
             logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
@@ -374,11 +377,12 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     default Map<String, String> resolveCqfLibraries() {
         return getExtension().stream()
                 .filter(e -> Constants.CQF_LIBRARY.equals(e.getUrl()))
-                .map(e -> e.getValue())
+                .map(IBaseExtension::getValue)
                 .filter(IPrimitiveType.class::isInstance)
                 .map(IPrimitiveType.class::cast)
                 .map(IPrimitiveType::getValueAsString)
-                .map(l -> Map.entry(Canonicals.getIdPart(l), l))
+                .filter(l -> StringUtils.isNotBlank(Canonicals.getIdPart(l)))
+                .map(l -> Map.entry(Objects.requireNonNull(Canonicals.getIdPart(l)), l))
                 .filter(e -> e.getKey() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

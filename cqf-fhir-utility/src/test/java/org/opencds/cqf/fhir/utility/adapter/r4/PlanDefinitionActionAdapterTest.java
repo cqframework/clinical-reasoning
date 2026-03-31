@@ -44,7 +44,7 @@ class PlanDefinitionActionAdapterTest {
         assertNotNull(adapter);
         assertEquals(action, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.getModelResolver());
+        assertNotNull(adapter.fhirTerser());
     }
 
     @Test

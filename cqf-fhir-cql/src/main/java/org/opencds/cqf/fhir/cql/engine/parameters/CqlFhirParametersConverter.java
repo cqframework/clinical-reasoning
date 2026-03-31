@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cql.engine.parameters;
 import static java.util.Objects.requireNonNull;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,18 +17,18 @@ import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.slf4j.LoggerFactory;
 
 public class CqlFhirParametersConverter {
@@ -37,8 +38,7 @@ public class CqlFhirParametersConverter {
     protected IAdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
     protected FhirContext fhirContext;
-    // private IFhirPath fhirPath;
-    private final ModelResolver modelResolver;
+    protected IFhirPath fhirPath;
 
     /*
      * Converts both CQL parameters and CQL Evaluation Results into Fhir Parameters Resources
@@ -48,10 +48,7 @@ public class CqlFhirParametersConverter {
         this.fhirContext = requireNonNull(fhirContext);
         this.adapterFactory = requireNonNull(adapterFactory);
         this.fhirTypeConverter = requireNonNull(fhirTypeConverter);
-        this.modelResolver = FhirModelResolverCache.resolverForVersion(
-                this.fhirContext.getVersion().getVersion());
-
-        // this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
     // This is basically a copy and paste from R4FhirTypeConverter, but it's not exposed.
@@ -313,39 +310,28 @@ public class CqlFhirParametersConverter {
         return parameterMap;
     }
 
+    @SuppressWarnings("rawtypes")
     private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-        var type = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "type");
-        // Optional<IPrimitiveType> type = this.fhirPath
-        // .evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
-        // if (type.isPresent()) {
-        if (type instanceof IPrimitiveType<?> primitiveType) {
-            return primitiveType.getValueAsString();
-        }
+         Optional<IPrimitiveType> type = this.fhirPath
+         .evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
+        return type.map(IPrimitiveType::getValueAsString).orElse(null);
 
-        return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"rawtypes"})
     private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-        var max = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "max");
-        // Optional<IPrimitiveType> max = this.fhirPath
-        // .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
-        // if (max.isPresent()) {
-        if (max instanceof IPrimitiveType<?> type) {
-            String maxString = type.getValueAsString();
+         Optional<IPrimitiveType> max = this.fhirPath
+         .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
+        if (max.isPresent()) {
+            var maxString = max.get().getValueAsString();
 
             return !maxString.equals("1");
         }
 
-        var min = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "min");
-        // Optional<IBaseIntegerDatatype> min = this.fhirPath
-        // .evaluateFirst(parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
-        // if (min.isPresent()) {
-        if (min instanceof IPrimitiveType) {
-            return ((IPrimitiveType<Integer>) min).getValue() > 1;
-        }
+         Optional<IBaseIntegerDatatype> min = this.fhirPath
+         .evaluateFirst(parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
+        return min.filter(iBaseIntegerDatatype -> iBaseIntegerDatatype.getValue() > 1).isPresent();
 
-        return false;
     }
 
     private Object convertToCql(IParametersParameterComponentAdapter ppca) {

@@ -31,16 +31,6 @@ public class DataRequirementAdapter extends BaseAdapter implements IDataRequirem
     }
 
     @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
-    }
-
-    @Override
     public boolean hasId() {
         return get().hasId();
     }

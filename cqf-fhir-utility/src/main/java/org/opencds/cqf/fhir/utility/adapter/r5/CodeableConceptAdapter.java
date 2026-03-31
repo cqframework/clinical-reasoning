@@ -34,11 +34,6 @@ public class CodeableConceptAdapter extends BaseAdapter implements ICodeableConc
     }
 
     @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
-    }
-
-    @Override
     public boolean hasCoding() {
         return get().hasCoding();
     }

@@ -2,21 +2,23 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.collect.Sets;
+import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
-public abstract class BaseResourceAdapter implements IResourceAdapter {
-    protected final FhirContext fhirContext;
+import static java.util.Objects.requireNonNull;
+
+public abstract class BaseResourceAdapter extends AdapterBase implements IResourceAdapter {
+//    protected final FhirContext fhirContext;
+//    protected final FhirTerser fhirTerser;
     protected final BaseRuntimeElementDefinition<?> elementDefinition;
     protected final IBaseResource resource;
-    protected final ModelResolver modelResolver;
-    protected final IAdapterFactory adapterFactory;
+//    protected final IAdapterFactory adapterFactory;
 
     protected static final Set<String> LIBRARY_TYPES =
             Sets.newHashSet("logic-library", "model-definition", "asset-collection", "module-definition");
@@ -41,32 +43,25 @@ public abstract class BaseResourceAdapter implements IResourceAdapter {
             Sets.newHashSet(Constants.CQFM_EFFECTIVE_DATA_REQUIREMENTS, Constants.CRMI_EFFECTIVE_DATA_REQUIREMENTS);
 
     protected BaseResourceAdapter(IBaseResource resource) {
-        if (resource == null) {
-            throw new IllegalArgumentException("resource can not be null");
-        }
+        super(FhirContext.forCached(requireNonNull(resource.getStructureFhirVersionEnum())));
         this.resource = resource;
-        fhirContext = FhirContext.forCached(resource.getStructureFhirVersionEnum());
-        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
-        elementDefinition = fhirContext.getElementDefinition(this.resource.getClass());
-        modelResolver = FhirModelResolverCache.resolverForVersion(
-                fhirContext.getVersion().getVersion());
+//        fhirContext = FhirContext.forCached(resource.getStructureFhirVersionEnum());
+//        fhirTerser = new FhirTerser(fhirContext);
+//        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
+        elementDefinition = fhirContext().getElementDefinition(this.resource.getClass());
     }
 
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    public ModelResolver getModelResolver() {
-        return modelResolver;
-    }
+//    public FhirContext fhirContext() {
+//        return fhirContext;
+//    }
 
     public IBaseResource get() {
         return resource;
     }
 
-    public IAdapterFactory getAdapterFactory() {
-        return adapterFactory;
-    }
+//    public IAdapterFactory getAdapterFactory() {
+//        return adapterFactory;
+//    }
 
     @SuppressWarnings("unchecked")
     @Override

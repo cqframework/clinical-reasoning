@@ -36,10 +36,14 @@ public class R4ReleaseManifestService {
             Endpoint terminologyEndpoint,
             String releaseLabel)
             throws FHIRException {
-        var resource = (Library) SearchHelper.readRepository(repository, id);
-        if (resource == null) {
+        var baseResource = SearchHelper.readRepository(repository, id);
+        if (baseResource == null) {
             throw new ResourceNotFoundException(id);
         }
+        if (!(baseResource instanceof Library)) {
+            throw new FHIRException("$release-manifest requires a Library resource, found: " + baseResource.fhirType());
+        }
+        var resource = (Library) baseResource;
         var params = new Parameters();
         if (version != null) {
             params.addParameter("version", version);

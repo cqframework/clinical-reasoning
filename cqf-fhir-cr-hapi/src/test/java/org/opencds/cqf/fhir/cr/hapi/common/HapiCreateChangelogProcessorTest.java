@@ -443,7 +443,7 @@ class HapiCreateChangelogProcessorTest {
                 "AcanthamoebaDiseaseKeratitisDisordersSNOMED");
         var newLeafValueSetNames = List.of(
                 "Diagnosis_ProblemTriggersforPublicHealthReporting",
-                "AnkylosingSpondylitis",
+                "AnkylosingSpondylitisUpdated",
                 "Cholera (Disorders) (SNOMED)",
                 "UpdatedName");
         assertDoesNotThrow(() -> {

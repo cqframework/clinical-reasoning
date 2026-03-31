@@ -145,7 +145,7 @@
 							}
 						],
 						"type": "depends-on",
-						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090|20180310"
+						"resource": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090|20200310"
 					},
 					{
 						"extension": [
@@ -312,7 +312,7 @@
 					"include": [
 						{
 							"valueSet": [
-								"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090|20180310"
+								"http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090|20200310"
 							]
 						},
 						{
@@ -354,7 +354,7 @@
 			}
 		},
 		{
-			"fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090|20180310",
+			"fullUrl": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090|20200310",
 			"resource": {
 				"resourceType": "ValueSet",
 				"id": "2.16.840.1.113883.3.464.1003.113.11.1090",
@@ -370,8 +370,9 @@
 						"value": "urn:oid:2.16.840.1.113883.3.464.1003.113.11.1090"
 					}
 				],
-				"version": "20180310",
-				"status": "active",
+				"version": "20200310",
+        "name":"AnkylosingSpondylitisUpdated",
+        "status": "active",
 				"useContext": [
 					{
 						"code": {
@@ -422,7 +423,7 @@
 			"request": {
 				"method": "POST",
 				"url": "ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090",
-				"ifNoneExist": "url=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090&version=20180310"
+				"ifNoneExist": "url=http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.113.11.1090&version=20200310"
 			}
 		},
 		{

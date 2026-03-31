@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Patient;
@@ -156,7 +157,7 @@ class MeasureAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var copy = (Measure) adapter.copy();
         var adapterCopy = new MeasureAdapter(copy);
-        adapterCopy.setId(new IdDt("Measure", "plan-2"));
+        adapterCopy.setId(new IdType("Measure", "plan-2"));
         assertNotEquals(measure.getId(), copy.getId());
         measure.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

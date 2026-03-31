@@ -50,7 +50,7 @@ class ProcessRequestTests {
     void dstu3Request() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertInstanceOf(RequestGroup.class, requestOrchestration);
 
@@ -62,7 +62,7 @@ class ProcessRequestTests {
     void r4Request() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertInstanceOf(org.hl7.fhir.r4.model.RequestGroup.class, requestOrchestration);
 
@@ -74,7 +74,7 @@ class ProcessRequestTests {
     void r5Request() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine);
         var requestOrchestration = fixture.generateRequestOrchestration(request);
         assertInstanceOf(RequestOrchestration.class, requestOrchestration);
 

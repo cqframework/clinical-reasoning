@@ -48,7 +48,6 @@ class ActionResolverTests {
         var request = RequestHelpers.newPDApplyRequestForVersion(
                         fhirVersion,
                         libraryEngine,
-                        FhirModelResolverCache.resolverForVersion(fhirVersion),
                         null,
                         inputParameterResolver)
                 .setQuestionnaire(questionnaire);

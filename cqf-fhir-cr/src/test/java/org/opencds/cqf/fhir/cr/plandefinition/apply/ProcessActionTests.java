@@ -96,7 +96,7 @@ class ProcessActionTests {
         action.addInput(new org.hl7.fhir.r4.model.DataRequirement()
                 .addProfile("http://fhir.org/test/StructureDefinition/test"));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         fixture.addQuestionnaireItemForInput(request, actionAdapter);
@@ -117,7 +117,7 @@ class ProcessActionTests {
                 .setExpression(
                         new Expression().setLanguage("text/cql-expression").setExpression(expression));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doThrow(new IllegalArgumentException())
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), eq(null), any(), eq(null));
@@ -138,7 +138,7 @@ class ProcessActionTests {
         var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doReturn(null)
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
@@ -155,7 +155,7 @@ class ProcessActionTests {
         var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doReturn(List.of(new StringType("Test")))
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
@@ -191,7 +191,7 @@ class ProcessActionTests {
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var requestAction = fixture.generateRequestAction(actionAdapter);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
         doReturn(List.of(new BooleanType(true)))
                 .when(libraryEngine)
@@ -216,7 +216,7 @@ class ProcessActionTests {
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var requestAction = fixture.generateRequestAction(actionAdapter);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
         fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertTrue(requestAction.getAction().isEmpty());

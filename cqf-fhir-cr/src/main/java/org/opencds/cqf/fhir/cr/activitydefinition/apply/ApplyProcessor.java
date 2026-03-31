@@ -35,18 +35,18 @@ public class ApplyProcessor implements IApplyProcessor {
                 "Performing $apply operation on ActivityDefinition/{}",
                 request.getActivityDefinition().getIdElement().getIdPart());
 
-        var result = resolverFactory.create(request.getActivityDefinition()).resolve(request);
+        var result = request.getAdapterFactory().createResource(resolverFactory.create(request.getActivityDefinition()).resolve(request));
         var id = Ids.newId(
                 request.getFhirVersion(),
-                result.fhirType(),
+                result.get().fhirType(),
                 request.getActivityDefinition().getIdElement().getIdPart());
         result.setId(id);
-        resolveMeta(request.getActivityDefinition(), result);
+        resolveMeta(request.getActivityDefinition(), result.get());
         extensionProcessor.processExtensions(request, result, request.getActivityDefinition(), EXCLUDED_EXTENSION_LIST);
         dynamicValueProcessor.processDynamicValues(request, result, request.getActivityDefinition());
         request.resolveOperationOutcome(result);
 
-        return result;
+        return result.get();
     }
 
     protected void resolveMeta(IBaseResource activityDefinition, IBaseResource resource) {

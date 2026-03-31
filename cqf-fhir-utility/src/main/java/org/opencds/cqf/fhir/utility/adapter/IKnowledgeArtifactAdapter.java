@@ -45,13 +45,13 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     IDomainResource copy();
 
-    default IIdType getId() {
-        return get().getIdElement();
-    }
-
-    default void setId(IIdType id) {
-        get().setId(id);
-    }
+//    default IIdType getId() {
+//        return get().getIdElement();
+//    }
+//
+//    default void setId(IIdType id) {
+//        get().setId(id);
+//    }
 
     default boolean hasName() {
         return StringUtils.isNotBlank(getName());
@@ -115,7 +115,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
      */
     default String getCanonical() {
         if (!hasUrl()) {
-            return getId().getValueAsString();
+            return getId();
         }
         return getUrl().concat(hasVersion() ? "|%s".formatted(getVersion()) : "");
     }

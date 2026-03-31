@@ -114,7 +114,7 @@ public class ItemProcessor {
                             .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
                             .stream()
                             .map(r -> {
-                                if (r.fhirType().equals("Tuple")) {
+                                if (r != null && r.fhirType().equals("Tuple")) {
                                     return new Tuple()
                                             .withElements(request.getAdapterFactory()
                                                     .createTuple(r)
@@ -232,11 +232,12 @@ public class ItemProcessor {
         request.setContextVariable(responseItem.get());
         // if we have a definition use it to populate
         var definition = item.getDefinition();
-        if (StringUtils.isNotBlank(definition) && profile != null) {
-            final var pathValue = getPathValue(request, context, definition, profile);
+        if (StringUtils.isNotBlank(definition) && profile != null && context instanceof IBase contextBase) {
+            final var pathValue = getPathValue(request, contextBase, definition, profile);
             if (pathValue != null) {
                 final List<IBase> answerValue =
-                        pathValue instanceof List ? (List<IBase>) pathValue : List.of((IBase) pathValue);
+                    pathValue instanceof List ? (List<IBase>) pathValue
+                        : List.of((IBase) pathValue);
                 if (!answerValue.isEmpty()) {
                     addAuthorExtension(request, responseItem);
                 }
@@ -257,7 +258,7 @@ public class ItemProcessor {
     }
 
     protected Object getPathValue(
-            IOperationRequest request, Object context, String definition, IStructureDefinitionAdapter profile) {
+            IOperationRequest request, IBase context, String definition, IStructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
         var sliceName = Helpers.getSliceName(elementId);
@@ -268,7 +269,7 @@ public class ItemProcessor {
         if (StringUtils.isNotBlank(sliceName)) {
             path = path.split("\\.")[0];
         }
-        pathValue = context == null ? null : request.getModelResolver().resolvePath(context, path);
+        pathValue = context == null ? null : element.resolvePath(context, path);
         if (pathValue instanceof ArrayList<?> pathList) {
             if (elementId.contains(":")) {
                 pathValue = getSliceValue(request, profile, path, sliceName, pathList);
@@ -306,7 +307,7 @@ public class ItemProcessor {
                             }
                         }
                         var filterPath = filterSplit[sliceIndex + 1];
-                        var filterValue = request.resolvePath(value, filterPath);
+                        var filterValue = filterElement.resolvePath(value, filterPath);
                         var filter = filterElement.getDefaultOrFixedOrPattern();
                         if (filter instanceof IPrimitiveType<?> filterString
                                 && filterValue instanceof IPrimitiveType<?> valueString

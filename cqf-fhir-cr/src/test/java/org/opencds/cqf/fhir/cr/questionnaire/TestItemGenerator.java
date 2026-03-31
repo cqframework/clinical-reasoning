@@ -27,6 +27,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -118,36 +122,28 @@ public class TestItemGenerator {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedItem {
         final IRepository repository;
-        final IBaseResource questionnaire;
+        final IQuestionnaireAdapter questionnaire;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
-        final Map<String, IBaseBackboneElement> items;
+        final Map<String, IQuestionnaireItemComponentAdapter> items;
 
         public GeneratedItem(IRepository repository, IBaseResource questionnaire) {
             this.repository = repository;
-            this.questionnaire = questionnaire;
+            var adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
+            this.questionnaire = adapterFactory.createQuestionnaire(questionnaire);
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    this.repository.fhirContext().getVersion().getVersion());
             items = new HashMap<>();
-            populateItems(getItems(questionnaire));
+            populateItems(this.questionnaire.getItem());
         }
 
         @SuppressWarnings("unchecked")
-        private List<IBaseBackboneElement> getItems(IBase base) {
-            var pathResult = modelResolver.resolvePath(base, "item");
-            return pathResult instanceof List ? (List<IBaseBackboneElement>) pathResult : new ArrayList<>();
-        }
-
-        private void populateItems(List<IBaseBackboneElement> itemList) {
+        private void populateItems(List<IQuestionnaireItemComponentAdapter> itemList) {
             for (var item : itemList) {
-                @SuppressWarnings("unchecked")
-                var linkIdPath = (IPrimitiveType<String>) modelResolver.resolvePath(item, "linkId");
-                var linkId = linkIdPath == null ? null : linkIdPath.getValue();
+                var linkId = item.getLinkId();
                 items.put(linkId, item);
-                var childItems = getItems(item);
+                var childItems = (List<IQuestionnaireItemComponentAdapter>) item.getItem();
                 if (!childItems.isEmpty()) {
                     populateItems(childItems);
                 }
@@ -157,7 +153,7 @@ public class TestItemGenerator {
         public void isEqualsTo(String expectedItemAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedItemAssetName), jsonParser.encodeResourceToString(questionnaire), true);
+                        load(expectedItemAssetName), jsonParser.encodeResourceToString(questionnaire.get()), true);
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
@@ -168,7 +164,7 @@ public class TestItemGenerator {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedQuestionnaireId)),
-                        jsonParser.encodeResourceToString(questionnaire),
+                        jsonParser.encodeResourceToString(questionnaire.get()),
                         true);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -184,7 +180,7 @@ public class TestItemGenerator {
         public GeneratedItem itemHasInitialValue(String linkId) {
             var item = items.get(linkId);
             assertNotNull(item);
-            assertNotNull(modelResolver.resolvePath(item, "initial"));
+            assertTrue(item.hasInitial());
             return this;
         }
 
@@ -217,13 +213,12 @@ public class TestItemGenerator {
             return this;
         }
 
-        @SuppressWarnings({"rawtypes", "unchecked"})
+        @SuppressWarnings("unchecked")
         public GeneratedItem hasLaunchContextExtension(int count) {
-            var pathResult = modelResolver.resolvePath(questionnaire, "extension");
-            var exts = pathResult instanceof List ? (List<IBaseExtension>) pathResult : new ArrayList<>();
+            var exts = questionnaire.getExtension();
             var launchContextExts = exts.stream()
                     .filter(e -> {
-                        var urlPathResult = modelResolver.resolvePath(e, "url");
+                        var urlPathResult = questionnaire.resolvePath(e, "url");
                         if (urlPathResult instanceof IPrimitiveType) {
                             return ((IPrimitiveType<String>) urlPathResult)
                                     .getValueAsString()
@@ -237,30 +232,24 @@ public class TestItemGenerator {
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedItem itemHasText(String linkId, String text) {
             var item = items.get(linkId);
             assertNotNull(item);
-            var itemText = (IPrimitiveType<String>) modelResolver.resolvePath(item, "text");
-            assertTrue(itemText.getValueAsString().contains(text));
+            assertTrue(item.getText().contains(text));
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedItem itemHasType(String linkId, String type) {
             var item = items.get(linkId);
             assertNotNull(item);
-            var itemType = (IPrimitiveType<String>) modelResolver.resolvePath(item, "type");
-            assertEquals(type, itemType.getValueAsString());
+            assertEquals(type, item.getType());
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedItem itemRepeats(String linkId, Boolean repeats) {
             var item = items.get(linkId);
             assertNotNull(item);
-            var itemRepeats = (IPrimitiveType<Boolean>) modelResolver.resolvePath(item, "repeats");
-            assertEquals(repeats, itemRepeats.getValue());
+            assertEquals(repeats, item.getRepeats());
             return this;
         }
     }

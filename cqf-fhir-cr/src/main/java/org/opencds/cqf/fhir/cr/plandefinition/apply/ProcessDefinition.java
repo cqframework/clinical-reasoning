@@ -58,8 +58,7 @@ public class ProcessDefinition {
                         : resource.getIdElement().getValue();
                 requestAction.setResource(buildReference(request.getFhirVersion(), reference));
                 if (Boolean.TRUE.equals(request.getContainResources())) {
-                    request.getModelResolver()
-                            .setValue(requestOrchestration, "contained", Collections.singletonList(resource));
+                    request.getPlanDefinitionAdapter().setValue(requestOrchestration, "contained", Collections.singletonList(resource));
                 } else {
                     request.getRequestResources().add(resource);
                 }
@@ -144,7 +143,7 @@ public class ProcessDefinition {
                 requestId.setValue("%s/%s%s".formatted(result.fhirType(), activityDefinitionId, counter));
             }
             result.setId(requestId);
-            activityRequest.resolveOperationOutcome(result);
+            activityRequest.resolveOperationOutcome(request.getAdapterFactory().createResource(result));
         } catch (Exception e) {
             var message = "ERROR: ActivityDefinition %s could not be applied and threw exception %s"
                     .formatted(definition.getValue(), e.toString());
@@ -163,7 +162,7 @@ public class ProcessDefinition {
                     : resolveRepository(definition));
             var nestedRequest = request.copy(nextPlanDefinition);
             var result = applyProcessor.applyPlanDefinition(nestedRequest);
-            nestedRequest.resolveOperationOutcome(result);
+            nestedRequest.resolveOperationOutcome(request.getAdapterFactory().createResource(result));
             request.getRequestResources().addAll(nestedRequest.getRequestResources());
             request.getExtractedResources().addAll(nestedRequest.getExtractedResources());
             request.setQuestionnaire(nestedRequest.getQuestionnaireAdapter());
@@ -198,7 +197,7 @@ public class ProcessDefinition {
 
     protected IBaseResource resolveContained(ApplyRequest request, String id) {
         requireNonNull(id);
-        var contained = request.resolvePathList(request.getPlanDefinition(), "contained", IBaseResource.class);
+        var contained = request.getPlanDefinitionAdapter().getContained();
         var containedId = getContainedId(id);
         var first = contained.stream()
                 .filter(r -> getContainedId(r.getIdElement().getIdPart()).equals(containedId))

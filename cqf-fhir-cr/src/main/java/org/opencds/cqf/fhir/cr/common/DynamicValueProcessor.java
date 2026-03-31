@@ -7,6 +7,9 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.BackboneElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +27,8 @@ public class DynamicValueProcessor {
      * @param resource the resource to apply the resolved value to
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      */
-    public void processDynamicValues(ICpgRequest request, IBaseResource resource, IElement definitionElement) {
-        var context = definitionElement instanceof IBaseResource baseResource ? baseResource : resource;
+    public void processDynamicValues(ICpgRequest request, IResourceAdapter resource, IElement definitionElement) {
+        var context = definitionElement instanceof IBaseResource baseResource ? baseResource : resource.get();
         processDynamicValues(request, context, resource, definitionElement, null);
     }
 
@@ -34,43 +37,45 @@ public class DynamicValueProcessor {
      *
      * @param request the $apply request parameters
      * @param context the original resource the dynamicValue is from
-     * @param resource the resource to apply the resolved value to
+     * @param resourceAdapter the resource adapter to apply the resolved value to
      * @param definitionElement the definition of the dynamicValue containing the expression and path
      * @param requestAction the action of the RequestOrchestration created from the definition action
      */
     public void processDynamicValues(
             ICpgRequest request,
             IBaseResource context,
-            IBaseResource resource,
+            IResourceAdapter resourceAdapter,
             IElement definitionElement,
             IElement requestAction) {
-        var dynamicValues = request.getDynamicValues(definitionElement);
+        var dynamicValues = resourceAdapter.resolvePathList(definitionElement, "dynamicValue", IBaseBackboneElement.class)
+            .stream().map(b -> new BackboneElementAdapter(request.getFhirVersion(), b))
+            .toList();
         for (var dynamicValue : dynamicValues) {
             try {
-                resolveDynamicValue(request, dynamicValue, context, resource, requestAction);
+                resolveDynamicValue(request, dynamicValue, context, resourceAdapter, requestAction);
             } catch (Exception e) {
                 var message = "DynamicValue resolution for path %s encountered exception: %s"
-                        .formatted(request.resolvePathString(dynamicValue, "path"), e.getMessage());
+                        .formatted(dynamicValue.resolvePathString("path"), e.getMessage());
                 logger.error(message);
                 request.logException(message);
             }
         }
     }
 
-    protected CqfExpression getDynamicValueExpression(ICpgRequest request, IBaseBackboneElement dynamicValue) {
+    protected CqfExpression getDynamicValueExpression(ICpgRequest request, IAdapter<?> dynamicValue) {
         return switch (request.getFhirVersion()) {
             case DSTU3 ->
                 new CqfExpression(
-                        request.resolvePathString(dynamicValue, "language"),
-                        request.resolvePathString(dynamicValue, EXPRESSION),
+                        dynamicValue.resolvePathString("language"),
+                        dynamicValue.resolvePathString(EXPRESSION),
                         request.getReferencedLibraries());
             case R4 ->
                 CqfExpression.of(
-                        request.resolvePath(dynamicValue, EXPRESSION, org.hl7.fhir.r4.model.Expression.class),
+                        dynamicValue.resolvePath(EXPRESSION, org.hl7.fhir.r4.model.Expression.class),
                         request.getReferencedLibraries());
             case R5 ->
                 CqfExpression.of(
-                        request.resolvePath(dynamicValue, EXPRESSION, org.hl7.fhir.r5.model.Expression.class),
+                        dynamicValue.resolvePath(EXPRESSION, org.hl7.fhir.r5.model.Expression.class),
                         request.getReferencedLibraries());
             default -> null;
         };
@@ -78,16 +83,16 @@ public class DynamicValueProcessor {
 
     protected void resolveDynamicValue(
             ICpgRequest request,
-            IBaseBackboneElement dynamicValue,
+            IAdapter<?> dynamicValue,
             IBaseResource context,
-            IBaseResource resource,
+            IResourceAdapter resourceAdapter,
             IElement requestAction) {
-        var path = request.resolvePathString(dynamicValue, "path");
+        var path = dynamicValue.resolvePathString("path");
         // Strip % so it is supported as defined in the spec
         path = path.replace("%", "");
         var cqfExpression = getDynamicValueExpression(request, dynamicValue);
         if (cqfExpression != null) {
-            var result = getDynamicValueExpressionResult(request, cqfExpression, context, resource);
+            var result = getDynamicValueExpressionResult(request, cqfExpression, context, resourceAdapter.get());
             if (result == null || result.isEmpty()) {
                 var warning = "Null value received when evaluating dynamic value expression: %s"
                         .formatted(cqfExpression.getExpression());
@@ -95,7 +100,7 @@ public class DynamicValueProcessor {
                 return;
             }
             var value = result.size() == 1 ? result.get(0) : result;
-            if (requiresRequestAction(path, resource)) {
+            if (requiresRequestAction(path, resourceAdapter.get())) {
                 if (requestAction == null) {
                     throw new IllegalArgumentException(
                             "Error resolving dynamicValue with path %s: expected requestAction not found"
@@ -113,10 +118,10 @@ public class DynamicValueProcessor {
                             .addExtension()
                             .setValue((org.hl7.fhir.dstu3.model.Type) value);
                 } else {
-                    request.getModelResolver().setValue(requestAction, path.replace("action.", ""), value);
+                    resourceAdapter.setValue(requestAction, path.replace("action.", ""), value);
                 }
             } else {
-                request.getModelResolver().setValue(resource, path, value);
+                resourceAdapter.setValue(path, value);
             }
         }
     }

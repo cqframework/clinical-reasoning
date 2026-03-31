@@ -51,7 +51,7 @@ public class ApproveVisitor extends BaseKnowledgeArtifactVisitor {
         var returnBundle = BundleHelper.newBundle(fhirVersion(), null, "transaction");
 
         var assessment = createApprovalAssessment(
-                adapter.getId(),
+                adapter.getIdElement(),
                 artifactAssessmentType,
                 artifactAssessmentSummary,
                 artifactAssessmentTarget,

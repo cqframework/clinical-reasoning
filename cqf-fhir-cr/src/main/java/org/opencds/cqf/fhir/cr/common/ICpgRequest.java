@@ -34,8 +34,4 @@ public interface ICpgRequest extends IQuestionnaireRequest {
     IBaseDatatype getSetting();
 
     IBaseDatatype getSettingContext();
-
-    default List<IBaseBackboneElement> getDynamicValues(IElement element) {
-        return resolvePathList(element, "dynamicValue", IBaseBackboneElement.class);
-    }
 }

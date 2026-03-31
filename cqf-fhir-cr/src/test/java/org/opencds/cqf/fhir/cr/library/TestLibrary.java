@@ -39,6 +39,8 @@ import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -278,21 +280,17 @@ public class TestLibrary {
     @SuppressWarnings("UnstableApiUsage")
     public static class Evaluation {
         final IRepository repository;
-        final IBaseParameters result;
+        final IParametersAdapter result;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
-        final List<IBase> parameter;
+        final List<IParametersParameterComponentAdapter> parameter;
         final IAdapterFactory adapterFactory;
 
-        @SuppressWarnings("unchecked")
         public Evaluation(IRepository repository, IBaseParameters result) {
             this.repository = repository;
-            this.result = result;
-            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    this.repository.fhirContext().getVersion().getVersion());
             adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
-            parameter = ((List<IBase>) modelResolver.resolvePath(result, "parameter"));
+            this.result = adapterFactory.createParameters(result);
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
+            parameter = this.result.getParameter();
         }
 
         public Evaluation hasResults(Integer count) {
@@ -301,15 +299,13 @@ public class TestLibrary {
         }
 
         public Evaluation hasOperationOutcome() {
-            assertTrue(modelResolver.resolvePath(parameter.get(0), "resource") instanceof IBaseOperationOutcome);
+            assertInstanceOf(IBaseOperationOutcome.class, parameter.get(0).getResource());
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public Evaluation resultHasValue(Integer index, IBase value) {
-            var actual = adapterFactory
-                    .createParametersParameter(parameter.get(index))
-                    .getValue();
+            var actual = parameter.get(index).getValue();
             if (value instanceof IPrimitiveType<?> primitiveValue) {
                 assertEquals(primitiveValue.getValueAsString(), ((IPrimitiveType<String>) actual).getValueAsString());
             } else {

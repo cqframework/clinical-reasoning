@@ -249,7 +249,7 @@ public class MeasureProcessorTimeUtils {
             throw new InternalErrorException(
                     "Measurement period interval has no point type for measure URLs: %s".formatted(measureUrls));
         }
-        String sourceTypeQualified = pointType.getTypeName();
+        String sourceTypeQualified = pointType.getLocalPart();
         String sourceType = sourceTypeQualified.substring(sourceTypeQualified.lastIndexOf(".") + 1);
         if (sourceType.equals(targetType)) {
             return interval;

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -152,7 +153,7 @@ class ActivityDefinitionAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(activityDef);
         var copy = (ActivityDefinition) adapter.copy();
         var adapterCopy = new ActivityDefinitionAdapter(copy);
-        adapterCopy.setId(new IdDt("ActivityDefinition", "plan-2"));
+        adapterCopy.setId(new IdType("ActivityDefinition", "plan-2"));
         assertNotEquals(activityDef.getId(), copy.getId());
         activityDef.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

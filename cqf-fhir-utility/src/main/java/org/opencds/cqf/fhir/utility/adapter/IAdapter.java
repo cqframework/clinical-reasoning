@@ -11,9 +11,12 @@ import java.util.stream.Collectors;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,16 @@ public interface IAdapter<T extends IBase> {
      * @return returns the underlying HL7 Structure for this adapter
      */
     T get();
+
+//    default String getId() {
+//        return fhirTerser().getSingleValueOrNull(get(), "id", IPrimitiveType.class).getValueAsString();
+//    }
+//
+//    default void setId(String id) {
+//        setId((IIdType) Ids.newId(fhirContext(), id));
+//    }
+//
+//    void setId(IIdType id);
 
     FhirContext fhirContext();
 
@@ -55,7 +68,14 @@ public interface IAdapter<T extends IBase> {
         }
     }
 
-    <E extends IBaseExtension<?, ?>> E addExtension();
+//    <E extends IBaseExtension<?, ?>> E addExtension();
+    @SuppressWarnings("unchecked")
+    default <E extends IBaseExtension<?, ?>> E addExtension() {
+        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
+            return (E) baseHasExtensions.addExtension();
+        }
+        return null;
+    }
 
 
 //    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
@@ -122,6 +142,10 @@ public interface IAdapter<T extends IBase> {
         return getExtension(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
+    default  List<IBase> resolvePathList(String path) {
+        return resolvePathList(get(), path);
+    }
+
     default List<IBase> resolvePathList(IBase base, String path) {
         try {
             return fhirTerser().getValues(base, path);
@@ -133,6 +157,10 @@ public interface IAdapter<T extends IBase> {
     @SuppressWarnings("unchecked")
     default <B extends IBase> List<B> resolvePathList(IBase base, String path, Class<B> clazz) {
         return resolvePathList(base, path).stream().map(i -> (B) i).collect(Collectors.toList());
+    }
+
+    default String resolvePathString(String path) {
+        return resolvePathString(get(), path);
     }
 
     default String resolvePathString(IBase base, String path) {
@@ -151,9 +179,18 @@ public interface IAdapter<T extends IBase> {
         }
     }
 
+    default IBase resolvePath(String path) {
+        return resolvePath(get(), path);
+    }
+
     default IBase resolvePath(IBase base, String path) {
         var pathResult = resolvePathList(base, path);
         return pathResult.isEmpty() ? null : pathResult.get(0);
+    }
+
+    @SuppressWarnings("unchecked")
+    default <B extends IBase> B resolvePath(String path, Class<B> clazz) {
+        return (B) resolvePath(get(), path);
     }
 
     @SuppressWarnings("unchecked")
@@ -162,6 +199,10 @@ public interface IAdapter<T extends IBase> {
     }
 
     void setValue(IBase base, String path, Object value);
+
+    default void setValue(String path, Object value) {
+        setValue(get(), path, value);
+    }
 
     @SuppressWarnings("unchecked")
     static <T extends ICompositeType> T newPeriod(FhirVersionEnum version) {

@@ -15,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
@@ -31,7 +30,6 @@ public class ExtractRequest implements IQuestionnaireRequest {
     private final IIdType subjectId;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirContext fhirContext;
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
@@ -41,23 +39,20 @@ public class ExtractRequest implements IQuestionnaireRequest {
     public ExtractRequest(
             IBaseResource questionnaireResponse,
             IBaseResource questionnaire,
-            IIdType subjectId,
+            //IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,
-            ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
         checkNotNull(questionnaireResponse, "expected non-null value for questionnaireResponse");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         fhirVersion = questionnaireResponse.getStructureFhirVersionEnum();
         questionnaireResponseAdapter = getAdapterFactory().createQuestionnaireResponse(questionnaireResponse);
         questionnaireAdapter =
                 questionnaire == null ? null : getAdapterFactory().createQuestionnaire(questionnaire);
-        this.subjectId = subjectId;
+        this.subjectId = questionnaireResponseAdapter.getSubject();
         this.data = bundle;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
                 : createResolver(libraryEngine.getRepository(), this.subjectId, null, null, parameters, this.data);
@@ -164,11 +159,6 @@ public class ExtractRequest implements IQuestionnaireRequest {
     @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

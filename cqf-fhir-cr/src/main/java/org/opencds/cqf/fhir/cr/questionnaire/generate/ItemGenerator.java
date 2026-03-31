@@ -105,10 +105,10 @@ public class ItemGenerator {
                                         request.getFhirVersion(), caseFeature.getLibraryUrl())));
                 // Add any other in parameters that with a type of Resource
                 featureLibrary.getParameter().stream()
-                        .filter(p -> request.resolvePathString(p, "use").equals("in"))
-                        .filter(p -> request.getFHIRTypes().contains(request.resolvePathString(p, "type")))
+                        .filter(p -> featureLibrary.resolvePathString(p, "use").equals("in"))
+                        .filter(p -> request.getFHIRTypes().contains(featureLibrary.resolvePathString(p, "type")))
                         .map(p -> new ImmutablePair<String, String>(
-                                request.resolvePathString(p, "name"), request.resolvePathString(p, "type")))
+                            featureLibrary.resolvePathString(p, "name"), featureLibrary.resolvePathString(p, "type")))
                         .forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request, p.left, p.right)));
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
@@ -169,7 +169,7 @@ public class ItemGenerator {
 
     protected CqfExpression getFeatureExpression(GenerateRequest request) {
         var expression = expressionProcessor.getCqfExpression(
-                request, request.getExtensions(request.getProfile()), Constants.CPG_FEATURE_EXPRESSION);
+                request, request.getProfileAdapter().getExtension(), Constants.CPG_FEATURE_EXPRESSION);
         if (expression != null) {
             expression.setName(request.getProfileAdapter().getName());
         }
@@ -394,8 +394,8 @@ public class ItemGenerator {
         var caseFeatureExtension = request.getProfileAdapter().getExtensionByUrl(Constants.CPG_FEATURE_EXPRESSION);
         if (caseFeatureExtension != null) {
             var expressionType = caseFeatureExtension.getValue();
-            var expression = request.resolvePathString(expressionType, "expression");
-            var reference = request.resolvePathString(expressionType, "reference");
+            var expression = request.getProfileAdapter().resolvePathString(expressionType, "expression");
+            var reference = request.getProfileAdapter().resolvePathString(expressionType, "reference");
             if (StringUtils.isNotBlank(expression) && StringUtils.isNotBlank(reference)) {
                 var libraryCanonical = canonicalTypeForVersion(request.getFhirVersion(), reference);
                 ILibraryAdapter library = null;
@@ -407,11 +407,11 @@ public class ItemGenerator {
                 }
                 if (library != null) {
                     var resultParam = library.getParameter().stream()
-                            .filter(p -> expression.equals(request.resolvePathString(p, "name")))
+                            .filter(p -> expression.equals(request.getProfileAdapter().resolvePathString(p, "name")))
                             .findFirst()
                             .orElse(null);
                     if (resultParam != null) {
-                        var max = request.resolvePathString(resultParam, "max");
+                        var max = request.getProfileAdapter().resolvePathString(resultParam, "max");
                         return StringUtils.isNotBlank(max) && !max.equals("1");
                     }
                 }

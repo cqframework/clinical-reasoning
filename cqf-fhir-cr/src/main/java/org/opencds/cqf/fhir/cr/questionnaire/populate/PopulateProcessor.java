@@ -36,8 +36,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         request.getQuestionnaireAdapter().getItem().forEach(item -> {
             request.addQuestionnaireResponseItems(populateItem(request, item));
         });
-        request.resolveOperationOutcome(
-                request.getQuestionnaireResponseAdapter().get());
+        request.resolveOperationOutcome(request.getQuestionnaireResponseAdapter());
         logger.info("$populate operation completed");
         return request.getQuestionnaireResponseAdapter().get();
     }
@@ -46,7 +45,7 @@ public class PopulateProcessor implements IPopulateProcessor {
     // This work will be done in a separate PR
     protected Map<String, Object> getVariables(PopulateRequest request, IBase element) {
         var variables = new HashMap<String, Object>();
-        var expressions = request.getExtensionsByUrl(element, Constants.VARIABLE_EXTENSION).stream()
+        var expressions = request.getQuestionnaireAdapter().getExtensionsByUrl(element, Constants.VARIABLE_EXTENSION).stream()
                 .map(e -> CqfExpression.of(e, request.getReferencedLibraries()))
                 .toList();
         expressions.forEach(expression -> {

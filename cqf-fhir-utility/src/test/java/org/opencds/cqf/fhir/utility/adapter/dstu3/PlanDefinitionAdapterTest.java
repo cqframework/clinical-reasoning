@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
@@ -156,7 +157,7 @@ class PlanDefinitionAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         var copy = (PlanDefinition) adapter.copy();
         var adapterCopy = new PlanDefinitionAdapter(copy);
-        adapterCopy.setId(new IdDt("PlanDefinition", "plan-2"));
+        adapterCopy.setId(new IdType("PlanDefinition", "plan-2"));
         assertNotEquals(planDef.getId(), copy.getId());
         planDef.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

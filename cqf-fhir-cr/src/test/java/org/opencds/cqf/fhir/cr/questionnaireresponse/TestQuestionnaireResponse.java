@@ -22,6 +22,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
@@ -144,14 +145,11 @@ public class TestQuestionnaireResponse {
         private final IRepository repository;
         private final IBaseBundle bundle;
         private final IParser jsonParser;
-        private final ModelResolver modelResolver;
 
         public Extract(IRepository repository, IBaseBundle bundle) {
             this.repository = repository;
             this.bundle = bundle;
             jsonParser = repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    repository.fhirContext().getVersion().getVersion());
         }
 
         public Extract isEqualsTo(String expectedBundleAssetName) {
@@ -178,7 +176,7 @@ public class TestQuestionnaireResponse {
         }
 
         public Extract hasEntry(int count) {
-            var entry = (List<?>) modelResolver.resolvePath(bundle, "entry");
+            var entry = BundleHelper.getEntry(bundle);
             assertEquals(count, entry.size());
             return this;
         }

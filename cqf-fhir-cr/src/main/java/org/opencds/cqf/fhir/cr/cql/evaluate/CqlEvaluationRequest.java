@@ -16,11 +16,9 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CqlEvaluationRequest implements ICqlOperationRequest {
@@ -30,7 +28,6 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
     private final IBaseBundle data;
     private final String content;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
     private IBaseOperationOutcome operationOutcome;
@@ -43,8 +40,7 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             String content,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            LibraryEngine libraryEngine) {
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         fhirVersion = libraryEngine.getRepository().fhirContext().getVersion().getVersion();
         this.libraryEngine = libraryEngine;
@@ -66,8 +62,6 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
         this.data = data;
         this.content = content;
         referencedLibraries = resolveIncludedLibraries(library);
-        this.modelResolver =
-                modelResolver != null ? modelResolver : FhirModelResolverCache.resolverForVersion(fhirVersion);
     }
 
     public String getExpression() {
@@ -110,11 +104,6 @@ public class CqlEvaluationRequest implements ICqlOperationRequest {
     @Override
     public String getOperationName() {
         return "cql";
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

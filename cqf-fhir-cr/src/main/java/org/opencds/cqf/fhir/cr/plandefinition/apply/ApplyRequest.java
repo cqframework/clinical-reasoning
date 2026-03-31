@@ -33,7 +33,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
@@ -62,7 +61,6 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseParameters parameters;
     private IBaseBundle data;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
@@ -91,11 +89,9 @@ public class ApplyRequest implements ICpgRequest {
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
             LibraryEngine libraryEngine,
-            ModelResolver modelResolver,
             IInputParameterResolver inputParameterResolver) {
         checkNotNull(planDefinition, "expected non-null value for planDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         fhirVersion = planDefinition.getStructureFhirVersionEnum();
         planDefinitionAdapter = getAdapterFactory().createPlanDefinition(planDefinition);
         this.subjectId = subjectId;
@@ -116,7 +112,6 @@ public class ApplyRequest implements ICpgRequest {
         }
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
                 : createResolver(
@@ -149,7 +144,6 @@ public class ApplyRequest implements ICpgRequest {
                         data,
                         null,
                         libraryEngine,
-                        modelResolver,
                         inputParameterResolver)
                 .setQuestionnaire(getQuestionnaireAdapter())
                 .setQuestionnaireResponse(getQuestionnaireResponseAdapter())
@@ -171,12 +165,11 @@ public class ApplyRequest implements ICpgRequest {
                 getSettingContext(),
                 getParameters(),
                 getData(),
-                libraryEngine,
-                modelResolver);
+                libraryEngine);
     }
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
-        return new GenerateRequest(profile, false, true, libraryEngine, modelResolver)
+        return new GenerateRequest(profile, false, true, libraryEngine)
                 .setReferencedLibraries(referencedLibraries)
                 .setQuestionnaire(getQuestionnaire());
     }
@@ -192,7 +185,7 @@ public class ApplyRequest implements ICpgRequest {
             var code = lc.getExtension().stream()
                     .map(c -> (IBaseExtension<?, ?>) c)
                     .filter(c -> c.getUrl().equals("name"))
-                    .map(c -> resolvePathString(c.getValue(), "code"))
+                    .map(c -> planDefinitionAdapter.resolvePathString(c.getValue(), "code"))
                     .findFirst()
                     .orElse(null);
             if (code != null) {
@@ -243,8 +236,7 @@ public class ApplyRequest implements ICpgRequest {
                 context,
                 null,
                 data,
-                libraryEngine,
-                modelResolver);
+                libraryEngine);
     }
 
     public IBaseResource getPlanDefinition() {
@@ -313,11 +305,6 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

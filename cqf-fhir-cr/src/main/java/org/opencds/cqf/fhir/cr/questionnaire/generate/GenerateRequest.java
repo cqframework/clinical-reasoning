@@ -13,7 +13,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -26,7 +25,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private final boolean supportedOnly;
     private final boolean requiredOnly;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private Map<String, String> referencedLibraries;
     private IQuestionnaireAdapter questionnaireAdapter;
@@ -37,18 +35,15 @@ public class GenerateRequest implements IQuestionnaireRequest {
             IBaseResource profile,
             boolean supportedOnly,
             boolean requiredOnly,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            LibraryEngine libraryEngine) {
         checkNotNull(profile, "expected non-null value for profile");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         fhirVersion = profile.getStructureFhirVersionEnum();
         profileAdapter = (IStructureDefinitionAdapter)
                 getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         this.supportedOnly = supportedOnly;
         this.requiredOnly = requiredOnly;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
         referencedLibraries = profileAdapter.getReferencedLibraries();
     }
 
@@ -128,11 +123,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
     @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

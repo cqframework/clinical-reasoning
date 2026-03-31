@@ -18,9 +18,11 @@ import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.exception.DataProviderException;
 import org.opencds.cqf.cql.engine.fhir.exception.UnknownType;
+import org.opencds.cqf.fhir.utility.Ids;
 import java.util.List;
 
 public abstract class BaseAdapter extends AdapterBase implements IAdapter<IBase> {
@@ -40,6 +42,10 @@ public abstract class BaseAdapter extends AdapterBase implements IAdapter<IBase>
 //        adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
     }
 
+    public IAdapter<?> setId(String id) {
+        setValue(get(), "id", id);
+        return this;
+    }
 //    public FhirContext fhirContext() {
 //        return fhirContext;
 //    }
@@ -52,12 +58,12 @@ public abstract class BaseAdapter extends AdapterBase implements IAdapter<IBase>
 //        return adapterFactory;
 //    }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <E extends IBaseExtension<?, ?>> E addExtension() {
-        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
-            return (E) baseHasExtensions.addExtension();
-        }
-        return null;
-    }
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public <E extends IBaseExtension<?, ?>> E addExtension() {
+//        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
+//            return (E) baseHasExtensions.addExtension();
+//        }
+//        return null;
+//    }
 }

@@ -11,15 +11,28 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.Ids;
 
 public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
     IBaseResource get();
 
-    default IIdType getId() {
-        return get().getIdElement();
+    default String getId() {
+        return getIdElement().getIdPart();
     }
+
+    default IIdType getIdElement() {
+        return fhirTerser().getSingleValueOrNull(get(), "id", IIdType.class);
+    }
+
+    default IAdapter<?> setId(String id) {
+        setId((IIdType) Ids.newId(fhirContext(), id));
+        return this;
+    }
+
+    void setId(IIdType id);
 
     IBase setProperty(String name, IBase value) throws FHIRException;
 

@@ -31,23 +31,22 @@ public class ActionResolver {
             var taskId = Ids.newId(request.getFhirVersion(), task.fhirType(), actionId);
             task.setId(taskId);
         }
-        request.getModelResolver()
-                .setValue(
+        action.setValue(
                         task,
                         "basedOn",
                         Collections.singletonList(buildReference(
                                 request.getFhirVersion(),
                                 requestOrchestration.getIdElement().getValue())));
         if (request.getQuestionnaireAdapter() != null
-                && request.resolvePath(task, "focus", IBaseReference.class) == null) {
-            var codePath = request.resolvePath(task, "code");
+                && action.resolvePath(task, "focus", IBaseReference.class) == null) {
+            var codePath = action.resolvePath(task, "code");
             if (codePath != null) {
                 var code = request.getAdapterFactory().createCodeableConcept(codePath);
                 if (code.hasCoding(CPG_ACTIVITY_TYPE_CODE.COLLECT_INFORMATION.code)) {
                     var questionnaireAdapter = request.getQuestionnaireAdapter();
                     var questionnaireReference =
                             buildReference(request.getFhirVersion(), questionnaireAdapter.getUrl());
-                    request.getModelResolver().setValue(task, "focus", questionnaireReference);
+                    action.setValue(task, "focus", questionnaireReference);
                 }
             }
         }

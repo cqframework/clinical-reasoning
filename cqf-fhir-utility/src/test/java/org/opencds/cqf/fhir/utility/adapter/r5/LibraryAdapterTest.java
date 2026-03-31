@@ -28,6 +28,7 @@ import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DataRequirement;
 import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
@@ -170,7 +171,7 @@ class LibraryAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         var copy = (Library) adapter.copy();
         var adapterCopy = new LibraryAdapter(copy);
-        adapterCopy.setId(new IdDt("Library", "library-2"));
+        adapterCopy.setId(new IdType("Library", "library-2"));
         assertNotEquals(library.getId(), copy.getId());
         library.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

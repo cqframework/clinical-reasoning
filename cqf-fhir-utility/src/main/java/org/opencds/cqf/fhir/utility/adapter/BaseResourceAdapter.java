@@ -9,6 +9,7 @@ import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.utility.Constants;
 
 import static java.util.Objects.requireNonNull;
@@ -59,16 +60,26 @@ public abstract class BaseResourceAdapter extends AdapterBase implements IResour
         return resource;
     }
 
-//    public IAdapterFactory getAdapterFactory() {
+    @Override
+    public void setId(IIdType id) {
+        setValue(get(), "id", id);
+    }
+
+    @Override
+    public void setValue(String path, Object value) {
+        setValue(get(), path, value);
+    }
+
+    //    public IAdapterFactory getAdapterFactory() {
 //        return adapterFactory;
 //    }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <E extends IBaseExtension<?, ?>> E addExtension() {
-        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
-            return (E) baseHasExtensions.addExtension();
-        }
-        return null;
-    }
+//    @SuppressWarnings("unchecked")
+//    @Override
+//    public <E extends IBaseExtension<?, ?>> E addExtension() {
+//        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
+//            return (E) baseHasExtensions.addExtension();
+//        }
+//        return null;
+//    }
 }

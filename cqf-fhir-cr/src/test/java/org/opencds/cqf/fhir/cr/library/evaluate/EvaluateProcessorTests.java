@@ -43,7 +43,7 @@ public class EvaluateProcessorTests {
         var expected = newParameters(fhirContextR4, "results");
         var expectedCanonical = String.format("%s|%s", url, version);
         var request = new EvaluateRequest(
-                library, new IdType("Patient", subject), null, null, null, null, libraryEngine, null);
+                library, new IdType("Patient", subject), null, null, null, null, libraryEngine);
         doReturn(expected)
                 .when(libraryEngine)
                 .evaluate(

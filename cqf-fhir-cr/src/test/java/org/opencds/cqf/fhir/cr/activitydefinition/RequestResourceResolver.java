@@ -108,9 +108,7 @@ public class RequestResourceResolver {
                     null,
                     null,
                     null,
-                    new LibraryEngine(repository, EvaluationSettings.getDefault()),
-                    FhirModelResolverCache.resolverForVersion(
-                            repository.fhirContext().getVersion().getVersion())));
+                    new LibraryEngine(repository, EvaluationSettings.getDefault())));
         }
     }
 }

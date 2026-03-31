@@ -148,7 +148,7 @@ public class ResponseBuilder {
             }
         }
 
-        var operationOutcomes = request.getContained(requestOrchestration).stream()
+        var operationOutcomes = request.getPlanDefinitionAdapter().getContained(requestOrchestration).stream()
                 .filter(r -> r.fhirType().equals(org.hl7.fhir.dstu3.model.ResourceType.OperationOutcome.name()))
                 .toList();
         for (var operationOutcome : operationOutcomes) {
@@ -199,7 +199,7 @@ public class ResponseBuilder {
             }
         }
 
-        var operationOutcomes = request.getContained(requestOrchestration).stream()
+        var operationOutcomes = request.getPlanDefinitionAdapter().getContained(requestOrchestration).stream()
                 .filter(r -> r.fhirType().equals(org.hl7.fhir.r4.model.ResourceType.OperationOutcome.name()))
                 .toList();
         for (var operationOutcome : operationOutcomes) {
@@ -254,7 +254,7 @@ public class ResponseBuilder {
             }
         }
 
-        var operationOutcomes = request.getContained(requestOrchestration).stream()
+        var operationOutcomes = request.getPlanDefinitionAdapter().getContained(requestOrchestration).stream()
                 .filter(r -> r.fhirType().equals(org.hl7.fhir.r5.model.ResourceType.OperationOutcome.name()))
                 .toList();
         for (var operationOutcome : operationOutcomes) {

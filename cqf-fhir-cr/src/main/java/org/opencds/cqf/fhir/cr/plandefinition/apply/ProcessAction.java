@@ -62,9 +62,9 @@ public class ProcessAction {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
             var requestAction = generateRequestAction(action);
             extensionProcessor.processExtensions(
-                    request, requestAction.get(), (IElement) action.get(), new ArrayList<>());
+                    request, requestAction, (IElement) action.get(), new ArrayList<>());
             processChildActions(request, requestOrchestration, metConditions, action, requestAction);
-            var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
+            var resource = request.getAdapterFactory().createResource(processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction));
             dynamicValueProcessor.processDynamicValues(
                     request, request.getPlanDefinition(), resource, (IElement) action.get(), (IElement)
                             requestAction.get());
@@ -149,12 +149,12 @@ public class ProcessAction {
     protected ICompositeType getDataRequirementElement(ApplyRequest request, IElement input) {
         return (ICompositeType)
                 (request.getFhirVersion().isEqualOrNewerThan(FhirVersionEnum.R5)
-                        ? request.resolvePath(input, "requirement")
+                        ? request.getPlanDefinitionAdapter().resolvePath(input, "requirement")
                         : input);
     }
 
     protected IBaseParameters resolveInputParameters(ApplyRequest request, IBaseBackboneElement action) {
-        var actionInput = request.resolvePathList(action, "input", IElement.class);
+        var actionInput = request.getPlanDefinitionAdapter().resolvePathList(action, "input", IElement.class);
         return request.resolveInputParameters(actionInput.stream()
                 .map(input -> getDataRequirementElement(request, input))
                 .collect(Collectors.toList()));
@@ -162,7 +162,8 @@ public class ProcessAction {
 
     protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         var conditions = action.getCondition().stream()
-                .filter(c -> "applicability".equals(request.resolvePathString(c, "kind")))
+                .filter(c -> "applicability".equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
+                .map(c -> request.getAdapterFactory().createBase(c))
                 .toList();
         if (conditions.isEmpty()) {
             return true;

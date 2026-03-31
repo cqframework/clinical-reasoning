@@ -3,7 +3,10 @@ package org.opencds.cqf.fhir.cql.engine.retrieve;
 import com.google.common.collect.Iterables;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
@@ -64,6 +67,10 @@ public class FederatedDataProvider extends CompositeDataProvider {
                     dateRange));
         }
 
-        return Iterables.concat(results);
+        @SuppressWarnings("unchecked")
+        var fhirModelResolver = (FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?>) this.getModelResolver();
+        return StreamSupport.stream(Iterables.concat(results).spliterator(), false)
+                .map(r -> (Object) fhirModelResolver.toCqlValue(r, false))
+                .collect(Collectors.toList());
     }
 }

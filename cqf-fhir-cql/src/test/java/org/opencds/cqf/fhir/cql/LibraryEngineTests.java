@@ -5,6 +5,7 @@ import static kotlinx.io.JvmCoreKt.asSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
@@ -53,8 +54,12 @@ class LibraryEngineTests {
     void fhirPath() {
         var patientId = "Patient/Patient1";
         var params = parameters();
-        params.addParameter(part("%subject", new Patient().addName(new HumanName().addGiven("Alice")).setId(patientId)));
-        params.addParameter(part("%practitioner", new Practitioner().addName(new HumanName().addGiven("Michael")).setId("Practitioner1")));
+        params.addParameter(part(
+                "%subject",
+                new Patient().addName(new HumanName().addGiven("Alice")).setId(patientId)));
+        params.addParameter(part(
+                "%practitioner",
+                new Practitioner().addName(new HumanName().addGiven("Michael")).setId("Practitioner1")));
         var expression = new CqfExpression(
                 "text/fhirpath",
                 "'Greeting: Hello! ' + %subject.name.given.first() + ' Message: Test message Practitioner: ' + %practitioner.name.given.first()",
@@ -189,9 +194,9 @@ class LibraryEngineTests {
         var result2 = libraryEngine.resolveExpression(patientId, expression2, params1, null, null, null, null);
         var result3 = libraryEngine.resolveExpression(patientId, expression1, params2, null, null, null, null);
         var result4 = libraryEngine.resolveExpression(patientId, expression2, params2, null, null, null, null);
-        assertEquals(codeableConcept1, result1.get(0));
+        assertTrue(codeableConcept1.equalsDeep((CodeableConcept) result1.get(0)));
         assertNull(((BooleanType) result2.get(0)).getValue());
-        assertEquals(codeableConcept2, result3.get(0));
+        assertTrue(codeableConcept2.equalsDeep((CodeableConcept) result3.get(0)));
         assertEquals(codeableConcept2.getCodingFirstRep().getDisplay(), ((StringType) result4.get(0)).getValue());
     }
 }

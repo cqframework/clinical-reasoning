@@ -9,10 +9,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -129,66 +131,32 @@ public class ReleaseManifestVisitor extends ReleaseVisitor {
      * http://loinc.org|2.81). This method removes the unversioned duplicates.
      */
     private void removeSupersededExpansionParams(IBaseParameters expansionParams) {
-        if (expansionParams instanceof org.hl7.fhir.r4.model.Parameters r4Params) {
-            removeSupersededR4Params(r4Params);
-        } else if (expansionParams instanceof org.hl7.fhir.dstu3.model.Parameters dstu3Params) {
-            removeSupersededDstu3Params(dstu3Params);
-        } else if (expansionParams instanceof org.hl7.fhir.r5.model.Parameters r5Params) {
-            removeSupersededR5Params(r5Params);
-        }
-    }
+        var adapter = IAdapterFactory.forFhirVersion(fhirVersion()).createParameters(expansionParams);
+        var allParams = adapter.getParameter();
 
-    private void removeSupersededR4Params(org.hl7.fhir.r4.model.Parameters params) {
-        var allParams = params.getParameter();
-        // Collect versioned base URLs by parameter name
+        // Collect versioned base URLs keyed by parameter name
         var versionedUrls = new java.util.HashSet<String>();
         for (var param : allParams) {
-            var value = param.hasValue() ? param.getValue().primitiveValue() : null;
+            var value = param.hasValue() ? param.getPrimitiveValue() : null;
             if (value != null && Canonicals.getVersion(value) != null) {
                 versionedUrls.add(param.getName() + "|" + Canonicals.getUrl(value));
             }
         }
-        // Remove unversioned entries that have a versioned counterpart
-        allParams.removeIf(param -> {
-            var value = param.hasValue() ? param.getValue().primitiveValue() : null;
-            return value != null
-                    && Canonicals.getVersion(value) == null
-                    && versionedUrls.contains(param.getName() + "|" + value);
-        });
-    }
 
-    private void removeSupersededDstu3Params(org.hl7.fhir.dstu3.model.Parameters params) {
-        var allParams = params.getParameter();
-        var versionedUrls = new java.util.HashSet<String>();
-        for (var param : allParams) {
-            var value = param.hasValue() ? param.getValue().primitiveValue() : null;
-            if (value != null && Canonicals.getVersion(value) != null) {
-                versionedUrls.add(param.getName() + "|" + Canonicals.getUrl(value));
-            }
-        }
-        allParams.removeIf(param -> {
-            var value = param.hasValue() ? param.getValue().primitiveValue() : null;
-            return value != null
-                    && Canonicals.getVersion(value) == null
-                    && versionedUrls.contains(param.getName() + "|" + value);
-        });
-    }
+        // Filter to only keep entries that are NOT superseded unversioned duplicates
+        var filtered = allParams.stream()
+                .filter(param -> {
+                    var value = param.hasValue() ? param.getPrimitiveValue() : null;
+                    if (value == null || Canonicals.getVersion(value) != null) {
+                        return true; // keep versioned entries and entries without values
+                    }
+                    // Remove unversioned entries that have a versioned counterpart
+                    return !versionedUrls.contains(param.getName() + "|" + value);
+                })
+                .map(param -> (IBaseBackboneElement) param.get())
+                .toList();
 
-    private void removeSupersededR5Params(org.hl7.fhir.r5.model.Parameters params) {
-        var allParams = params.getParameter();
-        var versionedUrls = new java.util.HashSet<String>();
-        for (var param : allParams) {
-            var value = param.hasValue() ? param.getValue().primitiveValue() : null;
-            if (value != null && Canonicals.getVersion(value) != null) {
-                versionedUrls.add(param.getName() + "|" + Canonicals.getUrl(value));
-            }
-        }
-        allParams.removeIf(param -> {
-            var value = param.hasValue() ? param.getValue().primitiveValue() : null;
-            return value != null
-                    && Canonicals.getVersion(value) == null
-                    && versionedUrls.contains(param.getName() + "|" + value);
-        });
+        adapter.setParameter(new java.util.ArrayList<>(filtered));
     }
 
     private void captureInputExpansionParams(

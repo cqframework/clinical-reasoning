@@ -1,6 +1,6 @@
 [versions]
-hapi = "8.8.0"
-cql = "4.4.0"
+hapi = "8.8.1"
+cql = "4.6.0"
 junit = "5.14.3"
 slf4j = "2.0.17"
 spring-boot = "3.4.11"
@@ -15,6 +15,7 @@ jsonassert = "1.5.3"
 equalsverifier = "4.3.1"
 reflections = "0.10.2"
 slf4j-test = "3.0.3"
+spring = "6.2.12"
 
 sonarqube = "7.2.2.6593"
 
@@ -24,45 +25,45 @@ hapi-fhir-bom = { module = "ca.uhn.hapi.fhir:hapi-fhir-bom", version.ref = "hapi
 cql-bom = { module = "org.cqframework:cql-bom", version.ref = "cql" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 
-# HAPI FHIR (BOM-managed except where noted)
-hapi-fhir-base = { module = "ca.uhn.hapi.fhir:hapi-fhir-base" }
-hapi-fhir-client = { module = "ca.uhn.hapi.fhir:hapi-fhir-client" }
-hapi-fhir-structures-dstu3 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3" }
-hapi-fhir-structures-r4 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r4" }
-hapi-fhir-structures-r4b = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r4b" }
-hapi-fhir-structures-r5 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r5" }
-hapi-fhir-structures-dstu2x1 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1" }
-hapi-fhir-validation = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation" }
-hapi-fhir-validation-resources-dstu3 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3" }
-hapi-fhir-validation-resources-r4 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4" }
-hapi-fhir-validation-resources-r4b = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4b" }
-hapi-fhir-validation-resources-r5 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r5" }
+# HAPI FHIR (all versioned at hapi; BOM also imported for transitive management)
+hapi-fhir-base = { module = "ca.uhn.hapi.fhir:hapi-fhir-base", version.ref = "hapi" }
+hapi-fhir-client = { module = "ca.uhn.hapi.fhir:hapi-fhir-client", version.ref = "hapi" }
+hapi-fhir-structures-dstu3 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu3", version.ref = "hapi" }
+hapi-fhir-structures-r4 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r4", version.ref = "hapi" }
+hapi-fhir-structures-r4b = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r4b", version.ref = "hapi" }
+hapi-fhir-structures-r5 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-r5", version.ref = "hapi" }
+hapi-fhir-structures-dstu2x1 = { module = "ca.uhn.hapi.fhir:hapi-fhir-structures-dstu2.1", version.ref = "hapi" }
+hapi-fhir-validation = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation", version.ref = "hapi" }
+hapi-fhir-validation-resources-dstu3 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-dstu3", version.ref = "hapi" }
+hapi-fhir-validation-resources-r4 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4", version.ref = "hapi" }
+hapi-fhir-validation-resources-r4b = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4b", version.ref = "hapi" }
+hapi-fhir-validation-resources-r5 = { module = "ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r5", version.ref = "hapi" }
 hapi-fhir-caching-caffeine = { module = "ca.uhn.hapi.fhir:hapi-fhir-caching-caffeine", version.ref = "hapi" }
-hapi-fhir-converter = { module = "ca.uhn.hapi.fhir:hapi-fhir-converter" }
-hapi-fhir-jpaserver-base = { module = "ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base" }
-hapi-fhir-storage = { module = "ca.uhn.hapi.fhir:hapi-fhir-storage" }
-hapi-fhir-server-cds-hooks = { module = "ca.uhn.hapi.fhir:hapi-fhir-server-cds-hooks" }
-hapi-fhir-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-test-utilities" }
-hapi-fhir-storage-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-storage-test-utilities" }
-hapi-fhir-jpaserver-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-jpaserver-test-utilities" }
+hapi-fhir-converter = { module = "ca.uhn.hapi.fhir:hapi-fhir-converter", version.ref = "hapi" }
+hapi-fhir-jpaserver-base = { module = "ca.uhn.hapi.fhir:hapi-fhir-jpaserver-base", version.ref = "hapi" }
+hapi-fhir-storage = { module = "ca.uhn.hapi.fhir:hapi-fhir-storage", version.ref = "hapi" }
+hapi-fhir-server-cds-hooks = { module = "ca.uhn.hapi.fhir:hapi-fhir-server-cds-hooks", version.ref = "hapi" }
+hapi-fhir-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-test-utilities", version.ref = "hapi" }
+hapi-fhir-storage-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-storage-test-utilities", version.ref = "hapi" }
+hapi-fhir-jpaserver-test-utilities = { module = "ca.uhn.hapi.fhir:hapi-fhir-jpaserver-test-utilities", version.ref = "hapi" }
 
 # CQL Engine (BOM-managed)
-cql-engine = { module = "org.cqframework:engine" }
-cql-engine-fhir = { module = "org.cqframework:engine-fhir" }
-cql-to-elm-jvm = { module = "org.cqframework:cql-to-elm-jvm" }
-cql-ucum = { module = "org.cqframework:ucum" }
-cql-elm-fhir = { module = "org.cqframework:elm-fhir" }
-cql-cqf-fhir = { module = "org.cqframework:cqf-fhir" }
-cql-cqf-fhir-npm = { module = "org.cqframework:cqf-fhir-npm" }
-cql-quick = { module = "org.cqframework:quick" }
+cql-engine = { module = "org.cqframework:engine", version.ref = "cql" }
+cql-engine-fhir = { module = "org.cqframework:engine-fhir", version.ref = "cql" }
+cql-to-elm-jvm = { module = "org.cqframework:cql-to-elm-jvm", version.ref = "cql" }
+cql-ucum = { module = "org.cqframework:ucum", version.ref = "cql" }
+cql-elm-fhir = { module = "org.cqframework:elm-fhir", version.ref = "cql" }
+cql-cqf-fhir = { module = "org.cqframework:cqf-fhir", version.ref = "cql" }
+cql-cqf-fhir-npm = { module = "org.cqframework:cqf-fhir-npm", version.ref = "cql" }
+cql-quick = { module = "org.cqframework:quick", version.ref = "cql" }
 
 # Jakarta
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
 jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api" }
 
 # Spring
-spring-context = { module = "org.springframework:spring-context" }
-spring-test = { module = "org.springframework:spring-test" }
+spring-context = { module = "org.springframework:spring-context", version.ref = "spring" }
+spring-test = { module = "org.springframework:spring-test", version.ref = "spring" }
 
 # Logging
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

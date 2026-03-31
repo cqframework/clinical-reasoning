@@ -76,8 +76,8 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
         // We are effectively returning an R4MeasureEvaluatorSingle her
-        return requestDetails -> new R4MultiMeasureService(
-                repositoryFactory.create(requestDetails),
+        return (requestDetails, environment) -> new R4MultiMeasureService(
+                environment.resolve(repositoryFactory.create(requestDetails)),
                 evaluationOptions,
                 requestDetails.getFhirServerBase(),
                 measurePeriodValidator);
@@ -88,8 +88,11 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
+        return (requestDetails, environment) -> new R4MultiMeasureService(
+                environment.resolve(repositoryFactory.create(requestDetails)),
+                evaluationOptions,
+                requestDetails.getFhirServerBase(),
+                measurePeriodValidator);
     }
 
     @Bean

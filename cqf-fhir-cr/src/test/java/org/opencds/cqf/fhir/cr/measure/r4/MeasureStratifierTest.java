@@ -1170,4 +1170,58 @@ class MeasureStratifierTest {
                 .firstStratifier()
                 .hasStratumCount(0); // No strata when patient has no encounters
     }
+
+    /**
+     * Non-subject value stratifier with a component expression name that does not exist in the CQL library.
+     * Should produce a clear InvalidRequestException with stratifier context rather than silently swallowing
+     * the CqlException into a contained OperationOutcome.
+     */
+    @Test
+    void cohortResourceValueStratNonExistentExpressionInvalid() {
+        try {
+            GIVEN_SIMPLE
+                    .when()
+                    .measureId("CohortResourceValueStratNonExistentExpression")
+                    .subject("Patient/patient-9")
+                    .evaluate()
+                    .then();
+            fail("Expected InvalidRequestException for non-existent stratifier expression");
+        } catch (InvalidRequestException e) {
+            var message = e.getMessage();
+            assertTrue(
+                    message.contains("This Expression Does Not Exist"),
+                    "Expected error to reference the bad expression name, but got: " + message);
+            assertTrue(
+                    message.contains("CohortResourceValueStratNonExistentExpression"),
+                    "Expected error to reference the measure URL, but got: " + message);
+        }
+    }
+
+    /**
+     * Non-subject value stratifier with a component expression that exists in the CQL library
+     * but is neither a function (define function) nor a scalar — it returns a list of resources
+     * (e.g. "All Encounters" returns [Encounter] E). This expression resolves successfully
+     * (so isExpressionFunctionRef returns false), but it's not a valid stratifier value.
+     * Should produce a clear InvalidRequestException rather than silently producing nonsense strata.
+     */
+    @Test
+    void cohortResourceValueStratNonScalarNonFunctionInvalid() {
+        try {
+            GIVEN_SIMPLE
+                    .when()
+                    .measureId("CohortResourceValueStratNonScalarNonFunction")
+                    .subject("Patient/patient-9")
+                    .evaluate()
+                    .then();
+            fail("Expected InvalidRequestException for resource-list expression used as stratifier component");
+        } catch (InvalidRequestException e) {
+            var message = e.getMessage();
+            assertTrue(
+                    message.contains("All Encounters"),
+                    "Expected error to reference the bad expression name, but got: " + message);
+            assertTrue(
+                    message.contains("CohortResourceValueStratNonScalarNonFunction"),
+                    "Expected error to reference the measure URL, but got: " + message);
+        }
+    }
 }

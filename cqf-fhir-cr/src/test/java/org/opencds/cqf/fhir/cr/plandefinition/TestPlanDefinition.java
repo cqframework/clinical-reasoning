@@ -40,7 +40,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
@@ -49,13 +48,12 @@ import org.opencds.cqf.fhir.cr.helpers.DataDateRollingIgRepository;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -349,7 +347,7 @@ public class TestPlanDefinition {
         final IAdapterFactory adapterFactory;
         public IQuestionnaireAdapter questionnaire;
         public IQuestionnaireResponseAdapter questionnaireResponse;
-        Map<String, IAdapter<?>> items;
+        Map<String, IQuestionnaireResponseItemComponentAdapter> items;
 
         public GeneratedBundle(IRepository repository, IBaseBundle generatedBundle) {
             this.repository = repository;
@@ -372,12 +370,14 @@ public class TestPlanDefinition {
             }
         }
 
-        private List<IAdapter<IBase>> getItems(IBase base) {
+        private List<IQuestionnaireResponseItemComponentAdapter> getItems(IBase base) {
             var pathResult = questionnaireResponse.resolvePathList(base, "item");
-            return pathResult.stream().map(adapterFactory::createBase).toList();
+            return pathResult.stream()
+                    .map(adapterFactory::createQuestionnaireResponseItem)
+                    .toList();
         }
 
-        private void populateItems(List<IAdapter<IBase>> itemList) {
+        private void populateItems(List<IQuestionnaireResponseItemComponentAdapter> itemList) {
             for (var item : itemList) {
                 @SuppressWarnings("unchecked")
                 var linkIdPath = (IPrimitiveType<String>) item.resolvePath("linkId");
@@ -425,8 +425,8 @@ public class TestPlanDefinition {
                     .toList();
             assertFalse(communications.isEmpty());
             assertTrue(communications.stream()
-                .map(adapterFactory::createResource)
-                .allMatch(c -> c.resolvePath("payload") != null));
+                    .map(adapterFactory::createResource)
+                    .allMatch(c -> c.resolvePath("payload") != null));
             return this;
         }
 
@@ -448,16 +448,14 @@ public class TestPlanDefinition {
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
-            var item = (IAdapter<?>) items.get(linkId);
-            var answerPath = item.resolvePathList("answer");
-            var answers = answerPath.stream()
-                    .map(a -> (IPrimitiveType<String>) item.resolvePath(a, "value"))
-                    .toList();
-            assertNotNull(answers);
+            var item = items.get(linkId);
+            assertTrue(item.hasAnswer());
             assertTrue(
-                    answers.stream().anyMatch(a -> a.getValue().equals(value)),
+                    item.getAnswer().stream()
+                            .filter(a -> a.getValue() instanceof IPrimitiveType<?>)
+                            .map(a -> (IPrimitiveType<?>) a.getValue())
+                            .anyMatch(a -> a.getValueAsString().equals(value)),
                     "expected answer to contain value: " + value);
             return this;
         }
@@ -476,8 +474,8 @@ public class TestPlanDefinition {
                     getEntry(generatedBundle).get(entry));
             assertNotNull(resource);
             var adapter = adapterFactory.createResource(resource);
-            assertTrue(adapter.getContained()
-                    .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome")));
+            assertTrue(
+                    adapter.getContained().stream().anyMatch(c -> c.fhirType().equals("OperationOutcome")));
             return this;
         }
     }
@@ -499,7 +497,9 @@ public class TestPlanDefinition {
         public GeneratedCarePlan isEqualsTo(String expectedCarePlanAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedCarePlanAssetName), jsonParser.encodeResourceToString(generatedCarePlan.get()), true);
+                        load(expectedCarePlanAssetName),
+                        jsonParser.encodeResourceToString(generatedCarePlan.get()),
+                        true);
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
                 fail("Unable to compare Jsons: " + e.getMessage());
@@ -526,22 +526,21 @@ public class TestPlanDefinition {
         }
 
         public GeneratedCarePlan hasOperationOutcome() {
-            assertTrue(generatedCarePlan.getContained()
-                    .stream().anyMatch(r -> r.fhirType().equals("OperationOutcome")));
+            assertTrue(generatedCarePlan.getContained().stream()
+                    .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
             return this;
         }
 
         public GeneratedCarePlan hasQuestionnaire() {
-            assertTrue(generatedCarePlan.getContained()
-                    .stream().anyMatch(r -> r.fhirType().equals("Questionnaire")));
+            assertTrue(generatedCarePlan.getContained().stream()
+                    .anyMatch(r -> r.fhirType().equals("Questionnaire")));
             return this;
         }
 
         public GeneratedCarePlan hasCommunicationRequestPayload() {
-            var communications = generatedCarePlan.getContained()
-                    .stream()
-                            .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                            .toList();
+            var communications = generatedCarePlan.getContained().stream()
+                    .filter(r -> r.fhirType().equals("CommunicationRequest"))
+                    .toList();
             assertFalse(communications.isEmpty());
             assertTrue(communications.stream().allMatch(c -> generatedCarePlan.resolvePath(c, "payload") != null));
             return this;

@@ -46,7 +46,8 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
                                     .anyMatch(lc -> lc.getExtension().stream()
                                             .map(c -> (IBaseExtension<?, ?>) c)
                                             .anyMatch(c -> c.getUrl().equals("name")
-                                                    && getQuestionnaireAdapter().resolvePathString(c.getValue(), "code")
+                                                    && getQuestionnaireAdapter()
+                                                            .resolvePathString(c.getValue(), "code")
                                                             .equals(code)));
                     if (!exists) {
                         getQuestionnaireAdapter().addExtension(e);

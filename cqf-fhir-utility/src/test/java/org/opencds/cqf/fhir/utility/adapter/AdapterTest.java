@@ -6,9 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Date;
 import org.hl7.fhir.r4.model.Coding;
@@ -75,7 +73,7 @@ class AdapterTest {
         var adapter = IAdapterFactory.createAdapterForResource(communicationRequest);
 
         var path =
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
         var value = new StringType("en");
 
         adapter.setValue(communicationRequest, path, value);
@@ -100,13 +98,13 @@ class AdapterTest {
         var adapter = IAdapterFactory.createAdapterForResource(communicationRequest);
 
         var path =
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
         var value = new StringType("en");
 
         adapter.setValue(communicationRequest, path, value);
 
         var contentString =
-            (StringType) communicationRequest.getPayloadFirstRep().getContent();
+                (StringType) communicationRequest.getPayloadFirstRep().getContent();
         assertNotNull(contentString);
         assertEquals("Hello", contentString.getValue());
 
@@ -129,7 +127,7 @@ class AdapterTest {
         var adapter = IAdapterFactory.createAdapterForResource(communicationRequest);
 
         var path =
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
         var value = new StringType("en");
 
         adapter.setValue(communicationRequest, path, value);
@@ -150,13 +148,13 @@ class AdapterTest {
         var adapter = IAdapterFactory.createAdapterForResource(communicationRequest);
 
         var path =
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString";
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString";
         var value = new StringType("Hej");
 
         adapter.setValue(communicationRequest, path, value);
 
         var contentString =
-            (StringType) communicationRequest.getPayloadFirstRep().getContent();
+                (StringType) communicationRequest.getPayloadFirstRep().getContent();
         var translationExt = contentString.getExtensionByUrl(TRANSLATION_EXT_URL);
         assertNotNull(translationExt);
 
@@ -174,18 +172,18 @@ class AdapterTest {
 
         // Set lang
         adapter.setValue(
-            communicationRequest,
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode",
-            new StringType("da"));
+                communicationRequest,
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode",
+                new StringType("da"));
 
         // Set content
         adapter.setValue(
-            communicationRequest,
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString",
-            new StringType("Hej"));
+                communicationRequest,
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString",
+                new StringType("Hej"));
 
         var contentString =
-            (StringType) communicationRequest.getPayloadFirstRep().getContent();
+                (StringType) communicationRequest.getPayloadFirstRep().getContent();
         var translationExt = contentString.getExtensionByUrl(TRANSLATION_EXT_URL);
         assertNotNull(translationExt);
 
@@ -211,7 +209,7 @@ class AdapterTest {
 
         // Add a second translation at index [1]
         var path =
-            "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[1].extension('lang').valueCode";
+                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[1].extension('lang').valueCode";
         var value = new StringType("de");
 
         adapter.setValue(communicationRequest, path, value);

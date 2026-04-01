@@ -108,7 +108,8 @@ public class ItemGenerator {
                         .filter(p -> featureLibrary.resolvePathString(p, "use").equals("in"))
                         .filter(p -> request.getFHIRTypes().contains(featureLibrary.resolvePathString(p, "type")))
                         .map(p -> new ImmutablePair<String, String>(
-                            featureLibrary.resolvePathString(p, "name"), featureLibrary.resolvePathString(p, "type")))
+                                featureLibrary.resolvePathString(p, "name"),
+                                featureLibrary.resolvePathString(p, "type")))
                         .forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request, p.left, p.right)));
             }
             return new ImmutablePair<>(questionnaireItem, launchContextExts);
@@ -407,7 +408,8 @@ public class ItemGenerator {
                 }
                 if (library != null) {
                     var resultParam = library.getParameter().stream()
-                            .filter(p -> expression.equals(request.getProfileAdapter().resolvePathString(p, "name")))
+                            .filter(p -> expression.equals(
+                                    request.getProfileAdapter().resolvePathString(p, "name")))
                             .findFirst()
                             .orElse(null);
                     if (resultParam != null) {

@@ -44,7 +44,8 @@ public class RequestHelpers {
         } catch (Exception e) {
             // Do nothing
         }
-        return newPDApplyRequestForVersion(fhirVersion, planDefinition, libraryEngine, parameters, inputParameterResolver);
+        return newPDApplyRequestForVersion(
+                fhirVersion, planDefinition, libraryEngine, parameters, inputParameterResolver);
     }
 
     public static org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest newPDApplyRequestForVersion(
@@ -89,7 +90,8 @@ public class RequestHelpers {
                 inputParameterResolver);
     }
 
-    public static GenerateRequest newGenerateRequestForVersion(FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
+    public static GenerateRequest newGenerateRequestForVersion(
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine) {
         IBaseResource profile = null;
         try {
             var fhirContext = FhirContext.forCached(fhirVersion);
@@ -124,13 +126,7 @@ public class RequestHelpers {
             LibraryEngine libraryEngine,
             IBaseResource questionnaireResponse,
             IBaseResource questionnaire) {
-        return new ExtractRequest(
-                questionnaireResponse,
-                questionnaire,
-                null,
-                null,
-                libraryEngine,
-                null);
+        return new ExtractRequest(questionnaireResponse, questionnaire, null, null, libraryEngine, null);
     }
 
     public static EvaluateRequest newEvaluateRequestForVersion(

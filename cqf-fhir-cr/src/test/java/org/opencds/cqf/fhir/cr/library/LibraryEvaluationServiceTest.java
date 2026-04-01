@@ -32,7 +32,8 @@ class LibraryEvaluationServiceTest {
                 .parameters(params)
                 .thenEvaluate()
                 .hasResults(3)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;
@@ -51,7 +52,8 @@ class LibraryEvaluationServiceTest {
                 .parameters(params)
                 .thenEvaluate()
                 .hasResults(7)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;
@@ -77,7 +79,8 @@ class LibraryEvaluationServiceTest {
                 .expression(expressionList)
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;
@@ -96,7 +99,8 @@ class LibraryEvaluationServiceTest {
                 .parameters(params)
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;
@@ -109,7 +113,7 @@ class LibraryEvaluationServiceTest {
         var issue = outcome.getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
         assertEquals(
-                "Example Failure Code: This is an error message",
+                "Example Failure Code: This is an error messageReturn Value If Not Error",
                 issue.getDiagnostics().replaceAll("[\\r\\n]", ""));
     }
 
@@ -123,7 +127,8 @@ class LibraryEvaluationServiceTest {
                 .parameters(params)
                 .thenEvaluate()
                 .hasResults(4)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;
@@ -137,19 +142,11 @@ class LibraryEvaluationServiceTest {
                         ParametersParameterComponent::getName, ParametersParameterComponent::getResource));
 
         assertEquals(
-                "Condition/SimpleCondition",
-                relatedEncountersByName
-                        .get("condition")
-                        .getIdElement()
-                        .toUnqualifiedVersionless()
-                        .getValue());
+                "SimpleCondition",
+                relatedEncountersByName.get("condition").getIdElement().getIdPart());
         assertEquals(
-                "Encounter/SimpleEncounter",
-                relatedEncountersByName
-                        .get("encounter")
-                        .getIdElement()
-                        .toUnqualifiedVersionless()
-                        .getValue());
+                "SimpleEncounter",
+                relatedEncountersByName.get("encounter").getIdElement().getIdPart());
     }
 
     // ToDo: bundle test

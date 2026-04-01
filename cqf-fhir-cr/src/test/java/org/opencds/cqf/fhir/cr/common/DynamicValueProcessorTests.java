@@ -21,7 +21,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.adapter.BackboneElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.slf4j.event.Level;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,12 +51,13 @@ class DynamicValueProcessorTests {
         var cqfExpression = new CqfExpression().setExpression("NullTest");
         var request = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        var dynamicValue = new BackboneElementAdapter(FhirVersionEnum.R4,
-            new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
-                .setPath("action.extension")
-                .setExpression(new org.hl7.fhir.r4.model.Expression()
-                        .setExpression("priority")
-                        .setLanguage("text/cql-identifier")));
+        var dynamicValue = new BaseElementAdapter(
+                FhirVersionEnum.R4,
+                new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
+                        .setPath("action.extension")
+                        .setExpression(new org.hl7.fhir.r4.model.Expression()
+                                .setExpression("priority")
+                                .setLanguage("text/cql-identifier")));
         var requestAction = new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent();
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(request, dynamicValue);
         doReturn(null).when(fixture).getDynamicValueExpressionResult(request, cqfExpression, null, null);
@@ -78,11 +79,12 @@ class DynamicValueProcessorTests {
         var cqfExpression = new CqfExpression();
         var requestDstu3 = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.DSTU3, libraryEngine, null, inputParameterResolver);
-        var dvDstu3 = new BackboneElementAdapter(FhirVersionEnum.DSTU3,
-            new org.hl7.fhir.dstu3.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
-                .setPath("action.extension")
-                .setExpression("priority")
-                .setLanguage("text/cql-identifier"));
+        var dvDstu3 = new BaseElementAdapter(
+                FhirVersionEnum.DSTU3,
+                new org.hl7.fhir.dstu3.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
+                        .setPath("action.extension")
+                        .setExpression("priority")
+                        .setLanguage("text/cql-identifier"));
         var raDstu3 = new org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent();
         var expressionResultsDstu3 = withExpressionResults(FhirVersionEnum.DSTU3);
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(requestDstu3, dvDstu3);
@@ -94,12 +96,13 @@ class DynamicValueProcessorTests {
 
         var requestR4 = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        var dvR4 = new BackboneElementAdapter(FhirVersionEnum.R4,
-            new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
-                .setPath("action.extension")
-                .setExpression(new org.hl7.fhir.r4.model.Expression()
-                        .setExpression("priority")
-                        .setLanguage("text/cql-identifier")));
+        var dvR4 = new BaseElementAdapter(
+                FhirVersionEnum.R4,
+                new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
+                        .setPath("action.extension")
+                        .setExpression(new org.hl7.fhir.r4.model.Expression()
+                                .setExpression("priority")
+                                .setLanguage("text/cql-identifier")));
         var raR4 = new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent();
         var expressionResultsR4 = withExpressionResults(FhirVersionEnum.R4);
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(requestR4, dvR4);

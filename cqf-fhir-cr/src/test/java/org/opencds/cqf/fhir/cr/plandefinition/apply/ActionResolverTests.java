@@ -17,7 +17,6 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CPG_ACTIVITY_TYPE_CODE;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -46,10 +45,7 @@ class ActionResolverTests {
         var requestGroup = new org.hl7.fhir.r4.model.RequestGroup();
         requestGroup.setId("RequestGroup/TestQuestionnaireTask");
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        fhirVersion,
-                        libraryEngine,
-                        null,
-                        inputParameterResolver)
+                        fhirVersion, libraryEngine, null, inputParameterResolver)
                 .setQuestionnaire(questionnaire);
         var action = (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(
                 fhirVersion,

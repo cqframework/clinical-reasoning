@@ -17,19 +17,20 @@ public class FhirModelResolverCache {
         // intentionally empty
     }
 
-    private static final Map<FhirVersionEnum, FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?>> cache = new EnumMap<>(FhirVersionEnum.class);
+    private static final Map<FhirVersionEnum, FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?>> cache =
+            new EnumMap<>(FhirVersionEnum.class);
 
     public static FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> resolverForVersion(FhirVersionEnum fhirVersionEnum) {
         requireNonNull(fhirVersionEnum, "fhirVersionEnum can not be null");
         if (!cache.containsKey(fhirVersionEnum)) {
-            var resolver = switch (fhirVersionEnum) {
-                case DSTU2 -> new Dstu2FhirModelResolver();
-                case DSTU3 -> new Dstu3FhirModelResolver();
-                case R4 -> new R4FhirModelResolver();
-                case R5 -> new R5FhirModelResolver();
-                default ->
-                    throw new IllegalArgumentException("unknown or unsupported FHIR version");
-            };
+            var resolver =
+                    switch (fhirVersionEnum) {
+                        case DSTU2 -> new Dstu2FhirModelResolver();
+                        case DSTU3 -> new Dstu3FhirModelResolver();
+                        case R4 -> new R4FhirModelResolver();
+                        case R5 -> new R5FhirModelResolver();
+                        default -> throw new IllegalArgumentException("unknown or unsupported FHIR version");
+                    };
 
             cache.put(fhirVersionEnum, resolver);
         }

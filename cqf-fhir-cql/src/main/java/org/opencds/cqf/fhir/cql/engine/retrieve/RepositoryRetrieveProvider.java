@@ -75,7 +75,8 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
 
         var resources = this.repository.search(bt, resourceType, config.searchParams, headers);
 
-        var modelResolver = FhirModelResolverCache.resolverForVersion(fhirContext.getVersion().getVersion());
+        var modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
         var iter = new BundleMappingIterable<>(repository, resources, p -> p.getResource());
         return iter.toStream()
                 .filter(config.filter)

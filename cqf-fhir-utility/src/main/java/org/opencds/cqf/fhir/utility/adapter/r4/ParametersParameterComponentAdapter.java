@@ -144,7 +144,10 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     @Override
     public IBase newTupleWithParts() {
         var tuple = new Tuple();
-        getPart().forEach(p -> tuple.addProperty(p.getName(), List.of((Base) p.getPartValue(p))));
+        getPart().forEach(p -> {
+            var value = p.getPartValue(p);
+            tuple.addProperty(p.getName(), value == null ? null : List.of((Base) value));
+        });
         return tuple;
     }
 }

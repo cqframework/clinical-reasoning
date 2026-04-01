@@ -206,7 +206,8 @@ public class ApplyProcessor implements IApplyProcessor {
                     // entry))
                 }
             } catch (Exception e) {
-                request.logException("Error encountered extracting %s: %s" .formatted(questionnaireResponse.getId(), e.getMessage()));
+                request.logException(
+                        "Error encountered extracting %s: %s".formatted(questionnaireResponse.getId(), e.getMessage()));
             }
         });
     }
@@ -218,16 +219,15 @@ public class ApplyProcessor implements IApplyProcessor {
 
         var requestOrchestration = processRequest.generateRequestOrchestration(request);
         var adapter = request.getAdapterFactory().createResource(requestOrchestration);
-        extensionProcessor.processExtensions(
-                request, adapter, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
+        extensionProcessor.processExtensions(request, adapter, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
         processGoals(request, adapter);
         var metConditions = new ArrayList<String>();
         for (var action : request.getPlanDefinitionAdapter().getAction()) {
             adapter.setValue(
-                            requestOrchestration,
-                            "action",
-                            Collections.singletonList(
-                                    processAction.processAction(request, requestOrchestration, metConditions, action)));
+                    requestOrchestration,
+                    "action",
+                    Collections.singletonList(
+                            processAction.processAction(request, requestOrchestration, metConditions, action)));
         }
 
         return Boolean.TRUE.equals(request.getContainResources())
@@ -251,7 +251,10 @@ public class ApplyProcessor implements IApplyProcessor {
             } else {
                 var goalId = Ids.newId(request.getFhirVersion(), "Goal", String.valueOf(i + 1));
                 goal.setId(goalId);
-                adapter.addExtension(buildReferenceExt(request.getFhirVersion(), pertainToGoalExtension(goal.getIdElement().getValue()), request.getContainResources()));
+                adapter.addExtension(buildReferenceExt(
+                        request.getFhirVersion(),
+                        pertainToGoalExtension(goal.getIdElement().getValue()),
+                        request.getContainResources()));
             }
             // Always add goals to the resource list so they can be added to the CarePlan if needed
             request.getRequestResources().add(goal);

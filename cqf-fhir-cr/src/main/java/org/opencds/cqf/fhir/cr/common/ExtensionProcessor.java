@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cr.common;
 import ca.uhn.fhir.model.api.IElement;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;

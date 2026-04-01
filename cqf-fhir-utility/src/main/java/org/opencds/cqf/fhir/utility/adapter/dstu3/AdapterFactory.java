@@ -21,11 +21,10 @@ import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.adapter.BackboneElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -85,11 +84,8 @@ public class AdapterFactory implements IAdapterFactory {
             return createRequestAction(requestAction);
         } else if (element instanceof ParametersParameterComponent parametersParameterComponent) {
             return createParametersParameter(parametersParameterComponent);
-        } else if (element instanceof IBaseBackboneElement backboneElement) {
-            return new BackboneElementAdapter(FhirVersionEnum.DSTU3, backboneElement);
         } else {
-            throw new UnprocessableEntityException(
-                    String.format("Unable to create an adapter for type: %s", element.fhirType()));
+            return new BaseElementAdapter(FhirVersionEnum.DSTU3, element);
         }
     }
 

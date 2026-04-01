@@ -32,10 +32,7 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private List<IElementDefinitionAdapter> snapshotElements;
 
     public GenerateRequest(
-            IBaseResource profile,
-            boolean supportedOnly,
-            boolean requiredOnly,
-            LibraryEngine libraryEngine) {
+            IBaseResource profile, boolean supportedOnly, boolean requiredOnly, LibraryEngine libraryEngine) {
         checkNotNull(profile, "expected non-null value for profile");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         fhirVersion = profile.getStructureFhirVersionEnum();

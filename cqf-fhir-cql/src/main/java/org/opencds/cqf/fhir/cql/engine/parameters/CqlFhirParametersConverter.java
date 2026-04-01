@@ -17,6 +17,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
@@ -26,8 +27,9 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -151,6 +153,13 @@ public class CqlFhirParametersConverter {
         }
 
         value = convertCqlClassInstanceIfNeeded(value);
+
+        if (value instanceof Tuple tupleValue) {
+            var ppca = this.addPart(pa, name);
+            tupleValue.getElements().forEach((k, v) -> addSubPart(ppca, k, v));
+
+            return;
+        }
 
         if (value instanceof Iterable) {
             var ppca = this.addPart(pa, name);
@@ -327,6 +336,12 @@ public class CqlFhirParametersConverter {
         return parameterMap;
     }
 
+    public Map<String, Object> toCqlParameters(Map<String, Object> parameters) {
+        Map<String, Object> parameterMap = new HashMap<>();
+        parameters.forEach((k, v) -> parameterMap.put(k, v instanceof Tuple ? v : modelResolver.toCqlValue(v, false)));
+        return parameterMap;
+    }
+
     @SuppressWarnings("rawtypes")
     private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
         Optional<IPrimitiveType> type =
@@ -360,9 +375,15 @@ public class CqlFhirParametersConverter {
 
         IBase instance;
         try {
-            instance = (IBase) clazz.getDeclaredConstructor().newInstance();
+            instance = (IBase) modelResolver.createHapiInstance$engine_fhir(typeName);
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not create instance of " + typeName, e);
+        }
+
+        if (instance instanceof IBaseEnumeration<?> enumeration) {
+            var value = cci.getElements().get("value");
+            enumeration.setValueAsString((String) value);
+            return instance;
         }
 
         if (instance instanceof IPrimitiveType<?> primitive) {
@@ -375,8 +396,7 @@ public class CqlFhirParametersConverter {
 
         @SuppressWarnings("unchecked")
         var ibaseClazz = (Class<? extends IBase>) clazz;
-        var definition =
-                (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getElementDefinition(ibaseClazz);
+        var definition = (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getElementDefinition(ibaseClazz);
         if (definition == null) {
             @SuppressWarnings("unchecked")
             var resourceClazz = (Class<? extends IBaseResource>) clazz;

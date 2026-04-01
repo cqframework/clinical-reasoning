@@ -1,18 +1,18 @@
-//package org.opencds.cqf.fhir.utility.model;
+// package org.opencds.cqf.fhir.utility.model;
 //
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertNotNull;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertNotNull;
 //
-//import ca.uhn.fhir.context.FhirContext;
-//import ca.uhn.fhir.context.RuntimeResourceDefinition;
-//import org.hl7.fhir.r4.model.CommunicationRequest;
-//import org.hl7.fhir.r4.model.Extension;
-//import org.hl7.fhir.r4.model.StringType;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+// import ca.uhn.fhir.context.FhirContext;
+// import ca.uhn.fhir.context.RuntimeResourceDefinition;
+// import org.hl7.fhir.r4.model.CommunicationRequest;
+// import org.hl7.fhir.r4.model.Extension;
+// import org.hl7.fhir.r4.model.StringType;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 //
-//class DynamicModelResolverTest {
+// class DynamicModelResolverTest {
 //
 //    private static final String TRANSLATION_EXT_URL = "http://hl7.org/fhir/StructureDefinition/translation";
 //
@@ -31,7 +31,8 @@
 //        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 //
 //        var path =
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
 //        var value = new StringType("en");
 //
 //        resolver.setNestedValue(communicationRequest, path, value, def);
@@ -57,7 +58,8 @@
 //        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 //
 //        var path =
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
 //        var value = new StringType("en");
 //
 //        resolver.setNestedValue(communicationRequest, path, value, def);
@@ -87,7 +89,8 @@
 //        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 //
 //        var path =
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode";
 //        var value = new StringType("en");
 //
 //        resolver.setNestedValue(communicationRequest, path, value, def);
@@ -109,7 +112,8 @@
 //        RuntimeResourceDefinition def = fhirContext.getResourceDefinition(communicationRequest);
 //
 //        var path =
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString";
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString";
 //        var value = new StringType("Hej");
 //
 //        resolver.setNestedValue(communicationRequest, path, value, def);
@@ -135,14 +139,16 @@
 //        // Set lang
 //        resolver.setNestedValue(
 //                communicationRequest,
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode",
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('lang').valueCode",
 //                new StringType("da"),
 //                def);
 //
 //        // Set content
 //        resolver.setNestedValue(
 //                communicationRequest,
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString",
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[0].extension('content').valueString",
 //                new StringType("Hej"),
 //                def);
 //
@@ -174,7 +180,8 @@
 //
 //        // Add a second translation at index [1]
 //        var path =
-//                "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[1].extension('lang').valueCode";
+//
+// "payload[0].contentString.extension('http://hl7.org/fhir/StructureDefinition/translation')[1].extension('lang').valueCode";
 //        var value = new StringType("de");
 //
 //        resolver.setNestedValue(communicationRequest, path, value, def);
@@ -187,4 +194,4 @@
 //        assertNotNull(langExt);
 //        assertEquals("de", langExt.getValue().primitiveValue());
 //    }
-//}
+// }

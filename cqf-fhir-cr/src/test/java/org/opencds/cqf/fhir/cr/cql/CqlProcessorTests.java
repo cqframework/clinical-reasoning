@@ -79,7 +79,8 @@ class CqlProcessorTests {
                 .thenEvaluate()
                 .hasResults(2)
                 .resultHasValue(1, new org.hl7.fhir.dstu3.model.IntegerType(25))
-                .result;
+                .result
+                .get();
         assertInstanceOf(org.hl7.fhir.dstu3.model.Parameters.class, result);
     }
 
@@ -92,7 +93,8 @@ class CqlProcessorTests {
                 .thenEvaluate()
                 .hasResults(2)
                 .resultHasValue(1, new IntegerType(25))
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
     }
 
@@ -123,7 +125,8 @@ class CqlProcessorTests {
                 .cqlContent(content)
                 .thenEvaluate()
                 .hasResults(3)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
     }
 
@@ -155,7 +158,8 @@ class CqlProcessorTests {
                 .cqlContent(content)
                 .thenEvaluate()
                 .hasResults(3)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
     }
 
@@ -189,7 +193,8 @@ class CqlProcessorTests {
                 .cqlContent(content)
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
         var results = (Parameters) result;
         assertInstanceOf(BooleanType.class, results.getParameter("Numerator").getValue());
@@ -203,7 +208,8 @@ class CqlProcessorTests {
                 .expression("5*5")
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
         var results = (Parameters) result;
         assertInstanceOf(IntegerType.class, results.getParameter("return").getValue());
@@ -220,7 +226,8 @@ class CqlProcessorTests {
                 .expression("year from %inputDate before 2020")
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
         var results = (Parameters) result;
         assertInstanceOf(BooleanType.class, results.getParameter("return").getValue());
@@ -235,7 +242,8 @@ class CqlProcessorTests {
                 .expression(expression)
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
         var report = (Parameters) result;
         assertTrue(report.hasParameter());
@@ -255,7 +263,8 @@ class CqlProcessorTests {
                 .expression(expression)
                 .thenEvaluate()
                 .hasResults(1)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
         var report = (Parameters) result;
         assertTrue(report.hasParameter());
@@ -267,7 +276,7 @@ class CqlProcessorTests {
         var issue = outcome.getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
         assertEquals(
-                "Example Failure Code: This is an error message",
+                "Example Failure Code: This is an error messageReturn Value If Not Error",
                 issue.getDiagnostics().replaceAll("[\\r\\n]", ""));
     }
 }

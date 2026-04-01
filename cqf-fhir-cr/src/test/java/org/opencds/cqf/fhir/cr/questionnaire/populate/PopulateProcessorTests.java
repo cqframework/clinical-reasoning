@@ -137,7 +137,8 @@ class PopulateProcessorTests {
 
     private void assertContainedOperationOutcome(
             PopulateRequest request, IBaseResource actual, IBaseOperationOutcome expectedOperationOutcome) {
-        final var operationOutcome = getContainedByResourceType(request, IAdapterFactory.createAdapterForResource(actual), "OperationOutcome");
+        final var operationOutcome = getContainedByResourceType(
+                request, IAdapterFactory.createAdapterForResource(actual), "OperationOutcome");
         assertEquals(expectedOperationOutcome, operationOutcome);
     }
 

@@ -61,12 +61,12 @@ public class ProcessAction {
         if (Boolean.TRUE.equals(meetsConditions(request, action))) {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
             var requestAction = generateRequestAction(action);
-            extensionProcessor.processExtensions(
-                    request, requestAction, (IElement) action.get(), new ArrayList<>());
+            extensionProcessor.processExtensions(request, requestAction, (IElement) action.get(), new ArrayList<>());
             processChildActions(request, requestOrchestration, metConditions, action, requestAction);
-            var resource = request.getAdapterFactory().createResource(processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction));
+            var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
+            var adapter = resource == null ? null : request.getAdapterFactory().createResource(resource);
             dynamicValueProcessor.processDynamicValues(
-                    request, request.getPlanDefinition(), resource, (IElement) action.get(), (IElement)
+                    request, request.getPlanDefinitionAdapter(), adapter, (IElement) action.get(), (IElement)
                             requestAction.get());
             return (IBaseBackboneElement) requestAction.get();
         }
@@ -162,7 +162,8 @@ public class ProcessAction {
 
     protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         var conditions = action.getCondition().stream()
-                .filter(c -> "applicability".equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
+                .filter(c -> "applicability"
+                        .equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
                 .map(c -> request.getAdapterFactory().createBase(c))
                 .toList();
         if (conditions.isEmpty()) {

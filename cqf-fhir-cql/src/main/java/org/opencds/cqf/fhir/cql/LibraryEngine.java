@@ -54,7 +54,8 @@ public class LibraryEngine {
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirContext.getVersion().getVersion());
+        modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
     }
 
     public IRepository getRepository() {
@@ -120,7 +121,8 @@ public class LibraryEngine {
 
     protected String getModelName(Object base) {
         if (base instanceof List<?> list) {
-            return getModelName(list.get(0));
+            // A Tuple requires each property to have a type.  If there is no value default ot a FHIR string.
+            return list.isEmpty() ? "FHIR.string" : getModelName(list.get(0));
         }
         if (base instanceof Tuple tuple) {
             var properties = new ArrayList<String>();
@@ -157,13 +159,15 @@ public class LibraryEngine {
 
             var resourceType = resourceParameter == null ? contextType : getModelName(resourceParameter);
             cqlParameters.add(new CqlParameterDefinition("%resource", resourceType, false));
-            evaluationParameters.put("%resource", modelResolver.toCqlValue(resourceParameter == null ? contextParameter : resourceParameter, false));
+            evaluationParameters.put(
+                    "%resource",
+                    modelResolver.toCqlValue(resourceParameter == null ? contextParameter : resourceParameter, false));
         }
         if (rawParameters != null) {
             rawParameters.forEach((k, v) -> {
                 cqlParameters.add(new CqlParameterDefinition(k, getModelName(v), v instanceof List<?>));
-                evaluationParameters.put(k, v);
             });
+            evaluationParameters.putAll(cqlFhirParametersConverter.toCqlParameters(rawParameters));
         }
         var libraryName = "expression";
         var libraryVersion = "1.0.0";
@@ -327,8 +331,8 @@ public class LibraryEngine {
                 engine, () -> Engines.forRepository(repository, settings, additionalData));
 
         var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
-        if (rawParameters != null && !rawParameters.isEmpty()) {
-            evaluationParameters.putAll(rawParameters);
+        if (rawParameters != null) {
+            evaluationParameters.putAll(cqlFhirParametersConverterToUse.toCqlParameters(rawParameters));
         }
 
         var paramsBuilder = new EvaluationParams.Builder();

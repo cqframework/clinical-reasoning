@@ -35,7 +35,9 @@ public class ApplyProcessor implements IApplyProcessor {
                 "Performing $apply operation on ActivityDefinition/{}",
                 request.getActivityDefinition().getIdElement().getIdPart());
 
-        var result = request.getAdapterFactory().createResource(resolverFactory.create(request.getActivityDefinition()).resolve(request));
+        var result = request.getAdapterFactory()
+                .createResource(
+                        resolverFactory.create(request.getActivityDefinition()).resolve(request));
         var id = Ids.newId(
                 request.getFhirVersion(),
                 result.get().fhirType(),

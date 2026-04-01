@@ -45,9 +45,10 @@ public class PopulateProcessor implements IPopulateProcessor {
     // This work will be done in a separate PR
     protected Map<String, Object> getVariables(PopulateRequest request, IBase element) {
         var variables = new HashMap<String, Object>();
-        var expressions = request.getQuestionnaireAdapter().getExtensionsByUrl(element, Constants.VARIABLE_EXTENSION).stream()
-                .map(e -> CqfExpression.of(e, request.getReferencedLibraries()))
-                .toList();
+        var expressions =
+                request.getQuestionnaireAdapter().getExtensionsByUrl(element, Constants.VARIABLE_EXTENSION).stream()
+                        .map(e -> CqfExpression.of(e, request.getReferencedLibraries()))
+                        .toList();
         expressions.forEach(expression -> {
             try {
                 var result = expressionProcessor.getExpressionResult(request, expression, null, null);

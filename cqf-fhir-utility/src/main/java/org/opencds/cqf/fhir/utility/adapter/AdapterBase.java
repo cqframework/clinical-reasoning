@@ -9,10 +9,14 @@ import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -20,9 +24,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 public abstract class AdapterBase {
     private static final String ENUMERATION = "Enumeration";
@@ -66,12 +67,10 @@ public abstract class AdapterBase {
                 if (childDef != null) {
                     var elementDef = childDef.getChildByName(path);
                     if (elementDef != null
-                        && elementDef.getImplementingClass().getSimpleName().equals(ENUMERATION)
-                        && value != null
-                        && !value.getClass().getSimpleName().equals(ENUMERATION)) {
-                        value = getEnumValue(
-                            (RuntimeChildPrimitiveEnumerationDatatypeDefinition) childDef,
-                            ((IPrimitiveType<?>) value).getValueAsString());
+                            && elementDef.getImplementingClass().getSimpleName().equals(ENUMERATION)
+                            && value != null
+                            && !value.getClass().getSimpleName().equals(ENUMERATION)) {
+                        value = getEnumValue((RuntimeChildPrimitiveEnumerationDatatypeDefinition) childDef, value);
                     }
                 }
             }
@@ -92,8 +91,7 @@ public abstract class AdapterBase {
             }
 
             if (child == null) {
-                throw new IllegalArgumentException(
-                    String.format("Unable to resolve path %s.", path));
+                throw new IllegalArgumentException(String.format("Unable to resolve path %s.", path));
             }
 
             try {
@@ -105,18 +103,19 @@ public abstract class AdapterBase {
                     child.getMutator().setValue(target, setBaseValue(value, target));
                 }
             } catch (IllegalArgumentException le) {
-//                if (value != null && value.getClass().getSimpleName().equals("Quantity")) {
-//                    try {
-//                        value = adapterFactory.createSimpleQuantity(value) castToSimpleQuantity((BaseType) value);
-//                    } catch (FHIRException e) {
-//                        throw new UnprocessableEntityException(
-//                            "Unable to cast Quantity to SimpleQuantity");
-//                    }
-//                    child.getMutator().setValue(target, setBaseValue(value, target));
-//                } else {
-                    throw new UnprocessableEntityException(
+                //                if (value != null && value.getClass().getSimpleName().equals("Quantity")) {
+                //                    try {
+                //                        value = adapterFactory.createSimpleQuantity(value)
+                // castToSimpleQuantity((BaseType) value);
+                //                    } catch (FHIRException e) {
+                //                        throw new UnprocessableEntityException(
+                //                            "Unable to cast Quantity to SimpleQuantity");
+                //                    }
+                //                    child.getMutator().setValue(target, setBaseValue(value, target));
+                //                } else {
+                throw new UnprocessableEntityException(
                         String.format("Configuration error encountered: %s", le.getMessage()));
-//                }
+                //                }
             }
         }
     }
@@ -128,13 +127,13 @@ public abstract class AdapterBase {
             case "InstantType":
                 // Ensure offset is taken into account from the ISO datetime String instead of the default timezone
                 target.setValueAsString(value.toString());
-                //TODO:
-                //setCalendarConstant((BaseDateTimeType) target, (BaseTemporal) value);
+                // TODO:
+                // setCalendarConstant((BaseDateTimeType) target, (BaseTemporal) value);
                 break;
             case "DateType":
                 target.setValue(value);
-                //TODO:
-                //setCalendarConstant((BaseDateTimeType) target, (BaseTemporal) value);
+                // TODO:
+                // setCalendarConstant((BaseDateTimeType) target, (BaseTemporal) value);
                 break;
             case "TimeType":
                 target.setValue(value.toString());
@@ -165,11 +164,11 @@ public abstract class AdapterBase {
         }
 
         throw new UnprocessableEntityException("Unable to resolve the runtime definition for %s"
-            .formatted(base.getClass().getName()));
+                .formatted(base.getClass().getName()));
     }
 
     protected BaseRuntimeChildDefinition resolveChoiceProperty(
-        BaseRuntimeElementCompositeDefinition<?> definition, String path) {
+            BaseRuntimeElementCompositeDefinition<?> definition, String path) {
         for (Object child : definition.getChildren()) {
             if (child instanceof RuntimeChildChoiceDefinition choiceDefinition) {
                 if (choiceDefinition.getElementName().startsWith(path)) {
@@ -183,14 +182,22 @@ public abstract class AdapterBase {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <T extends Enum<?>, E extends IBaseEnumeration<T>> E getEnumValue(
-        RuntimeChildPrimitiveEnumerationDatatypeDefinition targetDef, String value) {
+            RuntimeChildPrimitiveEnumerationDatatypeDefinition targetDef, Object value) {
+        String enumValue;
+        if (value instanceof IPrimitiveType<?> primitiveType) {
+            enumValue = primitiveType.getValueAsString();
+        } else if (value instanceof IBaseCoding coding) {
+            enumValue = coding.getCode();
+        } else {
+            enumValue = value.toString();
+        }
         return switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3 -> (E) new org.hl7.fhir.dstu3.model.Enumeration(
-                toEnumFactory(targetDef.getBoundEnumType()), value);
-            case R4 -> (E) new org.hl7.fhir.r4.model.Enumeration(
-                toEnumFactory(targetDef.getBoundEnumType()), value);
-            case R5 -> (E) new org.hl7.fhir.r5.model.Enumeration(
-                toEnumFactory(targetDef.getBoundEnumType()), value);
+            case DSTU3 ->
+                (E) new org.hl7.fhir.dstu3.model.Enumeration(toEnumFactory(targetDef.getBoundEnumType()), enumValue);
+            case R4 ->
+                (E) new org.hl7.fhir.r4.model.Enumeration(toEnumFactory(targetDef.getBoundEnumType()), enumValue);
+            case R5 ->
+                (E) new org.hl7.fhir.r5.model.Enumeration(toEnumFactory(targetDef.getBoundEnumType()), enumValue);
             default -> null;
         };
     }
@@ -231,8 +238,8 @@ public abstract class AdapterBase {
                 if (targetDef != null) {
                     var targetValues = targetDef.getAccessor().getValues(target);
                     var targetValue = (targetValues.size() >= index + 1 && !isLast)
-                        ? getTargetValueFromList(sliceName, index, targetValues)
-                        : getTargetValue(target, value, isLast, targetPath, targetDef);
+                            ? getTargetValueFromList(sliceName, index, targetValues)
+                            : getTargetValue(target, value, isLast, targetPath, targetDef);
                     target = targetValue == null ? target : targetValue;
                     if (!isLast) {
                         var nextDef = fhirContext.getElementDefinition(target.getClass());
@@ -240,7 +247,7 @@ public abstract class AdapterBase {
                         else if (nextDef instanceof RuntimePrimitiveDatatypeDefinition) def = nextDef;
                         else
                             throw new UnprocessableEntityException("Unable to resolve the runtime definition for %s"
-                                .formatted(target.getClass().getName()));
+                                    .formatted(target.getClass().getName()));
                     }
                 }
             }
@@ -287,11 +294,11 @@ public abstract class AdapterBase {
     private IBase resolveOrCreateExtension(IBase target, ExtensionInfo info) {
         if (!(target instanceof IBaseHasExtensions hasExtensions)) {
             throw new IllegalArgumentException(
-                "Target does not support extensions: " + target.getClass().getName());
+                    "Target does not support extensions: " + target.getClass().getName());
         }
         var matching = hasExtensions.getExtension().stream()
-            .filter(ext -> info.url().equals(ext.getUrl()))
-            .toList();
+                .filter(ext -> info.url().equals(ext.getUrl()))
+                .toList();
         if (matching.size() > info.index()) {
             return (IBase) matching.get(info.index());
         }
@@ -311,7 +318,7 @@ public abstract class AdapterBase {
             case R5 -> new org.hl7.fhir.r5.model.Extension(url);
             default ->
                 throw new IllegalStateException(
-                    "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
+                        "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
         };
     }
 
@@ -326,15 +333,15 @@ public abstract class AdapterBase {
     }
 
     private IBase getTargetValue(
-        IBase target, Object value, boolean isLast, String targetPath, BaseRuntimeChildDefinition targetDef) {
+            IBase target, Object value, boolean isLast, String targetPath, BaseRuntimeChildDefinition targetDef) {
         IBase targetValue;
         var elementDef = targetDef.getChildByName(targetPath);
         if (isLast) {
             var elementClass = elementDef.getImplementingClass();
             if (elementClass.getSimpleName().equals(ENUMERATION)) {
                 targetValue = getEnumValue(
-                    (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
-                    ((IPrimitiveType<?>) value).getValueAsString());
+                        (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
+                        ((IPrimitiveType<?>) value).getValueAsString());
             } else {
                 targetValue = (IBase) value;
             }

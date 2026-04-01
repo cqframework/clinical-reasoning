@@ -58,7 +58,8 @@ public class ProcessDefinition {
                         : resource.getIdElement().getValue();
                 requestAction.setResource(buildReference(request.getFhirVersion(), reference));
                 if (Boolean.TRUE.equals(request.getContainResources())) {
-                    request.getPlanDefinitionAdapter().setValue(requestOrchestration, "contained", Collections.singletonList(resource));
+                    request.getPlanDefinitionAdapter()
+                            .setValue(requestOrchestration, "contained", Collections.singletonList(resource));
                 } else {
                     request.getRequestResources().add(resource);
                 }

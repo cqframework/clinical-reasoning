@@ -106,17 +106,20 @@ public class ProcessDefinitionItem {
 
     protected <E extends IBaseExtension<?, ?>> E getExtractExtension(ExtractRequest request, ItemPair item) {
         var url = Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT;
-        E ext = getExtensionElement(request, item, url).getExtensionByUrl(url);
+        var extElement = getExtensionElement(request, item, url);
+        E ext = extElement == null ? null : extElement.getExtensionByUrl(url);
         if (ext != null) {
             return ext;
         }
         var deprecatedUrl = Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT;
-        return getExtensionElement(request, item, deprecatedUrl).getExtensionByUrl(deprecatedUrl);
+        var depElement = getExtensionElement(request, item, deprecatedUrl);
+        return depElement == null ? null : depElement.getExtensionByUrl(deprecatedUrl);
     }
 
     protected <E extends IBaseExtension<?, ?>> List<E> getValueExtensions(ExtractRequest request, ItemPair item) {
         var url = Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT_VALUE;
-        return getExtensionElement(request, item, url).getExtensionsByUrl(url);
+        var extElement = getExtensionElement(request, item, url);
+        return extElement == null ? Collections.emptyList() : extElement.getExtensionsByUrl(url);
     }
 
     protected IAdapter<?> getExtensionElement(ExtractRequest request, ItemPair item, String url) {
@@ -167,7 +170,8 @@ public class ProcessDefinitionItem {
             Optional<IStructureDefinitionAdapter> profile,
             boolean isCreatedResource,
             ItemPair item) {
-        var resourceDefinition = request.getFhirContext().getElementDefinition(resource.get().getClass());
+        var resourceDefinition =
+                request.getFhirContext().getElementDefinition(resource.get().getClass());
         if (isCreatedResource) {
             var id = request.getExtractId();
             var linkId = item.getResponseItem() == null
@@ -454,13 +458,20 @@ public class ProcessDefinitionItem {
             if (answerValue != null) {
                 var parentValue = useParent
                         ? parent
-                        : request.getAdapterFactory().createBase(newBase(
-                                ((BaseRuntimeChildDatatypeDefinition) propertyDefs.get(parentProperty)).getDatatype()));
+                        : request.getAdapterFactory()
+                                .createBase(
+                                        newBase(((BaseRuntimeChildDatatypeDefinition) propertyDefs.get(parentProperty))
+                                                .getDatatype()));
                 setAnswerValue(
                         request, parentValue, propertyDefs.get(childProperty), childProperty, answerValue, profile);
                 if (!useParent) {
                     setAnswerValue(
-                            request, parent, propertyDefs.get(parentProperty), parentProperty, parentValue.get(), profile);
+                            request,
+                            parent,
+                            propertyDefs.get(parentProperty),
+                            parentProperty,
+                            parentValue.get(),
+                            profile);
                 }
             }
         });
@@ -593,7 +604,7 @@ public class ProcessDefinitionItem {
     protected IBase getElement(IAdapter<?> parent, String path) {
         var elementPath = path.split("\\.")[0];
         var value = parent.resolvePathList(elementPath);
-        return (IBase) (value instanceof ArrayList<?> al ? al.get(0) : value);
+        return value.isEmpty() ? null : value.get(0);
     }
 
     protected List<Class<? extends IBase>> getChoices(BaseRuntimeChildDefinition pathDefinition) {
@@ -610,7 +621,8 @@ public class ProcessDefinitionItem {
                 profile == null ? null : profile.getElementByPath(answerPath.split(":")[0]);
         var answerType = pathElement == null ? null : pathElement.getTypeCode();
         if (answerType != null && !answerValue.fhirType().equals(answerType)) {
-            var newAnswerValue = request.getAdapterFactory().createBase(newBaseForVersion(answerType, request.getFhirVersion()));
+            var newAnswerValue =
+                    request.getAdapterFactory().createBase(newBaseForVersion(answerType, request.getFhirVersion()));
             newAnswerValue.setValue(VALUE_PATH, answerValue);
             answerValue = newAnswerValue.get();
         } else {

@@ -235,13 +235,11 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
                         .findAny()
                         .ifPresent(resource -> {
                             int indexOfDraftInIdList = resourceListWithOriginalIds.indexOf(resource);
-                            newResource
-                                    .setValue(
-                                            useContext,
-                                            "value",
-                                            VersionUtilities.referenceTypeForVersion(
-                                                    fhirVersion(),
-                                                    idListForTransactionBundle.get(indexOfDraftInIdList)));
+                            newResource.setValue(
+                                    useContext,
+                                    "value",
+                                    VersionUtilities.referenceTypeForVersion(
+                                            fhirVersion(), idListForTransactionBundle.get(indexOfDraftInIdList)));
                         });
             }
         }

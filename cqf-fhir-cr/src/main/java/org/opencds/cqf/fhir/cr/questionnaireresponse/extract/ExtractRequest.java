@@ -39,7 +39,7 @@ public class ExtractRequest implements IQuestionnaireRequest {
     public ExtractRequest(
             IBaseResource questionnaireResponse,
             IBaseResource questionnaire,
-            //IIdType subjectId,
+            // IIdType subjectId,
             IBaseParameters parameters,
             IBaseBundle bundle,
             LibraryEngine libraryEngine,

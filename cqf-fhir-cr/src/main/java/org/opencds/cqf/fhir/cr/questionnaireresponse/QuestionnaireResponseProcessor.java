@@ -11,7 +11,6 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -127,11 +126,11 @@ public class QuestionnaireResponseProcessor {
             LibraryEngine libraryEngine) {
         var questionnaireResponse = resolveQuestionnaireResponse(questionnaireResponseId);
         var questionnaire = resolveQuestionnaire(questionnaireResponse, questionnaireId);
-        //var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
+        // var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
         var request = new ExtractRequest(
                 questionnaireResponse,
                 questionnaire,
-                //subject == null ? null : subject.getReferenceElement(),
+                // subject == null ? null : subject.getReferenceElement(),
                 parameters,
                 data,
                 libraryEngine,

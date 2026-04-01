@@ -3,20 +3,19 @@ package org.opencds.cqf.fhir.utility.adapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.FhirTerser;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,15 +35,15 @@ public interface IAdapter<T extends IBase> {
      */
     T get();
 
-//    default String getId() {
-//        return fhirTerser().getSingleValueOrNull(get(), "id", IPrimitiveType.class).getValueAsString();
-//    }
-//
-//    default void setId(String id) {
-//        setId((IIdType) Ids.newId(fhirContext(), id));
-//    }
-//
-//    void setId(IIdType id);
+    //    default String getId() {
+    //        return fhirTerser().getSingleValueOrNull(get(), "id", IPrimitiveType.class).getValueAsString();
+    //    }
+    //
+    //    default void setId(String id) {
+    //        setId((IIdType) Ids.newId(fhirContext(), id));
+    //    }
+    //
+    //    void setId(IIdType id);
 
     FhirContext fhirContext();
 
@@ -56,7 +55,7 @@ public interface IAdapter<T extends IBase> {
 
     IAdapterFactory getAdapterFactory();
 
-//    <E extends IBaseExtension<?, ?>> void setExtension(List<E> extensions);
+    //    <E extends IBaseExtension<?, ?>> void setExtension(List<E> extensions);
 
     default void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         try {
@@ -68,7 +67,7 @@ public interface IAdapter<T extends IBase> {
         }
     }
 
-//    <E extends IBaseExtension<?, ?>> E addExtension();
+    //    <E extends IBaseExtension<?, ?>> E addExtension();
     @SuppressWarnings("unchecked")
     default <E extends IBaseExtension<?, ?>> E addExtension() {
         if (get() instanceof IBaseHasExtensions baseHasExtensions) {
@@ -77,8 +76,7 @@ public interface IAdapter<T extends IBase> {
         return null;
     }
 
-
-//    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
+    //    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
 
     default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
         try {
@@ -142,7 +140,7 @@ public interface IAdapter<T extends IBase> {
         return getExtension(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
-    default  List<IBase> resolvePathList(String path) {
+    default List<IBase> resolvePathList(String path) {
         return resolvePathList(get(), path);
     }
 
@@ -171,11 +169,12 @@ public interface IAdapter<T extends IBase> {
             return string;
         } else if (result instanceof IBaseReference reference) {
             return reference.getReferenceElement().getValue();
+        } else if (result instanceof IBaseEnumeration<?> enumeration) {
+            return enumeration.getValueAsString();
         } else {
-            throw new UnprocessableEntityException(
-                    "Path : {} on element of type {} could not be resolved",
-                    path,
-                    base.getClass().getSimpleName());
+            throw new UnprocessableEntityException(String.format(
+                    "Path (%s) on element of type (%s) could not be resolved",
+                    path, base.getClass().getSimpleName()));
         }
     }
 
@@ -184,18 +183,23 @@ public interface IAdapter<T extends IBase> {
     }
 
     default IBase resolvePath(IBase base, String path) {
-        var pathResult = resolvePathList(base, path);
-        return pathResult.isEmpty() ? null : pathResult.get(0);
+        try {
+            return (IBase) fhirTerser().getSingleValueOrNull(base, path);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    @SuppressWarnings("unchecked")
     default <B extends IBase> B resolvePath(String path, Class<B> clazz) {
-        return (B) resolvePath(get(), path);
+        return resolvePath(get(), path, clazz);
     }
 
-    @SuppressWarnings("unchecked")
     default <B extends IBase> B resolvePath(IBase base, String path, Class<B> clazz) {
-        return (B) resolvePath(base, path);
+        try {
+            return fhirTerser().getSingleValueOrNull(base, path, clazz);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     void setValue(IBase base, String path, Object value);

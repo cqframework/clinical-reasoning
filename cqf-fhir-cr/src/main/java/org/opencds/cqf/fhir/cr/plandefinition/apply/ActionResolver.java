@@ -32,11 +32,11 @@ public class ActionResolver {
             task.setId(taskId);
         }
         action.setValue(
-                        task,
-                        "basedOn",
-                        Collections.singletonList(buildReference(
-                                request.getFhirVersion(),
-                                requestOrchestration.getIdElement().getValue())));
+                task,
+                "basedOn",
+                Collections.singletonList(buildReference(
+                        request.getFhirVersion(),
+                        requestOrchestration.getIdElement().getValue())));
         if (request.getQuestionnaireAdapter() != null
                 && action.resolvePath(task, "focus", IBaseReference.class) == null) {
             var codePath = action.resolvePath(task, "code");

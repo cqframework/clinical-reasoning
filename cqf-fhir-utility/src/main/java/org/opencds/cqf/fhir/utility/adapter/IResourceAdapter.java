@@ -11,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 
@@ -19,8 +18,22 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
 
     IBaseResource get();
 
+    /**
+     * Returns the id of the resource including the type. i.e. Patient/id
+     * @return String
+     */
     default String getId() {
-        return getIdElement().getIdPart();
+        return getIdElement() == null
+                ? null
+                : String.format("%s/%s", get().fhirType(), getIdElement().getIdPart());
+    }
+
+    /**
+     * Returns just the id part of the id of the resource
+     * @return String
+     */
+    default String getIdPart() {
+        return getIdElement() == null ? null : getIdElement().getIdPart();
     }
 
     default IIdType getIdElement() {
@@ -28,7 +41,7 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
     }
 
     default IAdapter<?> setId(String id) {
-        setId((IIdType) Ids.newId(fhirContext(), id));
+        setId((IIdType) Ids.newId(fhirContext(), Ids.ensureIdType(id, get().fhirType())));
         return this;
     }
 
@@ -76,10 +89,9 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
     }
 
     default void addContained(IBaseResource base) {
-        resolvePathList(get(), "contained").add(base);
-//        var res = resolvePathList(get(), "contained", IBaseResource.class);
-//        res.add(base);
-//        setValue(get(), "contained", res);
+        var res = resolvePathList(get(), "contained", IBaseResource.class);
+        res.add(base);
+        setValue(get(), "contained", res);
     }
 
     default boolean hasProperty(String propertyName) {

@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
@@ -236,8 +238,7 @@ public class ItemProcessor {
             final var pathValue = getPathValue(request, contextBase, definition, profile);
             if (pathValue != null) {
                 final List<IBase> answerValue =
-                    pathValue instanceof List ? (List<IBase>) pathValue
-                        : List.of((IBase) pathValue);
+                        pathValue instanceof List ? (List<IBase>) pathValue : List.of((IBase) pathValue);
                 if (!answerValue.isEmpty()) {
                     addAuthorExtension(request, responseItem);
                 }
@@ -265,18 +266,21 @@ public class ItemProcessor {
         var element = profile.getElement(elementId);
         var elementPath = element.getPath();
         var answerType = element.getTypeCode();
-        var path = elementPath.substring(elementPath.indexOf(".") + 1).replace("[x]", "");
+        var path = elementPath.substring(elementPath.indexOf(".") + 1); // .replace("[x]", "");
         if (StringUtils.isNotBlank(sliceName)) {
             path = path.split("\\.")[0];
         }
-        pathValue = context == null ? null : element.resolvePath(context, path);
-        if (pathValue instanceof ArrayList<?> pathList) {
-            if (elementId.contains(":")) {
-                pathValue = getSliceValue(request, profile, path, sliceName, pathList);
-            } else {
-                pathValue = (pathList.get(0));
-            }
+        List<IBase> pathList = context == null ? Collections.emptyList() : element.resolvePathList(context, path);
+        if (elementId.contains(":")) {
+            pathValue = getSliceValue(request, profile, path, sliceName, pathList);
+        } else {
+            pathValue = (pathList.get(0));
         }
+        // Ensure resource id's include the resource type
+        if (pathValue instanceof IIdType idType && path.equals("id") && context instanceof IBaseResource) {
+            pathValue = idType.withResourceType(context.fhirType());
+        }
+
         if (pathValue != null
                 && !((IBase) pathValue).fhirType().equals(answerType)
                 && pathValue instanceof IPrimitiveType<?> stringPath) {
@@ -291,7 +295,7 @@ public class ItemProcessor {
             IStructureDefinitionAdapter profile,
             String path,
             String sliceName,
-            ArrayList<?> pathList) {
+            List<IBase> pathList) {
         var filterElements = profile.getSliceElements(sliceName).stream()
                 .filter(IElementDefinitionAdapter::hasDefaultOrFixedOrPattern)
                 .toList();

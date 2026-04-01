@@ -8,11 +8,8 @@ import static org.opencds.cqf.fhir.utility.OperationOutcomes.newOperationOutcome
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.Collections;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
@@ -51,12 +48,12 @@ public interface IOperationRequest {
     default void resolveOperationOutcome(IResourceAdapter adapter) {
         var issues = adapter.resolvePathList(getOperationOutcome(), "issue");
         if (issues != null && !issues.isEmpty()) {
-            getOperationOutcome()
-                    .setId("%s-outcome-%s"
-                            .formatted(
-                                    getOperationName(), adapter.getId()));
+            getOperationOutcome().setId("%s-outcome-%s".formatted(getOperationName(), adapter.getIdPart()));
             adapter.addContained(getOperationOutcome());
-            adapter.addExtension(buildReferenceExt(getFhirVersion(), cqfMessagesExtension(getOperationOutcome().getIdElement().getIdPart()), true));
+            adapter.addExtension(buildReferenceExt(
+                    getFhirVersion(),
+                    cqfMessagesExtension(getOperationOutcome().getIdElement().getIdPart()),
+                    true));
         }
     }
 }

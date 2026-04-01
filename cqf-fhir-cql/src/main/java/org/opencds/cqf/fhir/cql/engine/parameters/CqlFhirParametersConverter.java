@@ -338,7 +338,11 @@ public class CqlFhirParametersConverter {
 
     public Map<String, Object> toCqlParameters(Map<String, Object> parameters) {
         Map<String, Object> parameterMap = new HashMap<>();
-        parameters.forEach((k, v) -> parameterMap.put(k, v instanceof Tuple ? v : modelResolver.toCqlValue(v, false)));
+        parameters.forEach((k, v) -> {
+            var className = v.getClass().getName();
+            var value = className.contains("org.opencds.cqf.cql.engine") ? v : modelResolver.toCqlValue(v, false);
+            parameterMap.put(k, value);
+        });
         return parameterMap;
     }
 
@@ -365,8 +369,12 @@ public class CqlFhirParametersConverter {
                 .isPresent();
     }
 
+    public Object convertToFhirIfNeeded(Object value) {
+        return value instanceof CqlClassInstance cqlClassInstance ? toFhirValue(cqlClassInstance) : value;
+    }
+
     @SuppressWarnings("unchecked")
-    private IBase toFhirValue(CqlClassInstance cci) {
+    public IBase toFhirValue(CqlClassInstance cci) {
         var typeName = cci.getType().getLocalPart();
         var clazz = modelResolver.resolveType(typeName);
         if (clazz == null) {
@@ -400,7 +408,7 @@ public class CqlFhirParametersConverter {
         if (definition == null) {
             @SuppressWarnings("unchecked")
             var resourceClazz = (Class<? extends IBaseResource>) clazz;
-            definition = (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getResourceDefinition(resourceClazz);
+            definition = fhirContext.getResourceDefinition(resourceClazz);
         }
 
         for (var child : definition.getChildren()) {

@@ -15,6 +15,8 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Range;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -73,15 +75,7 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         if (cqlExpressionResult == null || cqlExpressionResult.getValue() == null) {
             return;
         }
-        var cqfFhirParameterConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
-        Object expressionResult;
-        if (cqlExpressionResult.getValue() instanceof List<?> listValue) {
-            expressionResult = listValue.stream()
-                    .map(cqfFhirParameterConverter::convertToFhirIfNeeded)
-                    .toList();
-        } else {
-            expressionResult = cqfFhirParameterConverter.convertToFhirIfNeeded(cqlExpressionResult.getValue());
-        }
+        var expressionResult = convertExpressionResult(cqlExpressionResult);
 
         var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult);
         // Encounter
@@ -111,5 +105,121 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
     @Override
     public Optional<Class<?>> extractFhirResourceType(String groupPopulationBasisCode) {
         return resolveResourceType(groupPopulationBasisCode, RESOURCE_TYPE_NAMES, FHIR_MODEL_PACKAGE);
+    }
+    
+    private void validateStratifierPopulationBasisType(
+            String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
+
+        if (stratifierDef.isCriteriaStratifier()) {
+            validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
+        } else {
+            for (var component : stratifierDef.components()) {
+                validateExpressionResultType(groupDef, stratifierDef, component.expression(), evaluationResult, url);
+            }
+        }
+    }
+
+    private void validateExpressionResultType(
+            GroupDef groupDef,
+            StratifierDef stratifierDef,
+            String expression,
+            EvaluationResult evaluationResult,
+            String url) {
+
+        var cqlExpressionResult = evaluationResult.get(expression);
+        if (cqlExpressionResult == null || cqlExpressionResult.getValue() == null) {
+            return;
+        }
+        var expressionResult = convertExpressionResult(cqlExpressionResult);
+
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult);
+        var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
+
+        if (stratifierDef.isCriteriaStratifier()) {
+            if (resultClasses.isEmpty()) {
+                log.warn("Criteria-based stratifier results are empty for measure: {}", url);
+                return;
+            }
+
+            if (resultClasses.stream()
+                    .noneMatch(resultClass -> doesBasisMatchResource(resultClass, groupPopulationBasisCode))) {
+
+                throw new InvalidRequestException(
+                        "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
+                                .formatted(expression, groupPopulationBasisCode, prettyClassNames(resultClasses), url));
+            }
+
+            // skip validation below since for criteria-based stratifier, the boolean basis test is irrelevant
+            return;
+        }
+
+        var resultMatchingClasses = resultClasses.stream()
+                .filter(resultClass ->
+                        ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.contains(resultClass) || Boolean.class == resultClass)
+                .toList();
+
+        if (resultMatchingClasses.size() != resultClasses.size()) {
+            throw new InvalidRequestException(
+                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total eval result classes: %s and matching result classes: %s"
+                            .formatted(
+                                    expression,
+                                    groupPopulationBasisCode,
+                                    url,
+                                    prettyClassNames(resultClasses),
+                                    prettyClassNames(resultMatchingClasses)));
+        }
+    }
+
+    private static Object convertExpressionResult(ExpressionResult cqlExpressionResult) {
+        var cqfFhirParameterConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
+        Object expressionResult;
+        if (cqlExpressionResult.getValue() instanceof List<?> listValue) {
+            expressionResult = listValue.stream()
+                    .map(cqfFhirParameterConverter::convertToFhirIfNeeded)
+                    .toList();
+        } else {
+            expressionResult = cqfFhirParameterConverter.convertToFhirIfNeeded(cqlExpressionResult.getValue());
+        }
+        return expressionResult;
+    }
+
+    private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {
+        // If we don't do this we'll fail with "boolean" vs. "Boolean"
+        if (resultClass == Boolean.class && BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
+            return true;
+        }
+
+        return resultClass.getSimpleName().equals(groupPopulationBasisCode);
+    }
+
+    private Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {
+        if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
+            return Optional.of(Boolean.class);
+        }
+
+        final Optional<String> optResourceClassName = Arrays.stream(ResourceType.values())
+                .map(ResourceType::name)
+                .filter(theName -> {
+                    if ("ListResource".equals(groupPopulationBasisCode)) {
+                        return true;
+                    }
+
+                    return theName.equals(groupPopulationBasisCode);
+                })
+                .map(typeName -> "org.hl7.fhir.r4.model." + typeName)
+                .findFirst();
+
+        if (optResourceClassName.isPresent()) {
+            try {
+                return Optional.of(Class.forName(optResourceClassName.get()));
+            } catch (ClassNotFoundException exception) {
+                throw new InternalErrorException(exception);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private List<String> prettyClassNames(List<Class<?>> classes) {
+        return classes.stream().map(Class::getSimpleName).toList();
     }
 }

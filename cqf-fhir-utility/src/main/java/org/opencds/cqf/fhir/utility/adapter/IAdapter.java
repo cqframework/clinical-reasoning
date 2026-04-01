@@ -3,12 +3,12 @@ package org.opencds.cqf.fhir.utility.adapter;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.FhirTerser;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
@@ -35,6 +35,16 @@ public interface IAdapter<T extends IBase> {
      */
     T get();
 
+    //    default String getId() {
+    //        return fhirTerser().getSingleValueOrNull(get(), "id", IPrimitiveType.class).getValueAsString();
+    //    }
+    //
+    //    default void setId(String id) {
+    //        setId((IIdType) Ids.newId(fhirContext(), id));
+    //    }
+    //
+    //    void setId(IIdType id);
+
     FhirContext fhirContext();
 
     FhirTerser fhirTerser();
@@ -44,6 +54,8 @@ public interface IAdapter<T extends IBase> {
     }
 
     IAdapterFactory getAdapterFactory();
+
+    //    <E extends IBaseExtension<?, ?>> void setExtension(List<E> extensions);
 
     default void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         try {
@@ -55,6 +67,7 @@ public interface IAdapter<T extends IBase> {
         }
     }
 
+    //    <E extends IBaseExtension<?, ?>> E addExtension();
     @SuppressWarnings("unchecked")
     default <E extends IBaseExtension<?, ?>> E addExtension() {
         if (get() instanceof IBaseHasExtensions baseHasExtensions) {
@@ -63,8 +76,7 @@ public interface IAdapter<T extends IBase> {
         return null;
     }
 
-
-//    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
+    //    <E extends IBaseExtension<?, ?>> E addExtension(E extension);
 
     default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
         try {
@@ -128,16 +140,16 @@ public interface IAdapter<T extends IBase> {
         return getExtension(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
-    Object resolvePath(Object target, String path);
-
     default List<IBase> resolvePathList(String path) {
         return resolvePathList(get(), path);
     }
 
-    @SuppressWarnings("unchecked")
     default List<IBase> resolvePathList(IBase base, String path) {
-        var pathResult = resolvePath(base, path);
-        return pathResult instanceof List ? (List<IBase>) pathResult : new ArrayList<>();
+        try {
+            return fhirTerser().getValues(base, path);
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -166,17 +178,28 @@ public interface IAdapter<T extends IBase> {
         }
     }
 
-    default Object resolvePath(String path) {
+    default IBase resolvePath(String path) {
         return resolvePath(get(), path);
+    }
+
+    default IBase resolvePath(IBase base, String path) {
+        try {
+            return (IBase) fhirTerser().getSingleValueOrNull(base, path);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     default <B extends IBase> B resolvePath(String path, Class<B> clazz) {
         return resolvePath(get(), path, clazz);
     }
 
-    @SuppressWarnings("unchecked")
     default <B extends IBase> B resolvePath(IBase base, String path, Class<B> clazz) {
-        return (B) resolvePath(base, path);
+        try {
+            return fhirTerser().getSingleValueOrNull(base, path, clazz);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     void setValue(IBase base, String path, Object value);

@@ -21,7 +21,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyRequest;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.adapter.ElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.slf4j.event.Level;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +51,7 @@ class DynamicValueProcessorTests {
         var cqfExpression = new CqfExpression().setExpression("NullTest");
         var request = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        var dynamicValue = new ElementAdapter(
+        var dynamicValue = new BaseElementAdapter(
                 FhirVersionEnum.R4,
                 new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                         .setPath("action.extension")
@@ -79,7 +79,7 @@ class DynamicValueProcessorTests {
         var cqfExpression = new CqfExpression();
         var requestDstu3 = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.DSTU3, libraryEngine, null, inputParameterResolver);
-        var dvDstu3 = new ElementAdapter(
+        var dvDstu3 = new BaseElementAdapter(
                 FhirVersionEnum.DSTU3,
                 new org.hl7.fhir.dstu3.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                         .setPath("action.extension")
@@ -96,7 +96,7 @@ class DynamicValueProcessorTests {
 
         var requestR4 = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
-        var dvR4 = new ElementAdapter(
+        var dvR4 = new BaseElementAdapter(
                 FhirVersionEnum.R4,
                 new org.hl7.fhir.r4.model.ActivityDefinition.ActivityDefinitionDynamicValueComponent()
                         .setPath("action.extension")

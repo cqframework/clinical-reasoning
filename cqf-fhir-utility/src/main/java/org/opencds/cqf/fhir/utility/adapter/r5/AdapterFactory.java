@@ -24,7 +24,7 @@ import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComp
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
-import org.opencds.cqf.fhir.utility.adapter.ElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -71,10 +71,8 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IAdapter<?> createBase(IBase element) {
-        if (element instanceof IBaseResource resource) {
-            return createResource(resource);
-        } else if (element instanceof QuestionnaireItemComponent item) {
+    public IAdapter<IBase> createBase(IBase element) {
+        if (element instanceof QuestionnaireItemComponent item) {
             return createQuestionnaireItem(item);
         } else if (element instanceof QuestionnaireResponseItemComponent responseItem) {
             return createQuestionnaireResponseItem(responseItem);
@@ -87,7 +85,7 @@ public class AdapterFactory implements IAdapterFactory {
         } else if (element instanceof ParametersParameterComponent parametersParameterComponent) {
             return createParametersParameter(parametersParameterComponent);
         } else {
-            return new ElementAdapter(FhirVersionEnum.R5, element);
+            return new BaseElementAdapter(FhirVersionEnum.R5, element);
         }
     }
 

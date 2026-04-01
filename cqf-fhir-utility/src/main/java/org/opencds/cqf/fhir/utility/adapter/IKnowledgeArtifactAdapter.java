@@ -25,7 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -45,13 +44,13 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     IDomainResource copy();
 
-    default IIdType getId() {
-        return get().getIdElement();
-    }
-
-    default void setId(IIdType id) {
-        get().setId(id);
-    }
+    //    default IIdType getId() {
+    //        return get().getIdElement();
+    //    }
+    //
+    //    default void setId(IIdType id) {
+    //        get().setId(id);
+    //    }
 
     default boolean hasName() {
         return StringUtils.isNotBlank(getName());
@@ -114,10 +113,8 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
      * @return canonical url of artifact
      */
     default String getCanonical() {
-        if (!hasUrl()) {
-            return getId().getValueAsString();
-        }
-        return getUrl().concat(hasVersion() ? "|%s".formatted(getVersion()) : "");
+        var url = hasUrl() ? getUrl() : getId();
+        return url == null ? null : url.concat(hasVersion() ? "|%s".formatted(getVersion()) : "");
     }
 
     List<IDependencyInfo> getDependencies();

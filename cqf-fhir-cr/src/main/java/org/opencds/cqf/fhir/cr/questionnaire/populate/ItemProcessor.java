@@ -9,6 +9,7 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +26,6 @@ import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
@@ -109,24 +109,23 @@ public class ItemProcessor {
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
-        List<IAdapter<?>> populationContext;
+        List<Object> populationContext;
         try {
             populationContext =
                     expressionProcessor
                             .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
                             .stream()
-//                            .map(r -> {
-//                                if (r != null && r.fhirType().equals("Tuple")) {
-//                                    return new Tuple()
-//                                            .withElements(request.getAdapterFactory()
-//                                                    .createTuple(r)
-//                                                    .getProperties());
-//                                }
-//                                return r;
-//                            })
+                            .map(r -> {
+                                if (r != null && r.fhirType().equals("Tuple")) {
+                                    return new Tuple()
+                                            .withElements(request.getAdapterFactory()
+                                                    .createTuple(r)
+                                                    .getProperties());
+                                }
+                                return r;
+                            })
                             // filtering nulls here to prevent unnecessary duplicate responseItems
                             .filter(Objects::nonNull)
-                            .map(r -> request.getAdapterFactory().createBase(r))
                             .collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -197,7 +196,7 @@ public class ItemProcessor {
             PopulateRequest request,
             IQuestionnaireItemComponentAdapter groupItem,
             String contextName,
-            IAdapter<?> context,
+            Object context,
             IStructureDefinitionAdapter profile) {
         final var contextItem = groupItem.newResponseItem();
         groupItem.getItem().stream()
@@ -226,7 +225,7 @@ public class ItemProcessor {
             PopulateRequest request,
             IQuestionnaireItemComponentAdapter item,
             String contextName,
-            IAdapter<?> context,
+            Object context,
             IStructureDefinitionAdapter profile) {
         if (item.hasInitial()) {
             return processSingleItem(request, item);
@@ -235,8 +234,8 @@ public class ItemProcessor {
         request.setContextVariable(responseItem.get());
         // if we have a definition use it to populate
         var definition = item.getDefinition();
-        if (StringUtils.isNotBlank(definition) && profile != null && context != null) {
-            final var pathValue = getPathValue(request, context, definition, profile);
+        if (StringUtils.isNotBlank(definition) && profile != null && context instanceof IBase contextBase) {
+            final var pathValue = getPathValue(request, contextBase, definition, profile);
             if (pathValue != null) {
                 final List<IBase> answerValue =
                         pathValue instanceof List ? (List<IBase>) pathValue : List.of((IBase) pathValue);
@@ -260,28 +259,26 @@ public class ItemProcessor {
     }
 
     protected Object getPathValue(
-            IOperationRequest request, IAdapter<?> context, String definition, IStructureDefinitionAdapter profile) {
+            IOperationRequest request, IBase context, String definition, IStructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
         var sliceName = Helpers.getSliceName(elementId);
         var element = profile.getElement(elementId);
         var elementPath = element.getPath();
         var answerType = element.getTypeCode();
-        var path = elementPath.substring(elementPath.indexOf(".") + 1).replace("[x]", "");
+        var path = elementPath.substring(elementPath.indexOf(".") + 1); // .replace("[x]", "");
         if (StringUtils.isNotBlank(sliceName)) {
             path = path.split("\\.")[0];
         }
-        pathValue = context.resolvePath(path);
-        if (pathValue instanceof ArrayList<?> pathList) {
-            if (elementId.contains(":")) {
-                pathValue = getSliceValue(request, profile, path, sliceName, pathList);
-            } else {
-                pathValue = (pathList.get(0));
-            }
+        List<IBase> pathList = context == null ? Collections.emptyList() : element.resolvePathList(context, path);
+        if (elementId.contains(":")) {
+            pathValue = getSliceValue(request, profile, path, sliceName, pathList);
+        } else {
+            pathValue = (pathList.get(0));
         }
         // Ensure resource id's include the resource type
-        if (pathValue instanceof IIdType idType && path.equals("id") && context.get() instanceof IBaseResource contextResource) {
-            pathValue = idType.withResourceType(contextResource.fhirType());
+        if (pathValue instanceof IIdType idType && path.equals("id") && context instanceof IBaseResource) {
+            pathValue = idType.withResourceType(context.fhirType());
         }
 
         if (pathValue != null
@@ -298,7 +295,7 @@ public class ItemProcessor {
             IStructureDefinitionAdapter profile,
             String path,
             String sliceName,
-            List<?> pathList) {
+            List<IBase> pathList) {
         var filterElements = profile.getSliceElements(sliceName).stream()
                 .filter(IElementDefinitionAdapter::hasDefaultOrFixedOrPattern)
                 .toList();

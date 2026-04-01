@@ -2,7 +2,9 @@ package org.opencds.cqf.fhir.cql.engine.parameters;
 
 import static java.util.Objects.requireNonNull;
 
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,18 +13,24 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
+import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
@@ -37,8 +45,8 @@ public class CqlFhirParametersConverter {
     protected IAdapterFactory adapterFactory;
     protected FhirTypeConverter fhirTypeConverter;
     protected FhirContext fhirContext;
-    // private IFhirPath fhirPath;
-    private final ModelResolver modelResolver;
+    protected FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver;
+    protected IFhirPath fhirPath;
 
     /*
      * Converts both CQL parameters and CQL Evaluation Results into Fhir Parameters Resources
@@ -50,8 +58,7 @@ public class CqlFhirParametersConverter {
         this.fhirTypeConverter = requireNonNull(fhirTypeConverter);
         this.modelResolver = FhirModelResolverCache.resolverForVersion(
                 this.fhirContext.getVersion().getVersion());
-
-        // this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
+        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
     }
 
     // This is basically a copy and paste from R4FhirTypeConverter, but it's not exposed.
@@ -145,6 +152,15 @@ public class CqlFhirParametersConverter {
                     fhirContext, DATA_ABSENT_REASON_EXT_URL, codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
         }
 
+        value = convertCqlClassInstanceIfNeeded(value);
+
+        if (value instanceof Tuple tupleValue) {
+            var ppca = this.addPart(pa, name);
+            tupleValue.getElements().forEach((k, v) -> addSubPart(ppca, k, v));
+
+            return;
+        }
+
         if (value instanceof Iterable) {
             var ppca = this.addPart(pa, name);
             Iterable<Object> values = (Iterable<Object>) value;
@@ -192,6 +208,8 @@ public class CqlFhirParametersConverter {
         if (value == null) {
             return;
         }
+
+        value = convertCqlClassInstanceIfNeeded(value);
 
         if (value instanceof Iterable) {
             Iterable<Object> values = (Iterable<Object>) value;
@@ -277,7 +295,12 @@ public class CqlFhirParametersConverter {
 
             // TODO: This breaks down a bit for CQL System types because they aren't prefixed.
             if (type == null && !values.isEmpty()) {
-                type = values.get(0).getClass().getSimpleName();
+                var firstValue = values.get(0);
+                if (firstValue instanceof CqlClassInstance cci) {
+                    type = "FHIR." + cci.getType().getLocalPart();
+                } else {
+                    type = firstValue.getClass().getSimpleName();
+                }
             }
 
             if (type == null) {
@@ -313,46 +336,103 @@ public class CqlFhirParametersConverter {
         return parameterMap;
     }
 
-    private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-        var type = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "type");
-        // Optional<IPrimitiveType> type = this.fhirPath
-        // .evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
-        // if (type.isPresent()) {
-        if (type instanceof IPrimitiveType<?> primitiveType) {
-            return primitiveType.getValueAsString();
-        }
-
-        return null;
+    public Map<String, Object> toCqlParameters(Map<String, Object> parameters) {
+        Map<String, Object> parameterMap = new HashMap<>();
+        parameters.forEach((k, v) -> parameterMap.put(k, v instanceof Tuple ? v : modelResolver.toCqlValue(v, false)));
+        return parameterMap;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
+    private String getType(IBaseExtension<?, ?> parameterDefinitionExtension) {
+        Optional<IPrimitiveType> type =
+                this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "type", IPrimitiveType.class);
+        return type.map(IPrimitiveType::getValueAsString).orElse(null);
+    }
+
+    @SuppressWarnings({"rawtypes"})
     private Boolean isListType(IBaseExtension<?, ?> parameterDefinitionExtension) {
-        var max = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "max");
-        // Optional<IPrimitiveType> max = this.fhirPath
-        // .evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
-        // if (max.isPresent()) {
-        if (max instanceof IPrimitiveType<?> type) {
-            String maxString = type.getValueAsString();
+        Optional<IPrimitiveType> max =
+                this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "max", IPrimitiveType.class);
+        if (max.isPresent()) {
+            var maxString = max.get().getValueAsString();
 
             return !maxString.equals("1");
         }
 
-        var min = modelResolver.resolvePath(parameterDefinitionExtension.getValue(), "min");
-        // Optional<IBaseIntegerDatatype> min = this.fhirPath
-        // .evaluateFirst(parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
-        // if (min.isPresent()) {
-        if (min instanceof IPrimitiveType) {
-            return ((IPrimitiveType<Integer>) min).getValue() > 1;
+        Optional<IBaseIntegerDatatype> min =
+                this.fhirPath.evaluateFirst(parameterDefinitionExtension.getValue(), "min", IBaseIntegerDatatype.class);
+        return min.filter(iBaseIntegerDatatype -> iBaseIntegerDatatype.getValue() > 1)
+                .isPresent();
+    }
+
+    @SuppressWarnings("unchecked")
+    private IBase toFhirValue(CqlClassInstance cci) {
+        var typeName = cci.getType().getLocalPart();
+        var clazz = modelResolver.resolveType(typeName);
+        if (clazz == null) {
+            throw new IllegalArgumentException("Could not resolve FHIR type: " + typeName);
         }
 
-        return false;
+        IBase instance;
+        try {
+            instance = (IBase) modelResolver.createHapiInstance$engine_fhir(typeName);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not create instance of " + typeName, e);
+        }
+
+        if (instance instanceof IBaseEnumeration<?> enumeration) {
+            var value = cci.getElements().get("value");
+            enumeration.setValueAsString((String) value);
+            return instance;
+        }
+
+        if (instance instanceof IPrimitiveType<?> primitive) {
+            var value = cci.getElements().get("value");
+            if (value != null) {
+                modelResolver.setPrimitiveValue(value, primitive);
+            }
+            return instance;
+        }
+
+        @SuppressWarnings("unchecked")
+        var ibaseClazz = (Class<? extends IBase>) clazz;
+        var definition = (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getElementDefinition(ibaseClazz);
+        if (definition == null) {
+            @SuppressWarnings("unchecked")
+            var resourceClazz = (Class<? extends IBaseResource>) clazz;
+            definition = (BaseRuntimeElementCompositeDefinition<?>) fhirContext.getResourceDefinition(resourceClazz);
+        }
+
+        for (var child : definition.getChildren()) {
+            var elementValue = cci.getElements().get(child.getElementName());
+            if (elementValue == null) {
+                continue;
+            }
+            if (elementValue instanceof List<?> list) {
+                for (var item : list) {
+                    if (item instanceof CqlClassInstance childCci) {
+                        child.getMutator().addValue(instance, toFhirValue(childCci));
+                    }
+                }
+            } else if (elementValue instanceof CqlClassInstance childCci) {
+                child.getMutator().addValue(instance, toFhirValue(childCci));
+            }
+        }
+        return instance;
+    }
+
+    private Object convertCqlClassInstanceIfNeeded(Object value) {
+        if (value instanceof CqlClassInstance cci) {
+            return toFhirValue(cci);
+        }
+        return value;
     }
 
     private Object convertToCql(IParametersParameterComponentAdapter ppca) {
         if (ppca.hasValue()) {
             return this.fhirTypeConverter.toCqlType(ppca.getValue());
         } else if (ppca.hasResource()) {
-            return ppca.getResource();
+            return modelResolver.toCqlValue(ppca.getResource(), false);
         } else if (ppca.hasPart()) {
             logger.debug("Ignored {} parameter sub-parts", ppca.getPart().size());
         }

@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import java.util.Collections;
@@ -17,7 +16,6 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -48,10 +46,10 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
     }
 
     @Override
-    public Iterable<Value> retrieve(
+    public Iterable<Object> retrieve(
             final String context,
             final String contextPath,
-            final String contextValue,
+            final Object contextValue,
             final String dataType,
             final String templateId,
             final String codePath,
@@ -79,10 +77,10 @@ public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
 
         var modelResolver = FhirModelResolverCache.resolverForVersion(
                 fhirContext.getVersion().getVersion());
-        var iter = new BundleMappingIterable<>(repository, resources, BundleEntryParts::getResource);
+        var iter = new BundleMappingIterable<>(repository, resources, p -> p.getResource());
         return iter.toStream()
                 .filter(config.filter)
-                .map(r -> modelResolver.toCqlValue(r, false))
+                .map(r -> (Object) modelResolver.toCqlValue(r, false))
                 .collect(Collectors.toList());
     }
 

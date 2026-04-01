@@ -97,7 +97,10 @@ public class DynamicValueProcessor {
         var cqfExpression = getDynamicValueExpression(request, dynamicValue);
         if (cqfExpression != null) {
             var result = getDynamicValueExpressionResult(
-                    request, cqfExpression, context.get(), resourceAdapter == null ? null : resourceAdapter.get());
+                    request,
+                    cqfExpression,
+                    context == null ? null : context.get(),
+                    resourceAdapter == null ? null : resourceAdapter.get());
             if (result == null || result.isEmpty()) {
                 var warning = "Null value received when evaluating dynamic value expression: %s"
                         .formatted(cqfExpression.getExpression());
@@ -123,7 +126,7 @@ public class DynamicValueProcessor {
                             .addExtension()
                             .setValue((org.hl7.fhir.dstu3.model.Type) value);
                 } else {
-                    context.setValue(requestAction, path.replace("action.", ""), value);
+                    dynamicValue.setValue(requestAction, path.replace("action.", ""), value);
                 }
             } else {
                 resourceAdapter.setValue(path, value);

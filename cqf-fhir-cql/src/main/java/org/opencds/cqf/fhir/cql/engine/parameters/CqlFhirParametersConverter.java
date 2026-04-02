@@ -340,7 +340,7 @@ public class CqlFhirParametersConverter {
         Map<String, Object> parameterMap = new HashMap<>();
         parameters.forEach((k, v) -> {
             var className = v.getClass().getName();
-            var value = className.contains("org.opencds.cqf.cql.engine") ? v : modelResolver.toCqlValue(v, false);
+            var value = className.contains("org.hl7.fhir") ? modelResolver.toCqlValue(v, false) : v;
             parameterMap.put(k, value);
         });
         return parameterMap;

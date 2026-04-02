@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -58,10 +59,26 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
 
     private final HapiArtifactDiffProcessor hapiArtifactDiffProcessor;
 
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+
     public HapiCreateChangelogProcessor(IRepository repository) {
         this.fhirVersion = repository.fhirContext().getVersion().getVersion();
         this.packageProcessor = new PackageProcessor(repository);
         this.hapiArtifactDiffProcessor = new HapiArtifactDiffProcessor(repository);
+    }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                EXECUTOR_SERVICE.shutdown();
+                if (!EXECUTOR_SERVICE.awaitTermination(30, TimeUnit.SECONDS)) {
+                    EXECUTOR_SERVICE.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                EXECUTOR_SERVICE.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }));
     }
 
     @Override
@@ -69,26 +86,22 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             IBaseResource source, IBaseResource target, IBaseResource terminologyEndpoint) {
 
         // 1) Use package to get a pair of bundles
-        ExecutorService service = Executors.newCachedThreadPool();
         List<Future<IBaseBundle>> packages;
         Bundle sourceBundle;
         Bundle targetBundle;
         Parameters params = new Parameters();
         params.addParameter().setName("terminologyEndpoint").setResource((Resource) terminologyEndpoint);
         try {
-            packages = service.invokeAll(Arrays.asList(
+            packages = EXECUTOR_SERVICE.invokeAll(Arrays.asList(
                     () -> packageProcessor.packageResource(source, params),
                     () -> packageProcessor.packageResource(target, params)));
             sourceBundle = (Bundle) packages.get(0).get();
             targetBundle = (Bundle) packages.get(1).get();
-            service.shutdownNow();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new UnprocessableEntityException(e.getMessage());
+            throw new InternalErrorException(e.getMessage());
         } catch (ExecutionException e) {
-            throw new UnprocessableEntityException(e.getMessage());
-        } finally {
-            service.shutdown();
+            throw new InternalErrorException(e.getMessage());
         }
 
         // 2) Fill the cache with the bundle contents
@@ -126,7 +139,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             return bin;
         }
 
-        return null;
+        throw new UnprocessableEntityException("Could not find source or target resource in cached package responses");
     }
 
     private DiffCache populateCache(

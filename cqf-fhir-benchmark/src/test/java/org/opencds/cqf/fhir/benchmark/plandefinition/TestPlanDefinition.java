@@ -35,9 +35,9 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.opencds.cqf.fhir.benchmark.TestOperationProvider;
 import org.opencds.cqf.fhir.benchmark.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.benchmark.helpers.GeneratedPackage;
@@ -351,10 +351,10 @@ public class TestPlanDefinition {
         final IRepository repository;
         final IBaseBundle generatedBundleInner;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
+        final FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver;
         IBaseResource questionnaire;
         IBaseResource questionnaireResponse;
-        Map<String, IBaseBackboneElement> items;
+        Map<String, CqlClassInstance> items;
 
         public GeneratedBundle(IRepository repository, IBaseBundle generatedBundleInner) {
             this.repository = repository;
@@ -376,17 +376,24 @@ public class TestPlanDefinition {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        private List<IBaseBackboneElement> getItems(IBase base) {
-            var pathResult = modelResolver.resolvePath(base, "item");
-            return pathResult instanceof List ? (List<IBaseBackboneElement>) pathResult : new ArrayList<>();
+        private List<CqlClassInstance> getItems(IBase base) {
+            var baseAsCqlValue = modelResolver.toCqlValue(base, false);
+            return getItems(baseAsCqlValue);
         }
 
-        private void populateItems(List<IBaseBackboneElement> itemList) {
+        @SuppressWarnings("unchecked")
+        private List<CqlClassInstance> getItems(CqlClassInstance cqlValue) {
+            var pathResult = cqlValue.getElements().get("item");
+            return pathResult instanceof List ? (List<CqlClassInstance>) pathResult : new ArrayList<>();
+        }
+
+        @SuppressWarnings("unchecked")
+        private void populateItems(List<CqlClassInstance> itemList) {
             for (var item : itemList) {
-                @SuppressWarnings("unchecked")
-                var linkIdPath = (IPrimitiveType<String>) modelResolver.resolvePath(item, "linkId");
-                var linkId = linkIdPath == null ? null : linkIdPath.getValue();
+                var linkIdPath = (CqlClassInstance) item.getElements().get("linkId");
+                var linkId = linkIdPath == null
+                        ? null
+                        : (String) linkIdPath.getElements().get("value");
                 items.put(linkId, item);
                 var childItems = getItems(item);
                 if (!childItems.isEmpty()) {
@@ -429,7 +436,9 @@ public class TestPlanDefinition {
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
                     .toList();
             assertFalse(communications.isEmpty());
-            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+            assertTrue(communications.stream()
+                    .allMatch(c ->
+                            modelResolver.toCqlValue(c, false).getElements().get("payload") != null));
             return this;
         }
 
@@ -445,15 +454,16 @@ public class TestPlanDefinition {
 
         @SuppressWarnings({"unchecked", "squid:S2259"})
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
-            var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
+            var answerPath = items.get(linkId).getElements().get("answer");
             var answers = answerPath instanceof List<?> l
                     ? l.stream()
-                            .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
+                            .map(a -> (CqlClassInstance)
+                                    ((CqlClassInstance) a).getElements().get("value"))
                             .toList()
                     : null;
             assertNotNull(answers);
             assertTrue(
-                    answers.stream().anyMatch(a -> a.getValue().equals(value)),
+                    answers.stream().anyMatch(a -> a.getElements().get("value").equals(value)),
                     "expected answer to contain value: " + value);
             return this;
         }
@@ -462,8 +472,13 @@ public class TestPlanDefinition {
         public GeneratedBundle hasQuestionnaireOperationOutcome() {
             assertTrue(getEntryResources(generatedBundleInner).stream()
                     .anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)
-                            && ((List<IBaseResource>) modelResolver.resolvePath(r, CONTAINED))
-                                    .stream().anyMatch(c -> c.fhirType().equals(OPERATION_OUTCOME))));
+                            && ((List<CqlClassInstance>) modelResolver
+                                            .toCqlValue(r, false)
+                                            .getElements()
+                                            .get(CONTAINED))
+                                    .stream()
+                                            .anyMatch(c ->
+                                                    c.getType().getLocalPart().equals(OPERATION_OUTCOME))));
             return this;
         }
 
@@ -472,8 +487,11 @@ public class TestPlanDefinition {
             var resource = getEntryResource(
                     generatedBundleInner.getStructureFhirVersionEnum(),
                     getEntry(generatedBundleInner).get(entry));
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(resource, CONTAINED))
-                    .stream().anyMatch(c -> c.fhirType().equals(OPERATION_OUTCOME)));
+            assertTrue(((List<CqlClassInstance>) modelResolver
+                            .toCqlValue(resource, false)
+                            .getElements()
+                            .get(CONTAINED))
+                    .stream().anyMatch(c -> c.getType().getLocalPart().equals(OPERATION_OUTCOME)));
             return this;
         }
     }
@@ -483,7 +501,7 @@ public class TestPlanDefinition {
         final IRepository repository;
         final IBaseResource generatedCarePlanInner;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
+        final FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver;
 
         public GeneratedCarePlan(IRepository repository, IBaseResource generatedCarePlanInner) {
             this.repository = repository;
@@ -522,32 +540,46 @@ public class TestPlanDefinition {
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasContained(int count) {
             assertEquals(
-                    count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED)).size());
+                    count,
+                    ((List<CqlClassInstance>) modelResolver
+                                    .toCqlValue(generatedCarePlanInner, false)
+                                    .getElements()
+                                    .get(CONTAINED))
+                            .size());
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasOperationOutcome() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
-                    .stream().anyMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
+            assertTrue(((List<CqlClassInstance>) modelResolver
+                            .toCqlValue(generatedCarePlanInner, false)
+                            .getElements()
+                            .get(CONTAINED))
+                    .stream().anyMatch(r -> r.getType().getLocalPart().equals(OPERATION_OUTCOME)));
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasQuestionnaire() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
-                    .stream().anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)));
+            assertTrue(((List<CqlClassInstance>) modelResolver
+                            .toCqlValue(generatedCarePlanInner, false)
+                            .getElements()
+                            .get(CONTAINED))
+                    .stream().anyMatch(r -> r.getType().getLocalPart().equals(QUESTIONNAIRE)));
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasCommunicationRequestPayload() {
-            var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
+            var communications = ((List<CqlClassInstance>) modelResolver
+                            .toCqlValue(generatedCarePlanInner, false)
+                            .getElements()
+                            .get(CONTAINED))
                     .stream()
-                            .filter(r -> r.fhirType().equals("CommunicationRequest"))
+                            .filter(r -> r.getType().getLocalPart().equals("CommunicationRequest"))
                             .toList();
             assertFalse(communications.isEmpty());
-            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+            assertTrue(communications.stream().allMatch(c -> c.getElements().get("payload") != null));
             return this;
         }
     }

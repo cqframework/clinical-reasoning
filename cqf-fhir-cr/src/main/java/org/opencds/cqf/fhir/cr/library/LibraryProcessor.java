@@ -296,7 +296,8 @@ public class LibraryProcessor {
             Either3<C, IIdType, R> sourceLibrary,
             Either3<C, IIdType, R> targetLibrary,
             IBaseResource terminologyEndpoint) {
-        var processor = createChangelogProcessor != null ? createChangelogProcessor : new CreateChangelogProcessor();
+        var processor =
+                createChangelogProcessor != null ? createChangelogProcessor : new CreateChangelogProcessor(repository);
         return processor.createChangelog(
                 resolveLibrary(sourceLibrary), resolveLibrary(targetLibrary), terminologyEndpoint);
     }

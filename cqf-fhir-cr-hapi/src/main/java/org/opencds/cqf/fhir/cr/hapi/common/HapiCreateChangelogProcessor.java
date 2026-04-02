@@ -43,10 +43,11 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache.DiffCacheResource;
-import org.opencds.cqf.fhir.cr.common.CreateChangelogProcessor.ChangeLog;
 import org.opencds.cqf.fhir.cr.common.ICreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.crmi.KnowledgeArtifactProcessor;
+import org.opencds.cqf.fhir.cr.crmi.changelog.ChangeLog;
+import org.opencds.cqf.fhir.cr.crmi.changelog.Page;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -219,7 +220,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             DiffCache cache,
             ParametersParameterComponent change,
             MetadataResource sourceResource,
-            ChangeLog.Page<?> page) {
+            Page<?> page) {
         if (change.hasName()
                 && !change.getName().equals("operation")
                 && change.hasResource()

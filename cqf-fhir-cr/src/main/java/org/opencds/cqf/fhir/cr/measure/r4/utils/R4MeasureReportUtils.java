@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import ca.uhn.fhir.context.FhirContext;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -12,6 +14,8 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -61,26 +65,37 @@ public class R4MeasureReportUtils {
         // Fast path for non-component stratifiers (single value)
         if (!stratumDef.isComponent()) {
             var valuePair = valueDefs.iterator().next();
-            var value = valuePair.value();
+            var stratumValue = valuePair.value();
 
-            // Handle CodeableConcept values for non-component
-            if (value.getValueClass().equals(CodeableConcept.class)
-                    && value.getValue() instanceof CodeableConcept codeableConcept) {
-                return codeableConcept.getText();
+            var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
+            Object value;
+            if (stratumValue.getValueClass().equals(CqlClassInstance.class)) {
+                value = cqlFhirParametersConverter.toFhirValue((CqlClassInstance) stratumValue.getValue());
+            } else {
+                value = stratumValue.getValue();
             }
 
-            // Handle VALUE or CRITERIA type stratifiers with non-CodeableConcept values
+            // Handle CodeableConcept values for non-component
+            if (value instanceof CodeableConcept codeableConcept) {
+                return codeableConcept.getText();
+            }
+            // Handle Enumeration values for non-component
+            if (value instanceof IBaseEnumeration<?> enumeration) {
+                return enumeration.getValueAsString();
+            }
+
+            // Handle VALUE or CRITERIA type stratifiers with non-FHIR values
             var stratifierType = stratifierDef.getStratifierType();
 
             if (MeasureStratifierType.VALUE == stratifierType) {
                 // VALUE-type stratifiers with non-CodeableConcept values
-                return value.getValueAsString();
+                return stratumValue.getValueAsString();
             } else if (MeasureStratifierType.NON_SUBJECT_VALUE == stratifierType) {
                 // NON_SUBJECT_VALUE-type stratifiers with non-CodeableConcept values
-                return value.getValueAsString();
+                return stratumValue.getValueAsString();
             } else if (MeasureStratifierType.CRITERIA == stratifierType) {
                 // CRITERIA-type stratifiers with non-CodeableConcept values
-                return value.getValueAsString();
+                return stratumValue.getValueAsString();
             }
 
             return null;

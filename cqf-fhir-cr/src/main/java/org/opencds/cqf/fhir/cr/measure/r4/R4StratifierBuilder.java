@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Expression;
@@ -20,6 +22,8 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -150,17 +154,28 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
+        var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
         for (StratumValueDef valuePair : values) {
-            StratumValueWrapper value = valuePair.value();
+            StratumValueWrapper stratumValue = valuePair.value();
             var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
-            if (value.getValueClass().equals(CodeableConcept.class)) {
+            Object value;
+            if (stratumValue.getValueClass().equals(CqlClassInstance.class)) {
+                value = cqlFhirParametersConverter.toFhirValue((CqlClassInstance) stratumValue.getValue());
+            } else {
+                value = stratumValue;
+            }
+            if (value instanceof IBaseEnumeration<?> enumeration) {
+                value = expressionResultToCodableConcept(enumeration.getValueAsString());
+            }
+
+            if (value instanceof CodeableConcept codeableConcept) {
                 if (isComponent) {
                     StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
                     // component stratifier example: code: "gender", value: 'M'
                     // value being stratified: 'M'
-                    sgcc.setValue(expressionResultToCodableConcept(value));
+                    sgcc.setValue(codeableConcept);
                     // code specified from componentDef: "gender"
                     sgcc.setCode(
                             new CodeableConcept().setText(componentDef.code().text()));
@@ -169,13 +184,13 @@ class R4StratifierBuilder {
                 } else {
                     // non-component stratifiers only set stratified value, code is set on stratifier object
                     // value being stratified: 'M'
-                    stratum.setValue((CodeableConcept) value.getValue());
+                    stratum.setValue(codeableConcept);
                 }
             } else if (isComponent) {
                 // component stratifier example: code: "gender", value: 'M'
                 StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
                 // value being stratified: 'M'
-                sgcc.setValue(expressionResultToCodableConcept(value));
+                sgcc.setValue(expressionResultToCodableConcept(stratumValue.getValueAsString()));
                 // code specified from componentDef: "gender"
                 sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
                 // set component on MeasureReport
@@ -184,7 +199,7 @@ class R4StratifierBuilder {
                     || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
                 // non-component stratifiers (single-component or non-component) only set stratified value
                 // value being stratified: 'M', '35', etc.
-                stratum.setValue(expressionResultToCodableConcept(value));
+                stratum.setValue(expressionResultToCodableConcept(stratumValue.getValueAsString()));
             }
         }
 
@@ -226,8 +241,8 @@ class R4StratifierBuilder {
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
     // which was previously unsupported.  So for now, comma-delim the first five values.
-    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
-        return new CodeableConcept().setText(value.getValueAsString());
+    private static CodeableConcept expressionResultToCodableConcept(String value) {
+        return new CodeableConcept().setText(value);
     }
 
     // TODO: LD: take the StratumDef and use it to figure out the subject ID intersection instead of

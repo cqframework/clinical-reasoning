@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.getId;
+
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
@@ -16,6 +18,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
@@ -641,6 +644,12 @@ public class MeasureMultiSubjectEvaluator {
      * Normalize a resource to its ID string for use as a row key component.
      */
     private static String normalizeResourceKey(Object obj) {
+        if (obj instanceof CqlClassInstance cqlClassInstance) {
+            var id = getId(cqlClassInstance);
+            if (id != null) {
+                return id;
+            }
+        }
         if (obj instanceof IBaseResource resource
                 && resource.getIdElement() != null
                 && !resource.getIdElement().isEmpty()) {

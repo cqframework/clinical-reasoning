@@ -105,9 +105,8 @@ class R4MeasureReportBuilderContext {
         }
     }
 
-    public void addCriteriaExtensionToEvaluatedResource(Resource resource, String criteriaId) {
-        var id = getId(resource);
-        var ref = addEvaluatedResourceReference(id);
+    public void addCriteriaExtensionToEvaluatedResource(String resourceId, String criteriaId) {
+        var ref = addEvaluatedResourceReference(resourceId);
         addCriteriaExtensionToReference(ref, criteriaId);
     }
 

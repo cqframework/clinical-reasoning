@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.getId;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
@@ -10,6 +12,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -549,12 +552,8 @@ public class MeasureReportDefScorer {
                         Map<Object, Object> filteredMap = new java.util.HashMap<>();
                         for (var entry : map.entrySet()) {
                             Object key = entry.getKey();
-                            if (key instanceof IBaseResource baseResource) {
-                                String resourceId = baseResource
-                                        .getIdElement()
-                                        .toVersionless()
-                                        .getValue();
-                                if (stratumResourceIds.contains(resourceId)) {
+                            if (key instanceof CqlClassInstance cqlClassInstance) {
+                                if (stratumResourceIds.contains(getId(cqlClassInstance))) {
                                     filteredMap.put(key, entry.getValue());
                                 }
                             }

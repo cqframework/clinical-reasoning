@@ -29,9 +29,9 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -356,9 +356,12 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Object> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
-                Resource resource = (Resource) object;
-                String resourceId = resource.getId();
-                Reference reference = this.getEvaluatedResourceReference(resourceId);
+                final var resource = (CqlClassInstance) object;
+                final var resourceIdInstance =
+                        (CqlClassInstance) resource.getElements().get("id");
+                final var resourceIdValue =
+                        (String) resourceIdInstance.getElements().get("value");
+                Reference reference = this.getEvaluatedResourceReference(resourceIdValue);
                 Extension ext = createStringExtension(
                         MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE, measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);

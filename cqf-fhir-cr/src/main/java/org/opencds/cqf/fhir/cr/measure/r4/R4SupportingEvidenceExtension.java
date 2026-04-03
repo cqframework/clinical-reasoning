@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
+import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.cli.command;
 
+import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.io.BufferedWriter;
@@ -20,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
@@ -93,6 +96,15 @@ public class Utilities {
     public static String tempConvert(Object value) {
         if (value == null) {
             return "null";
+        }
+
+        if (value instanceof CqlClassInstance cqlClassInstance) {
+            var id = getId(cqlClassInstance);
+            if (id != null) {
+                var idPart = id.contains("/") ? id.split("/")[1] : id;
+                return "%s(id=%s)".formatted(cqlClassInstance.getType().getLocalPart(), idPart);
+            }
+            return cqlClassInstance.getType().getLocalPart();
         }
 
         if (value instanceof Iterable<?> values) {

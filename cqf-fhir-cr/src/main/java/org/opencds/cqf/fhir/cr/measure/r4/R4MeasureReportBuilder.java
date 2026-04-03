@@ -1,10 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
+import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
-import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
-import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.getId;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;

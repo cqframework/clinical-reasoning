@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.HashBasedTable;

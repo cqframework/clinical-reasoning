@@ -104,7 +104,7 @@ public class ValueSetComposeWalker {
 
     private IValueSetAdapter createValueSetAdapter(IBaseResource resource) {
         try {
-            return IAdapterFactory.forFhirVersion(fhirVersion).createValueSet((IDomainResource) resource);
+            return IAdapterFactory.forFhirVersion(fhirVersion).createValueSet(resource);
         } catch (Exception e) {
             logger.debug("Could not create ValueSet adapter: {}", e.getMessage());
             return null;

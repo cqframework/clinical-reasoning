@@ -162,7 +162,7 @@ public class ReleaseManifestVisitor extends ReleaseVisitor {
                     // Remove unversioned entries that have a versioned counterpart
                     return !versionedUrls.contains(param.getName() + "|" + value);
                 })
-                .map(param -> (IBaseBackboneElement) param.get())
+               .map(IParametersParameterComponentAdapter::get)
                 .toList();
 
         adapter.setParameter(new java.util.ArrayList<>(filtered));

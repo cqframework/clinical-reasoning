@@ -5,7 +5,6 @@ import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;

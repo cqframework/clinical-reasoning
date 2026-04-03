@@ -193,6 +193,22 @@ public class ConformanceResourceResolver {
         }
 
         // Tier 1: Federated repository (search by canonical)
+        var result = resolveResourceFromRepository(canonicalUrl, resourceType);
+        if (result != null) {
+            return result;
+        }
+
+        // Tier 2: NPM resource cache (lazy-built)
+        result = resolveFromResourceCache(canonicalUrl, resourceType);
+        if (result != null) {
+            return result;
+        }
+
+        // Tier 3: Core FHIR (for base spec resources)
+        return resolveResourceFromCoreSupport(canonicalUrl, resourceType);
+    }
+
+    private IBaseResource resolveResourceFromRepository(String canonicalUrl, String resourceType) {
         try {
             var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(federatedRepository, canonicalUrl);
             if (bundle != null) {
@@ -208,14 +224,10 @@ public class ConformanceResourceResolver {
         } catch (Exception e) {
             logger.debug("Could not resolve {} from repository: {}", resourceType, canonicalUrl, e);
         }
+        return null;
+    }
 
-        // Tier 2: NPM resource cache (lazy-built)
-        var cached = resolveFromResourceCache(canonicalUrl, resourceType);
-        if (cached != null) {
-            return cached;
-        }
-
-        // Tier 3: Core FHIR (for base spec resources)
+    private IBaseResource resolveResourceFromCoreSupport(String canonicalUrl, String resourceType) {
         try {
             var resourceClass = fhirContext.getResourceDefinition(resourceType).getImplementingClass();
             return coreSupport.fetchResource(resourceClass, canonicalUrl);

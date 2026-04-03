@@ -13,10 +13,10 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
-class ParametersParameterComponentAdapter extends BaseAdapter implements IParametersParameterComponentAdapter {
+class ParametersParameterComponentAdapter extends BaseElementAdapter implements IParametersParameterComponentAdapter {
 
     private final Parameters.ParametersParameterComponent parametersParameterComponent;
 

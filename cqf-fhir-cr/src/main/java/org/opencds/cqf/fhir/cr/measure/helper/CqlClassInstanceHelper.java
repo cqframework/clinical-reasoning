@@ -1,11 +1,21 @@
 package org.opencds.cqf.fhir.cr.measure.helper;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
 public class CqlClassInstanceHelper {
+    public static CqlFhirParametersConverter r4Converter =
+            Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
+
+    private CqlClassInstanceHelper() {
+        // intentionally empty
+    }
 
     public static String getId(CqlClassInstance cqlClassInstance) {
-        if (cqlClassInstance.getType().getNamespaceURI().equals("http://hl7.org/fhir")
+        if (cqlClassInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
                 && cqlClassInstance.getElements().containsKey("id")
                 && cqlClassInstance.getElements().get("id") != null) {
             var resourceIdInstance =
@@ -17,5 +27,9 @@ public class CqlClassInstanceHelper {
             }
         }
         return null;
+    }
+
+    public static Object convertToFhirR4IfNeeded(Object value) {
+        return r4Converter.convertToFhirIfNeeded(value);
     }
 }

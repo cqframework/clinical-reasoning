@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 /**
  * R4SupportingEvidenceExtension appends Supporting Evidence Criteria Results to MeasureReport.
@@ -328,8 +332,10 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
+        var value = convertToFhirR4IfNeeded(leaf);
+
         // Interval<DateTime>/Interval<Date> -> Period
-        Interval interval = asInterval(leaf);
+        Interval interval = asInterval(value);
         if (interval != null) {
             Period p = tryBuildPeriod(interval);
             if (p != null) {
@@ -340,7 +346,7 @@ public class R4SupportingEvidenceExtension {
         }
 
         // Tuple -> represented as nested extensions under this "value"
-        if (leaf instanceof Tuple tuple) {
+        if (value instanceof Tuple tuple) {
             for (Map.Entry<String, Object> entry : tuple.getElements().entrySet()) {
                 Extension fieldExt = new Extension(entry.getKey());
                 // field values become repeated nested "value" slices under the field extension
@@ -351,20 +357,20 @@ public class R4SupportingEvidenceExtension {
         }
 
         // Scalars / resources / numeric
-        if (leaf instanceof Boolean b) {
+        if (value instanceof Boolean b) {
             valueExt.setValue(new BooleanType(b));
-        } else if (leaf instanceof Integer i) {
+        } else if (value instanceof Integer i) {
             valueExt.setValue(new IntegerType(i));
-        } else if (leaf instanceof BigDecimal bd) {
+        } else if (value instanceof BigDecimal bd) {
             valueExt.setValue(new DecimalType(bd));
-        } else if (leaf instanceof String s) {
+        } else if (value instanceof String s) {
             valueExt.setValue(new StringType(s));
-        } else if (leaf instanceof IBaseResource r) {
+        } else if (value instanceof IBaseResource r) {
             valueExt.setValue(new StringType(resourceIdString(r)));
-        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
+        } else if (value instanceof org.hl7.fhir.r4.model.Type t) {
             valueExt.setValue(t);
         } else {
-            valueExt.setValue(new StringType(String.valueOf(leaf)));
+            valueExt.setValue(new StringType(String.valueOf(value)));
         }
     }
 
@@ -381,11 +387,13 @@ public class R4SupportingEvidenceExtension {
     }
 
     private static String resourceIdString(IBaseResource r) {
-        var id = r.getIdElement();
+        var id = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
+                .createResource(r)
+                .getId();
         if (id == null || id.isEmpty()) {
             return "(no-id)";
         }
-        return id.toUnqualifiedVersionless().getValue();
+        return id;
     }
 
     @Nullable

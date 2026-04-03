@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
+import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
 import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.getId;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -230,6 +231,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private String getPopulationResourceIds(Object resourceObject) {
+        if (resourceObject instanceof CqlClassInstance cqlClassInstance) {
+            return getId(cqlClassInstance);
+        }
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
@@ -272,8 +276,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
-                    .filter(Resource.class::isInstance)
                     .map(this::getPopulationResourceIds)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         }
 
@@ -347,8 +351,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Map.Entry<StratumValueWrapper, Long> accumulator :
                 sde.getAccumulatedValues().entrySet()) {
 
+            var value = convertToFhirR4IfNeeded(accumulator.getKey().getValue());
             Resource obs;
-            if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
+            if (!(value instanceof Resource resource)) {
                 String valueCode = accumulator.getKey().getValueAsString();
                 Long valueCount = accumulator.getValue();
 

@@ -370,7 +370,10 @@ public class CqlFhirParametersConverter {
     }
 
     public Object convertToFhirIfNeeded(Object value) {
-        return value instanceof CqlClassInstance cqlClassInstance ? toFhirValue(cqlClassInstance) : value;
+        return value instanceof CqlClassInstance cqlClassInstance
+                        && cqlClassInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
+                ? toFhirValue(cqlClassInstance)
+                : value;
     }
 
     @SuppressWarnings("unchecked")

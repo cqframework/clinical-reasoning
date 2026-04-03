@@ -15,10 +15,10 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.Tuple;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
-class ParametersParameterComponentAdapter extends BaseAdapter implements IParametersParameterComponentAdapter {
+class ParametersParameterComponentAdapter extends BaseElementAdapter implements IParametersParameterComponentAdapter {
 
     private final Parameters.ParametersParameterComponent parametersParameterComponent;
 

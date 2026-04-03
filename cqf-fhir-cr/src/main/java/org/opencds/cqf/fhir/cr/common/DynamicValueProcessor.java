@@ -7,7 +7,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
@@ -52,7 +52,7 @@ public class DynamicValueProcessor {
             IElement requestAction) {
         var dynamicValues =
                 context.resolvePathList(definitionElement, "dynamicValue", IBaseBackboneElement.class).stream()
-                        .map(b -> new BaseElementAdapter(request.getFhirVersion(), b))
+                        .map(b -> new ElementAdapter(request.getFhirVersion(), b))
                         .toList();
         for (var dynamicValue : dynamicValues) {
             try {

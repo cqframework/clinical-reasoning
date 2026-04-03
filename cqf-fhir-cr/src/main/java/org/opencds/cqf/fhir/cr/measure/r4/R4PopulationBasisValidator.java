@@ -1,8 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import ca.uhn.fhir.context.FhirContext;
+import static org.opencds.cqf.fhir.cr.measure.helper.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
+
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -18,7 +20,6 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
@@ -170,15 +171,16 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Object convertExpressionResult(ExpressionResult cqlExpressionResult) {
-        var cqfFhirParameterConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
         Object expressionResult;
-        if (cqlExpressionResult.getValue() instanceof List<?> listValue) {
-            expressionResult = listValue.stream()
-                    .map(cqfFhirParameterConverter::convertToFhirIfNeeded)
-                    .toList();
+        if (cqlExpressionResult.getValue() instanceof Iterable<?> iterable) {
+            expressionResult = new ArrayList<>();
+            for (var result : iterable) {
+                ((List<Object>) expressionResult).add(convertToFhirR4IfNeeded(result));
+            }
         } else {
-            expressionResult = cqfFhirParameterConverter.convertToFhirIfNeeded(cqlExpressionResult.getValue());
+            expressionResult = convertToFhirR4IfNeeded(cqlExpressionResult.getValue());
         }
         return expressionResult;
     }

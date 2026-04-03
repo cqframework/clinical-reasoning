@@ -26,6 +26,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
+import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -633,15 +634,21 @@ public class FunctionEvaluationHandler {
     }
 
     private static void validateObservationResult(List<Object> functionArguments, Object observationResult) {
+        var msgFormat =
+                "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: %s";
+        if (observationResult instanceof CqlClassInstance cqlClassInstance) {
+            var type = cqlClassInstance.getType().getLocalPart();
+            if (!List.of("String", "Integer", "Double").contains(type)) {
+                throw new IllegalArgumentException(msgFormat.formatted(type));
+            }
+        }
         if (!(observationResult instanceof String
                 || observationResult instanceof Integer
                 || observationResult instanceof Double)) {
-            throw new IllegalArgumentException(
-                    "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: %s"
-                            .formatted(
-                                    functionArguments.size() > 1
-                                            ? EvaluationResultFormatter.printValues(functionArguments)
-                                            : EvaluationResultFormatter.printValue(functionArguments.get(0))));
+            throw new IllegalArgumentException(msgFormat.formatted(
+                    functionArguments.size() > 1
+                            ? EvaluationResultFormatter.printValues(functionArguments)
+                            : EvaluationResultFormatter.printValue(functionArguments.get(0))));
         }
     }
 

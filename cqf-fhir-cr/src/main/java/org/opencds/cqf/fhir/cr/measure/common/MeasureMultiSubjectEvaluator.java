@@ -970,6 +970,12 @@ public class MeasureMultiSubjectEvaluator {
         if (obj == null) {
             return null;
         }
+        if (obj instanceof CqlClassInstance cqlClassInstance) {
+            var id = getId(cqlClassInstance);
+            if (id != null) {
+                return id;
+            }
+        }
         if (obj instanceof IBaseResource resource) {
             if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
                 return resource.getIdElement().toVersionless().getValueAsString();
@@ -987,6 +993,12 @@ public class MeasureMultiSubjectEvaluator {
     private static String normalizeValueKey(Object value, int index) {
         if (value == null) {
             return "null_" + index;
+        }
+        if (value instanceof CqlClassInstance cqlClassInstance) {
+            var id = getId(cqlClassInstance);
+            if (id != null) {
+                return id;
+            }
         }
         if (value instanceof IBaseResource resource
                 && resource.getIdElement() != null

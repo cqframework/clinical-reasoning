@@ -13,6 +13,15 @@ application { mainClass = "org.opencds.cqf.fhir.cr.cli.Main" }
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     mainClass = "org.opencds.cqf.fhir.cr.cli.Main"
+    // Publish the fat JAR as the primary (unclassified) artifact so consumers
+    // can resolve it without specifying a classifier
+    archiveClassifier.set("")
+}
+
+tasks.named<Jar>("jar") {
+    // The standard library JAR gets the "plain" classifier to avoid conflicting
+    // with the bootJar output
+    archiveClassifier.set("plain")
 }
 
 dependencies {

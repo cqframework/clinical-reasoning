@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
 
 import java.util.Collections;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Constants.CPG_ACTIVITY_TYPE_CODE;
@@ -39,7 +40,7 @@ public class ActionResolver {
                         requestOrchestration.getIdElement().getValue())));
         if (request.getQuestionnaireAdapter() != null
                 && action.resolvePath(task, "focus", IBaseReference.class) == null) {
-            var codePath = action.resolvePath(task, "code");
+            var codePath = action.resolvePath(task, "code", IBase.class);
             if (codePath != null) {
                 var code = request.getAdapterFactory().createCodeableConcept(codePath);
                 if (code.hasCoding(CPG_ACTIVITY_TYPE_CODE.COLLECT_INFORMATION.code)) {

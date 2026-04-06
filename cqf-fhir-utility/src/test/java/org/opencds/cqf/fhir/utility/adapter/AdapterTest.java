@@ -50,7 +50,6 @@ class AdapterTest {
         assertEquals(coding, adapter.get());
         assertEquals(fhirVersion, adapter.fhirVersion());
         assertNotNull(adapter.getAdapterFactory());
-        assertNotNull(adapter.fhirTerser());
     }
 
     @Test

@@ -4,6 +4,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateTimeType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateType;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newPeriod;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
+import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
@@ -44,14 +46,6 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     IDomainResource copy();
 
-    //    default IIdType getId() {
-    //        return get().getIdElement();
-    //    }
-    //
-    //    default void setId(IIdType id) {
-    //        get().setId(id);
-    //    }
-
     default boolean hasName() {
         return StringUtils.isNotBlank(getName());
     }
@@ -61,7 +55,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setName(String name) {
-        fhirTerser().setElement(get(), "name", name);
+        setValue(get(), "name", newStringType(fhirVersion(), name));
     }
 
     default boolean hasTitle() {
@@ -73,7 +67,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setTitle(String title) {
-        fhirTerser().setElement(get(), "title", title);
+        setValue(get(), "title", newStringType(fhirVersion(), title));
     }
 
     default String getDescriptor() {
@@ -93,7 +87,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setUrl(String url) {
-        fhirTerser().setElement(get(), "url", url);
+        setValue(get(), "url", newUriType(fhirVersion(), url));
     }
 
     default boolean hasVersion() {
@@ -105,7 +99,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setVersion(String version) {
-        fhirTerser().setElement(get(), "version", version);
+        setValue(get(), "version", newStringType(fhirVersion(), version));
     }
 
     /**
@@ -143,7 +137,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setApprovalDate(Date approvalDate) {
-        setApprovalDateElement(newDateType(get().getStructureFhirVersionEnum(), approvalDate));
+        setApprovalDateElement(newDateType(fhirVersion(), approvalDate));
     }
 
     default void setApprovalDateElement(IPrimitiveType<Date> approvalDate) {
@@ -162,7 +156,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
     }
 
     default void setDate(Date date) {
-        setDateElement(newDateTimeType(get().getStructureFhirVersionEnum(), date));
+        setDateElement(newDateTimeType(fhirVersion(), date));
     }
 
     default void setDateElement(IPrimitiveType<Date> date) {
@@ -181,7 +175,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
 
     default ICompositeType getEffectivePeriod() {
         var effectivePeriod = resolvePath(get(), "effectivePeriod", ICompositeType.class);
-        return effectivePeriod == null ? newPeriod(get().getStructureFhirVersionEnum()) : effectivePeriod;
+        return effectivePeriod == null ? newPeriod(fhirVersion()) : effectivePeriod;
     }
 
     default void setEffectivePeriod(ICompositeType period) {
@@ -365,9 +359,7 @@ public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
         return getReferencedLibraries().values().stream()
                 .map(url -> getAdapterFactory()
                         .createLibrary(SearchHelper.searchRepositoryByCanonical(
-                                repository,
-                                VersionUtilities.canonicalTypeForVersion(
-                                        repository.fhirContext().getVersion().getVersion(), url))))
+                                repository, VersionUtilities.canonicalTypeForVersion(fhirVersion(), url))))
                 .collect(toMap(IKnowledgeArtifactAdapter::getName, l -> l));
     }
 

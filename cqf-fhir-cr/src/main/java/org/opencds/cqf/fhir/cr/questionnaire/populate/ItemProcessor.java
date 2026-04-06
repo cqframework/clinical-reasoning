@@ -9,7 +9,6 @@ import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -266,15 +265,17 @@ public class ItemProcessor {
         var element = profile.getElement(elementId);
         var elementPath = element.getPath();
         var answerType = element.getTypeCode();
-        var path = elementPath.substring(elementPath.indexOf(".") + 1); // .replace("[x]", "");
+        var path = elementPath.substring(elementPath.indexOf(".") + 1).replace("[x]", "");
         if (StringUtils.isNotBlank(sliceName)) {
             path = path.split("\\.")[0];
         }
-        List<IBase> pathList = context == null ? Collections.emptyList() : element.resolvePathList(context, path);
-        if (elementId.contains(":")) {
-            pathValue = getSliceValue(request, profile, path, sliceName, pathList);
-        } else {
-            pathValue = (pathList.get(0));
+        pathValue = context == null ? null : profile.resolvePath(context, path);
+        if (pathValue instanceof ArrayList<?> pathList) {
+            if (elementId.contains(":")) {
+                pathValue = getSliceValue(request, profile, path, sliceName, pathList);
+            } else {
+                pathValue = (pathList.get(0));
+            }
         }
         // Ensure resource id's include the resource type
         if (pathValue instanceof IIdType idType && path.equals("id") && context instanceof IBaseResource) {
@@ -295,7 +296,7 @@ public class ItemProcessor {
             IStructureDefinitionAdapter profile,
             String path,
             String sliceName,
-            List<IBase> pathList) {
+            List<?> pathList) {
         var filterElements = profile.getSliceElements(sliceName).stream()
                 .filter(IElementDefinitionAdapter::hasDefaultOrFixedOrPattern)
                 .toList();

@@ -138,8 +138,7 @@ public class CqlFhirParametersConverter {
     }
 
     protected IParametersParameterComponentAdapter addPart(IParametersAdapter pa, String name) {
-        IBaseBackboneElement ppc = pa.addParameter();
-        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameter(ppc);
+        var ppca = pa.addParameter();
         ppca.setName(name);
 
         return ppca;
@@ -194,8 +193,7 @@ public class CqlFhirParametersConverter {
 
     protected IParametersParameterComponentAdapter addSubPart(
             IParametersParameterComponentAdapter ppcAdapter, String name) {
-        IBaseBackboneElement ppc = ppcAdapter.addPart();
-        IParametersParameterComponentAdapter ppca = this.adapterFactory.createParametersParameter(ppc);
+        var ppca = ppcAdapter.addPart();
         ppca.setName(name);
 
         return ppca;

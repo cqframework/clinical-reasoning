@@ -5,10 +5,10 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
+import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.FhirTerser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -26,18 +26,16 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public abstract class BaseAdapter {
-    private static final String ENUMERATION = "Enumeration";
-    private static final Pattern EXTENSION_PATTERN = Pattern.compile("extension\\('([^']+)'\\)(\\[(\\d+)])?");
+    protected static final String ENUMERATION = "Enumeration";
+    protected static final Pattern EXTENSION_PATTERN = Pattern.compile("extension\\('([^']+)'\\)(\\[(\\d+)])?");
 
     protected final FhirContext fhirContext;
-    protected final FhirTerser fhirTerser;
     protected final IAdapterFactory adapterFactory;
 
-    private record ExtensionInfo(String url, int index) {}
+    protected record ExtensionInfo(String url, int index) {}
 
     public BaseAdapter(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
-        fhirTerser = this.fhirContext.newTerser();
         adapterFactory = IAdapterFactory.forFhirContext(this.fhirContext);
     }
 
@@ -45,13 +43,110 @@ public abstract class BaseAdapter {
         return fhirContext;
     }
 
-    public FhirTerser fhirTerser() {
-        return fhirTerser;
-    }
-
     public IAdapterFactory getAdapterFactory() {
         return adapterFactory;
     }
+
+    public Object resolvePath(Object target, String path) {
+        String[] identifiers = path.split("\\.");
+        for (String identifier : identifiers) {
+            // handling indexes: i.e. item[0].code
+            if (identifier.contains("[")) {
+                int index = Character.getNumericValue(identifier.charAt(identifier.indexOf("[") + 1));
+                target = resolveProperty(target, identifier.replaceAll("\\[\\d]", ""));
+                target = ((ArrayList<?>) target).get(index);
+            } else {
+                target = resolveProperty(target, identifier);
+            }
+        }
+
+        return target;
+    }
+
+    protected Object resolveProperty(Object target, String path) {
+        if (target == null) {
+            return null;
+        }
+
+        if (target instanceof IBaseEnumeration && path.equals("value")) {
+            return ((IBaseEnumeration<?>) target).getValueAsString();
+        }
+
+        if (target instanceof IAnyResource resource && resource.fhirType().equals(path)) {
+            return target;
+        }
+
+        IBase base = (IBase) target;
+        BaseRuntimeElementCompositeDefinition<?> definition;
+        if (base instanceof IPrimitiveType) {
+            return path.equals("value") ? ((IPrimitiveType<?>) target).getValue() : target;
+        } else {
+            definition = resolveRuntimeDefinition(base);
+        }
+
+        BaseRuntimeChildDefinition child = definition.getChildByName(path);
+        if (child == null) {
+            child = resolveChoiceProperty(definition, path);
+        }
+
+        if (child == null) {
+            return null;
+        }
+
+        List<IBase> values = child.getAccessor().getValues(base);
+
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+
+        // If the instance is a primitive (including (or even especially an enumeration), and it has no value, return
+        // null
+        if (child instanceof RuntimeChildPrimitiveDatatypeDefinition) {
+            IBase value = values.get(0);
+            if (value instanceof IPrimitiveType) {
+                if (!((IPrimitiveType<?>) value).hasValue()) {
+                    return null;
+                }
+            }
+        }
+
+        if (child instanceof RuntimeChildChoiceDefinition
+                && !child.getElementName().equalsIgnoreCase(path)) {
+            if (!values.get(0)
+                    .getClass()
+                    .getSimpleName()
+                    .equalsIgnoreCase(
+                            child.getChildByName(path).getImplementingClass().getSimpleName())) {
+                return null;
+            }
+        }
+
+        return child.getMax() < 1 ? values : values.get(0);
+        //        return toJavaPrimitive(child.getMax() < 1 ? values : values.get(0), base);
+    }
+
+    //    protected Object toJavaPrimitive(Object result, Object source) {
+    //        if (source instanceof IPrimitiveType<?> && !((IPrimitiveType<?>) source).hasValue()) {
+    //            return null;
+    //        }
+    //
+    //        String simpleName = source.getClass().getSimpleName();
+    //        switch (simpleName) {
+    //            case "InstantType":
+    //            case "DateTimeType":
+    //                return toDateTime((BaseDateTimeType) source);
+    //            case "DateType":
+    //                return toDate((BaseDateTimeType) source);
+    //            case "TimeType":
+    //                return toTime((TimeType) source);
+    //            case "IdType":
+    //                return this.idToString((IdType) source);
+    //            case "Base64BinaryType":
+    //                return ((IPrimitiveType) source).getValueAsString();
+    //            default:
+    //                return result;
+    //        }
+    //    }
 
     public void setValue(IBase target, String path, Object value) {
         if (target == null) {
@@ -120,7 +215,8 @@ public abstract class BaseAdapter {
         }
     }
 
-    public void setPrimitiveValue(Object value, IPrimitiveType target) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    protected void setPrimitiveValue(Object value, IPrimitiveType target) {
         String simpleName = target.getClass().getSimpleName();
         switch (simpleName) {
             case "DateTimeType":
@@ -146,7 +242,7 @@ public abstract class BaseAdapter {
         }
     }
 
-    public IBase setBaseValue(Object value, IBase target) {
+    protected IBase setBaseValue(Object value, IBase target) {
         if (target instanceof IPrimitiveType<?> primitiveType) {
             setPrimitiveValue(value, primitiveType);
         }
@@ -181,7 +277,7 @@ public abstract class BaseAdapter {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private <T extends Enum<?>, E extends IBaseEnumeration<T>> E getEnumValue(
+    protected <T extends Enum<?>, E extends IBaseEnumeration<T>> E getEnumValue(
             RuntimeChildPrimitiveEnumerationDatatypeDefinition targetDef, Object value) {
         String enumValue;
         if (value instanceof IPrimitiveType<?> primitiveType) {
@@ -254,7 +350,7 @@ public abstract class BaseAdapter {
         }
     }
 
-    private static List<String> splitPathSegments(String path) {
+    protected static List<String> splitPathSegments(String path) {
         var segments = new ArrayList<String>();
         var current = new StringBuilder();
         boolean inQuotes = false;
@@ -276,11 +372,11 @@ public abstract class BaseAdapter {
         return segments;
     }
 
-    private static boolean isExtensionSegment(String segment) {
+    protected static boolean isExtensionSegment(String segment) {
         return EXTENSION_PATTERN.matcher(segment).matches();
     }
 
-    private static ExtensionInfo parseExtensionSegment(String segment) {
+    protected static ExtensionInfo parseExtensionSegment(String segment) {
         var matcher = EXTENSION_PATTERN.matcher(segment);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Not an extension segment: " + segment);
@@ -291,7 +387,7 @@ public abstract class BaseAdapter {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private IBase resolveOrCreateExtension(IBase target, ExtensionInfo info) {
+    protected IBase resolveOrCreateExtension(IBase target, ExtensionInfo info) {
         if (!(target instanceof IBaseHasExtensions hasExtensions)) {
             throw new IllegalArgumentException(
                     "Target does not support extensions: " + target.getClass().getName());
@@ -300,7 +396,7 @@ public abstract class BaseAdapter {
                 .filter(ext -> info.url().equals(ext.getUrl()))
                 .toList();
         if (matching.size() > info.index()) {
-            return (IBase) matching.get(info.index());
+            return matching.get(info.index());
         }
         var extensionList = (List) hasExtensions.getExtension();
         IBaseExtension<?, ?> created = null;
@@ -308,10 +404,10 @@ public abstract class BaseAdapter {
             created = newExtension(info.url());
             extensionList.add(created);
         }
-        return (IBase) created;
+        return created;
     }
 
-    private IBaseExtension<?, ?> newExtension(String url) {
+    protected IBaseExtension<?, ?> newExtension(String url) {
         return switch (fhirContext.getVersion().getVersion()) {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.Extension(url);
             case R4 -> new org.hl7.fhir.r4.model.Extension(url);
@@ -322,7 +418,7 @@ public abstract class BaseAdapter {
         };
     }
 
-    private String getTargetPath(String identifier, boolean isList, boolean isSlice) {
+    protected String getTargetPath(String identifier, boolean isList, boolean isSlice) {
         if (isList) {
             return identifier.replaceAll("\\[\\d]", "");
         }
@@ -332,7 +428,7 @@ public abstract class BaseAdapter {
         return identifier;
     }
 
-    private IBase getTargetValue(
+    protected IBase getTargetValue(
             IBase target, Object value, boolean isLast, String targetPath, BaseRuntimeChildDefinition targetDef) {
         IBase targetValue;
         var elementDef = targetDef.getChildByName(targetPath);
@@ -354,7 +450,7 @@ public abstract class BaseAdapter {
         return targetValue;
     }
 
-    private IBase getTargetValueFromList(String sliceName, int index, List<IBase> targetValues) {
+    protected IBase getTargetValueFromList(String sliceName, int index, List<IBase> targetValues) {
         IBase targetValue;
         if (targetValues.size() > 1 && StringUtils.isNotBlank(sliceName)) {
             // TODO: handle slice names

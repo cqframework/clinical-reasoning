@@ -37,7 +37,7 @@ public interface IResourceAdapter extends IAdapter<IBaseResource> {
     }
 
     default IIdType getIdElement() {
-        return fhirTerser().getSingleValueOrNull(get(), "id", IIdType.class);
+        return resolvePath(get(), "id", IIdType.class);
     }
 
     default IAdapter<?> setId(String id) {

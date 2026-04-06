@@ -227,11 +227,11 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
         for (var useContext : useContexts) {
             // will we ever need to resolve these references?
             var value = newResource.resolvePath(useContext, "value");
-            if (value instanceof IBaseReference) {
+            if (value instanceof IBaseReference reference) {
                 resourceListWithOriginalIds.stream()
                         .filter(resource -> (resource.getClass().getSimpleName() + "/"
                                         + resource.getIdElement().getIdPart())
-                                .equals(newResource.resolvePathString(value, "reference")))
+                                .equals(newResource.resolvePathString(reference, "reference")))
                         .findAny()
                         .ifPresent(resource -> {
                             int indexOfDraftInIdList = resourceListWithOriginalIds.indexOf(resource);

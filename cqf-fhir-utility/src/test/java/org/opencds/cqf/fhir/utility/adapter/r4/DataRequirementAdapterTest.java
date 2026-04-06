@@ -29,7 +29,6 @@ class DataRequirementAdapterTest {
         assertNotNull(adapter);
         assertEquals(dataReq, adapter.get());
         assertEquals(FhirVersionEnum.R4, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.fhirTerser());
         assertTrue(adapter.hasId());
         assertEquals(id, adapter.getId());
     }

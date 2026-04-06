@@ -47,8 +47,14 @@ class ParametersParameterComponentAdapter extends BaseElementAdapter implements 
     }
 
     @Override
-    public void setName(String name) {
+    public IParametersParameterComponentAdapter setName(String name) {
         this.getParametersParameterComponent().setName(name);
+        return this;
+    }
+
+    @Override
+    public boolean hasName() {
+        return this.getParametersParameterComponent().hasName();
     }
 
     @Override
@@ -69,7 +75,7 @@ class ParametersParameterComponentAdapter extends BaseElementAdapter implements 
     }
 
     @Override
-    public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
+    public IParametersParameterComponentAdapter setPart(List<IBaseBackboneElement> parametersParameterComponents) {
         this.getParametersParameterComponent()
                 .setPart(
                         parametersParameterComponents == null
@@ -77,11 +83,13 @@ class ParametersParameterComponentAdapter extends BaseElementAdapter implements 
                                 : parametersParameterComponents.stream()
                                         .map(x -> (ParametersParameterComponent) x)
                                         .collect(Collectors.toList()));
+        return this;
     }
 
     @Override
-    public IBaseBackboneElement addPart() {
-        return this.getParametersParameterComponent().addPart();
+    public IParametersParameterComponentAdapter addPart() {
+        return adapterFactory.createParametersParameter(
+                this.getParametersParameterComponent().addPart());
     }
 
     @Override
@@ -110,8 +118,9 @@ class ParametersParameterComponentAdapter extends BaseElementAdapter implements 
     }
 
     @Override
-    public void setResource(IBaseResource resource) {
+    public IParametersParameterComponentAdapter setResource(IBaseResource resource) {
         this.getParametersParameterComponent().setResource((Resource) resource);
+        return this;
     }
 
     @Override
@@ -125,8 +134,9 @@ class ParametersParameterComponentAdapter extends BaseElementAdapter implements 
     }
 
     @Override
-    public void setValue(IBaseDatatype value) {
+    public IParametersParameterComponentAdapter setValue(IBaseDatatype value) {
         this.getParametersParameterComponent().setValue((Type) value);
+        return this;
     }
 
     @Override

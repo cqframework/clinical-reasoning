@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.ElementDefinition;
 import org.hl7.fhir.r5.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.junit.jupiter.api.Test;
 
 class ElementDefinitionAdapterTest {
@@ -31,7 +32,6 @@ class ElementDefinitionAdapterTest {
         assertNotNull(adapter);
         assertEquals(element, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.fhirTerser());
 
         assertEquals(element.getId(), adapter.getId());
         assertEquals(element.getPath(), adapter.getPath());
@@ -45,7 +45,8 @@ class ElementDefinitionAdapterTest {
         assertEquals(element.getDefinition(), adapter.getDefinition());
         assertEquals(element.getComment(), adapter.getComment());
         assertEquals(element.getRequirements(), adapter.getRequirements());
-        assertEquals(element.getAlias(), adapter.getAlias());
+        assertEquals(
+                element.getAlias().stream().map(PrimitiveType::asStringValue).toList(), adapter.getAlias());
         assertEquals(element.getMin(), adapter.getMin());
         assertEquals(element.hasMin(), adapter.hasMin());
         assertTrue(adapter.isRequired());

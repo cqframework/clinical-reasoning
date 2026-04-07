@@ -151,7 +151,7 @@ public class CqlFhirParametersConverter {
                     fhirContext, DATA_ABSENT_REASON_EXT_URL, codeType(fhirContext, DATA_ABSENT_REASON_UNKNOWN_CODE));
         }
 
-        value = convertCqlClassInstanceIfNeeded(value);
+        value = convertToFhirIfNeeded(value);
 
         if (value instanceof Tuple tupleValue) {
             var ppca = this.addPart(pa, name);
@@ -207,7 +207,7 @@ public class CqlFhirParametersConverter {
             return;
         }
 
-        value = convertCqlClassInstanceIfNeeded(value);
+        value = convertToFhirIfNeeded(value);
 
         if (value instanceof Iterable) {
             Iterable<Object> values = (Iterable<Object>) value;
@@ -390,13 +390,13 @@ public class CqlFhirParametersConverter {
         }
 
         if (instance instanceof IBaseEnumeration<?> enumeration) {
-            var value = cci.getElements().get("value");
+            var value = cci.get("value");
             enumeration.setValueAsString((String) value);
             return instance;
         }
 
         if (instance instanceof IPrimitiveType<?> primitive) {
-            var value = cci.getElements().get("value");
+            var value = cci.get("value");
             if (value != null) {
                 modelResolver.setPrimitiveValue(value, primitive);
             }
@@ -413,7 +413,7 @@ public class CqlFhirParametersConverter {
         }
 
         for (var child : definition.getChildren()) {
-            var elementValue = cci.getElements().get(child.getElementName());
+            var elementValue = cci.get(child.getElementName());
             if (elementValue == null) {
                 continue;
             }
@@ -428,13 +428,6 @@ public class CqlFhirParametersConverter {
             }
         }
         return instance;
-    }
-
-    private Object convertCqlClassInstanceIfNeeded(Object value) {
-        if (value instanceof CqlClassInstance cci) {
-            return toFhirValue(cci);
-        }
-        return value;
     }
 
     private Object convertToCql(IParametersParameterComponentAdapter ppca) {

@@ -15,11 +15,9 @@ public class CqlClassInstanceHelper {
 
     public static String getId(CqlClassInstance cqlClassInstance) {
         if (cqlClassInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
-                && cqlClassInstance.getElements().containsKey("id")
-                && cqlClassInstance.getElements().get("id") != null) {
-            var resourceIdInstance =
-                    (CqlClassInstance) cqlClassInstance.getElements().get("id");
-            var resourceIdValue = (String) resourceIdInstance.getElements().get("value");
+                && cqlClassInstance.has("id")) {
+            var resourceIdInstance = (CqlClassInstance) cqlClassInstance.get("id");
+            var resourceIdValue = resourceIdInstance == null ? null : (String) resourceIdInstance.get("value");
             if (resourceIdValue != null) {
                 var type = cqlClassInstance.getType().getLocalPart();
                 return "%s/%s".formatted(type, resourceIdValue);

@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.Collections;
@@ -356,12 +358,8 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Object> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
             for (Object object : evaluatedResources) {
-                final var resource = (CqlClassInstance) object;
-                final var resourceIdInstance =
-                        (CqlClassInstance) resource.getElements().get("id");
-                final var resourceIdValue =
-                        (String) resourceIdInstance.getElements().get("value");
-                Reference reference = this.getEvaluatedResourceReference(resourceIdValue);
+                var resourceId = getId((CqlClassInstance) object);
+                Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(
                         MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE, measurePopulationType.toCode());
                 addExtensionToReference(reference, ext);

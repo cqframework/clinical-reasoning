@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 
 import static org.opencds.cqf.fhir.utility.adapter.AdapterHelper.as;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -127,31 +128,7 @@ public abstract class BaseAdapter {
         }
 
         return child.getMax() < 1 ? values : values.get(0);
-        //        return toJavaPrimitive(child.getMax() < 1 ? values : values.get(0), base);
     }
-
-    //    protected Object toJavaPrimitive(Object result, Object source) {
-    //        if (source instanceof IPrimitiveType<?> && !((IPrimitiveType<?>) source).hasValue()) {
-    //            return null;
-    //        }
-    //
-    //        String simpleName = source.getClass().getSimpleName();
-    //        switch (simpleName) {
-    //            case "InstantType":
-    //            case "DateTimeType":
-    //                return toDateTime((BaseDateTimeType) source);
-    //            case "DateType":
-    //                return toDate((BaseDateTimeType) source);
-    //            case "TimeType":
-    //                return toTime((TimeType) source);
-    //            case "IdType":
-    //                return this.idToString((IdType) source);
-    //            case "Base64BinaryType":
-    //                return ((IPrimitiveType) source).getValueAsString();
-    //            default:
-    //                return result;
-    //        }
-    //    }
 
     public void setValue(IBase target, String path, Object value) {
         if (target == null) {
@@ -197,25 +174,14 @@ public abstract class BaseAdapter {
             try {
                 if (value instanceof Iterable) {
                     for (Object val : (Iterable<?>) value) {
-                        child.getMutator().addValue(target, setBaseValue(val, target));
+                        child.getMutator().addValue(target, setBaseValue(val, target, getChildType(child)));
                     }
                 } else {
-                    child.getMutator().setValue(target, setBaseValue(value, target));
+                    child.getMutator().setValue(target, setBaseValue(value, target, getChildType(child)));
                 }
             } catch (IllegalArgumentException le) {
-                //                if (value != null && value.getClass().getSimpleName().equals("Quantity")) {
-                //                    try {
-                //                        value = adapterFactory.createSimpleQuantity(value)
-                // castToSimpleQuantity((BaseType) value);
-                //                    } catch (FHIRException e) {
-                //                        throw new UnprocessableEntityException(
-                //                            "Unable to cast Quantity to SimpleQuantity");
-                //                    }
-                //                    child.getMutator().setValue(target, setBaseValue(value, target));
-                //                } else {
                 throw new UnprocessableEntityException(
                         String.format("Configuration error encountered: %s", le.getMessage()));
-                //                }
             }
         }
     }
@@ -226,15 +192,7 @@ public abstract class BaseAdapter {
         switch (simpleName) {
             case "DateTimeType":
             case "InstantType":
-                // Ensure offset is taken into account from the ISO datetime String instead of the default timezone
                 target.setValueAsString(value.toString());
-                // TODO:
-                // setCalendarConstant((BaseDateTimeType) target, (BaseTemporal) value);
-                break;
-            case "DateType":
-                target.setValue(value);
-                // TODO:
-                // setCalendarConstant((BaseDateTimeType) target, (BaseTemporal) value);
                 break;
             case "TimeType":
                 target.setValue(value.toString());
@@ -247,11 +205,18 @@ public abstract class BaseAdapter {
         }
     }
 
-    protected IBase setBaseValue(Object value, IBase target) {
+    protected IBase setBaseValue(Object value, IBase target, Class<?> type) {
         if (target instanceof IPrimitiveType<?> primitiveType) {
             setPrimitiveValue(value, primitiveType);
         }
-        return (IBase) value;
+        return (IBase) (type == null ? value : as(fhirVersion, value, type));
+    }
+
+    protected Class<?> getChildType(BaseRuntimeChildDefinition child) {
+        if (child instanceof BaseRuntimeChildDatatypeDefinition datatypeDefinition) {
+            return datatypeDefinition.getDatatype();
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")

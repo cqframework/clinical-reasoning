@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.opencds.cqf.fhir.utility.Resources;
 
 public class AdapterHelper {
     private static final String CAST_ERROR_MESSAGE = "Cannot cast a value of type %s as %s.";
@@ -15,6 +17,18 @@ public class AdapterHelper {
     }
 
     public static Object as(FhirVersionEnum fhirVersion, Object value, Class<?> type) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value.getClass().getSimpleName().equals("Tuple")) {
+            var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
+            var tupleAdapter = adapterFactory.createTuple((IBase) value);
+            var result = adapterFactory.createBase(Resources.newBaseForVersion(type.getSimpleName(), fhirVersion));
+            tupleAdapter.getProperties().forEach(result::setValue);
+            return result.get();
+        }
+
         return switch (fhirVersion) {
             case DSTU3 -> asDstu3(value, type);
             case R4 -> asR4(value, type);
@@ -264,6 +278,23 @@ public class AdapterHelper {
                     break;
             }
         }
+        //
+        //        if (value instanceof org.hl7.fhir.r4.model.Tuple tuple) {
+        //            var tupleAdapter =
+        //                    IAdapterFactory.forFhirVersion(FhirVersionEnum.R4).createTuple(tuple);
+        //            switch (type.getSimpleName()) {
+        //                case "Coding":
+        //                    var system = tupleAdapter.getProperty("system") instanceof
+        // org.hl7.fhir.r4.model.StringType stringType ? stringType.asStringValue() : null;
+        //                    var code = tupleAdapter.getProperty("code") instanceof org.hl7.fhir.r4.model.StringType
+        // stringType ? stringType.asStringValue() : null;
+        //                    var display = tupleAdapter.getProperty("display") instanceof
+        // org.hl7.fhir.r4.model.StringType stringType ? stringType.asStringValue() : null;
+        //                    return new org.hl7.fhir.r4.model.Coding(system, code, display);
+        //                default:
+        //                    break;
+        //            }
+        //        }
 
         throw new IllegalArgumentException(
                 CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));
@@ -403,6 +434,20 @@ public class AdapterHelper {
                     break;
             }
         }
+        //
+        //        if (value instanceof org.hl7.fhir.r5.model.Tuple tuple) {
+        //            var tupleAdapter =
+        //                    IAdapterFactory.forFhirVersion(FhirVersionEnum.R5).createTuple(tuple);
+        //            switch (type.getSimpleName()) {
+        //                case "Coding":
+        //                    var system = (String) tupleAdapter.getProperty("system");
+        //                    var code = (String) tupleAdapter.getProperty("code");
+        //                    var display = (String) tupleAdapter.getProperty("display");
+        //                    return new org.hl7.fhir.r4.model.Coding(system, code, display);
+        //                default:
+        //                    break;
+        //            }
+        //        }
 
         throw new IllegalArgumentException(
                 CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));

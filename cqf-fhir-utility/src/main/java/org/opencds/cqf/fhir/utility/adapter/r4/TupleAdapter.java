@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Tuple;
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
@@ -19,6 +20,16 @@ public class TupleAdapter extends BaseElementAdapter implements ITupleAdapter {
     @Override
     public Tuple get() {
         return (Tuple) element;
+    }
+
+    @Override
+    public Object getProperty(String name) {
+        return get().children().stream()
+                .filter(c -> c.getName().equals(name))
+                .map(p -> p.hasValues() ? p.getValues().get(0) : null)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

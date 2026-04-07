@@ -22,6 +22,14 @@ public class TupleAdapter extends BaseElementAdapter implements ITupleAdapter {
     }
 
     @Override
+    public Object getProperty(String name) {
+        return get().children().stream()
+                .filter(c -> c.getName().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
     public LinkedHashMap<String, Object> getProperties() {
         var properties = new LinkedHashMap<String, Object>();
         get().children().forEach(c -> properties.put(c.getName(), c.getValues()));

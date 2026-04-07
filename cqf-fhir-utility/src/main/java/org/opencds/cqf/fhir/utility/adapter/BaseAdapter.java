@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import static org.opencds.cqf.fhir.utility.adapter.AdapterHelper.as;
+
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
@@ -30,12 +33,14 @@ public abstract class BaseAdapter {
     protected static final Pattern EXTENSION_PATTERN = Pattern.compile("extension\\('([^']+)'\\)(\\[(\\d+)])?");
 
     protected final FhirContext fhirContext;
+    protected final FhirVersionEnum fhirVersion;
     protected final IAdapterFactory adapterFactory;
 
     protected record ExtensionInfo(String url, int index) {}
 
     public BaseAdapter(FhirContext fhirContext) {
         this.fhirContext = fhirContext;
+        fhirVersion = this.fhirContext.getVersion().getVersion();
         adapterFactory = IAdapterFactory.forFhirContext(this.fhirContext);
     }
 
@@ -430,16 +435,18 @@ public abstract class BaseAdapter {
 
     protected IBase getTargetValue(
             IBase target, Object value, boolean isLast, String targetPath, BaseRuntimeChildDefinition targetDef) {
-        IBase targetValue;
+        IBase targetValue = null;
         var elementDef = targetDef.getChildByName(targetPath);
         if (isLast) {
             var elementClass = elementDef.getImplementingClass();
             if (elementClass.getSimpleName().equals(ENUMERATION)) {
-                targetValue = getEnumValue(
-                        (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
-                        ((IPrimitiveType<?>) value).getValueAsString());
+                if (as(fhirVersion, value, IPrimitiveType.class) instanceof IPrimitiveType<?> primitiveType) {
+                    targetValue = getEnumValue(
+                            (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
+                            primitiveType.getValueAsString());
+                }
             } else {
-                targetValue = (IBase) value;
+                targetValue = (IBase) as(fhirVersion, value, elementClass);
             }
         } else {
             targetValue = elementDef.newInstance(targetDef.getInstanceConstructorArguments());

@@ -2,15 +2,21 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils.getFullUrl;
 
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.rest.param.InternalCodingDt;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,13 +24,20 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.DataRequirement;
+import org.hl7.fhir.r4.model.ImagingStudy;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
@@ -258,13 +271,13 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subjectToUse);
 
+        var context = Engines.forRepository(resolvedRepo, this.measureEvaluationOptions.getEvaluationSettings(), null);
+
         var subjects =
                 switch (singleOrMultiple) {
-                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, resolvedRepo);
+                    case SINGLE -> getSubjectsForEvaluateSingle(measures, context, subjectToUse, resolvedRepo);
                     case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
                 };
-
-        var context = Engines.forRepository(resolvedRepo, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
@@ -533,8 +546,143 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         return new Bundle.BundleEntryComponent().setResource(resource).setFullUrl(getFullUrl(serverBase, resource));
     }
 
+    // TODO: Candidate for measure utils?
+    protected Library getEffectiveDataRequirements(Measure measure) {
+        var e = measure.getExtensionByUrl(
+                "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-effectiveDataRequirements");
+
+        if (e == null) {
+            e = measure.getExtensionByUrl(
+                    "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
+        }
+
+        if (e != null) {
+            var libraryId = "";
+            if (e.getValue() instanceof Reference) {
+                libraryId = ((Reference) e.getValue()).getReference();
+            } else {
+                libraryId = e.getValueAsPrimitive().getValueAsString();
+            }
+
+            if (!("".equals(libraryId))) {
+                Resource contained = measure.getContained(libraryId);
+                if (contained instanceof Library) {
+                    return (Library) contained;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected boolean isSelectiveRequirement(DataRequirement dr) {
+        var isSelective = dr.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/cqf-isSelective");
+        if (isSelective != null
+                && isSelective.hasValue()
+                && isSelective.getValue() instanceof BooleanType
+                && ((BooleanType) isSelective.getValue()).booleanValue()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected boolean isPatientSubjectMeasure(Measure measure) {
+        if (measure.getSubject() == null) {
+            return true;
+        }
+
+        if (measure.getSubjectCodeableConcept() != null) {
+            if (measure.getSubjectCodeableConcept().hasCoding()
+                    && measure.getSubjectCodeableConcept()
+                            .getCodingFirstRep()
+                            .getCode()
+                            .equals("Patient")) {
+                return true;
+            }
+        }
+
+        // TODO: Would also need to return true if the subject was a Group that contained patients...
+
+        return false;
+    }
+
     @Nonnull
-    private List<String> getSubjectsForEvaluateSingle(String subjectId, IRepository subjectRepo) {
+    private List<String> getSubjectsForEvaluateSingle(
+            List<Measure> measures, CqlEngine context, String subjectId, IRepository subjectRepo) {
+        // TODO: This should probably be in the SubjectProvider
+        if (measures != null && measures.size() == 1) {
+            // Given a single patient context measure for evaluation and that measure has a selective data requirement
+            // with a type that has a relationship to the subject
+            // Use that data requirement to construct a query against the repository and use that as an index to define
+            // the set of subjects for evaluation
+            Measure measure = measures.get(0);
+            // TODO: Generalize to any subject type and resource type, this is just PoC code to demonstrate the
+            // capability
+            if (isPatientSubjectMeasure(measure)) {
+                Library effectiveDataRequirements = getEffectiveDataRequirements(measure);
+                if (effectiveDataRequirements != null) {
+                    for (DataRequirement dr : effectiveDataRequirements.getDataRequirement()) {
+                        // TODO: Generalize to consider all selective data requirements at once
+                        if (isSelectiveRequirement(dr)) {
+                            if ("ImagingStudy".equals(dr.getType())) {
+                                Multimap<String, List<IQueryParameterType>> searchParams = HashMultimap.create();
+                                var codeFilter = dr.getCodeFilterFirstRep();
+                                if (codeFilter != null
+                                        && ("modality".equals(codeFilter.getPath())
+                                                || "modality".equals(codeFilter.getSearchParam()))) {
+                                    // TODO: Refactor with code from
+                                    // BaseRetrieveProvider.populateTerminologySearchParameters()
+                                    if (codeFilter.hasValueSet()) {
+                                        var valueSet = codeFilter.getValueSet();
+                                        // Inline the codes into the retrieve e.g.
+                                        // Observation?code=system|code,system|code
+                                        List<IQueryParameterType> codeList = new ArrayList<>();
+                                        for (Code code : context.getEnvironment()
+                                                .getTerminologyProvider()
+                                                .expand(new ValueSetInfo().withId(valueSet))) {
+                                            codeList.add(new TokenParam(new InternalCodingDt()
+                                                    .setSystem(code.getSystem())
+                                                    .setCode(code.getCode())));
+                                        }
+                                        searchParams.put("modality", codeList);
+
+                                        var subjects = new HashSet<String>();
+
+                                        Bundle results =
+                                                subjectRepo.search(Bundle.class, ImagingStudy.class, searchParams);
+                                        while (results != null) {
+
+                                            for (var entry : results.getEntry()) {
+                                                if (entry.hasResource()
+                                                        && entry.getResource() instanceof ImagingStudy) {
+                                                    var is = (ImagingStudy) entry.getResource();
+                                                    if (is.hasSubject()
+                                                            && is.getSubject().hasReference()) {
+                                                        subjects.add(
+                                                                is.getSubject().getReference());
+                                                    }
+                                                }
+                                            }
+
+                                            var nextLink = results.getLink("next");
+                                            if (nextLink != null && nextLink.hasUrl()) {
+                                                results = subjectRepo.link(Bundle.class, nextLink.getUrl());
+                                            } else {
+                                                results = null; // No next link, drop out
+                                            }
+                                        }
+
+                                        return subjects.stream().toList();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return subjectProvider
                 .getSubjects(
                         subjectRepo,

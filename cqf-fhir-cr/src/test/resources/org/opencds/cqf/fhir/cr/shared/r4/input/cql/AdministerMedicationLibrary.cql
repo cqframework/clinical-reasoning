@@ -14,7 +14,7 @@ define "Medication Requests":
 
 define "Medication Proposal":
   First([MedicationRequest] M
-      sort by authoredOn
+      sort by authoredOn.value
   )
 
 define "Medication Request Code":

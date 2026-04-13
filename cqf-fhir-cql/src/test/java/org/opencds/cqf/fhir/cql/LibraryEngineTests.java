@@ -199,4 +199,21 @@ class LibraryEngineTests {
         assertTrue(codeableConcept2.equalsDeep((CodeableConcept) result3.get(0)));
         assertEquals(codeableConcept2.getCodingFirstRep().getDisplay(), ((StringType) result4.get(0)).getValue());
     }
+
+    @Test
+    void fhirPathJoinFunction() {
+        var patientId = "Patient/Patient1";
+        var patient = new Patient()
+                .addName(new HumanName().addGiven("Alice").addGiven("Marie").setFamily("Smith"))
+                .setId(patientId);
+
+        var params = parameters();
+        params.addParameter(part("%subject", patient));
+
+        // Test joining given names with a space separator
+        var expression = new CqfExpression("text/fhirpath", "%subject.name.first().given.join(' ')", null);
+
+        var result = libraryEngine.resolveExpression(patientId, expression, params, null, null, null, null);
+        assertEquals("Alice Marie", ((StringType) result.get(0)).getValue());
+    }
 }

@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,10 +28,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
+import org.cqframework.fhir.npm.NpmPackageManagerException;
 import org.cqframework.fhir.npm.NpmProcessor;
 import org.cqframework.fhir.utilities.IGContext;
 import org.cqframework.fhir.utilities.LoggerAdapter;
@@ -50,6 +54,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.data.SystemDataProvider;
+import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
@@ -191,6 +196,38 @@ class EnginesTest {
     }
 
     @Test
+    void debugMapExplicit() {
+        var settings = EvaluationSettings.getDefault();
+        var customDebugMap = new DebugMap();
+        customDebugMap.setLoggingEnabled(true);
+        customDebugMap.setCoverageEnabled(true);
+        settings.getCqlOptions().getCqlEngineOptions().setDebugMap(customDebugMap);
+        var engine = getEngine(settings);
+        assertSame(customDebugMap, engine.getState().getDebugMap());
+        assertTrue(engine.getState().getDebugMap().isLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isCoverageEnabled());
+
+        assertDataProviders(engine);
+    }
+
+    @Test
+    void debugMapTakesPrecedenceOverDebugLoggingEnabled() {
+        var settings = EvaluationSettings.getDefault();
+        var customDebugMap = new DebugMap();
+        customDebugMap.setLoggingEnabled(false);
+        customDebugMap.setCoverageEnabled(true);
+        settings.getCqlOptions().getCqlEngineOptions().setDebugMap(customDebugMap);
+        settings.getCqlOptions().getCqlEngineOptions().setDebugLoggingEnabled(true);
+        var engine = getEngine(settings);
+        // The explicit debug map should win, even though isDebugLoggingEnabled is true
+        assertSame(customDebugMap, engine.getState().getDebugMap());
+        assertFalse(engine.getState().getDebugMap().isLoggingEnabled());
+        assertTrue(engine.getState().getDebugMap().isCoverageEnabled());
+
+        assertDataProviders(engine);
+    }
+
+    @Test
     void librarySourceProviders() {
         var settings = EvaluationSettings.getDefault();
         settings.getLibrarySourceProviders().add(new StringLibrarySourceProvider(List.of()));
@@ -297,7 +334,16 @@ class EnginesTest {
 
         var igContext = new IGContext(new LoggerAdapter(log));
         igContext.initializeFromIni(ini.toString());
-        var settings = EvaluationSettings.getDefault().withNpmProcessor(new NpmProcessor(igContext));
+
+        NpmProcessor npmProcessor;
+        try {
+            npmProcessor = new NpmProcessor(igContext);
+        } catch (NpmPackageManagerException e) {
+            assumeTrue(false, "Skipping: NPM package cache unavailable — " + e.getMessage());
+            return; // unreachable, but satisfies compiler
+        }
+
+        var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
 
         var engine = getEngine(settings);
         var lm = engine.getEnvironment().getLibraryManager();
@@ -364,6 +410,31 @@ class EnginesTest {
     @Test
     void getCqlFhirParametersConverter() {
         assertNotNull(Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached()));
+    }
+
+    @Test
+    void additionalNamespacesRegistered() {
+        var name = "com.organization.common";
+        var uri = "http://com.organization.common";
+        var namespaces = new ConcurrentHashMap<String, String>();
+        namespaces.put(name, uri);
+        var settings = new EvaluationSettings().withRegisteredNamespaces(namespaces);
+        var name2 = "com.smiledigitalhealth.greatreef";
+        var uri2 = "http://smile.org/greatreef";
+        settings.addRegisteredNamespace(name2, uri2);
+        var engine = getEngine(settings);
+        assertEquals(
+                uri,
+                engine.getEnvironment()
+                        .getLibraryManager()
+                        .getNamespaceManager()
+                        .resolveNamespaceUri(name));
+        assertEquals(
+                uri2,
+                engine.getEnvironment()
+                        .getLibraryManager()
+                        .getNamespaceManager()
+                        .resolveNamespaceUri(name2));
     }
 
     /**
@@ -508,7 +579,7 @@ class EnginesTest {
 
     @ParameterizedTest
     @MethodSource("successfulParameters")
-    public void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String spName) {
+    void retrieve_withValidDatesInRange_succeeds(IBaseResource resource, String spName) {
         // test
         var results = retrieveResourcesWithin2000BySPName(resource, spName);
 
@@ -521,7 +592,7 @@ class EnginesTest {
 
     @ParameterizedTest
     @MethodSource("failureParameters")
-    public void retrieve_withValidDatesOutOfRange_failToRetrieve(IBaseResource resource, String spName) {
+    void retrieve_withValidDatesOutOfRange_failToRetrieve(IBaseResource resource, String spName) {
         // setup
         IParser parser = repository.fhirContext().newJsonParser();
 
@@ -563,7 +634,7 @@ class EnginesTest {
         var dateRange = new Interval(start, true, end, true);
 
         // Retrieve resources with period overlapping 2000
-        var results = dataProvider.retrieve(
+        return dataProvider.retrieve(
                 resourceType, // context
                 null, // contextPath
                 "pat1", // contextValue
@@ -577,12 +648,10 @@ class EnginesTest {
                 "period.end", // dateHighPath
                 dateRange // dateRange
                 );
-
-        return results;
     }
 
     @Test
-    public void dateFiltering() {
+    void dateFiltering() {
         // setup
         RetrieveSettings retrieveSettings = new RetrieveSettings();
         retrieveSettings.setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY);

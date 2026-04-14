@@ -24,8 +24,12 @@ import org.opencds.cqf.fhir.utility.VersionUtilities;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
+    private static final Logger logger = LoggerFactory.getLogger(DraftVisitor.class);
+
     public DraftVisitor(IRepository repository) {
         super(repository);
     }
@@ -169,9 +173,10 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
         }
         var pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
         var matcher = pattern.matcher(version);
-        boolean matchFound = matcher.find();
-        if (!matchFound) {
-            throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH");
+        if (!matcher.find()) {
+            logger.warn(
+                    "The version '{}' is not in the recommended semver format MAJOR.MINOR.PATCH. Semver is preferred but not required.",
+                    version);
         }
     }
 

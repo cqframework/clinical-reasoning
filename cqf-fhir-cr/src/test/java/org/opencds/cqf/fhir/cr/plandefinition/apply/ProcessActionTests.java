@@ -141,7 +141,7 @@ class ProcessActionTests {
                 FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         doReturn(null)
                 .when(libraryEngine)
-                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var result = fixture.meetsConditions(request, actionAdapter);
@@ -158,7 +158,7 @@ class ProcessActionTests {
                 FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
         doReturn(List.of(new StringType("Test")))
                 .when(libraryEngine)
-                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var result = fixture.meetsConditions(request, actionAdapter);
@@ -195,7 +195,7 @@ class ProcessActionTests {
         var metConditions = new ArrayList<String>();
         doReturn(List.of(new BooleanType(true)))
                 .when(libraryEngine)
-                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), eq(null), any(), eq(null));
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertEquals(3, requestAction.getAction().size());
 

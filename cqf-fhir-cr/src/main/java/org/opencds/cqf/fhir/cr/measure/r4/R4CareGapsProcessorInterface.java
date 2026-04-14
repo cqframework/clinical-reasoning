@@ -3,11 +3,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import jakarta.annotation.Nullable;
 import java.time.ZonedDateTime;
 import java.util.List;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
 /**
  * Describe operations provided to process caregaps for downstream implementors
@@ -19,7 +17,7 @@ public interface R4CareGapsProcessorInterface {
             @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> status,
-            List<Either3<IdType, String, CanonicalType>> measure,
+            List<MeasureReference> measureRefs,
             boolean notDocument);
 
     R4CareGapsParameters setCareGapParameters(
@@ -27,10 +25,10 @@ public interface R4CareGapsProcessorInterface {
             @Nullable ZonedDateTime periodEnd,
             String subject,
             List<String> status,
-            List<Either3<IdType, String, CanonicalType>> measure,
+            List<MeasureReference> measureRefs,
             boolean notDocument);
 
-    List<Measure> resolveMeasure(List<Either3<IdType, String, CanonicalType>> measure);
+    List<Measure> resolveMeasure(List<MeasureReference> measureRefs);
 
     List<String> getSubjects(String subject);
 
@@ -40,7 +38,7 @@ public interface R4CareGapsProcessorInterface {
 
     Parameters initializeResult();
 
-    void checkValidStatusCode(List<Either3<IdType, String, CanonicalType>> measure, List<String> statuses);
+    void checkValidStatusCode(List<MeasureReference> measureRefs, List<String> statuses);
 
     void measureCompatibilityCheck(List<Measure> measures);
 

@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.visitor.DeleteVisitor;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -48,9 +49,23 @@ class DeleteVisitorTests {
         Parameters params = parameters(part("version", version));
         Bundle returnedBundle = (Bundle) libraryAdapter.accept(deleteVisitor, params);
 
-        var res = returnedBundle.getEntry();
+        var libraryEntries = BundleHelper.getEntryResources(returnedBundle).stream()
+                .filter(r -> r.fhirType().equals("Library"))
+                .toList();
+        var planDefEntries = BundleHelper.getEntryResources(returnedBundle).stream()
+                .filter(r -> r.fhirType().equals("PlanDefinition"))
+                .toList();
+        var valueSetEntries = BundleHelper.getEntryResources(returnedBundle).stream()
+                .filter(r -> r.fhirType().equals("ValueSet"))
+                .toList();
+        var basicEntries = BundleHelper.getEntryResources(returnedBundle).stream()
+                .filter(r -> r.fhirType().equals("Basic"))
+                .toList();
 
-        assertEquals(4, res.size());
+        assertEquals(2, libraryEntries.size());
+        assertEquals(1, planDefEntries.size());
+        assertEquals(1, valueSetEntries.size());
+        assertEquals(1, basicEntries.size());
     }
 
     @Test

@@ -28,6 +28,7 @@ class MultiMeasureServiceTest {
                 .evaluate();
 
         when.then()
+                .hasSupplementalDataSearchParameter()
                 // This is a population/summary report so we should have a single bundle containing
                 // all MeasureReports
                 .hasBundleCount(1)

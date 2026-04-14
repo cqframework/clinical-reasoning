@@ -70,6 +70,116 @@ class ElementDefinitionAdapterTest {
         assertNull(adapter.getBindingValueSet());
     }
 
+    @Test
+    void testBindingMethods() {
+        var element = new ElementDefinition();
+        element.getBinding()
+                .setStrength(org.hl7.fhir.r4.model.Enumerations.BindingStrength.REQUIRED)
+                .setValueSet("http://example.org/ValueSet/test");
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertTrue(adapter.hasBinding());
+        assertEquals("required", adapter.getBindingStrength());
+        assertEquals("http://example.org/ValueSet/test", adapter.getBindingValueSet());
+    }
+
+    @Test
+    void testBindingStrengthNullWhenNoStrength() {
+        var element = new ElementDefinition();
+        element.getBinding().setValueSet("http://example.org/ValueSet/test");
+        // No strength set
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertNull(adapter.getBindingStrength());
+    }
+
+    @Test
+    void testBaseMethods() {
+        var element = new ElementDefinition();
+        element.getBase().setPath("Patient.name").setMin(0).setMax("*");
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertEquals("Patient.name", adapter.getBasePath());
+        assertEquals(0, adapter.getBaseMin());
+        assertEquals("*", adapter.getBaseMax());
+    }
+
+    @Test
+    void testBaseMethodsWithoutBase() {
+        var element = new ElementDefinition();
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertNull(adapter.getBasePath());
+        assertEquals(0, adapter.getBaseMin());
+        assertEquals("*", adapter.getBaseMax());
+    }
+
+    @Test
+    void testIsModifier() {
+        var element = new ElementDefinition();
+        element.setIsModifier(true);
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertTrue(adapter.isModifier());
+    }
+
+    @Test
+    void testHasCondition() {
+        var element = new ElementDefinition();
+        element.addCondition("dom-1");
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertTrue(adapter.hasCondition());
+    }
+
+    @Test
+    void testHasMaxLength() {
+        var element = new ElementDefinition();
+        element.setMaxLength(100);
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertTrue(adapter.hasMaxLength());
+    }
+
+    @Test
+    void testGetExtensionUrls() {
+        var element = new ElementDefinition();
+        element.addExtension("http://ext1", new org.hl7.fhir.r4.model.StringType("val"));
+        element.addExtension("http://ext2", new org.hl7.fhir.r4.model.BooleanType(true));
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        var urls = adapter.getExtensionUrls();
+        assertEquals(2, urls.size());
+        assertTrue(urls.contains("http://ext1"));
+        assertTrue(urls.contains("http://ext2"));
+    }
+
+    @Test
+    void testGetExtensionUrlsEmpty() {
+        var element = new ElementDefinition();
+
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertTrue(adapter.getExtensionUrls().isEmpty());
+    }
+
+    @Test
+    void testHasR5KeyConstraints() {
+        var element = new ElementDefinition();
+        // R4 doesn't have R5 key constraints, so this should return false
+        var adapter = adapterFactory.createElementDefinition(element);
+
+        assertFalse(adapter.hasR5KeyConstraints());
+    }
+
     private ElementDefinition exampleDefinition() {
         var element = new ElementDefinition()
                 .setPath("Observation.value[x]")

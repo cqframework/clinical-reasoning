@@ -140,4 +140,69 @@ class PackageHelperTest {
         var params = PackageHelper.packageParameters(version, null, false);
         assertInstanceOf(org.hl7.fhir.instance.model.api.IBaseParameters.class, params);
     }
+
+    @Test
+    void packageParameters_withArtifactEndpointConfiguration_addsConfigParams() {
+        var config = new org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent()
+                .setName("artifactEndpointConfiguration");
+        config.addPart().setName("artifactRoute").setValue(new org.hl7.fhir.r4.model.UriType("https://example.org"));
+        config.addPart()
+                .setName("endpointUri")
+                .setValue(new org.hl7.fhir.r4.model.UriType("https://tx.example.org/fhir"));
+
+        var actual = packageParameters(FhirVersionEnum.R4, List.of(config), null, false);
+        var r4Params = (org.hl7.fhir.r4.model.Parameters) actual;
+        assertTrue(r4Params.hasParameter("artifactEndpointConfiguration"));
+    }
+
+    @Test
+    void packageParameters_withNullArtifactEndpointConfiguration_omitsConfigParams() {
+        var actual =
+                packageParameters(FhirVersionEnum.R4, (List<org.hl7.fhir.instance.model.api.IBase>) null, null, false);
+        var r4Params = (org.hl7.fhir.r4.model.Parameters) actual;
+        assertFalse(r4Params.hasParameter("artifactEndpointConfiguration"));
+    }
+
+    @Test
+    void packageParameters_withMultipleConfigurations_addsAll() {
+        var config1 = new org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent()
+                .setName("artifactEndpointConfiguration");
+        config1.addPart().setName("artifactRoute").setValue(new org.hl7.fhir.r4.model.UriType("https://vsac.org"));
+
+        var config2 = new org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent()
+                .setName("artifactEndpointConfiguration");
+        config2.addPart().setName("artifactRoute").setValue(new org.hl7.fhir.r4.model.UriType("https://example.org"));
+
+        var actual = packageParameters(FhirVersionEnum.R4, List.of(config1, config2), null, false);
+        var r4Params = (org.hl7.fhir.r4.model.Parameters) actual;
+        assertEquals(2, r4Params.getParameters("artifactEndpointConfiguration").size());
+    }
+
+    @Test
+    void packageParameters_fullOverload_withAllParams() {
+        var config = new org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent()
+                .setName("artifactEndpointConfiguration");
+        config.addPart().setName("artifactRoute").setValue(new org.hl7.fhir.r4.model.UriType("https://example.org"));
+
+        var endpoint = new org.hl7.fhir.r4.model.Endpoint();
+        endpoint.setAddress("https://tx.example.org/fhir");
+
+        var actual = packageParameters(
+                FhirVersionEnum.R4,
+                new IntegerType(0),
+                new IntegerType(100),
+                "searchset",
+                List.of("ValueSet"),
+                List.of(config),
+                endpoint,
+                false);
+        var r4Params = (org.hl7.fhir.r4.model.Parameters) actual;
+        assertTrue(r4Params.hasParameter("offset"));
+        assertTrue(r4Params.hasParameter("count"));
+        assertTrue(r4Params.hasParameter("bundleType"));
+        assertTrue(r4Params.hasParameter("include"));
+        assertTrue(r4Params.hasParameter("artifactEndpointConfiguration"));
+        assertTrue(r4Params.hasParameter("terminologyEndpoint"));
+        assertTrue(r4Params.hasParameter("isPut"));
+    }
 }

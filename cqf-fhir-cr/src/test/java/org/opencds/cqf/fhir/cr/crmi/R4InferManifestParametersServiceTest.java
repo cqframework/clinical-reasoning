@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
@@ -64,8 +63,9 @@ class R4InferManifestParametersServiceTest {
         assertEquals("asset-collection", result.getType().getCodingFirstRep().getCode());
         assertEquals("ModuleDefManifest", result.getName());
 
+        // Only terminology resources produce parameters (Library is skipped)
         var parameters = (Parameters) result.getContained().get(0);
-        assertEquals(3, parameters.getParameter().size());
+        assertEquals(2, parameters.getParameter().size());
 
         // Verify system-version for CodeSystem
         var systemVersionParam = parameters.getParameter().stream()
@@ -78,25 +78,12 @@ class R4InferManifestParametersServiceTest {
 
         // Verify canonicalVersion for ValueSet
         var valueSetParam = parameters.getParameter().stream()
-                .filter(p -> "canonicalVersion".equals(p.getName())
-                        && p.getValue().primitiveValue().contains("ValueSet"))
+                .filter(p -> "canonicalVersion".equals(p.getName()))
                 .findFirst();
         assertTrue(valueSetParam.isPresent());
         assertEquals(
                 "http://hl7.org/fhir/uv/sdc/ValueSet/sdc-question-type|3.0.0",
                 valueSetParam.get().getValue().primitiveValue());
-
-        // Verify canonicalVersion with resourceType extension for Library
-        var libraryParam = parameters.getParameter().stream()
-                .filter(p -> "canonicalVersion".equals(p.getName())
-                        && p.getValue().primitiveValue().contains("Library"))
-                .findFirst();
-        assertTrue(libraryParam.isPresent());
-        var libraryExt = libraryParam
-                .get()
-                .getExtensionByUrl("http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-resourceType");
-        assertNotNull(libraryExt);
-        assertEquals("Library", ((CodeType) libraryExt.getValue()).getCode());
     }
 
     @Test

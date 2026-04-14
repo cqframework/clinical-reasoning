@@ -45,28 +45,19 @@ public class Searches {
         return new SearchBuilder();
     }
 
-    public static Map<String, List<IQueryParameterType>> byId(String... ids) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withTokenParam("_id", ids).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byId(String... ids) {
+        return builder().withTokenParam("_id", ids).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byId(String id) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withTokenParam("_id", id).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byId(String id) {
+        return builder().withTokenParam("_id", id).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byProfile(String profile) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withProfile(profile).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byProfile(String profile) {
+        return builder().withProfile(profile).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byCanonical(String canonical) {
+    public static Multimap<String, List<IQueryParameterType>> byCanonical(String canonical) {
         var parts = Canonicals.getParts(canonical);
         if (parts.version() != null) {
             return byUrlAndVersion(parts.url(), parts.version());
@@ -75,52 +66,36 @@ public class Searches {
         }
     }
 
-    public static Map<String, List<IQueryParameterType>> byCodeAndSystem(String code, String system) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withTokenParam("code", code, system).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byCodeAndSystem(String code, String system) {
+        return builder().withTokenParam("code", code, system).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byUrl(String url) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withUriParam("url", url).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byUrl(String url) {
+        return builder().withUriParam("url", url).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byUrlAndVersion(String url, String version) {
-        Multimap<String, List<IQueryParameterType>> multimap = builder()
+    public static Multimap<String, List<IQueryParameterType>> byUrlAndVersion(String url, String version) {
+        return builder()
                 .withUriParam("url", url)
                 .withTokenParam("version", version)
                 .build();
-
-        return toFlattenedMap(multimap);
     }
 
-    public static Map<String, List<IQueryParameterType>> byName(String name) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withStringParam("name", name).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byName(String name) {
+        return builder().withStringParam("name", name).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> byStatus(String status) {
-        Multimap<String, List<IQueryParameterType>> multimap =
-                builder().withTokenParam("status", status).build();
-
-        return toFlattenedMap(multimap);
+    public static Multimap<String, List<IQueryParameterType>> byStatus(String status) {
+        return builder().withTokenParam("status", status).build();
     }
 
-    public static Map<String, List<IQueryParameterType>> exceptStatus(String status) {
-        Multimap<String, List<IQueryParameterType>> multimap = builder()
+    public static Multimap<String, List<IQueryParameterType>> exceptStatus(String status) {
+        return builder()
                 .withModifiedTokenParam("status", TokenParamModifier.NOT, status)
                 .build();
-
-        return toFlattenedMap(multimap);
     }
 
-    public static Map<String, List<IQueryParameterType>> byNameAndVersion(String name, String version) {
+    public static Multimap<String, List<IQueryParameterType>> byNameAndVersion(String name, String version) {
         Multimap<String, List<IQueryParameterType>> multimap;
 
         if (version == null || version.isEmpty()) {
@@ -132,7 +107,7 @@ public class Searches {
                     .build();
         }
 
-        return toFlattenedMap(multimap);
+        return multimap;
     }
 
     public static Map<String, List<IQueryParameterType>> toFlattenedMap(

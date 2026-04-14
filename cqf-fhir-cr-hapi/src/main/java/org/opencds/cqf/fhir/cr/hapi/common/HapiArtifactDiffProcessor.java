@@ -48,7 +48,7 @@ import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanWrapperImpl;
@@ -363,7 +363,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         // Only update if ValueSet has changed since last expansion
         if (wasValueSetChangedSinceLastExpansion(vset)) {
             var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
-            var ts = new TerminologyServerClient(context);
+            var ts = new FederatedTerminologyProviderRouter(context);
             var expandHelper = new ExpandHelper(repository, ts);
             var endpointAdapter = Optional.ofNullable(terminologyEndpoint).map(factory::createEndpoint);
             var valueSetAdapter = (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vset);

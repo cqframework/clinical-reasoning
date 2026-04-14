@@ -1,8 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 public class CriteriaResult {
     private final Object value;
@@ -44,6 +48,22 @@ public class CriteriaResult {
 
     public Set<Object> evaluatedResources() {
         return this.evaluatedResources;
+    }
+
+    /**
+     * Returns the value(s) as a list with nulls filtered out.
+     * Handles single values, iterables, and null values uniformly.
+     */
+    public List<Object> nonNullValues() {
+        if (this.value == null) {
+            return Collections.emptyList();
+        }
+        if (this.value instanceof Iterable<?> iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false)
+                    .filter(Objects::nonNull)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        }
+        return List.of(this.value);
     }
 
     private Set<Object> buildSet(Iterable<Object> iterable) {

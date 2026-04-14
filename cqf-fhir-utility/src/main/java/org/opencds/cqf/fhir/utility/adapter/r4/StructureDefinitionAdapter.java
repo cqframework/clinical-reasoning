@@ -123,6 +123,11 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
     }
 
     @Override
+    public String getDerivation() {
+        return get().hasDerivation() ? get().getDerivation().toCode() : null;
+    }
+
+    @Override
     public IPrimitiveType<String> getBaseDefinition() {
         return get().getBaseDefinitionElement();
     }
@@ -137,6 +142,22 @@ public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter impleme
         return get().getSnapshot().getElement().stream()
                 .filter(ElementDefinition::hasPath)
                 .filter(e -> e.getPath().split("\\.").length > 1)
+                .map(adapterFactory::createElementDefinition)
+                .toList();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getAllSnapshotElements() {
+        return get().getSnapshot().getElement().stream()
+                .filter(ElementDefinition::hasPath)
+                .map(adapterFactory::createElementDefinition)
+                .toList();
+    }
+
+    @Override
+    public List<IElementDefinitionAdapter> getAllDifferentialElements() {
+        return get().getDifferential().getElement().stream()
+                .filter(ElementDefinition::hasPath)
                 .map(adapterFactory::createElementDefinition)
                 .toList();
     }

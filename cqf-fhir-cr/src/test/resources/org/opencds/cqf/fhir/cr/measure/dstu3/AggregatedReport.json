@@ -116,29 +116,29 @@
   ],
   "extension": [
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.population.description",
+      "url": "http://hl7.org/fhir/StructureDefinition/measurereport-populationDescription",
       "valueString": "This measure assesses the number of patients who received VTE prophylaxis or have documentation why no VTE prophylaxis was given the day of or the day after hospital admission or surgery end date for surgeries that start the day of or the day after hospital admission"
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-ethnicity-coding-2186-5"
       }
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-race-coding-2106-3"
       }
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-sex-code-f"
       }
     },
     {
-      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference",
+      "url": "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData",
       "valueReference": {
         "reference": "#sde-observation-sde-sex-code-m"
       }

@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.cr.helpers.TestEvaluationSettings.defaultTestEvaluationSettings;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
@@ -28,16 +30,15 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -94,15 +95,7 @@ public class TestLibrary {
                 igRepository.setOperationProvider(TestOperationProvider.newProvider(repository.fhirContext()));
             }
             if (evaluationSettings == null) {
-                evaluationSettings = EvaluationSettings.getDefault();
-                evaluationSettings
-                        .getRetrieveSettings()
-                        .setSearchParameterMode(SEARCH_FILTER_MODE.FILTER_IN_MEMORY)
-                        .setTerminologyParameterMode(TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY);
-
-                evaluationSettings
-                        .getTerminologySettings()
-                        .setValuesetExpansionMode(VALUESET_EXPANSION_MODE.PERFORM_NAIVE_EXPANSION);
+                evaluationSettings = defaultTestEvaluationSettings();
             }
             var crSettings = CrSettings.getDefault().withEvaluationSettings(evaluationSettings);
             return new LibraryProcessor(repository, crSettings);
@@ -288,7 +281,8 @@ public class TestLibrary {
         final IBaseParameters result;
         final IParser jsonParser;
         final ModelResolver modelResolver;
-        final List<IBaseResource> parameter;
+        final List<IBase> parameter;
+        final IAdapterFactory adapterFactory;
 
         @SuppressWarnings("unchecked")
         public Evaluation(IRepository repository, IBaseParameters result) {
@@ -297,7 +291,8 @@ public class TestLibrary {
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
-            parameter = ((List<IBaseResource>) modelResolver.resolvePath(result, "parameter"));
+            adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
+            parameter = ((List<IBase>) modelResolver.resolvePath(result, "parameter"));
         }
 
         public Evaluation hasResults(Integer count) {
@@ -310,9 +305,16 @@ public class TestLibrary {
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         public Evaluation resultHasValue(Integer index, IBase value) {
-            var actual = parameter.get(index);
-            assertEquals(value, actual);
+            var actual = adapterFactory
+                    .createParametersParameter(parameter.get(index))
+                    .getValue();
+            if (value instanceof IPrimitiveType<?> primitiveValue) {
+                assertEquals(primitiveValue.getValueAsString(), ((IPrimitiveType<String>) actual).getValueAsString());
+            } else {
+                assertInstanceOf(value.getClass(), actual);
+            }
             return this;
         }
     }

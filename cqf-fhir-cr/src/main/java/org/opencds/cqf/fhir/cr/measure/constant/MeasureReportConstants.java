@@ -19,8 +19,9 @@ public class MeasureReportConstants {
             "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-improvementNotation";
     public static final String MEASUREREPORT_MEASURE_POPULATION_SYSTEM =
             "http://terminology.hl7.org/CodeSystem/measure-population";
+    // DEQM STU5: R5 cross-version extension for MeasureReport.supplementalData
     public static final String MEASUREREPORT_MEASURE_SUPPLEMENTALDATA_EXTENSION =
-            "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-supplementalData";
+            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData";
     public static final String MEASUREREPORT_SUPPLEMENTALDATA_SEARCHPARAMETER_URL =
             "http://hl7.org/fhir/us/davinci-deqm/SearchParameter/measurereport-supplemental-data";
     public static final String MEASUREREPORT_PRODUCT_LINE_EXT_URL =
@@ -31,10 +32,12 @@ public class MeasureReportConstants {
     public static final String SDE_SYSTEM_URL = "http://terminology.hl7.org/CodeSystem/measure-data-usage";
     public static final String SDE_USAGE_CODE = "supplemental-data";
     public static final String RISK_ADJUSTMENT_USAGE_CODE = "risk-adjustment-factor";
+    // DEQM STU5: R5 cross-version extension for MeasureReport.supplementalData
     public static final String SDE_REFERENCE_EXT_URL =
-            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalDataElement.reference";
+            "http://hl7.org/fhir/5.0/StructureDefinition/extension-MeasureReport.supplementalData";
+    // DEQM STU5 deprecated extension-criteriaReference in favor of cqf-criteriaReference
     public static final String SDE_DAVINCI_DEQM_EXT_URL =
-            "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-criteriaReference";
+            "http://hl7.org/fhir/StructureDefinition/cqf-criteriaReference";
     public static final String COUNTRY_CODING_SYSTEM_CODE = "urn:iso:std:iso:3166";
     public static final String US_COUNTRY_CODE = "US";
     public static final String US_COUNTRY_DISPLAY = "United States of America";

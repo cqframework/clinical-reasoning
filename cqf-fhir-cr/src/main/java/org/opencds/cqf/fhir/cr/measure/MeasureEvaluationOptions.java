@@ -17,6 +17,7 @@ public class MeasureEvaluationOptions {
     private Map<String, ValidationProfile> validationProfiles = new HashMap<>();
     private SubjectProviderOptions subjectProviderOptions;
 
+    private boolean ensureSearchParameters = true;
     private EvaluationSettings evaluationSettings = null;
 
     public boolean isValidationEnabled() {
@@ -60,5 +61,14 @@ public class MeasureEvaluationOptions {
 
     public boolean getApplyScoringSetMembership() {
         return this.applyScoringSetMembership;
+    }
+
+    public boolean isEnsureSearchParameters() {
+        return this.ensureSearchParameters;
+    }
+
+    public MeasureEvaluationOptions setEnsureSearchParameters(boolean ensureSearchParameters) {
+        this.ensureSearchParameters = ensureSearchParameters;
+        return this;
     }
 }

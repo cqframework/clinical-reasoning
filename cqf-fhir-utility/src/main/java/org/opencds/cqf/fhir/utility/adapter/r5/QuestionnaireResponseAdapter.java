@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.QuestionnaireResponse;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus;
@@ -48,14 +49,34 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
     }
 
     @Override
+    public boolean hasQuestionnaire() {
+        return get().hasQuestionnaire();
+    }
+
+    @Override
     public String getQuestionnaire() {
         return get().getQuestionnaire();
+    }
+
+    @Override
+    public CanonicalType getQuestionnaireCanonical() {
+        return get().hasQuestionnaire() ? get().getQuestionnaireElement() : null;
     }
 
     @Override
     public IQuestionnaireResponseAdapter setQuestionnaire(String canonical) {
         get().setQuestionnaire(canonical);
         return this;
+    }
+
+    @Override
+    public boolean hasSubject() {
+        return get().hasSubject();
+    }
+
+    @Override
+    public IIdType getSubject() {
+        return get().getSubject().getReferenceElement();
     }
 
     @Override

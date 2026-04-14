@@ -35,8 +35,15 @@ class QuestionnaireResponseAdapterTest {
         assertNotNull(adapter.getModelResolver());
         assertNotNull(adapter.getAdapterFactory());
         adapter.setId("test");
-        adapter.setQuestionnaire("test.com/Questionnaire/test");
-        adapter.setSubject(new IdType("test1"));
+        var canonical = "test.com/Questionnaire/test";
+        adapter.setQuestionnaire(canonical);
+        assertTrue(adapter.hasQuestionnaire());
+        assertEquals(canonical, adapter.getQuestionnaire());
+        assertEquals(canonical, adapter.getQuestionnaireCanonical().getValueAsString());
+        var id = new IdType("test1");
+        adapter.setSubject(id);
+        assertTrue(adapter.hasSubject());
+        assertEquals(id.getValue(), adapter.getSubject().getValue());
         adapter.setAuthored(new Date());
         adapter.setStatus("in-progress");
     }
@@ -46,6 +53,9 @@ class QuestionnaireResponseAdapterTest {
         var questionnaireResponse = new QuestionnaireResponse();
         var item1 =
                 adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent().setLinkId("1"));
+        var item1_1 = adapterFactory.createQuestionnaireResponseItem(
+                new QuestionnaireResponseItemComponent().setLinkId("1.1"));
+        item1.addItem(item1_1);
         var item2 =
                 adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent().setLinkId("2"));
         var item3 =
@@ -56,6 +66,7 @@ class QuestionnaireResponseAdapterTest {
         questionnaireResponse.addItem((QuestionnaireResponseItemComponent) item2.get());
         var adapter = adapterFactory.createQuestionnaireResponse(questionnaireResponse);
         assertTrue(adapter.hasItem());
+        assertTrue(adapter.hasItem("1"));
         assertEquals(2, adapter.getItem().size());
         adapter.addItem(item3);
         assertEquals(3, adapter.getItem().size());
@@ -63,5 +74,7 @@ class QuestionnaireResponseAdapterTest {
         assertEquals(1, adapter.getItem().size());
         adapter.addItems(List.of(item2, item3, item4));
         assertEquals(4, adapter.getItem().size());
+        assertEquals(1, adapter.getItem("1.1").size());
+        assertEquals(item1_1.get(), adapter.getItem("1.1").get(0).get());
     }
 }

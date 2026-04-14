@@ -75,8 +75,8 @@ import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.r4.LibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r4.ValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
 class PackageVisitorTests {
@@ -167,7 +167,8 @@ class PackageVisitorTests {
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
-        terminologyEndpoint.setAddress("test.com");
+        terminologyEndpoint.setAddress(Constants.VSAC_BASE_URL);
+
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         var result = (Bundle) libraryAdapter.accept(packageVisitor, params);
@@ -209,7 +210,7 @@ class PackageVisitorTests {
         Endpoint terminologyEndpoint = new Endpoint();
         terminologyEndpoint.addExtension(Constants.VSAC_USERNAME, new StringType(username));
         terminologyEndpoint.addExtension(Constants.APIKEY, new StringType(apiKey));
-        terminologyEndpoint.setAddress("test.com");
+        terminologyEndpoint.setAddress(Constants.VSAC_BASE_URL);
         Parameters params = parameters(part("terminologyEndpoint", terminologyEndpoint));
 
         libraryAdapter.accept(packageVisitor, params);
@@ -576,7 +577,7 @@ class PackageVisitorTests {
                 .copy();
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var mockCache = Mockito.mock(IValueSetExpansionCache.class);
-        var packageVisitor = new PackageVisitor(repo, (TerminologyServerClient) null, mockCache);
+        var packageVisitor = new PackageVisitor(repo, (ITerminologyProviderRouter) null, mockCache);
 
         var canonical1 = "http://cts.nlm.nih.gov/fhir/ValueSet/123-this-will-be-routine|20210526";
         var mockValueSetAdapter1 = Mockito.mock(ValueSetAdapter.class);
@@ -622,7 +623,7 @@ class PackageVisitorTests {
                 .copy();
         var endpoint = createEndpoint(authoritativeSource);
 
-        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
+        var clientMock = mock(ITerminologyProviderRouter.class, new ReturnsDeepStubs());
         // expect the Tx Server to provide the missing ValueSet
         when(clientMock.getValueSetResource(any(IEndpointAdapter.class), any())).thenReturn(Optional.of(missingVset));
         doAnswer(new Answer<ValueSet>() {

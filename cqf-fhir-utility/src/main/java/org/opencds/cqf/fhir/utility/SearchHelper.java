@@ -23,6 +23,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
+@SuppressWarnings("UnstableApiUsage")
 public class SearchHelper {
 
     private SearchHelper() {}
@@ -297,7 +298,9 @@ public class SearchHelper {
      * @return
      */
     public static IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-            IRepository repository, String canonical, Map<String, List<IQueryParameterType>> additionalSearchParams) {
+            IRepository repository,
+            String canonical,
+            Multimap<String, List<IQueryParameterType>> additionalSearchParams) {
         var resourceType = getResourceType(repository, canonical);
         return searchRepositoryByCanonicalWithPagingWithParams(
                 repository, canonical, resourceType, additionalSearchParams);
@@ -335,16 +338,14 @@ public class SearchHelper {
                     IRepository repository,
                     CanonicalType canonical,
                     Class<R> resourceType,
-                    Map<String, List<IQueryParameterType>> additionalSearchParams) {
+                    Multimap<String, List<IQueryParameterType>> additionalSearchParams) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         if (additionalSearchParams != null) {
             searchParams.putAll(additionalSearchParams);
         }
-        var searchResult = searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
-
-        return searchResult;
+        return searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
     }
 
     /**
@@ -375,16 +376,14 @@ public class SearchHelper {
             IRepository repository,
             String canonical,
             Class<R> resourceType,
-            Map<String, List<IQueryParameterType>> additionalSearchParams) {
+            Multimap<String, List<IQueryParameterType>> additionalSearchParams) {
         var url = Canonicals.getUrl(canonical);
         var version = Canonicals.getVersion(canonical);
         var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
         if (additionalSearchParams != null) {
             searchParams.putAll(additionalSearchParams);
         }
-        var searchResult = searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
-
-        return searchResult;
+        return searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
     }
 
     /**

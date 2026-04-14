@@ -8,7 +8,9 @@ import java.util.Arrays;
 import java.util.Map;
 import org.opencds.cqf.fhir.cr.crmi.R4ApproveService;
 import org.opencds.cqf.fhir.cr.crmi.R4DraftService;
+import org.opencds.cqf.fhir.cr.crmi.R4InferManifestParametersService;
 import org.opencds.cqf.fhir.cr.crmi.R4PackageService;
+import org.opencds.cqf.fhir.cr.crmi.R4ReleaseManifestService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
@@ -21,7 +23,9 @@ import org.opencds.cqf.fhir.cr.hapi.r4.ICollectDataServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDataRequirementsServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IDraftServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IERSDV2ImportServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IInferManifestParametersServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IPackageServiceFactory;
+import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseManifestServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.IReleaseServiceFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.ISubmitDataProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
@@ -29,7 +33,9 @@ import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureServiceUtilsFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ApproveProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.DraftProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.InferManifestParametersProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.PackageProvider;
+import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseManifestProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.crmi.ReleaseProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.ecr.ERSDTransformProvider;
 import org.opencds.cqf.fhir.cr.hapi.r4.measure.CareGapsOperationProvider;
@@ -62,7 +68,8 @@ import org.springframework.context.annotation.Import;
     RetireOperationConfig.class,
     WithdrawOperationConfig.class,
     ReviseOperationConfig.class,
-    ArtifactDiffOperationConfig.class
+    ArtifactDiffOperationConfig.class,
+    CreateChangelogOperationConfig.class
 })
 public class CrR4Config {
 
@@ -72,8 +79,8 @@ public class CrR4Config {
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
         // We are effectively returning an R4MeasureEvaluatorSingle her
-        return requestDetails -> new R4MultiMeasureService(
-                repositoryFactory.create(requestDetails),
+        return (requestDetails, environment) -> new R4MultiMeasureService(
+                environment.resolve(repositoryFactory.create(requestDetails)),
                 evaluationOptions,
                 requestDetails.getFhirServerBase(),
                 measurePeriodValidator);
@@ -84,8 +91,11 @@ public class CrR4Config {
             IRepositoryFactory repositoryFactory,
             MeasureEvaluationOptions evaluationOptions,
             MeasurePeriodValidator measurePeriodValidator) {
-        return rd -> new R4MultiMeasureService(
-                repositoryFactory.create(rd), evaluationOptions, rd.getFhirServerBase(), measurePeriodValidator);
+        return (requestDetails, environment) -> new R4MultiMeasureService(
+                environment.resolve(repositoryFactory.create(requestDetails)),
+                evaluationOptions,
+                requestDetails.getFhirServerBase(),
+                measurePeriodValidator);
     }
 
     @Bean
@@ -195,6 +205,27 @@ public class CrR4Config {
     }
 
     @Bean
+    IReleaseManifestServiceFactory releaseManifestServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4ReleaseManifestService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    ReleaseManifestProvider r4ReleaseManifestProvider(IReleaseManifestServiceFactory r4ReleaseManifestServiceFactory) {
+        return new ReleaseManifestProvider(r4ReleaseManifestServiceFactory);
+    }
+
+    @Bean
+    IInferManifestParametersServiceFactory inferManifestParametersServiceFactory(IRepositoryFactory repositoryFactory) {
+        return rd -> new R4InferManifestParametersService(repositoryFactory.create(rd));
+    }
+
+    @Bean
+    InferManifestParametersProvider r4InferManifestParametersProvider(
+            IInferManifestParametersServiceFactory r4InferManifestParametersServiceFactory) {
+        return new InferManifestParametersProvider(r4InferManifestParametersServiceFactory);
+    }
+
+    @Bean
     SubmitDataProvider r4SubmitDataProvider(ISubmitDataProcessorFactory r4SubmitDataProcessorFactory) {
         return new SubmitDataProvider(r4SubmitDataProcessorFactory);
     }
@@ -226,7 +257,9 @@ public class CrR4Config {
                                 ApproveProvider.class,
                                 ERSDTransformProvider.class,
                                 PackageProvider.class,
-                                ReleaseProvider.class)));
+                                ReleaseProvider.class,
+                                ReleaseManifestProvider.class,
+                                InferManifestParametersProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

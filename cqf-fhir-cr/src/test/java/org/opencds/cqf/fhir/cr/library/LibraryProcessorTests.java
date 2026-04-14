@@ -12,6 +12,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -200,5 +201,32 @@ class LibraryProcessorTests {
                 .terminology(content)
                 .thenEvaluate()
                 .hasResults(6);
+    }
+
+    @Test
+    void testEvaluateMultipleLibraryVersions() {
+        var libraryUrl = "http://fhir.org/guides/cdc/opioid-cds/Library/HelloWorld";
+        var version1 = "1.0.0";
+        var version2 = "2.0.0";
+        var repository =
+                new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4"));
+        var evaluationSettings = EvaluationSettings.getDefault();
+        given().repository(repository)
+                .evaluationSettings(evaluationSettings)
+                .when()
+                .libraryUrl(String.format("%s|%s", libraryUrl, version1))
+                .subjectId("Patient1")
+                .thenEvaluate()
+                .hasResults(8)
+                .resultHasValue(3, new StringType("Hello World!"));
+
+        given().repository(repository)
+                .evaluationSettings(evaluationSettings)
+                .when()
+                .libraryUrl(String.format("%s|%s", libraryUrl, version2))
+                .subjectId("Patient1")
+                .thenEvaluate()
+                .hasResults(8)
+                .resultHasValue(3, new StringType("Hello World! I am a new version!"));
     }
 }

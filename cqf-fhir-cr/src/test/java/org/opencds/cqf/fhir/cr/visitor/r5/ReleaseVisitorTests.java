@@ -58,7 +58,7 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.r5.AdapterFactory;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.r5.MetadataResourceHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
@@ -68,23 +68,20 @@ class ReleaseVisitorTests {
     private final FhirContext fhirContext = FhirContext.forR5Cached();
     private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
-    private final List<String> badVersionList = Arrays.asList(
+    private final List<String> badVersionList =
+            Arrays.asList("1.|1.1.1", "1/.1.1.1", "1.2.1.3-draft", "1.2.3-draft", "", null);
+    private final List<String> nonSemverVersionList = Arrays.asList(
             "11asd1",
             "1.1.3.1.1",
-            "1.|1.1.1",
-            "1/.1.1.1",
             "-1.-1.2.1",
             "1.-1.2.1",
             "1.1.-2.1",
             "7.1..21",
-            "1.2.1.3-draft",
-            "1.2.3-draft",
             "3.2",
             "1.",
             "3.ad.2.",
             "1.0.0.1",
-            "",
-            null);
+            "2025-09");
 
     @BeforeEach
     void setup() {
@@ -513,8 +510,9 @@ class ReleaseVisitorTests {
 
         var endpoint = createEndpoint(authoritativeSource);
 
-        var clientMock = mock(TerminologyServerClient.class, new ReturnsDeepStubs());
-        when(clientMock.getLatestValueSetResource(any(), any())).thenReturn(Optional.of(latestVSet));
+        var clientMock = mock(ITerminologyServerClient.class, new ReturnsDeepStubs());
+        when(clientMock.getLatestValueSetResource(any(IEndpointAdapter.class), any()))
+                .thenReturn(Optional.of(latestVSet));
         var releaseVisitor = new ReleaseVisitor(repo, clientMock);
         var libraryAdapter = new AdapterFactory().createLibrary(library);
         var params = parameters(
@@ -620,6 +618,23 @@ class ReleaseVisitorTests {
                 maybeException = e;
             }
             assertNotNull(maybeException);
+        }
+        // Non-semver versions should warn but not throw UnprocessableEntityException for format
+        for (String version : nonSemverVersionList) {
+            var lib = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                    .copy();
+            var adapter = new AdapterFactory().createLibrary(lib);
+            var params = parameters(
+                    part("version", new StringType(version)), part("versionBehavior", new CodeType("force")));
+            UnprocessableEntityException versionException = null;
+            try {
+                adapter.accept(releaseVisitor, params);
+            } catch (UnprocessableEntityException e) {
+                versionException = e;
+            } catch (Exception e) {
+                // Other exceptions (e.g. PreconditionFailedException) are not version-related
+            }
+            assertNull(versionException, "Non-semver version '" + version + "' should not throw for format");
         }
     }
 

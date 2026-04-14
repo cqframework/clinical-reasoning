@@ -19,7 +19,9 @@ import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
 public class VisitorHelper {
@@ -100,6 +102,69 @@ public class VisitorHelper {
                 .map(factory::createParameters)
                 .map(p -> p.getParameter(name))
                 .map(parametersParameters -> ((IPrimitiveType<String>) parametersParameters.getValue()).getValue());
+    }
+
+    /**
+     * Parses artifactEndpointConfiguration parameters from the operation parameters.
+     * The artifactEndpointConfiguration parameter has the following structure:
+     * - artifactRoute (uri, 0..1): Route to match artifact canonical URLs
+     * - endpointUri (uri, 0..1): URI of the endpoint (mutually exclusive with endpoint)
+     * - endpoint (Endpoint, 0..1): Endpoint resource (mutually exclusive with endpointUri)
+     *
+     * @param operationParameters the operation parameters
+     * @return list of parsed ArtifactEndpointConfiguration objects
+     */
+    @SuppressWarnings("unchecked")
+    public static List<ArtifactEndpointConfiguration> getArtifactEndpointConfigurations(
+            IBaseParameters operationParameters) {
+        if (operationParameters == null) {
+            return new ArrayList<>();
+        }
+
+        var factory = IAdapterFactory.forFhirVersion(operationParameters.getStructureFhirVersionEnum());
+        var result = new ArrayList<ArtifactEndpointConfiguration>();
+        var paramsAdapter = factory.createParameters(operationParameters);
+
+        // Filter all parameters to find those named "artifactEndpointConfiguration"
+        var configs = paramsAdapter.getParameter().stream()
+                .filter(p -> "artifactEndpointConfiguration".equals(p.getName()))
+                .toList();
+
+        for (var config : configs) {
+            String artifactRoute = null;
+            String endpointUri = null;
+            IEndpointAdapter endpoint = null;
+
+            for (var part : config.getPart()) {
+                switch (part.getName()) {
+                    case "artifactRoute":
+                        if (part.hasValue()) {
+                            artifactRoute = ((IPrimitiveType<String>) part.getValue()).getValueAsString();
+                        }
+                        break;
+                    case "endpointUri":
+                        if (part.hasValue()) {
+                            endpointUri = ((IPrimitiveType<String>) part.getValue()).getValueAsString();
+                        }
+                        break;
+                    case "endpoint":
+                        if (part.hasResource()) {
+                            endpoint = factory.createEndpoint(part.getResource());
+                        }
+                        break;
+                    default:
+                        // Ignore unknown parts
+                        break;
+                }
+            }
+
+            // Only add if we have at least an endpoint or endpointUri
+            if (endpoint != null || endpointUri != null) {
+                result.add(new ArtifactEndpointConfiguration(artifactRoute, endpointUri, endpoint));
+            }
+        }
+
+        return result;
     }
 
     public static List<IDomainResource> getMetadataResourcesFromBundle(IBaseBundle bundle) {

@@ -11,9 +11,7 @@ dependencies {
     api(libs.hapi.fhir.converter)
     api(project(":cqf-fhir-cr"))
     api(project(":cqf-fhir-utility"))
-    api(libs.hapi.fhir.jpaserver.base) {
-        exclude(group = "org.glassfish", module = "jakarta.json")
-    }
+    api(libs.hapi.fhir.jpaserver.base) { exclude(group = "org.glassfish", module = "jakarta.json") }
     api(libs.hapi.fhir.storage) {
         exclude(group = "com.sun.activation", module = "jakarta.activation")
     }
@@ -21,7 +19,6 @@ dependencies {
         exclude(group = "junit", module = "junit")
         exclude(group = "com.sun.activation", module = "jakarta.activation")
     }
-    implementation(libs.spring.security.core)
     compileOnly(libs.jakarta.servlet.api)
 
     // Test dependencies

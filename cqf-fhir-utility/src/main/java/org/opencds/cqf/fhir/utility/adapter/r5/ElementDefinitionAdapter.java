@@ -208,4 +208,51 @@ public class ElementDefinitionAdapter extends BaseAdapter implements IElementDef
     public String getBindingValueSet() {
         return hasBinding() ? get().getBinding().getValueSet() : null;
     }
+
+    @Override
+    public boolean isModifier() {
+        return get().getIsModifier();
+    }
+
+    @Override
+    public boolean hasCondition() {
+        return get().hasCondition();
+    }
+
+    @Override
+    public int getBaseMin() {
+        return get().hasBase() ? get().getBase().getMin() : 0;
+    }
+
+    @Override
+    public String getBaseMax() {
+        return get().hasBase() ? get().getBase().getMax() : "*";
+    }
+
+    @Override
+    public String getBasePath() {
+        return get().hasBase() ? get().getBase().getPath() : null;
+    }
+
+    @Override
+    public String getBindingStrength() {
+        return hasBinding() && get().getBinding().hasStrength()
+                ? get().getBinding().getStrength().toCode()
+                : null;
+    }
+
+    @Override
+    public boolean hasMaxLength() {
+        return get().hasMaxLength();
+    }
+
+    @Override
+    public List<String> getExtensionUrls() {
+        return get().getExtension().stream().map(e -> e.getUrl()).toList();
+    }
+
+    @Override
+    public boolean hasR5KeyConstraints() {
+        return get().hasMustHaveValue() || get().hasValueAlternatives() || get().hasMinValue() || get().hasMaxValue();
+    }
 }

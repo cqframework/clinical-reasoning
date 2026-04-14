@@ -1,17 +1,19 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
 /**
  * This is some hackery because most of these objects don't implement
@@ -86,21 +88,25 @@ public class StratumValueWrapper {
         }
 
         String key = null;
-        if (value instanceof Coding coding) {
+        if (value instanceof IBaseCoding) {
             // ASSUMPTION: We won't have different systems with the same code
             // within a given stratifier / sde
+            ICodingAdapter coding = createCodingAdapter(value);
             key = joinValues("coding", coding.getCode());
-        } else if (value instanceof CodeableConcept concept) {
-            key = joinValues("codeable-concept", concept.getCodingFirstRep().getCode());
+        } else if (isCodeableConcept(value)) {
+            ICodingAdapter coding = createCodeableConceptAdapter(value);
+            key = joinValues("codeable-concept", coding.getCode());
         } else if (value instanceof Code c) {
             key = joinValues("code", c.getCode());
         } else if (value instanceof Enum<?> e) {
             key = joinValues("enum", e.toString());
         } else if (value instanceof IPrimitiveType<?> p) {
             key = joinValues("primitive", p.getValueAsString());
-        } else if (value instanceof Identifier identifier) {
-            key = identifier.getValue();
-        } else if (value instanceof Resource resource) {
+        } else if (isIdentifier(value)) {
+            key = adapterFactoryFor((IBase) value)
+                    .createIdentifier((IBase) value)
+                    .getValue();
+        } else if (value instanceof IBaseResource resource) {
             key = resource.getIdElement().toVersionless().getValue();
         } else {
             key = value.toString();
@@ -124,21 +130,23 @@ public class StratumValueWrapper {
         if (isEmptyCollection(value)) {
             return EMPTY_STRATUM_VALUE;
         }
-        if (value instanceof Coding coding) {
+        if (value instanceof IBaseCoding) {
+            ICodingAdapter coding = createCodingAdapter(value);
             return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
-        } else if (value instanceof CodeableConcept concept) {
-            return concept.getCodingFirstRep().hasDisplay()
-                    ? concept.getCodingFirstRep().getDisplay()
-                    : concept.getCodingFirstRep().getCode();
+        } else if (isCodeableConcept(value)) {
+            ICodingAdapter coding = createCodeableConceptAdapter(value);
+            return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
         } else if (value instanceof Code c) {
             return c.getDisplay() != null ? c.getDisplay() : c.getCode();
         } else if (value instanceof Enum<?> e) {
             return e.toString();
         } else if (value instanceof IPrimitiveType<?> p) {
             return p.getValueAsString();
-        } else if (value instanceof Identifier identifier) {
-            return identifier.getValue();
-        } else if (value instanceof Resource resource) {
+        } else if (isIdentifier(value)) {
+            return adapterFactoryFor((IBase) value)
+                    .createIdentifier((IBase) value)
+                    .getValue();
+        } else if (value instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValue();
         } else {
             return value.toString();
@@ -186,19 +194,21 @@ public class StratumValueWrapper {
         if (isEmptyCollection(valueInner)) {
             return EMPTY_STRATUM_VALUE;
         }
-        if (valueInner instanceof Coding coding) {
-            return coding.getCode();
-        } else if (valueInner instanceof CodeableConcept concept) {
-            return concept.getCodingFirstRep().getCode();
+        if (valueInner instanceof IBaseCoding) {
+            return createCodingAdapter(valueInner).getCode();
+        } else if (isCodeableConcept(valueInner)) {
+            return createCodeableConceptAdapter(valueInner).getCode();
         } else if (valueInner instanceof Code c) {
             return c.getCode();
         } else if (valueInner instanceof Enum<?> e) {
             return e.toString();
         } else if (valueInner instanceof IPrimitiveType<?> p) {
             return p.getValueAsString();
-        } else if (valueInner instanceof Identifier identifier) {
-            return identifier.getValue();
-        } else if (valueInner instanceof Resource resource) {
+        } else if (isIdentifier(valueInner)) {
+            return adapterFactoryFor((IBase) valueInner)
+                    .createIdentifier((IBase) valueInner)
+                    .getValue();
+        } else if (valueInner instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValue();
         } else if (valueInner instanceof Iterable<?> iterable) {
             return StreamSupport.stream(iterable.spliterator(), false)
@@ -208,5 +218,40 @@ public class StratumValueWrapper {
         } else {
             return valueInner.toString();
         }
+    }
+
+    private static boolean isCodeableConcept(Object value) {
+        return value instanceof IBase base && "CodeableConcept".equals(base.fhirType());
+    }
+
+    private static boolean isIdentifier(Object value) {
+        return value instanceof IBase base && "Identifier".equals(base.fhirType());
+    }
+
+    private static ICodingAdapter createCodingAdapter(Object value) {
+        IBase base = (IBase) value;
+        return adapterFactoryFor(base).createCoding(base);
+    }
+
+    private static ICodingAdapter createCodeableConceptAdapter(Object value) {
+        IBase base = (IBase) value;
+        return adapterFactoryFor(base).createCodeableConcept(base).getCodingFirstRep();
+    }
+
+    private static IAdapterFactory adapterFactoryFor(IBase base) {
+        if (base instanceof IBaseResource resource) {
+            return IAdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum());
+        }
+        String pkg = base.getClass().getPackageName();
+        if (pkg.contains(".dstu3.")) {
+            return IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
+        }
+        if (pkg.contains(".r4.")) {
+            return IAdapterFactory.forFhirVersion(FhirVersionEnum.R4);
+        }
+        if (pkg.contains(".r5.")) {
+            return IAdapterFactory.forFhirVersion(FhirVersionEnum.R5);
+        }
+        throw new IllegalArgumentException("Cannot determine FHIR version from: " + base.getClass());
     }
 }

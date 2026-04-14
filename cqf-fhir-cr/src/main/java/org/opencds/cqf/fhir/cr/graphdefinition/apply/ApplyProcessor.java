@@ -9,6 +9,7 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import com.google.common.collect.Multimap;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -143,7 +144,7 @@ public class ApplyProcessor implements IApplyProcessor {
         return sectionComponent;
     }
 
-    protected Map<String, List<IQueryParameterType>> getSearchParams(
+    protected Multimap<String, List<IQueryParameterType>> getSearchParams(
             ApplyRequest request, String type, String profile) {
         var searchParams = Searches.byProfile(profile);
         searchParams.put(

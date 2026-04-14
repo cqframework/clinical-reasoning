@@ -61,36 +61,42 @@ public class ImplementationGuideAdapter extends KnowledgeArtifactAdapter impleme
         final String referenceSource = getReferenceSource();
         addProfileReferences(references, referenceSource);
 
-        var artifactUrlExt = "http://hl7.org/fhir/StructureDefinition/artifact-url";
-
         for (var dr : getImplementationGuide().getDefinition().getResource()) {
-            if (dr.hasReference() && dr.getReference().hasReference()) {
-                if (dr.hasIsExample() && dr.getIsExample()) {
-                    continue;
-                }
-                var refValue = dr.getReference().getReference();
-                var refElement = dr.getReference().getReferenceElement();
-                var refClass = fhirContext
-                        .getResourceDefinition(refElement.getResourceType())
-                        .newInstance()
-                        .getClass();
-                var read = repository.read(refClass, new IdType(refValue));
-                if (read instanceof MetadataResource mr && (mr.hasUrl() || mr.hasUrlElement())) {
-                    var url = mr.hasUrlElement() ? mr.getUrlElement() : new UrlType(mr.getUrl());
-                    references.add(
-                            new DependencyInfo(refValue, url.getValueAsString(), mr.getExtension(), url::setValue));
-                } else if (read instanceof DomainResource domRes && domRes.getExtensionByUrl(artifactUrlExt) != null) {
-                    // TODO: ensure this extension is accounted for during the gather step
-                    var ext = domRes.getExtensionByUrl(artifactUrlExt);
-                    var url = new UriType(ext.getValue().primitiveValue());
-                    references.add(
-                            new DependencyInfo(refValue, url.getValueAsString(), domRes.getExtension(), url::setValue));
-                } else {
-                    IAdapter.logger.warn("Unable to resolve dependency URL for reference: {}", refValue);
-                }
+            if (dr.hasReference() && dr.getReference().hasReference() && !(dr.hasIsExample() && dr.getIsExample())) {
+                addPackageResourceDependency(dr, repository, references);
             }
         }
 
         return references;
+    }
+
+    private void addPackageResourceDependency(
+            org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionResourceComponent dr,
+            IRepository repository,
+            List<IDependencyInfo> references) {
+        var artifactUrlExt = "http://hl7.org/fhir/StructureDefinition/artifact-url";
+        var refValue = dr.getReference().getReference();
+        var refElement = dr.getReference().getReferenceElement();
+        Object read;
+        try {
+            var refClass = fhirContext
+                    .getResourceDefinition(refElement.getResourceType())
+                    .newInstance()
+                    .getClass();
+            read = repository.read(refClass, new IdType(refValue));
+        } catch (Exception e) {
+            IAdapter.logger.warn("Unable to read resource for reference: {}, skipping", refValue);
+            return;
+        }
+        if (read instanceof MetadataResource mr && (mr.hasUrl() || mr.hasUrlElement())) {
+            var url = mr.hasUrlElement() ? mr.getUrlElement() : new UrlType(mr.getUrl());
+            references.add(new DependencyInfo(refValue, url.getValueAsString(), mr.getExtension(), url::setValue));
+        } else if (read instanceof DomainResource domRes && domRes.getExtensionByUrl(artifactUrlExt) != null) {
+            var ext = domRes.getExtensionByUrl(artifactUrlExt);
+            var url = new UriType(ext.getValue().primitiveValue());
+            references.add(new DependencyInfo(refValue, url.getValueAsString(), domRes.getExtension(), url::setValue));
+        } else {
+            IAdapter.logger.warn("Unable to resolve dependency URL for reference: {}", refValue);
+        }
     }
 }

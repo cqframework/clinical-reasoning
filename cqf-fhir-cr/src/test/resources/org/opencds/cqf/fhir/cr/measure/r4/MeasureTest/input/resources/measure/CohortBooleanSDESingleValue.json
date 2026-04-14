@@ -69,6 +69,7 @@
         "code": "supplemental-data"
       } ]
     } ],
+    "description": "Patient biological sex for stratification",
     "criteria": {
       "language": "text/cql.identifier",
       "expression": "SDE Sex"

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,7 +139,7 @@ class SearchHelperTest {
         var bundle = new org.hl7.fhir.r4.model.Bundle();
         bundle.addEntry().setResource(vs);
         // searchRepositoryByCanonical calls the 3-arg search (no headers)
-        when(r4mockRepository.search(any(), any(), any(java.util.Map.class))).thenReturn(bundle);
+        when(r4mockRepository.search(any(), any(), any(Multimap.class))).thenReturn(bundle);
         var canonical = new org.hl7.fhir.r4.model.CanonicalType("http://example.org/ValueSet/test");
         var result = SearchHelper.searchRepositoryByCanonical(r4mockRepository, canonical);
         assertEquals("test-vs", result.getIdElement().getIdPart());
@@ -192,7 +193,7 @@ class SearchHelperTest {
     void searchRepositoryByCanonicalWithPagingWithParams() {
         var repo = fullMockR4();
         var result = SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
-                repo, "http://example.org/ValueSet/test|1.0", java.util.Collections.emptyMap());
+                repo, "http://example.org/ValueSet/test|1.0", ArrayListMultimap.create());
         assertEquals(1, BundleHelper.getEntryResources(result).size());
     }
 

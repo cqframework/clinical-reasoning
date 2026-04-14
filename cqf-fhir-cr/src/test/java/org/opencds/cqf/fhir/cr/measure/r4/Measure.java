@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -19,19 +20,22 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportContained;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportExtension;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportGroup;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportReference;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
 // consider rolling this entire thing into MultiMeasure with "single measure" assertions
 @SuppressWarnings({"squid:S2699", "squid:S5960", "squid:S1135"})
@@ -225,16 +229,14 @@ public class Measure {
 
         public When evaluate() {
             this.operation = () -> multiMeasureService.evaluateSingleMeasureCaptureDef(
-                    Eithers.forMiddle3(new IdType("Measure", measureId)),
+                    new MeasureReference.ById(new IdType("Measure", measureId)),
                     periodStart,
                     periodEnd,
                     reportType,
                     subject,
                     null,
-                    null,
-                    null,
-                    null,
-                    additionalData,
+                    new MeasureEnvironment(null, null, null, additionalData)
+                            .resolve(multiMeasureService.getRepository()),
                     parameters,
                     productLine,
                     practitioner);
@@ -458,6 +460,17 @@ public class Measure {
 
         public SelectedMeasureReportExtension extension(String supplementalDataId) {
             return report().extension(supplementalDataId);
+        }
+
+        public Then hasSupplementalDataSearchParameter() {
+            var result = repository.search(
+                    Bundle.class,
+                    SearchParameter.class,
+                    new SearchBuilder()
+                            .withTokenParam("code", "supplemental-data")
+                            .build());
+            assertFalse(result.getEntry().isEmpty(), "Expected supplemental-data SearchParameter in repository");
+            return this;
         }
     }
 }

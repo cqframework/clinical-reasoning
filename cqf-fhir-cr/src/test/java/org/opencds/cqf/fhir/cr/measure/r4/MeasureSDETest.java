@@ -38,6 +38,7 @@ class MeasureSDETest {
                 .up()
                 .extension("sde-patient-sex")
                 .extensionHasSDEUrl()
+                .extensionHasSDEDescription("Patient biological sex for stratification")
                 .up()
                 .report();
     }
@@ -88,9 +89,11 @@ class MeasureSDETest {
                 .hasExtension(EXT_SDE_REFERENCE_URL, 2)
                 .extensionByValueReference("Encounter/patient-9-encounter-1")
                 .extensionHasSDEId("sde-patient-encounters")
+                .extensionHasNoSDEDescription()
                 .up()
                 .extensionByValueReference("Encounter/patient-9-encounter-2")
                 .extensionHasSDEId("sde-patient-encounters")
+                .extensionHasNoSDEDescription()
                 .up()
                 .report();
     }

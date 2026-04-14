@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.visitor.r5;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r5.Parameters.parameters;
@@ -42,23 +43,20 @@ class DraftVisitorTests {
     private IRepository repo;
     private final IParser jsonParser = fhirContext.newJsonParser();
     private final String specificationLibReference = "Library/SpecificationLibrary";
-    private final List<String> badVersionList = Arrays.asList(
+    private final List<String> badVersionList =
+            Arrays.asList("1.|1.1.1", "1/.1.1.1", "1.2.1.3-draft", "1.2.3-draft", "", null);
+    private final List<String> nonSemverVersionList = Arrays.asList(
             "11asd1",
             "1.1.3.1.1",
-            "1.|1.1.1",
-            "1/.1.1.1",
             "-1.-1.2.1",
             "1.-1.2.1",
             "1.1.-2.1",
             "7.1..21",
-            "1.2.1.3-draft",
-            "1.2.3-draft",
             "3.2",
             "1.",
             "3.ad.2.",
             "1.0.0.1",
-            "",
-            null);
+            "2025-09");
 
     @BeforeEach
     void setup() {
@@ -208,6 +206,22 @@ class DraftVisitorTests {
                 maybeException = e;
             }
             assertNotNull(maybeException);
+        }
+        // Non-semver versions should warn but not throw UnprocessableEntityException for format
+        for (String version : nonSemverVersionList) {
+            var lib = repo.read(Library.class, new IdType("Library/SpecificationLibraryDraftVersion-1-0-0-23"))
+                    .copy();
+            var adapter = new AdapterFactory().createLibrary(lib);
+            Parameters params = parameters(part("version", new StringType(version)));
+            UnprocessableEntityException versionException = null;
+            try {
+                adapter.accept(draftVisitor, params);
+            } catch (UnprocessableEntityException e) {
+                versionException = e;
+            } catch (Exception e) {
+                // Other exceptions are not version-related
+            }
+            assertNull(versionException, "Non-semver version '" + version + "' should not throw for format");
         }
     }
 }

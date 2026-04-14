@@ -40,8 +40,9 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.terminology.GenericTerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,22 +58,31 @@ import org.slf4j.LoggerFactory;
 public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
-    protected final TerminologyServerClient terminologyServerClient;
-    private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
+    protected final ITerminologyServerClient terminologyServerClient;
+    protected IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
+
+    // Hold on to terminology sever settings.
+    // TerminologyProviderRouters don't keep a reference to the settings, those are for individual clients.
+    // In the future allow for the ability to have unique settings for each client type.
+    protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
-        terminologyServerClient = new TerminologyServerClient(fhirContext());
+        this.terminologyServerClientSettings = TerminologyServerClientSettings.getDefault();
+        terminologyServerClient = new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
     }
 
-    public ReleaseVisitor(IRepository repository, TerminologyServerClient terminologyServerClient) {
+    public ReleaseVisitor(IRepository repository, ITerminologyServerClient terminologyServerClient) {
         super(repository);
         this.terminologyServerClient = terminologyServerClient;
+        this.terminologyServerClientSettings = terminologyServerClient.getTerminologyServerClientSettings();
     }
 
     public ReleaseVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
-        this.terminologyServerClient = new TerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerClient =
+                new GenericTerminologyServerClient(fhirContext(), terminologyServerClientSettings);
+        this.terminologyServerClientSettings = terminologyServerClientSettings;
     }
 
     @SuppressWarnings("unchecked")
@@ -183,11 +193,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             if (isDistinct) {
                 distinctResolvedRelatedArtifacts.add(resolvedRelatedArtifact);
                 // preserve Extensions if found
+                var resolvedUrl = Canonicals.getUrl(relatedArtifactReference);
                 originalDependenciesWithExtensions.stream()
-                        .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
-                                        .equals(Canonicals.getUrl(relatedArtifactReference))
-                                && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
+                        .filter(originalDep ->
+                                Objects.equals(Canonicals.getUrl(originalDep.getReference()), resolvedUrl)
+                                        && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
+                                                .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
@@ -218,7 +229,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private void captureInputExpansionParams(
+    protected void captureInputExpansionParams(
             IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(
@@ -232,7 +243,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private static void updateMetadata(
+    protected static void updateMetadata(
             IKnowledgeArtifactAdapter artifactAdapter,
             String version,
             ICompositeType rootEffectivePeriod,
@@ -389,8 +400,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     dependency.setReference(dependencyAdapter.getCanonical());
 
                     // Classify roles for this dependency to determine if it's key
+                    var conformanceResolver = new ConformanceResourceResolver(repository);
                     List<String> currentDependencyRoles = DependencyRoleClassifier.classifyDependencyRoles(
-                            dependency, artifactAdapter, dependencyAdapter, repository);
+                            dependency, artifactAdapter, dependencyAdapter, conformanceResolver);
 
                     // Propagate key role from parent if needed
                     if (parentRoles.contains("key") && !currentDependencyRoles.contains("key")) {
@@ -466,7 +478,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
+    protected Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
             IDependencyInfo dependency,
             IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
@@ -490,12 +502,11 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                     tryFindLatestDependency(dependency.getReference(), resourceType, latestFromTxServer, endpoint);
 
             // Only add the expansion parameters entry for versionless references
-            if (maybeAdapter.isPresent() && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter) {
+            if (maybeAdapter.isPresent()
+                    && artifactBeingReleasedAdapter instanceof ILibraryAdapter libraryAdapter
+                    && this.terminologyServerClientSettings != null) {
                 libraryAdapter.ensureExpansionParametersEntry(
-                        maybeAdapter.get(),
-                        terminologyServerClient
-                                .getTerminologyServerClientSettings()
-                                .getCrmiVersion());
+                        maybeAdapter.get(), this.terminologyServerClientSettings.getCrmiVersion());
             }
         }
 
@@ -669,7 +680,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<String> getReleaseVersion(
+    protected Optional<String> getReleaseVersion(
             String version, Optional<String> versionBehavior, String existingVersion, FhirVersionEnum fhirVersion)
             throws UnprocessableEntityException {
         switch (fhirVersion) {
@@ -689,7 +700,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
+    protected void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
         if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource resource2) {
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.updateReleaseLabel(resource2, releaseLabel);
         } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource resource1) {
@@ -717,7 +728,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return Optional.empty();
     }
 
-    private void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
+    protected void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
             throws PreconditionFailedException {
         if (artifact == null) {
             throw new ResourceNotFoundException("Resource not found.");
@@ -742,7 +753,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private void checkReleaseVersion(String version, Optional<String> versionBehavior)
+    protected void checkReleaseVersion(String version, Optional<String> versionBehavior)
             throws UnprocessableEntityException {
         if (versionBehavior.isEmpty()) {
             throw new UnprocessableEntityException(
@@ -763,9 +774,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
         var pattern = Pattern.compile("^(\\d+\\.)(\\d+\\.)(\\*|\\d+)$", Pattern.CASE_INSENSITIVE);
         var matcher = pattern.matcher(version);
-        boolean matchFound = matcher.find();
-        if (!matchFound) {
-            throw new UnprocessableEntityException("The version must be in the format MAJOR.MINOR.PATCH");
+        if (!matcher.find()) {
+            logger.warn(
+                    "The version '{}' is not in the recommended semver format MAJOR.MINOR.PATCH. Semver is preferred but not required.",
+                    version);
         }
     }
 
@@ -794,8 +806,9 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             List<String> parentRoles) {
 
         // 1. Classify dependency roles
+        var conformanceResolver = new ConformanceResourceResolver(repository);
         List<String> roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, sourceArtifact, dependencyArtifact, repository);
+                dependency, sourceArtifact, dependencyArtifact, conformanceResolver);
 
         // 2. Propagate "key" role from parent if this is a transitive dependency
         if (parentRoles != null && parentRoles.contains("key") && !roles.contains("key")) {

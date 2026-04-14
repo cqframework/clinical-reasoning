@@ -26,6 +26,7 @@ class MeasureScoringTypeProportionTest {
                 .measureId("ProportionBooleanAllPopulations")
                 .evaluate()
                 .then()
+                .hasSupplementalDataSearchParameter()
                 // MeasureDef assertions (pre-scoring) - verify internal state after processing
                 .def()
                 .hasNoErrors()

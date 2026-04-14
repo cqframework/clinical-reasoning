@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -85,4 +86,31 @@ public interface IElementDefinitionAdapter extends IAdapter<IBase> {
     boolean hasBinding();
 
     String getBindingValueSet();
+
+    boolean isModifier();
+
+    boolean hasCondition();
+
+    int getBaseMin();
+
+    String getBaseMax();
+
+    String getBasePath();
+
+    String getBindingStrength();
+
+    boolean hasMaxLength();
+
+    default List<String> getExtensionUrls() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Returns true if this element has R5-specific key constraints
+     * (mustHaveValue, valueAlternatives, minValue, maxValue).
+     * Default returns false for non-R5 versions.
+     */
+    default boolean hasR5KeyConstraints() {
+        return false;
+    }
 }

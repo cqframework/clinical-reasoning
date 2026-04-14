@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
+import java.util.Set;
+import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -22,10 +24,15 @@ class DependencyRoleClassifierTest {
 
     private final AdapterFactory adapterFactory = new AdapterFactory();
 
-    @Test
-    void testAllDependenciesGetDefaultRole() {
+    private ConformanceResourceResolver createResolver() {
         var repository = mock(IRepository.class);
         when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        return new ConformanceResourceResolver(repository);
+    }
+
+    @Test
+    void testAllDependenciesGetDefaultRole() {
+        var resolver = createResolver();
 
         var measure = new Measure();
         measure.setUrl("http://example.org/Measure/test");
@@ -33,7 +40,7 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/Library/helper");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, null, repository);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, null, resolver);
 
         assertTrue(roles.contains("default"), "All dependencies should get default role");
     }
@@ -45,8 +52,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testMeasureDependencyGetsOnlyDefault() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var measure = new Measure();
         measure.setUrl("http://example.org/Measure/test");
@@ -59,8 +65,8 @@ class DependencyRoleClassifierTest {
         var dependency = createDependency("http://example.org/Library/primary");
         dependency.addFhirPath("library[0]");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, measureAdapter, libraryAdapter, repository);
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, libraryAdapter, resolver);
 
         assertEquals(1, roles.size(), "Measure library dependency should only get default role (no heuristics)");
         assertTrue(roles.contains("default"));
@@ -69,8 +75,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testLibraryDependencyGetsOnlyDefault() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var library = new Library();
         library.setUrl("http://example.org/Library/main");
@@ -83,7 +88,7 @@ class DependencyRoleClassifierTest {
         var dependency = createDependency("http://example.org/Library/helper");
 
         var roles =
-                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, helperAdapter, repository);
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, helperAdapter, resolver);
 
         assertEquals(1, roles.size());
         assertTrue(roles.contains("default"));
@@ -92,8 +97,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testStructureDefinitionWithNonValueSetDependency() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
@@ -103,7 +107,7 @@ class DependencyRoleClassifierTest {
         // Dependency is not a ValueSet (e.g., another profile)
         var dependency = createDependency("http://hl7.org/fhir/StructureDefinition/Patient");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, null, repository);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, null, resolver);
 
         assertEquals(1, roles.size());
         assertTrue(roles.contains("default"));
@@ -112,18 +116,25 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testStructureDefinitionWithValueSetNotBoundToKeyElement() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
         profile.setType("Patient");
+        profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 
-        // Add non-key element with binding
-        var element = profile.getDifferential().addElement();
+        // Add non-key element with binding in snapshot
+        var rootElement = profile.getSnapshot().addElement();
+        rootElement.setId("Patient");
+        rootElement.setPath("Patient");
+
+        var element = profile.getSnapshot().addElement();
+        element.setId("Patient.contact.relationship");
         element.setPath("Patient.contact.relationship");
         element.setMustSupport(false); // Not a key element
-        element.getBinding().setValueSet("http://example.org/ValueSet/contact-relationship");
+        element.getBinding()
+                .setStrength(BindingStrength.REQUIRED)
+                .setValueSet("http://example.org/ValueSet/contact-relationship");
 
         var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
 
@@ -133,8 +144,8 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/ValueSet/different-valueset");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, profileAdapter, valueSetAdapter, repository);
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, valueSetAdapter, resolver);
 
         assertEquals(1, roles.size());
         assertTrue(roles.contains("default"));
@@ -143,18 +154,26 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testStructureDefinitionWithValueSetBoundToKeyElement() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
         profile.setType("Patient");
+        profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 
-        // Add key element with binding
-        var element = profile.getDifferential().addElement();
+        // Add root element to snapshot
+        var rootElement = profile.getSnapshot().addElement();
+        rootElement.setId("Patient");
+        rootElement.setPath("Patient");
+
+        // Add key element with binding in snapshot
+        var element = profile.getSnapshot().addElement();
+        element.setId("Patient.maritalStatus");
         element.setPath("Patient.maritalStatus");
         element.setMustSupport(true); // Key element
-        element.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/marital-status");
+        element.getBinding()
+                .setStrength(BindingStrength.REQUIRED)
+                .setValueSet("http://hl7.org/fhir/ValueSet/marital-status");
 
         var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
 
@@ -164,8 +183,8 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://hl7.org/fhir/ValueSet/marital-status");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, profileAdapter, valueSetAdapter, repository);
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, valueSetAdapter, resolver);
 
         assertEquals(2, roles.size(), "ValueSet bound to key element should get both key and default roles");
         assertTrue(roles.contains("key"));
@@ -174,18 +193,26 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testStructureDefinitionWithVersionedValueSetUrl() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
         profile.setType("Patient");
+        profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 
-        // Add key element with versioned ValueSet binding
-        var element = profile.getDifferential().addElement();
+        // Add root element to snapshot
+        var rootElement = profile.getSnapshot().addElement();
+        rootElement.setId("Patient");
+        rootElement.setPath("Patient");
+
+        // Add key element with versioned ValueSet binding in snapshot
+        var element = profile.getSnapshot().addElement();
+        element.setId("Patient.gender");
         element.setPath("Patient.gender");
         element.setMustSupport(true);
-        element.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1");
+        element.getBinding()
+                .setStrength(BindingStrength.REQUIRED)
+                .setValueSet("http://hl7.org/fhir/ValueSet/administrative-gender|4.0.1");
 
         var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
 
@@ -196,8 +223,8 @@ class DependencyRoleClassifierTest {
         // Dependency reference without version
         var dependency = createDependency("http://hl7.org/fhir/ValueSet/administrative-gender");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, profileAdapter, valueSetAdapter, repository);
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, valueSetAdapter, resolver);
 
         assertTrue(roles.contains("key"), "Should match ValueSet ignoring version");
         assertTrue(roles.contains("default"));
@@ -205,44 +232,99 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testStructureDefinitionWithMultipleValueSets() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
         profile.setType("Patient");
+        profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+
+        // Add root element to snapshot
+        var rootElement = profile.getSnapshot().addElement();
+        rootElement.setId("Patient");
+        rootElement.setPath("Patient");
 
         // Add first key element
-        var element1 = profile.getDifferential().addElement();
+        var element1 = profile.getSnapshot().addElement();
+        element1.setId("Patient.maritalStatus");
         element1.setPath("Patient.maritalStatus");
         element1.setMustSupport(true);
-        element1.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/marital-status");
+        element1.getBinding()
+                .setStrength(BindingStrength.REQUIRED)
+                .setValueSet("http://hl7.org/fhir/ValueSet/marital-status");
 
         // Add second key element
-        var element2 = profile.getDifferential().addElement();
+        var element2 = profile.getSnapshot().addElement();
+        element2.setId("Patient.gender");
         element2.setPath("Patient.gender");
         element2.setMustSupport(true);
-        element2.getBinding().setValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
+        element2.getBinding()
+                .setStrength(BindingStrength.REQUIRED)
+                .setValueSet("http://hl7.org/fhir/ValueSet/administrative-gender");
 
         var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
 
-        // Test first ValueSet
+        // Test first ValueSet — must provide resolved ValueSet adapter
+        var vs1 = new ValueSet();
+        vs1.setUrl("http://hl7.org/fhir/ValueSet/marital-status");
+        var vs1Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs1);
         var dependency1 = createDependency("http://hl7.org/fhir/ValueSet/marital-status");
-        var roles1 = DependencyRoleClassifier.classifyDependencyRoles(dependency1, profileAdapter, null, repository);
+        var roles1 =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency1, profileAdapter, vs1Adapter, resolver);
 
         assertTrue(roles1.contains("key"));
         assertTrue(roles1.contains("default"));
 
         // Test second ValueSet
+        var vs2 = new ValueSet();
+        vs2.setUrl("http://hl7.org/fhir/ValueSet/administrative-gender");
+        var vs2Adapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs2);
         var dependency2 = createDependency("http://hl7.org/fhir/ValueSet/administrative-gender");
-        var roles2 = DependencyRoleClassifier.classifyDependencyRoles(dependency2, profileAdapter, null, repository);
+        var roles2 =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency2, profileAdapter, vs2Adapter, resolver);
 
         assertTrue(roles2.contains("key"));
         assertTrue(roles2.contains("default"));
     }
 
     @Test
-    void testNullRepository() {
+    void testNonFhirUrlValueSetClassifiedAsKeyWhenResolved() {
+        var resolver = createResolver();
+
+        var profile = new StructureDefinition();
+        profile.setUrl("http://example.org/StructureDefinition/TestPatient");
+        profile.setType("Patient");
+        profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+
+        // Add root element and key element with binding to a non-FHIR-URL ValueSet
+        var rootElement = profile.getSnapshot().addElement();
+        rootElement.setId("Patient");
+        rootElement.setPath("Patient");
+
+        var element = profile.getSnapshot().addElement();
+        element.setId("Patient.maritalStatus");
+        element.setPath("Patient.maritalStatus");
+        element.setMustSupport(true);
+        element.getBinding().setStrength(BindingStrength.REQUIRED).setValueSet("http://www.ada.org/cdt");
+
+        var profileAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(profile);
+
+        // Provide a resolved ValueSet adapter with a non-FHIR canonical URL
+        var valueSet = new ValueSet();
+        valueSet.setUrl("http://www.ada.org/cdt");
+        var valueSetAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(valueSet);
+
+        var dependency = createDependency("http://www.ada.org/cdt");
+
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, valueSetAdapter, resolver);
+
+        assertTrue(roles.contains("key"), "Non-FHIR-URL ValueSet should be classified as key when resolved");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testNullResolver() {
         var profile = new StructureDefinition();
         profile.setUrl("http://example.org/StructureDefinition/TestPatient");
         profile.setType("Patient");
@@ -252,15 +334,14 @@ class DependencyRoleClassifierTest {
 
         var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, profileAdapter, null, null);
 
-        assertTrue(roles.contains("default"), "Should handle null repository gracefully");
+        assertTrue(roles.contains("default"), "Should handle null resolver gracefully");
     }
 
     @Test
     void testTransitiveKeyRoleNotPropagatedByClassifier() {
         // DependencyRoleClassifier only classifies direct relationships
         // Transitive propagation is handled by ReleaseVisitor
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var library = new Library();
         library.setUrl("http://example.org/Library/parent");
@@ -274,7 +355,7 @@ class DependencyRoleClassifierTest {
 
         // Direct classification - library to valueset - should only be default
         var roles =
-                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, childAdapter, repository);
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, childAdapter, resolver);
 
         assertEquals(1, roles.size(), "Direct library->valueset dependency should only get default role");
         assertTrue(roles.contains("default"));
@@ -283,8 +364,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testNullDependencyArtifact() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var measure = new Measure();
         measure.setUrl("http://example.org/Measure/test");
@@ -292,7 +372,7 @@ class DependencyRoleClassifierTest {
 
         var dependency = createDependency("http://example.org/Library/helper");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, null, repository);
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, null, resolver);
 
         assertTrue(roles.contains("default"), "Should handle null dependency artifact");
         assertEquals(1, roles.size());
@@ -300,8 +380,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testNoHeuristicsForUrlPatterns() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var measure = new Measure();
         measure.setUrl("http://example.org/Measure/test");
@@ -317,7 +396,7 @@ class DependencyRoleClassifierTest {
         var dependency = createDependency("http://example.org/Library/test-helper");
 
         var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, measureAdapter, testLibraryAdapter, repository);
+                dependency, measureAdapter, testLibraryAdapter, resolver);
 
         assertEquals(1, roles.size(), "Should not apply heuristics based on URL/name/title patterns");
         assertTrue(roles.contains("default"));
@@ -327,8 +406,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testNoHeuristicsForFhirPathPatterns() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var measure = new Measure();
         measure.setUrl("http://example.org/Measure/test");
@@ -343,8 +421,8 @@ class DependencyRoleClassifierTest {
         dependency.addFhirPath("library[0]");
         dependency.addFhirPath("population[0].criteria");
 
-        var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, measureAdapter, libraryAdapter, repository);
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, measureAdapter, libraryAdapter, resolver);
 
         assertEquals(1, roles.size(), "Should not apply heuristics based on FHIRPath patterns");
         assertTrue(roles.contains("default"));
@@ -353,8 +431,7 @@ class DependencyRoleClassifierTest {
 
     @Test
     void testNoHeuristicsForExperimentalStatus() {
-        var repository = mock(IRepository.class);
-        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+        var resolver = createResolver();
 
         var measure = new Measure();
         measure.setUrl("http://example.org/Measure/production");
@@ -370,10 +447,81 @@ class DependencyRoleClassifierTest {
         var dependency = createDependency("http://example.org/Library/experimental");
 
         var roles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, measureAdapter, experimentalAdapter, repository);
+                dependency, measureAdapter, experimentalAdapter, resolver);
 
         assertEquals(1, roles.size(), "Should not apply heuristics based on experimental status");
         assertTrue(roles.contains("default"));
         assertFalse(roles.contains("test"), "Should not classify as 'test' based on experimental status");
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_matchesCodeSystem() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://loinc.org");
+        var transitiveKeys = Set.of("http://loinc.org", "http://snomed.info/sct");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeys);
+
+        assertTrue(roles.contains("key"), "CodeSystem in transitive set should be classified as key");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_matchesValueSet() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://example.org/ValueSet/test-vs|1.0.0");
+        var transitiveKeys = Set.of("http://example.org/ValueSet/test-vs");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeys);
+
+        assertTrue(roles.contains("key"), "ValueSet in transitive set should be classified as key (version stripped)");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_noMatch_remainsDefault() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://example.org/ValueSet/other");
+        var transitiveKeys = Set.of("http://example.org/ValueSet/test-vs");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeys);
+
+        assertFalse(roles.contains("key"), "Canonical not in transitive set should not be key");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_emptySet_noEffect() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://example.org/ValueSet/test");
+
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, null, resolver, Set.of());
+
+        assertFalse(roles.contains("key"));
+        assertTrue(roles.contains("default"));
     }
 }

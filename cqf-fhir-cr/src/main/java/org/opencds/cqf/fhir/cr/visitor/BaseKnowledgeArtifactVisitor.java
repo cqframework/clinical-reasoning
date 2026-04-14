@@ -35,7 +35,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClient;
+import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +131,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
             IEndpointAdapter terminologyEndpoint,
-            TerminologyServerClient client,
+            ITerminologyProviderRouter router,
             IBaseOperationOutcome[] messagesWrapper)
             throws PreconditionFailedException {
         Map<String, String> igDependencyVersions = extractIgDependencyVersions(adapter);
@@ -142,7 +142,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                 include,
                 versionTuple,
                 terminologyEndpoint,
-                client,
+                router,
                 messagesWrapper,
                 igDependencyVersions);
     }
@@ -154,7 +154,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             List<String> include,
             ImmutableTriple<List<String>, List<String>, List<String>> versionTuple,
             IEndpointAdapter terminologyEndpoint,
-            TerminologyServerClient client,
+            ITerminologyProviderRouter client,
             IBaseOperationOutcome[] messagesWrapper,
             Map<String, String> igDependencyVersions)
             throws PreconditionFailedException {
@@ -246,11 +246,11 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
     }
 
     private IDomainResource tryGetValueSetsFromTxServer(
-            IDependencyInfo ra, TerminologyServerClient client, IEndpointAdapter endpoint) {
-        if (client != null
+            IDependencyInfo ra, ITerminologyProviderRouter router, IEndpointAdapter endpoint) {
+        if (router != null
                 && endpoint != null
                 && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
-            return client.getValueSetResource(endpoint, ra.getReference()).orElse(null);
+            return router.getValueSetResource(endpoint, ra.getReference()).orElse(null);
         }
         return null;
     }

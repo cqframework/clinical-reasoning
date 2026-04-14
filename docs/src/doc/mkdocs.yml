@@ -6,7 +6,7 @@ site_description: >-
 
 copyright: Copyright &copy; 2019+ Smile Digital Health
 repo_url: https://github.com/cqframework/clinical-reasoning/
-edit_uri: edit/master/docs/src/doc/docs
+edit_uri: edit/main/docs/src/doc/docs
 
 theme:
   favicon: assets/images/icon/favicon.ico
@@ -37,7 +37,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets:
       base_path: [".", "../main/java/docs", "../main/resources"]
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - toc:
       permalink: true
 

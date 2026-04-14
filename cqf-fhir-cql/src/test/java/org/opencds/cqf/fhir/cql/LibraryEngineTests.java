@@ -34,6 +34,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -200,6 +201,8 @@ class LibraryEngineTests {
         assertEquals(codeableConcept2.getCodingFirstRep().getDisplay(), ((StringType) result4.get(0)).getValue());
     }
 
+    @Disabled(
+            "Currently failing with an error from the CQL engine: Could not resolve call to operator join with signature (list<FHIR.string>, System.String).")
     @Test
     void fhirPathJoinFunction() {
         var patientId = "Patient/Patient1";

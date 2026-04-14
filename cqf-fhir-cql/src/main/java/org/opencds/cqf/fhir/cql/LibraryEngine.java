@@ -121,7 +121,7 @@ public class LibraryEngine {
 
     protected String getModelName(Object base) {
         if (base instanceof List<?> list) {
-            // A Tuple requires each property to have a type.  If there is no value default ot a FHIR string.
+            // A Tuple requires each property to have a type.  If there is no value default to a FHIR string.
             return list.isEmpty() ? "FHIR.string" : getModelName(list.get(0));
         }
         if (base instanceof Tuple tuple) {

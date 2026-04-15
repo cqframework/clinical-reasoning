@@ -59,7 +59,7 @@ class R4MeasureReportUtilsTest {
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
         assertInstanceOf(StringType.class, methodExt.getValue());
-        assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("average", ((StringType) methodExt.getValue()).getValue());
     }
 
     @Test
@@ -114,7 +114,7 @@ class R4MeasureReportUtilsTest {
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
         assertInstanceOf(StringType.class, methodExt.getValue());
-        assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("average", ((StringType) methodExt.getValue()).getValue());
     }
 
     @Test
@@ -200,7 +200,7 @@ class R4MeasureReportUtilsTest {
 
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
-        assertEquals("min", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("minimum", ((StringType) methodExt.getValue()).getValue());
     }
 
     @Test
@@ -242,7 +242,7 @@ class R4MeasureReportUtilsTest {
 
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
-        assertEquals("max", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("maximum", ((StringType) methodExt.getValue()).getValue());
     }
 
     // ========================================
@@ -329,7 +329,7 @@ class R4MeasureReportUtilsTest {
 
         Extension methodExt = stratumPopulation.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
-        assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("average", ((StringType) methodExt.getValue()).getValue());
 
         Extension criteriaRefExt = stratumPopulation.getExtensionByUrl(MeasureConstants.EXT_CQFM_CRITERIA_REFERENCE);
         assertNotNull(criteriaRefExt);
@@ -435,8 +435,8 @@ class R4MeasureReportUtilsTest {
     @Test
     void testAddAggregationResultAndMethod_FromEnum_WithAllAggregationMethodsAndCriteriaReference() {
         // Test multiple aggregate methods in a single test to reduce duplication
-        testAggregationMethodAndResult(ContinuousVariableObservationAggregateMethod.MIN, 1.2, "min");
-        testAggregationMethodAndResult(ContinuousVariableObservationAggregateMethod.MAX, 1.3, "max");
+        testAggregationMethodAndResult(ContinuousVariableObservationAggregateMethod.MIN, 1.2, "minimum");
+        testAggregationMethodAndResult(ContinuousVariableObservationAggregateMethod.MAX, 1.3, "maximum");
         testAggregationMethodAndResult(ContinuousVariableObservationAggregateMethod.MEDIAN, 1.4, "median");
         testAggregationMethodAndResult(ContinuousVariableObservationAggregateMethod.SUM, 1.5, "sum");
     }
@@ -578,7 +578,7 @@ class R4MeasureReportUtilsTest {
 
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
-        assertEquals("avg", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("average", ((StringType) methodExt.getValue()).getValue());
 
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNotNull(resultExt);
@@ -636,7 +636,7 @@ class R4MeasureReportUtilsTest {
         // Assert all three extensions are set
         Extension methodExt = population.getExtensionByUrl(EXT_CQFM_AGGREGATE_METHOD_URL);
         assertNotNull(methodExt);
-        assertEquals("min", ((StringType) methodExt.getValue()).getValue());
+        assertEquals("minimum", ((StringType) methodExt.getValue()).getValue());
 
         Extension resultExt = population.getExtensionByUrl(MeasureConstants.EXT_AGGREGATION_METHOD_RESULT);
         assertNotNull(resultExt);

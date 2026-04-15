@@ -1,0 +1,38 @@
+package org.opencds.cqf.fhir.cr.hapi.config.r4;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import org.opencds.cqf.fhir.cr.hapi.common.IBundleProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
+import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
+import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
+import org.opencds.cqf.fhir.cr.hapi.r4.bundle.BundleValidateProvider;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import java.util.Arrays;
+import java.util.Map;
+
+@Configuration
+@Import(CrProcessorConfig.class)
+public class ValidateOperationConfig {
+
+    @Bean
+    BundleValidateProvider r4BundleValidateProvider(
+        IBundleProcessorFactory bundleProcessorFactory) {
+        return new BundleValidateProvider(bundleProcessorFactory);
+    }
+
+    @Bean(name = "validateOperationLoader")
+    public ProviderLoader validateOperationLoader(
+        ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
+        var selector = new ProviderSelector(
+            fhirContext, Map.of(FhirVersionEnum.R4, Arrays.asList(BundleValidateProvider.class)));
+
+        return new ProviderLoader(restfulServer, applicationContext, selector);
+    }
+
+}

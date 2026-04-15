@@ -1,16 +1,20 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import java.util.List;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.bundle.BundleProcessor;
 import org.opencds.cqf.fhir.cr.cql.CqlProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiCreateChangelogProcessor;
+import org.opencds.cqf.fhir.cr.hapi.common.HapiValidateProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.IActivityDefinitionProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.IBundleProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.ICqlProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionApplyRequestBuilderFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
@@ -77,6 +81,16 @@ public class CrProcessorConfig {
                     repository,
                     crSettings,
                     List.of(new HapiArtifactDiffProcessor(repository), new HapiCreateChangelogProcessor(repository)));
+        };
+    }
+
+    @Bean
+    IBundleProcessorFactory bundleProcessorFactory(IRepositoryFactory repositoryFactory, DaoRegistry daoRegistry) {
+        return rd -> {
+            var repository = repositoryFactory.create(rd);
+            return new BundleProcessor(
+                repository,
+                new HapiValidateProcessor(repository.fhirContext(), daoRegistry));
         };
     }
 

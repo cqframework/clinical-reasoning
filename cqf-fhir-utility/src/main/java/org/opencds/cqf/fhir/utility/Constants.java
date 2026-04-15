@@ -154,6 +154,7 @@ public class Constants {
     public static final String CRMI_OPERATION_RETIRE = "$retire";
     public static final String CRMI_OPERATION_REVISE = "$revise";
     public static final String CRMI_OPERATION_WITHDRAW = "$withdraw";
+    public static final String CRMI_OPERATION_VALIDATE = "$validate";
 
     public static final String DTR_QUESTIONNAIRE_RESPONSE_QUESTIONNAIRE =
             "http://hl7.org/fhir/us/davinci-dtr/StructureDefinition/dtr-questionnaireresponse-questionnaire";

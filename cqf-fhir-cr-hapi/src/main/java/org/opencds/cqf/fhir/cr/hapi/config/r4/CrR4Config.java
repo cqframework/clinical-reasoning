@@ -69,7 +69,8 @@ import org.springframework.context.annotation.Import;
     WithdrawOperationConfig.class,
     ReviseOperationConfig.class,
     ArtifactDiffOperationConfig.class,
-    CreateChangelogOperationConfig.class
+    CreateChangelogOperationConfig.class,
+    ValidateOperationConfig.class
 })
 public class CrR4Config {
 

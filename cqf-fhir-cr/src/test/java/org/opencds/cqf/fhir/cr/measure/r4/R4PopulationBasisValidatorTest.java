@@ -55,6 +55,8 @@ class R4PopulationBasisValidatorTest {
             NUMERATOR, EXPRESSION_NUMERATOR);
 
     private static final CodeDef BASIS_BOOLEAN = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
+    private static final CodeDef BASIS_STRING_LOWERCASE = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "string");
+    private static final CodeDef BASIS_STRING_UPPERCASE = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "String");
     private static final CodeDef BASIS_ENCOUNTER = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "Encounter");
     private static final CodeDef BASIS_PROCEDURE = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "Procedure");
     private static final Encounter ENCOUNTER = new Encounter();
@@ -62,6 +64,8 @@ class R4PopulationBasisValidatorTest {
 
     private enum Basis {
         BOOLEAN(BASIS_BOOLEAN),
+        STRING_LOWERCASE(BASIS_STRING_LOWERCASE),
+        STRING_UPPERCASE(BASIS_STRING_UPPERCASE),
         ENCOUNTER(BASIS_ENCOUNTER),
         PROCEDURE(BASIS_PROCEDURE);
 
@@ -508,6 +512,62 @@ class R4PopulationBasisValidatorTest {
                 "stratifier expression criteria results for expression: [Numerator] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    /**
+     * DQM-692: "String" (uppercase) is NOT a valid FHIR type code — only lowercase "string" is valid
+     * per FHIRAllTypes. A criteria stratifier with uppercase "String" basis should fail validation.
+     */
+    @Test
+    void criteriaStratifierWithUppercaseStringBasisShouldFail() {
+        var groupDef = buildGroupDef(
+                Basis.STRING_UPPERCASE,
+                buildPopulationDefs(Basis.STRING_UPPERCASE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.CRITERIA,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var evaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                "someStringValue",
+                EXPRESSION_DENOMINATOR,
+                "someStringValue",
+                EXPRESSION_NUMERATOR,
+                "someStringValue"));
+
+        var expectedExceptionMessage =
+                "criteria-based stratifier is invalid for expression: [InitialPopulation] due to mismatch between population basis: [String] and result types: [String] for measure URL: fakeMeasureUrl";
+
+        validateStratifierBasisTypeErrorPath(groupDef, evaluationResult, expectedExceptionMessage);
+    }
+
+    /**
+     * DQM-692: criteria-based stratifier with lowercase "string" population basis (the valid FHIR
+     * type code) should pass validation when the CQL expression returns String results.
+     */
+    @Test
+    void criteriaStratifierWithLowercaseStringBasisShouldPass() {
+        var groupDef = buildGroupDef(
+                Basis.STRING_LOWERCASE,
+                buildPopulationDefs(Basis.STRING_LOWERCASE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.CRITERIA,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var evaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                "someStringValue",
+                EXPRESSION_DENOMINATOR,
+                "someStringValue",
+                EXPRESSION_NUMERATOR,
+                "someStringValue"));
+
+        // This should NOT throw — lowercase "string" basis should match String result type
+        testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
     }
 
     private void validateStratifierBasisTypeErrorPath(

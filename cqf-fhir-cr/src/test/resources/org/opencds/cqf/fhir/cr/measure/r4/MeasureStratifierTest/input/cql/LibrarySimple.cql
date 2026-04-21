@@ -101,6 +101,9 @@ define function "MeasureObservation"(Encounter Encounter):
 define "Gender Stratification":
   "SDE Sex"
 
+define "Gender Stratification String":
+  if Patient.gender = 'male' then 'male' else 'female'
+
 // boolean criteria stratifier
 
 define "boolean strat not finished":

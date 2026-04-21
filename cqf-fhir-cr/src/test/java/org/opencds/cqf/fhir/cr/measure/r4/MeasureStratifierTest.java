@@ -1155,6 +1155,44 @@ class MeasureStratifierTest {
     }
 
     /**
+     * DQM-692: Uppercase "String" is NOT a valid FHIRAllTypes code — only lowercase "string" is valid.
+     * The measure should fail at the definition-building stage before evaluation even begins.
+     */
+    @Test
+    void ratioStringCriteriaStratUppercaseBasisShouldFail() {
+        try {
+            GIVEN_MEASURE_STRATIFIER_TEST
+                    .when()
+                    .measureId("RatioStringCriteriaStratUppercase")
+                    .evaluate()
+                    .then();
+            fail("Expected uppercase 'String' population basis to be rejected");
+        } catch (InvalidRequestException e) {
+            assertTrue(e.getMessage().contains("has an invalid population basis of 'String'"));
+            assertTrue(e.getMessage().contains("Did you mean to enter 'string' instead?"));
+        }
+    }
+
+    /**
+     * DQM-692: Ratio measure with lowercase "string" population basis (the valid FHIR type code)
+     * and CRITERIA stratifier returning String values. Validates that the fix for case-sensitive
+     * comparison in doesBasisMatchResource allows "string" basis to match String result types.
+     */
+    @Test
+    void ratioStringCriteriaStratLowercaseBasisShouldPass() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioStringCriteriaStratLowercase")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Gender Stratification String")
+                .hasStratumCount(1);
+    }
+
+    /**
      * Tests that patient with no encounters results in no stratum.
      * Patient with no encounters should not contribute to any stratum.
      */

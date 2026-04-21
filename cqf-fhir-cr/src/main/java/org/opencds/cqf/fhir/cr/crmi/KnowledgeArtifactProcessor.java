@@ -167,6 +167,18 @@ public class KnowledgeArtifactProcessor {
                         .anyMatch(uc -> uc.hasCode() && uc.getCode().getCode().equals(TransformProperties.grouperType));
     }
 
+    public static boolean isGrouper(org.hl7.fhir.r5.model.MetadataResource resource) {
+        return resource.getResourceType() == org.hl7.fhir.r5.model.ResourceType.ValueSet
+                && resource.getUseContext().stream()
+                        .anyMatch(uc -> uc.hasCode() && uc.getCode().getCode().equals(TransformProperties.grouperType));
+    }
+
+    public static boolean isGrouper(org.hl7.fhir.dstu3.model.MetadataResource resource) {
+        return resource.getResourceType() == org.hl7.fhir.dstu3.model.ResourceType.ValueSet
+                && resource.getUseContext().stream()
+                        .anyMatch(uc -> uc.hasCode() && uc.getCode().getCode().equals(TransformProperties.grouperType));
+    }
+
     public static boolean checkIfValueSetNeedsCondition(
             MetadataResource resource, IDependencyInfo relatedArtifact, IRepository hapiFhirRepository)
             throws UnprocessableEntityException {

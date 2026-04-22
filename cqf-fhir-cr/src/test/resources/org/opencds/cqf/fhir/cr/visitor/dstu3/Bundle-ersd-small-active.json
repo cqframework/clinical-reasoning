@@ -264,6 +264,15 @@
                         }
                     ]
                 },
+                "useContext": [
+                  {
+                    "code":{
+                      "system":"http://terminology.hl7.org/CodeSystem/usage-context-type",
+                      "code":"grouper-type",
+                      "display":"model-grouper"
+                    }
+                  }
+                ],
                 "expansion": {
                     "timestamp": "2022-10-21T15:18:29-04:00",
                     "contains": [

@@ -151,13 +151,17 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             var federatedRepo = conformanceResolver.getFederatedRepository();
             logger.debug("Federated repo type: {}", federatedRepo.getClass().getSimpleName());
 
+            // Pre-compute transitive key dependencies from ValueSet compose chains
+            var transitiveKeyCanonicals = computeTransitiveKeyCanonicals(adapter, conformanceResolver, federatedRepo);
+
             var ctx = new GatherContext(
                     new HashSet<>(),
                     new HashMap<>(),
                     artifactEndpointConfigurations,
                     terminologyEndpoint.orElse(null),
                     conformanceResolver,
-                    federatedRepo);
+                    federatedRepo,
+                    transitiveKeyCanonicals);
 
             gatherDependenciesWithClassification(adapter, new ArrayList<>(), relatedArtifacts, ctx);
 
@@ -190,7 +194,8 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             List<ArtifactEndpointConfiguration> endpointConfigurations,
             IEndpointAdapter terminologyEndpoint,
             ConformanceResourceResolver conformanceResolver,
-            IRepository dependencyRepo) {}
+            IRepository dependencyRepo,
+            Set<String> transitiveKeyCanonicals) {}
 
     private <T extends ICompositeType & IBaseHasExtensions> void gatherDependenciesWithClassification(
             IKnowledgeArtifactAdapter artifactAdapter,
@@ -238,9 +243,9 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                 k -> tryResolveDependencyReadOnly(
                         dependency, ctx.endpointConfigurations, ctx.terminologyEndpoint, ctx.dependencyRepo));
 
-        // Classify roles
+        // Classify roles (includes transitive key canonicals from compose walking)
         var currentRoles = DependencyRoleClassifier.classifyDependencyRoles(
-                dependency, artifactAdapter, dependencyAdapter, ctx.conformanceResolver);
+                dependency, artifactAdapter, dependencyAdapter, ctx.conformanceResolver, ctx.transitiveKeyCanonicals);
         if (parentRoles.contains("key") && !currentRoles.contains("key")) {
             currentRoles.add(0, "key");
         }
@@ -502,6 +507,64 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
      * NpmRepository walks transitive dependencies automatically, so dependsOn entries are
      * included as explicit seeds for redundancy.
      */
+    /**
+     * Pre-computes the set of transitive key canonical URLs by scanning all StructureDefinitions
+     * in the IG for key element ValueSet bindings, then walking those ValueSets' compose chains
+     * to discover referenced CodeSystems and transitive ValueSets.
+     */
+    private Set<String> computeTransitiveKeyCanonicals(
+            IKnowledgeArtifactAdapter igAdapter,
+            ConformanceResourceResolver conformanceResolver,
+            IRepository federatedRepo) {
+        var allKeyValueSets = new HashSet<String>();
+        var analyzer = new KeyElementAnalyzer(conformanceResolver, fhirVersion());
+
+        // Scan all dependencies to find StructureDefinitions and extract their key ValueSets
+        for (var dependency : igAdapter.getDependencies(federatedRepo)) {
+            var reference = dependency.getReference();
+            if (reference == null) {
+                continue;
+            }
+            var resourceType = conformanceResolver.getResourceType(Canonicals.getUrl(reference));
+            if (!"StructureDefinition".equals(resourceType)) {
+                continue;
+            }
+            var sd = conformanceResolver.resolveStructureDefinition(Canonicals.getUrl(reference));
+            if (sd != null) {
+                try {
+                    allKeyValueSets.addAll(analyzer.getKeyElementValueSets(sd));
+                } catch (Exception e) {
+                    logger.debug("Error analyzing key elements for {}: {}", reference, e.getMessage());
+                }
+            }
+        }
+
+        if (allKeyValueSets.isEmpty()) {
+            return Set.of();
+        }
+
+        logger.debug("Found {} key ValueSets from profile bindings, walking compose chains", allKeyValueSets.size());
+
+        // Walk compose chains to discover transitive CodeSystems and ValueSets
+        var composeWalker = new ValueSetComposeWalker(conformanceResolver, fhirVersion());
+        var composeResult = composeWalker.walkComposeChains(allKeyValueSets);
+
+        // Build unified set of all transitive key canonicals
+        var transitiveKeyCanonicals = new HashSet<String>();
+        transitiveKeyCanonicals.addAll(allKeyValueSets);
+        transitiveKeyCanonicals.addAll(composeResult.transitiveValueSets());
+        transitiveKeyCanonicals.addAll(composeResult.transitiveCodeSystems());
+
+        logger.debug(
+                "Transitive key canonicals: {} total ({} from profile bindings, {} transitive ValueSets, {} transitive CodeSystems)",
+                transitiveKeyCanonicals.size(),
+                allKeyValueSets.size(),
+                composeResult.transitiveValueSets().size(),
+                composeResult.transitiveCodeSystems().size());
+
+        return transitiveKeyCanonicals;
+    }
+
     private List<String[]> extractDependsOnPackages(IKnowledgeArtifactAdapter adapter) {
         List<String[]> packages = new ArrayList<>();
         try {

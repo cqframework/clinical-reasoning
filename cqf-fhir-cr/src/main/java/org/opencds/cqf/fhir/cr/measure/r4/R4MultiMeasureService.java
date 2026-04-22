@@ -20,9 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
@@ -34,13 +31,10 @@ import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasu
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
-import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.repository.FederatedRepository;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
 
 /**
  * Alternate MeasureService call to Process MeasureEvaluation for the selected population of subjects against n-number
@@ -56,8 +50,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     private final MeasurePeriodValidator measurePeriodValidator;
     private final String serverBase;
     private final R4RepositorySubjectProvider subjectProvider;
-    private final R4MeasureProcessor r4MeasureProcessorStandardRepository;
-    private final R4MeasureServiceUtils r4MeasureServiceUtilsStandardRepository;
 
     private enum SingleOrMultiple {
         SINGLE,
@@ -74,8 +66,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         this.measurePeriodValidator = measurePeriodValidator;
         this.serverBase = serverBase;
         this.subjectProvider = new R4RepositorySubjectProvider(measureEvaluationOptions.getSubjectProviderOptions());
-        this.r4MeasureProcessorStandardRepository = new R4MeasureProcessor(repository, this.measureEvaluationOptions);
-        this.r4MeasureServiceUtilsStandardRepository = new R4MeasureServiceUtils(repository);
     }
 
     // We should eliminate this if/when we eliminate the Measure test class
@@ -85,16 +75,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @Override
     public MeasureReport evaluate(
-            Either3<CanonicalType, IdType, Measure> measure,
+            MeasureReference measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subjectId,
             String lastReceivedOn,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
             Parameters parameters,
             String productLine,
             String practitioner) {
@@ -106,10 +92,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                         reportType,
                         subjectId,
                         lastReceivedOn,
-                        contentEndpoint,
-                        terminologyEndpoint,
-                        dataEndpoint,
-                        additionalData,
+                        repository,
                         parameters,
                         productLine,
                         null) // reporter is null in the single measure case
@@ -118,34 +101,25 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @VisibleForTesting
     MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
-            Either3<CanonicalType, IdType, Measure> measure,
+            MeasureReference measure,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subjectId,
             String lastReceivedOn,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            IRepository resolvedRepo,
             Parameters parameters,
             String productLine,
             String practitioner) {
 
         final List<List<MeasureDefAndR4MeasureReport>> resultsAsListOfList = evaluateToListOfList(
                 SingleOrMultiple.SINGLE,
-                measure,
-                List.of(),
-                List.of(),
-                List.of(),
+                List.of(measure),
                 periodStart,
                 periodEnd,
                 reportType,
                 subjectId,
-                contentEndpoint,
-                terminologyEndpoint,
-                dataEndpoint,
-                additionalData,
+                resolvedRepo,
                 parameters,
                 productLine,
                 null,
@@ -170,33 +144,22 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @Override
     public Parameters evaluate(
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
+            List<MeasureReference> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject, // practitioner passed in here
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
             Parameters parameters,
             String productLine,
             String reporter) {
 
         return evaluateWithDefs(
-                        measureId,
-                        measureUrl,
-                        measureIdentifier,
+                        measures,
                         periodStart,
                         periodEnd,
                         reportType,
                         subject,
-                        contentEndpoint,
-                        terminologyEndpoint,
-                        dataEndpoint,
-                        additionalData,
+                        repository,
                         parameters,
                         productLine,
                         reporter)
@@ -214,17 +177,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      * post-scoring state (MeasureReport) for each evaluated measure.
      * </p>
      *
-     * @param measureId list of Measure IDs
-     * @param measureUrl list of Measure URLs
-     * @param measureIdentifier list of Measure identifiers
+     * @param measures list of MeasureReferences
      * @param periodStart start date of Measurement Period
      * @param periodEnd end date of Measurement Period
      * @param reportType type of report
      * @param subject the subject ID (or practitioner)
-     * @param contentEndpoint content endpoint
-     * @param terminologyEndpoint terminology endpoint
-     * @param dataEndpoint data endpoint
-     * @param additionalData additional data bundle
+     * @param resolvedRepo fully configured repository (endpoints proxied, data federated)
      * @param parameters CQL parameters
      * @param productLine product line
      * @param reporter reporter ID
@@ -232,35 +190,24 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      */
     @VisibleForTesting
     MeasureDefAndR4ParametersWithMeasureReports evaluateWithDefs(
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
+            List<MeasureReference> measures,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            IRepository resolvedRepo,
             Parameters parameters,
             String productLine,
             String reporter) {
 
         return toMeasureDefAndParametersResults(evaluateToListOfList(
                 SingleOrMultiple.MULTIPLE,
-                null,
-                measureId,
-                measureUrl,
-                measureIdentifier,
+                measures,
                 periodStart,
                 periodEnd,
                 reportType,
                 subject,
-                contentEndpoint,
-                terminologyEndpoint,
-                dataEndpoint,
-                additionalData,
+                resolvedRepo,
                 parameters,
                 productLine,
                 reporter,
@@ -269,18 +216,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     private List<List<MeasureDefAndR4MeasureReport>> evaluateToListOfList(
             SingleOrMultiple singleOrMultiple,
-            @Nullable Either3<CanonicalType, IdType, Measure> measure,
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
+            List<MeasureReference> measureRefs,
             @Nullable ZonedDateTime periodStart,
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             String subject,
-            Endpoint contentEndpoint,
-            Endpoint terminologyEndpoint,
-            Endpoint dataEndpoint,
-            Bundle additionalData,
+            IRepository resolvedRepo,
             Parameters parameters,
             String productLine,
             String reporter,
@@ -288,19 +229,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 
-        final R4MeasureProcessor r4ProcessorToUse;
-        final R4MeasureServiceUtils r4MeasureServiceUtilsToUse;
-        if (dataEndpoint != null && contentEndpoint != null && terminologyEndpoint != null) {
-            var repositoryToUse =
-                    Repositories.proxy(repository, true, dataEndpoint, contentEndpoint, terminologyEndpoint);
-
-            r4ProcessorToUse = new R4MeasureProcessor(repositoryToUse, this.measureEvaluationOptions);
-
-            r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(repositoryToUse);
-        } else {
-            r4ProcessorToUse = r4MeasureProcessorStandardRepository;
-            r4MeasureServiceUtilsToUse = r4MeasureServiceUtilsStandardRepository;
-        }
+        var r4ProcessorToUse = new R4MeasureProcessor(resolvedRepo, this.measureEvaluationOptions);
+        var r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(resolvedRepo);
 
         if (measureEvaluationOptions.isEnsureSearchParameters()) {
             r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
@@ -322,24 +252,19 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             subjectToUse = subject;
         }
 
-        final List<Measure> measures =
-                getMeasures(measure, measureId, measureUrl, measureIdentifier, r4MeasureServiceUtilsToUse);
+        final List<Measure> measures = r4MeasureServiceUtilsToUse.getMeasures(measureRefs);
 
         log.debug("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subjectToUse);
 
-        // another flex point between single and multi measures
         var subjects =
                 switch (singleOrMultiple) {
-                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, repository, additionalData);
+                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, resolvedRepo);
                     case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
                 };
 
-        var context = Engines.forRepository(
-                r4ProcessorToUse.getRepository(),
-                this.measureEvaluationOptions.getEvaluationSettings(),
-                additionalData);
+        var context = Engines.forRepository(resolvedRepo, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
@@ -376,18 +301,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 evalType,
                 reporter,
                 productLine);
-    }
-
-    private List<Measure> getMeasures(
-            @Nullable Either3<CanonicalType, IdType, Measure> measureEither,
-            List<IdType> measureId,
-            List<String> measureUrl,
-            List<String> measureIdentifier,
-            R4MeasureServiceUtils r4MeasureServiceUtilsToUse) {
-        return Optional.ofNullable(measureEither)
-                .map(nonNullMeasureEither ->
-                        List.of(R4MeasureServiceUtils.foldMeasure(nonNullMeasureEither, this.repository)))
-                .orElse(r4MeasureServiceUtilsToUse.getMeasures(measureId, measureIdentifier, measureUrl));
     }
 
     private List<List<MeasureDefAndR4MeasureReport>> populationOrSingleMeasureReport(
@@ -621,19 +534,10 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     @Nonnull
-    private List<String> getSubjectsForEvaluateSingle(
-            String subjectId, IRepository proxyRepoForMeasureProcessor, Bundle additionalData) {
-        final IRepository repoToUseForSubjectProvider;
-        if (additionalData != null) {
-            repoToUseForSubjectProvider = new FederatedRepository(
-                    this.repository, new InMemoryFhirRepository(this.repository.fhirContext(), additionalData));
-        } else {
-            repoToUseForSubjectProvider = proxyRepoForMeasureProcessor;
-        }
-
+    private List<String> getSubjectsForEvaluateSingle(String subjectId, IRepository subjectRepo) {
         return subjectProvider
                 .getSubjects(
-                        repoToUseForSubjectProvider,
+                        subjectRepo,
                         Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
                 .toList();
     }

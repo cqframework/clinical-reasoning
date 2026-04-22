@@ -46,7 +46,10 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
@@ -173,9 +176,7 @@ class MultiMeasure {
             this.repository = repository;
         }
 
-        private List<IdType> measureId = new ArrayList<>();
-        private List<String> measureUrl = new ArrayList<>();
-        private List<String> measureIdentifier = new ArrayList<>();
+        private List<MeasureReference> measureRefs = new ArrayList<>();
         private ZonedDateTime periodStart;
         private ZonedDateTime periodEnd;
         private String subject;
@@ -188,17 +189,23 @@ class MultiMeasure {
         private String reporter;
 
         public MultiMeasure.When measureId(String measureId) {
-            this.measureId.add(new IdType("Measure", measureId));
+            if (measureId != null) {
+                this.measureRefs.add(new MeasureReference.ById(new IdType("Measure", measureId)));
+            }
             return this;
         }
 
         public MultiMeasure.When measureIdentifier(String measureIdentifier) {
-            this.measureIdentifier.add(measureIdentifier);
+            if (measureIdentifier != null) {
+                this.measureRefs.add(new MeasureReference.ByIdentifier(measureIdentifier));
+            }
             return this;
         }
 
         public MultiMeasure.When measureUrl(String measureUrl) {
-            this.measureUrl.add(measureUrl);
+            if (measureUrl != null) {
+                this.measureRefs.add(new MeasureReference.ByCanonicalUrl(measureUrl));
+            }
             return this;
         }
 
@@ -246,17 +253,12 @@ class MultiMeasure {
 
         public MultiMeasure.When evaluate() {
             this.operation = () -> service.evaluateWithDefs(
-                    measureId,
-                    measureUrl,
-                    measureIdentifier,
+                    measureRefs,
                     periodStart,
                     periodEnd,
                     reportType,
                     subject,
-                    null,
-                    null,
-                    null,
-                    additionalData,
+                    new MeasureEnvironment(null, null, null, additionalData).resolve(service.getRepository()),
                     parameters,
                     productLine,
                     reporter);
@@ -638,6 +640,10 @@ class MultiMeasure {
             return this;
         }
 
+        public SelectedPopulation population(MeasurePopulationType type) {
+            return population(type.toCode());
+        }
+
         public SelectedPopulation population(String name) {
             return this.population(g -> g.getPopulation().stream()
                     .filter(x -> x.hasCode()
@@ -781,6 +787,10 @@ class MultiMeasure {
 
         public SelectedStratumPopulation firstPopulation() {
             return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
+        }
+
+        public SelectedStratumPopulation population(MeasurePopulationType type) {
+            return population(type.toCode());
         }
 
         public SelectedStratumPopulation population(String name) {

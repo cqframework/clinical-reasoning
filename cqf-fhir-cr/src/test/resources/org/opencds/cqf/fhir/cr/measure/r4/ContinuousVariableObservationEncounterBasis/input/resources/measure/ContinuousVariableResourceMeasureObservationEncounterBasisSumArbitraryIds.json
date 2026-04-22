@@ -1,15 +1,15 @@
 {
-  "id": "ContinuousVariableResourceMeasureObservationBooleanBasisAvg",
+  "id": "ContinuousVariableResourceMeasureObservationEncounterBasisSumArbitraryIds",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/ContinuousVariableResourceMeasureObservationBooleanBasisAvg",
-  "name": "ContinuousVariableResourceMeasureObservationBooleanBasisAvg",
+  "url": "http://example.com/Measure/ContinuousVariableResourceMeasureObservationEncounterBasisSumArbitraryIds",
+  "name": "ContinuousVariableResourceMeasureObservationEncounterBasisSumArbitraryIds",
   "library": [
-    "http://example.com/Library/ContinuousVariableObservationBooleanBasis"
+    "http://example.com/Library/ContinuousVariableObservationEncounterBasis"
   ],
   "extension": [
     {
       "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
-      "valueCode": "boolean"
+      "valueCode": "Encounter"
     }
   ],
   "scoring": {
@@ -25,7 +25,7 @@
       "id": "group-1",
       "population": [
         {
-          "id": "initial-population",
+          "id": "IP_1",
           "code": {
             "coding": [
               {
@@ -37,7 +37,7 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Initial Population Boolean"
+            "expression": "Initial Population Resource"
           }
         },
         {
@@ -53,11 +53,11 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Measure Population Boolean"
+            "expression": "Measure Population Resource"
           }
         },
         {
-          "id": "measure-population-exclusion",
+          "id": "MPExcl_1",
           "code": {
             "coding": [
               {
@@ -69,11 +69,11 @@
           },
           "criteria": {
             "language": "text/cql-identifier",
-            "expression": "Measure Population Exclusion Boolean"
+            "expression": "Measure Population Exclusions Resource"
           }
         },
         {
-          "id": "measure-observation-1",
+          "id": "MO_1",
           "extension" : [
             {
               "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
@@ -81,7 +81,7 @@
             },
             {
               "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-              "valueCode": "average"
+              "valueCode" : "sum"
             }
           ],
           "code" : {
@@ -101,19 +101,19 @@
       ],
       "stratifier": [
         {
-          "id": "stratifier-gender",
+          "id": "stratifier-age",
           "code": {
-            "text": "Gender"
+            "text": "Age"
           },
           "component": [
             {
               "id": "stratifier-gender-comp-1",
               "code": {
-                "text": "Gender"
+                "text": "Age"
               },
               "criteria": {
                 "language": "text/cql.identifier",
-                "expression": "Gender"
+                "expression": "Age Function"
               }
             }
           ]

@@ -6,6 +6,7 @@ import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 @SuppressWarnings({"java:S2699"})
@@ -25,13 +26,13 @@ class MultiLibEvalComplexCqlTest {
                 .hasMeasureReportCount(1)
                 .getFirstMeasureReport()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(7)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(3);
     }
 
@@ -47,13 +48,13 @@ class MultiLibEvalComplexCqlTest {
                 .hasMeasureReportCount(1)
                 .getFirstMeasureReport()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(3)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1);
     }
 
@@ -70,26 +71,26 @@ class MultiLibEvalComplexCqlTest {
                 .hasMeasureReportCount(2)
                 .getFirstMeasureReport()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(7)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(3)
                 .up()
                 .up()
                 .up()
                 .getSecondMeasureReport()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(3)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1);
     }
 

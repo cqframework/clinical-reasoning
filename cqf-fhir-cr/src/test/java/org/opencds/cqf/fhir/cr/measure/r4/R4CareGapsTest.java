@@ -318,7 +318,7 @@ class R4CareGapsTest {
             Assertions.assertTrue(
                     e.getMessage()
                             .contains(
-                                    "CareGap status parameter: closed-ga, is not an accepted value for Measure: [BreastCancerScreeningFHIR]"));
+                                    "CareGap status parameter: closed-ga, is not an accepted value for Measure: [Measure/BreastCancerScreeningFHIR]"));
         }
     }
 

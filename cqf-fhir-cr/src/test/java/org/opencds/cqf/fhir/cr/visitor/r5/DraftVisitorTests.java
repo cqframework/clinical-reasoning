@@ -27,6 +27,7 @@ import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.PlanDefinition;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.visitor.DraftVisitor;
@@ -96,6 +97,16 @@ class DraftVisitorTests {
         assertFalse(lib.hasApprovalDate());
         assertFalse(lib.hasExtension(IKnowledgeArtifactAdapter.RELEASE_DESCRIPTION_URL));
         assertFalse(lib.hasExtension(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL));
+        Optional<BundleEntryComponent> maybeGrouper = returnedBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("ValueSet"))
+                .findAny();
+        assertTrue(maybeGrouper.isPresent());
+        ValueSet grouper = repo.read(
+                ValueSet.class, new IdType(maybeGrouper.get().getResponse().getLocation()));
+        assertNotNull(maybeGrouper);
+        grouper.getCompose().getInclude().forEach(include -> {
+            assertFalse(include.getValueSet().get(0).getValueAsString().contains("|"));
+        });
         List<RelatedArtifact> relatedArtifacts = lib.getRelatedArtifact();
         assertFalse(relatedArtifacts.isEmpty());
         MetadataResourceHelper.forEachMetadataResource(

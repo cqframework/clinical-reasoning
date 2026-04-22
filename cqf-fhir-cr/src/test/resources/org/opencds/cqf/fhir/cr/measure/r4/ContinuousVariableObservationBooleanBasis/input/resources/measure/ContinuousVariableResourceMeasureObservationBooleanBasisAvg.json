@@ -81,7 +81,7 @@
             },
             {
               "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-              "valueCode" : "avg"
+              "valueCode": "average"
             }
           ],
           "code" : {

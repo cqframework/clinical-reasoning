@@ -1,5 +1,6 @@
 [versions]
 # Gradle plugins (used in build.gradle.kts dependencies)
+kotlin = "2.3.20"
 spotless = "8.2.1"
 errorprone-gradle = "5.0.0"
 animalsniffer = "2.0.1"
@@ -12,6 +13,7 @@ error-prone-core = "2.42.0"
 jacoco = "0.8.14"
 palantir-format = "2.88.0"
 gummy-bears = "0.12.0"
+ktfmt = "0.53"
 
 [plugins]
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
@@ -19,3 +21,4 @@ errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-gradle" }
 animalsniffer = { id = "ru.vyarus.animalsniffer", version.ref = "animalsniffer" }
 buildconfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
 vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

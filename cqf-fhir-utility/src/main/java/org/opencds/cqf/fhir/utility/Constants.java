@@ -150,6 +150,7 @@ public class Constants {
     public static final String CRMI_OPERATION_DELETE = "$delete";
     public static final String CRMI_OPERATION_PACKAGE = "$package";
     public static final String CRMI_OPERATION_RELEASE = "$release";
+    public static final String CRMI_OPERATION_RELEASE_MANIFEST = "$release-manifest";
     public static final String CRMI_OPERATION_RETIRE = "$retire";
     public static final String CRMI_OPERATION_REVISE = "$revise";
     public static final String CRMI_OPERATION_WITHDRAW = "$withdraw";

@@ -1,5 +1,5 @@
 plugins {
-    id("cqf.java-conventions")
+    id("cqf.kotlin-conventions")
     id("cqf.spotless-conventions")
     id("cqf.jacoco-conventions")
     id("cqf.animal-sniffer-conventions")
@@ -9,9 +9,7 @@ plugins {
 dependencies {
     // CQL Engine - api scope since types are used by downstream modules
     api(libs.cql.engine)
-    api(libs.cql.engine.fhir) {
-        exclude(group = "junit", module = "junit")
-    }
+    api(libs.cql.engine.fhir) { exclude(group = "junit", module = "junit") }
     api(libs.cql.to.elm.jvm)
     api(libs.cql.ucum)
     api(libs.cql.elm.fhir)

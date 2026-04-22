@@ -6,11 +6,11 @@ import jakarta.annotation.Nullable;
  * All continuous variable scoring aggregation methods.
  */
 public enum ContinuousVariableObservationAggregateMethod {
-    AVG("avg"),
+    AVG("average"),
     COUNT("count"),
-    MAX("max"),
+    MAX("maximum"),
     MEDIAN("median"),
-    MIN("min"),
+    MIN("minimum"),
     SUM("sum"),
     N_A(null);
 

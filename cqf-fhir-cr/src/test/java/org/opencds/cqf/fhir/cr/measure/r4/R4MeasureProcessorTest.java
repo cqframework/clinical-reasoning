@@ -7,9 +7,7 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
@@ -19,9 +17,8 @@ import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
-import org.opencds.cqf.fhir.utility.monad.Either3;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 class R4MeasureProcessorTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
@@ -34,7 +31,7 @@ class R4MeasureProcessorTest {
 
     record CaptureDefParams(
             String description,
-            Function<IRepository, Either3<CanonicalType, IdType, Measure>> measureFactory,
+            Function<IRepository, MeasureReference> measureFactory,
             String reportType,
             MeasureEvalType evalType,
             List<String> subjectIds) {
@@ -49,25 +46,25 @@ class R4MeasureProcessorTest {
         return Stream.of(
                 new CaptureDefParams(
                         "idType_subject",
-                        repo -> Eithers.forMiddle3(new IdType("Measure", MEASURE_ID)),
+                        repo -> new MeasureReference.ById(new IdType("Measure", MEASURE_ID)),
                         "subject",
                         MeasureEvalType.SUBJECT,
                         List.of(SUBJECT_ID)),
                 new CaptureDefParams(
                         "measureResource_subject",
-                        repo -> Eithers.forRight3(repo.read(Measure.class, new IdType("Measure", MEASURE_ID))),
+                        repo -> new MeasureReference.ById(new IdType("Measure", MEASURE_ID)),
                         "subject",
                         MeasureEvalType.SUBJECT,
                         List.of(SUBJECT_ID)),
                 new CaptureDefParams(
                         "idType_nullEvalType_derivedFromReportType",
-                        repo -> Eithers.forMiddle3(new IdType("Measure", MEASURE_ID)),
+                        repo -> new MeasureReference.ById(new IdType("Measure", MEASURE_ID)),
                         "subject",
                         null,
                         List.of(SUBJECT_ID)),
                 new CaptureDefParams(
                         "idType_population",
-                        repo -> Eithers.forMiddle3(new IdType("Measure", MEASURE_ID)),
+                        repo -> new MeasureReference.ById(new IdType("Measure", MEASURE_ID)),
                         "population",
                         MeasureEvalType.POPULATION,
                         List.of(SUBJECT_ID)));
@@ -132,15 +129,15 @@ class R4MeasureProcessorTest {
     }
 
     @Test
-    void evaluateMeasureWithCqlEngine_withEither3() {
+    void evaluateMeasureWithCqlEngine_withMeasureReference() {
         var repository = GIVEN_REPO.getRepository();
         var r4MeasureProcessor = new R4MeasureProcessor(repository, MeasureEvaluationOptions.defaultOptions());
         var cqlEngine = Engines.forRepository(repository);
 
-        Either3<CanonicalType, IdType, Measure> measureEither = Eithers.forMiddle3(new IdType("Measure", MEASURE_ID));
+        var measureRef = new MeasureReference.ById(new IdType("Measure", MEASURE_ID));
 
         var results = r4MeasureProcessor.evaluateMeasureWithCqlEngine(
-                List.of(SUBJECT_ID), measureEither, null, null, new Parameters(), cqlEngine);
+                List.of(SUBJECT_ID), measureRef, null, null, new Parameters(), cqlEngine);
 
         assertNotNull(results);
         var evaluationResults = results.processMeasureForSuccessOrFailure(MINIMAL_COHORT_BOOLEAN_BASIS_SINGLE_GROUP);
@@ -157,7 +154,7 @@ class R4MeasureProcessorTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("captureDefParams")
-    void evaluateMeasureCaptureDef_withEither3(CaptureDefParams params) {
+    void evaluateMeasureCaptureDef_withMeasureReference(CaptureDefParams params) {
         var repository = GIVEN_REPO.getRepository();
         var r4MeasureProcessor = new R4MeasureProcessor(repository, MeasureEvaluationOptions.defaultOptions());
         var cqlEngine = Engines.forRepository(repository);

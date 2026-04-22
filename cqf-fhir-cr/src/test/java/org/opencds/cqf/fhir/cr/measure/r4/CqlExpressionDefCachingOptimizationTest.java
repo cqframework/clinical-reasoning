@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
 public class CqlExpressionDefCachingOptimizationTest {
@@ -25,7 +26,7 @@ public class CqlExpressionDefCachingOptimizationTest {
                 .getFirstMeasureReport()
                 .hasMeasure("http://example.com/Measure/MeasureA")
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
                 .up()
@@ -33,7 +34,7 @@ public class CqlExpressionDefCachingOptimizationTest {
                 .getSecondMeasureReport()
                 .hasMeasure("http://example.com/Measure/MeasureB")
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1);
     }
 

@@ -8,9 +8,9 @@ import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -28,8 +28,8 @@ import org.opencds.cqf.fhir.utility.FhirPathCache;
 
 public class ResourceMatcherR4 implements ResourceMatcher {
 
-    private Map<SPPathKey, IParsedExpression> pathCache = new HashMap<>();
-    private Map<String, RuntimeSearchParam> searchParams = new HashMap<>();
+    private Map<SPPathKey, IParsedExpression> pathCache = new ConcurrentHashMap<>();
+    private Map<String, RuntimeSearchParam> searchParams = new ConcurrentHashMap<>();
 
     @Override
     public IFhirPath getEngine() {

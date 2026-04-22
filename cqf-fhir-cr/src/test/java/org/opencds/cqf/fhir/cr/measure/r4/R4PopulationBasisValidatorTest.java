@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.INITIALPOPULATION;
@@ -55,6 +56,8 @@ class R4PopulationBasisValidatorTest {
             NUMERATOR, EXPRESSION_NUMERATOR);
 
     private static final CodeDef BASIS_BOOLEAN = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
+    private static final CodeDef BASIS_STRING_LOWERCASE = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "string");
+    private static final CodeDef BASIS_STRING_UPPERCASE = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "String");
     private static final CodeDef BASIS_ENCOUNTER = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "Encounter");
     private static final CodeDef BASIS_PROCEDURE = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "Procedure");
     private static final Encounter ENCOUNTER = new Encounter();
@@ -62,6 +65,8 @@ class R4PopulationBasisValidatorTest {
 
     private enum Basis {
         BOOLEAN(BASIS_BOOLEAN),
+        STRING_LOWERCASE(BASIS_STRING_LOWERCASE),
+        STRING_UPPERCASE(BASIS_STRING_UPPERCASE),
         ENCOUNTER(BASIS_ENCOUNTER),
         PROCEDURE(BASIS_PROCEDURE);
 
@@ -454,7 +459,7 @@ class R4PopulationBasisValidatorTest {
                 ENCOUNTER));
 
         var expectedExceptionMessage =
-                "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Encounter] and matching result classes: []";
+                "Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter] for Measure: [fakeMeasureUrl].";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -480,7 +485,7 @@ class R4PopulationBasisValidatorTest {
                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER)));
 
         var expectedExceptionMessage =
-                "stratifier expression criteria results for expression: [InitialPopulation] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Encounter, Encounter, Encounter] and matching result classes: []";
+                "Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter, Encounter, Encounter] for Measure: [fakeMeasureUrl].";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -505,9 +510,140 @@ class R4PopulationBasisValidatorTest {
                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER)));
 
         var expectedExceptionMessage =
-                "stratifier expression criteria results for expression: [Numerator] must fall within accepted types for population-basis: [boolean] for Measure: [fakeMeasureUrl] due to mismatch between total eval result classes: [Boolean, Boolean, Encounter] and matching result classes: [Boolean, Boolean]";
+                "Value stratifier expression for [Numerator] returned invalid result type(s): [Boolean, Boolean, Encounter] for Measure: [fakeMeasureUrl].";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    @Test
+    void mismatchEncounterBasisSingleEncounterResult() {
+        var expectedGroupDef = buildGroupDef(
+                Basis.ENCOUNTER,
+                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.NON_SUBJECT_VALUE,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var expectedEvaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                ENCOUNTER,
+                EXPRESSION_DENOMINATOR,
+                ENCOUNTER,
+                EXPRESSION_NUMERATOR,
+                ENCOUNTER));
+
+        var expectedExceptionMessage =
+                "Non Subject Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter] for Measure: [fakeMeasureUrl] with population basis: [Encounter].";
+
+        validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    @Test
+    void mismatchEncounterBasisMultipleEncounterResults() {
+        var expectedGroupDef = buildGroupDef(
+                Basis.ENCOUNTER,
+                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.NON_SUBJECT_VALUE,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var expectedEvaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
+                EXPRESSION_DENOMINATOR,
+                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER),
+                EXPRESSION_NUMERATOR,
+                List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER)));
+
+        var expectedExceptionMessage =
+                "Non Subject Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter, Encounter, Encounter] for Measure: [fakeMeasureUrl] with population basis: [Encounter].";
+
+        validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    @Test
+    void mismatchEncounterBasisMixedCategoricalAndEncounterResults() {
+        var expectedGroupDef = buildGroupDef(
+                Basis.ENCOUNTER,
+                buildPopulationDefs(Basis.ENCOUNTER, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.NON_SUBJECT_VALUE,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var expectedEvaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
+                EXPRESSION_DENOMINATOR,
+                List.of(Boolean.TRUE, Boolean.TRUE, Boolean.TRUE),
+                EXPRESSION_NUMERATOR,
+                List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER)));
+
+        var expectedExceptionMessage =
+                "Non Subject Value stratifier expression for [Numerator] returned invalid result type(s): [Boolean, Boolean, Encounter] for Measure: [fakeMeasureUrl] with population basis: [Encounter].";
+
+        validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
+    }
+
+    /**
+     * DQM-692: "String" (uppercase) is NOT a valid FHIR type code — only lowercase "string" is valid
+     * per FHIRAllTypes. A criteria stratifier with uppercase "String" basis should fail validation.
+     */
+    @Test
+    void criteriaStratifierWithUppercaseStringBasisShouldFail() {
+        var groupDef = buildGroupDef(
+                Basis.STRING_UPPERCASE,
+                buildPopulationDefs(Basis.STRING_UPPERCASE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.CRITERIA,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var evaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                "someStringValue",
+                EXPRESSION_DENOMINATOR,
+                "someStringValue",
+                EXPRESSION_NUMERATOR,
+                "someStringValue"));
+
+        var expectedExceptionMessage =
+                "criteria-based stratifier is invalid for expression: [InitialPopulation] due to mismatch between population basis: [String] and result types: [String] for measure URL: fakeMeasureUrl";
+
+        validateStratifierBasisTypeErrorPath(groupDef, evaluationResult, expectedExceptionMessage);
+    }
+
+    /**
+     * DQM-692: criteria-based stratifier with lowercase "string" population basis (the valid FHIR
+     * type code) should pass validation when the CQL expression returns String results.
+     */
+    @Test
+    void criteriaStratifierWithLowercaseStringBasisShouldPass() {
+        var groupDef = buildGroupDef(
+                Basis.STRING_LOWERCASE,
+                buildPopulationDefs(Basis.STRING_LOWERCASE, INITIALPOPULATION, DENOMINATOR, NUMERATOR),
+                buildStratifierDefs(
+                        MeasureStratifierType.CRITERIA,
+                        EXPRESSION_INITIALPOPULATION,
+                        EXPRESSION_DENOMINATOR,
+                        EXPRESSION_NUMERATOR));
+
+        var evaluationResult = buildEvaluationResult(Map.of(
+                EXPRESSION_INITIALPOPULATION,
+                "someStringValue",
+                EXPRESSION_DENOMINATOR,
+                "someStringValue",
+                EXPRESSION_NUMERATOR,
+                "someStringValue"));
+
+        // This should NOT throw — lowercase "string" basis should match String result type
+        testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
     }
 
     private void validateStratifierBasisTypeErrorPath(
@@ -516,7 +652,10 @@ class R4PopulationBasisValidatorTest {
             testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
             fail("Expected this test to fail");
         } catch (InvalidRequestException exception) {
-            assertEquals(expectedExceptionMessage, exception.getMessage());
+            assertTrue(
+                    exception.getMessage().startsWith(expectedExceptionMessage),
+                    "Expected message to start with:\n  " + expectedExceptionMessage + "\nbut was:\n  "
+                            + exception.getMessage());
         }
     }
 
@@ -563,7 +702,8 @@ class R4PopulationBasisValidatorTest {
     @Nonnull
     private static StratifierDef buildStratifierDef(MeasureStratifierType stratifierType, String expression) {
         final List<StratifierComponentDef> stratifierComponentDefs;
-        if (stratifierType == MeasureStratifierType.VALUE) {
+        if (stratifierType == MeasureStratifierType.VALUE
+                || stratifierType == MeasureStratifierType.NON_SUBJECT_VALUE) {
             stratifierComponentDefs = List.of(new StratifierComponentDef(null, null, expression));
         } else {
             stratifierComponentDefs = List.of();

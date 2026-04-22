@@ -26,7 +26,8 @@ public class CrDstu3Config {
     @Bean
     IMeasureServiceFactory dstu3MeasureServiceFactory(
             IRepositoryFactory repositoryFactory, MeasureEvaluationOptions evaluationOptions) {
-        return rd -> new Dstu3MeasureService(repositoryFactory.create(rd), evaluationOptions);
+        return (requestDetails, environment) -> new Dstu3MeasureService(
+                environment.resolve(repositoryFactory.create(requestDetails)), evaluationOptions);
     }
 
     @Bean

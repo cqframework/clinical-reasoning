@@ -86,15 +86,9 @@ public class Engines {
         registerModelInfoProviders(settings, modelManager, repository);
         registerNpmSupport(settings, libraryManager, modelManager);
 
-        // Manually registering Using CQL and US CQL Common namespace for now
-        libraryManager
-                .getNamespaceManager()
-                .ensureNamespaceRegistered(new NamespaceInfo("hl7.fhir.uv.cql", "http://hl7.org/fhir/uv/cql"));
-        libraryManager
-                .getNamespaceManager()
-                .ensureNamespaceRegistered(new NamespaceInfo("hl7.fhir.us.cql", "http://hl7.org/fhir/us/cql"));
-
-        // Register any namespaces added to the settings
+        // This allows for namespaces to be manually registered downstream.
+        // Ideally we don't need to do this at all and can determine what namespaces are required from the library.
+        // This will require more work in the CQL engine to accommodate.
         settings.getRegisteredNamespaces()
                 .forEach((name, uri) ->
                         libraryManager.getNamespaceManager().ensureNamespaceRegistered(new NamespaceInfo(name, uri)));
@@ -199,9 +193,13 @@ public class Engines {
     }
 
     private static CqlEngine createEngine(Environment environment, EvaluationSettings settings) {
-        var engine = new CqlEngine(
-                environment, settings.getCqlOptions().getCqlEngineOptions().getOptions());
-        if (settings.getCqlOptions().getCqlEngineOptions().isDebugLoggingEnabled()) {
+        var engineOptions = settings.getCqlOptions().getCqlEngineOptions();
+        var engine = new CqlEngine(environment, engineOptions.getOptions());
+
+        // Precedence: explicit debugMap > isDebugLoggingEnabled > none
+        if (engineOptions.getDebugMap() != null) {
+            engine.getState().setDebugMap(engineOptions.getDebugMap());
+        } else if (engineOptions.isDebugLoggingEnabled()) {
             var map = new DebugMap();
             map.setLoggingEnabled(true);
             engine.getState().setDebugMap(map);

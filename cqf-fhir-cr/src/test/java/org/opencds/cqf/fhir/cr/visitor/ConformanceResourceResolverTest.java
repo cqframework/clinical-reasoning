@@ -172,6 +172,96 @@ class ConformanceResourceResolverTest {
     }
 
     @Test
+    void testResolveResource_nullUrl_returnsNull() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository);
+        assertNull(resolver.resolveResource(null, "ValueSet"));
+    }
+
+    @Test
+    void testResolveResource_emptyUrl_returnsNull() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository);
+        assertNull(resolver.resolveResource("", "ValueSet"));
+    }
+
+    @Test
+    void testResolveResource_nullResourceType_returnsNull() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository);
+        assertNull(resolver.resolveResource("http://example.org/ValueSet/test", null));
+    }
+
+    @Test
+    void testResolveResource_valueSetFromRepository() {
+        var repository = new org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository(FhirContext.forR4Cached());
+
+        var vs = new org.hl7.fhir.r4.model.ValueSet();
+        vs.setId("ValueSet/test-vs");
+        vs.setUrl("http://example.org/ValueSet/test-vs");
+        vs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        repository.update(vs);
+
+        var resolver = new ConformanceResourceResolver(repository);
+        var result = resolver.resolveResource("http://example.org/ValueSet/test-vs", "ValueSet");
+
+        assertNotNull(result, "Should resolve ValueSet from repository");
+        assertEquals("ValueSet", result.fhirType());
+    }
+
+    @Test
+    void testResolveResource_codeSystemFromRepository() {
+        var repository = new org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository(FhirContext.forR4Cached());
+
+        var cs = new org.hl7.fhir.r4.model.CodeSystem();
+        cs.setId("CodeSystem/test-cs");
+        cs.setUrl("http://example.org/CodeSystem/test-cs");
+        cs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        cs.setContent(org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode.COMPLETE);
+        repository.update(cs);
+
+        var resolver = new ConformanceResourceResolver(repository);
+        var result = resolver.resolveResource("http://example.org/CodeSystem/test-cs", "CodeSystem");
+
+        assertNotNull(result, "Should resolve CodeSystem from repository");
+        assertEquals("CodeSystem", result.fhirType());
+    }
+
+    @Test
+    void testResolveResource_wrongResourceType_returnsNull() {
+        var repository = new org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository(FhirContext.forR4Cached());
+
+        // Add a ValueSet but search for CodeSystem
+        var vs = new org.hl7.fhir.r4.model.ValueSet();
+        vs.setId("ValueSet/test-vs");
+        vs.setUrl("http://example.org/ValueSet/test-vs");
+        vs.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+        repository.update(vs);
+
+        var resolver = new ConformanceResourceResolver(repository);
+        var result = resolver.resolveResource("http://example.org/ValueSet/test-vs", "CodeSystem");
+
+        assertNull(result, "Should return null when resource type doesn't match");
+    }
+
+    @Test
+    void testResolveResource_unknownUrl_returnsNull() {
+        var repository = mock(IRepository.class);
+        when(repository.fhirContext()).thenReturn(FhirContext.forR4Cached());
+
+        var resolver = new ConformanceResourceResolver(repository);
+        var result = resolver.resolveResource("http://example.org/ValueSet/nonexistent", "ValueSet");
+
+        assertNull(result, "Should return null for unknown URLs");
+    }
+
+    @Test
     void testResolveStructureDefinitionFromRepository() {
         var repository = new org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository(FhirContext.forR4Cached());
 

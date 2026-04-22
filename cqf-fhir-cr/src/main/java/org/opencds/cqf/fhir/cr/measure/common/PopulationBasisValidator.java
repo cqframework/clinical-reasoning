@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,15 +194,38 @@ public interface PopulationBasisValidator {
                 .toList();
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
-            throw new InvalidRequestException(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total eval result classes: %s and matching result classes: %s"
-                            .formatted(
-                                    expression,
-                                    groupPopulationBasisCode,
-                                    url,
-                                    prettyClassNames(resultClasses),
-                                    prettyClassNames(resultMatchingClasses)));
+            var invalidTypes = resultClasses.stream()
+                    .filter(c -> !resultMatchingClasses.contains(c))
+                    .toList();
+            throw new InvalidRequestException(buildValueStratifierErrorMessage(
+                    stratifierDef, expression, groupPopulationBasisCode, url, resultClasses, invalidTypes));
         }
+    }
+
+    private String buildValueStratifierErrorMessage(
+            StratifierDef stratifierDef,
+            String expression,
+            String groupPopulationBasisCode,
+            String url,
+            List<Class<?>> resultClasses,
+            List<Class<?>> invalidTypes) {
+
+        var allowedTypes = prettyClassNames(List.copyOf(allowedStratifierValueTypes()));
+        var invalidTypeNames = prettyClassNames(invalidTypes);
+
+        if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
+            return "Non Subject Value stratifier expression for [%s] returned invalid result type(s): %s for Measure: [%s] with population basis: [%s]. Non Subject Value stratifier expressions must return categorical types, such as: %s. Resource types like %s cannot be used as stratifier values. Consider using a CRITERIA-based stratifier for resource membership stratification."
+                    .formatted(
+                            expression,
+                            prettyClassNames(resultClasses),
+                            url,
+                            groupPopulationBasisCode,
+                            allowedTypes,
+                            invalidTypeNames);
+        }
+
+        return "Value stratifier expression for [%s] returned invalid result type(s): %s for Measure: [%s]. Value stratifier expressions must return categorical types for stratification, such as: %s. Resource types like %s are not valid for Value stratifiers. If you intend to stratify by resource membership, use a CRITERIA-based stratifier instead."
+                .formatted(expression, prettyClassNames(resultClasses), url, allowedTypes, invalidTypeNames);
     }
 
     private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {

@@ -538,7 +538,19 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Exception for subjectId: Patient/patient-8, Message: stratifier expression criteria results for expression: [Encounters in Period] must fall within accepted types for population-basis: [boolean] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean] due to mismatch between total eval result classes: [Encounter] and matching result classes: []");
+                        "Value stratifier expression for [Encounters in Period] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean].");
+    }
+
+    @Test
+    void ratioEncounterValueStratExpressionNonCategorical() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioResourceStratValueNonCategorical")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Non Subject Value stratifier expression for [All Patient Encounters] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/RatioResourceStratValueNonCategorical] with population basis: [Encounter].");
     }
 
     @Test

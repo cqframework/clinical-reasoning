@@ -39,7 +39,7 @@ import org.opencds.cqf.fhir.utility.operation.OperationRegistry;
 @SuppressWarnings("UnstableApiUsage")
 public class InMemoryFhirRepository implements IRepository {
 
-    private final Map<String, Map<IIdType, IBaseResource>> resourceMap;
+    private final Map<String, Map<String, IBaseResource>> resourceMap;
     private final FhirContext context;
     private final OperationRegistry operationRegistry;
     private final ResourceMatcher resourceMatcher;
@@ -57,7 +57,7 @@ public class InMemoryFhirRepository implements IRepository {
         this.resourceMap = resources.stream()
                 .collect(Collectors.groupingBy(
                         IBaseResource::fhirType,
-                        Collectors.toMap(r -> r.getIdElement().toUnqualifiedVersionless(), Function.identity())));
+                        Collectors.toMap(r -> r.getIdElement().getIdPart(), Function.identity())));
         this.operationRegistry = new OperationRegistry();
         this.resourceMatcher = Repositories.getResourceMatcher(this.context);
     }
@@ -68,7 +68,7 @@ public class InMemoryFhirRepository implements IRepository {
             Class<T> resourceType, I id, Map<String, String> headers) {
         var resources = this.resourceMap.computeIfAbsent(resourceType.getSimpleName(), x -> new HashMap<>());
 
-        var resource = resources.get(id.toUnqualifiedVersionless());
+        var resource = resources.get(id.getIdPart());
 
         if (resource == null) {
             throw new ResourceNotFoundException(id);
@@ -81,12 +81,12 @@ public class InMemoryFhirRepository implements IRepository {
     public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = Ids.newRandomId(context, resource.fhirType());
-        while (resources.containsKey(theId)) {
+        while (resources.containsKey(theId.getIdPart())) {
             theId = Ids.newRandomId(context, resource.fhirType());
         }
         resource.setId(theId);
         var outcome = new MethodOutcome(theId, true);
-        resources.put(theId.toUnqualifiedVersionless(), resource);
+        resources.put(theId.getIdPart(), resource);
         return outcome;
     }
 
@@ -100,14 +100,15 @@ public class InMemoryFhirRepository implements IRepository {
     public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
         var resources = resourceMap.computeIfAbsent(resource.fhirType(), r -> new HashMap<>());
         var theId = resource.getIdElement().toUnqualifiedVersionless();
+        var idPart = theId.getIdPart();
         var outcome = new MethodOutcome(theId, false);
-        if (!resources.containsKey(theId)) {
+        if (!resources.containsKey(idPart)) {
             outcome.setCreated(true);
         }
         if (resource.fhirType().equals("SearchParameter")) {
             this.resourceMatcher.addCustomParameter(BundleHelper.resourceToRuntimeSearchParam(resource));
         }
-        resources.put(theId, resource);
+        resources.put(idPart, resource);
 
         return outcome;
     }
@@ -117,7 +118,7 @@ public class InMemoryFhirRepository implements IRepository {
             Class<T> resourceType, I id, Map<String, String> headers) {
         var outcome = new MethodOutcome(id, false);
         var resources = resourceMap.computeIfAbsent(id.getResourceType(), r -> new HashMap<>());
-        var keyId = id.toUnqualifiedVersionless();
+        var keyId = id.getIdPart();
         if (resources.containsKey(keyId)) {
             outcome.setResource(resources.get(keyId));
             resources.remove(keyId);
@@ -154,10 +155,7 @@ public class InMemoryFhirRepository implements IRepository {
                 assert idQuery != null;
                 for (var query : idQuery) {
                     if (query instanceof TokenParam idToken) {
-                        // Need to construct the equivalent "UnqualifiedVersionless" id that the map is
-                        // indexed by. If an id has a version it won't match. Need apples-to-apples Ids types
-                        var id = Ids.newId(context, resourceType.getSimpleName(), idToken.getValue());
-                        var r = resourceIdMap.get(id);
+                        var r = resourceIdMap.get(idToken.getValue());
                         if (r != null) {
                             idResources.add(r);
                         }

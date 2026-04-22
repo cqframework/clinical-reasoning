@@ -107,7 +107,7 @@
           "id": "observation-num",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-            "valueCode": "avg"
+            "valueCode": "average"
           }, {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
             "valueString": "numerator"

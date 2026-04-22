@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,9 +19,11 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.debug.DebugResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.execution.trace.Trace;
 
 class CompositeEvaluationResultsPerMeasureTest {
 
@@ -277,5 +280,74 @@ class CompositeEvaluationResultsPerMeasureTest {
         assertTrue(result.contains("Patient/patient-1"));
         assertTrue(result.contains("Patient/patient-2"));
         assertTrue(result.contains("[")); // Collection bracket
+    }
+
+    @Test
+    void mergePreservesDebugResult() {
+        var measureDef = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureDebug"), "http://example.com/Measure/debug");
+
+        EvaluationResult er = new EvaluationResult();
+        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(true, Set.of()));
+
+        var debugResult = new DebugResult();
+        er.setDebugResult(debugResult);
+
+        EvaluationResult observationResult = new EvaluationResult();
+        observationResult.set(new EvaluationExpressionRef("obs1"), new ExpressionResult(42, Set.of()));
+
+        var builder = CompositeEvaluationResultsPerMeasure.builder();
+        builder.addResult(measureDef, "patient-1", er, List.of(observationResult));
+
+        var composite = builder.build();
+        var results = composite.getResultsPerMeasure().get(measureDef);
+        var mergedResult = results.get("patient-1");
+
+        assertNotNull(mergedResult);
+        assertTrue(mergedResult.getExpressionResults().containsKey("expr1"));
+        assertTrue(mergedResult.getExpressionResults().containsKey("obs1"));
+        assertEquals(debugResult, mergedResult.getDebugResult());
+    }
+
+    @Test
+    void mergePreservesTrace() {
+        var measureDef = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureTrace"), "http://example.com/Measure/trace");
+
+        EvaluationResult er = new EvaluationResult();
+        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(true, Set.of()));
+
+        var trace = new Trace(List.of());
+        er.setTrace(trace);
+
+        var builder = CompositeEvaluationResultsPerMeasure.builder();
+        builder.addResult(measureDef, "patient-1", er, List.of());
+
+        var composite = builder.build();
+        var results = composite.getResultsPerMeasure().get(measureDef);
+        var mergedResult = results.get("patient-1");
+
+        assertNotNull(mergedResult);
+        assertEquals(trace, mergedResult.getTrace());
+    }
+
+    @Test
+    void mergeWithNoDebugInfoLeavesFieldsNull() {
+        var measureDef = MeasureDef.fromIdAndUrl(
+                new IdType(ResourceType.Measure.name(), "measureNoDebug"), "http://example.com/Measure/nodebug");
+
+        EvaluationResult er = new EvaluationResult();
+        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(true, Set.of()));
+
+        var builder = CompositeEvaluationResultsPerMeasure.builder();
+        builder.addResult(measureDef, "patient-1", er, List.of());
+
+        var composite = builder.build();
+        var results = composite.getResultsPerMeasure().get(measureDef);
+        var mergedResult = results.get("patient-1");
+
+        assertNotNull(mergedResult);
+        assertNull(mergedResult.getDebugResult());
+        assertNull(mergedResult.getTrace());
     }
 }

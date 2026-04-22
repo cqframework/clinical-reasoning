@@ -16,6 +16,9 @@ java {
 }
 
 repositories {
+    if (file("${rootProject.projectDir}/local.properties").exists()) {
+        mavenLocal()
+    }
     mavenCentral()
     maven {
         name = "central-snapshots"

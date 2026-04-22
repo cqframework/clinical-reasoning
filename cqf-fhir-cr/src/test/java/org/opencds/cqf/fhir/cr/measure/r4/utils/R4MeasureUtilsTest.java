@@ -499,7 +499,7 @@ class R4MeasureUtilsTest {
     void testGetAggregateMethod_WithAvgExtension() {
         String measureUrl = "http://example.com/Measure/test";
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
-        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("avg"));
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("average"));
 
         ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
 
@@ -521,7 +521,7 @@ class R4MeasureUtilsTest {
     void testGetAggregateMethod_WithMinExtension() {
         String measureUrl = "http://example.com/Measure/test";
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
-        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("min"));
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("minimum"));
 
         ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
 
@@ -532,7 +532,7 @@ class R4MeasureUtilsTest {
     void testGetAggregateMethod_WithMaxExtension() {
         String measureUrl = "http://example.com/Measure/test";
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
-        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("max"));
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("maximum"));
 
         ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
 
@@ -588,7 +588,7 @@ class R4MeasureUtilsTest {
 
         MeasureGroupComponent group = new MeasureGroupComponent();
         MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
-        addAggregateMethodExtension(measureObs, "avg");
+        addAggregateMethodExtension(measureObs, "average");
         group.addPopulation(measureObs);
 
         boolean result = R4MeasureUtils.isRatioContinuousVariable(scoring, group);

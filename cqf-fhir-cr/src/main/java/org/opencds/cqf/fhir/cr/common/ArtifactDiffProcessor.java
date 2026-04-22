@@ -34,8 +34,8 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
     }
 
     public static class DiffCache {
-        private final Map<String, Parameters> diffs = new HashMap<String, Parameters>();
-        private final Map<String, DiffCacheResource> resources = new HashMap<String, DiffCacheResource>();
+        private final Map<String, Parameters> diffs = new HashMap<>();
+        private final Map<String, DiffCacheResource> resources = new HashMap<>();
 
         public DiffCache() {
             super();
@@ -77,6 +77,14 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
                     .filter(k -> url.equals(Canonicals.getUrl(k)))
                     .map(this.resources::get)
                     .toList();
+        }
+
+        public Optional<DiffCacheResource> getSourceResourceForUrl(String url) {
+            return getResourcesForUrl(url).stream().filter(res -> res.isSource).findFirst();
+        }
+
+        public Optional<DiffCacheResource> getTargetResourceForUrl(String url) {
+            return getResourcesForUrl(url).stream().filter(res -> !res.isSource).findFirst();
         }
 
         public static class DiffCacheResource {

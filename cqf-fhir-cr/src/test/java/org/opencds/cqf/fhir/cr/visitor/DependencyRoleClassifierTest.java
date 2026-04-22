@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
+import java.util.Set;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -451,5 +452,76 @@ class DependencyRoleClassifierTest {
         assertEquals(1, roles.size(), "Should not apply heuristics based on experimental status");
         assertTrue(roles.contains("default"));
         assertFalse(roles.contains("test"), "Should not classify as 'test' based on experimental status");
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_matchesCodeSystem() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://loinc.org");
+        var transitiveKeys = Set.of("http://loinc.org", "http://snomed.info/sct");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeys);
+
+        assertTrue(roles.contains("key"), "CodeSystem in transitive set should be classified as key");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_matchesValueSet() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://example.org/ValueSet/test-vs|1.0.0");
+        var transitiveKeys = Set.of("http://example.org/ValueSet/test-vs");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeys);
+
+        assertTrue(roles.contains("key"), "ValueSet in transitive set should be classified as key (version stripped)");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_noMatch_remainsDefault() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://example.org/ValueSet/other");
+        var transitiveKeys = Set.of("http://example.org/ValueSet/test-vs");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeys);
+
+        assertFalse(roles.contains("key"), "Canonical not in transitive set should not be key");
+        assertTrue(roles.contains("default"));
+    }
+
+    @Test
+    void testTransitiveKeyCanonicals_emptySet_noEffect() {
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var dependency = createDependency("http://example.org/ValueSet/test");
+
+        var roles =
+                DependencyRoleClassifier.classifyDependencyRoles(dependency, libraryAdapter, null, resolver, Set.of());
+
+        assertFalse(roles.contains("key"));
+        assertTrue(roles.contains("default"));
     }
 }

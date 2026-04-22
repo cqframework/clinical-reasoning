@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,6 +10,7 @@ import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_CQFM
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -19,6 +21,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
+import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
@@ -1158,6 +1161,200 @@ class R4MeasureReportUtilsTest {
 
         // Assert
         assertNull(result, "Should return null when component has CodeableConcept but componentDef is null");
+    }
+
+    // ========================================
+    // Tests for matchesStratumValue()
+    // ========================================
+
+    @Test
+    void testMatchesStratumValue_SingleValue_Matches() {
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Gender"), "GenderExpr", MeasureStratifierType.VALUE);
+
+        StringType stringValue = new StringType("male");
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(stringValue);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum.setValue(new CodeableConcept().setText("male"));
+
+        assertTrue(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
+    }
+
+    @Test
+    void testMatchesStratumValue_SingleValue_Mismatch() {
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1", new ConceptDef(List.of(), "Gender"), "GenderExpr", MeasureStratifierType.VALUE);
+
+        StringType stringValue = new StringType("male");
+        StratumValueWrapper valueWrapper = new StratumValueWrapper(stringValue);
+        StratumValueDef valueDef = new StratumValueDef(valueWrapper, null);
+        StratumDef stratumDef =
+                new StratumDef(Collections.emptyList(), Set.of(valueDef), Collections.emptyList(), null);
+
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum.setValue(new CodeableConcept().setText("female"));
+
+        assertFalse(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
+    }
+
+    @Test
+    void testMatchesStratumValue_MultiComponent_Matches() {
+        StratifierComponentDef genderComponentDef =
+                new StratifierComponentDef("comp-1", new ConceptDef(List.of(), "Gender"), "GenderExpr");
+        StratifierComponentDef ageComponentDef =
+                new StratifierComponentDef("comp-2", new ConceptDef(List.of(), "Age"), "AgeExpr");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Gender and Age"),
+                null,
+                MeasureStratifierType.VALUE,
+                List.of(genderComponentDef, ageComponentDef));
+
+        Set<StratumValueDef> valueDefs = new LinkedHashSet<>();
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new StringType("male")), genderComponentDef));
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new IntegerType(74)), ageComponentDef));
+        StratumDef stratumDef = new StratumDef(Collections.emptyList(), valueDefs, Collections.emptyList(), null);
+
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Gender"))
+                .setValue(new CodeableConcept().setText("male"));
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Age"))
+                .setValue(new CodeableConcept().setText("74"));
+
+        assertTrue(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
+    }
+
+    @Test
+    void testMatchesStratumValue_MultiComponent_DifferentOrder_Matches() {
+        StratifierComponentDef genderComponentDef =
+                new StratifierComponentDef("comp-1", new ConceptDef(List.of(), "Gender"), "GenderExpr");
+        StratifierComponentDef ageComponentDef =
+                new StratifierComponentDef("comp-2", new ConceptDef(List.of(), "Age"), "AgeExpr");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Gender and Age"),
+                null,
+                MeasureStratifierType.VALUE,
+                List.of(genderComponentDef, ageComponentDef));
+
+        Set<StratumValueDef> valueDefs = new LinkedHashSet<>();
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new StringType("male")), genderComponentDef));
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new IntegerType(74)), ageComponentDef));
+        StratumDef stratumDef = new StratumDef(Collections.emptyList(), valueDefs, Collections.emptyList(), null);
+
+        // Report components in reverse order
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Age"))
+                .setValue(new CodeableConcept().setText("74"));
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Gender"))
+                .setValue(new CodeableConcept().setText("male"));
+
+        assertTrue(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
+    }
+
+    @Test
+    void testMatchesStratumValue_MultiComponent_ValueMismatch() {
+        StratifierComponentDef genderComponentDef =
+                new StratifierComponentDef("comp-1", new ConceptDef(List.of(), "Gender"), "GenderExpr");
+        StratifierComponentDef ageComponentDef =
+                new StratifierComponentDef("comp-2", new ConceptDef(List.of(), "Age"), "AgeExpr");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Gender and Age"),
+                null,
+                MeasureStratifierType.VALUE,
+                List.of(genderComponentDef, ageComponentDef));
+
+        Set<StratumValueDef> valueDefs = new LinkedHashSet<>();
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new StringType("male")), genderComponentDef));
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new IntegerType(74)), ageComponentDef));
+        StratumDef stratumDef = new StratumDef(Collections.emptyList(), valueDefs, Collections.emptyList(), null);
+
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Gender"))
+                .setValue(new CodeableConcept().setText("female")); // mismatch
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Age"))
+                .setValue(new CodeableConcept().setText("74"));
+
+        assertFalse(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
+    }
+
+    @Test
+    void testMatchesStratumValue_MultiComponent_DifferentComponentCount() {
+        StratifierComponentDef genderComponentDef =
+                new StratifierComponentDef("comp-1", new ConceptDef(List.of(), "Gender"), "GenderExpr");
+        StratifierComponentDef ageComponentDef =
+                new StratifierComponentDef("comp-2", new ConceptDef(List.of(), "Age"), "AgeExpr");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Gender and Age"),
+                null,
+                MeasureStratifierType.VALUE,
+                List.of(genderComponentDef, ageComponentDef));
+
+        Set<StratumValueDef> valueDefs = new LinkedHashSet<>();
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new StringType("male")), genderComponentDef));
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new IntegerType(74)), ageComponentDef));
+        StratumDef stratumDef = new StratumDef(Collections.emptyList(), valueDefs, Collections.emptyList(), null);
+
+        // Report stratum with only 1 component
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Gender"))
+                .setValue(new CodeableConcept().setText("male"));
+
+        assertFalse(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
+    }
+
+    @Test
+    void testMatchesStratumValue_MultiComponent_NullComponentDef() {
+        StratifierComponentDef genderComponentDef =
+                new StratifierComponentDef("comp-1", new ConceptDef(List.of(), "Gender"), "GenderExpr");
+
+        StratifierDef stratifierDef = new StratifierDef(
+                "stratifier-1",
+                new ConceptDef(List.of(), "Gender and Age"),
+                null,
+                MeasureStratifierType.VALUE,
+                List.of(genderComponentDef));
+
+        Set<StratumValueDef> valueDefs = new LinkedHashSet<>();
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new StringType("male")), genderComponentDef));
+        valueDefs.add(new StratumValueDef(new StratumValueWrapper(new IntegerType(74)), null)); // null componentDef
+        StratumDef stratumDef = new StratumDef(Collections.emptyList(), valueDefs, Collections.emptyList(), null);
+
+        StratifierGroupComponent reportStratum = new StratifierGroupComponent();
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Gender"))
+                .setValue(new CodeableConcept().setText("male"));
+        reportStratum
+                .addComponent()
+                .setCode(new CodeableConcept().setText("Age"))
+                .setValue(new CodeableConcept().setText("74"));
+
+        assertFalse(R4MeasureReportUtils.matchesStratumValue(reportStratum, stratumDef, stratifierDef));
     }
 
     @Test

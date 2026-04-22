@@ -233,10 +233,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // One must reference numerator, one must reference denominator
-        var hasNumeratorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.NUMERATOR)
-                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.NUMERATOR);
-        var hasDenominatorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.DENOMINATOR)
-                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.DENOMINATOR);
+        var hasNumeratorRef = R4MeasureUtils.criteriaReferenceResolvesToType(
+                        criteriaRef1, group, MeasurePopulationType.NUMERATOR)
+                || R4MeasureUtils.criteriaReferenceResolvesToType(criteriaRef2, group, MeasurePopulationType.NUMERATOR);
+        var hasDenominatorRef =
+                R4MeasureUtils.criteriaReferenceResolvesToType(criteriaRef1, group, MeasurePopulationType.DENOMINATOR)
+                        || R4MeasureUtils.criteriaReferenceResolvesToType(
+                                criteriaRef2, group, MeasurePopulationType.DENOMINATOR);
 
         if (!hasNumeratorRef || !hasDenominatorRef) {
             throw new InvalidRequestException(

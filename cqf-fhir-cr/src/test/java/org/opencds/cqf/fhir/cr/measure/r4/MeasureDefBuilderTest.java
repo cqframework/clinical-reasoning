@@ -22,7 +22,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -323,8 +322,8 @@ class MeasureDefBuilderTest {
         try {
             measureDefBuilder("fish", "cohort", decrease, null, "fish", "cohort", increase, null, null, null, null);
             fail("invalid code, should fail");
-        } catch (FHIRException e) {
-            assertTrue(e.getMessage().contains("Unknown FHIRAllTypes code 'fish'"));
+        } catch (InvalidRequestException e) {
+            assertTrue(e.getMessage().contains("has an invalid population basis of 'fish'"));
         }
     }
 
@@ -333,8 +332,8 @@ class MeasureDefBuilderTest {
         try {
             measureDefBuilder(null, null, null, null, null, null, null, null, "whale", "ratio", decrease);
             fail("invalid code, should fail");
-        } catch (FHIRException e) {
-            assertTrue(e.getMessage().contains("Unknown FHIRAllTypes code 'whale'"));
+        } catch (InvalidRequestException e) {
+            assertTrue(e.getMessage().contains("has an invalid population basis of 'whale'"));
         }
     }
 

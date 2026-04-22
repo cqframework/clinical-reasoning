@@ -538,7 +538,19 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Exception for subjectId: Patient/patient-8, Message: stratifier expression criteria results for expression: [Encounters in Period] must fall within accepted types for population-basis: [boolean] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean] due to mismatch between total eval result classes: [Encounter] and matching result classes: []");
+                        "Value stratifier expression for [Encounters in Period] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean].");
+    }
+
+    @Test
+    void ratioEncounterValueStratExpressionNonCategorical() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioResourceStratValueNonCategorical")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Non Subject Value stratifier expression for [All Patient Encounters] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/RatioResourceStratValueNonCategorical] with population basis: [Encounter].");
     }
 
     @Test
@@ -1152,6 +1164,45 @@ class MeasureStratifierTest {
                 .stratumByText("arrived")
                 .firstPopulation()
                 .hasCount(1); // patient-2-encounter-1
+    }
+
+    /**
+     * DQM-692: Uppercase "String" is NOT a valid FHIRAllTypes code — only lowercase "string" is valid.
+     * The measure should fail at the definition-building stage before evaluation even begins.
+     */
+    @Test
+    void ratioStringCriteriaStratUppercaseBasisShouldFail() {
+        final When when = GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioStringCriteriaStratUppercase")
+                .evaluate();
+
+        try {
+            when.then();
+            fail("Expected uppercase 'String' population basis to be rejected");
+        } catch (InvalidRequestException e) {
+            assertTrue(e.getMessage().contains("has an invalid population basis of 'String'"));
+            assertTrue(e.getMessage().contains("Did you mean to enter 'string' instead?"));
+        }
+    }
+
+    /**
+     * DQM-692: Ratio measure with lowercase "string" population basis (the valid FHIR type code)
+     * and CRITERIA stratifier returning String values. Validates that the fix for case-sensitive
+     * comparison in doesBasisMatchResource allows "string" basis to match String result types.
+     */
+    @Test
+    void ratioStringCriteriaStratLowercaseBasisShouldPass() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioStringCriteriaStratLowercase")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Gender Stratification String")
+                .hasStratumCount(1);
     }
 
     /**

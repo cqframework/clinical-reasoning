@@ -41,7 +41,7 @@
           }
         },
         {
-          "id": "measure-population",
+          "id": "measure-population-1",
           "code": {
             "coding": [
               {
@@ -77,7 +77,7 @@
           "extension" : [
             {
               "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
-              "valueString" : "measure-population"
+              "valueString" : "measure-population-1"
             },
             {
               "url" : "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",

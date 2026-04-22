@@ -1172,12 +1172,13 @@ class MeasureStratifierTest {
      */
     @Test
     void ratioStringCriteriaStratUppercaseBasisShouldFail() {
+        final When when = GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioStringCriteriaStratUppercase")
+                .evaluate();
+
         try {
-            GIVEN_MEASURE_STRATIFIER_TEST
-                    .when()
-                    .measureId("RatioStringCriteriaStratUppercase")
-                    .evaluate()
-                    .then();
+            when.then();
             fail("Expected uppercase 'String' population basis to be rejected");
         } catch (InvalidRequestException e) {
             assertTrue(e.getMessage().contains("has an invalid population basis of 'String'"));

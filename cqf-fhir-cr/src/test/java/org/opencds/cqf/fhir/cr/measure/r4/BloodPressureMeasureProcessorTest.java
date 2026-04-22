@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings("java:S2699")
@@ -22,10 +23,10 @@ class BloodPressureMeasureProcessorTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(1);
     }
 
@@ -41,10 +42,10 @@ class BloodPressureMeasureProcessorTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(2);
     }
 }

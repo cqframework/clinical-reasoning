@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings("java:S2699")
@@ -32,10 +33,10 @@ class SimpleMeasureProcessorTest {
                     .evaluate()
                     .then()
                     .firstGroup()
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(1)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(1);
 
             given.when()
@@ -47,10 +48,10 @@ class SimpleMeasureProcessorTest {
                     .evaluate()
                     .then()
                     .firstGroup()
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(0)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(1);
         }
 
@@ -66,10 +67,10 @@ class SimpleMeasureProcessorTest {
                     .then()
                     .firstGroup()
                     .hasScore("1.0")
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(1)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(1);
 
             given.when()
@@ -82,10 +83,10 @@ class SimpleMeasureProcessorTest {
                     .then()
                     .firstGroup()
                     .hasScore("0.0")
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(0)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(1);
         }
 
@@ -101,13 +102,13 @@ class SimpleMeasureProcessorTest {
                     .then()
                     .firstGroup()
                     .hasScore("0.5")
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(1)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(2)
                     .up()
-                    .population("initial-population")
+                    .population(MeasurePopulationType.INITIALPOPULATION)
                     .hasCount(2)
                     .up()
                     .up()
@@ -127,13 +128,13 @@ class SimpleMeasureProcessorTest {
                     .then()
                     .firstGroup()
                     .hasScore("0.5")
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(1)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(2)
                     .up()
-                    .population("initial-population")
+                    .population(MeasurePopulationType.INITIALPOPULATION)
                     .hasCount(2)
                     .up()
                     .up()
@@ -154,10 +155,10 @@ class SimpleMeasureProcessorTest {
                     .then()
                     .firstGroup()
                     .hasScore("1.0")
-                    .population("numerator")
+                    .population(MeasurePopulationType.NUMERATOR)
                     .hasCount(1)
                     .up()
-                    .population("denominator")
+                    .population(MeasurePopulationType.DENOMINATOR)
                     .hasCount(1)
                     .up()
                     .up()

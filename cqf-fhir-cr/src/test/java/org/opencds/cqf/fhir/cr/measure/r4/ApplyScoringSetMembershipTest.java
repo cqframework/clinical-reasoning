@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -31,19 +32,19 @@ class ApplyScoringSetMembershipTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(10)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(10)
                 .up()
-                .population("denominator-exclusion")
+                .population(MeasurePopulationType.DENOMINATOREXCLUSION)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(10)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(0) // numerator will not display subjects in denominator exclusion
                 .up()
@@ -66,15 +67,15 @@ class ApplyScoringSetMembershipTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(10)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(10)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 // Same interval for all 10 generated patients, should be a count of 10
                 .hasCount(10)
                 .up()

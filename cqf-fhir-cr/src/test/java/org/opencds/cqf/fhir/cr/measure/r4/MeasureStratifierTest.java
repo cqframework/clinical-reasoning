@@ -302,6 +302,60 @@ class MeasureStratifierTest {
                 .hasCount(5);
     }
 
+    /**
+     * Ratio Measure with Boolean Basis and multi-component stratifier (Gender + Age).
+     * This tests the critical path that was broken before the matchesStratumValue fix:
+     * stratum scores must be copied for multi-component strata, not just single-component.
+     *
+     * <p>Test data: 10 patients, all in IP and Denominator.
+     * Numerator = patients with finished encounters in measurement period.
+     * <ul>
+     *   <li>(M, 35): patients 1,3,5,7,9 → IP=5, Denom=5, Numer=1 (patient-9), Score=0.2</li>
+     *   <li>(F, 38): patients 0,2,4,6,8 → IP=5, Denom=5, Numer=1 (patient-8), Score=0.2</li>
+     * </ul>
+     */
+    @Test
+    void ratioBooleanMultiComponentStratHasScores() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioBooleanStratComponent")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(10)
+                .up()
+                .firstStratifier()
+                .hasCodeText("Gender and Age")
+                .hasStratumCount(2)
+                // Male stratum (M, 35): 5 males, 1 with finished encounter in period
+                .stratumByComponentValueText("M")
+                .hasComponentStratifierCount(2)
+                .hasScore("0.2")
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.DENOMINATOR)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.NUMERATOR)
+                .hasCount(1)
+                .up()
+                .up()
+                // Female stratum (F, 38): 5 females, 2 with finished encounters in period
+                .stratumByComponentValueText("F")
+                .hasComponentStratifierCount(2)
+                .hasScore("0.4")
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.DENOMINATOR)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.NUMERATOR)
+                .hasCount(2);
+    }
+
     @Test
     void invalidStratifierTopLevelCriteriaEmptyComponent() {
 

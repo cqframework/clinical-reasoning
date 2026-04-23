@@ -103,8 +103,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
         final var version = VisitorHelper.getStringParameter("version", operationParameters)
                 .orElseThrow(() -> new UnprocessableEntityException("Version must be present"));
-        final var releaseLabel = VisitorHelper.getStringParameter("releaseLabel", operationParameters)
-                .orElse("");
+        final var releaseLabel = VisitorHelper.getStringParameter("releaseLabel", operationParameters);
         final var versionBehavior = VisitorHelper.getStringParameter("versionBehavior", operationParameters);
         final var requireNonExperimental = VisitorHelper.getStringParameter(
                         "requireNonExperimental", operationParameters)
@@ -118,7 +117,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 });
         checkReleaseVersion(version, versionBehavior);
         checkReleasePreconditions(rootAdapter, rootAdapter.getApprovalDate());
-        updateReleaseLabel(rootLibrary, releaseLabel);
+        releaseLabel.ifPresent(label -> updateReleaseLabel(rootLibrary, label));
         // Determine which version should be used.
         final var existingVersion =
                 rootAdapter.hasVersion() ? rootAdapter.getVersion().replace("-draft", "") : null;

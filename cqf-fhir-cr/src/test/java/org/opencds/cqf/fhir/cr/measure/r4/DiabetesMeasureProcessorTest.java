@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings("squid:S2699")
@@ -21,10 +22,10 @@ class DiabetesMeasureProcessorTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(1);
     }
 
@@ -38,10 +39,10 @@ class DiabetesMeasureProcessorTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(2);
     }
 
@@ -62,10 +63,10 @@ class DiabetesMeasureProcessorTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(1);
     }
 }

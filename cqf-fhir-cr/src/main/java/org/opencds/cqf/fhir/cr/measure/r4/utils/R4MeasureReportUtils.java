@@ -123,10 +123,51 @@ public class R4MeasureReportUtils {
      */
     public static boolean matchesStratumValue(
             StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
-        // Use the same logic as R4MeasureReportScorer: compare CodeableConcept.text
+
+        if (stratumDef.isComponent()) {
+            return matchesComponentStratumValues(reportStratum, stratumDef);
+        }
+
+        // Existing single-value matching logic (unchanged)
         String reportText = reportStratum.hasValue() ? reportStratum.getValue().getText() : null;
         String defText = getStratumDefText(stratifierDef, stratumDef);
         return Objects.equals(reportText, defText);
+    }
+
+    /**
+     * Match a multi-component report stratum against a StratumDef by comparing
+     * each component's code text and value text.
+     */
+    private static boolean matchesComponentStratumValues(
+            StratifierGroupComponent reportStratum, StratumDef stratumDef) {
+
+        var reportComponents = reportStratum.getComponent();
+        var valueDefs = stratumDef.valueDefs();
+
+        if (reportComponents.size() != valueDefs.size()) {
+            return false;
+        }
+
+        for (var valueDef : valueDefs) {
+            var componentDef = valueDef.def();
+            if (componentDef == null || componentDef.code() == null) {
+                return false;
+            }
+
+            String expectedCodeText = componentDef.code().text();
+            String expectedValueText = valueDef.value().getValueAsString();
+
+            boolean found = reportComponents.stream()
+                    .anyMatch(rc -> Objects.equals(
+                                    expectedCodeText, rc.getCode().getText())
+                            && Objects.equals(expectedValueText, rc.getValue().getText()));
+
+            if (!found) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static void addAggregationResultMethodAndCriteriaRef(

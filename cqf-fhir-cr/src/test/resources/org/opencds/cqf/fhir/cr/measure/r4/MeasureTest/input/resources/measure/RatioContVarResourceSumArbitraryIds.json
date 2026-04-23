@@ -1,7 +1,7 @@
 {
-  "id": "RatioContVarResourceMin",
+  "id": "RatioContVarResourceSumArbitraryIds",
   "resourceType": "Measure",
-  "url": "http://example.com/Measure/RatioContVarResourceMin",
+  "url": "http://example.com/Measure/RatioContVarResourceSumArbitraryIds",
   "library": [
     "http://example.com/Library/LibrarySimple"
   ],
@@ -24,7 +24,7 @@
       "id": "group-1",
       "population": [
         {
-          "id": "initial-population",
+          "id": "IP_1",
           "code": {
             "coding": [
               {
@@ -40,7 +40,7 @@
           }
         },
         {
-          "id": "denominator",
+          "id": "Denominator_1",
           "code": {
             "coding": [
               {
@@ -56,7 +56,7 @@
           }
         },
         {
-          "id": "denominator-exclusion",
+          "id": "DenomExcl_1",
           "code": {
             "coding": [
               {
@@ -72,7 +72,7 @@
           }
         },
         {
-          "id": "numerator-exclusion",
+          "id": "NumerExcl_1",
           "code": {
             "coding": [
               {
@@ -88,7 +88,7 @@
           }
         },
         {
-          "id": "numerator",
+          "id": "Numerator_1",
           "code": {
             "coding": [
               {
@@ -107,10 +107,10 @@
           "id": "observation-num",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-            "valueCode": "minimum"
+            "valueCode": "sum"
           }, {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
-            "valueString": "numerator"
+            "valueString": "Numerator_1"
           } ],
           "code": {
             "coding": [ {
@@ -128,10 +128,10 @@
           "id": "observation-den",
           "extension": [ {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-aggregateMethod",
-            "valueCode": "minimum"
+            "valueCode": "sum"
           }, {
             "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-criteriaReference",
-            "valueString": "denominator"
+            "valueString": "Denominator_1"
           } ],
           "code": {
             "coding": [ {

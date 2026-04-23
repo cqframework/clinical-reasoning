@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.sonarqube)
     jacoco
     id("cqf.ci-conventions")
+    id("cqf.git-version")
 }
 
 // Required for the JaCoCo ant dependency used by the aggregate report task

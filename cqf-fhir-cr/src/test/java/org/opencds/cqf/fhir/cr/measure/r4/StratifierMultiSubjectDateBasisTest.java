@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -54,7 +55,7 @@ class StratifierMultiSubjectDateBasisTest {
                 .then()
                 .hasGroupCount(1)
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 // Group-level count: 2 patients × 5 dates = 10
                 .hasCount(10)
                 .up()
@@ -62,7 +63,7 @@ class StratifierMultiSubjectDateBasisTest {
                 .hasCodeText("Constant Stratifier")
                 .hasStratumCount(1)
                 .stratum(allDatesStratum)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 // Stratum count should also be 10 (all dates map to this stratum)
                 // BUG: Before fix, this was 5 due to deduplication
                 .hasCount(10)
@@ -90,14 +91,14 @@ class StratifierMultiSubjectDateBasisTest {
                 .then()
                 .hasGroupCount(1)
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 // Single patient × 5 dates = 5
                 .hasCount(5)
                 .up()
                 .firstStratifier()
                 .hasStratumCount(1)
                 .stratum(allDatesStratum)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(5)
                 .up()
                 .up()

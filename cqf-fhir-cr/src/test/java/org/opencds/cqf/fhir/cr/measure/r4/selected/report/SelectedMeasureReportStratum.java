@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.MeasureValidationUtils;
@@ -57,11 +58,11 @@ public class SelectedMeasureReportStratum
         return this;
     }
 
-    public SelectedMeasureReportStratumPopulation population(String name) {
+    public SelectedMeasureReportStratumPopulation population(MeasurePopulationType populationType) {
         var population = population(s -> s.getPopulation().stream()
                 .filter(x -> x.hasCode()
                         && x.getCode().hasCoding()
-                        && x.getCode().getCoding().get(0).getCode().equals(name))
+                        && x.getCode().getCoding().get(0).getCode().equals(populationType.toCode()))
                 .findFirst()
                 .orElse(null));
 

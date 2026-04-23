@@ -42,8 +42,8 @@ public interface Selector<T, S> { T select(S from); }
 
 ### Return Records (test infrastructure)
 
-- **`MeasureDefAndR4MeasureReport`**: Pairs a single `MeasureDef` with a single `MeasureReport` (used by `Measure`)
-- **`MeasureDefAndR4ParametersWithMeasureReports`**: Pairs `List<MeasureDef>` with `Parameters` containing bundled `MeasureReport`s (used by `MultiMeasure`)
+- **`MeasureDefAndR4MeasureReport`**: Pairs a single `MeasureDef` with a single `MeasureReport` and `Map<String, EvaluationResult>` (used by `Measure`)
+- **`MeasureDefAndR4ParametersWithMeasureReports`**: Pairs `List<MeasureDef>` with `Parameters` containing bundled `MeasureReport`s and `Map<MeasureDef, Map<String, EvaluationResult>>` evaluation results per measure (used by `MultiMeasure`)
 
 ## Given Phase - Test Setup
 
@@ -405,6 +405,9 @@ All classes in `selected/def/` extend `Measure.Selected<T, P>`.
 .group("groupId")                          -> SelectedMeasureDefGroup (by ID)
 .group(0)                                  -> SelectedMeasureDefGroup (by index)
 
+// Logging (debug aid, similar to SelectedMeasureReport.logReportJson())
+.logEvaluationResults()                    // Logs formatted CQL evaluation results (per subject) at INFO level
+
 // Assertions
 .hasNoErrors()
 .hasErrors(2)
@@ -421,6 +424,10 @@ All classes in `selected/def/` extend `Measure.Selected<T, P>`.
 **Parent**: generic `<P>` (used by `MultiMeasure.Then`)
 
 ```java
+// Logging (debug aid)
+.logAllMeasureEvaluationResults()          // Logs formatted CQL evaluation results for ALL measures at once
+
+// Navigation
 .hasCount(3)
 .first()                                   -> SelectedMeasureDef
 .get(0)                                    -> SelectedMeasureDef (by index)

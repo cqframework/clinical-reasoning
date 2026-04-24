@@ -288,7 +288,7 @@ class MeasureStratifierTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
                 .firstStratifier()
@@ -298,8 +298,62 @@ class MeasureStratifierTest {
                 .hasStratumCount(2)
                 .stratum("M")
                 .hasScore("0.2") // make sure stratum are scored
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(5);
+    }
+
+    /**
+     * Ratio Measure with Boolean Basis and multi-component stratifier (Gender + Age).
+     * This tests the critical path that was broken before the matchesStratumValue fix:
+     * stratum scores must be copied for multi-component strata, not just single-component.
+     *
+     * <p>Test data: 10 patients, all in IP and Denominator.
+     * Numerator = patients with finished encounters in measurement period.
+     * <ul>
+     *   <li>(M, 35): patients 1,3,5,7,9 → IP=5, Denom=5, Numer=1 (patient-9), Score=0.2</li>
+     *   <li>(F, 38): patients 0,2,4,6,8 → IP=5, Denom=5, Numer=1 (patient-8), Score=0.2</li>
+     * </ul>
+     */
+    @Test
+    void ratioBooleanMultiComponentStratHasScores() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioBooleanStratComponent")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(10)
+                .up()
+                .firstStratifier()
+                .hasCodeText("Gender and Age")
+                .hasStratumCount(2)
+                // Male stratum (M, 35): 5 males, 1 with finished encounter in period
+                .stratumByComponentValueText("M")
+                .hasComponentStratifierCount(2)
+                .hasScore("0.2")
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.DENOMINATOR)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.NUMERATOR)
+                .hasCount(1)
+                .up()
+                .up()
+                // Female stratum (F, 38): 5 females, 2 with finished encounters in period
+                .stratumByComponentValueText("F")
+                .hasComponentStratifierCount(2)
+                .hasScore("0.4")
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.DENOMINATOR)
+                .hasCount(5)
+                .up()
+                .population(MeasurePopulationType.NUMERATOR)
+                .hasCount(2);
     }
 
     @Test
@@ -350,7 +404,7 @@ class MeasureStratifierTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(4)
                 .up()
                 .hasStratifierCount(1)
@@ -359,7 +413,7 @@ class MeasureStratifierTest {
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(1)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1);
     }
 
@@ -379,13 +433,13 @@ class MeasureStratifierTest {
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(8)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 // due to apply scoring, we keep only those numerator encounters that are also in the denominator
                 .hasCount(5)
                 .up()
@@ -397,13 +451,13 @@ class MeasureStratifierTest {
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(0)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(0)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(0);
     }
 
@@ -434,7 +488,7 @@ class MeasureStratifierTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(9)
                 .up()
                 .hasStratifierCount(1)
@@ -461,7 +515,7 @@ class MeasureStratifierTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(2)
                 .up()
                 .hasStratifierCount(1)
@@ -484,13 +538,13 @@ class MeasureStratifierTest {
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(8)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 // due to apply scoring, we keep only those numerator encounters that are also in the denominator
                 .hasCount(5)
                 .up()
@@ -502,13 +556,13 @@ class MeasureStratifierTest {
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(3)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(2)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1);
     }
 
@@ -538,7 +592,19 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Exception for subjectId: Patient/patient-8, Message: stratifier expression criteria results for expression: [Encounters in Period] must fall within accepted types for population-basis: [boolean] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean] due to mismatch between total eval result classes: [Encounter] and matching result classes: []");
+                        "value stratifier is invalid for expression: [Encounters in Period] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanStratValueNonBoolean. Expected a scalar type");
+    }
+
+    @Test
+    void ratioEncounterValueStratExpressionNonCategorical() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioResourceStratValueNonCategorical")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "non-subject value stratifier is invalid for expression: [All Patient Encounters] with result types: [Encounter] for population basis: [Encounter] for measure URL: http://example.com/Measure/RatioResourceStratValueNonCategorical. Expected a scalar or scalar-returning function");
     }
 
     @Test
@@ -552,13 +618,13 @@ class MeasureStratifierTest {
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(8)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 // due to apply scoring, we keep only those numerator encounters that are also in the denominator
                 .hasCount(5)
                 .up()
@@ -570,13 +636,13 @@ class MeasureStratifierTest {
                 .hasStratumCount(1)
                 .firstStratum()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(3)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(2)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1);
     }
 
@@ -902,7 +968,7 @@ class MeasureStratifierTest {
                 .hasValueText("empty")
                 .up()
                 .hasPopulationCount(1)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCode(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(2);
     }
@@ -1155,6 +1221,45 @@ class MeasureStratifierTest {
     }
 
     /**
+     * DQM-692: Uppercase "String" is NOT a valid FHIRAllTypes code — only lowercase "string" is valid.
+     * The measure should fail at the definition-building stage before evaluation even begins.
+     */
+    @Test
+    void ratioStringCriteriaStratUppercaseBasisShouldFail() {
+        final When when = GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioStringCriteriaStratUppercase")
+                .evaluate();
+
+        try {
+            when.then();
+            fail("Expected uppercase 'String' population basis to be rejected");
+        } catch (InvalidRequestException e) {
+            assertTrue(e.getMessage().contains("has an invalid population basis of 'String'"));
+            assertTrue(e.getMessage().contains("Did you mean to enter 'string' instead?"));
+        }
+    }
+
+    /**
+     * DQM-692: Ratio measure with lowercase "string" population basis (the valid FHIR type code)
+     * and CRITERIA stratifier returning String values. Validates that the fix for case-sensitive
+     * comparison in doesBasisMatchResource allows "string" basis to match String result types.
+     */
+    @Test
+    void ratioStringCriteriaStratLowercaseBasisShouldPass() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("RatioStringCriteriaStratLowercase")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Gender Stratification String")
+                .hasStratumCount(1);
+    }
+
+    /**
      * Tests that patient with no encounters results in no stratum.
      * Patient with no encounters should not contribute to any stratum.
      */
@@ -1169,5 +1274,130 @@ class MeasureStratifierTest {
                 .firstGroup()
                 .firstStratifier()
                 .hasStratumCount(0); // No strata when patient has no encounters
+    }
+
+    /**
+     * Non-subject value stratifier with a component expression name that does not exist in the CQL library.
+     * Should produce a contained OperationOutcome with a contextual error message referencing both
+     * the bad expression name and the measure URL.
+     */
+    @Test
+    void cohortResourceValueStratNonExistentExpressionInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratNonExistentExpression")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("This Expression Does Not Exist")
+                .hasContainedOperationOutcomeMsg("CohortResourceValueStratNonExistentExpression");
+    }
+
+    /**
+     * Non-subject value stratifier with a component expression that exists in the CQL library
+     * but is neither a function (define function) nor a scalar — it returns a list of resources
+     * (e.g. "All Encounters" returns [Encounter] E). This expression resolves successfully
+     * (so isExpressionFunctionRef returns false), but it's not a valid stratifier value.
+     * Exercises the NON_SUBJECT_VALUE branch of buildValueStratifierErrorMessage.
+     */
+    @Test
+    void cohortResourceValueStratNonScalarNonFunctionInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratNonScalarNonFunction")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "non-subject value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for population basis: [Encounter] for measure URL: http://example.com/Measure/CohortResourceValueStratNonScalarNonFunction. Expected a scalar or scalar-returning function");
+    }
+
+    /**
+     * Non-subject value stratifier with a single scalar component expression ("Patient Age Bracket").
+     * This is a valid define (not a function) returning a String like '21--41'.
+     * Patient-9 has 2 encounters; both should share the same scalar stratum value.
+     */
+    @Test
+    void cohortResourceValueStratScalarOnly() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratScalarOnly")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(1)
+                .firstStratum()
+                .firstPopulation()
+                .hasCount(2);
+    }
+
+    /**
+     * Non-subject value stratifier with a single function component expression ("Encounter Status Stratifier").
+     * This is a valid define function taking an Encounter and returning its status string.
+     * Patient-9 has 2 encounters: one "finished" and one "in-progress", so expect 2 strata.
+     */
+    @Test
+    void cohortResourceValueStratFunctionOnly() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratFunctionOnly")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(2)
+                .firstStratum()
+                .firstPopulation()
+                .hasCount(1);
+    }
+
+    /**
+     * Non-subject value stratifier with a function component whose parameter type does not match
+     * the population basis. "Age of Period" takes Interval&lt;DateTime&gt; but the population basis
+     * is Encounter. isExpressionFunctionRef returns true (it IS a function), but the CQL engine
+     * fails at invocation time because the argument type doesn't match.
+     * Exercises FunctionEvaluationHandler.executeCqlFunction error handling (lines 533-539).
+     */
+    @Test
+    void cohortResourceValueStratFunctionWrongParamTypeInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratFunctionWrongParamType")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Exception for subjectId: Patient/patient-9, Message: CQL Exception while evaluating function: Age of Period");
+    }
+
+    /**
+     * Boolean/subject basis VALUE stratifier with a component expression that returns a list of resources
+     * ("All Encounters" returns [Encounter] E). This is not a function (passes validateNotFunction),
+     * but the result type (Encounter) is not in ALLOWED_STRATIFIER_VALUE_TYPES.
+     * Exercises the VALUE branch of buildValueStratifierErrorMessage.
+     */
+    @Test
+    void cohortBooleanValueStratListExpressionInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortBooleanValueStratListExpression")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanValueStratListExpression. Expected a scalar type");
     }
 }

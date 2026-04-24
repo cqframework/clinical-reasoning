@@ -57,17 +57,18 @@ public class SelectedMeasureDefStratum<P> extends org.opencds.cqf.fhir.cr.measur
     /**
      * Navigate to a stratum population by code (e.g., "numerator").
      *
-     * @param populationCode the population code
+     * @param populationType the population code
      * @return SelectedMeasureDefStratumPopulation for the matching population
      * @throws AssertionError if no population with the given code is found
      */
-    public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> population(String populationCode) {
+    public SelectedMeasureDefStratumPopulation<SelectedMeasureDefStratum<P>> population(
+            MeasurePopulationType populationType) {
         assertNotNull(value(), "StratumDef is null");
         StratumPopulationDef population = value().stratumPopulations().stream()
-                .filter(p -> populationCode.equals(p.id()))
+                .filter(p -> populationType.toCode().equals(p.id()))
                 .findFirst()
                 .orElse(null);
-        assertNotNull(population, "No stratum population found with code: " + populationCode);
+        assertNotNull(population, "No stratum population found with type: " + populationType);
         return new SelectedMeasureDefStratumPopulation<>(population, this);
     }
 

@@ -16,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.opencds.cqf.fhir.cr.crmi.KnowledgeArtifactProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.PackageHelper;
@@ -123,6 +124,31 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
                     IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(newResource);
             newResourceAdapter.setStatus("draft");
             newResourceAdapter.setVersion(draftVersion);
+
+            // Leaf ValueSet versions should be removed from grouper dependencies
+            var isGrouper =
+                    switch (repository.fhirContext().getVersion().getVersion()) {
+                        case DSTU3 ->
+                            KnowledgeArtifactProcessor.isGrouper(
+                                    (org.hl7.fhir.dstu3.model.MetadataResource) newResource);
+                        case R4 ->
+                            KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.r4.model.MetadataResource) newResource);
+                        case R5 ->
+                            KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.r5.model.MetadataResource) newResource);
+                        default ->
+                            throw new UnprocessableEntityException("Unsupported FHIR version: "
+                                    + repository.fhirContext().getVersion().getVersion());
+                    };
+
+            if (isGrouper) {
+                newResourceAdapter.getDependencies().forEach(vs -> {
+                    if (vs.getReference().contains("|")) {
+                        vs.setReference(
+                                vs.getReference().substring(0, vs.getReference().indexOf("|")));
+                    }
+                });
+            }
+
             resourcesToCreate.add(newResource);
             var ownedRelatedArtifacts = sourceResourceAdapter.getOwnedRelatedArtifacts();
             for (var ra : ownedRelatedArtifacts) {

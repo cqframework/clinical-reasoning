@@ -87,7 +87,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         // group Measure Scoring
         var groupScoring = getGroupMeasureScoring(measure, group);
         // populationBasis
-        var groupBasis = getGroupPopulationBasis(group);
+        var groupBasis = getGroupPopulationBasis(measure, group);
         // improvement Notation
         var groupImpNotation = getGroupImpNotation(measure, group);
         var hasGroupImpNotation = groupImpNotation != null;
@@ -233,10 +233,13 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         // One must reference numerator, one must reference denominator
-        var hasNumeratorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.NUMERATOR)
-                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.NUMERATOR);
-        var hasDenominatorRef = R4MeasureUtils.criteriaReferenceMatches(criteriaRef1, MeasurePopulationType.DENOMINATOR)
-                || R4MeasureUtils.criteriaReferenceMatches(criteriaRef2, MeasurePopulationType.DENOMINATOR);
+        var hasNumeratorRef = R4MeasureUtils.criteriaReferenceResolvesToType(
+                        criteriaRef1, group, MeasurePopulationType.NUMERATOR)
+                || R4MeasureUtils.criteriaReferenceResolvesToType(criteriaRef2, group, MeasurePopulationType.NUMERATOR);
+        var hasDenominatorRef =
+                R4MeasureUtils.criteriaReferenceResolvesToType(criteriaRef1, group, MeasurePopulationType.DENOMINATOR)
+                        || R4MeasureUtils.criteriaReferenceResolvesToType(
+                                criteriaRef2, group, MeasurePopulationType.DENOMINATOR);
 
         if (!hasNumeratorRef || !hasDenominatorRef) {
             throw new InvalidRequestException(
@@ -522,16 +525,40 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         var ext = measure.getExtensionByUrl(MeasureConstants.POPULATION_BASIS_URL);
         // check for population-basis Extension, assume boolean if no Extension is found
         if (ext != null) {
-            return makeCodeDefFromExtension(ext);
+            return makeCodeDefFromExtension(ext, measure.getUrl());
         }
         return null;
     }
 
-    private CodeDef makeCodeDefFromExtension(Extension extension) {
+    private CodeDef makeCodeDefFromExtension(Extension extension, String measureUrl) {
         var code = extension.getValue().toString();
-        // validate code membership
-        assert Enumerations.FHIRAllTypes.fromCode(code) != null;
+        validatePopulationBasisCode(code, measureUrl);
         return new CodeDef(MeasureConstants.POPULATION_BASIS_URL, code);
+    }
+
+    private void validatePopulationBasisCode(String code, String measureUrl) {
+        try {
+            Enumerations.FHIRAllTypes.fromCode(code);
+        } catch (Exception e) {
+            var matchingCode = findCaseInsensitiveMatch(code);
+            if (matchingCode.isPresent()) {
+                throw new InvalidRequestException(
+                        "Measure %s has an invalid population basis of '%s'. Did you mean to enter '%s' instead?"
+                                .formatted(measureUrl, code, matchingCode.get()));
+            }
+            throw new InvalidRequestException(
+                    "Measure %s has an invalid population basis of '%s'. See http://hl7.org/fhir/R4/valueset-all-types.html for allowed codes."
+                            .formatted(measureUrl, code));
+        }
+    }
+
+    private Optional<String> findCaseInsensitiveMatch(String code) {
+        for (var type : Enumerations.FHIRAllTypes.values()) {
+            if (type.toCode() != null && type.toCode().equalsIgnoreCase(code)) {
+                return Optional.of(type.toCode());
+            }
+        }
+        return Optional.empty();
     }
 
     public CodeDef getMeasureImprovementNotation(Measure measure) {
@@ -564,11 +591,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return R4MeasureUtils.getGroupMeasureScoring(measure, group);
     }
 
-    public CodeDef getGroupPopulationBasis(MeasureGroupComponent group) {
+    public CodeDef getGroupPopulationBasis(Measure measure, MeasureGroupComponent group) {
         var ext = group.getExtensionByUrl(MeasureConstants.POPULATION_BASIS_URL);
         // check for population-basis Extension, assume boolean if no Extension is found
         if (ext != null) {
-            return makeCodeDefFromExtension(ext);
+            return makeCodeDefFromExtension(ext, measure.getUrl());
         }
         return null;
     }

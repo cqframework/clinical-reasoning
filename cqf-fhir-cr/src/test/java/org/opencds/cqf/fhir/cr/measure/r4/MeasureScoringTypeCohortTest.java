@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -29,7 +30,7 @@ class MeasureScoringTypeCohortTest {
                 .def()
                 .hasNoErrors()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
                 .up()
@@ -37,7 +38,7 @@ class MeasureScoringTypeCohortTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
                 .up()
@@ -56,7 +57,7 @@ class MeasureScoringTypeCohortTest {
                 .def()
                 .hasNoErrors()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
                 .up()
@@ -64,7 +65,7 @@ class MeasureScoringTypeCohortTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
                 .up()
@@ -82,7 +83,7 @@ class MeasureScoringTypeCohortTest {
                 .def()
                 .hasNoErrors()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
                 .up()
                 .up()
@@ -90,7 +91,7 @@ class MeasureScoringTypeCohortTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(11)
                 .up()
                 .up()
@@ -122,7 +123,7 @@ class MeasureScoringTypeCohortTest {
                 .def()
                 .hasNoErrors()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(2)
                 .up()
                 .up()
@@ -130,7 +131,7 @@ class MeasureScoringTypeCohortTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(2)
                 .up()
                 .up()
@@ -160,7 +161,7 @@ class MeasureScoringTypeCohortTest {
                 .def()
                 .hasNoErrors()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
                 .up()
@@ -168,7 +169,7 @@ class MeasureScoringTypeCohortTest {
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 .report()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(10)
                 .up()
                 .up()

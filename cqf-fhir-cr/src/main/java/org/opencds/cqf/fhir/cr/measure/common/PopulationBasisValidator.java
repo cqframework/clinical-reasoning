@@ -197,7 +197,7 @@ public interface PopulationBasisValidator {
             var invalidTypes = resultClasses.stream()
                     .filter(c -> !resultMatchingClasses.contains(c))
                     .toList();
-            throw new InvalidRequestException(buildValueStratifierErrorMessage(
+            throw new InvalidStratifierExpressionTypeException(buildValueStratifierErrorMessage(
                     stratifierDef, expression, groupPopulationBasisCode, url, resultClasses, invalidTypes));
         }
     }

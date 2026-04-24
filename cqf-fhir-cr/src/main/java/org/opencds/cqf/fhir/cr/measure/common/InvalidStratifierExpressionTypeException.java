@@ -7,6 +7,11 @@ import java.util.List;
  * (e.g. a list of FHIR resources instead of a scalar value).
  */
 public class InvalidStratifierExpressionTypeException extends RuntimeException {
+
+    public InvalidStratifierExpressionTypeException(String message) {
+        super(message);
+    }
+
     public InvalidStratifierExpressionTypeException(
             String expression,
             String populationBasisCode,

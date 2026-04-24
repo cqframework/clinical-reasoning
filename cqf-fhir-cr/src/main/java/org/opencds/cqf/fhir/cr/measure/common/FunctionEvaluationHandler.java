@@ -365,7 +365,14 @@ public class FunctionEvaluationHandler {
         // - Scalar expressions (for subject-level stratification)
         // If it's a scalar expression, skip function processing here;
         // MeasureEvaluator.handleNonBooleanBasisComponent() will use the fallback path
-        if (!isExpressionFunctionRef(context, libraryIdentifier, stratifierExpression)) {
+        boolean isFunction;
+        try {
+            isFunction = isExpressionFunctionRef(context, libraryIdentifier, stratifierExpression);
+        } catch (Exception e) {
+            throw new StratifierExpressionNotFoundException(stratifierExpression, measureUrl, e);
+        }
+
+        if (!isFunction) {
             logger.debug(
                     "Non-subject value stratifier expression '{}' is a scalar expression, "
                             + "skipping function processing for measure: {}",

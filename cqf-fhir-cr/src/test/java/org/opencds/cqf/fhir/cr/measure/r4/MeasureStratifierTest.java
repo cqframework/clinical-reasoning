@@ -592,7 +592,7 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Value stratifier expression for [Encounters in Period] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean].");
+                        "value stratifier is invalid for expression: [Encounters in Period] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanStratValueNonBoolean. Expected a scalar type");
     }
 
     @Test
@@ -604,7 +604,7 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Non Subject Value stratifier expression for [All Patient Encounters] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/RatioResourceStratValueNonCategorical] with population basis: [Encounter].");
+                        "non-subject value stratifier is invalid for expression: [All Patient Encounters] with result types: [Encounter] for population basis: [Encounter] for measure URL: http://example.com/Measure/RatioResourceStratValueNonCategorical. Expected a scalar or scalar-returning function");
     }
 
     @Test
@@ -1274,5 +1274,130 @@ class MeasureStratifierTest {
                 .firstGroup()
                 .firstStratifier()
                 .hasStratumCount(0); // No strata when patient has no encounters
+    }
+
+    /**
+     * Non-subject value stratifier with a component expression name that does not exist in the CQL library.
+     * Should produce a contained OperationOutcome with a contextual error message referencing both
+     * the bad expression name and the measure URL.
+     */
+    @Test
+    void cohortResourceValueStratNonExistentExpressionInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratNonExistentExpression")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg("This Expression Does Not Exist")
+                .hasContainedOperationOutcomeMsg("CohortResourceValueStratNonExistentExpression");
+    }
+
+    /**
+     * Non-subject value stratifier with a component expression that exists in the CQL library
+     * but is neither a function (define function) nor a scalar — it returns a list of resources
+     * (e.g. "All Encounters" returns [Encounter] E). This expression resolves successfully
+     * (so isExpressionFunctionRef returns false), but it's not a valid stratifier value.
+     * Exercises the NON_SUBJECT_VALUE branch of buildValueStratifierErrorMessage.
+     */
+    @Test
+    void cohortResourceValueStratNonScalarNonFunctionInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratNonScalarNonFunction")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "non-subject value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for population basis: [Encounter] for measure URL: http://example.com/Measure/CohortResourceValueStratNonScalarNonFunction. Expected a scalar or scalar-returning function");
+    }
+
+    /**
+     * Non-subject value stratifier with a single scalar component expression ("Patient Age Bracket").
+     * This is a valid define (not a function) returning a String like '21--41'.
+     * Patient-9 has 2 encounters; both should share the same scalar stratum value.
+     */
+    @Test
+    void cohortResourceValueStratScalarOnly() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratScalarOnly")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(1)
+                .firstStratum()
+                .firstPopulation()
+                .hasCount(2);
+    }
+
+    /**
+     * Non-subject value stratifier with a single function component expression ("Encounter Status Stratifier").
+     * This is a valid define function taking an Encounter and returning its status string.
+     * Patient-9 has 2 encounters: one "finished" and one "in-progress", so expect 2 strata.
+     */
+    @Test
+    void cohortResourceValueStratFunctionOnly() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratFunctionOnly")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(2)
+                .firstStratum()
+                .firstPopulation()
+                .hasCount(1);
+    }
+
+    /**
+     * Non-subject value stratifier with a function component whose parameter type does not match
+     * the population basis. "Age of Period" takes Interval&lt;DateTime&gt; but the population basis
+     * is Encounter. isExpressionFunctionRef returns true (it IS a function), but the CQL engine
+     * fails at invocation time because the argument type doesn't match.
+     * Exercises FunctionEvaluationHandler.executeCqlFunction error handling (lines 533-539).
+     */
+    @Test
+    void cohortResourceValueStratFunctionWrongParamTypeInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratFunctionWrongParamType")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Exception for subjectId: Patient/patient-9, Message: CQL Exception while evaluating function: Age of Period");
+    }
+
+    /**
+     * Boolean/subject basis VALUE stratifier with a component expression that returns a list of resources
+     * ("All Encounters" returns [Encounter] E). This is not a function (passes validateNotFunction),
+     * but the result type (Encounter) is not in ALLOWED_STRATIFIER_VALUE_TYPES.
+     * Exercises the VALUE branch of buildValueStratifierErrorMessage.
+     */
+    @Test
+    void cohortBooleanValueStratListExpressionInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortBooleanValueStratListExpression")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanValueStratListExpression. Expected a scalar type");
     }
 }

@@ -16,6 +16,9 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.ValidationIssue;
+import org.opencds.cqf.fhir.cr.measure.common.ValidationResult;
+import org.opencds.cqf.fhir.cr.measure.common.ValidationSeverity;
 
 /**
  * Package-private context class for building R4 MeasureReports.
@@ -149,6 +152,15 @@ class R4MeasureReportBuilderContext {
         }
     }
 
+    public void addValidationOutcomes(ValidationResult validationResult) {
+        if (validationResult == null || validationResult.isEmpty()) {
+            return;
+        }
+        for (var issue : validationResult.getIssues()) {
+            addContained(createOperationOutcome(issue));
+        }
+    }
+
     private OperationOutcome createOperationOutcome(String errorMsg) {
         OperationOutcome op = new OperationOutcome();
         op.addIssue()
@@ -156,5 +168,49 @@ class R4MeasureReportBuilderContext {
                 .setCode(IssueType.EXCEPTION)
                 .setDiagnostics(errorMsg);
         return op;
+    }
+
+    private OperationOutcome createOperationOutcome(ValidationIssue issue) {
+        OperationOutcome op = new OperationOutcome();
+        var outcomeIssue = op.addIssue()
+                .setSeverity(mapSeverity(issue.severity()))
+                .setCode(mapIssueType(issue.code()))
+                .setDiagnostics(issue.description()
+                        + (issue.remediation() != null ? " Remediation: " + issue.remediation() : ""));
+
+        if (issue.code() != null) {
+            outcomeIssue
+                    .getDetails()
+                    .addCoding()
+                    .setSystem("http://opencds.org/fhir/measure-validation")
+                    .setCode(issue.code());
+        }
+
+        if (issue.location() != null) {
+            outcomeIssue.addLocation(issue.location());
+        }
+
+        return op;
+    }
+
+    private static OperationOutcome.IssueSeverity mapSeverity(ValidationSeverity severity) {
+        return switch (severity) {
+            case ERROR -> OperationOutcome.IssueSeverity.ERROR;
+            case WARNING -> OperationOutcome.IssueSeverity.WARNING;
+            case INFO -> OperationOutcome.IssueSeverity.INFORMATION;
+        };
+    }
+
+    private static IssueType mapIssueType(String validationCode) {
+        if (validationCode == null) {
+            return IssueType.PROCESSING;
+        }
+        return switch (validationCode) {
+            case "LIBRARY_NOT_FOUND", "VALUESET_UNAVAILABLE" -> IssueType.NOTFOUND;
+            case "EXPRESSION_NOT_FOUND" -> IssueType.NOTFOUND;
+            case "MISSING_REQUIRED_PARAMETER" -> IssueType.REQUIRED;
+            case "UNKNOWN_PARAMETER", "PARAMETER_TYPE_MISMATCH" -> IssueType.VALUE;
+            default -> IssueType.PROCESSING;
+        };
     }
 }

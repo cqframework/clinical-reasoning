@@ -33,11 +33,15 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.CompositeMeasureDefValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDefValidationContext;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureDefValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -52,6 +56,7 @@ public class R4MeasureProcessor {
     private final MeasureEvaluationOptions measureEvaluationOptions;
     private final FhirContext fhirContext = FhirContext.forR4Cached();
     private final MeasureEvaluationResultHandler measureEvaluationResultHandler;
+    private final MeasureDefValidator preEvaluationValidator;
 
     public R4MeasureProcessor(IRepository repository, MeasureEvaluationOptions measureEvaluationOptions) {
 
@@ -60,6 +65,11 @@ public class R4MeasureProcessor {
                 measureEvaluationOptions != null ? measureEvaluationOptions : MeasureEvaluationOptions.defaultOptions();
         this.measureEvaluationResultHandler =
                 new MeasureEvaluationResultHandler(this.measureEvaluationOptions, new R4PopulationBasisValidator());
+        this.preEvaluationValidator = new CompositeMeasureDefValidator(List.of(
+                new R4CqlLibraryValidator(),
+                new R4ValueSetAvailabilityValidator(),
+                new R4ParameterConfigurationValidator(),
+                new R4ExpressionReferenceValidator()));
     }
 
     // Expose this so CQL measure evaluation can use the same Repository as the one passed to the
@@ -178,6 +188,9 @@ public class R4MeasureProcessor {
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
+
+        // Run pre-evaluation validation
+        runPreEvaluationValidation(measureDef, measure, null);
 
         // Process Criteria Expression Results
         measureEvaluationResultHandler.processResults(fhirContext, results, measureDef, evaluationType);
@@ -393,14 +406,19 @@ public class R4MeasureProcessor {
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
         R4MeasureDefBuilder.triggerFirstPassValidation(measures);
 
+        // Run pre-evaluation validation checks (library resolution, valueset availability, etc.)
+        final Map<String, Object> parametersMap = new HashMap<>(resolveParameterMap(parameters));
+        for (Measure measure : measures) {
+            var measureDef = new R4MeasureDefBuilder().build(measure);
+            runPreEvaluationValidation(measureDef, measure, parametersMap);
+        }
+
         var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures);
 
         var measureUrls = measures.stream()
                 .map(Measure::getUrl)
                 .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
                 .toList();
-
-        final Map<String, Object> parametersMap = new HashMap<>(resolveParameterMap(parameters));
 
         MeasureProcessorTimeUtils.resolveMeasurementPeriodIntoParameters(
                 measurementPeriodParams,
@@ -536,5 +554,29 @@ public class R4MeasureProcessor {
             measurementPeriod = helper.buildMeasurementPeriodInterval(periodStart, periodEnd);
         }
         return measurementPeriod;
+    }
+
+    private void runPreEvaluationValidation(
+            org.opencds.cqf.fhir.cr.measure.common.MeasureDef measureDef,
+            Measure measure,
+            @Nullable Map<String, Object> parameters) {
+        var validationContext = new MeasureDefValidationContext(measureDef, measure, repository, parameters);
+        var validationResult = preEvaluationValidator.validate(validationContext);
+
+        // Log warnings
+        for (var issue : validationResult.getIssues()) {
+            if (issue.isWarning()) {
+                log.warn(
+                        "Measure validation warning [{}]: {} - {}",
+                        issue.code(),
+                        issue.description(),
+                        issue.remediation());
+            }
+        }
+
+        // Block on errors
+        if (validationResult.hasErrors()) {
+            throw new MeasureValidationException(measure.getUrl(), validationResult);
+        }
     }
 }

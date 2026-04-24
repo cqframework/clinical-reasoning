@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureValidationException;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 // This class has tests that verify failure behavior for various types of invalid measures.
@@ -28,7 +28,9 @@ class InvalidMeasureTest {
                 .when()
                 .measureId("LibraryUnavailable")
                 .evaluate();
-        assertThrows(ResourceNotFoundException.class, when::then);
+        var e = assertThrows(MeasureValidationException.class, when::then);
+        assertTrue(e.getMessage().contains("LIBRARY_NOT_FOUND"));
+        assertTrue(e.getMessage().contains("was not found in the repository"));
     }
 
     @Test

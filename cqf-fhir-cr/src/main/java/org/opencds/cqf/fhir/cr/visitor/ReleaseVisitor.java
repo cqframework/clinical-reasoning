@@ -59,12 +59,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
     private static final String NOT_SUPPORTED = " not supported";
     private Logger logger = LoggerFactory.getLogger(ReleaseVisitor.class);
     protected final ITerminologyServerClient terminologyServerClient;
-    private IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
+    protected IKnowledgeArtifactAdapter artifactBeingReleasedAdapter;
 
     // Hold on to terminology sever settings.
     // TerminologyProviderRouters don't keep a reference to the settings, those are for individual clients.
     // In the future allow for the ability to have unique settings for each client type.
-    private TerminologyServerClientSettings terminologyServerClientSettings;
+    protected TerminologyServerClientSettings terminologyServerClientSettings;
 
     public ReleaseVisitor(IRepository repository) {
         super(repository);
@@ -103,8 +103,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
         final var version = VisitorHelper.getStringParameter("version", operationParameters)
                 .orElseThrow(() -> new UnprocessableEntityException("Version must be present"));
-        final var releaseLabel = VisitorHelper.getStringParameter("releaseLabel", operationParameters)
-                .orElse("");
+        final var releaseLabel = VisitorHelper.getStringParameter("releaseLabel", operationParameters);
         final var versionBehavior = VisitorHelper.getStringParameter("versionBehavior", operationParameters);
         final var requireNonExperimental = VisitorHelper.getStringParameter(
                         "requireNonExperimental", operationParameters)
@@ -118,7 +117,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 });
         checkReleaseVersion(version, versionBehavior);
         checkReleasePreconditions(rootAdapter, rootAdapter.getApprovalDate());
-        updateReleaseLabel(rootLibrary, releaseLabel);
+        releaseLabel.ifPresent(label -> updateReleaseLabel(rootLibrary, label));
         // Determine which version should be used.
         final var existingVersion =
                 rootAdapter.hasVersion() ? rootAdapter.getVersion().replace("-draft", "") : null;
@@ -193,11 +192,12 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             if (isDistinct) {
                 distinctResolvedRelatedArtifacts.add(resolvedRelatedArtifact);
                 // preserve Extensions if found
+                var resolvedUrl = Canonicals.getUrl(relatedArtifactReference);
                 originalDependenciesWithExtensions.stream()
-                        .filter(originalDep -> Canonicals.getUrl(originalDep.getReference())
-                                        .equals(Canonicals.getUrl(relatedArtifactReference))
-                                && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
-                                        .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
+                        .filter(originalDep ->
+                                Objects.equals(Canonicals.getUrl(originalDep.getReference()), resolvedUrl)
+                                        && IKnowledgeArtifactAdapter.getRelatedArtifactType(resolvedRelatedArtifact)
+                                                .equalsIgnoreCase(Constants.RELATEDARTIFACT_TYPE_DEPENDSON))
                         .findFirst()
                         .ifPresent(dep -> {
                             ((List<IBaseExtension<?, ?>>) resolvedRelatedArtifact.getExtension())
@@ -228,7 +228,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return repository.transaction(transactionBundle);
     }
 
-    private void captureInputExpansionParams(
+    protected void captureInputExpansionParams(
             IBaseParameters inputExpansionParams, IKnowledgeArtifactAdapter rootAdapter) {
         if (this.fhirVersion().equals(FhirVersionEnum.DSTU3)) {
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.captureInputExpansionParams(
@@ -242,7 +242,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private static void updateMetadata(
+    protected static void updateMetadata(
             IKnowledgeArtifactAdapter artifactAdapter,
             String version,
             ICompositeType rootEffectivePeriod,
@@ -477,7 +477,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
+    protected Optional<IKnowledgeArtifactAdapter> tryResolveDependency(
             IDependencyInfo dependency,
             IBaseParameters inputExpansionParameters,
             boolean latestFromTxServer,
@@ -679,7 +679,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private Optional<String> getReleaseVersion(
+    protected Optional<String> getReleaseVersion(
             String version, Optional<String> versionBehavior, String existingVersion, FhirVersionEnum fhirVersion)
             throws UnprocessableEntityException {
         switch (fhirVersion) {
@@ -699,7 +699,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
+    protected void updateReleaseLabel(IBaseResource artifact, String releaseLabel) throws IllegalArgumentException {
         if (artifact instanceof org.hl7.fhir.dstu3.model.MetadataResource resource2) {
             org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.updateReleaseLabel(resource2, releaseLabel);
         } else if (artifact instanceof org.hl7.fhir.r4.model.MetadataResource resource1) {
@@ -727,7 +727,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return Optional.empty();
     }
 
-    private void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
+    protected void checkReleasePreconditions(IKnowledgeArtifactAdapter artifact, Date approvalDate)
             throws PreconditionFailedException {
         if (artifact == null) {
             throw new ResourceNotFoundException("Resource not found.");
@@ -752,7 +752,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         }
     }
 
-    private void checkReleaseVersion(String version, Optional<String> versionBehavior)
+    protected void checkReleaseVersion(String version, Optional<String> versionBehavior)
             throws UnprocessableEntityException {
         if (versionBehavior.isEmpty()) {
             throw new UnprocessableEntityException(

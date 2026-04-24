@@ -59,6 +59,47 @@ public class DependencyRoleClassifier {
     }
 
     /**
+     * Classifies the roles for a dependency, also considering transitive key canonicals
+     * discovered via ValueSet compose chain walking.
+     *
+     * @param dependency the dependency information
+     * @param sourceArtifact the artifact that has this dependency
+     * @param dependencyArtifact the artifact being depended on (may be null if not available)
+     * @param resolver the conformance resource resolver
+     * @param transitiveKeyCanonicals set of canonical URLs known to be key via compose walking
+     * @return the list of role codes
+     */
+    public static List<String> classifyDependencyRoles(
+            IDependencyInfo dependency,
+            IKnowledgeArtifactAdapter sourceArtifact,
+            IKnowledgeArtifactAdapter dependencyArtifact,
+            ConformanceResourceResolver resolver,
+            Set<String> transitiveKeyCanonicals) {
+
+        List<String> roles = new ArrayList<>();
+
+        if (isKeyDependency(dependency, sourceArtifact, dependencyArtifact, resolver)
+                || isTransitiveKeyDependency(dependency, transitiveKeyCanonicals)) {
+            roles.add("key");
+        }
+
+        roles.add("default");
+        return roles;
+    }
+
+    /**
+     * Checks if a dependency is in the set of transitive key canonicals discovered
+     * via ValueSet compose chain walking.
+     */
+    private static boolean isTransitiveKeyDependency(IDependencyInfo dependency, Set<String> transitiveKeyCanonicals) {
+        if (transitiveKeyCanonicals == null || transitiveKeyCanonicals.isEmpty()) {
+            return false;
+        }
+        var canonical = getDependencyCanonical(dependency.getReference());
+        return canonical != null && transitiveKeyCanonicals.contains(canonical);
+    }
+
+    /**
      * Determines if a dependency is a key dependency using standards-based analysis.
      * <p>
      * For StructureDefinition (profile) sources with ValueSet dependencies, this uses the

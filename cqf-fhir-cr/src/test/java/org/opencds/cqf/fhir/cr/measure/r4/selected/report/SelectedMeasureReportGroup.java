@@ -16,6 +16,7 @@ import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupPopulationComponent;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
 import org.hl7.fhir.r4.model.Period;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 import org.opencds.cqf.fhir.cr.measure.r4.MeasureValidationUtils;
@@ -78,13 +79,23 @@ public class SelectedMeasureReportGroup
         return this;
     }
 
-    public SelectedMeasureReportPopulation population(String name) {
-        return this.population(g -> g.getPopulation().stream()
+    public SelectedMeasureReportPopulation population(MeasurePopulationType type) {
+        var population = value().getPopulation().stream()
                 .filter(x -> x.hasCode()
                         && x.getCode().hasCoding()
-                        && x.getCode().getCoding().get(0).getCode().equals(name))
+                        && x.getCode().getCoding().get(0).getCode().equals(type.toCode()))
                 .findFirst()
-                .get());
+                .orElse(null);
+        assertNotNull(
+                population,
+                "Population of type '%s' not found in group. Available population codes: %s"
+                        .formatted(
+                                type.toCode(),
+                                value().getPopulation().stream()
+                                        .filter(x -> x.hasCode() && x.getCode().hasCoding())
+                                        .map(x -> x.getCode().getCoding().get(0).getCode())
+                                        .toList()));
+        return new SelectedMeasureReportPopulation(population, this);
     }
 
     public SelectedMeasureReportPopulation populationId(String populationId) {

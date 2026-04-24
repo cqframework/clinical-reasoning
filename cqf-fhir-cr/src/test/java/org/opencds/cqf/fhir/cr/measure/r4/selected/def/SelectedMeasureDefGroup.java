@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -46,19 +47,19 @@ public class SelectedMeasureDefGroup<P> extends org.opencds.cqf.fhir.cr.measure.
     /**
      * Navigate to a population by code (e.g., "numerator", "denominator").
      *
-     * @param populationCode the population code
+     * @param populationType the population code
      * @return SelectedMeasureDefPopulation for the matching population
      * @throws AssertionError if no population with the given code is found
      */
-    public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> population(String populationCode) {
+    public SelectedMeasureDefPopulation<SelectedMeasureDefGroup<P>> population(MeasurePopulationType populationType) {
         assertNotNull(value(), "GroupDef is null");
         PopulationDef population = value().populations().stream()
                 .filter(p -> p.code() != null
                         && !p.code().isEmpty()
-                        && p.code().first().code().equals(populationCode))
+                        && p.code().first().code().equals(populationType.toCode()))
                 .findFirst()
                 .orElse(null);
-        assertNotNull(population, "No population found with code: " + populationCode);
+        assertNotNull(population, "No population found with type: " + populationType);
         return new SelectedMeasureDefPopulation<>(population, this);
     }
 

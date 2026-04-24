@@ -36,12 +36,12 @@ import org.hl7.fhir.r4.model.TerminologyCapabilities.TerminologyCapabilitiesCode
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
-import org.opencds.cqf.fhir.cr.ecr.r4.R4ImportBundleProducer;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.r4.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.Uris;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
@@ -264,7 +264,7 @@ public class ReleaseVisitor {
 
     public static void addAuthoritativeSourceExtension(ValueSet valueSet, String url) {
         try {
-            url = R4ImportBundleProducer.ensureHttps(url);
+            url = Uris.ensureHttps(url);
         } catch (URISyntaxException | MalformedURLException e) {
             // Do nothing here and let the malformed URL flow through.
         }

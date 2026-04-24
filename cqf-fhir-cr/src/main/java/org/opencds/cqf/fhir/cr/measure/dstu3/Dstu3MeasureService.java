@@ -87,7 +87,7 @@ public class Dstu3MeasureService implements Dstu3MeasureEvaluatorSingle {
      *                               received.
      * @param productLine         the productLine (e.g. Medicare, Medicaid, etc) to use
      *                               for the evaluation. This is a non-standard parameter.
-     * @param environment         endpoint and supplemental data configuration
+     * @param parameters          parameters to pass to the CQL evaluation
      * @return the calculated MeasureReport
      */
     @Override

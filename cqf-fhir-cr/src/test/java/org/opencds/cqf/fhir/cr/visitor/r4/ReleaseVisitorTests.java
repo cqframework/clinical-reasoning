@@ -28,7 +28,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -582,9 +581,7 @@ class ReleaseVisitorTests {
         // Return versioned ValueSet, without Authoritative Source Extension - replicates Terminology Server behavior
         var latestVset = originalVset.copy();
         latestVset.setVersion("3.0.0");
-        latestVset.setExtension(latestVset.getExtension().stream()
-                .filter(ext -> !ext.getUrl().equals(TransformProperties.authoritativeSourceExtUrl))
-                .collect(Collectors.toList()));
+        latestVset.getExtension().removeIf(ext -> ext.getUrl().equals(TransformProperties.authoritativeSourceExtUrl));
         var clientMock = mock(ITerminologyServerClient.class, new ReturnsDeepStubs());
         when(clientMock.getLatestValueSetResource(any(IEndpointAdapter.class), any()))
                 .thenReturn(Optional.of(latestVset));

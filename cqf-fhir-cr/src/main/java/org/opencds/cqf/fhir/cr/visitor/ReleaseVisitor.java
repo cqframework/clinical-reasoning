@@ -522,24 +522,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             maybeAdapter = terminologyServerClient
                     .getLatestValueSetResource(endpoint, reference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
-            maybeAdapter.ifPresent(adapter -> {
-                if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
-                    switch (fhirVersion()) {
-                        case DSTU3 ->
-                            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.addAuthoritativeSourceExtension(
-                                    (org.hl7.fhir.dstu3.model.ValueSet) adapter.get(), adapter.getUrl());
-                        case R4 ->
-                            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.addAuthoritativeSourceExtension(
-                                    (org.hl7.fhir.r4.model.ValueSet) adapter.get(), adapter.getUrl());
-                        case R5 ->
-                            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.addAuthoritativeSourceExtension(
-                                    (org.hl7.fhir.r5.model.ValueSet) adapter.get(), adapter.getUrl());
-                        default ->
-                            throw new UnprocessableEntityException(
-                                    "Unsupported FHIR version: " + fhirVersion().name());
-                    }
-                }
-            });
+            maybeAdapter.ifPresent(this::ensureAuthoritativeSourcExtension);
         } else if (resourceType != null
                 && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
                 && latestFromTxServer) {
@@ -561,6 +544,25 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             }
         }
         return maybeAdapter;
+    }
+
+    private void ensureAuthoritativeSourcExtension(IKnowledgeArtifactAdapter adapter) {
+        if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
+            switch (fhirVersion()) {
+                case DSTU3 ->
+                    org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.addAuthoritativeSourceExtension(
+                            (org.hl7.fhir.dstu3.model.ValueSet) adapter.get(), adapter.getUrl());
+                case R4 ->
+                    org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.addAuthoritativeSourceExtension(
+                            (org.hl7.fhir.r4.model.ValueSet) adapter.get(), adapter.getUrl());
+                case R5 ->
+                    org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.addAuthoritativeSourceExtension(
+                            (org.hl7.fhir.r5.model.ValueSet) adapter.get(), adapter.getUrl());
+                default ->
+                    throw new UnprocessableEntityException(
+                            "Unsupported FHIR version: " + fhirVersion().name());
+            }
+        }
     }
 
     private <T extends ICompositeType & IBaseHasExtensions> Optional<IKnowledgeArtifactAdapter> updateComponentAndCache(

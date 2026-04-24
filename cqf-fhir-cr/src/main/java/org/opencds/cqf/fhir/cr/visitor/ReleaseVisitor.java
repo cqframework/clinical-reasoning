@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.cr.common.ExtensionBuilders;
+import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -521,6 +522,24 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             maybeAdapter = terminologyServerClient
                     .getLatestValueSetResource(endpoint, reference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
+            maybeAdapter.ifPresent(adapter -> {
+                if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
+                    switch (fhirVersion()) {
+                        case DSTU3 ->
+                            org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.addAuthoritativeSourceExtension(
+                                    (org.hl7.fhir.dstu3.model.ValueSet) adapter.get(), adapter.getUrl());
+                        case R4 ->
+                            org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.addAuthoritativeSourceExtension(
+                                    (org.hl7.fhir.r4.model.ValueSet) adapter.get(), adapter.getUrl());
+                        case R5 ->
+                            org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.addAuthoritativeSourceExtension(
+                                    (org.hl7.fhir.r5.model.ValueSet) adapter.get(), adapter.getUrl());
+                        default ->
+                            throw new UnprocessableEntityException(
+                                    "Unsupported FHIR version: " + fhirVersion().name());
+                    }
+                }
+            });
         } else if (resourceType != null
                 && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
                 && latestFromTxServer) {

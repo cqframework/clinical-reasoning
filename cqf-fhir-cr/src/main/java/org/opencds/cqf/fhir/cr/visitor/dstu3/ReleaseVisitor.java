@@ -4,6 +4,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +24,13 @@ import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ResourceType;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
+import org.opencds.cqf.fhir.cr.ecr.r4.R4ImportBundleProducer;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseExperimentalBehavior.CRMIReleaseExperimentalBehaviorCodes;
 import org.opencds.cqf.fhir.cr.visitor.dstu3.CRMIReleaseVersionBehavior.CRMIReleaseVersionBehaviorCodes;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -178,5 +183,17 @@ public class ReleaseVisitor {
                         "Unsupported IBaseParameters implementation: " + inputExpansionParams.getClass());
             }
         }
+    }
+
+    public static void addAuthoritativeSourceExtension(ValueSet valueSet, String url) {
+        try {
+            url = R4ImportBundleProducer.ensureHttps(url);
+        } catch (URISyntaxException | MalformedURLException e) {
+            // Do nothing here and let the malformed URL flow through.
+        }
+        var ext = new Extension();
+        ext.setUrl(TransformProperties.authoritativeSourceExtUrl);
+        ext.setValue(new UriType(url));
+        valueSet.getExtension().add(ext);
     }
 }

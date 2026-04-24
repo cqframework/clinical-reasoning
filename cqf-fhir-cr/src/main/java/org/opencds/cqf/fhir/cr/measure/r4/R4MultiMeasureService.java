@@ -30,6 +30,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationRequest;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -74,61 +75,37 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     @Override
-    public MeasureReport evaluate(
-            MeasureReference measure,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            String subjectId,
-            String lastReceivedOn,
-            Parameters parameters,
-            String productLine,
-            String practitioner) {
-
-        return evaluateSingleMeasureCaptureDef(
-                        measure,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        subjectId,
-                        lastReceivedOn,
-                        repository,
-                        parameters,
-                        productLine,
-                        null) // reporter is null in the single measure case
+    public MeasureReport evaluate(MeasureReference measure, MeasureEvaluationRequest request, Parameters parameters) {
+        return evaluateSingleMeasureCaptureDef(measure, request, repository, parameters)
                 .measureReport();
     }
 
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     *
+     * @param measure     the measure to evaluate
+     * @param request     evaluation request parameters
+     * @param resolvedRepo fully configured repository (endpoints proxied, data federated)
+     * @param parameters  CQL parameters
+     * @return MeasureDefAndR4MeasureReport containing both MeasureDef and MeasureReport
+     */
     @VisibleForTesting
     MeasureDefAndR4MeasureReport evaluateSingleMeasureCaptureDef(
             MeasureReference measure,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            String subjectId,
-            String lastReceivedOn,
+            MeasureEvaluationRequest request,
             IRepository resolvedRepo,
-            Parameters parameters,
-            String productLine,
-            String practitioner) {
+            Parameters parameters) {
 
-        final List<List<MeasureDefAndR4MeasureReport>> resultsAsListOfList = evaluateToListOfList(
-                SingleOrMultiple.SINGLE,
-                List.of(measure),
-                periodStart,
-                periodEnd,
-                reportType,
-                subjectId,
-                resolvedRepo,
-                parameters,
-                productLine,
-                null,
-                practitioner); // reporter is null in the single measure case
+        final List<List<MeasureDefAndR4MeasureReport>> resultsAsListOfList =
+                evaluateToListOfList(SingleOrMultiple.SINGLE, List.of(measure), request, resolvedRepo, parameters);
 
         if (resultsAsListOfList.size() != 1) {
             throw new InternalErrorException(
                     "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
-                            .formatted(measure, subjectId));
+                            .formatted(measure, request.subjectId()));
         }
 
         final List<MeasureDefAndR4MeasureReport> measureDefAndR4MeasureReports = resultsAsListOfList.get(0);
@@ -136,7 +113,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         if (measureDefAndR4MeasureReports.size() != 1) {
             throw new InternalErrorException(
                     "Expected only a single MeasureReport but got multiples for measureId: %s and subjectId: %s"
-                            .formatted(measure, subjectId));
+                            .formatted(measure, request.subjectId()));
         }
 
         return measureDefAndR4MeasureReports.get(0);
@@ -144,26 +121,8 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     @Override
     public Parameters evaluate(
-            List<MeasureReference> measures,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            String subject, // practitioner passed in here
-            Parameters parameters,
-            String productLine,
-            String reporter) {
-
-        return evaluateWithDefs(
-                        measures,
-                        periodStart,
-                        periodEnd,
-                        reportType,
-                        subject,
-                        repository,
-                        parameters,
-                        productLine,
-                        reporter)
-                .parameters();
+            List<MeasureReference> measures, MeasureEvaluationRequest request, Parameters parameters) {
+        return evaluateWithDefs(measures, request, repository, parameters).parameters();
     }
 
     /**
@@ -188,46 +147,37 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
      * @param reporter reporter ID
      * @return MeasureDefAndR4ParametersWithMeasureReports containing Set of MeasureDefs and Parameters with bundled MeasureReports
      */
+    /**
+     * Test-visible evaluation method that captures both MeasureDef and MeasureReport for each measure.
+     * <p>
+     * <strong>TEST INFRASTRUCTURE ONLY - DO NOT USE IN PRODUCTION CODE</strong>
+     * </p>
+     *
+     * @param measures     list of MeasureReferences
+     * @param request      evaluation request parameters
+     * @param resolvedRepo fully configured repository (endpoints proxied, data federated)
+     * @param parameters   CQL parameters
+     * @return MeasureDefAndR4ParametersWithMeasureReports containing Set of MeasureDefs and Parameters with bundled MeasureReports
+     */
     @VisibleForTesting
     MeasureDefAndR4ParametersWithMeasureReports evaluateWithDefs(
             List<MeasureReference> measures,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            String subject,
+            MeasureEvaluationRequest request,
             IRepository resolvedRepo,
-            Parameters parameters,
-            String productLine,
-            String reporter) {
+            Parameters parameters) {
 
-        return toMeasureDefAndParametersResults(evaluateToListOfList(
-                SingleOrMultiple.MULTIPLE,
-                measures,
-                periodStart,
-                periodEnd,
-                reportType,
-                subject,
-                resolvedRepo,
-                parameters,
-                productLine,
-                reporter,
-                null));
+        return toMeasureDefAndParametersResults(
+                evaluateToListOfList(SingleOrMultiple.MULTIPLE, measures, request, resolvedRepo, parameters));
     }
 
     private List<List<MeasureDefAndR4MeasureReport>> evaluateToListOfList(
             SingleOrMultiple singleOrMultiple,
             List<MeasureReference> measureRefs,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            String reportType,
-            String subject,
+            MeasureEvaluationRequest request,
             IRepository resolvedRepo,
-            Parameters parameters,
-            String productLine,
-            String reporter,
-            @Nullable String practitioner) {
+            Parameters parameters) {
 
-        measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
+        measurePeriodValidator.validatePeriodStartAndEnd(request.periodStart(), request.periodEnd());
 
         var r4ProcessorToUse = new R4MeasureProcessor(resolvedRepo, this.measureEvaluationOptions);
         var r4MeasureServiceUtilsToUse = new R4MeasureServiceUtils(resolvedRepo);
@@ -236,27 +186,20 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             r4MeasureServiceUtilsToUse.ensureSupplementalDataElementSearchParameter();
         }
 
-        // backward compatibility: in the single measure case, we set the subjectId to practitioner,
-        // but we don't in the multi-measure case.
+        // Single-measure case: practitioner takes precedence over subjectId.
+        // Multi-measure case: subjectId is used as-is (practitioner field not used).
         final String subjectToUse;
         if (SingleOrMultiple.SINGLE == singleOrMultiple) {
-            if (StringUtils.isNotBlank(practitioner)) {
-                if (!practitioner.contains("/")) {
-                    practitioner = "Practitioner/".concat(practitioner);
-                }
-                subjectToUse = practitioner;
-            } else {
-                subjectToUse = subject;
-            }
+            subjectToUse = resolvePractitionerOverride(request.subjectId(), request.practitioner());
         } else {
-            subjectToUse = subject;
+            subjectToUse = request.subjectId();
         }
 
         final List<Measure> measures = r4MeasureServiceUtilsToUse.getMeasures(measureRefs);
 
         log.debug("multi-evaluate-measure, measures to evaluate: {}", measures.size());
 
-        var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subjectToUse);
+        var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(request.reportType(), subjectToUse);
 
         var subjects =
                 switch (singleOrMultiple) {
@@ -268,7 +211,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
-                        subjects, measures, periodStart, periodEnd, parameters, context);
+                        subjects, measures, request.periodStart(), request.periodEnd(), parameters, context);
 
         if (SingleOrMultiple.SINGLE == singleOrMultiple
                 || evalType.equals(MeasureEvalType.POPULATION)
@@ -280,12 +223,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                     context,
                     measures,
                     subjects,
-                    periodStart,
-                    periodEnd,
-                    reportType,
+                    request.periodStart(),
+                    request.periodEnd(),
+                    request.reportType(),
                     evalType,
-                    reporter,
-                    subject);
+                    request.reporter(),
+                    subjectToUse);
         }
 
         return subjectReport(
@@ -295,12 +238,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
                 context,
                 measures,
                 subjects,
-                periodStart,
-                periodEnd,
-                reportType,
+                request.periodStart(),
+                request.periodEnd(),
+                request.reportType(),
                 evalType,
-                reporter,
-                productLine);
+                request.reporter(),
+                request.productLine());
     }
 
     private List<List<MeasureDefAndR4MeasureReport>> populationOrSingleMeasureReport(
@@ -531,6 +474,19 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
     protected Bundle.BundleEntryComponent getBundleEntry(String serverBase, Resource resource) {
         return new Bundle.BundleEntryComponent().setResource(resource).setFullUrl(getFullUrl(serverBase, resource));
+    }
+
+    /**
+     * If practitioner is set, use it as the effective subject (takes precedence over subjectId).
+     * Ensures the practitioner reference is qualified with a resource-type prefix.
+     */
+    @Nullable
+    private String resolvePractitionerOverride(@Nullable String subjectId, @Nullable String practitioner) {
+        if (StringUtils.isNotBlank(practitioner)) {
+            var qualified = practitioner.contains("/") ? practitioner : "Practitioner/".concat(practitioner);
+            return qualified;
+        }
+        return subjectId;
     }
 
     @Nonnull

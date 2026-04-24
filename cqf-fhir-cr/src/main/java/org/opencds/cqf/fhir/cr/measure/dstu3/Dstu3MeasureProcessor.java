@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -68,6 +70,41 @@ public class Dstu3MeasureProcessor {
         var measure = this.repository.read(Measure.class, measureId);
         return this.evaluateMeasure(
                 measure, periodStart, periodEnd, reportType, subjectIds, additionalData, parameters);
+    }
+
+    /**
+     * Evaluates a Measure using pre-parsed period dates.
+     *
+     * <p>Called by {@link Dstu3MeasureService} after the transport adapter has parsed period
+     * strings into {@link ZonedDateTime}. Bypasses the string-based parsing path in
+     * {@link org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils}.
+     *
+     * @param measureId   Measure ID
+     * @param periodStart start of measurement period, null defers to CQL
+     * @param periodEnd   end of measurement period, null defers to CQL
+     * @param reportType  type of report
+     * @param subjectIds  subjects to evaluate
+     * @param additionalData supplemental data bundle (nullable)
+     * @param parameters  CQL parameters
+     * @return the completed MeasureReport
+     */
+    public MeasureReport evaluateMeasure(
+            IdType measureId,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData,
+            Parameters parameters) {
+        var measure = this.repository.read(Measure.class, measureId);
+        return evaluateMeasureCaptureDefs(
+                        measure,
+                        MeasureProcessorTimeUtils.buildMeasurementPeriod(periodStart, periodEnd),
+                        reportType,
+                        subjectIds,
+                        additionalData,
+                        parameters)
+                .measureReport();
     }
 
     // NOTE: Do not make a top-level function that takes a Measure resource. This
@@ -153,7 +190,30 @@ public class Dstu3MeasureProcessor {
 
         checkMeasureLibrary(measure);
 
-        Interval measurementPeriodParams = MeasureProcessorTimeUtils.buildMeasurementPeriod(periodStart, periodEnd);
+        return evaluateMeasureCaptureDefs(
+                measure,
+                MeasureProcessorTimeUtils.buildMeasurementPeriod(periodStart, periodEnd),
+                reportType,
+                subjectIds,
+                additionalData,
+                parameters);
+    }
+
+    /**
+     * Core evaluation: accepts an already-built measurement-period {@link Interval} so both the
+     * string-based ({@link #evaluateMeasureCaptureDefs(Measure, String, String, String, List, IBaseBundle, Parameters)})
+     * and ZonedDateTime-based ({@link #evaluateMeasure(IdType, ZonedDateTime, ZonedDateTime, String, List, IBaseBundle, Parameters)})
+     * paths share one implementation.
+     */
+    private MeasureDefAndDstu3MeasureReport evaluateMeasureCaptureDefs(
+            Measure measure,
+            @Nullable Interval measurementPeriodParams,
+            String reportType,
+            List<String> subjectIds,
+            IBaseBundle additionalData,
+            Parameters parameters) {
+
+        checkMeasureLibrary(measure);
 
         // setup MeasureDef
         var measureDef = new Dstu3MeasureDefBuilder().build(measure);

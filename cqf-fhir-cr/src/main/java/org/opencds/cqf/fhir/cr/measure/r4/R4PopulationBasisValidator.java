@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.InvalidStratifierExpressionTypeException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationDef;
@@ -160,14 +161,12 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
                 .toList();
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
-            throw new InvalidRequestException(
-                    "stratifier expression criteria results for expression: [%s] must fall within accepted types for population-basis: [%s] for Measure: [%s] due to mismatch between total eval result classes: %s and matching result classes: %s"
-                            .formatted(
-                                    expression,
-                                    groupPopulationBasisCode,
-                                    url,
-                                    prettyClassNames(resultClasses),
-                                    prettyClassNames(resultMatchingClasses)));
+            throw new InvalidStratifierExpressionTypeException(
+                    expression,
+                    groupPopulationBasisCode,
+                    url,
+                    prettyClassNames(resultClasses),
+                    prettyClassNames(resultMatchingClasses));
         }
     }
 

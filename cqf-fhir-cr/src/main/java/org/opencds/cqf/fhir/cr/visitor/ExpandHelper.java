@@ -134,7 +134,7 @@ public class ExpandHelper {
 
                 addCodesToExpansion(expansion, copyAdapter);
 
-                if (valueSet.hasNaiveParameter()) {
+                if (copyAdapter.hasNaiveParameter()) {
                     isNaive = true;
                 }
             }

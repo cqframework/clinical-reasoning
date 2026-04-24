@@ -55,7 +55,8 @@ class ExpandHelperTest {
         // should not be used
         var client = mockTerminologyServerWithValueSetR4(leaf);
 
-        assertTrue(grouper.getExpansion().getContains().isEmpty(), "Precondition failed: grouper should start unexpanded");
+        assertTrue(
+                grouper.getExpansion().getContains().isEmpty(), "Precondition failed: grouper should start unexpanded");
 
         var expandHelper = new ExpandHelper(rep, client);
         expandHelper.expandValueSet(
@@ -73,9 +74,8 @@ class ExpandHelperTest {
 
         // Mutation detection: ensure no intermediate expansion polluted the result
         assertFalse(
-            contains.stream().anyMatch(c -> c.getSystem() == null || c.getCode() == null),
-            "Detected malformed expansion entries, likely due to intermediate mutation"
-        );
+                contains.stream().anyMatch(c -> c.getSystem() == null || c.getCode() == null),
+                "Detected malformed expansion entries, likely due to intermediate mutation");
 
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());

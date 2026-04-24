@@ -32,6 +32,7 @@ import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.InvalidStratifierExpressionTypeException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
@@ -459,7 +460,7 @@ class R4PopulationBasisValidatorTest {
                 ENCOUNTER));
 
         var expectedExceptionMessage =
-                "Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter] for Measure: [fakeMeasureUrl].";
+                "value stratifier is invalid for expression: [InitialPopulation] with result types: [Encounter] for measure URL: fakeMeasureUrl. Expected a scalar type";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -485,7 +486,7 @@ class R4PopulationBasisValidatorTest {
                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER)));
 
         var expectedExceptionMessage =
-                "Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter, Encounter, Encounter] for Measure: [fakeMeasureUrl].";
+                "value stratifier is invalid for expression: [InitialPopulation] with result types: [Encounter] for measure URL: fakeMeasureUrl. Expected a scalar type";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -510,7 +511,7 @@ class R4PopulationBasisValidatorTest {
                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER)));
 
         var expectedExceptionMessage =
-                "Value stratifier expression for [Numerator] returned invalid result type(s): [Boolean, Boolean, Encounter] for Measure: [fakeMeasureUrl].";
+                "value stratifier is invalid for expression: [Numerator] with result types: [Encounter] for measure URL: fakeMeasureUrl. Expected a scalar type";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -535,7 +536,7 @@ class R4PopulationBasisValidatorTest {
                 ENCOUNTER));
 
         var expectedExceptionMessage =
-                "Non Subject Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter] for Measure: [fakeMeasureUrl] with population basis: [Encounter].";
+                "non-subject value stratifier is invalid for expression: [InitialPopulation] with result types: [Encounter] for population basis: [Encounter] for measure URL: fakeMeasureUrl. Expected a scalar or scalar-returning function";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -560,7 +561,7 @@ class R4PopulationBasisValidatorTest {
                 List.of(ENCOUNTER, ENCOUNTER, ENCOUNTER)));
 
         var expectedExceptionMessage =
-                "Non Subject Value stratifier expression for [InitialPopulation] returned invalid result type(s): [Encounter, Encounter, Encounter] for Measure: [fakeMeasureUrl] with population basis: [Encounter].";
+                "non-subject value stratifier is invalid for expression: [InitialPopulation] with result types: [Encounter] for population basis: [Encounter] for measure URL: fakeMeasureUrl. Expected a scalar or scalar-returning function";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -585,7 +586,7 @@ class R4PopulationBasisValidatorTest {
                 List.of(Boolean.TRUE, Boolean.TRUE, ENCOUNTER)));
 
         var expectedExceptionMessage =
-                "Non Subject Value stratifier expression for [Numerator] returned invalid result type(s): [Boolean, Boolean, Encounter] for Measure: [fakeMeasureUrl] with population basis: [Encounter].";
+                "non-subject value stratifier is invalid for expression: [Numerator] with result types: [Encounter] for population basis: [Encounter] for measure URL: fakeMeasureUrl. Expected a scalar or scalar-returning function";
 
         validateStratifierBasisTypeErrorPath(expectedGroupDef, expectedEvaluationResult, expectedExceptionMessage);
     }
@@ -651,7 +652,7 @@ class R4PopulationBasisValidatorTest {
         try {
             testSubject.validateStratifiers(MEASURE_DEF, groupDef, evaluationResult);
             fail("Expected this test to fail");
-        } catch (InvalidRequestException exception) {
+        } catch (InvalidRequestException | InvalidStratifierExpressionTypeException exception) {
             assertTrue(
                     exception.getMessage().startsWith(expectedExceptionMessage),
                     "Expected message to start with:\n  " + expectedExceptionMessage + "\nbut was:\n  "

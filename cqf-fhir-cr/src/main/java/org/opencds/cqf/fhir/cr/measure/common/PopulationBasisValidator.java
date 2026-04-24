@@ -210,22 +210,15 @@ public interface PopulationBasisValidator {
             List<Class<?>> resultClasses,
             List<Class<?>> invalidTypes) {
 
-        var allowedTypes = prettyClassNames(List.copyOf(allowedStratifierValueTypes()));
-        var invalidTypeNames = prettyClassNames(invalidTypes);
+        var distinctInvalidTypes = prettyDistinctClassNames(invalidTypes);
 
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
-            return "Non Subject Value stratifier expression for [%s] returned invalid result type(s): %s for Measure: [%s] with population basis: [%s]. Non Subject Value stratifier expressions must return categorical types, such as: %s. Resource types like %s cannot be used as stratifier values. Consider using a CRITERIA-based stratifier for resource membership stratification."
-                    .formatted(
-                            expression,
-                            prettyClassNames(resultClasses),
-                            url,
-                            groupPopulationBasisCode,
-                            allowedTypes,
-                            invalidTypeNames);
+            return "non-subject value stratifier is invalid for expression: [%s] with result types: %s for population basis: [%s] for measure URL: %s. Expected a scalar or scalar-returning function"
+                    .formatted(expression, distinctInvalidTypes, groupPopulationBasisCode, url);
         }
 
-        return "Value stratifier expression for [%s] returned invalid result type(s): %s for Measure: [%s]. Value stratifier expressions must return categorical types for stratification, such as: %s. Resource types like %s are not valid for Value stratifiers. If you intend to stratify by resource membership, use a CRITERIA-based stratifier instead."
-                .formatted(expression, prettyClassNames(resultClasses), url, allowedTypes, invalidTypeNames);
+        return "value stratifier is invalid for expression: [%s] with result types: %s for measure URL: %s. Expected a scalar type"
+                .formatted(expression, distinctInvalidTypes, url);
     }
 
     private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {
@@ -244,5 +237,9 @@ public interface PopulationBasisValidator {
 
     private List<String> prettyClassNames(List<Class<?>> classes) {
         return classes.stream().map(Class::getSimpleName).toList();
+    }
+
+    private List<String> prettyDistinctClassNames(List<Class<?>> classes) {
+        return classes.stream().map(Class::getSimpleName).distinct().toList();
     }
 }

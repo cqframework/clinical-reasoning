@@ -592,7 +592,7 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Value stratifier expression for [Encounters in Period] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/CohortBooleanStratValueNonBoolean].");
+                        "value stratifier is invalid for expression: [Encounters in Period] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanStratValueNonBoolean. Expected a scalar type");
     }
 
     @Test
@@ -604,7 +604,7 @@ class MeasureStratifierTest {
                 .then()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "Non Subject Value stratifier expression for [All Patient Encounters] returned invalid result type(s): [Encounter] for Measure: [http://example.com/Measure/RatioResourceStratValueNonCategorical] with population basis: [Encounter].");
+                        "non-subject value stratifier is invalid for expression: [All Patient Encounters] with result types: [Encounter] for population basis: [Encounter] for measure URL: http://example.com/Measure/RatioResourceStratValueNonCategorical. Expected a scalar or scalar-returning function");
     }
 
     @Test
@@ -1299,7 +1299,7 @@ class MeasureStratifierTest {
      * but is neither a function (define function) nor a scalar — it returns a list of resources
      * (e.g. "All Encounters" returns [Encounter] E). This expression resolves successfully
      * (so isExpressionFunctionRef returns false), but it's not a valid stratifier value.
-     * Should produce a contained OperationOutcome with a contextual error message.
+     * Exercises the NON_SUBJECT_VALUE branch of buildValueStratifierErrorMessage.
      */
     @Test
     void cohortResourceValueStratNonScalarNonFunctionInvalid() {
@@ -1310,8 +1310,8 @@ class MeasureStratifierTest {
                 .evaluate()
                 .then()
                 .hasContainedOperationOutcome()
-                .hasContainedOperationOutcomeMsg("All Encounters")
-                .hasContainedOperationOutcomeMsg("CohortResourceValueStratNonScalarNonFunction");
+                .hasContainedOperationOutcomeMsg(
+                        "non-subject value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for population basis: [Encounter] for measure URL: http://example.com/Measure/CohortResourceValueStratNonScalarNonFunction. Expected a scalar or scalar-returning function");
     }
 
     /**
@@ -1385,17 +1385,19 @@ class MeasureStratifierTest {
     /**
      * Boolean/subject basis VALUE stratifier with a component expression that returns a list of resources
      * ("All Encounters" returns [Encounter] E). This is not a function (passes validateNotFunction),
-     * but the result type (Encounter) is not in ALLOWED_STRATIFIER_BOOLEAN_BASIS_TYPES.
-     * Asserting no error for now to observe actual behavior.
+     * but the result type (Encounter) is not in ALLOWED_STRATIFIER_VALUE_TYPES.
+     * Exercises the VALUE branch of buildValueStratifierErrorMessage.
      */
     @Test
-    void cohortBooleanValueStratListExpressionNoError() {
+    void cohortBooleanValueStratListExpressionInvalid() {
         GIVEN_SIMPLE
                 .when()
                 .measureId("CohortBooleanValueStratListExpression")
                 .subject("Patient/patient-9")
                 .evaluate()
                 .then()
-                .hasStatus(MeasureReportStatus.COMPLETE);
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanValueStratListExpression. Expected a scalar type");
     }
 }

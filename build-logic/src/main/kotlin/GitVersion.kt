@@ -16,10 +16,10 @@ import org.gradle.process.ExecOutput
  * 2. **main SNAPSHOT** — if on the `main` branch with no release tag at HEAD, take the most recent
  *    tag reachable from HEAD matching [VersionScheme.describeGlob], feed it through
  *    [VersionScheme.bumpForSnapshot], and append `-SNAPSHOT`.
- * 3. **Branch SNAPSHOT** — otherwise, append a sanitized branch identifier and the short SHA to
- *    the bumped base (e.g. `2026.03.R02-feature-xyz-5ac419a5d-SNAPSHOT`). Branch name is taken
- *    from `GITHUB_REF_NAME` / `CI_COMMIT_REF_NAME` if set (CI convention), else from `git
- *    rev-parse`; a detached HEAD falls back to the literal `detached`.
+ * 3. **Branch SNAPSHOT** — otherwise, append a sanitized branch identifier and the short SHA to the
+ *    bumped base (e.g. `2026.03.R02-feature-xyz-5ac419a5d-SNAPSHOT`). Branch name is taken from
+ *    `GITHUB_REF_NAME` / `CI_COMMIT_REF_NAME` if set (CI convention), else from `git rev-parse`; a
+ *    detached HEAD falls back to the literal `detached`.
  *
  * Fallbacks keep the build working in edge cases: no tags anywhere → [VersionScheme.fallbackBase];
  * `git` invocation failure → empty string, which callers treat as "no data."
@@ -43,9 +43,9 @@ fun gitVersion(rootDir: File, scheme: VersionScheme, providers: ProviderFactory)
     }
 
     val lastTag =
-        git("describe", "--tags", "--abbrev=0", "--match=${scheme.describeGlob}")
-            .trim()
-            .takeIf { it.isNotEmpty() }
+        git("describe", "--tags", "--abbrev=0", "--match=${scheme.describeGlob}").trim().takeIf {
+            it.isNotEmpty()
+        }
     val baseVersion = lastTag?.removePrefix("v") ?: scheme.fallbackBase
     val bumped = scheme.bumpForSnapshot(baseVersion)
 

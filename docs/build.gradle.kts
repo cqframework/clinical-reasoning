@@ -1,7 +1,4 @@
-plugins {
-    id("cqf.java-conventions")
-    id("cqf.spotless-conventions")
-}
+plugins { id("cqf.java-conventions") }
 
 // No publishing for docs module
 

@@ -911,14 +911,18 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                                                 .setName(Constants.PREVIOUS_VALUE)
                                                 .setValue(oldValVSECC.getCodeElement());
                                     } else if (oldVal instanceof ConceptSetComponent oldValCSC) {
-                                        oldValCSC.getConcept().forEach(ref -> parameter
-                                                .addPart()
-                                                .setName(Constants.PREVIOUS_VALUE)
-                                                .setValue(ref.getCodeElement()));
-                                        oldValCSC.getValueSet().forEach(vs -> parameter
-                                                .addPart()
-                                                .setName(Constants.PREVIOUS_VALUE)
-                                                .setValue(vs));
+                                        oldValCSC
+                                                .getConcept()
+                                                .forEach(ref -> parameter
+                                                        .addPart()
+                                                        .setName(Constants.PREVIOUS_VALUE)
+                                                        .setValue(ref.getCodeElement()));
+                                        oldValCSC
+                                                .getValueSet()
+                                                .forEach(vs -> parameter
+                                                        .addPart()
+                                                        .setName(Constants.PREVIOUS_VALUE)
+                                                        .setValue(vs));
                                     }
                                 });
 

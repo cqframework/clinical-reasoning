@@ -1,13 +1,13 @@
 /**
  * Strategy for parsing release tags and computing the next SNAPSHOT base version.
  *
- * Canonical source: `home/shared/gradle/conventions/VersionScheme.kt`. Consumers vendor a copy
- * into their own `build-logic/`; propagate enhancements through `shared/`.
+ * Canonical source: `home/shared/gradle/conventions/VersionScheme.kt`. Consumers vendor a copy into
+ * their own `build-logic/`; propagate enhancements through `shared/`.
  *
  * [gitVersion] is scheme-agnostic; all format-specific behavior lives here so the same resolver can
  * be shared across repos with different versioning conventions. Two built-in schemes are provided:
- * [SemverScheme] for `X.Y.Z` (bumps minor) and [CalendarReleaseScheme] for `YYYY.MM.RNN` (bumps
- * the `R` counter).
+ * [SemverScheme] for `X.Y.Z` (bumps minor) and [CalendarReleaseScheme] for `YYYY.MM.RNN` (bumps the
+ * `R` counter).
  */
 interface VersionScheme {
     /**
@@ -37,9 +37,7 @@ interface VersionScheme {
     fun bumpForSnapshot(baseVersion: String): String
 }
 
-/**
- * Semantic versioning (`X.Y.Z`). Bump rule: increment minor, reset patch.
- */
+/** Semantic versioning (`X.Y.Z`). Bump rule: increment minor, reset patch. */
 object SemverScheme : VersionScheme {
     override val tagRegex = Regex("""\d+\.\d+\.\d+.*""")
     override val describeGlob = "v*.*.*"

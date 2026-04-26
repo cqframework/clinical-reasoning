@@ -83,11 +83,7 @@ public final class SearchParameterTranslator {
     }
 
     private static IQueryParameterType create(
-            RestSearchParameterTypeEnum type,
-            FhirContext fhirContext,
-            String name,
-            String qualifier,
-            String rawValue) {
+            RestSearchParameterTypeEnum type, FhirContext fhirContext, String name, String qualifier, String rawValue) {
         IQueryParameterType param =
                 switch (type) {
                     case TOKEN -> new TokenParam();

@@ -118,7 +118,8 @@ class ServerIntegrationTest {
         modified.addName().setFamily("Modified");
 
         var resp = put("/Patient/to-update", encode(modified));
-        assertTrue(resp.statusCode() == 200 || resp.statusCode() == 201,
+        assertTrue(
+                resp.statusCode() == 200 || resp.statusCode() == 201,
                 () -> "expected 200 or 201, got " + resp.statusCode() + ": " + resp.body());
 
         var stored = repo.read(Patient.class, new IdType("Patient", "to-update"));
@@ -135,7 +136,8 @@ class ServerIntegrationTest {
         repo.update(seeded);
 
         var resp = delete("/Patient/to-delete");
-        assertTrue(resp.statusCode() >= 200 && resp.statusCode() < 300,
+        assertTrue(
+                resp.statusCode() >= 200 && resp.statusCode() < 300,
                 () -> "expected 2xx; got " + resp.statusCode() + ": " + resp.body());
 
         try {
@@ -161,8 +163,10 @@ class ServerIntegrationTest {
         var resp = get("/Patient?_id=search-target");
         assertEquals(200, resp.statusCode(), () -> "body:\n" + resp.body());
         assertTrue(resp.body().contains("\"resourceType\":\"Bundle\""));
-        assertTrue(resp.body().contains("\"family\":\"SearchHit\""),
-                () -> "expected matched Patient in bundle, got: " + resp.body().substring(0, Math.min(500, resp.body().length())));
+        assertTrue(
+                resp.body().contains("\"family\":\"SearchHit\""),
+                () -> "expected matched Patient in bundle, got: "
+                        + resp.body().substring(0, Math.min(500, resp.body().length())));
     }
 
     /**
@@ -195,7 +199,8 @@ class ServerIntegrationTest {
                 .setUrl("Observation/txn-obs");
 
         var resp = post("/", encode(bundle));
-        assertTrue(resp.statusCode() == 200 || resp.statusCode() == 201,
+        assertTrue(
+                resp.statusCode() == 200 || resp.statusCode() == 201,
                 () -> "expected 200/201; got " + resp.statusCode() + ": " + resp.body());
 
         // Verify both entries actually persisted via direct IRepository read.

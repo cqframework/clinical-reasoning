@@ -11,9 +11,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -63,9 +63,7 @@ public class RepositoryResourceProvider<T extends IBaseResource> implements IRes
 
     @Create
     public MethodOutcome create(
-            @ResourceParam T resource,
-            @ConditionalUrlParam String conditionalUrl,
-            RequestDetails requestDetails) {
+            @ResourceParam T resource, @ConditionalUrlParam String conditionalUrl, RequestDetails requestDetails) {
         var headers = headersOf(requestDetails);
         if (conditionalUrl != null && !conditionalUrl.isEmpty()) {
             // Conditional-create per the FHIR spec is signalled via the If-None-Exist header,
@@ -84,9 +82,8 @@ public class RepositoryResourceProvider<T extends IBaseResource> implements IRes
         if (conditionalUrl != null && !conditionalUrl.isEmpty()) {
             // Conditional update by URL params (e.g. PUT /Patient?identifier=foo) is not yet
             // routed to IRepository — fail loudly rather than silently doing the wrong thing.
-            throw new MethodNotAllowedException(
-                    "Conditional update by URL is not supported by this server; "
-                            + "use PUT /[type]/[id] with If-Match for optimistic concurrency.");
+            throw new MethodNotAllowedException("Conditional update by URL is not supported by this server; "
+                    + "use PUT /[type]/[id] with If-Match for optimistic concurrency.");
         }
         if (id != null && id.hasIdPart()) {
             // Make the URL id authoritative; align body id so the repository sees one id.
@@ -97,13 +94,10 @@ public class RepositoryResourceProvider<T extends IBaseResource> implements IRes
 
     @Delete
     public MethodOutcome delete(
-            @IdParam IIdType id,
-            @ConditionalUrlParam String conditionalUrl,
-            RequestDetails requestDetails) {
+            @IdParam IIdType id, @ConditionalUrlParam String conditionalUrl, RequestDetails requestDetails) {
         if (conditionalUrl != null && !conditionalUrl.isEmpty()) {
             throw new MethodNotAllowedException(
-                    "Conditional delete by URL is not supported by this server; "
-                            + "use DELETE /[type]/[id].");
+                    "Conditional delete by URL is not supported by this server; " + "use DELETE /[type]/[id].");
         }
         return repositoryFactory.create(requestDetails).delete(resourceType, id, headersOf(requestDetails));
     }
@@ -116,12 +110,12 @@ public class RepositoryResourceProvider<T extends IBaseResource> implements IRes
     @Search(allowUnknownParams = true)
     public IBundleProvider search(RequestDetails requestDetails) {
         var rawParams = requestDetails.getParameters();
-        var typedParams = SearchParameterTranslator.translate(
-                fhirContext, fhirContext.getResourceType(resourceType), rawParams);
+        var typedParams =
+                SearchParameterTranslator.translate(fhirContext, fhirContext.getResourceType(resourceType), rawParams);
 
         @SuppressWarnings("unchecked")
-        Class<IBaseBundle> bundleClass = (Class<IBaseBundle>)
-                fhirContext.getResourceDefinition("Bundle").getImplementingClass();
+        Class<IBaseBundle> bundleClass =
+                (Class<IBaseBundle>) fhirContext.getResourceDefinition("Bundle").getImplementingClass();
 
         IBaseBundle bundle = repositoryFactory
                 .create(requestDetails)

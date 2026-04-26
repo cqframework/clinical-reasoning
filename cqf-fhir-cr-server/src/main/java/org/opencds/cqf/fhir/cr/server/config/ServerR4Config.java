@@ -74,9 +74,7 @@ public class ServerR4Config {
 
     @Bean
     public RepositoryRestProviderRegistrar repositoryProviderRegistrar(
-            RestfulServer restfulServer,
-            IRepositoryFactory repositoryFactory,
-            FhirContext fhirContext) {
+            RestfulServer restfulServer, IRepositoryFactory repositoryFactory, FhirContext fhirContext) {
         // null = register every concrete resource type known to the FhirContext.
         return new RepositoryRestProviderRegistrar(restfulServer, repositoryFactory, fhirContext, null);
     }
@@ -154,9 +152,8 @@ public class ServerR4Config {
     @Bean
     public ProviderLoader providerLoader(
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
-        var selector = new ProviderSelector(
-                fhirContext,
-                Map.of(FhirVersionEnum.R4, List.of(MeasureOperationsProvider.class)));
+        var selector =
+                new ProviderSelector(fhirContext, Map.of(FhirVersionEnum.R4, List.of(MeasureOperationsProvider.class)));
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }
 

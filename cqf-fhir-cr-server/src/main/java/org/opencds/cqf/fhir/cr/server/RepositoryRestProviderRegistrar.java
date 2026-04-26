@@ -53,9 +53,7 @@ public class RepositoryRestProviderRegistrar {
             registerOne(typeName);
         }
         restfulServer.registerProvider(new RepositorySystemProvider(repositoryFactory));
-        logger.info(
-                "Registered {} IRepository-backed CRUD providers + system provider",
-                types.size());
+        logger.info("Registered {} IRepository-backed CRUD providers + system provider", types.size());
     }
 
     private List<String> allConcreteResourceTypes() {

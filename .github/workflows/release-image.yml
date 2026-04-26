@@ -1,0 +1,81 @@
+name: Release Image
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Read source, write packages (GHCR). No write to git contents.
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: release-image-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  jlink-image:
+    name: Publish jlink Docker image to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-tags: true
+
+      - uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
+
+      # Build the bootJar that Dockerfile.jlink copies in. The Dockerfile's first stage
+      # extracts its layered tree and runs jdeps + jlink against the contents.
+      - name: Build bootJar
+        run: ./gradlew :cqf-fhir-cr-server:bootJar
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Derive image tags
+        id: tags
+        run: |
+          # The git tag is "v4.7.0" -> semver "4.7.0".
+          GIT_TAG="${GITHUB_REF#refs/tags/}"
+          SEMVER="${GIT_TAG#v}"
+          echo "semver=${SEMVER}" >> "$GITHUB_OUTPUT"
+          # Update :latest only for stable releases (skip rc/alpha/beta/etc).
+          if [[ "$SEMVER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "is-stable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is-stable=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build jlink image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/cqf-fhir-cr-server
+          SEMVER: ${{ steps.tags.outputs.semver }}
+        run: |
+          docker build \
+            -t "${IMAGE}:${SEMVER}-jlink" \
+            -t "${IMAGE}:${SEMVER}" \
+            -f cqf-fhir-cr-server/Dockerfile.jlink \
+            .
+
+      - name: Tag :latest for stable releases
+        if: steps.tags.outputs.is-stable == 'true'
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/cqf-fhir-cr-server
+          SEMVER: ${{ steps.tags.outputs.semver }}
+        run: docker tag "${IMAGE}:${SEMVER}" "${IMAGE}:latest"
+
+      - name: Push image
+        env:
+          IMAGE: ghcr.io/${{ github.repository }}/cqf-fhir-cr-server
+          SEMVER: ${{ steps.tags.outputs.semver }}
+        run: |
+          docker push "${IMAGE}:${SEMVER}"
+          docker push "${IMAGE}:${SEMVER}-jlink"
+          if [ "${{ steps.tags.outputs.is-stable }}" = "true" ]; then
+            docker push "${IMAGE}:latest"
+          fi

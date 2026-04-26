@@ -258,8 +258,9 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         var reference = enrichReference(dependency, dependencyAdapter, ctx.conformanceResolver);
 
         // Skip if already in the related artifacts list
-        if (relatedArtifacts.stream().anyMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
-                .equals(reference))) {
+        if (relatedArtifacts.stream()
+                .anyMatch(ra -> IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)
+                        .equals(reference))) {
             return;
         }
 

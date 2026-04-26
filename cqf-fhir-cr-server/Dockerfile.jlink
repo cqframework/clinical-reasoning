@@ -1,0 +1,89 @@
+# jlink-based image. Produces a custom minimal JRE containing only the JDK modules the app
+# actually needs, then layers it onto a distroless base. Aims for the smallest practical image
+# without losing parity with the standard Dockerfile.
+#
+# Build: docker build -t cqf-fhir-cr-server:jlink -f cqf-fhir-cr-server/Dockerfile.jlink .
+# Run:   docker run --rm -p 8080:8080 cqf-fhir-cr-server:jlink
+
+# Stage 1: extract the bootJar's layered tree so jdeps can read nested dependency jars.
+FROM eclipse-temurin:17-jdk AS extractor
+WORKDIR /work
+ARG JAR_FILE=cqf-fhir-cr-server/build/libs/cqf-fhir-cr-server-*.jar
+COPY ${JAR_FILE} app.jar
+RUN java -Djarmode=tools -jar app.jar extract --layers --launcher
+
+# Stage 2: build a custom JRE.
+#
+# Strategy: run jdeps over the extracted libs to get a candidate module list, then UNION it with
+# a baseline of modules HAPI/Spring/JCE need at runtime via reflection (jdeps misses these).
+# `--ignore-missing-deps` is essential — Spring Boot fat jars contain libs whose own optional
+# transitive deps aren't on the classpath, and without the flag jdeps refuses to print anything.
+FROM eclipse-temurin:17-jdk AS jre-builder
+WORKDIR /work
+COPY --from=extractor /work/app /work/app
+
+# Baseline modules HAPI FHIR's reflective code paths require beyond what jdeps detects.
+# - java.desktop: HAPI's validation occasionally pulls AWT (Color, image classes via XHTML).
+# - java.naming: JNDI used by Hibernate/Spring Boot bootstrap probes.
+# - java.management.rmi: JMX RMI connector.
+# - java.security.jgss: Kerberos / SPNEGO if the JCE chain triggers.
+# - java.sql.rowset: pulled by some Spring Boot conditional configs.
+# - jdk.crypto.cryptoki / jdk.crypto.ec: TLS cipher suites.
+# - jdk.unsupported: sun.misc.Unsafe — many libs (Netty / Guava / etc).
+# - jdk.zipfs: needed to read zip-style filesystems (some Spring Boot loader paths).
+# - jdk.localedata: ICU locales for FHIR string handling.
+# - java.compiler: some HAPI/CQL code paths use the in-process compiler.
+ENV BASELINE_MODULES="java.base,java.compiler,java.desktop,java.instrument,java.logging,java.management,java.management.rmi,java.naming,java.net.http,java.rmi,java.scripting,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,java.xml.crypto,jdk.crypto.cryptoki,jdk.crypto.ec,jdk.httpserver,jdk.jdwp.agent,jdk.localedata,jdk.management,jdk.management.agent,jdk.naming.dns,jdk.naming.rmi,jdk.security.auth,jdk.security.jgss,jdk.unsupported,jdk.zipfs"
+
+# jdeps over the dependency tree. Some libs declare unparseable bytecode or have missing
+# transitives; --ignore-missing-deps lets jdeps continue past them. If jdeps still errors out
+# entirely (it does on some HAPI versions), fall back to the baseline.
+RUN set -eux; \
+    DETECTED=$(jdeps \
+        --print-module-deps \
+        --ignore-missing-deps \
+        --multi-release 17 \
+        --recursive \
+        --class-path "app/dependencies/BOOT-INF/lib/*:app/snapshot-dependencies/BOOT-INF/lib/*:app/application/BOOT-INF/lib/*" \
+        app/application/BOOT-INF/classes app/application/BOOT-INF/lib/*.jar 2>/dev/null \
+        || echo ""); \
+    echo "jdeps raw output: $DETECTED"; \
+    # jdeps output can contain "Warning: ..." lines mixed into the comma-separated module list.
+    # Filter to valid module-name shape ([a-z][a-z0-9._]*) before merging.
+    MODS="$(printf '%s,%s' "$BASELINE_MODULES" "$DETECTED" \
+        | tr ',' '\n' \
+        | grep -E '^[a-z][a-z0-9._]*$' \
+        | sort -u \
+        | paste -sd, -)"; \
+    echo "Final module set:"; echo "$MODS" | tr ',' '\n'; \
+    echo "$MODS" > /work/modules.txt
+
+RUN MODS=$(cat /work/modules.txt) && \
+    jlink \
+        --add-modules "$MODS" \
+        --strip-debug \
+        --no-man-pages \
+        --no-header-files \
+        --compress=2 \
+        --output /opt/jre
+
+# Smoke: confirm the custom JRE runs.
+RUN /opt/jre/bin/java --version
+
+# Stage 3: minimal runtime. Distroless base provides glibc + ca-certs and nothing else.
+FROM gcr.io/distroless/base-debian12
+LABEL org.opencds.cqf.module="cqf-fhir-cr-server"
+
+# Custom JRE (built above) + Spring Boot layered app (built in stage 1).
+COPY --from=jre-builder /opt/jre /opt/jre
+WORKDIR /opt/app
+COPY --from=extractor /work/app/dependencies/ ./
+COPY --from=extractor /work/app/spring-boot-loader/ ./
+COPY --from=extractor /work/app/snapshot-dependencies/ ./
+COPY --from=extractor /work/app/application/ ./
+
+EXPOSE 8080
+
+# Distroless has no shell, so no $JAVA_OPTS expansion. Pass tuning via -D in the cmd if needed
+# or override with `docker run --entrypoint`.
+ENTRYPOINT ["/opt/jre/bin/java", "org.springframework.boot.loader.launch.JarLauncher"]

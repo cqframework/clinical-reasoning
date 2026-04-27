@@ -522,7 +522,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             maybeAdapter = terminologyServerClient
                     .getLatestValueSetResource(endpoint, reference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
-            maybeAdapter.ifPresent(this::ensureAuthoritativeSourcExtension);
+            maybeAdapter.ifPresent(this::ensureAuthoritativeSourceExtension);
         } else if (resourceType != null
                 && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
                 && latestFromTxServer) {
@@ -546,7 +546,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
         return maybeAdapter;
     }
 
-    private void ensureAuthoritativeSourcExtension(IKnowledgeArtifactAdapter adapter) {
+    private void ensureAuthoritativeSourceExtension(IKnowledgeArtifactAdapter adapter) {
         if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
             switch (fhirVersion()) {
                 case DSTU3 ->

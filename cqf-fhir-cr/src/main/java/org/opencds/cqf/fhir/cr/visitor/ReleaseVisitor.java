@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
+import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -10,6 +12,8 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +40,7 @@ import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.Uris;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
@@ -548,21 +553,38 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private void ensureAuthoritativeSourceExtension(IKnowledgeArtifactAdapter adapter) {
         if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
-            switch (fhirVersion()) {
-                case DSTU3 ->
-                    org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.addAuthoritativeSourceExtension(
-                            (org.hl7.fhir.dstu3.model.ValueSet) adapter.get(), adapter.getUrl());
-                case R4 ->
-                    org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.addAuthoritativeSourceExtension(
-                            (org.hl7.fhir.r4.model.ValueSet) adapter.get(), adapter.getUrl());
-                case R5 ->
-                    org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.addAuthoritativeSourceExtension(
-                            (org.hl7.fhir.r5.model.ValueSet) adapter.get(), adapter.getUrl());
-                default ->
-                    throw new UnprocessableEntityException(
-                            "Unsupported FHIR version: " + fhirVersion().name());
-            }
+            addAuthoritativeSourceExtension(adapter, adapter.getUrl());
         }
+        //            switch (fhirVersion()) {
+        //                case DSTU3 ->
+        //                    org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.addAuthoritativeSourceExtension(
+        //                            (org.hl7.fhir.dstu3.model.ValueSet) adapter.get(), adapter.getUrl());
+        //                case R4 ->
+        //                    org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.addAuthoritativeSourceExtension(
+        //                            (org.hl7.fhir.r4.model.ValueSet) adapter.get(), adapter.getUrl());
+        //                case R5 ->
+        //                    org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.addAuthoritativeSourceExtension(
+        //                            (org.hl7.fhir.r5.model.ValueSet) adapter.get(), adapter.getUrl());
+        //                default ->
+        //                    throw new UnprocessableEntityException(
+        //                            "Unsupported FHIR version: " + fhirVersion().name());
+        //            }
+        //        }
+    }
+
+    private void addAuthoritativeSourceExtension(IKnowledgeArtifactAdapter adapter, String url) {
+        try {
+            url = Uris.ensureHttps(url);
+        } catch (URISyntaxException | MalformedURLException e) {
+            // Do nothing here and let the malformed URL flow through.
+        }
+        var ext = (IBaseExtension<?, ?>) newBaseForVersion("Extension", fhirVersion());
+        adapter.getModelResolver().setValue(ext, "url", TransformProperties.authoritativeSourceExtUrl);
+        adapter.getModelResolver().setValue(ext, "value", uriTypeForVersion(fhirVersion(), url));
+        // ext.setUrl(TransformProperties.authoritativeSourceExtUrl);
+        // ext.setValue(new UriType(url));
+        adapter.addExtension(ext);
+        // valueSet.getExtension().add(ext);
     }
 
     private <T extends ICompositeType & IBaseHasExtensions> Optional<IKnowledgeArtifactAdapter> updateComponentAndCache(

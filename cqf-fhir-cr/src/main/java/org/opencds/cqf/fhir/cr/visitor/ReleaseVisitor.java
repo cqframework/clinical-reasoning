@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
+import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -10,6 +12,8 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.FhirTerser;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,11 +34,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.cr.common.ExtensionBuilders;
+import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
+import org.opencds.cqf.fhir.utility.Uris;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
@@ -521,6 +527,7 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             maybeAdapter = terminologyServerClient
                     .getLatestValueSetResource(endpoint, reference)
                     .map(r -> (IKnowledgeArtifactAdapter) createAdapterForResource(r));
+            maybeAdapter.ifPresent(this::ensureAuthoritativeSourceExtension);
         } else if (resourceType != null
                 && resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM)
                 && latestFromTxServer) {
@@ -542,6 +549,25 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             }
         }
         return maybeAdapter;
+    }
+
+    private void ensureAuthoritativeSourceExtension(IKnowledgeArtifactAdapter adapter) {
+        if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
+            var url = adapter.getUrl();
+            try {
+                url = Uris.ensureHttps(url);
+            } catch (URISyntaxException | MalformedURLException e) {
+                // Do nothing here and let the malformed URL flow through.
+            }
+            var ext = (IBaseExtension<?, ?>) newBaseForVersion("Extension", fhirVersion());
+            adapter.getModelResolver()
+                    .setValue(
+                            ext,
+                            "url",
+                            uriTypeForVersion(fhirVersion(), TransformProperties.authoritativeSourceExtUrl));
+            adapter.getModelResolver().setValue(ext, "value", uriTypeForVersion(fhirVersion(), url));
+            adapter.addExtension(ext);
+        }
     }
 
     private <T extends ICompositeType & IBaseHasExtensions> Optional<IKnowledgeArtifactAdapter> updateComponentAndCache(

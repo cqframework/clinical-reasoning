@@ -5,8 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Fluent assertion API for MeasureDef objects.
@@ -39,8 +44,17 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  */
 public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected<MeasureDef, P> {
 
+    private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureDef.class);
+
+    private final Map<String, EvaluationResult> evaluationResults;
+
     public SelectedMeasureDef(MeasureDef value, P parent) {
+        this(value, parent, Map.of());
+    }
+
+    public SelectedMeasureDef(MeasureDef value, P parent, Map<String, EvaluationResult> evaluationResults) {
         super(value, parent);
+        this.evaluationResults = evaluationResults;
     }
 
     // ==================== Navigation Methods ====================
@@ -88,6 +102,19 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
                 "Group index out of bounds: " + index + ", size: "
                         + value().groups().size());
         return new SelectedMeasureDefGroup<>(value().groups().get(index), this);
+    }
+
+    // ==================== Logging Methods ====================
+
+    /**
+     * Log the CQL evaluation results for this measure, formatted for readability.
+     * Similar to {@link org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport#logReportJson()}.
+     *
+     * @return this SelectedMeasureDef for chaining
+     */
+    public SelectedMeasureDef<P> logEvaluationResults() {
+        logger.info(EvaluationResultFormatter.formatMeasureEvaluationResults(value().id(), evaluationResults));
+        return this;
     }
 
     // ==================== Assertion Methods ====================

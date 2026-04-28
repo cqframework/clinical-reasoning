@@ -141,13 +141,13 @@ class InputParametersTest {
                                 newStringPart(fhirContextR4, "name", "study"),
                                 newPart(fhirContextR4, "Reference", "content", study.getId())))),
                 Arrays.asList(
-                        (IBaseExtension<?, ?>)
-                                new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                        .setExtension(Arrays.asList(
-                                                new org.hl7.fhir.r4.model.Extension(
-                                                        "name", new org.hl7.fhir.r4.model.Coding().setCode("patient")),
-                                                new org.hl7.fhir.r4.model.Extension(
-                                                        "type", new org.hl7.fhir.r4.model.CodeType("Patient")))),
+                        (IBaseExtension<?, ?>) new org.hl7.fhir.r4.model.Extension(
+                                        Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.r4.model.Extension(
+                                                "name", new org.hl7.fhir.r4.model.Coding().setCode("patient")),
+                                        new org.hl7.fhir.r4.model.Extension(
+                                                "type", new org.hl7.fhir.r4.model.CodeType("Patient")))),
                         (IBaseExtension<?, ?>) new org.hl7.fhir.r4.model.Extension(
                                         Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
@@ -155,20 +155,20 @@ class InputParametersTest {
                                                 "name", new org.hl7.fhir.r4.model.Coding().setCode("encounter")),
                                         new org.hl7.fhir.r4.model.Extension(
                                                 "type", new org.hl7.fhir.r4.model.CodeType("Encounter")))),
-                        (IBaseExtension<?, ?>)
-                                new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                        .setExtension(Arrays.asList(
-                                                new org.hl7.fhir.r4.model.Extension(
-                                                        "name", new org.hl7.fhir.r4.model.Coding().setCode("location")),
-                                                new org.hl7.fhir.r4.model.Extension(
-                                                        "type", new org.hl7.fhir.r4.model.CodeType("Location")))),
-                        (IBaseExtension<?, ?>)
-                                new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                        .setExtension(Arrays.asList(
-                                                new org.hl7.fhir.r4.model.Extension(
-                                                        "name", new org.hl7.fhir.r4.model.Coding().setCode("user")),
-                                                new org.hl7.fhir.r4.model.Extension(
-                                                        "type", new org.hl7.fhir.r4.model.CodeType("Practitioner")))),
+                        (IBaseExtension<?, ?>) new org.hl7.fhir.r4.model.Extension(
+                                        Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.r4.model.Extension(
+                                                "name", new org.hl7.fhir.r4.model.Coding().setCode("location")),
+                                        new org.hl7.fhir.r4.model.Extension(
+                                                "type", new org.hl7.fhir.r4.model.CodeType("Location")))),
+                        (IBaseExtension<?, ?>) new org.hl7.fhir.r4.model.Extension(
+                                        Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.r4.model.Extension(
+                                                "name", new org.hl7.fhir.r4.model.Coding().setCode("user")),
+                                        new org.hl7.fhir.r4.model.Extension(
+                                                "type", new org.hl7.fhir.r4.model.CodeType("Practitioner")))),
                         (IBaseExtension<?, ?>) new org.hl7.fhir.r4.model.Extension(
                                         Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
@@ -313,13 +313,13 @@ class InputParametersTest {
                         "context",
                         newStringPart(fhirContextR4, "name", "user"),
                         newPart(fhirContextR4, "Reference", "content", user.getId())))),
-                List.of((IBaseExtension<?, ?>)
-                        new org.hl7.fhir.r4.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.r4.model.Extension(
-                                                "name", new org.hl7.fhir.r4.model.Coding().setCode("user")),
-                                        new org.hl7.fhir.r4.model.Extension(
-                                                "type", new org.hl7.fhir.r4.model.CodeType("RelatedPerson"))))));
+                List.of((IBaseExtension<?, ?>) new org.hl7.fhir.r4.model.Extension(
+                                Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new org.hl7.fhir.r4.model.Extension(
+                                        "name", new org.hl7.fhir.r4.model.Coding().setCode("user")),
+                                new org.hl7.fhir.r4.model.Extension(
+                                        "type", new org.hl7.fhir.r4.model.CodeType("RelatedPerson"))))));
         var actual = (org.hl7.fhir.r4.model.Parameters) resolver.getParameters();
         assertEquals(3, actual.getParameter().size());
         assertEquals("%subject", actual.getParameter().get(0).getName());
@@ -384,13 +384,13 @@ class InputParametersTest {
                                 newStringPart(fhirContextR5, "name", "study"),
                                 newPart(fhirContextR5, "Reference", "content", study.getId())))),
                 List.of(
-                        (IBaseExtension<?, ?>)
-                                new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                        .setExtension(Arrays.asList(
-                                                new org.hl7.fhir.r5.model.Extension(
-                                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("patient")),
-                                                new org.hl7.fhir.r5.model.Extension(
-                                                        "type", new org.hl7.fhir.r5.model.CodeType("Patient")))),
+                        (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
+                                        Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.r5.model.Extension(
+                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("patient")),
+                                        new org.hl7.fhir.r5.model.Extension(
+                                                "type", new org.hl7.fhir.r5.model.CodeType("Patient")))),
                         (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
                                         Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
@@ -398,20 +398,20 @@ class InputParametersTest {
                                                 "name", new org.hl7.fhir.r5.model.Coding().setCode("encounter")),
                                         new org.hl7.fhir.r5.model.Extension(
                                                 "type", new org.hl7.fhir.r5.model.CodeType("Encounter")))),
-                        (IBaseExtension<?, ?>)
-                                new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                        .setExtension(Arrays.asList(
-                                                new org.hl7.fhir.r5.model.Extension(
-                                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("location")),
-                                                new org.hl7.fhir.r5.model.Extension(
-                                                        "type", new org.hl7.fhir.r5.model.CodeType("Location")))),
-                        (IBaseExtension<?, ?>)
-                                new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                        .setExtension(Arrays.asList(
-                                                new org.hl7.fhir.r5.model.Extension(
-                                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                                new org.hl7.fhir.r5.model.Extension(
-                                                        "type", new org.hl7.fhir.r5.model.CodeType("Practitioner")))),
+                        (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
+                                        Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.r5.model.Extension(
+                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("location")),
+                                        new org.hl7.fhir.r5.model.Extension(
+                                                "type", new org.hl7.fhir.r5.model.CodeType("Location")))),
+                        (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
+                                        Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                                .setExtension(Arrays.asList(
+                                        new org.hl7.fhir.r5.model.Extension(
+                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
+                                        new org.hl7.fhir.r5.model.Extension(
+                                                "type", new org.hl7.fhir.r5.model.CodeType("Practitioner")))),
                         (IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
                                         Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
                                 .setExtension(Arrays.asList(
@@ -464,13 +464,13 @@ class InputParametersTest {
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
                         newPart(fhirContextR5, "Reference", "content", user.getId())))),
-                List.of((IBaseExtension<?, ?>)
-                        new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "type", new org.hl7.fhir.r5.model.CodeType("Patient"))))));
+                List.of((IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
+                                Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "type", new org.hl7.fhir.r5.model.CodeType("Patient"))))));
         var actual = (org.hl7.fhir.r5.model.Parameters) resolver.getParameters();
         assertEquals(3, actual.getParameter().size());
         assertEquals("%subject", actual.getParameter().get(0).getName());
@@ -499,13 +499,13 @@ class InputParametersTest {
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
                         newPart(fhirContextR5, "Reference", "content", user.getId())))),
-                List.of((IBaseExtension<?, ?>)
-                        new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "type", new org.hl7.fhir.r5.model.CodeType("PractitionerRole"))))));
+                List.of((IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
+                                Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "type", new org.hl7.fhir.r5.model.CodeType("PractitionerRole"))))));
         var actual = (org.hl7.fhir.r5.model.Parameters) resolver.getParameters();
         assertEquals(3, actual.getParameter().size());
         assertEquals("%subject", actual.getParameter().get(0).getName());
@@ -534,13 +534,13 @@ class InputParametersTest {
                         "context",
                         newStringPart(fhirContextR5, "name", "user"),
                         newPart(fhirContextR5, "Reference", "content", user.getId())))),
-                List.of((IBaseExtension<?, ?>)
-                        new org.hl7.fhir.r5.model.Extension(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
-                                .setExtension(Arrays.asList(
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
-                                        new org.hl7.fhir.r5.model.Extension(
-                                                "type", new org.hl7.fhir.r5.model.CodeType("RelatedPerson"))))));
+                List.of((IBaseExtension<?, ?>) new org.hl7.fhir.r5.model.Extension(
+                                Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT)
+                        .setExtension(Arrays.asList(
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "name", new org.hl7.fhir.r5.model.Coding().setCode("user")),
+                                new org.hl7.fhir.r5.model.Extension(
+                                        "type", new org.hl7.fhir.r5.model.CodeType("RelatedPerson"))))));
         var actual = (org.hl7.fhir.r5.model.Parameters) resolver.getParameters();
         assertEquals(3, actual.getParameter().size());
         assertEquals("%subject", actual.getParameter().get(0).getName());

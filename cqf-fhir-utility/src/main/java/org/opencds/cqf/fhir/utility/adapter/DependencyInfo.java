@@ -185,9 +185,10 @@ public class DependencyInfo implements IDependencyInfo {
     public static IDependencyInfo convertRelatedArtifact(ICompositeType ra, String source) {
         if (ra instanceof org.hl7.fhir.dstu3.model.RelatedArtifact reference) {
             return new DependencyInfo(
-                    source, reference.getResource().getReference(), reference.getExtension(), ref -> reference
-                            .getResource()
-                            .setReference(ref));
+                    source,
+                    reference.getResource().getReference(),
+                    reference.getExtension(),
+                    ref -> reference.getResource().setReference(ref));
         } else if (ra instanceof org.hl7.fhir.r4.model.RelatedArtifact reference) {
             return new DependencyInfo(
                     source, reference.getResource(), reference.getExtension(), reference::setResource);

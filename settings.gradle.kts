@@ -14,12 +14,21 @@ plugins {
 rootProject.name = "cqf-fhir"
 
 include("cqf-fhir-utility")
+
 include("cqf-fhir-test")
+
 include("cqf-fhir-cql")
+
 include("cqf-fhir-cr")
+
 include("cqf-fhir-bom")
+
 include("cqf-fhir-cr-hapi")
+
 include("cqf-fhir-cr-spring")
+
 include("cqf-fhir-cr-cli")
+
 include("cqf-fhir-benchmark")
+
 include("docs")

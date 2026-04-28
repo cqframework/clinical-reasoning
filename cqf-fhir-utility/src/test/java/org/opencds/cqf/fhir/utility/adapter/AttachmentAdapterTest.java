@@ -51,8 +51,9 @@ class AttachmentAdapterTest {
 
     @Test
     void r4WrongTypeThrows() {
-        assertThrows(IllegalArgumentException.class, () -> IAdapterFactory.forFhirVersion(
-                        ca.uhn.fhir.context.FhirVersionEnum.R4)
-                .createAttachment(new org.hl7.fhir.r4.model.Patient()));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> IAdapterFactory.forFhirVersion(ca.uhn.fhir.context.FhirVersionEnum.R4)
+                        .createAttachment(new org.hl7.fhir.r4.model.Patient()));
     }
 }

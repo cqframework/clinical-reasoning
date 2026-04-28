@@ -1,6 +1,5 @@
 plugins {
     id("cqf.java-conventions")
-    id("cqf.spotless-conventions")
     id("cqf.jacoco-conventions")
     id("cqf.publishing-conventions")
 }

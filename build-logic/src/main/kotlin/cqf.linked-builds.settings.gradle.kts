@@ -4,6 +4,7 @@ import cqf.LinkedBuildRegistry
 // linked builds as composite builds with the correct dependency substitutions.
 
 val localPropsFile = file("local.properties")
+
 if (localPropsFile.exists()) {
     val localProps = java.util.Properties().apply { localPropsFile.inputStream().use(::load) }
 

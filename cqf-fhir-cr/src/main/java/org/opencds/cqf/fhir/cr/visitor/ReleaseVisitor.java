@@ -553,38 +553,21 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
 
     private void ensureAuthoritativeSourceExtension(IKnowledgeArtifactAdapter adapter) {
         if (adapter.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl) == null) {
-            addAuthoritativeSourceExtension(adapter, adapter.getUrl());
+            var url = adapter.getUrl();
+            try {
+                url = Uris.ensureHttps(url);
+            } catch (URISyntaxException | MalformedURLException e) {
+                // Do nothing here and let the malformed URL flow through.
+            }
+            var ext = (IBaseExtension<?, ?>) newBaseForVersion("Extension", fhirVersion());
+            adapter.getModelResolver()
+                    .setValue(
+                            ext,
+                            "url",
+                            uriTypeForVersion(fhirVersion(), TransformProperties.authoritativeSourceExtUrl));
+            adapter.getModelResolver().setValue(ext, "value", uriTypeForVersion(fhirVersion(), url));
+            adapter.addExtension(ext);
         }
-        //            switch (fhirVersion()) {
-        //                case DSTU3 ->
-        //                    org.opencds.cqf.fhir.cr.visitor.dstu3.ReleaseVisitor.addAuthoritativeSourceExtension(
-        //                            (org.hl7.fhir.dstu3.model.ValueSet) adapter.get(), adapter.getUrl());
-        //                case R4 ->
-        //                    org.opencds.cqf.fhir.cr.visitor.r4.ReleaseVisitor.addAuthoritativeSourceExtension(
-        //                            (org.hl7.fhir.r4.model.ValueSet) adapter.get(), adapter.getUrl());
-        //                case R5 ->
-        //                    org.opencds.cqf.fhir.cr.visitor.r5.ReleaseVisitor.addAuthoritativeSourceExtension(
-        //                            (org.hl7.fhir.r5.model.ValueSet) adapter.get(), adapter.getUrl());
-        //                default ->
-        //                    throw new UnprocessableEntityException(
-        //                            "Unsupported FHIR version: " + fhirVersion().name());
-        //            }
-        //        }
-    }
-
-    private void addAuthoritativeSourceExtension(IKnowledgeArtifactAdapter adapter, String url) {
-        try {
-            url = Uris.ensureHttps(url);
-        } catch (URISyntaxException | MalformedURLException e) {
-            // Do nothing here and let the malformed URL flow through.
-        }
-        var ext = (IBaseExtension<?, ?>) newBaseForVersion("Extension", fhirVersion());
-        adapter.getModelResolver().setValue(ext, "url", TransformProperties.authoritativeSourceExtUrl);
-        adapter.getModelResolver().setValue(ext, "value", uriTypeForVersion(fhirVersion(), url));
-        // ext.setUrl(TransformProperties.authoritativeSourceExtUrl);
-        // ext.setValue(new UriType(url));
-        adapter.addExtension(ext);
-        // valueSet.getExtension().add(ext);
     }
 
     private <T extends ICompositeType & IBaseHasExtensions> Optional<IKnowledgeArtifactAdapter> updateComponentAndCache(

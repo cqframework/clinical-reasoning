@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -670,6 +671,96 @@ class ExpandHelperTest {
                 .count();
 
         assertEquals(1, naiveCount);
+    }
+
+    @Test
+    void expandValueSet_withFilter_fallsThroughToTerminologyServer_andFails() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var url = baseUrl + "/ValueSet/with-filter";
+
+        // ValueSet with a filter (should NOT be eligible for local expansion)
+        var vs = new ValueSet();
+        vs.setUrl(url);
+
+        var include = vs.getCompose().addInclude();
+        include.setSystem("http://loinc.org");
+        include.addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.EQUAL)
+                .setValue("1234-5");
+
+        // repository should not be used
+        var repo = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // terminology server should be attempted but FAIL
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenThrow(new RuntimeException("tx server failure"));
+
+        var helper = new ExpandHelper(repo, client);
+
+        Exception thrown = null;
+        try {
+            helper.expandValueSet(
+                    (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                    factory.createParameters(new Parameters()),
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
+        } catch (Exception e) {
+            thrown = e;
+        }
+
+        // we expect failure because:
+        // - local expansion is disallowed (filter present)
+        // - terminology server throws
+        assertNotNull(thrown);
+
+        // verify terminology server was attempted
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+
+        // verify repository fallback was NOT used
+        verify(repo, never()).search(any(), any(), any(Multimap.class), any());
+    }
+
+    @Test
+    void expandValueSet_withExclude_fallsThroughToTerminologyServer_andFails() {
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var vs = new ValueSet();
+        vs.setUrl(baseUrl + "/ValueSet/with-exclude");
+
+        vs.getCompose().addInclude().setSystem("http://loinc.org").addConcept().setCode("1234-5");
+
+        vs.getCompose().addExclude().setSystem("http://loinc.org").addConcept().setCode("9999-9");
+
+        var repo = mockRepositoryWithValueSetR4(new ValueSet());
+
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenThrow(new RuntimeException("tx server failure"));
+
+        var helper = new ExpandHelper(repo, client);
+
+        assertThrows(
+                Exception.class,
+                () -> helper.expandValueSet(
+                        (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                        factory.createParameters(new Parameters()),
+                        Optional.of(factory.createEndpoint(endpoint)),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new Date()));
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+        verify(repo, never()).search(any(), any(), any(Multimap.class), any());
     }
 
     @Test

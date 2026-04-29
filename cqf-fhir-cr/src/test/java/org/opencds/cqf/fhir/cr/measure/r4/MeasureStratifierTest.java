@@ -29,17 +29,17 @@ class MeasureStratifierTest {
     private static final Given GIVEN_SIMPLE = Measure.given().repositoryFor("MeasureTest");
 
     @Test
-    void cms2024_ControllingHighBloodPressureFHIR() {
+    void emptyStratifier() {
         final When when = GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
-                .measureId("ControllingHighBloodPressureFHIR")
+                .measureId("EmptyStratifier")
                 .evaluate();
         try {
             when.then();
             fail("expected InvalidMeasureDefinitionException for stratifier without expression or components");
         } catch (InvalidMeasureDefinitionException e) {
             assertEquals(
-                    "Stratifier '863b910a-a4b5-4493-8e8e-3c94a4560d7b' has no criteria.expression and no components for measure: https://madie.cms.gov/Measure/ControllingHighBloodPressureFHIR",
+                    "Stratifier 'stratifier-1' has no criteria.expression and no components for measure: https://example.com/Measure/EmptyStratifier",
                     e.getMessage());
         }
     }

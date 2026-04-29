@@ -1,13 +1,13 @@
 {
   "resourceType": "Library",
-  "id": "ControllingHighBloodPressureFHIR",
-  "url": "https://madie.cms.gov/Library/ControllingHighBloodPressureFHIR",
+  "id": "EmptyStratifier",
+  "url": "https://example.com/Library/EmptyStratifier",
   "meta": {
     "profile": [
       "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/computable-library-cqfm"
     ]
   },
-  "name": "ControllingHighBloodPressureFHIR",
+  "name": "EmptyStratifier",
   "status": "active",
   "type": {
     "coding": [
@@ -20,7 +20,7 @@
   "content": [
     {
       "contentType": "text/cql",
-      "url": "../../cql/ControllingHighBloodPressureFHIR.cql"
+      "url": "../../cql/EmptyStratifier.cql"
     }
   ]
 }

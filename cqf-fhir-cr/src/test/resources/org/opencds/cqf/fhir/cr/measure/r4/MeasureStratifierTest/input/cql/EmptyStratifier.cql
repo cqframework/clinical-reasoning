@@ -1,4 +1,4 @@
-library ControllingHighBloodPressureFHIR version '0.1.000'
+library EmptyStratifier
 
 using FHIR version '4.0.1'
 

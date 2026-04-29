@@ -5,7 +5,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
  * stratifier with no {@code criteria.expression} and no components, or other shape errors that make
  * the Measure un-evaluable.
  */
-public class InvalidMeasureDefinitionException extends MeasureEvaluationException {
+public class InvalidMeasureDefinitionException extends RuntimeException {
     public InvalidMeasureDefinitionException(String message) {
         super(message);
     }

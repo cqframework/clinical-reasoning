@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +31,7 @@ public class StratifierComponentDef {
         return this.code;
     }
 
-    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
+    public void putResult(String subject, Value value, Set<Value> evaluatedResources) {
         this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
     }
 

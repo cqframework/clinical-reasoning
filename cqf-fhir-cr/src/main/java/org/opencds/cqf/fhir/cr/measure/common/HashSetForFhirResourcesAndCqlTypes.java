@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.runtime.CqlType;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
  * A HashSet implementation that uses FHIR resource identity rules when comparing resources or
@@ -19,7 +19,7 @@ import org.opencds.cqf.cql.engine.runtime.CqlType;
  * This class exists strictly to compensate for the fact that FHIR resource classes and CQL types
  * do not implement equals() and hashCode().
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
- *           or a {@link CqlType}
+ *           or a {@link Value}
  */
 @SuppressWarnings("squid:S3776")
 public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
@@ -78,7 +78,7 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
             }
         }
 
-        final CqlType newElementCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newElement);
+        final Value newElementCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newElement);
 
         if (newElementCqlType != null) {
             if (this.contains(newElementCqlType)) {
@@ -116,11 +116,11 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
             return false;
         }
 
-        final CqlType removalCandidateCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(removalCandidate);
+        final Value removalCandidateCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(removalCandidate);
 
         if (removalCandidateCqlType != null) {
             for (T next : this) {
-                if (next instanceof CqlType nextCqlType
+                if (next instanceof Value nextCqlType
                         && FhirResourceAndCqlTypeUtils.areEqualCqlTypes(nextCqlType, removalCandidateCqlType)) {
                     return super.remove(nextCqlType);
                 }
@@ -165,7 +165,7 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
 
     private static boolean contains(Collection<?> collection, Object obj) {
         final IBaseResource otherResource = FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(obj);
-        final CqlType otherCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(obj);
+        final Value otherCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(obj);
 
         // prevent infinite recursion
         if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResourcesAndCqlTypes) {

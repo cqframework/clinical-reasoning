@@ -15,6 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Quantity;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
  * Utility class for formatting EvaluationResult objects into human-readable strings.
@@ -271,7 +274,7 @@ public class EvaluationResultFormatter {
         return subjectId + ": " + toString;
     }
 
-    public static String printValues(Collection<Object> values) {
+    public static String printValues(Collection<Value> values) {
 
         if (values == null || values.isEmpty()) {
             return "{empty}";
@@ -280,14 +283,17 @@ public class EvaluationResultFormatter {
         return values.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
     }
 
-    public static String printValue(Object value) {
+    public static String printValue(Value value) {
         if (value == null) {
             return "null";
         }
 
-        if (value instanceof IBaseResource resource) {
-            return resource.getIdElement().getValueAsString();
+        if (value instanceof ClassInstance classInstance && classInstance.has("id")) {
+            return "%s/%s".formatted(classInstance.getTypeAsString(), classInstance.get("id"));
         }
+//        if (value instanceof IBaseResource resource) {
+//            return resource.getIdElement().getValueAsString();
+//        }
 
         if (value instanceof Map<?, ?> map) {
             final String toString = map.entrySet().stream()

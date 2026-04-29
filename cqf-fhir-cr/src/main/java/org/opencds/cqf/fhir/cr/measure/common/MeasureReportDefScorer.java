@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
@@ -12,7 +12,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -492,7 +494,7 @@ public class MeasureReportDefScorer {
      * @param stratumPopulationDef the stratum population to filter by
      * @return collection of resources belonging to this stratum
      */
-    private static Collection<Object> getResultsForStratum(
+    private static Collection<Value> getResultsForStratum(
             PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
 
         if (stratumPopulationDef == null || populationDef == null || populationDef.getSubjectResources() == null) {
@@ -534,7 +536,7 @@ public class MeasureReportDefScorer {
      * @param stratumPopulationDef the stratum population containing resource IDs
      * @return collection of resources/observations matching the stratum's resource IDs
      */
-    private static Collection<Object> getResultsForStratumByResourceIds(
+    private static Collection<Value> getResultsForStratumByResourceIds(
             PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
 
         Set<String> stratumResourceIds = stratumPopulationDef.resourceIdsAsSet();
@@ -545,15 +547,17 @@ public class MeasureReportDefScorer {
         if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
             return populationDef.getSubjectResources().values().stream()
                     .flatMap(Collection::stream)
-                    .filter(Map.class::isInstance)
+                    .filter(Tuple.class::isInstance)
+                    .map(Tuple.class::cast)
+                    .map(Tuple::getElements)
                     .map(m -> (Map<?, ?>) m)
                     .map(map -> {
                         // Filter the map to only include entries matching stratum resource IDs
                         Map<Object, Object> filteredMap = new java.util.HashMap<>();
                         for (var entry : map.entrySet()) {
                             Object key = entry.getKey();
-                            if (key instanceof CqlClassInstance cqlClassInstance) {
-                                if (stratumResourceIds.contains(getId(cqlClassInstance))) {
+                            if (key instanceof ClassInstance classInstance) {
+                                if (stratumResourceIds.contains(getId(classInstance))) {
                                     filteredMap.put(key, entry.getValue());
                                 }
                             }
@@ -588,7 +592,7 @@ public class MeasureReportDefScorer {
      */
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
-            @Nullable PopulationDef populationDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
+            @Nullable PopulationDef populationDef, Function<PopulationDef, Collection<Value>> popDefToResources) {
 
         if (populationDef == null) {
             return null;
@@ -608,7 +612,7 @@ public class MeasureReportDefScorer {
      */
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
-            ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
+            ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Value> qualifyingResources) {
         // Delegate to MeasureScoreCalculator for collection and aggregation
         var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
         return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);

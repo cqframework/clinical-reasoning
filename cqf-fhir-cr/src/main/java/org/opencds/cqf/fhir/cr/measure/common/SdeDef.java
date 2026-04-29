@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -46,7 +48,7 @@ public class SdeDef {
         return this.description;
     }
 
-    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
+    public void putResult(String subject, Value value, Set<Value> evaluatedResources) {
         this.results.put(subject, new CriteriaResult(value, evaluatedResources));
     }
 

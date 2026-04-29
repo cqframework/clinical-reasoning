@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,8 +30,8 @@ public class PopulationDef {
     @Nullable
     private Double aggregationResult;
 
-    protected Set<Object> evaluatedResources;
-    protected Map<String, Set<Object>> subjectResources = new HashMap<>();
+    protected Set<Value> evaluatedResources;
+    protected Map<String, Set<Value>> subjectResources = new HashMap<>();
 
     public PopulationDef(
             String id,
@@ -96,7 +98,7 @@ public class PopulationDef {
         return populationType == this.measurePopulationType;
     }
 
-    public Set<Object> getEvaluatedResources() {
+    public Set<Value> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
             this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
         }
@@ -123,20 +125,21 @@ public class PopulationDef {
             return;
         }
 
-        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
+        final Set<Value> resourcesForSubject = subjectResources.get(subjectId);
         if (resourcesForSubject == null) {
             return;
         }
 
         // Remove the key from all inner maps
         resourcesForSubject.forEach(element -> {
-            if (element instanceof Map<?, ?> innerMap) {
-                innerMap.remove(measureObservationResourceKey);
+            if (element instanceof Tuple innerMap) {
+                // TODO: Not sure what is being done here
+                innerMap.getElements().remove(measureObservationResourceKey);
             }
         });
 
         // Remove empty inner maps - critical for correct counting
-        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+        resourcesForSubject.removeIf(element -> element instanceof Tuple m && m.getElements().isEmpty());
 
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {
@@ -179,7 +182,7 @@ public class PopulationDef {
      * </pre>
      *
      */
-    public List<Object> getAllSubjectResources() {
+    public List<Value> getAllSubjectResources() {
         return subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
@@ -193,8 +196,9 @@ public class PopulationDef {
         }
 
         return this.getAllSubjectResources().stream()
-                .filter(Map.class::isInstance)
-                .map(Map.class::cast)
+                .filter(Tuple.class::isInstance)
+                .map(Tuple.class::cast)
+                .map(Tuple::getElements)
                 .mapToInt(Map::size)
                 .sum();
     }
@@ -209,16 +213,16 @@ public class PopulationDef {
     }
 
     // Getter method
-    public Map<String, Set<Object>> getSubjectResources() {
+    public Map<String, Set<Value>> getSubjectResources() {
         return subjectResources;
     }
 
-    public Set<Object> getResourcesForSubject(String subjectId) {
+    public Set<Value> getResourcesForSubject(String subjectId) {
         return subjectResources.getOrDefault(subjectId, new HashSetForFhirResourcesAndCqlTypes<>());
     }
 
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
-    public void addResource(String key, Object value) {
+    public void addResource(String key, Value value) {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
                 .add(value);

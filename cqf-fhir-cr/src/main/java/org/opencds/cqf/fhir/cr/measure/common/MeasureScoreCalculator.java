@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -245,10 +247,11 @@ public class MeasureScoreCalculator {
      * @param resources Collection of objects that may contain Maps with QuantityDef values
      * @return List of QuantityDef objects found
      */
-    public static List<QuantityDef> collectQuantities(Collection<Object> resources) {
+    public static List<QuantityDef> collectQuantities(Collection<Value> resources) {
         var mapValues = resources.stream()
-                .filter(x -> x instanceof Map<?, ?>)
-                .map(x -> (Map<?, ?>) x)
+                .filter(x -> x instanceof Tuple)
+                .map(x -> (Tuple) x)
+                .map(Tuple::getElements)
                 .map(Map::values)
                 .flatMap(Collection::stream)
                 .toList();

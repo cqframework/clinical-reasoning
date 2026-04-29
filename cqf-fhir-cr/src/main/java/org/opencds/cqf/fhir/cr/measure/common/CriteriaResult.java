@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,26 +12,25 @@ import java.util.Set;
 import java.util.stream.StreamSupport;
 
 public class CriteriaResult {
-    private final Object value;
-    private final Set<Object> evaluatedResources;
+    private final Value value;
+    private final Set<Value> evaluatedResources;
 
-    public static final Object NULL_VALUE = new Object();
+    public static final Value NULL_VALUE = null;
 
     public static final CriteriaResult EMPTY_RESULT = new CriteriaResult(NULL_VALUE, Collections.emptySet());
 
-    public CriteriaResult(Object value, Set<Object> evaluatedResources) {
+    public CriteriaResult(Value value, Set<Value> evaluatedResources) {
         this.value = value;
         this.evaluatedResources = new HashSet<>(evaluatedResources);
     }
 
-    public Object rawValue() {
+    public Value rawValue() {
         return this.value;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public Iterable<Object> iterableValue() {
-        if (this.rawValue() instanceof Iterable<?>) {
-            return (Iterable) this.rawValue();
+    public Iterable<Value> iterableValue() {
+        if (this.rawValue() instanceof org.opencds.cqf.cql.engine.runtime.List cqlList) {
+            return cqlList.getValue();
         } else if (this.rawValue() == null) {
             return Collections.emptyList();
         } else {
@@ -36,9 +38,9 @@ public class CriteriaResult {
         }
     }
 
-    public Set<Object> valueAsSet() {
-        if (this.rawValue() instanceof Iterable) {
-            return buildSet(unsafeCast(this.rawValue()));
+    public Set<Value> valueAsSet() {
+        if (this.rawValue() instanceof org.opencds.cqf.cql.engine.runtime.List cqlList) {
+            return buildSet(unsafeCast(cqlList.getValue()));
         } else if (this.rawValue() == null) {
             return new HashSetForFhirResourcesAndCqlTypes<>();
         } else {
@@ -46,7 +48,7 @@ public class CriteriaResult {
         }
     }
 
-    public Set<Object> evaluatedResources() {
+    public Set<Value> evaluatedResources() {
         return this.evaluatedResources;
     }
 
@@ -54,11 +56,11 @@ public class CriteriaResult {
      * Returns the value(s) as a list with nulls filtered out.
      * Handles single values, iterables, and null values uniformly.
      */
-    public List<Object> nonNullValues() {
+    public List<Value> nonNullValues() {
         if (this.value == null) {
             return Collections.emptyList();
         }
-        if (this.value instanceof Iterable<?> iterable) {
+        if (this.value instanceof org.opencds.cqf.cql.engine.runtime.List iterable) {
             return StreamSupport.stream(iterable.spliterator(), false)
                     .filter(Objects::nonNull)
                     .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
@@ -66,7 +68,7 @@ public class CriteriaResult {
         return List.of(this.value);
     }
 
-    private Set<Object> buildSet(Iterable<Object> iterable) {
+    private Set<Value> buildSet(Iterable<Value> iterable) {
         return new HashSetForFhirResourcesAndCqlTypes<>(iterable);
     }
 

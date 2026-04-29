@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static java.util.Collections.emptyList;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOMINATOR;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DENOMINATOREXCEPTION;
@@ -24,6 +25,8 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,55 +115,53 @@ public class MeasureEvaluator {
         return measureDef;
     }
 
-    @SuppressWarnings("unchecked")
-    protected Iterable<Object> evaluatePopulationCriteria(
+    protected Iterable<Value> evaluatePopulationCriteria(
             String subjectType,
             ExpressionResult expressionResult,
             EvaluationResult evaluationResult,
-            Set<Object> outEvaluatedResources) {
+            Set<Value> outEvaluatedResources) {
 
-        if (expressionResult != null
+        if (expressionResult != null && expressionResult.getEvaluatedResources() != null
                 && !expressionResult.getEvaluatedResources().isEmpty()) {
             outEvaluatedResources.addAll(expressionResult.getEvaluatedResources());
         }
 
         if (expressionResult == null || expressionResult.getValue() == null) {
-            return Collections.emptyList();
+            return new org.opencds.cqf.cql.engine.runtime.List(emptyList());
         }
 
-        if (expressionResult.getValue() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
+        if (expressionResult.getValue() instanceof org.opencds.cqf.cql.engine.runtime.Boolean cqlBool) {
+            if (cqlBool.getValue()) {
                 // if Boolean, returns context by SubjectType
-                Object booleanResult = evaluationResult.get(subjectType).getValue();
+                var booleanResult = evaluationResult.get(subjectType);
                 // remove evaluated resources
-                return Collections.singletonList(booleanResult);
+                return booleanResult == null ? emptyList() : Collections.singletonList(booleanResult.getValue());
             } else {
                 // false result shows nothing
-                return Collections.emptyList();
+                return emptyList();
             }
         }
 
-        Object value = expressionResult.getValue();
-        if (value instanceof Iterable<?>) {
-            return (Iterable<Object>) value;
+        var value = expressionResult.getValue();
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.List list) {
+            return list;
         } else {
-            return Collections.singletonList(value);
+            return new org.opencds.cqf.cql.engine.runtime.List(List.of(value));
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
+    protected Iterable<Value> evaluateSupportingCriteria(ExpressionResult expressionResult) {
 
         // Case 1 — true null
         if (expressionResult == null || expressionResult.getValue() == null) {
             return null; // need to preserve result
         }
 
-        Object value = expressionResult.getValue();
+        var value = expressionResult.getValue();
 
         // Case 2 — list
-        if (value instanceof Iterable<?>) {
-            return (Iterable<Object>) value; // may be empty or not
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.List list) {
+            return list.getValue();
         }
 
         // Case 3 — scalar
@@ -190,7 +191,7 @@ public class MeasureEvaluator {
         }
 
         // Add Resources from SubjectId
-        for (Object resource : evaluatePopulationCriteria(
+        for (var resource : evaluatePopulationCriteria(
                 subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
             // hashmap instead of set
             inclusionDef.addResource(subjectId, resource);
@@ -469,23 +470,21 @@ public class MeasureEvaluator {
      */
     @SuppressWarnings("unchecked")
     public void retainObservationSubjectResourcesInPopulation(
-            Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
+            Map<String, Set<Value>> measurePopulation, Map<String, Set<Value>> measureObservation) {
 
         if (measurePopulation == null || measureObservation == null) {
             return;
         }
 
-        for (Iterator<Map.Entry<String, Set<Object>>> it =
-                        measureObservation.entrySet().iterator();
-                it.hasNext(); ) {
-            Map.Entry<String, Set<Object>> entry = it.next();
+        for (var it = measureObservation.entrySet().iterator(); it.hasNext();) {
+            var entry = it.next();
             String subjectId = entry.getKey();
 
             // Cast subject's observation set to the expected type
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
+            var obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
 
             // get valid population values for this subject
-            Set<Object> validPopulation = measurePopulation.get(subjectId);
+            var validPopulation = measurePopulation.get(subjectId);
 
             if (validPopulation == null || validPopulation.isEmpty()) {
                 // no population for this subject -> drop the whole subject
@@ -495,7 +494,7 @@ public class MeasureEvaluator {
 
             // remove observations not matching population values
             obsSet.removeIf(obsMap -> {
-                for (Object key : obsMap.keySet()) {
+                for (var key : obsMap.keySet()) {
                     if (!validPopulation.contains(key)) {
                         return true; // remove this observation map
                     }
@@ -516,12 +515,12 @@ public class MeasureEvaluator {
             PopulationDef measurePopulationDef,
             //        MeasurePopulationType.MEASUREOBSERVATION
             PopulationDef measureObservationDef) {
-        for (Object populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
-            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
-                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
-                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
+        for (var populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
+            if (populationResource instanceof Tuple measureObservationResourceAsMap) {
+                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.getElements().entrySet()) {
+                    final var measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
                     if (measurePopulationDef != null) {
-                        final Set<Object> measurePopulationResourcesForSubject =
+                        final var measurePopulationResourcesForSubject =
                                 measurePopulationDef.getResourcesForSubject(subjectId);
                         if (!measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
                             // remove observation results not found in measure population
@@ -540,22 +539,18 @@ public class MeasureEvaluator {
      * @param measurePopulation population results that you would like to exclude from measureObservation
      * @param measureObservation population results that will have items excluded from it, if found in measurePopulation
      */
-    @SuppressWarnings("unchecked")
     public void removeObservationSubjectResourcesInPopulation(
-            Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
+            Map<String, Set<Value>> measurePopulation, Map<String, Set<Value>> measureObservation) {
 
         if (measurePopulation == null || measureObservation == null) {
             return;
         }
 
-        for (Iterator<Map.Entry<String, Set<Object>>> it =
-                        measureObservation.entrySet().iterator();
-                it.hasNext(); ) {
-
-            Map.Entry<String, Set<Object>> entry = it.next();
+        for (var it = measureObservation.entrySet().iterator(); it.hasNext();) {
+            var entry = it.next();
             String subjectId = entry.getKey();
 
-            final Set<?> entryValue = entry.getValue();
+            final var entryValue = entry.getValue();
 
             if (CollectionUtils.isEmpty(entryValue)) {
                 continue;
@@ -566,10 +561,10 @@ public class MeasureEvaluator {
     }
 
     private void removeObservatorySubjectResource(
-            Map<String, Set<Object>> measurePopulation,
+            Map<String, Set<Value>> measurePopulation,
             Set<?> entryValue,
             String subjectId,
-            Iterator<Entry<String, Set<Object>>> iterator) {
+            Iterator<Entry<String, Set<Value>>> iterator) {
         if (entryValue.isEmpty()) {
             // Nothing to do
             return;
@@ -584,7 +579,7 @@ public class MeasureEvaluator {
         Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
 
         // population values for this subject
-        Set<Object> populationValues = measurePopulation.get(subjectId);
+        var populationValues = measurePopulation.get(subjectId);
 
         // If there is no population for this subject, there is nothing "to remove because iterator matches",
         // so leave the observation set as-is.
@@ -657,8 +652,9 @@ public class MeasureEvaluator {
         }
     }
 
-    protected Object evaluateDateOfCompliance(PopulationDef populationDef, EvaluationResult evaluationResult) {
-        return evaluationResult.get(populationDef.expression()).getValue();
+    protected Value evaluateDateOfCompliance(PopulationDef populationDef, EvaluationResult evaluationResult) {
+        var expressionResult = evaluationResult.get(populationDef.expression());
+        return expressionResult == null ? null : expressionResult.getValue();
     }
 
     protected void evaluateSdes(String subjectId, List<SdeDef> sdes, EvaluationResult evaluationResult) {
@@ -667,11 +663,12 @@ public class MeasureEvaluator {
             if (expressionResult == null) {
                 throw new ExpressionResultNotFoundException("SDE", sde.expression());
             }
-            Object result = expressionResult.getValue();
-            // TODO: This is a hack-around for an cql engine bug. Need to investigate.
-            if ((result instanceof List<?> list) && (list.size() == 1) && list.get(0) == null) {
-                result = null;
-            }
+            var result = expressionResult.getValue();
+//            // TODO: This is a hack-around for an cql engine bug. Need to investigate.
+            // TODO: Is this still needed?
+//            if ((result instanceof org.opencds.cqf.cql.engine.runtime.List list) && (list.size() == 1) && list.get(0) == null) {
+//                result = null;
+//            }
 
             sde.putResult(subjectId, result, expressionResult.getEvaluatedResources());
         }

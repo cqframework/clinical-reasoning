@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 
 import ca.uhn.fhir.context.FhirContext;
 import com.google.common.collect.HashBasedTable;
@@ -18,7 +18,9 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
@@ -644,8 +646,8 @@ public class MeasureMultiSubjectEvaluator {
      * Normalize a resource to its ID string for use as a row key component.
      */
     private static String normalizeResourceKey(Object obj) {
-        if (obj instanceof CqlClassInstance cqlClassInstance) {
-            var id = getId(cqlClassInstance);
+        if (obj instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
             if (id != null) {
                 return id;
             }
@@ -761,18 +763,18 @@ public class MeasureMultiSubjectEvaluator {
      *   <li>Otherwise, intersect using {@link CriteriaResult#valueAsSet()}</li>
      * </ul>
      */
-    private static Set<Object> calculateCriteriaStratifierIntersection(
+    private static Set<Value> calculateCriteriaStratifierIntersection(
             StratifierDef stratifierDef, PopulationDef populationDef) {
 
         final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
-        final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
+        final List<Value> allPopulationStratumIntersectingResources = new ArrayList<>();
 
         // For each subject, we intersect between the population and stratifier results
         for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
-            final Set<Object> stratifierResultsPerSubject =
+            final Set<Value> stratifierResultsPerSubject =
                     criteriaResultAsIntersectionSet(stratifierEntryBySubject.getValue());
 
-            final Set<Object> populationResultsPerSubject =
+            final Set<Value> populationResultsPerSubject =
                     populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
 
             allPopulationStratumIntersectingResources.addAll(
@@ -789,14 +791,15 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For Map-based results (Map<inputParam, producedValue>), the input parameters (map keys)
      * are the intersectable items.
      */
-    private static Set<Object> criteriaResultAsIntersectionSet(CriteriaResult result) {
+    private static Set<Value> criteriaResultAsIntersectionSet(CriteriaResult result) {
         if (result == null) {
             return Set.of();
         }
 
-        Object raw = result.rawValue();
-        if (raw instanceof Map<?, ?> m) {
-            return new HashSet<>(m.keySet());
+        var raw = result.rawValue();
+        if (raw instanceof Tuple t) {
+            // TODO: Not sure this is correct
+            return new HashSet<>(t.getElements().values());
         }
 
         return result.valueAsSet();
@@ -970,8 +973,8 @@ public class MeasureMultiSubjectEvaluator {
         if (obj == null) {
             return null;
         }
-        if (obj instanceof CqlClassInstance cqlClassInstance) {
-            var id = getId(cqlClassInstance);
+        if (obj instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
             if (id != null) {
                 return id;
             }
@@ -994,8 +997,8 @@ public class MeasureMultiSubjectEvaluator {
         if (value == null) {
             return "null_" + index;
         }
-        if (value instanceof CqlClassInstance cqlClassInstance) {
-            var id = getId(cqlClassInstance);
+        if (value instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
             if (id != null) {
                 return id;
             }

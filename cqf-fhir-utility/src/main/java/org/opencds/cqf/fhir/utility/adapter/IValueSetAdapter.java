@@ -37,6 +37,10 @@ public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
 
     boolean hasComposeInclude();
 
+    public boolean hasComposeExclude();
+
+    public boolean hasComposeFilters();
+
     /**
      * A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
      * include cannot have a filter or reference a ValueSet and must have a system and enumerate concepts.

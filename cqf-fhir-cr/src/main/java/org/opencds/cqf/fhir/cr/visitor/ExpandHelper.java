@@ -74,6 +74,18 @@ public class ExpandHelper {
         });
     }
 
+    private boolean canDoLocalExpansion(IValueSetAdapter valueSet) {
+        if (valueSet == null || !valueSet.hasCompose()) {
+            return false;
+        }
+        // Hard exclusions first (these force a fallback to the terminology server)
+        if (valueSet.hasComposeExclude() || valueSet.hasComposeFilters()) {
+            return false;
+        }
+        // Is there anything defined that we can actually expand
+        return valueSet.hasExplicitConcepts() || valueSet.hasValueSetReferences();
+    }
+
     public void expandValueSet(
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,
@@ -114,7 +126,7 @@ public class ExpandHelper {
 
         // Hybrid local expansion for ValueSets with explicit concepts and/or valueSet
         // references
-        if (valueSet.hasCompose() && (valueSet.hasExplicitConcepts() || valueSet.hasValueSetReferences())) {
+        if (canDoLocalExpansion(valueSet) && (valueSet.hasExplicitConcepts() || valueSet.hasValueSetReferences())) {
             var expansion = valueSet.newExpansion();
             boolean isNaive = false;
 
@@ -179,8 +191,14 @@ public class ExpandHelper {
                         valueSet.get().getClass(),
                         headers);
 
-                var expandedAdapter = (IValueSetAdapter) adapterFactory.createResource(vs);
-                valueSet.setExpansion(expandedAdapter.getExpansion());
+                var expandedValueSet = (IValueSetAdapter) adapterFactory.createResource(vs);
+
+                // expansions are only valid for a particular version
+                if (!valueSet.hasVersion()) {
+                    valueSet.setVersion(expandedValueSet.getVersion());
+                }
+                valueSet.setExpansion(expandedValueSet.getExpansion());
+                // Validate that the expansion parameters reflect what we asked for
                 validateExpansionParameters(valueSet, expansionParameters);
             } catch (Exception e) {
                 throw new UnprocessableEntityException(

@@ -168,6 +168,56 @@ class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
     }
 
     @Test
+    void hasExplicitConcepts_noCompose_returnsFalse() {
+        var vs = new ValueSet(); // no compose
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+        assertFalse(adapter.hasExplicitConcepts());
+    }
+
+    @Test
+    void hasExplicitConcepts_noConceptsInIncludes_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().setSystem("http://test"); // no concepts
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+        assertFalse(adapter.hasExplicitConcepts());
+    }
+
+    @Test
+    void hasExplicitConcepts_withConcept_returnsTrue() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().setSystem("http://test").addConcept().setCode("A");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+        assertTrue(adapter.hasExplicitConcepts());
+    }
+
+    @Test
+    void hasValueSetReferences_noCompose_returnsFalse() {
+        var vs = new ValueSet();
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+        assertFalse(adapter.hasValueSetReferences());
+    }
+
+    @Test
+    void hasValueSetReferences_noReferences_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().setSystem("http://test"); // no valueSet refs
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+        assertFalse(adapter.hasValueSetReferences());
+    }
+
+    @Test
+    void hasValueSetReferences_withReference_returnsTrue() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().addValueSet("http://example.org/ValueSet/test");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+        assertTrue(adapter.hasValueSetReferences());
+    }
+
+    @Test
     void adapter_get_all_dependencies() {
         var dependencies = List.of("profileRef");
         var valueSet = new ValueSet();

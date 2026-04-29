@@ -5,9 +5,7 @@ plugins {
 
 // group and version are set automatically from gradle.properties
 
-javaPlatform {
-    allowDependencies()
-}
+javaPlatform { allowDependencies() }
 
 dependencies {
     constraints {

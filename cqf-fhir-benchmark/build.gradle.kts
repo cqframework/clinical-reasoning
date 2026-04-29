@@ -1,10 +1,7 @@
 import net.ltgt.gradle.errorprone.errorprone
 
 // No jacoco, no animal-sniffer, no publishing for benchmarks
-plugins {
-    id("cqf.java-conventions")
-    id("cqf.spotless-conventions")
-}
+plugins { id("cqf.java-conventions") }
 
 dependencies {
     implementation(project(":cqf-fhir-cr"))

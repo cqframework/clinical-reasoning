@@ -5,16 +5,18 @@ import cqf.LinkedBuildRegistry
 
 tasks.register("resolveLinkedBuilds") {
     group = "ci"
-    description = "Parses Depends-On from the PR description and sets up composite builds for linked repos."
+    description =
+        "Parses Depends-On from the PR description and sets up composite builds for linked repos."
 
     outputs.upToDateWhen { false }
 
     doLast {
         fun run(vararg args: String): String {
-            val proc = ProcessBuilder(*args)
-                .directory(project.projectDir)
-                .redirectErrorStream(true)
-                .start()
+            val proc =
+                ProcessBuilder(*args)
+                    .directory(project.projectDir)
+                    .redirectErrorStream(true)
+                    .start()
             val output = proc.inputStream.bufferedReader().readText()
             val exitCode = proc.waitFor()
             if (exitCode != 0) {
@@ -23,12 +25,13 @@ tasks.register("resolveLinkedBuilds") {
             return output.trim()
         }
 
-        val prNumber = (findProperty("prNumber") as? String)
-            ?: System.getenv("PR_NUMBER")
-            ?: throw GradleException(
-                "resolveLinkedBuilds requires a PR number. " +
-                    "Pass -PprNumber=123 or set PR_NUMBER env var."
-            )
+        val prNumber =
+            (findProperty("prNumber") as? String)
+                ?: System.getenv("PR_NUMBER")
+                ?: throw GradleException(
+                    "resolveLinkedBuilds requires a PR number. " +
+                        "Pass -PprNumber=123 or set PR_NUMBER env var."
+                )
 
         // Fetch PR body via gh CLI
         val prBody = run("gh", "pr", "view", prNumber, "--json", "body", "--jq", ".body")
@@ -68,16 +71,22 @@ tasks.register("resolveLinkedBuilds") {
             cloneDir.parentFile.mkdirs()
 
             run(
-                "git", "clone", "--depth", "1", "--branch", branch,
+                "git",
+                "clone",
+                "--depth",
+                "1",
+                "--branch",
+                branch,
                 "https://github.com/$repoSlug.git",
-                cloneDir.absolutePath
+                cloneDir.absolutePath,
             )
 
-            val buildPath = if (build.buildRoot.isNotEmpty()) {
-                "${cloneDir.absolutePath}/${build.buildRoot}"
-            } else {
-                cloneDir.absolutePath
-            }
+            val buildPath =
+                if (build.buildRoot.isNotEmpty()) {
+                    "${cloneDir.absolutePath}/${build.buildRoot}"
+                } else {
+                    cloneDir.absolutePath
+                }
 
             properties.setProperty(build.propertyKey, buildPath)
         }

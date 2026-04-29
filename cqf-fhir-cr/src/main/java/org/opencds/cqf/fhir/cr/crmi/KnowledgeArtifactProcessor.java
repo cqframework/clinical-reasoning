@@ -138,8 +138,9 @@ public class KnowledgeArtifactProcessor {
 
     public static List<IDependencyInfo> getRelatedArtifactsWithPreservedExtensions(List<IDependencyInfo> deps) {
         return deps.stream()
-                .filter(ra -> preservedExtensionUrls.stream().anyMatch(url -> ra.getExtension().stream()
-                        .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
+                .filter(ra -> preservedExtensionUrls.stream()
+                        .anyMatch(url -> ra.getExtension().stream()
+                                .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
                 .collect(Collectors.toList());
     }
 

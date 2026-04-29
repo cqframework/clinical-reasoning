@@ -1337,12 +1337,14 @@ class MeasureScoringTypeRatioContVariableTest {
      */
     @Test
     void ratioContinuousVariableBadDenDef() {
-        var expectedException = assertThrows(InvalidRequestException.class, () -> given.when()
-                .measureId("RatioContVarResourceSumError2")
-                .subject("Patient/patient-9")
-                .evaluate()
-                .then()
-                .report());
+        var expectedException = assertThrows(
+                InvalidRequestException.class,
+                () -> given.when()
+                        .measureId("RatioContVarResourceSumError2")
+                        .subject("Patient/patient-9")
+                        .evaluate()
+                        .then()
+                        .report());
 
         assertTrue(expectedException.getMessage().contains("no matching criteria reference was found for extension"));
     }

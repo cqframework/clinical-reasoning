@@ -3,12 +3,11 @@ plugins {
     jacoco
     id("cqf.ci-conventions")
     id("cqf.git-version")
+    id("cqf.spotless-conventions")
 }
 
 // Required for the JaCoCo ant dependency used by the aggregate report task
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 sonar {
     properties {
@@ -17,7 +16,10 @@ sonar {
         property("sonar.host.url", "https://sonarcloud.io")
         property("sonar.java.source", "17")
         property("sonar.java.target", "17")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get()}/reports/jacoco/jacocoAggregateReport/jacocoAggregateReport.xml")
+        property(
+            "sonar.coverage.jacoco.xmlReportPaths",
+            "${layout.buildDirectory.get()}/reports/jacoco/jacocoAggregateReport/jacocoAggregateReport.xml",
+        )
         property("sonar.java.coveragePlugin", "jacoco")
         property("sonar.exclusions", "**/generated/**,**/benchmark/**")
         property("sonar.coverage.exclusions", "**/config/**,**/constants/**")
@@ -25,9 +27,7 @@ sonar {
 }
 
 // Ensure the sonar task generates the aggregate JaCoCo report first so coverage data is available
-tasks.named("sonar") {
-    dependsOn("jacocoAggregateReport")
-}
+tasks.named("sonar") { dependsOn("jacocoAggregateReport") }
 
 // Aggregate JaCoCo reports from all subprojects that apply the jacoco plugin
 tasks.register<JacocoReport>("jacocoAggregateReport") {
@@ -37,13 +37,17 @@ tasks.register<JacocoReport>("jacocoAggregateReport") {
     val jacocoSubprojects = subprojects.filter { it.plugins.hasPlugin("jacoco") }
     dependsOn(jacocoSubprojects.map { it.tasks.named("test") })
 
-    sourceDirectories.setFrom(jacocoSubprojects.map { it.the<SourceSetContainer>()["main"].allSource.srcDirs })
+    sourceDirectories.setFrom(
+        jacocoSubprojects.map { it.the<SourceSetContainer>()["main"].allSource.srcDirs }
+    )
     classDirectories.setFrom(jacocoSubprojects.map { it.the<SourceSetContainer>()["main"].output })
-    executionData.setFrom(jacocoSubprojects.map {
-        it.tasks.named<Test>("test").map { task ->
-            task.extensions.getByType<JacocoTaskExtension>().destinationFile!!
+    executionData.setFrom(
+        jacocoSubprojects.map {
+            it.tasks.named<Test>("test").map { task ->
+                task.extensions.getByType<JacocoTaskExtension>().destinationFile!!
+            }
         }
-    })
+    )
 
     reports {
         xml.required = true

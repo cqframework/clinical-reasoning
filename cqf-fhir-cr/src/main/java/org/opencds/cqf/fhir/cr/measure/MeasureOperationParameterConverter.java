@@ -48,7 +48,7 @@ public class MeasureOperationParameterConverter {
             return;
         }
 
-        IPrimitiveType<String> productLineFhir = this.fhirTypeConverter.toFhirString(productLine);
+        IPrimitiveType<String> productLineFhir = this.fhirTypeConverter.toFhirString(new org.opencds.cqf.cql.engine.runtime.String(productLine));
 
         this.addChild(parameters, "Product Line", productLineFhir);
     }

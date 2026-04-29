@@ -22,7 +22,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
@@ -161,8 +161,8 @@ class R4StratifierBuilder {
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
             Object value;
-            if (stratumValue.getValueClass().equals(CqlClassInstance.class)) {
-                value = cqlFhirParametersConverter.toFhirValue((CqlClassInstance) stratumValue.getValue());
+            if (stratumValue.getValueClass().equals(ClassInstance.class)) {
+                value = cqlFhirParametersConverter.toFhirValue((ClassInstance) stratumValue.getValue());
             } else {
                 value = stratumValue;
             }

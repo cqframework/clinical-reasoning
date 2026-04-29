@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
-import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
@@ -40,7 +40,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
@@ -231,8 +231,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof CqlClassInstance cqlClassInstance) {
-            return getId(cqlClassInstance);
+        if (resourceObject instanceof ClassInstance classInstance) {
+            return getId(classInstance);
         }
         if (resourceObject instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
@@ -316,8 +316,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
 
         for (Object object : evaluatedResources) {
-            var cqlClassInstance = (CqlClassInstance) object;
-            var resourceId = getId(cqlClassInstance);
+            var classInstance = (ClassInstance) object;
+            var resourceId = getId(classInstance);
             bc.addCriteriaExtensionToEvaluatedResource(resourceId, criteriaId);
         }
     }

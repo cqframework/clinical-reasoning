@@ -14,7 +14,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
@@ -69,8 +69,8 @@ public class R4MeasureReportUtils {
 
             var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
             Object value;
-            if (stratumValue.getValueClass().equals(CqlClassInstance.class)) {
-                value = cqlFhirParametersConverter.toFhirValue((CqlClassInstance) stratumValue.getValue());
+            if (stratumValue.getValueClass().equals(ClassInstance.class)) {
+                value = cqlFhirParametersConverter.toFhirValue((ClassInstance) stratumValue.getValue());
             } else {
                 value = stratumValue.getValue();
             }

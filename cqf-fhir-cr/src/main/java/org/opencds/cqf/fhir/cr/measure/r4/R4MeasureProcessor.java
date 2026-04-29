@@ -45,6 +45,7 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class R4MeasureProcessor {
     private static final Logger log = LoggerFactory.getLogger(R4MeasureProcessor.class);
 
@@ -505,7 +506,7 @@ public class R4MeasureProcessor {
                 if (value instanceof IPrimitiveType<?> type) {
                     // TODO: handle Code, CodeableConcept, Quantity, etc
                     // resolves Date/Time values
-                    value = modelResolver.toJavaPrimitive(type.getValue(), value);
+                    value = modelResolver.toSimpleCqlType(type);
                 }
             }
             if (parameterMap.containsKey(param.getName())) {

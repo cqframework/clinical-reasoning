@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cql.CqlClassInstanceHelper.convertToFhirR4IfNeeded;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.CqlType;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
@@ -272,7 +272,7 @@ public class R4SupportingEvidenceExtension {
         }
 
         // Preserve CQL runtime wrappers (encode later)
-        if (value instanceof CqlType) {
+        if (value instanceof Value) {
             out.add(value);
             return;
         }
@@ -347,7 +347,7 @@ public class R4SupportingEvidenceExtension {
 
         // Tuple -> represented as nested extensions under this "value"
         if (value instanceof Tuple tuple) {
-            for (Map.Entry<String, Object> entry : tuple.getElements().entrySet()) {
+            for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
                 Extension fieldExt = new Extension(entry.getKey());
                 // field values become repeated nested "value" slices under the field extension
                 addValues(fieldExt, entry.getValue());

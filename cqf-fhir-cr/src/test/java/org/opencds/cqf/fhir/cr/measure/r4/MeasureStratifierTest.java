@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.InvalidMeasureDefinitionException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
@@ -26,6 +27,23 @@ class MeasureStratifierTest {
     private static final Given GIVEN_CRITERIA_BASED_STRAT_COMPLEX =
             Measure.given().repositoryFor("CriteriaBasedStratifiersComplex");
     private static final Given GIVEN_SIMPLE = Measure.given().repositoryFor("MeasureTest");
+
+    @Test
+    void emptyStratifier() {
+        final When when = GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("EmptyStratifier")
+                .evaluate();
+        try {
+            when.then();
+            fail("expected InvalidMeasureDefinitionException for stratifier without expression or components");
+        } catch (InvalidMeasureDefinitionException e) {
+            assertEquals(
+                    "Stratifier 'stratifier-1' has no criteria.expression and no components for measure: https://example.com/Measure/EmptyStratifier",
+                    e.getMessage());
+        }
+    }
+
     /**
      * Boolean Basis Measure with Stratifier defined by component expression that results in CodeableConcept value of 'M' or 'F' for the Measure population. For 'Individual' reportType
      */

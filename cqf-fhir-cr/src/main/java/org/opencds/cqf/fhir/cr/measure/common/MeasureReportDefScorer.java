@@ -550,21 +550,25 @@ public class MeasureReportDefScorer {
                     .filter(Tuple.class::isInstance)
                     .map(Tuple.class::cast)
                     .map(Tuple::getElements)
-                    .map(m -> (Map<?, ?>) m)
+                    //.map(m -> (Map<?, ?>) m)
                     .map(map -> {
                         // Filter the map to only include entries matching stratum resource IDs
-                        Map<Object, Object> filteredMap = new java.util.HashMap<>();
+                        Map<String, Value> filteredMap = new java.util.HashMap<>();
                         for (var entry : map.entrySet()) {
-                            Object key = entry.getKey();
-                            if (key instanceof ClassInstance classInstance) {
-                                if (stratumResourceIds.contains(getId(classInstance))) {
-                                    filteredMap.put(key, entry.getValue());
-                                }
+                            var key = entry.getKey();
+                            // TODO: I don't understand how we would get a Value as a key
+                            if (stratumResourceIds.contains(key)) {
+                                filteredMap.put(key, entry.getValue());
                             }
+//                            if (key instanceof ClassInstance classInstance) {
+//                                if (stratumResourceIds.contains(getId(classInstance))) {
+//                                    filteredMap.put(key, entry.getValue());
+//                                }
+//                            }
                         }
                         return filteredMap;
                     })
-                    .filter(map -> !map.isEmpty()) // Only include non-empty filtered maps
+                    .map(map -> new Tuple().withElements(map))
                     .collect(Collectors.toList());
         }
 
@@ -572,9 +576,8 @@ public class MeasureReportDefScorer {
         return populationDef.getSubjectResources().values().stream()
                 .flatMap(Collection::stream)
                 .filter(resource -> {
-                    if (resource instanceof IBaseResource baseResource) {
-                        String resourceId =
-                                baseResource.getIdElement().toVersionless().getValue();
+                    if (resource instanceof ClassInstance instance && instance.has("id")) {
+                        String resourceId = instance.get("id").toString();
                         return stratumResourceIds.contains(resourceId);
                     }
                     return false;

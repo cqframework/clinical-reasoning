@@ -6,7 +6,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEO
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
@@ -312,13 +311,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addEvaluatedResourceReferences(
-            R4MeasureReportBuilderContext bc, String criteriaId, Set<Object> evaluatedResources) {
+            R4MeasureReportBuilderContext bc, String criteriaId, Set<Value> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }
 
-        var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
-        for (Object object : evaluatedResources) {
+        for (var object : evaluatedResources) {
             var classInstance = (ClassInstance) object;
             var resourceId = getId(classInstance);
             bc.addCriteriaExtensionToEvaluatedResource(resourceId, criteriaId);

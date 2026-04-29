@@ -17,6 +17,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Quantity;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
@@ -27,7 +28,6 @@ public class EvaluationResultFormatter {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd:HH:mm:ss";
     private static final String INDENT = "  ";
-    private static final String SEPARATOR = "----------------------------------------";
 
     private EvaluationResultFormatter() {
         // Static utility class
@@ -221,44 +221,12 @@ public class EvaluationResultFormatter {
         return INDENT.repeat(Math.max(0, level));
     }
 
-    /**
-     * Formats evaluation results for a single measure, with separator lines between subjects.
-     *
-     * @param measureId the measure ID for the header
-     * @param evaluationResults map of subject ID to EvaluationResult
-     * @return formatted string
-     */
-    public static String formatMeasureEvaluationResults(
-            String measureId, Map<String, EvaluationResult> evaluationResults) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(SEPARATOR).append("\n");
-        sb.append("Evaluation Results for Measure: ").append(measureId).append("\n");
-        sb.append(SEPARATOR).append("\n");
-
-        if (evaluationResults.isEmpty()) {
-            sb.append("  (no evaluation results available)\n");
-        } else {
-            boolean first = true;
-            for (Map.Entry<String, EvaluationResult> entry : evaluationResults.entrySet()) {
-                if (!first) {
-                    sb.append("  ").append(SEPARATOR).append("\n");
-                }
-                first = false;
-                sb.append("  Subject: ").append(entry.getKey()).append("\n");
-                sb.append(format(entry.getValue(), 2));
-            }
-        }
-
-        sb.append(SEPARATOR).append("\n");
-        return sb.toString();
-    }
-
-    public static Object printSubjectResources(PopulationDef populationDef, String subjectId) {
+    public static String printSubjectResources(PopulationDef populationDef, String subjectId) {
         if (populationDef == null) {
             return "{empty}";
         }
 
-        final Set<Object> resources = populationDef.getSubjectResources().get(subjectId);
+        final Set<Value> resources = populationDef.getSubjectResources().get(subjectId);
 
         if (CollectionUtils.isEmpty(resources)) {
             return subjectId + ": {empty}";
@@ -295,9 +263,9 @@ public class EvaluationResultFormatter {
 //            return resource.getIdElement().getValueAsString();
 //        }
 
-        if (value instanceof Map<?, ?> map) {
-            final String toString = map.entrySet().stream()
-                    .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
+        if (value instanceof Tuple map) {
+            final String toString = map.getElements().entrySet().stream()
+                    .map(entry -> entry.getKey() + " -> " + printValue(entry.getValue()))
                     .collect(Collectors.joining(", "));
 
             if (StringUtils.isBlank(toString)) {

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +37,12 @@ public class MeasureObservationHandler {
             return;
         }
 
-        final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
+        final var exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
         if (CollectionUtils.isEmpty(exclusionResources)) {
             return;
         }
 
-        final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
+        final var observationResources = measureObservationDef.getResourcesForSubject(subjectId);
         if (CollectionUtils.isEmpty(observationResources)) {
             return;
         }
@@ -54,7 +55,7 @@ public class MeasureObservationHandler {
 
         // Make a copy to avoid ConcurrentModificationException when removeExcludedMeasureObservationResource
         // removes empty maps from the original set
-        final Set<Object> observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
+        final var observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
 
         // Iterate over observation resources (which are Maps) and remove matching keys
         for (Object observationResource : observationResourcesCopy) {
@@ -79,7 +80,7 @@ public class MeasureObservationHandler {
      */
     private static void removeMatchingKeysFromObservationMap(
             Map<?, ?> observationMap,
-            Set<Object> exclusionResources,
+            Set<Value> exclusionResources,
             PopulationDef measureObservationDef,
             String subjectId) {
 

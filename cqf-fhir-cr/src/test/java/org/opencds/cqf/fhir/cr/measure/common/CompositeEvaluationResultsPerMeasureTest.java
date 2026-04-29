@@ -24,8 +24,11 @@ import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.trace.Trace;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 
 class CompositeEvaluationResultsPerMeasureTest {
+    static final FhirModelResolver modelResolver = new R4FhirModelResolver();
 
     @Test
     void gettersContainExpectedData() {
@@ -110,12 +113,11 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measure123"), "http://example.com/Measure/test");
 
         // Create a patient resource with ID
-        Patient patient = new Patient();
-        patient.setId("Patient/patient-1");
+        var patient = modelResolver.toCqlValue(new Patient().setId("Patient/patient-1"), false);
 
         // Create an EvaluationResult with expression results
         EvaluationResult er = new EvaluationResult();
-        ExpressionResult expressionResult = new ExpressionResult(true, new HashSet<>(Arrays.asList(patient)));
+        ExpressionResult expressionResult = new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), new HashSet<>(List.of(patient)));
         er.set(new EvaluationExpressionRef("Initial Population"), expressionResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -169,18 +171,16 @@ class CompositeEvaluationResultsPerMeasureTest {
         var measureDef2 = MeasureDef.fromIdAndUrl(new IdType(ResourceType.Measure.name(), "measure-null-url"), null);
 
         // Create resources
-        Patient patient = new Patient();
-        patient.setId("Patient/patient-2");
+        var patient = modelResolver.toCqlValue(new Patient().setId("Patient/patient-2"), false);
 
-        Encounter encounter = new Encounter();
-        encounter.setId("Encounter/patient-2-encounter-1");
+        var encounter = modelResolver.toCqlValue(new Encounter().setId("Encounter/patient-2-encounter-1"), false);
 
         // Create EvaluationResult with multiple expression results
         EvaluationResult er = new EvaluationResult();
-        ExpressionResult popResult = new ExpressionResult(5, new HashSet<>(Arrays.asList(patient, encounter)));
+        ExpressionResult popResult = new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Integer(5), new HashSet<>(List.of(patient, encounter)));
         er.set(new EvaluationExpressionRef("Initial Population"), popResult);
 
-        ExpressionResult numResult = new ExpressionResult("test-string", Set.of());
+        ExpressionResult numResult = new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.String("test-string"), Set.of());
         er.set(new EvaluationExpressionRef("Numerator"), numResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -223,11 +223,11 @@ class CompositeEvaluationResultsPerMeasureTest {
         // Create EvaluationResult with date values
         EvaluationResult er = new EvaluationResult();
 
-        LocalDate localDate = LocalDate.of(2024, 1, 15);
+        var localDate = modelResolver.toCqlValue(LocalDate.of(2024, 1, 15), false);
         ExpressionResult dateResult = new ExpressionResult(localDate, Set.of());
         er.set(new EvaluationExpressionRef("Date Expression"), dateResult);
 
-        LocalDateTime localDateTime = LocalDateTime.of(2024, 1, 15, 14, 30, 45);
+        var localDateTime = modelResolver.toCqlValue(LocalDateTime.of(2024, 1, 15, 14, 30, 45), false);
         ExpressionResult dateTimeResult = new ExpressionResult(localDateTime, Set.of());
         er.set(new EvaluationExpressionRef("DateTime Expression"), dateTimeResult);
 
@@ -254,15 +254,13 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measure-list"), "http://example.com/Measure/collections");
 
         // Create resources
-        Patient patient1 = new Patient();
-        patient1.setId("Patient/patient-1");
+        var patient1 = modelResolver.toCqlValue(new Patient().setId("Patient/patient-1"), false);
 
-        Patient patient2 = new Patient();
-        patient2.setId("Patient/patient-2");
+        var patient2 = modelResolver.toCqlValue(new Patient().setId("Patient/patient-2"), false);
 
         // Create EvaluationResult with collection value
         EvaluationResult er = new EvaluationResult();
-        List<Patient> patientList = Arrays.asList(patient1, patient2);
+        var patientList = new org.opencds.cqf.cql.engine.runtime.List(List.of(patient1, patient2));
         ExpressionResult listResult = new ExpressionResult(patientList, Set.of());
         er.set(new EvaluationExpressionRef("Patient List"), listResult);
 
@@ -288,13 +286,13 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureDebug"), "http://example.com/Measure/debug");
 
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(true, Set.of()));
+        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
 
         var debugResult = new DebugResult();
         er.setDebugResult(debugResult);
 
         EvaluationResult observationResult = new EvaluationResult();
-        observationResult.set(new EvaluationExpressionRef("obs1"), new ExpressionResult(42, Set.of()));
+        observationResult.set(new EvaluationExpressionRef("obs1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Integer(42), Set.of()));
 
         var builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef, "patient-1", er, List.of(observationResult));
@@ -315,7 +313,7 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureTrace"), "http://example.com/Measure/trace");
 
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(true, Set.of()));
+        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
 
         var trace = new Trace(List.of());
         er.setTrace(trace);
@@ -337,7 +335,7 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureNoDebug"), "http://example.com/Measure/nodebug");
 
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(true, Set.of()));
+        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
 
         var builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef, "patient-1", er, List.of());

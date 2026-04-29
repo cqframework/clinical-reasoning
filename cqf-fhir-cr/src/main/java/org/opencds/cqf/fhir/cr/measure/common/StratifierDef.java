@@ -90,7 +90,7 @@ public class StratifierDef {
     }
 
     // Ensure we handle FHIR resource identity properly
-    public Set<Object> getAllCriteriaResultValues() {
+    public Set<Value> getAllCriteriaResultValues() {
         return new HashSetForFhirResourcesAndCqlTypes<>(this.getResults().values().stream()
                 .map(CriteriaResult::rawValue)
                 .map(this::toSet)
@@ -102,12 +102,12 @@ public class StratifierDef {
         return stratifierType;
     }
 
-    private Set<Object> toSet(Object value) {
+    private Set<Value> toSet(Value value) {
         if (value == null) {
             return Set.of();
         }
 
-        if (value instanceof Iterable<?> iterable) {
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.List iterable) {
             return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
         } else {
             return Set.of(value);

@@ -19,7 +19,7 @@ public class SdeDef {
 
     // Pre-accumulated state (populated by MeasureMultiSubjectEvaluator)
     private final Map<StratumValueWrapper, Long> accumulatedValues = new HashMap<>();
-    private final Set<Object> allEvaluatedResources = new HashSet<>();
+    private final Set<Value> allEvaluatedResources = new HashSet<>();
 
     public SdeDef(String id, ConceptDef code, String expression) {
         this(id, code, expression, null);
@@ -56,7 +56,7 @@ public class SdeDef {
         return this.accumulatedValues;
     }
 
-    public Set<Object> getAllEvaluatedResources() {
+    public Set<Value> getAllEvaluatedResources() {
         return this.allEvaluatedResources;
     }
 

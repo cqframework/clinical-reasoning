@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
@@ -25,7 +27,7 @@ public class StratumPopulationDef {
      * (ex: [Patient/pat1, Patient/pat2] or [pat1, pat2]
      */
     private final Set<String> subjectsQualifiedOrUnqualified;
-    private final Set<Object> populationDefEvaluationResultIntersection;
+    private final Set<Value> populationDefEvaluationResultIntersection;
     private final List<String> resourceIdsForSubjectList;
     private final MeasureStratifierType measureStratifierType;
     private final CodeDef populationBasis;
@@ -36,7 +38,7 @@ public class StratumPopulationDef {
     public StratumPopulationDef(
             PopulationDef populationDef,
             Set<String> subjectsQualifiedOrUnqualified,
-            Set<Object> populationDefEvaluationResultIntersection,
+            Set<Value> populationDefEvaluationResultIntersection,
             List<String> resourceIdsForSubjectList,
             MeasureStratifierType measureStratifierType,
             CodeDef populationBasis) {
@@ -57,7 +59,7 @@ public class StratumPopulationDef {
         return subjectsQualifiedOrUnqualified;
     }
 
-    public Set<Object> populationDefEvaluationResultIntersection() {
+    public Set<Value> populationDefEvaluationResultIntersection() {
         return populationDefEvaluationResultIntersection;
     }
 
@@ -182,13 +184,16 @@ public class StratumPopulationDef {
             return "null";
         }
 
+        // TODO: why 5?
         var limited = populationDefEvaluationResultIntersection.stream()
                 .limit(5)
                 .map(obj -> {
-                    if (obj instanceof IBaseResource resource) {
-                        return resource.getIdElement().getValueAsString();
-                    } else if (obj instanceof IBase base) {
-                        return base.fhirType();
+                    if (obj instanceof ClassInstance classInstance) {
+                        if (classInstance.has("id")) {
+                            return classInstance.get("id").toString();
+                        } else {
+                            return classInstance.getTypeAsString();
+                        }
                     } else {
                         return obj.toString();
                     }

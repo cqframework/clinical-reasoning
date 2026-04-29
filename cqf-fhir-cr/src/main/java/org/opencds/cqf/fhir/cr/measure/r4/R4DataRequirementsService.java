@@ -46,6 +46,7 @@ import org.opencds.cqf.cql.engine.fhir.retrieve.R4FhirQueryGenerator;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.content.RepositoryFhirLibrarySourceProvider;
 import org.opencds.cqf.fhir.cql.cql2elm.util.LibraryVersionSelector;
@@ -84,7 +85,7 @@ public class R4DataRequirementsService {
             throw new ResourceNotFoundException(measure.getLibrary().get(0).asStringValue());
         }
 
-        Map<String, Object> parameters = new HashMap<>();
+        Map<String, Value> parameters = new HashMap<>();
 
         Interval measurementPeriod;
         if (StringUtils.isNotBlank(periodStart) && StringUtils.isNotBlank(periodEnd)) {
@@ -179,7 +180,7 @@ public class R4DataRequirementsService {
         return translator;
     }
 
-    private Library processDataRequirements(Library library, Map<String, Object> parameters) {
+    private Library processDataRequirements(Library library, Map<String, Value> parameters) {
         LibraryManager libraryManager = createLibraryManager(library);
         CqlTranslator translator = translateLibrary(library, libraryManager);
 
@@ -209,7 +210,7 @@ public class R4DataRequirementsService {
             TerminologyProvider terminologyProvider,
             ModelResolver modelResolver,
             IBaseConformance capStatement,
-            Map<String, Object> parameters,
+            Map<String, Value> parameters,
             MeasureEvaluationOptions measureEvaluationOptions) {
 
         org.hl7.fhir.r5.model.Library libraryR5 = getModuleDefinitionLibraryR5(
@@ -234,7 +235,7 @@ public class R4DataRequirementsService {
         return libraryR4;
     }
 
-    private Library processDataRequirements(Measure measure, Library library, Map<String, Object> parameters) {
+    private Library processDataRequirements(Measure measure, Library library, Map<String, Value> parameters) {
         LibraryManager libraryManager = createLibraryManager(library);
         CqlTranslator translator = translateLibrary(library, libraryManager);
 
@@ -337,7 +338,7 @@ public class R4DataRequirementsService {
             TerminologyProvider terminologyProvider,
             ModelResolver modelResolver,
             IBaseConformance capStatement,
-            Map<String, Object> parameters) {
+            Map<String, Value> parameters) {
 
         VersionConvertor_40_50 versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
         org.hl7.fhir.r5.model.Measure r5Measure =
@@ -366,7 +367,7 @@ public class R4DataRequirementsService {
             LibraryManager libraryManager,
             CompiledLibrary translatedLibrary,
             CqlCompilerOptions options,
-            Map<String, Object> parameters) {
+            Map<String, Value> parameters) {
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
 
         return dqReqTrans.gatherDataRequirements(
@@ -378,7 +379,7 @@ public class R4DataRequirementsService {
             LibraryManager libraryManager,
             CompiledLibrary translatedLibrary,
             CqlCompilerOptions options,
-            Map<String, Object> parameters) {
+            Map<String, Value> parameters) {
         Set<String> expressionList = getExpressions(measureToUse);
         DataRequirementsProcessor dqReqTrans = new DataRequirementsProcessor();
 
@@ -461,7 +462,7 @@ public class R4DataRequirementsService {
                         .getQueryBatchThreshold());
             }
 
-            Map<String, Object> contextValues = new HashMap<>();
+            Map<String, String> contextValues = new HashMap<>();
             SubjectContext contextValue = getContextForSubject(library.getSubject());
             contextValues.put(contextValue.getContextType(), contextValue.getContextValue());
 

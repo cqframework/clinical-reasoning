@@ -271,10 +271,10 @@ class Dstu3MeasureReportBuilderTest {
         PopulationDef numeratorPop =
                 new PopulationDef("num-1", numCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
         // Add resources with UNQUALIFIED IDs
-        numeratorPop.addResource("patient-1", true);
-        numeratorPop.addResource("patient-2", true);
-        numeratorPop.addResource("patient-3", true);
-        numeratorPop.addResource("patient-4", true);
+        numeratorPop.addResource("patient-1", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource("patient-2", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource("patient-3", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource("patient-4", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
 
         ConceptDef denCode = new ConceptDef(
                 List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "denominator")),
@@ -282,11 +282,11 @@ class Dstu3MeasureReportBuilderTest {
         PopulationDef denominatorPop = new PopulationDef(
                 "den-1", denCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
         // Add resources with UNQUALIFIED IDs
-        denominatorPop.addResource("patient-1", true);
-        denominatorPop.addResource("patient-2", true);
-        denominatorPop.addResource("patient-3", true);
-        denominatorPop.addResource("patient-4", true);
-        denominatorPop.addResource("patient-5", true);
+        denominatorPop.addResource("patient-1", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource("patient-2", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource("patient-3", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource("patient-4", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource("patient-5", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
 
         // Create stratum populations with QUALIFIED subject IDs (e.g., "Patient/patient-1")
         StratumPopulationDef stratumNumPop = new StratumPopulationDef(

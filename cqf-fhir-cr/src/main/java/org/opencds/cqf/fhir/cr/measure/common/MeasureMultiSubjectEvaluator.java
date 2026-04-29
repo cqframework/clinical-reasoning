@@ -270,7 +270,7 @@ public class MeasureMultiSubjectEvaluator {
         var qualifiedSubjectIdsCommonToPopulation = Sets.intersection(new HashSet<>(subjectIds), popSubjectIds);
 
         // Calculate intersection and resource IDs based on stratifier type and basis
-        Set<Object> populationDefEvaluationResultIntersection;
+        Set<Value> populationDefEvaluationResultIntersection;
         List<String> resourceIdsForSubjectList;
 
         // For criteria stratifiers, always calculate the intersection regardless of basis
@@ -888,7 +888,7 @@ public class MeasureMultiSubjectEvaluator {
                 continue;
             }
 
-            Set<Object> resources = entry.getValue();
+            var resources = entry.getValue();
             if (resources != null) {
                 if (isResourceType) {
                     resources.stream()
@@ -929,16 +929,16 @@ public class MeasureMultiSubjectEvaluator {
                 String subjectId = entry.getKey();
                 // Qualify the subject ID to match the format used in StratifierRowKey (only needed for primitive types)
                 String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-                Set<Object> resources = entry.getValue();
+                var resources = entry.getValue();
                 if (resources != null) {
                     // For MEASUREOBSERVATION, resources are Map<inputResource, outputValue>
                     // We need to extract the keys (input resources)
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
                         // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
-                                .filter(Map.class::isInstance)
-                                .map(m -> (Map<?, ?>) m)
-                                .flatMap(m -> m.keySet().stream())
+                                .filter(Tuple.class::isInstance)
+                                //.map(m -> (Map<?, ?>) m)
+                                .flatMap(m -> ((Tuple) m).getElements().keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)
                                 .map(SubjectResourceKey::resourceOnly)

@@ -686,8 +686,8 @@ public class FunctionEvaluationHandler {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-        evaluationResultToReturn.set(
-                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+//        evaluationResultToReturn.set(
+//                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }
@@ -698,8 +698,8 @@ public class FunctionEvaluationHandler {
             Map<Object, Object> functionResults,
             Set<Object> evaluatedResources) {
 
-        result.set(
-                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+//        result.set(
+//                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
     }
 
     private static boolean isExpressionFunctionRef(

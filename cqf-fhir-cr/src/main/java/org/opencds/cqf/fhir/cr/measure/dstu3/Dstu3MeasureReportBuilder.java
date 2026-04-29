@@ -37,6 +37,7 @@ import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
@@ -326,7 +327,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    protected void buildMeasureObservations(String observationName, Collection<Object> resources) {
+    protected void buildMeasureObservations(String observationName, Collection<Value> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation =
@@ -355,9 +356,9 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Object> evaluatedResources) {
+    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Value> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
-            for (Object object : evaluatedResources) {
+            for (var object : evaluatedResources) {
                 var resourceId = getId((ClassInstance) object);
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(

@@ -253,6 +253,53 @@ class CqlExpressionValueTest {
         assertEquals(List.of(encounter), toList(result));
     }
 
+    // -- isMap / asMap -----------------------------------------------------------
+
+    @Test
+    void isMap_trueOnlyForMapValues() {
+        assertTrue(CqlExpressionValue.ofRaw(Map.of("k", "v"), null).isMap());
+        assertTrue(CqlExpressionValue.ofRaw(Map.of(), null).isMap());
+        assertFalse(CqlExpressionValue.ofRaw(List.of(), null).isMap());
+        assertFalse(CqlExpressionValue.ofRaw("string", null).isMap());
+        assertFalse(CqlExpressionValue.ofRaw(null, null).isMap());
+    }
+
+    @Test
+    void asMap_emptyOptionalForNonMapInputs() {
+        assertEquals(
+                java.util.Optional.empty(), CqlExpressionValue.ofRaw(null, null).asMap());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw("scalar", null).asMap());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw(List.of(1, 2), null).asMap());
+    }
+
+    @Test
+    void asMap_returnsTypedMapForMapInputs() {
+        Patient patient = new Patient();
+        patient.setId("p1");
+        Map<Object, Object> source = new HashMap<>();
+        source.put(patient, 42);
+
+        java.util.Optional<Map<Object, Object>> opt =
+                CqlExpressionValue.ofRaw(source, null).asMap();
+
+        assertTrue(opt.isPresent());
+        assertSame(source, opt.get());
+        assertEquals(42, opt.get().get(patient));
+    }
+
+    @Test
+    void asMap_emptyMapInputYieldsEmptyMap() {
+        java.util.Optional<Map<Object, Object>> opt =
+                CqlExpressionValue.ofRaw(Map.of(), null).asMap();
+
+        assertTrue(opt.isPresent());
+        assertTrue(opt.get().isEmpty());
+    }
+
     // -- valueAsSet --------------------------------------------------------------
 
     @Test

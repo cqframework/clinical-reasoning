@@ -542,8 +542,8 @@ public class MeasureReportDefScorer {
         if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
             return populationDef.getSubjectResources().values().stream()
                     .flatMap(Collection::stream)
-                    .filter(Map.class::isInstance)
-                    .map(m -> (Map<?, ?>) m)
+                    .map(item -> CqlExpressionValue.ofRaw(item, null).asMap())
+                    .flatMap(java.util.Optional::stream)
                     .map(map -> {
                         // Filter the map to only include entries matching stratum resource IDs
                         Map<Object, Object> filteredMap = new java.util.HashMap<>();

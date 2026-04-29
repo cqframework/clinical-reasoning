@@ -497,18 +497,22 @@ public class MeasureMultiSubjectEvaluator {
             for (var entry : componentDef.getResults().entrySet()) {
                 String subjectId = entry.getKey();
                 CqlExpressionValue result = entry.getValue();
-                Object rawValue = result == null ? null : result.raw();
 
                 // Only process function results (Map values)
-                if (rawValue instanceof Map<?, ?> functionResults) {
-                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-                    Set<StratifierRowKey> rowKeys =
-                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+                if (result == null) {
+                    continue;
+                }
+                Map<Object, Object> functionResults = result.asMap().orElse(null);
+                if (functionResults == null) {
+                    continue;
+                }
+                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+                Set<StratifierRowKey> rowKeys =
+                        functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 
-                    for (Object key : functionResults.keySet()) {
-                        String normalizedKey = normalizeResourceKey(key);
-                        rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
-                    }
+                for (Object key : functionResults.keySet()) {
+                    String normalizedKey = normalizeResourceKey(key);
+                    rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
                 }
             }
         }
@@ -533,11 +537,11 @@ public class MeasureMultiSubjectEvaluator {
         final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
         final Object rawValue = result == null ? null : result.raw();
 
-        if (rawValue instanceof Map<?, ?> functionResults) {
-            return addFunctionResultRows(qualifiedSubject, functionResults);
-
-        } else if (rawValue instanceof Iterable<?> iterableValue) {
-            return addIterableValueRows(qualifiedSubject, iterableValue);
+        if (result != null && result.isMap()) {
+            return addFunctionResultRows(qualifiedSubject, result.asMap().orElseThrow());
+        }
+        if (result != null && result.isIterable()) {
+            return addIterableValueRows(qualifiedSubject, (Iterable<?>) rawValue);
         }
 
         // Scalar value: check if we need to expand to match function row keys
@@ -785,8 +789,8 @@ public class MeasureMultiSubjectEvaluator {
             return Set.of();
         }
 
-        Object raw = result.raw();
-        if (raw instanceof Map<?, ?> m) {
+        Map<Object, Object> m = result.asMap().orElse(null);
+        if (m != null) {
             return new HashSet<>(m.keySet());
         }
 
@@ -924,8 +928,9 @@ public class MeasureMultiSubjectEvaluator {
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
                         // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
-                                .filter(Map.class::isInstance)
-                                .map(m -> (Map<?, ?>) m)
+                                .map(item ->
+                                        CqlExpressionValue.ofRaw(item, null).asMap())
+                                .flatMap(java.util.Optional::stream)
                                 .flatMap(m -> m.keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)

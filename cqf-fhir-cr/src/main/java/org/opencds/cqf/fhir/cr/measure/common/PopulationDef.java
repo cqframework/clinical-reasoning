@@ -129,14 +129,15 @@ public class PopulationDef {
         }
 
         // Remove the key from all inner maps
-        resourcesForSubject.forEach(element -> {
-            if (element instanceof Map<?, ?> innerMap) {
-                innerMap.remove(measureObservationResourceKey);
-            }
-        });
+        resourcesForSubject.forEach(element -> CqlExpressionValue.ofRaw(element, null)
+                .asMap()
+                .ifPresent(innerMap -> innerMap.remove(measureObservationResourceKey)));
 
         // Remove empty inner maps - critical for correct counting
-        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+        resourcesForSubject.removeIf(element -> CqlExpressionValue.ofRaw(element, null)
+                .asMap()
+                .map(Map::isEmpty)
+                .orElse(false));
 
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {
@@ -193,8 +194,8 @@ public class PopulationDef {
         }
 
         return this.getAllSubjectResources().stream()
-                .filter(Map.class::isInstance)
-                .map(Map.class::cast)
+                .map(item -> CqlExpressionValue.ofRaw(item, null).asMap())
+                .flatMap(java.util.Optional::stream)
                 .mapToInt(Map::size)
                 .sum();
     }

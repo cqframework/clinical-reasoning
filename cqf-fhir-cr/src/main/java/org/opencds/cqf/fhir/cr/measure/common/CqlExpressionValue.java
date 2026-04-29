@@ -77,6 +77,10 @@ public final class CqlExpressionValue {
         return raw instanceof Iterable<?>;
     }
 
+    public boolean isMap() {
+        return raw instanceof Map<?, ?>;
+    }
+
     /**
      * True when the underlying value is null, an empty {@link Iterable} (or {@link Collection}),
      * or an empty {@link Map}.
@@ -99,6 +103,17 @@ public final class CqlExpressionValue {
 
     public Optional<Boolean> asBoolean() {
         return raw instanceof Boolean b ? Optional.of(b) : Optional.empty();
+    }
+
+    /**
+     * Returns the underlying value as a typed {@link Map} when it is one, otherwise empty.
+     * The single unchecked cast is localized here so call sites do not have to repeat it.
+     * Used for measure-observation accumulators where the CQL engine produces
+     * {@code Map<inputResource, outputValue>}.
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<Map<Object, Object>> asMap() {
+        return raw instanceof Map<?, ?> map ? Optional.of((Map<Object, Object>) map) : Optional.empty();
     }
 
     /**

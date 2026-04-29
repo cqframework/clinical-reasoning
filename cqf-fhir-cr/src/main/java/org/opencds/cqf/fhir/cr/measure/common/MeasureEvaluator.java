@@ -14,6 +14,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -426,7 +427,6 @@ public class MeasureEvaluator {
      * Keeps Measure-Observation values found in measurePopulation
      * are not found in the corresponding measurePopulation set.
      */
-    @SuppressWarnings("unchecked")
     public void retainObservationSubjectResourcesInPopulation(
             Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
 
@@ -439,9 +439,7 @@ public class MeasureEvaluator {
                 it.hasNext(); ) {
             Map.Entry<String, Set<Object>> entry = it.next();
             String subjectId = entry.getKey();
-
-            // Cast subject's observation set to the expected type
-            Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
+            Set<Object> obsSet = entry.getValue();
 
             // get valid population values for this subject
             Set<Object> validPopulation = measurePopulation.get(subjectId);
@@ -452,8 +450,13 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            // remove observations not matching population values
-            obsSet.removeIf(obsMap -> {
+            // remove observation accumulators whose keys aren't all in the valid population
+            obsSet.removeIf(item -> {
+                Map<Object, Object> obsMap =
+                        CqlExpressionValue.ofRaw(item, null).asMap().orElse(null);
+                if (obsMap == null) {
+                    return false; // not an observation accumulator, leave alone
+                }
                 for (Object key : obsMap.keySet()) {
                     if (!validPopulation.contains(key)) {
                         return true; // remove this observation map
@@ -475,23 +478,26 @@ public class MeasureEvaluator {
             PopulationDef measurePopulationDef,
             //        MeasurePopulationType.MEASUREOBSERVATION
             PopulationDef measureObservationDef) {
-        for (Object populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
-            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
-                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
-                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
-                    if (measurePopulationDef != null) {
-                        final Set<Object> measurePopulationResourcesForSubject =
-                                measurePopulationDef.getResourcesForSubject(subjectId);
-                        if (!measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
-                            // remove observation results not found in measure population
-                            measureObservationDef
-                                    .getResourcesForSubject(subjectId)
-                                    .remove(populationResource);
-                        }
-                    }
+        if (measurePopulationDef == null) {
+            return;
+        }
+        Set<Object> resourcesForSubject = measureObservationDef.getResourcesForSubject(subjectId);
+        Set<Object> measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
+        List<Object> toRemove = new ArrayList<>();
+        for (Object populationResource : resourcesForSubject) {
+            Map<Object, Object> obsMap =
+                    CqlExpressionValue.ofRaw(populationResource, null).asMap().orElse(null);
+            if (obsMap == null) {
+                continue;
+            }
+            for (Object key : obsMap.keySet()) {
+                if (!measurePopulationResourcesForSubject.contains(key)) {
+                    toRemove.add(populationResource);
+                    break;
                 }
             }
         }
+        resourcesForSubject.removeAll(toRemove);
     }
 
     /**
@@ -535,12 +541,12 @@ public class MeasureEvaluator {
         }
         final Object firstEntryValue = entryValue.iterator().next();
 
-        if (!(firstEntryValue instanceof Map<?, ?>)) {
+        if (!CqlExpressionValue.ofRaw(firstEntryValue, null).isMap()) {
             throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
         }
 
         @SuppressWarnings("unchecked")
-        Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
+        Set<Object> obsSet = (Set<Object>) entryValue;
 
         // population values for this subject
         Set<Object> populationValues = measurePopulation.get(subjectId);
@@ -552,7 +558,12 @@ public class MeasureEvaluator {
         }
 
         // Remove observations that *do* match population values
-        obsSet.removeIf(obsMap -> {
+        obsSet.removeIf(item -> {
+            Map<Object, Object> obsMap =
+                    CqlExpressionValue.ofRaw(item, null).asMap().orElse(null);
+            if (obsMap == null) {
+                return false;
+            }
             for (Object key : obsMap.keySet()) {
                 if (populationValues.contains(key)) {
                     // This observation map is backed by a population resource -> remove iterator

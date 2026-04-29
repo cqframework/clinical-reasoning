@@ -276,36 +276,6 @@ public class ExpandHelper {
         validateExpansionParameters(valueSet, expansionParameters);
     }
 
-    private void groupExpand(
-            IValueSetAdapter valueSet,
-            IParametersAdapter expansionParameters,
-            Optional<IEndpointAdapter> terminologyEndpoint,
-            List<IValueSetAdapter> valueSets,
-            List<String> expandedList,
-            IRepository repository,
-            Date expansionTimestamp) {
-        var expansion = expandIncludes(
-                valueSet,
-                expansionParameters,
-                terminologyEndpoint,
-                valueSets,
-                expandedList,
-                repository,
-                expansionTimestamp);
-        try {
-            ValueSets.setExpansionTimestamp(
-                    fhirContext(), expansion, expansionTimestamp == null ? new Date() : expansionTimestamp);
-        } catch (InstantiationException
-                | IllegalAccessException
-                | IllegalArgumentException
-                | InvocationTargetException
-                | NoSuchMethodException
-                | SecurityException e) {
-            throw new UnprocessableEntityException(e.getMessage());
-        }
-        valueSet.setExpansion(expansion);
-    }
-
     private IBaseBackboneElement expandIncludes(
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,

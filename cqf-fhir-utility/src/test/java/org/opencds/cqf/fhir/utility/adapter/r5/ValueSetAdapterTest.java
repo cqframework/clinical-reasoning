@@ -19,6 +19,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations.FilterOperator;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.IntegerType;
 import org.hl7.fhir.r5.model.Library;
@@ -189,6 +190,136 @@ class ValueSetAdapterTest implements IValueSetAdapterTest<ValueSet> {
         assertNotEquals(valueSet.getId(), copy.getId());
         valueSet.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());
+    }
+
+    @Test
+    void hasSimpleCompose_noCompose_returnsFalse() {
+        var vs = new ValueSet();
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasSimpleCompose_withExclude_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addExclude().setSystem("http://test").addConcept().setCode("A");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasSimpleCompose_validSimpleCompose_returnsTrue() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().setSystem("http://test").addConcept().setCode("A");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertTrue(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasSimpleCompose_withFilter_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://test")
+                .addFilter()
+                .setProperty("code")
+                .setOp(FilterOperator.EQUAL)
+                .setValue("A");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasSimpleCompose_withValueSetReference_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().addValueSet("http://example.org/vs");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasSimpleCompose_missingSystem_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().addConcept().setCode("A"); // no system
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasSimpleCompose_missingConcept_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().setSystem("http://test"); // no concept
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasSimpleCompose());
+    }
+
+    @Test
+    void hasGroupingCompose_noCompose_returnsFalse() {
+        var vs = new ValueSet();
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasGroupingCompose());
+    }
+
+    @Test
+    void hasGroupingCompose_withExclude_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addExclude().addValueSet("http://example.org/vs");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasGroupingCompose());
+    }
+
+    @Test
+    void hasGroupingCompose_validGroupingCompose_returnsTrue() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().addValueSet("http://example.org/vs");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertTrue(adapter.hasGroupingCompose());
+    }
+
+    @Test
+    void hasGroupingCompose_missingValueSetReference_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose().addInclude().setSystem("http://test"); // no valueSet ref
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasGroupingCompose());
+    }
+
+    @Test
+    void hasGroupingCompose_withFilter_returnsFalse() {
+        var vs = new ValueSet();
+        vs.getCompose()
+                .addInclude()
+                .addValueSet("http://example.org/vs")
+                .addFilter()
+                .setProperty("code")
+                .setOp(FilterOperator.EQUAL)
+                .setValue("A");
+
+        var adapter = (IValueSetAdapter) adapterFactory.createKnowledgeArtifactAdapter(vs);
+
+        assertFalse(adapter.hasGroupingCompose());
     }
 
     @Test

@@ -58,6 +58,7 @@ import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -619,7 +620,7 @@ class EnginesTest {
                                 .collect(Collectors.toSet())));
     }
 
-    private Iterable<Object> retrieveResourcesWithin2000BySPName(IBaseResource resource, String spName) {
+    private Iterable<Value> retrieveResourcesWithin2000BySPName(IBaseResource resource, String spName) {
         // setup
         String resourceType = resource.fhirType();
 
@@ -745,7 +746,7 @@ class EnginesTest {
                         null, null, null, clazz.getSimpleName(), null, null, null, null, null, null, null, null));
     }
 
-    private static <T extends Resource> List<T> convert(Class<T> clazz, Iterable<Object> iterable) {
+    private static <T extends Resource> List<T> convert(Class<T> clazz, Iterable<Value> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false)
                 .filter(clazz::isInstance)
                 .map(clazz::cast)

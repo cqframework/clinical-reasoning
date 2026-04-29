@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.PROFILE_MODE;
 
@@ -37,10 +38,10 @@ class BaseRetrieveProviderTests {
         TerminologyProvider terminologyProvider = Mockito.mock(TerminologyProvider.class);
         return new BaseRetrieveProvider(fhirContext, terminologyProvider, new RetrieveSettings()) {
             @Override
-            public Iterable<Object> retrieve(
+            public Iterable<Value> retrieve(
                     String context,
                     String contextPath,
-                    Object contextValue,
+                    String contextValue,
                     @Nonnull String dataType,
                     String templateId,
                     String codePath,

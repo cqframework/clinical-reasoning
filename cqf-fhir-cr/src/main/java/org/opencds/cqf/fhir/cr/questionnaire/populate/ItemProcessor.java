@@ -25,6 +25,7 @@ import org.opencds.cqf.fhir.cr.common.IOperationRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.Helpers;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
@@ -108,23 +109,24 @@ public class ItemProcessor {
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
         final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
                 request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
-        List<Object> populationContext;
+        List<IAdapter<?>> populationContext;
         try {
             populationContext =
                     expressionProcessor
                             .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
                             .stream()
-                            .map(r -> {
-                                if (r != null && r.fhirType().equals("Tuple")) {
-                                    return new Tuple()
-                                            .withElements(request.getAdapterFactory()
-                                                    .createTuple(r)
-                                                    .getProperties());
-                                }
-                                return r;
-                            })
+//                            .map(r -> {
+//                                if (r != null && r.fhirType().equals("Tuple")) {
+//                                    return new Tuple()
+//                                            .withElements(request.getAdapterFactory()
+//                                                    .createTuple(r)
+//                                                    .getProperties());
+//                                }
+//                                return r;
+//                            })
                             // filtering nulls here to prevent unnecessary duplicate responseItems
                             .filter(Objects::nonNull)
+                            .map(r -> request.getAdapterFactory().createBase(r))
                             .collect(Collectors.toList());
 
         } catch (Exception e) {
@@ -195,7 +197,7 @@ public class ItemProcessor {
             PopulateRequest request,
             IQuestionnaireItemComponentAdapter groupItem,
             String contextName,
-            Object context,
+            IAdapter<?> context,
             IStructureDefinitionAdapter profile) {
         final var contextItem = groupItem.newResponseItem();
         groupItem.getItem().stream()
@@ -224,7 +226,7 @@ public class ItemProcessor {
             PopulateRequest request,
             IQuestionnaireItemComponentAdapter item,
             String contextName,
-            Object context,
+            IAdapter<?> context,
             IStructureDefinitionAdapter profile) {
         if (item.hasInitial()) {
             return processSingleItem(request, item);
@@ -233,8 +235,8 @@ public class ItemProcessor {
         request.setContextVariable(responseItem.get());
         // if we have a definition use it to populate
         var definition = item.getDefinition();
-        if (StringUtils.isNotBlank(definition) && profile != null && context instanceof IBase contextBase) {
-            final var pathValue = getPathValue(request, contextBase, definition, profile);
+        if (StringUtils.isNotBlank(definition) && profile != null && context != null) {
+            final var pathValue = getPathValue(request, context, definition, profile);
             if (pathValue != null) {
                 final List<IBase> answerValue =
                         pathValue instanceof List ? (List<IBase>) pathValue : List.of((IBase) pathValue);
@@ -258,7 +260,7 @@ public class ItemProcessor {
     }
 
     protected Object getPathValue(
-            IOperationRequest request, IBase context, String definition, IStructureDefinitionAdapter profile) {
+            IOperationRequest request, IAdapter<?> context, String definition, IStructureDefinitionAdapter profile) {
         Object pathValue = null;
         var elementId = definition.split("#")[1];
         var sliceName = Helpers.getSliceName(elementId);
@@ -269,7 +271,7 @@ public class ItemProcessor {
         if (StringUtils.isNotBlank(sliceName)) {
             path = path.split("\\.")[0];
         }
-        pathValue = context == null ? null : profile.resolvePath(context, path);
+        pathValue = context.resolvePath(path);
         if (pathValue instanceof ArrayList<?> pathList) {
             if (elementId.contains(":")) {
                 pathValue = getSliceValue(request, profile, path, sliceName, pathList);
@@ -278,8 +280,8 @@ public class ItemProcessor {
             }
         }
         // Ensure resource id's include the resource type
-        if (pathValue instanceof IIdType idType && path.equals("id") && context instanceof IBaseResource) {
-            pathValue = idType.withResourceType(context.fhirType());
+        if (pathValue instanceof IIdType idType && path.equals("id") && context.get() instanceof IBaseResource contextResource) {
+            pathValue = idType.withResourceType(contextResource.fhirType());
         }
 
         if (pathValue != null

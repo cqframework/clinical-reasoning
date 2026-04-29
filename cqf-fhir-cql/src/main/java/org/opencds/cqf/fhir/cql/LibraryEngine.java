@@ -66,8 +66,8 @@ public class LibraryEngine {
         return settings;
     }
 
-    private kotlin.Pair<String, Object> buildContextParameter(String patientId) {
-        kotlin.Pair<String, Object> contextParameter = null;
+    private kotlin.Pair<String, String> buildContextParameter(String patientId) {
+        kotlin.Pair<String, String> contextParameter = null;
         if (patientId != null) {
             if (patientId.startsWith("Patient/")) {
                 patientId = patientId.replace("Patient/", "");

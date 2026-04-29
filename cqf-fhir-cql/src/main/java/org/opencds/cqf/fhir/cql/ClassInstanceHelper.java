@@ -2,24 +2,27 @@ package org.opencds.cqf.fhir.cql;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
-public class CqlClassInstanceHelper {
+/**
+ * This class provides utilities for handling ClassInstance objects from the CQL engine.
+ */
+public class ClassInstanceHelper {
     public static CqlFhirParametersConverter r4Converter =
             Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
 
-    private CqlClassInstanceHelper() {
+    private ClassInstanceHelper() {
         // intentionally empty
     }
 
-    public static String getId(CqlClassInstance cqlClassInstance) {
-        if (cqlClassInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
-                && cqlClassInstance.has("id")) {
-            var resourceIdInstance = (CqlClassInstance) cqlClassInstance.get("id");
-            var resourceIdValue = resourceIdInstance == null ? null : (String) resourceIdInstance.get("value");
+    public static String getId(ClassInstance classInstance) {
+        if (classInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
+                && classInstance.has("id")) {
+            var resourceIdInstance = classInstance.get("id");
+            var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.toString();
             if (resourceIdValue != null) {
-                var type = cqlClassInstance.getType().getLocalPart();
+                var type = classInstance.getType().getLocalPart();
                 return "%s/%s".formatted(type, resourceIdValue);
             }
         }

@@ -28,8 +28,9 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
-import org.opencds.cqf.cql.engine.runtime.CqlClassInstance;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -171,7 +172,7 @@ public class CqlFhirParametersConverter {
         }
 
         if (this.fhirTypeConverter.isCqlType(value)) {
-            value = this.fhirTypeConverter.toFhirType(value);
+            value = this.fhirTypeConverter.toFhirType((Value) value);
         }
 
         if (value instanceof IBaseDatatype dataType) {
@@ -219,7 +220,7 @@ public class CqlFhirParametersConverter {
         }
 
         if (this.fhirTypeConverter.isCqlType(value)) {
-            value = this.fhirTypeConverter.toFhirType(value);
+            value = this.fhirTypeConverter.toFhirType((Value) value);
         }
 
         if (value instanceof IBaseDatatype datatype) {
@@ -256,7 +257,7 @@ public class CqlFhirParametersConverter {
                     .findFirst();
 
             // Actual values. if present
-            List<Object> values = entry.getValue().stream()
+            var values = entry.getValue().stream()
                     .map(this::convertToCql)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
@@ -294,7 +295,7 @@ public class CqlFhirParametersConverter {
             // TODO: This breaks down a bit for CQL System types because they aren't prefixed.
             if (type == null && !values.isEmpty()) {
                 var firstValue = values.get(0);
-                if (firstValue instanceof CqlClassInstance cci) {
+                if (firstValue instanceof ClassInstance cci) {
                     type = "FHIR." + cci.getType().getLocalPart();
                 } else {
                     type = firstValue.getClass().getSimpleName();
@@ -307,9 +308,9 @@ public class CqlFhirParametersConverter {
                                 .formatted(entry.getKey()));
             }
 
-            Object value = null;
+            Value value = null;
             if (isList) {
-                value = values;
+                value = new org.opencds.cqf.cql.engine.runtime.List(values);
             } else if (!values.isEmpty()) {
                 value = values.get(0);
             }
@@ -320,8 +321,8 @@ public class CqlFhirParametersConverter {
         return cqlParameterDefinitions;
     }
 
-    public Map<String, Object> toCqlParameters(IBaseParameters parameters) {
-        Map<String, Object> parameterMap = new HashMap<>();
+    public Map<String, Value> toCqlParameters(IBaseParameters parameters) {
+        Map<String, Value> parameterMap = new HashMap<>();
         List<CqlParameterDefinition> cqlParameterDefinitions = this.toCqlParameterDefinitions(parameters);
         if (cqlParameterDefinitions == null || cqlParameterDefinitions.isEmpty()) {
             return parameterMap;
@@ -334,11 +335,11 @@ public class CqlFhirParametersConverter {
         return parameterMap;
     }
 
-    public Map<String, Object> toCqlParameters(Map<String, Object> parameters) {
-        Map<String, Object> parameterMap = new HashMap<>();
+    public Map<String, Value> toCqlParameters(Map<String, Object> parameters) {
+        Map<String, Value> parameterMap = new HashMap<>();
         parameters.forEach((k, v) -> {
             var className = v.getClass().getName();
-            var value = className.contains("org.hl7.fhir") ? modelResolver.toCqlValue(v, false) : v;
+            var value = className.contains("org.hl7.fhir") ? modelResolver.toCqlValue(v, false) : (Value) v;
             parameterMap.put(k, value);
         });
         return parameterMap;
@@ -368,15 +369,15 @@ public class CqlFhirParametersConverter {
     }
 
     public Object convertToFhirIfNeeded(Object value) {
-        return value instanceof CqlClassInstance cqlClassInstance
-                        && cqlClassInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
-                ? toFhirValue(cqlClassInstance)
+        return value instanceof ClassInstance classInstance
+                        && classInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
+                ? toFhirValue(classInstance)
                 : value;
     }
 
     @SuppressWarnings("unchecked")
-    public IBase toFhirValue(CqlClassInstance cci) {
-        var typeName = cci.getType().getLocalPart();
+    public IBase toFhirValue(ClassInstance classInstance) {
+        var typeName = classInstance.getType().getLocalPart();
         var clazz = modelResolver.resolveType(typeName);
         if (clazz == null) {
             throw new IllegalArgumentException("Could not resolve FHIR type: " + typeName);
@@ -390,15 +391,17 @@ public class CqlFhirParametersConverter {
         }
 
         if (instance instanceof IBaseEnumeration<?> enumeration) {
-            var value = cci.get("value");
-            enumeration.setValueAsString((String) value);
+            var value = classInstance.get("value");
+            if (value != null) {
+                enumeration.setValueAsString(value.toString());
+            }
             return instance;
         }
 
         if (instance instanceof IPrimitiveType<?> primitive) {
-            var value = cci.get("value");
+            var value = classInstance.get("value");
             if (value != null) {
-                modelResolver.setPrimitiveValue(value, primitive);
+                modelResolver.setPrimitiveValue(value.toString(), primitive);
             }
             return instance;
         }
@@ -413,26 +416,26 @@ public class CqlFhirParametersConverter {
         }
 
         for (var child : definition.getChildren()) {
-            var elementValue = cci.get(child.getElementName());
+            var elementValue = classInstance.get(child.getElementName());
             if (elementValue == null) {
                 continue;
             }
-            if (elementValue instanceof List<?> list) {
+            if (elementValue instanceof org.opencds.cqf.cql.engine.runtime.List list) {
                 for (var item : list) {
-                    if (item instanceof CqlClassInstance childCci) {
+                    if (item instanceof ClassInstance childCci) {
                         child.getMutator().addValue(instance, toFhirValue(childCci));
                     }
                 }
-            } else if (elementValue instanceof CqlClassInstance childCci) {
+            } else if (elementValue instanceof ClassInstance childCci) {
                 child.getMutator().addValue(instance, toFhirValue(childCci));
             }
         }
         return instance;
     }
 
-    private Object convertToCql(IParametersParameterComponentAdapter ppca) {
+    private Value convertToCql(IParametersParameterComponentAdapter ppca) {
         if (ppca.hasValue()) {
-            return this.fhirTypeConverter.toCqlType(ppca.getValue());
+            return (Value) this.fhirTypeConverter.toCqlType(ppca.getValue());
         } else if (ppca.hasResource()) {
             return modelResolver.toCqlValue(ppca.getResource(), false);
         } else if (ppca.hasPart()) {

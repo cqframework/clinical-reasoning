@@ -260,14 +260,14 @@ class PlanDefinitionProcessorTests {
         var planDefinitionID = "opioidcds-10-patient-view";
         var patientID = "example-rec-10-patient-view-POS-Cocaine-drugs";
         var encounterID = "example-rec-10-patient-view-POS-Cocaine-drugs-prefetch";
-        given().repositoryFor(fhirContextR4, "r4/opioid-Rec10-patient-view")
+        given().repositoryForWithDataDateRolling(fhirContextR4, "r4/opioid-Rec10-patient-view")
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)
                 .encounterId(encounterID)
                 .thenApply()
                 .isEqualsTo(new org.hl7.fhir.r4.model.IdType("CarePlan", planDefinitionID));
-        given().repositoryFor(fhirContextR4, "r4/opioid-Rec10-patient-view")
+        given().repositoryForWithDataDateRolling(fhirContextR4, "r4/opioid-Rec10-patient-view")
                 .when()
                 .planDefinitionId(planDefinitionID)
                 .subjectId(patientID)

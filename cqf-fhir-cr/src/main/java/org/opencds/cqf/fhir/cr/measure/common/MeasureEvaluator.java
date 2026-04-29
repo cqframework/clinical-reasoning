@@ -14,7 +14,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -481,23 +480,20 @@ public class MeasureEvaluator {
         if (measurePopulationDef == null) {
             return;
         }
-        Set<Object> resourcesForSubject = measureObservationDef.getResourcesForSubject(subjectId);
         Set<Object> measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
-        List<Object> toRemove = new ArrayList<>();
-        for (Object populationResource : resourcesForSubject) {
+        measureObservationDef.getResourcesForSubject(subjectId).removeIf(populationResource -> {
             Map<Object, Object> obsMap =
                     CqlExpressionValue.ofRaw(populationResource, null).asMap().orElse(null);
             if (obsMap == null) {
-                continue;
+                return false;
             }
             for (Object key : obsMap.keySet()) {
                 if (!measurePopulationResourcesForSubject.contains(key)) {
-                    toRemove.add(populationResource);
-                    break;
+                    return true;
                 }
             }
-        }
-        resourcesForSubject.removeAll(toRemove);
+            return false;
+        });
     }
 
     /**

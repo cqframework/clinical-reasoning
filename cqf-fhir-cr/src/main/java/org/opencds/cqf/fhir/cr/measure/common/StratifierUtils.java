@@ -15,22 +15,23 @@ public class StratifierUtils {
         // Static utility class
     }
 
-    public static List<Class<?>> extractClassesFromSingleOrListResult(Object result) {
-        if (result == null) {
+    public static List<Class<?>> extractClassesFromSingleOrListResult(CqlExpressionValue value) {
+        if (value.isNull()) {
             return Collections.emptyList();
         }
 
-        if (result instanceof Class<?> clazz) {
+        Object raw = value.raw();
+        if (raw instanceof Class<?> clazz) {
             return List.of(clazz);
         }
 
-        if (!(result instanceof Iterable<?> iterable)) {
-            return List.of(result.getClass());
+        if (!value.isIterable()) {
+            return List.of(raw.getClass());
         }
 
         // Need to this to return List<Class<?>> and get rid of Sonar warnings.
         final Stream<Class<?>> classStream =
-                getStream(iterable).filter(Objects::nonNull).map(Object::getClass);
+                getStream(value.asIterable()).filter(Objects::nonNull).map(Object::getClass);
 
         return classStream.toList();
     }

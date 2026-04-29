@@ -118,7 +118,7 @@ public interface PopulationBasisValidator {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(wrapper.raw());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(wrapper);
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
 
@@ -167,7 +167,7 @@ public interface PopulationBasisValidator {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(wrapper.raw());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(wrapper);
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
         if (stratifierDef.isCriteriaStratifier()) {

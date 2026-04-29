@@ -58,10 +58,10 @@ public class MeasureObservationHandler {
 
         // Iterate over observation resources (which are Maps) and remove matching keys
         for (Object observationResource : observationResourcesCopy) {
-            if (observationResource instanceof Map<?, ?> observationMap) {
-                removeMatchingKeysFromObservationMap(
-                        observationMap, exclusionResources, measureObservationDef, subjectId);
-            }
+            CqlExpressionValue.ofRaw(observationResource, null)
+                    .asMap()
+                    .ifPresent(observationMap -> removeMatchingKeysFromObservationMap(
+                            observationMap, exclusionResources, measureObservationDef, subjectId));
         }
     }
 

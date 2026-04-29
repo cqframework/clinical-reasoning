@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Pure mathematical functions for measure scoring calculations.
@@ -247,8 +248,8 @@ public class MeasureScoreCalculator {
      */
     public static List<QuantityDef> collectQuantities(Collection<Object> resources) {
         var mapValues = resources.stream()
-                .filter(x -> x instanceof Map<?, ?>)
-                .map(x -> (Map<?, ?>) x)
+                .map(x -> CqlExpressionValue.ofRaw(x, null).asMap())
+                .flatMap(Optional::stream)
                 .map(Map::values)
                 .flatMap(Collection::stream)
                 .toList();

@@ -88,9 +88,7 @@ public class CrProcessorConfig {
     IBundleProcessorFactory bundleProcessorFactory(IRepositoryFactory repositoryFactory, DaoRegistry daoRegistry) {
         return rd -> {
             var repository = repositoryFactory.create(rd);
-            return new BundleProcessor(
-                repository,
-                new HapiValidateProcessor(repository.fhirContext(), daoRegistry));
+            return new BundleProcessor(repository, new HapiValidateProcessor(repository.fhirContext(), daoRegistry));
         };
     }
 

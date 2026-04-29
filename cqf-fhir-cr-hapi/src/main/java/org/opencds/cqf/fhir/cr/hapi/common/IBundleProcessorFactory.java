@@ -6,5 +6,4 @@ import org.opencds.cqf.fhir.cr.bundle.BundleProcessor;
 @FunctionalInterface
 public interface IBundleProcessorFactory {
     BundleProcessor create(RequestDetails requestDetails);
-
 }

@@ -18,7 +18,7 @@ public class ValidateProcessor implements IValidateProcessor {
     @Override
     public IBaseOperationOutcome validate(IBaseBundle bundle, String mode, String profile) {
         logger.info("Unable to perform CRMI $validate outside of HAPI context");
-        return (IBaseOperationOutcome) fhirContext.getResourceDefinition("OperationOutcome")
-            .newInstance();
+        return (IBaseOperationOutcome)
+                fhirContext.getResourceDefinition("OperationOutcome").newInstance();
     }
 }

@@ -21,11 +21,11 @@ public class BundleValidateProvider {
 
     @Operation(name = CRMI_OPERATION_VALIDATE, idempotent = true, global = true, type = Bundle.class)
     @Description(shortDefinition = CRMI_OPERATION_VALIDATE, value = "Validate a bundle")
-    public OperationOutcome validateOperation(RequestDetails requestDetails,
-        @OperationParam(name = "resource") IBaseBundle resource,
-        @OperationParam(name = "mode") String mode,
-        @OperationParam(name = "profile") String profile) {
+    public OperationOutcome validateOperation(
+            RequestDetails requestDetails,
+            @OperationParam(name = "resource") IBaseBundle resource,
+            @OperationParam(name = "mode") String mode,
+            @OperationParam(name = "profile") String profile) {
         return (OperationOutcome) bundleProcessorFactory.create(requestDetails).validate(resource, mode, profile);
     }
-
 }

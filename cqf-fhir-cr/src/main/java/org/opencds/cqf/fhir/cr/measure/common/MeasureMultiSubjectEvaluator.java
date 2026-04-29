@@ -496,8 +496,8 @@ public class MeasureMultiSubjectEvaluator {
         for (StratifierComponentDef componentDef : componentDefs) {
             for (var entry : componentDef.getResults().entrySet()) {
                 String subjectId = entry.getKey();
-                CriteriaResult result = entry.getValue();
-                Object rawValue = result == null ? null : result.rawValue();
+                CqlExpressionValue result = entry.getValue();
+                Object rawValue = result == null ? null : result.raw();
 
                 // Only process function results (Map values)
                 if (rawValue instanceof Map<?, ?> functionResults) {
@@ -528,10 +528,10 @@ public class MeasureMultiSubjectEvaluator {
     private record StratumTableRow(StratifierRowKey stratifierRowKey, StratumValueWrapper stratumValueWrapper) {}
 
     private static List<StratumTableRow> mapToListOfTableEntries(
-            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
+            String subjectId, CqlExpressionValue result, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
 
         final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-        final Object rawValue = result == null ? null : result.rawValue();
+        final Object rawValue = result == null ? null : result.raw();
 
         if (rawValue instanceof Map<?, ?> functionResults) {
             return addFunctionResultRows(qualifiedSubject, functionResults);
@@ -749,19 +749,19 @@ public class MeasureMultiSubjectEvaluator {
      * <p>Intersection rules:
      * <ul>
      *   <li>If the stratifier result is {@code Map<inputParam, producedValue>}, intersect using {@code map.keySet()} (the input params)</li>
-     *   <li>Otherwise, intersect using {@link CriteriaResult#valueAsSet()}</li>
+     *   <li>Otherwise, intersect using {@link CqlExpressionValue#valueAsSet()}</li>
      * </ul>
      */
     private static Set<Object> calculateCriteriaStratifierIntersection(
             StratifierDef stratifierDef, PopulationDef populationDef) {
 
-        final Map<String, CriteriaResult> stratifierResultsBySubject = stratifierDef.getResults();
+        final Map<String, CqlExpressionValue> stratifierResultsBySubject = stratifierDef.getResults();
         final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
 
         // For each subject, we intersect between the population and stratifier results
-        for (Entry<String, CriteriaResult> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
+        for (Entry<String, CqlExpressionValue> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
             final Set<Object> stratifierResultsPerSubject =
-                    criteriaResultAsIntersectionSet(stratifierEntryBySubject.getValue());
+                    stratifierResultAsIntersectionSet(stratifierEntryBySubject.getValue());
 
             final Set<Object> populationResultsPerSubject =
                     populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
@@ -775,17 +775,17 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Convert a CriteriaResult into the set that should be used for intersection.
+     * Convert a stratifier result into the set that should be used for intersection.
      *
      * <p>For Map-based results (Map<inputParam, producedValue>), the input parameters (map keys)
      * are the intersectable items.
      */
-    private static Set<Object> criteriaResultAsIntersectionSet(CriteriaResult result) {
+    private static Set<Object> stratifierResultAsIntersectionSet(CqlExpressionValue result) {
         if (result == null) {
             return Set.of();
         }
 
-        Object raw = result.rawValue();
+        Object raw = result.raw();
         if (raw instanceof Map<?, ?> m) {
             return new HashSet<>(m.keySet());
         }

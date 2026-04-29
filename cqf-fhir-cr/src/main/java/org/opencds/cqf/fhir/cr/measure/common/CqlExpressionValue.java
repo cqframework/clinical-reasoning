@@ -1,11 +1,15 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 
@@ -158,6 +162,39 @@ public final class CqlExpressionValue {
             return Collections.singletonList(subjectResult.getValue());
         }
         return asIterable();
+    }
+
+    /**
+     * Returns the underlying value(s) as a {@link Set} that uses FHIR-resource and CQL-type
+     * identity semantics: scalars are wrapped in a single-element set, iterables are flattened
+     * into the set, and a null value yields an empty set.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Set<Object> valueAsSet() {
+        if (raw == null) {
+            return new HashSetForFhirResourcesAndCqlTypes<>();
+        }
+        if (raw instanceof Iterable<?>) {
+            return new HashSetForFhirResourcesAndCqlTypes<>((Iterable) raw);
+        }
+        return new HashSetForFhirResourcesAndCqlTypes<>(raw);
+    }
+
+    /**
+     * Returns the underlying value(s) as a {@link List} with nulls filtered out. A scalar
+     * becomes a single-element list, an iterable is flattened (preserving order, dropping
+     * nulls), and a null value yields an empty list.
+     */
+    public List<Object> nonNullValues() {
+        if (raw == null) {
+            return Collections.emptyList();
+        }
+        if (raw instanceof Iterable<?> iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false)
+                    .filter(Objects::nonNull)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        }
+        return List.of(raw);
     }
 
     public Set<Object> evaluatedResources() {

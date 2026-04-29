@@ -253,6 +253,69 @@ class CqlExpressionValueTest {
         assertEquals(List.of(encounter), toList(result));
     }
 
+    // -- valueAsSet --------------------------------------------------------------
+
+    @Test
+    void valueAsSet_nullValueYieldsEmptySet() {
+        Set<Object> set = CqlExpressionValue.ofRaw(null, null).valueAsSet();
+
+        assertTrue(set instanceof HashSetForFhirResourcesAndCqlTypes);
+        assertTrue(set.isEmpty());
+    }
+
+    @Test
+    void valueAsSet_scalarYieldsSingletonSet() {
+        Patient patient = new Patient();
+        patient.setId("p1");
+
+        Set<Object> set = CqlExpressionValue.ofRaw(patient, null).valueAsSet();
+
+        assertTrue(set instanceof HashSetForFhirResourcesAndCqlTypes);
+        assertEquals(1, set.size());
+        assertTrue(set.contains(patient));
+    }
+
+    @Test
+    void valueAsSet_iterableFlattensIntoSet() {
+        Patient p1 = new Patient();
+        p1.setId("p1");
+        Patient p2 = new Patient();
+        p2.setId("p2");
+
+        Set<Object> set = CqlExpressionValue.ofRaw(List.of(p1, p2), null).valueAsSet();
+
+        assertTrue(set instanceof HashSetForFhirResourcesAndCqlTypes);
+        assertEquals(2, set.size());
+    }
+
+    // -- nonNullValues -----------------------------------------------------------
+
+    @Test
+    void nonNullValues_nullValueYieldsEmptyList() {
+        assertEquals(List.of(), CqlExpressionValue.ofRaw(null, null).nonNullValues());
+    }
+
+    @Test
+    void nonNullValues_scalarYieldsSingletonList() {
+        assertEquals(List.of("v"), CqlExpressionValue.ofRaw("v", null).nonNullValues());
+    }
+
+    @Test
+    void nonNullValues_iterableFiltersOutNullElements() {
+        ArrayList<Object> source = new ArrayList<>();
+        source.add("a");
+        source.add(null);
+        source.add("b");
+        source.add(null);
+
+        assertEquals(List.of("a", "b"), CqlExpressionValue.ofRaw(source, null).nonNullValues());
+    }
+
+    @Test
+    void nonNullValues_emptyIterableYieldsEmptyList() {
+        assertEquals(List.of(), CqlExpressionValue.ofRaw(List.of(), null).nonNullValues());
+    }
+
     // -- evaluatedResources / raw ------------------------------------------------
 
     @Test

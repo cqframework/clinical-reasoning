@@ -202,7 +202,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // the StratumValueWrapper does it for them.
         Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
                 .collect(Collectors.groupingBy(
-                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
+                        x -> new StratumValueWrapper(subjectValues.get(x).raw())));
 
         for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(

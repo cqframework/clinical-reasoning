@@ -112,13 +112,13 @@ public interface PopulationBasisValidator {
             return;
         }
 
-        var expressionResult = evaluationResult.get(populationExpression);
+        var wrapper = CqlExpressionValue.of(evaluationResult.get(populationExpression));
 
-        if (expressionResult == null || expressionResult.getValue() == null) {
+        if (wrapper.isNull()) {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.getValue());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(wrapper.raw());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
         var optResourceClass = extractResourceType(groupPopulationBasisCode);
 
@@ -161,13 +161,13 @@ public interface PopulationBasisValidator {
             EvaluationResult evaluationResult,
             String url) {
 
-        var expressionResult = evaluationResult.get(expression);
+        var wrapper = CqlExpressionValue.of(evaluationResult.get(expression));
 
-        if (expressionResult == null || expressionResult.getValue() == null) {
+        if (wrapper.isNull()) {
             return;
         }
 
-        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(expressionResult.getValue());
+        var resultClasses = StratifierUtils.extractClassesFromSingleOrListResult(wrapper.raw());
         var groupPopulationBasisCode = groupDef.getPopulationBasis().code();
 
         if (stratifierDef.isCriteriaStratifier()) {

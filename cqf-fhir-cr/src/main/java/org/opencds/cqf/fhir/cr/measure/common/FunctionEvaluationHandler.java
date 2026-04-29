@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -600,32 +599,7 @@ public class FunctionEvaluationHandler {
 
     private static Iterable<?> getResultIterable(
             EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
-        if (expressionResult.getValue() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
-                // if Boolean, returns context by SubjectType
-                var expressionResultForSubjectId = evaluationResult.get(subjectTypePart);
-
-                if (expressionResultForSubjectId == null) {
-                    throw new InternalErrorException(
-                            "expression result is null for subject type: %s".formatted(subjectTypePart));
-                }
-
-                Object booleanResult = expressionResultForSubjectId.getValue();
-
-                // remove evaluated resources
-                return Collections.singletonList(booleanResult);
-            } else {
-                // false result shows nothing
-                return Collections.emptyList();
-            }
-        }
-
-        Object value = expressionResult.getValue();
-        if (value instanceof Iterable<?> iterable) {
-            return iterable;
-        } else {
-            return Collections.singletonList(value);
-        }
+        return CqlExpressionValue.of(expressionResult).resolveForPopulation(subjectTypePart, evaluationResult);
     }
 
     private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {

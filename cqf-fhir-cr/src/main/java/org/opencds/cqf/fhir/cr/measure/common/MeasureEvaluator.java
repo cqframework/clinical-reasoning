@@ -14,7 +14,6 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.NUMER
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -112,59 +111,19 @@ public class MeasureEvaluator {
         return measureDef;
     }
 
-    @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluatePopulationCriteria(
             String subjectType,
             ExpressionResult expressionResult,
             EvaluationResult evaluationResult,
             Set<Object> outEvaluatedResources) {
 
-        if (expressionResult != null
-                && !expressionResult.getEvaluatedResources().isEmpty()) {
-            outEvaluatedResources.addAll(expressionResult.getEvaluatedResources());
-        }
-
-        if (expressionResult == null || expressionResult.getValue() == null) {
-            return Collections.emptyList();
-        }
-
-        if (expressionResult.getValue() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
-                // if Boolean, returns context by SubjectType
-                Object booleanResult = evaluationResult.get(subjectType).getValue();
-                // remove evaluated resources
-                return Collections.singletonList(booleanResult);
-            } else {
-                // false result shows nothing
-                return Collections.emptyList();
-            }
-        }
-
-        Object value = expressionResult.getValue();
-        if (value instanceof Iterable<?>) {
-            return (Iterable<Object>) value;
-        } else {
-            return Collections.singletonList(value);
-        }
+        var wrapper = CqlExpressionValue.of(expressionResult);
+        outEvaluatedResources.addAll(wrapper.evaluatedResources());
+        return wrapper.resolveForPopulation(subjectType, evaluationResult);
     }
 
-    @SuppressWarnings("unchecked")
     protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
-
-        // Case 1 — true null
-        if (expressionResult == null || expressionResult.getValue() == null) {
-            return null; // need to preserve result
-        }
-
-        Object value = expressionResult.getValue();
-
-        // Case 2 — list
-        if (value instanceof Iterable<?>) {
-            return (Iterable<Object>) value; // may be empty or not
-        }
-
-        // Case 3 — scalar
-        return List.of(value);
+        return CqlExpressionValue.of(expressionResult).asIterableOrNull();
     }
 
     protected PopulationDef evaluatePopulationMembership(

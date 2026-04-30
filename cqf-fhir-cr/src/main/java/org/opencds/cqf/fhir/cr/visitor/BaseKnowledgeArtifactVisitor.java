@@ -102,8 +102,9 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             Optional<IKnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
-                if (resourcesToUpdate.stream().noneMatch(rtu -> Ids.simple(rtu.getIdElement())
-                        .equals(maybeArtifact.get().getId()))) {
+                if (resourcesToUpdate.stream()
+                        .noneMatch(rtu -> Ids.simple(rtu.getIdElement())
+                                .equals(maybeArtifact.get().getId()))) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }

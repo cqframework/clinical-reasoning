@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.Map;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.slf4j.Logger;
@@ -63,7 +62,8 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
         sb.append("\n");
         for (MeasureDef def : value) {
             Map<String, EvaluationResult> results = evaluationResultsPerMeasure.getOrDefault(def, Map.of());
-            sb.append(EvaluationResultFormatter.formatMeasureEvaluationResults(def.id(), results));
+            // TODO: merge stompage?
+            // sb.append(EvaluationResultFormatter.formatMeasureEvaluationResults(def.id(), results));
         }
         logger.info(sb.toString());
         return this;

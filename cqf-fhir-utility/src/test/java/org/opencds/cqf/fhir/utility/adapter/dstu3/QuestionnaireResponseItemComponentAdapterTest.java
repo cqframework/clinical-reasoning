@@ -32,7 +32,6 @@ class QuestionnaireResponseItemComponentAdapterTest {
         assertNotNull(adapter);
         assertEquals(item, adapter.get());
         assertEquals(FhirVersionEnum.DSTU3, adapter.fhirVersion());
-        assertNotNull(adapter.fhirTerser());
         assertNotNull(adapter.getAdapterFactory());
         var linkId = "1";
         adapter.setLinkId(linkId);

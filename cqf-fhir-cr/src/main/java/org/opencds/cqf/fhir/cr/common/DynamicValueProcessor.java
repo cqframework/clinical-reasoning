@@ -7,7 +7,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.CqfExpression;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.ElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
@@ -52,7 +52,7 @@ public class DynamicValueProcessor {
             IElement requestAction) {
         var dynamicValues =
                 context.resolvePathList(definitionElement, "dynamicValue", IBaseBackboneElement.class).stream()
-                        .map(b -> new BaseElementAdapter(request.getFhirVersion(), b))
+                        .map(b -> new ElementAdapter(request.getFhirVersion(), b))
                         .toList();
         for (var dynamicValue : dynamicValues) {
             try {
@@ -97,7 +97,10 @@ public class DynamicValueProcessor {
         var cqfExpression = getDynamicValueExpression(request, dynamicValue);
         if (cqfExpression != null) {
             var result = getDynamicValueExpressionResult(
-                    request, cqfExpression, context.get(), resourceAdapter == null ? null : resourceAdapter.get());
+                    request,
+                    cqfExpression,
+                    context == null ? null : context.get(),
+                    resourceAdapter == null ? null : resourceAdapter.get());
             if (result == null || result.isEmpty()) {
                 var warning = "Null value received when evaluating dynamic value expression: %s"
                         .formatted(cqfExpression.getExpression());
@@ -123,7 +126,7 @@ public class DynamicValueProcessor {
                             .addExtension()
                             .setValue((org.hl7.fhir.dstu3.model.Type) value);
                 } else {
-                    context.setValue(requestAction, path.replace("action.", ""), value);
+                    dynamicValue.setValue(requestAction, path.replace("action.", ""), value);
                 }
             } else {
                 resourceAdapter.setValue(path, value);

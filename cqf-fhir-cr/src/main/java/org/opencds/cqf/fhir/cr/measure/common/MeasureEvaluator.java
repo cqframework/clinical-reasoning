@@ -121,7 +121,8 @@ public class MeasureEvaluator {
             EvaluationResult evaluationResult,
             Set<Value> outEvaluatedResources) {
 
-        if (expressionResult != null && expressionResult.getEvaluatedResources() != null
+        if (expressionResult != null
+                && expressionResult.getEvaluatedResources() != null
                 && !expressionResult.getEvaluatedResources().isEmpty()) {
             outEvaluatedResources.addAll(expressionResult.getEvaluatedResources());
         }
@@ -476,7 +477,7 @@ public class MeasureEvaluator {
             return;
         }
 
-        for (var it = measureObservation.entrySet().iterator(); it.hasNext();) {
+        for (var it = measureObservation.entrySet().iterator(); it.hasNext(); ) {
             var entry = it.next();
             String subjectId = entry.getKey();
 
@@ -517,7 +518,8 @@ public class MeasureEvaluator {
             PopulationDef measureObservationDef) {
         for (var populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
             if (populationResource instanceof Tuple measureObservationResourceAsMap) {
-                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.getElements().entrySet()) {
+                for (Entry<?, ?> measureObservationResourceMapEntry :
+                        measureObservationResourceAsMap.getElements().entrySet()) {
                     final var measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
                     if (measurePopulationDef != null) {
                         final var measurePopulationResourcesForSubject =
@@ -546,7 +548,7 @@ public class MeasureEvaluator {
             return;
         }
 
-        for (var it = measureObservation.entrySet().iterator(); it.hasNext();) {
+        for (var it = measureObservation.entrySet().iterator(); it.hasNext(); ) {
             var entry = it.next();
             String subjectId = entry.getKey();
 
@@ -664,11 +666,12 @@ public class MeasureEvaluator {
                 throw new ExpressionResultNotFoundException("SDE", sde.expression());
             }
             var result = expressionResult.getValue();
-//            // TODO: This is a hack-around for an cql engine bug. Need to investigate.
+            //            // TODO: This is a hack-around for an cql engine bug. Need to investigate.
             // TODO: Is this still needed?
-//            if ((result instanceof org.opencds.cqf.cql.engine.runtime.List list) && (list.size() == 1) && list.get(0) == null) {
-//                result = null;
-//            }
+            //            if ((result instanceof org.opencds.cqf.cql.engine.runtime.List list) && (list.size() == 1) &&
+            // list.get(0) == null) {
+            //                result = null;
+            //            }
 
             sde.putResult(subjectId, result, expressionResult.getEvaluatedResources());
         }

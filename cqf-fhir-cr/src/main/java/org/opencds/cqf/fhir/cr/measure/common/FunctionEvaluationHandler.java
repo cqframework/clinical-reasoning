@@ -1,10 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static java.util.Collections.emptyList;
+
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +20,6 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationFunctionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams.Builder;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
@@ -30,8 +30,6 @@ import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.util.Collections.emptyList;
 
 /**
  * Capture all logic for measure evaluation for continuous variable scoring.
@@ -613,7 +611,8 @@ public class FunctionEvaluationHandler {
                 var booleanResult = expressionResultForSubjectId.getValue();
 
                 // remove evaluated resources
-                return new org.opencds.cqf.cql.engine.runtime.List(booleanResult == null ? emptyList() : List.of(booleanResult));
+                return new org.opencds.cqf.cql.engine.runtime.List(
+                        booleanResult == null ? emptyList() : List.of(booleanResult));
             } else {
                 // false result shows nothing
                 return new org.opencds.cqf.cql.engine.runtime.List(emptyList());
@@ -686,8 +685,9 @@ public class FunctionEvaluationHandler {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
-//        evaluationResultToReturn.set(
-//                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+        //        evaluationResultToReturn.set(
+        //                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults,
+        // evaluatedResources));
 
         return evaluationResultToReturn;
     }
@@ -698,8 +698,9 @@ public class FunctionEvaluationHandler {
             Map<Object, Object> functionResults,
             Set<Object> evaluatedResources) {
 
-//        result.set(
-//                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+        //        result.set(
+        //                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults,
+        // evaluatedResources));
     }
 
     private static boolean isExpressionFunctionRef(

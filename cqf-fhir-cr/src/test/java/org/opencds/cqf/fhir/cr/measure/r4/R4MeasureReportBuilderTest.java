@@ -12,7 +12,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -37,8 +36,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Value;
@@ -71,7 +68,6 @@ class R4MeasureReportBuilderTest {
     public static final String MEASURE_URL_2 = "http://something.com/measure2|something";
 
     static final FhirModelResolver modelResolver = new R4FhirModelResolver();
-
 
     @Test
     void happyPathEmptySdes() {
@@ -110,27 +106,27 @@ class R4MeasureReportBuilderTest {
     }
 
     // TODO: Is this testing something that can no longer be done?
-//    @Test
-//    void happyPathEmptySdesAllNullResources() {
-//        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
-//
-//        var nullList = new ArrayList<>();
-//        nullList.add(null);
-//        var nulls = new org.opencds.cqf.cql.engine.runtime.List(List.of(null));
-//
-//        var measureReport = r4MeasureReportBuilder.build(
-//                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-//                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
-//                MeasureReportType.INDIVIDUAL,
-//                null,
-//                List.of());
-//
-//        assertNotNull(measureReport);
-//
-//        final List<Resource> contained = measureReport.getContained();
-//
-//        assertTrue(contained.isEmpty());
-//    }
+    //    @Test
+    //    void happyPathEmptySdesAllNullResources() {
+    //        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
+    //
+    //        var nullList = new ArrayList<>();
+    //        nullList.add(null);
+    //        var nulls = new org.opencds.cqf.cql.engine.runtime.List(List.of(null));
+    //
+    //        var measureReport = r4MeasureReportBuilder.build(
+    //                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
+    //                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
+    //                MeasureReportType.INDIVIDUAL,
+    //                null,
+    //                List.of());
+    //
+    //        assertNotNull(measureReport);
+    //
+    //        final List<Resource> contained = measureReport.getContained();
+    //
+    //        assertTrue(contained.isEmpty());
+    //    }
 
     @Test
     void happyPathNonEmptySdes() {
@@ -265,7 +261,9 @@ class R4MeasureReportBuilderTest {
         if (evaluatedResources != null) {
             sdeDef.putResult(
                     "subject",
-                    isKeyResource ? modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "patient1")), false) : new org.opencds.cqf.cql.engine.runtime.String("nonResource"),
+                    isKeyResource
+                            ? modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "patient1")), false)
+                            : new org.opencds.cqf.cql.engine.runtime.String("nonResource"),
                     evaluatedResources.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()));
         }
 

@@ -19,8 +19,8 @@ public class ClassInstanceHelper {
     public static String getId(ClassInstance classInstance) {
         if (classInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
                 && classInstance.has("id")) {
-            var resourceIdInstance = classInstance.get("id");
-            var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.toString();
+            var resourceIdInstance = (ClassInstance) classInstance.get("id");
+            var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.get("value");
             if (resourceIdValue != null) {
                 var type = classInstance.getType().getLocalPart();
                 return "%s/%s".formatted(type, resourceIdValue);

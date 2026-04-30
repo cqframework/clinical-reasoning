@@ -16,7 +16,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.cql.engine.runtime.Quantity;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
@@ -259,9 +258,9 @@ public class EvaluationResultFormatter {
         if (value instanceof ClassInstance classInstance && classInstance.has("id")) {
             return "%s/%s".formatted(classInstance.getTypeAsString(), classInstance.get("id"));
         }
-//        if (value instanceof IBaseResource resource) {
-//            return resource.getIdElement().getValueAsString();
-//        }
+        //        if (value instanceof IBaseResource resource) {
+        //            return resource.getIdElement().getValueAsString();
+        //        }
 
         if (value instanceof Tuple map) {
             final String toString = map.getElements().entrySet().stream()

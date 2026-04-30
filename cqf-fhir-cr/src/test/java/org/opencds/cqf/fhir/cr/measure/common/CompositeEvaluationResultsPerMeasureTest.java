@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +116,8 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Create an EvaluationResult with expression results
         EvaluationResult er = new EvaluationResult();
-        ExpressionResult expressionResult = new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), new HashSet<>(List.of(patient)));
+        ExpressionResult expressionResult = new ExpressionResult(
+                new org.opencds.cqf.cql.engine.runtime.Boolean(true), new HashSet<>(List.of(patient)));
         er.set(new EvaluationExpressionRef("Initial Population"), expressionResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -177,10 +177,12 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Create EvaluationResult with multiple expression results
         EvaluationResult er = new EvaluationResult();
-        ExpressionResult popResult = new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Integer(5), new HashSet<>(List.of(patient, encounter)));
+        ExpressionResult popResult = new ExpressionResult(
+                new org.opencds.cqf.cql.engine.runtime.Integer(5), new HashSet<>(List.of(patient, encounter)));
         er.set(new EvaluationExpressionRef("Initial Population"), popResult);
 
-        ExpressionResult numResult = new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.String("test-string"), Set.of());
+        ExpressionResult numResult =
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.String("test-string"), Set.of());
         er.set(new EvaluationExpressionRef("Numerator"), numResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -286,13 +288,17 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureDebug"), "http://example.com/Measure/debug");
 
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
+        er.set(
+                new EvaluationExpressionRef("expr1"),
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
 
         var debugResult = new DebugResult();
         er.setDebugResult(debugResult);
 
         EvaluationResult observationResult = new EvaluationResult();
-        observationResult.set(new EvaluationExpressionRef("obs1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Integer(42), Set.of()));
+        observationResult.set(
+                new EvaluationExpressionRef("obs1"),
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Integer(42), Set.of()));
 
         var builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef, "patient-1", er, List.of(observationResult));
@@ -313,7 +319,9 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureTrace"), "http://example.com/Measure/trace");
 
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
+        er.set(
+                new EvaluationExpressionRef("expr1"),
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
 
         var trace = new Trace(List.of());
         er.setTrace(trace);
@@ -335,7 +343,9 @@ class CompositeEvaluationResultsPerMeasureTest {
                 new IdType(ResourceType.Measure.name(), "measureNoDebug"), "http://example.com/Measure/nodebug");
 
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("expr1"), new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
+        er.set(
+                new EvaluationExpressionRef("expr1"),
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
 
         var builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef, "patient-1", er, List.of());

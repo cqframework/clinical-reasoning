@@ -94,7 +94,10 @@ class MeasureMultiSubjectEvaluatorTest {
     @Test
     void nullValues_filteredOut() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        var list = new org.opencds.cqf.cql.engine.runtime.List(Arrays.asList(new org.opencds.cqf.cql.engine.runtime.String("male"), null, new org.opencds.cqf.cql.engine.runtime.String("female")));
+        var list = new org.opencds.cqf.cql.engine.runtime.List(Arrays.asList(
+                new org.opencds.cqf.cql.engine.runtime.String("male"),
+                null,
+                new org.opencds.cqf.cql.engine.runtime.String("female")));
         sde.putResult("Patient/p1", list, Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));

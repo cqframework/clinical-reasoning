@@ -1,8 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.cql.engine.runtime.Tuple;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.StreamSupport;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class CriteriaResult {
     private final Value value;

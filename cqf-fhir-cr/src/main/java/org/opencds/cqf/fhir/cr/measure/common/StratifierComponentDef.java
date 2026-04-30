@@ -1,10 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class StratifierComponentDef {
     private final String id;

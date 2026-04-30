@@ -1,8 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
-import org.opencds.cqf.cql.engine.runtime.Tuple;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class PopulationDef {
 
@@ -139,7 +139,8 @@ public class PopulationDef {
         });
 
         // Remove empty inner maps - critical for correct counting
-        resourcesForSubject.removeIf(element -> element instanceof Tuple m && m.getElements().isEmpty());
+        resourcesForSubject.removeIf(
+                element -> element instanceof Tuple m && m.getElements().isEmpty());
 
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {

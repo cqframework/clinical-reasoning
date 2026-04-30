@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
-
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
@@ -11,7 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.cql.engine.runtime.Value;
@@ -550,7 +547,7 @@ public class MeasureReportDefScorer {
                     .filter(Tuple.class::isInstance)
                     .map(Tuple.class::cast)
                     .map(Tuple::getElements)
-                    //.map(m -> (Map<?, ?>) m)
+                    // .map(m -> (Map<?, ?>) m)
                     .map(map -> {
                         // Filter the map to only include entries matching stratum resource IDs
                         Map<String, Value> filteredMap = new java.util.HashMap<>();
@@ -560,11 +557,11 @@ public class MeasureReportDefScorer {
                             if (stratumResourceIds.contains(key)) {
                                 filteredMap.put(key, entry.getValue());
                             }
-//                            if (key instanceof ClassInstance classInstance) {
-//                                if (stratumResourceIds.contains(getId(classInstance))) {
-//                                    filteredMap.put(key, entry.getValue());
-//                                }
-//                            }
+                            //                            if (key instanceof ClassInstance classInstance) {
+                            //                                if (stratumResourceIds.contains(getId(classInstance))) {
+                            //                                    filteredMap.put(key, entry.getValue());
+                            //                                }
+                            //                            }
                         }
                         return filteredMap;
                     })

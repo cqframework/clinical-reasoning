@@ -937,7 +937,7 @@ public class MeasureMultiSubjectEvaluator {
                         // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
                                 .filter(Tuple.class::isInstance)
-                                //.map(m -> (Map<?, ?>) m)
+                                // .map(m -> (Map<?, ?>) m)
                                 .flatMap(m -> ((Tuple) m).getElements().keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)

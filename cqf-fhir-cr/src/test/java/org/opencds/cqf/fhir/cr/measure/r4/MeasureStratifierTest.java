@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.measure.common.InvalidMeasureDefinitionException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.When;
@@ -28,20 +27,29 @@ class MeasureStratifierTest {
             Measure.given().repositoryFor("CriteriaBasedStratifiersComplex");
     private static final Given GIVEN_SIMPLE = Measure.given().repositoryFor("MeasureTest");
 
+    /**
+     * Stratifiers with no {@code criteria.expression} and no components are skipped and
+     * surfaced as one contained OperationOutcome per offending stratifier; the rest of
+     * the measure still evaluates.
+     */
     @Test
     void emptyStratifier() {
-        final When when = GIVEN_MEASURE_STRATIFIER_TEST
+        GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("EmptyStratifier")
-                .evaluate();
-        try {
-            when.then();
-            fail("expected InvalidMeasureDefinitionException for stratifier without expression or components");
-        } catch (InvalidMeasureDefinitionException e) {
-            assertEquals(
-                    "Stratifier 'stratifier-1' has no criteria.expression and no components for measure: https://example.com/Measure/EmptyStratifier",
-                    e.getMessage());
-        }
+                .evaluate()
+                .then()
+                .report()
+                .logReportJson()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "Stratifier 'stratifier-1' has no criteria.expression and no components for measure: http://example.com/Measure/EmptyStratifier")
+                .hasContainedOperationOutcomeMsg(
+                        "Stratifier 'stratifier-2' has no criteria.expression and no components for measure: http://example.com/Measure/EmptyStratifier")
+                .firstGroup()
+                .hasStratifierCount(2)
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(10);
     }
 
     /**

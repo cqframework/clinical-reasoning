@@ -254,14 +254,17 @@ public class EvaluationResultFormatter {
             return "{empty}";
         }
 
-        final Set<Object> resources = populationDef.getSubjectResources().get(subjectId);
+        final Set<CqlExpressionValue> resources =
+                populationDef.getSubjectResources().get(subjectId);
 
         if (CollectionUtils.isEmpty(resources)) {
             return subjectId + ": {empty}";
         }
 
-        final String toString =
-                resources.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
+        final String toString = resources.stream()
+                .map(CqlExpressionValue::raw)
+                .map(EvaluationResultFormatter::printValue)
+                .collect(Collectors.joining(", "));
 
         if (StringUtils.isBlank(toString)) {
             return subjectId + ": {empty}";

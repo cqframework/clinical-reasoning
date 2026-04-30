@@ -30,7 +30,7 @@ class PopulationDefTest {
 
         popDef1.retainAllResources("subj1", popDef2);
         assertEquals(1, popDef1.getAllSubjectResources().size());
-        assertTrue(popDef1.getAllSubjectResources().contains("string1"));
+        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains("string1"));
     }
 
     @Test
@@ -47,7 +47,7 @@ class PopulationDefTest {
 
         popDef1.retainAllResources("subj1", popDef2);
         assertEquals(1, popDef1.getAllSubjectResources().size());
-        assertTrue(popDef1.getAllSubjectResources().contains(123));
+        assertTrue(getResourcesDistinctAcrossAllSubjects(popDef1).contains(123));
     }
 
     @Test
@@ -77,6 +77,7 @@ class PopulationDefTest {
         return new HashSetForFhirResourcesAndCqlTypes<>(popDef.getSubjectResources().values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
+                .map(CqlExpressionValue::raw)
                 .collect(Collectors.toUnmodifiableSet()));
     }
 

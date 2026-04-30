@@ -762,16 +762,23 @@ public class MeasureMultiSubjectEvaluator {
         final Map<String, CqlExpressionValue> stratifierResultsBySubject = stratifierDef.getResults();
         final List<Object> allPopulationStratumIntersectingResources = new ArrayList<>();
 
-        // For each subject, we intersect between the population and stratifier results
+        // For each subject, we intersect between the population (Set<CqlExpressionValue>) and
+        // stratifier results (Set<Object> of raw resources). Iterate the population side and
+        // delegate to the stratifier set's contains(): for Map-based stratifier results that's
+        // plain Object.equals on map keys; for non-Map results that's FHIR-identity equality
+        // via HashSetForFhirResourcesAndCqlTypes.
         for (Entry<String, CqlExpressionValue> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
             final Set<Object> stratifierResultsPerSubject =
                     stratifierResultAsIntersectionSet(stratifierEntryBySubject.getValue());
-
-            final Set<Object> populationResultsPerSubject =
+            final Set<CqlExpressionValue> populationResultsPerSubject =
                     populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
 
-            allPopulationStratumIntersectingResources.addAll(
-                    Sets.intersection(populationResultsPerSubject, stratifierResultsPerSubject));
+            for (CqlExpressionValue wrapper : populationResultsPerSubject) {
+                Object raw = wrapper == null ? null : wrapper.raw();
+                if (stratifierResultsPerSubject.contains(raw)) {
+                    allPopulationStratumIntersectingResources.add(raw);
+                }
+            }
         }
 
         // We add up all the results of the intersections here:
@@ -784,18 +791,6 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For Map-based results (Map<inputParam, producedValue>), the input parameters (map keys)
      * are the intersectable items.
      */
-    // MIGRATION-NOTE (typed-subjectResources): the calling site
-    // calculateCriteriaStratifierIntersection runs Sets.intersection(populationResultsPerSubject,
-    // stratifierResultsPerSubject) where populationResultsPerSubject comes from
-    // populationDef.getResourcesForSubject(...) — a Set<Object> today, Set<CqlExpressionValue>
-    // post-migration. The intersection MUST use FHIR-identity equality between the two sides.
-    // Either: (a) wrap the population side too and ensure the wrapper's equals delegates to FHIR
-    // identity, or (b) rebuild stratifierResultsPerSubject as a Set<Object> of raw resources by
-    // unwrapping. The current method already returns Set<Object>, so option (b) is the smaller
-    // change but loses the "everything is a wrapper" invariant the migration is trying to achieve.
-    //
-    // Test focus: criteria-based stratifiers where stratifier and population results overlap
-    // partially (the typical intersection case); all-Map and all-iterable stratifier results.
     private static Set<Object> stratifierResultAsIntersectionSet(CqlExpressionValue result) {
         if (result == null) {
             return Set.of();
@@ -892,15 +887,19 @@ public class MeasureMultiSubjectEvaluator {
                 continue;
             }
 
-            Set<Object> resources = entry.getValue();
+            Set<CqlExpressionValue> resources = entry.getValue();
             if (resources != null) {
                 if (isResourceType) {
                     resources.stream()
+                            .map(CqlExpressionValue::raw)
                             .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                             .filter(java.util.Objects::nonNull)
                             .forEach(resourceIds::add);
                 } else {
-                    resources.stream().map(Object::toString).forEach(resourceIds::add);
+                    resources.stream()
+                            .map(CqlExpressionValue::raw)
+                            .map(Object::toString)
+                            .forEach(resourceIds::add);
                 }
             }
         }
@@ -922,17 +921,6 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For MEASUREOBSERVATION populations, the subjectResources contain Set&lt;Map&lt;inputResource, outputValue&gt;&gt;
      * so we extract the keys (input resources) from those maps.
      */
-    // MIGRATION-NOTE (typed-subjectResources): three branches all consume Set<Object> from
-    // populationDef.getSubjectResources(). When typed:
-    //   - MEASUREOBSERVATION branch: drop the per-item ofRaw(...) wrap; call item.asMap() directly.
-    //   - isResourceType branch: normalizePopulationKey(item.raw()) — or extend the wrapper with an
-    //     overload that takes a wrapper. Using raw() keeps the existing key-derivation semantics.
-    //   - primitive branch: obj.raw().toString() — the toString fallback is unchanged.
-    // Note that resourceKeys is a plain HashSet of SubjectResourceKey records, so wrapper equality
-    // doesn't affect this method directly; the wrapper concern is purely on the input side.
-    //
-    // Test focus: stratifiers across all three population-basis dimensions (boolean, FHIR resource,
-    // primitive); cross-subject duplicate-resource handling for non-resource basis.
     private static Set<SubjectResourceKey> getPopulationResourceKeySet(
             FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef) {
         final String resourceType = FhirResourceUtils.determineFhirResourceTypeOrNull(fhirContext, groupDef);
@@ -944,15 +932,14 @@ public class MeasureMultiSubjectEvaluator {
                 String subjectId = entry.getKey();
                 // Qualify the subject ID to match the format used in StratifierRowKey (only needed for primitive types)
                 String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-                Set<Object> resources = entry.getValue();
+                Set<CqlExpressionValue> resources = entry.getValue();
                 if (resources != null) {
                     // For MEASUREOBSERVATION, resources are Map<inputResource, outputValue>
                     // We need to extract the keys (input resources)
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
                         // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
-                                .map(item ->
-                                        CqlExpressionValue.ofRaw(item, null).asMap())
+                                .map(CqlExpressionValue::asMap)
                                 .flatMap(java.util.Optional::stream)
                                 .flatMap(m -> m.keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
@@ -962,6 +949,7 @@ public class MeasureMultiSubjectEvaluator {
                     } else if (isResourceType) {
                         // FHIR resource types have globally unique IDs - no subject qualification needed
                         resources.stream()
+                                .map(CqlExpressionValue::raw)
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(java.util.Objects::nonNull)
                                 .map(SubjectResourceKey::resourceOnly)
@@ -969,6 +957,7 @@ public class MeasureMultiSubjectEvaluator {
                     } else {
                         // Primitive types (like Date) - include subject context to preserve duplicates
                         resources.stream()
+                                .map(CqlExpressionValue::raw)
                                 .map(obj -> SubjectResourceKey.of(qualifiedSubject, obj.toString()))
                                 .forEach(resourceKeys::add);
                     }

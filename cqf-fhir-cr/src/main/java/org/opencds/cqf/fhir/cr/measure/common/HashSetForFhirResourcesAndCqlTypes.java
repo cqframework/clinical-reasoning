@@ -19,19 +19,8 @@ import org.opencds.cqf.cql.engine.runtime.CqlType;
  * This class exists strictly to compensate for the fact that FHIR resource classes and CQL types
  * do not implement equals() and hashCode().
  *
- * <p/>MIGRATION-NOTE (typed-subjectResources): when PopulationDef.subjectResources moves to
- * Set&lt;CqlExpressionValue&gt;, this Set's identity contract becomes the load-bearing decision
- * point. Two options:
- * <ol>
- *   <li>Add equals/hashCode to CqlExpressionValue that delegate to FhirResourceAndCqlTypeUtils
- *       .areObjectsEqual on raw(). Pollutes a generic wrapper; affects every other Set/Map of
- *       wrappers project-wide.</li>
- *   <li>Build a parallel HashSetForCqlExpressionValues that overrides contains/remove etc. to
- *       compare on element.raw() via the same FhirResourceAndCqlTypeUtils helpers. Keeps the
- *       wrapper generic; localizes the special-case storage to the population-results pipeline.</li>
- * </ol>
- * Test focus when migrating: every retainAll / removeAll / removeIf path that operates on
- * subjectResources, especially observation-exclusion filtering and stratifier intersection.
+ * <p/>For a wrapper-aware sister type used by {@code PopulationDef.subjectResources}, see
+ * {@link HashSetForCqlExpressionValues}.
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
  *           or a {@link CqlType}
  */

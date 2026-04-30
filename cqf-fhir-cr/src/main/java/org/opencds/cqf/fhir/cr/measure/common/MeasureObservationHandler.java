@@ -29,15 +29,6 @@ public class MeasureObservationHandler {
      * @param measurePopulationExclusionDef population containing resources to exclude (e.g., cancelled encounters)
      * @param measureObservationDef population containing observation maps to filter
      */
-    // MIGRATION-NOTE (typed-subjectResources): consumes both populationDef.getResourcesForSubject
-    // (Set<Object> today) and the HashSetForFhirResourcesAndCqlTypes copy. When subjectResources
-    // is typed, observationResources becomes Set<CqlExpressionValue>; the copy constructor needs
-    // a wrapper-aware HashSet variant that preserves FHIR-identity dedup on the underlying raw
-    // resources. The lambda inside ifPresent already operates on a Map view, so the body holds.
-    //
-    // Test focus: continuous-variable measures with measure-population-exclusion that filters
-    // observations by FHIR resource identity (different Java instances of the same FHIR resource
-    // must still match — the existing HashSetForFhirResourcesAndCqlTypes guarantee).
     static void removeObservationResourcesInPopulation(
             String subjectId, PopulationDef measurePopulationExclusionDef, PopulationDef measureObservationDef) {
 
@@ -45,12 +36,13 @@ public class MeasureObservationHandler {
             return;
         }
 
-        final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
+        final Set<CqlExpressionValue> exclusionResources =
+                measurePopulationExclusionDef.getResourcesForSubject(subjectId);
         if (CollectionUtils.isEmpty(exclusionResources)) {
             return;
         }
 
-        final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
+        final Set<CqlExpressionValue> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
         if (CollectionUtils.isEmpty(observationResources)) {
             return;
         }
@@ -63,11 +55,12 @@ public class MeasureObservationHandler {
 
         // Make a copy to avoid ConcurrentModificationException when removeExcludedMeasureObservationResource
         // removes empty maps from the original set
-        final Set<Object> observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
+        final Set<CqlExpressionValue> observationResourcesCopy =
+                new HashSetForCqlExpressionValues(observationResources);
 
         // Iterate over observation resources (which are Maps) and remove matching keys
-        for (Object observationResource : observationResourcesCopy) {
-            CqlExpressionValue.ofRaw(observationResource, null)
+        for (CqlExpressionValue observationResource : observationResourcesCopy) {
+            observationResource
                     .asMap()
                     .ifPresent(observationMap -> removeMatchingKeysFromObservationMap(
                             observationMap, exclusionResources, measureObservationDef, subjectId));
@@ -82,30 +75,31 @@ public class MeasureObservationHandler {
      * map keys may be separate Java object instances representing the same FHIR resource.
      *
      * @param observationMap observation map containing Resource -> QuantityDef entries
-     * @param exclusionResources set of resources to exclude
+     * @param exclusionResources set of resources to exclude (wrapped)
      * @param measureObservationDef the observation population definition
      * @param subjectId the subject ID
      */
     private static void removeMatchingKeysFromObservationMap(
             Map<?, ?> observationMap,
-            Set<Object> exclusionResources,
+            Set<CqlExpressionValue> exclusionResources,
             PopulationDef measureObservationDef,
             String subjectId) {
 
         // Find observation map keys that match any exclusion resource
-        for (Object exclusionResource : exclusionResources) {
+        for (CqlExpressionValue exclusionResource : exclusionResources) {
+            Object exclusionRaw = exclusionResource.raw();
             // Check if this exclusion resource matches any key in the observation map
             // Must use custom equality that compares FHIR resource identity, not object instance
             boolean matchFound = observationMap.keySet().stream()
-                    .anyMatch(mapKey -> FhirResourceAndCqlTypeUtils.areObjectsEqual(mapKey, exclusionResource));
+                    .anyMatch(mapKey -> FhirResourceAndCqlTypeUtils.areObjectsEqual(mapKey, exclusionRaw));
 
             if (matchFound) {
                 logger.debug(
                         "Removing observation for excluded resource: {}",
-                        EvaluationResultFormatter.formatResource(exclusionResource));
+                        EvaluationResultFormatter.formatResource(exclusionRaw));
                 // Remove the entry from the inner map using the PopulationDef's removal method
                 // This ensures proper handling of the Map<String, Set<Map<Resource, QuantityDef>>> structure
-                measureObservationDef.removeExcludedMeasureObservationResource(subjectId, exclusionResource);
+                measureObservationDef.removeExcludedMeasureObservationResource(subjectId, exclusionRaw);
             }
         }
     }

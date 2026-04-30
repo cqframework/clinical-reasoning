@@ -76,10 +76,8 @@ class MeasureObservationHandlerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 List.of());
 
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(observationMap1);
-        observationResources.add(observationMap2);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, observationMap1);
+        measureObservationDef.addResource(SUBJECT_ID_1, observationMap2);
 
         // Create MEASUREPOPULATIONEXCLUSION population with encounter to exclude
         measurePopulationExclusionDef = new PopulationDef(
@@ -90,21 +88,20 @@ class MeasureObservationHandlerTest {
                 codeDef,
                 List.of());
 
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(encounter1InExclusion); // This should match encounter1InObservation by ID
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, exclusionResources);
+        // This encounter should match encounter1InObservation by ID
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, encounter1InExclusion);
 
         // When: Remove observation resources that match exclusions
         MeasureObservationHandler.removeObservationResourcesInPopulation(
                 SUBJECT_ID_1, measurePopulationExclusionDef, measureObservationDef);
 
         // Then: The empty map should be removed, leaving only 1 map
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
         assertThat(
                 "Should have 1 observation map remaining after empty map removal", remainingObservations, hasSize(1));
 
         // Verify encounter-1's map was removed and only encounter-2 remains
-        Map<?, ?> remainingMap = (Map<?, ?>) remainingObservations.iterator().next();
+        Map<?, ?> remainingMap = remainingObservations.iterator().next().asMap().orElseThrow();
         assertThat("Remaining map should have 1 entry", remainingMap.size(), is(1));
         assertTrue(remainingMap.containsKey(encounter2InObservation), "Should contain encounter-2");
         var quantityFromMapForEncounter = remainingMap.get(encounter2InObservation);
@@ -137,29 +134,25 @@ class MeasureObservationHandlerTest {
         obsMap3.put(enc3Obs, new QuantityDef(300.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMap1);
-        observationResources.add(obsMap2);
-        observationResources.add(obsMap3);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap2);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap3);
 
         // Create exclusions
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(enc1Excl);
-        exclusionResources.add(enc2Excl);
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, enc1Excl);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, enc2Excl);
 
         // When
         MeasureObservationHandler.removeObservationResourcesInPopulation(
                 SUBJECT_ID_1, measurePopulationExclusionDef, measureObservationDef);
 
         // Then: The two empty maps (obsMap1 and obsMap2) should be removed, leaving only obsMap3
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
         assertThat("Should have 1 observation map remaining", remainingObservations, hasSize(1));
 
         // Verify only enc3 remains
-        Map<?, ?> remainingMap = (Map<?, ?>) remainingObservations.iterator().next();
+        Map<?, ?> remainingMap = remainingObservations.iterator().next().asMap().orElseThrow();
         assertThat("Map should have 1 entry", remainingMap.size(), is(1));
         assertTrue(remainingMap.containsKey(enc3Obs), "Should contain encounter-3");
         var quantityFromMapForEncounter = remainingMap.get(enc3Obs);
@@ -187,23 +180,19 @@ class MeasureObservationHandlerTest {
         obsMap2.put(enc2Obs, new QuantityDef(200.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMap1);
-        observationResources.add(obsMap2);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap2);
 
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(enc3Excl);
-        exclusionResources.add(enc4Excl);
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, enc3Excl);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, enc4Excl);
 
         // When
         MeasureObservationHandler.removeObservationResourcesInPopulation(
                 SUBJECT_ID_1, measurePopulationExclusionDef, measureObservationDef);
 
         // Then: All observations should remain
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
         assertThat("Should have 2 observation maps remaining", remainingObservations, hasSize(2));
     }
 
@@ -218,19 +207,17 @@ class MeasureObservationHandlerTest {
         obsMap1.put(enc1, new QuantityDef(100.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMap1);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
 
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, new HashSetForFhirResourcesAndCqlTypes<>());
+        // No exclusions for this subject — getResourcesForSubject returns an empty default set
 
         // When
         MeasureObservationHandler.removeObservationResourcesInPopulation(
                 SUBJECT_ID_1, measurePopulationExclusionDef, measureObservationDef);
 
         // Then: All observations should remain
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
         assertThat("Should have 1 observation map remaining", remainingObservations, hasSize(1));
     }
 
@@ -241,9 +228,7 @@ class MeasureObservationHandlerTest {
     void removeObservationResourcesInPopulation_nullMeasureObservation_noExceptionThrown() {
         // Given: Null measure observation def
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(createEncounter("encounter-1"));
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, createEncounter("encounter-1"));
 
         // When/Then: Should not throw exception
         MeasureObservationHandler.removeObservationResourcesInPopulation(
@@ -257,16 +242,14 @@ class MeasureObservationHandlerTest {
     void removeObservationResourcesInPopulation_nullExclusionDef_noExceptionThrown() {
         // Given: Null exclusion def
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
         Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
         obsMap1.put(createEncounter("encounter-1"), new QuantityDef(100.0));
-        observationResources.add(obsMap1);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
 
         // When/Then: Should not throw exception, all observations remain
         MeasureObservationHandler.removeObservationResourcesInPopulation(SUBJECT_ID_1, null, measureObservationDef);
 
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
         assertThat("Should have 1 observation map remaining", remainingObservations, hasSize(1));
     }
 
@@ -281,21 +264,17 @@ class MeasureObservationHandlerTest {
         obsMap1.put(enc1, new QuantityDef(100.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMap1);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
 
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(createEncounter("encounter-1"));
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_2, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_2, createEncounter("encounter-1"));
 
         // When: Try to remove for subject-1 (no exclusions)
         MeasureObservationHandler.removeObservationResourcesInPopulation(
                 SUBJECT_ID_1, measurePopulationExclusionDef, measureObservationDef);
 
         // Then: All observations should remain
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_1);
         assertThat("Should have 1 observation map remaining", remainingObservations, hasSize(1));
     }
 
@@ -321,27 +300,23 @@ class MeasureObservationHandlerTest {
         obsMapActive.put(nonCancelledEncObs, new QuantityDef(420.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMapCancelled);
-        observationResources.add(obsMapActive);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_3, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_3, obsMapCancelled);
+        measureObservationDef.addResource(SUBJECT_ID_3, obsMapActive);
 
         // Only the cancelled encounter is in exclusions
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(cancelledEncExcl);
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_3, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_3, cancelledEncExcl);
 
         // When
         MeasureObservationHandler.removeObservationResourcesInPopulation(
                 SUBJECT_ID_3, measurePopulationExclusionDef, measureObservationDef);
 
         // Then: The empty obsMapCancelled should be removed, leaving only obsMapActive
-        Set<Object> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_3);
+        Set<CqlExpressionValue> remainingObservations = measureObservationDef.getResourcesForSubject(SUBJECT_ID_3);
         assertThat("Should have 1 observation map remaining", remainingObservations, hasSize(1));
 
         // Verify only the non-cancelled encounter remains
-        Map<?, ?> remainingMap = (Map<?, ?>) remainingObservations.iterator().next();
+        Map<?, ?> remainingMap = remainingObservations.iterator().next().asMap().orElseThrow();
         assertThat("Map should have 1 entry", remainingMap.size(), is(1));
         assertTrue(remainingMap.containsKey(nonCancelledEncObs), "Should contain non-cancelled encounter");
         QuantityDef activeQuantity = (QuantityDef) remainingMap.get(nonCancelledEncObs);
@@ -363,9 +338,7 @@ class MeasureObservationHandlerTest {
         obsMap1.put(enc1Obs, new QuantityDef(100.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMap1);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
 
         // Initial count should include the subject
         assertEquals(1, measureObservationDef.getCount(), "Initial count should be 1");
@@ -373,9 +346,7 @@ class MeasureObservationHandlerTest {
 
         // Create exclusion with the same encounter
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(enc1Excl);
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, enc1Excl);
 
         // When: Remove observation resources
         MeasureObservationHandler.removeObservationResourcesInPopulation(
@@ -405,9 +376,7 @@ class MeasureObservationHandlerTest {
         obsMap.put(enc2, new QuantityDef(200.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> observationResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        observationResources.add(obsMap);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, observationResources);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap);
 
         // Initial count should be 2 (two observation entries)
         assertEquals(2, measureObservationDef.getCount(), "Initial count should be 2");
@@ -415,9 +384,7 @@ class MeasureObservationHandlerTest {
 
         // Create exclusion with only one encounter
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
-        Set<Object> exclusionResources = new HashSetForFhirResourcesAndCqlTypes<>();
-        exclusionResources.add(enc1Excl);
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, exclusionResources);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, enc1Excl);
 
         // When: Remove observation resources
         MeasureObservationHandler.removeObservationResourcesInPopulation(
@@ -455,17 +422,9 @@ class MeasureObservationHandlerTest {
         obsMap3.put(enc4, new QuantityDef(400.0));
 
         measureObservationDef = createMeasureObservationDef();
-        Set<Object> obs1 = new HashSetForFhirResourcesAndCqlTypes<>();
-        obs1.add(obsMap1);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_1, obs1);
-
-        Set<Object> obs2 = new HashSetForFhirResourcesAndCqlTypes<>();
-        obs2.add(obsMap2);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_2, obs2);
-
-        Set<Object> obs3 = new HashSetForFhirResourcesAndCqlTypes<>();
-        obs3.add(obsMap3);
-        measureObservationDef.subjectResources.put(SUBJECT_ID_3, obs3);
+        measureObservationDef.addResource(SUBJECT_ID_1, obsMap1);
+        measureObservationDef.addResource(SUBJECT_ID_2, obsMap2);
+        measureObservationDef.addResource(SUBJECT_ID_3, obsMap3);
 
         // Initial: 1 + 2 + 1 = 4 total observations, 3 subjects
         assertEquals(4, measureObservationDef.getCount(), "Initial count should be 4");
@@ -475,14 +434,10 @@ class MeasureObservationHandlerTest {
         measurePopulationExclusionDef = createMeasurePopulationExclusionDef();
 
         // Subject 1: Exclude all (enc1)
-        Set<Object> excl1 = new HashSetForFhirResourcesAndCqlTypes<>();
-        excl1.add(createEncounter("encounter-1"));
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_1, excl1);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_1, createEncounter("encounter-1"));
 
         // Subject 2: Exclude one (enc2)
-        Set<Object> excl2 = new HashSetForFhirResourcesAndCqlTypes<>();
-        excl2.add(createEncounter("encounter-2"));
-        measurePopulationExclusionDef.subjectResources.put(SUBJECT_ID_2, excl2);
+        measurePopulationExclusionDef.addResource(SUBJECT_ID_2, createEncounter("encounter-2"));
 
         // When: Remove for each subject
         MeasureObservationHandler.removeObservationResourcesInPopulation(

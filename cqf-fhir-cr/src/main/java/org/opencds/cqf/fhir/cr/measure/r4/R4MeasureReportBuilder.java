@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -197,7 +198,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
                         && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue = docPopDef.getAllSubjectResources().iterator().next();
+                    var docValue =
+                            docPopDef.getAllSubjectResources().iterator().next().raw();
                     if (docValue != null) {
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
@@ -227,8 +229,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof IBaseResource resource) {
+    private String getPopulationResourceIds(CqlExpressionValue wrapper) {
+        if (wrapper.raw() instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
         return null;
@@ -263,14 +265,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // This is a temporary list carried forward to stratifiers
         // subjectResult set defined by basis of Measure
-        // MIGRATION-NOTE (typed-subjectResources): when getAllSubjectResources() returns
-        // List<CqlExpressionValue>, the filter chain becomes
-        // .map(CqlExpressionValue::raw).filter(Resource.class::isInstance) — preserve the
-        // existing "non-Resource entries are silently dropped" behaviour. The stratifier path
-        // downstream consumes populationSet as Set<String>, so wrapper boundary stops here.
-        //
-        // Test focus: subject-list reports (where populationSet drives subject references); ratio
-        // measures (which carry FHIR Resource lookups across both numerator and denominator).
         Set<String> populationSet;
         if (groupDef.isBooleanBasis()) {
             populationSet = populationDef.getSubjects().stream()
@@ -278,7 +272,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
-                    .filter(Resource.class::isInstance)
+                    .filter(wrapper -> wrapper.raw() instanceof Resource)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }

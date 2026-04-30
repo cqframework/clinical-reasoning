@@ -426,31 +426,23 @@ public class MeasureEvaluator {
      * Keeps Measure-Observation values found in measurePopulation
      * are not found in the corresponding measurePopulation set.
      */
-    // MIGRATION-NOTE (typed-subjectResources): both parameters are PopulationDef.subjectResources
-    // map references handed in from callers. When the field type changes, both signatures here
-    // (and in removeObservationSubjectResourcesInPopulation / removeObservatorySubjectResource)
-    // change in lockstep — Map<String, Set<CqlExpressionValue>>. The asMap() inside the removeIf
-    // already operates on a wrapper view, so the body stays nearly identical: drop the per-item
-    // CqlExpressionValue.ofRaw(...) and call item.asMap() directly.
-    //
-    // Test focus: ratio measures (numerator-and-denominator filtering); continuous-variable
-    // measures with measure-population-exclusion (exercises retain + remove flow).
     public void retainObservationSubjectResourcesInPopulation(
-            Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
+            Map<String, Set<CqlExpressionValue>> measurePopulation,
+            Map<String, Set<CqlExpressionValue>> measureObservation) {
 
         if (measurePopulation == null || measureObservation == null) {
             return;
         }
 
-        for (Iterator<Map.Entry<String, Set<Object>>> it =
+        for (Iterator<Map.Entry<String, Set<CqlExpressionValue>>> it =
                         measureObservation.entrySet().iterator();
                 it.hasNext(); ) {
-            Map.Entry<String, Set<Object>> entry = it.next();
+            Map.Entry<String, Set<CqlExpressionValue>> entry = it.next();
             String subjectId = entry.getKey();
-            Set<Object> obsSet = entry.getValue();
+            Set<CqlExpressionValue> obsSet = entry.getValue();
 
             // get valid population values for this subject
-            Set<Object> validPopulation = measurePopulation.get(subjectId);
+            Set<CqlExpressionValue> validPopulation = measurePopulation.get(subjectId);
 
             if (validPopulation == null || validPopulation.isEmpty()) {
                 // no population for this subject -> drop the whole subject
@@ -460,8 +452,7 @@ public class MeasureEvaluator {
 
             // remove observation accumulators whose keys aren't all in the valid population
             obsSet.removeIf(item -> {
-                Map<Object, Object> obsMap =
-                        CqlExpressionValue.ofRaw(item, null).asMap().orElse(null);
+                Map<Object, Object> obsMap = item.asMap().orElse(null);
                 if (obsMap == null) {
                     return false; // not an observation accumulator, leave alone
                 }
@@ -480,14 +471,6 @@ public class MeasureEvaluator {
         }
     }
 
-    // MIGRATION-NOTE (typed-subjectResources): walks the observation accumulator set directly via
-    // measureObservationDef.getResourcesForSubject(subjectId). When that returns Set<CqlExpression
-    // Value>, the lambda becomes (wrapper) -> wrapper.asMap()... — drop the local ofRaw wrap. The
-    // measurePopulationResourcesForSubject contains() check on map keys still operates on raw FHIR
-    // resources (the keys, not the values), so its semantics don't change.
-    //
-    // Test focus: continuous-variable measures with both numerator and denominator observations,
-    // where some observation keys aren't in the corresponding population (exclusion flow).
     protected void retainObservationResourcesInPopulation(
             String subjectId,
             //        MeasurePopulationType.MEASUREPOPULATION
@@ -497,10 +480,10 @@ public class MeasureEvaluator {
         if (measurePopulationDef == null) {
             return;
         }
-        Set<Object> measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
+        Set<CqlExpressionValue> measurePopulationResourcesForSubject =
+                measurePopulationDef.getResourcesForSubject(subjectId);
         measureObservationDef.getResourcesForSubject(subjectId).removeIf(populationResource -> {
-            Map<Object, Object> obsMap =
-                    CqlExpressionValue.ofRaw(populationResource, null).asMap().orElse(null);
+            Map<Object, Object> obsMap = populationResource.asMap().orElse(null);
             if (obsMap == null) {
                 return false;
             }
@@ -518,22 +501,22 @@ public class MeasureEvaluator {
      * @param measurePopulation population results that you would like to exclude from measureObservation
      * @param measureObservation population results that will have items excluded from it, if found in measurePopulation
      */
-    @SuppressWarnings("unchecked")
     public void removeObservationSubjectResourcesInPopulation(
-            Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
+            Map<String, Set<CqlExpressionValue>> measurePopulation,
+            Map<String, Set<CqlExpressionValue>> measureObservation) {
 
         if (measurePopulation == null || measureObservation == null) {
             return;
         }
 
-        for (Iterator<Map.Entry<String, Set<Object>>> it =
+        for (Iterator<Map.Entry<String, Set<CqlExpressionValue>>> it =
                         measureObservation.entrySet().iterator();
                 it.hasNext(); ) {
 
-            Map.Entry<String, Set<Object>> entry = it.next();
+            Map.Entry<String, Set<CqlExpressionValue>> entry = it.next();
             String subjectId = entry.getKey();
 
-            final Set<?> entryValue = entry.getValue();
+            final Set<CqlExpressionValue> entryValue = entry.getValue();
 
             if (CollectionUtils.isEmpty(entryValue)) {
                 continue;
@@ -543,35 +526,23 @@ public class MeasureEvaluator {
         }
     }
 
-    // MIGRATION-NOTE (typed-subjectResources): the unsafe (Set<Object>) cast at the body's
-    // `obsSet` line goes away when `entryValue` is already Set<CqlExpressionValue>. The
-    // `firstEntryValue.isMap()` check stays — it's a structural sanity check, not a type
-    // discrimination. Note: the InternalErrorException for "expected a Map but wasn't" is left
-    // in place by convention; converting to a domain exception is the responsibility of the
-    // separate exception-handling pass.
-    //
-    // Test focus: ratio measures with denominator-exclusion populations (the "remove if matches"
-    // inverse flow); empty observation sets after filtering.
     private void removeObservatorySubjectResource(
-            Map<String, Set<Object>> measurePopulation,
-            Set<?> entryValue,
+            Map<String, Set<CqlExpressionValue>> measurePopulation,
+            Set<CqlExpressionValue> entryValue,
             String subjectId,
-            Iterator<Entry<String, Set<Object>>> iterator) {
+            Iterator<Entry<String, Set<CqlExpressionValue>>> iterator) {
         if (entryValue.isEmpty()) {
             // Nothing to do
             return;
         }
-        final Object firstEntryValue = entryValue.iterator().next();
+        final CqlExpressionValue firstEntryValue = entryValue.iterator().next();
 
-        if (!CqlExpressionValue.ofRaw(firstEntryValue, null).isMap()) {
-            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
+        if (!firstEntryValue.isMap()) {
+            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue.raw()));
         }
 
-        @SuppressWarnings("unchecked")
-        Set<Object> obsSet = (Set<Object>) entryValue;
-
         // population values for this subject
-        Set<Object> populationValues = measurePopulation.get(subjectId);
+        Set<CqlExpressionValue> populationValues = measurePopulation.get(subjectId);
 
         // If there is no population for this subject, there is nothing "to remove because iterator matches",
         // so leave the observation set as-is.
@@ -580,9 +551,8 @@ public class MeasureEvaluator {
         }
 
         // Remove observations that *do* match population values
-        obsSet.removeIf(item -> {
-            Map<Object, Object> obsMap =
-                    CqlExpressionValue.ofRaw(item, null).asMap().orElse(null);
+        entryValue.removeIf(item -> {
+            Map<Object, Object> obsMap = item.asMap().orElse(null);
             if (obsMap == null) {
                 return false;
             }
@@ -596,7 +566,7 @@ public class MeasureEvaluator {
         });
 
         // If no observations remain for this subject, remove the subject entry entirely
-        if (obsSet.isEmpty()) {
+        if (entryValue.isEmpty()) {
             iterator.remove();
         }
     }

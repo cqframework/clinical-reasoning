@@ -489,7 +489,7 @@ public class MeasureReportDefScorer {
      * @param stratumPopulationDef the stratum population to filter by
      * @return collection of resources belonging to this stratum
      */
-    private static Collection<Object> getResultsForStratum(
+    private static Collection<CqlExpressionValue> getResultsForStratum(
             PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
 
         if (stratumPopulationDef == null || populationDef == null || populationDef.getSubjectResources() == null) {
@@ -531,7 +531,7 @@ public class MeasureReportDefScorer {
      * @param stratumPopulationDef the stratum population containing resource IDs
      * @return collection of resources/observations matching the stratum's resource IDs
      */
-    private static Collection<Object> getResultsForStratumByResourceIds(
+    private static Collection<CqlExpressionValue> getResultsForStratumByResourceIds(
             PopulationDef populationDef, StratumPopulationDef stratumPopulationDef) {
 
         Set<String> stratumResourceIds = stratumPopulationDef.resourceIdsAsSet();
@@ -542,8 +542,8 @@ public class MeasureReportDefScorer {
         if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
             return populationDef.getSubjectResources().values().stream()
                     .flatMap(Collection::stream)
-                    .map(item -> CqlExpressionValue.ofRaw(item, null).asMap())
-                    .flatMap(java.util.Optional::stream)
+                    .map(CqlExpressionValue::asMap)
+                    .flatMap(Optional::stream)
                     .map(map -> {
                         // Filter the map to only include entries matching stratum resource IDs
                         Map<Object, Object> filteredMap = new java.util.HashMap<>();
@@ -562,14 +562,16 @@ public class MeasureReportDefScorer {
                         return filteredMap;
                     })
                     .filter(map -> !map.isEmpty()) // Only include non-empty filtered maps
+                    .map(filteredMap -> CqlExpressionValue.ofRaw(filteredMap, null))
                     .collect(Collectors.toList());
         }
 
         // For non-MEASUREOBSERVATION populations, filter resources directly
         return populationDef.getSubjectResources().values().stream()
                 .flatMap(Collection::stream)
-                .filter(resource -> {
-                    if (resource instanceof IBaseResource baseResource) {
+                .filter(wrapper -> {
+                    Object raw = wrapper.raw();
+                    if (raw instanceof IBaseResource baseResource) {
                         String resourceId =
                                 baseResource.getIdElement().toVersionless().getValue();
                         return stratumResourceIds.contains(resourceId);
@@ -589,7 +591,8 @@ public class MeasureReportDefScorer {
      */
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
-            @Nullable PopulationDef populationDef, Function<PopulationDef, Collection<Object>> popDefToResources) {
+            @Nullable PopulationDef populationDef,
+            Function<PopulationDef, Collection<CqlExpressionValue>> popDefToResources) {
 
         if (populationDef == null) {
             return null;
@@ -609,19 +612,9 @@ public class MeasureReportDefScorer {
      */
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
-            ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
-        // MIGRATION-NOTE (typed-subjectResources): qualifyingResources is sourced via the
-        // popDefToResources Function from PopulationDef.getAllSubjectResources() (List<Object>) or
-        // getResultsForStratum (List<Object>). When PopulationDef returns typed wrappers, this
-        // boundary wrap and the popDefToResources signature both update: Function<PopulationDef,
-        // Collection<CqlExpressionValue>>. The wrap-and-toList step here goes away.
-        //
-        // Test focus: continuous-variable scoring (group-level + stratum-level, both proportion
-        // and ratio variants) — those are the only consumers of this aggregate path.
-        var wrapped = qualifyingResources.stream()
-                .map(o -> CqlExpressionValue.ofRaw(o, null))
-                .toList();
-        var observationQuantity = MeasureScoreCalculator.collectQuantities(wrapped);
+            ContinuousVariableObservationAggregateMethod aggregateMethod,
+            Collection<CqlExpressionValue> qualifyingResources) {
+        var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
         return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
     }
 

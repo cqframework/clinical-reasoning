@@ -136,26 +136,25 @@ public class EvaluationResultFormatter {
      * @return formatted string representation
      */
     private static String formatValue(Object value) {
-        if (value == null) {
+        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        if (wrapper.isNull()) {
             return "null";
         }
 
         // Handle iterables and collections
-        if (value instanceof Iterable<?> iterable) {
-            String items = StreamSupport.stream(iterable.spliterator(), false)
+        if (wrapper.isIterable()) {
+            String items = StreamSupport.stream(wrapper.asIterable().spliterator(), false)
                     .map(EvaluationResultFormatter::formatSingleValue)
                     .collect(Collectors.joining(", "));
             return "[" + items + "]";
         }
 
-        if (value instanceof Map<?, ?> map) {
-            return map.entrySet().stream()
-                    .map(entry -> "%s -> %s"
-                            .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
-                    .collect(Collectors.joining(", "));
-        }
-
-        return formatSingleValue(value);
+        return wrapper.asMap()
+                .map(map -> map.entrySet().stream()
+                        .map(entry -> "%s -> %s"
+                                .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
+                        .collect(Collectors.joining(", ")))
+                .orElseGet(() -> formatSingleValue(value));
     }
 
     /**
@@ -289,18 +288,14 @@ public class EvaluationResultFormatter {
             return resource.getIdElement().getValueAsString();
         }
 
-        if (value instanceof Map<?, ?> map) {
-            final String toString = map.entrySet().stream()
-                    .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
-                    .collect(Collectors.joining(", "));
-
-            if (StringUtils.isBlank(toString)) {
-                return "{empty}";
-            }
-
-            return toString;
-        }
-
-        return value.toString();
+        return CqlExpressionValue.ofRaw(value, null)
+                .asMap()
+                .map(map -> {
+                    final String toString = map.entrySet().stream()
+                            .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
+                            .collect(Collectors.joining(", "));
+                    return StringUtils.isBlank(toString) ? "{empty}" : toString;
+                })
+                .orElseGet(value::toString);
     }
 }

@@ -310,7 +310,7 @@ class MeasureScoreCalculatorTest {
         Map<String, Object> map2 = new HashMap<>();
         map2.put("key3", new QuantityDef(30.0));
 
-        Collection<Object> resources = List.of(map1, map2);
+        Collection<CqlExpressionValue> resources = wrap(map1, map2);
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -323,7 +323,7 @@ class MeasureScoreCalculatorTest {
 
     @Test
     void testCollectQuantities_EmptyCollection() {
-        Collection<Object> resources = new ArrayList<>();
+        Collection<CqlExpressionValue> resources = new ArrayList<>();
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -334,7 +334,7 @@ class MeasureScoreCalculatorTest {
     @Test
     void testCollectQuantities_NoMaps() {
         // Collection with non-Map objects
-        Collection<Object> resources = List.of("string", 42, new Object());
+        Collection<CqlExpressionValue> resources = wrap("string", 42, new Object());
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -348,7 +348,7 @@ class MeasureScoreCalculatorTest {
         map1.put("key1", "not a quantity");
         map1.put("key2", 123);
 
-        Collection<Object> resources = List.of(map1);
+        Collection<CqlExpressionValue> resources = wrap(map1);
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -366,13 +366,19 @@ class MeasureScoreCalculatorTest {
         Map<String, Object> map2 = new HashMap<>();
         map2.put("key3", 123);
 
-        Collection<Object> resources = List.of(map1, "string", map2, new QuantityDef(20.0));
+        Collection<CqlExpressionValue> resources = wrap(map1, "string", map2, new QuantityDef(20.0));
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
         assertNotNull(quantities);
         assertEquals(1, quantities.size());
         assertEquals(10.0, quantities.get(0).value(), 0.0001);
+    }
+
+    private static List<CqlExpressionValue> wrap(Object... items) {
+        return java.util.Arrays.stream(items)
+                .map(item -> CqlExpressionValue.ofRaw(item, null))
+                .toList();
     }
 
     // ========== Edge Cases and Integration Tests ==========
@@ -425,7 +431,7 @@ class MeasureScoreCalculatorTest {
         Map<String, Object> resource2 = new HashMap<>();
         resource2.put("obs3", new QuantityDef(30.0));
 
-        Collection<Object> resources = List.of(resource1, resource2);
+        Collection<CqlExpressionValue> resources = wrap(resource1, resource2);
 
         // Collect quantities
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);

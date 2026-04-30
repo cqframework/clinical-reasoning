@@ -610,8 +610,18 @@ public class MeasureReportDefScorer {
     @Nullable
     private static QuantityDef calculateContinuousVariableAggregateQuantity(
             ContinuousVariableObservationAggregateMethod aggregateMethod, Collection<Object> qualifyingResources) {
-        // Delegate to MeasureScoreCalculator for collection and aggregation
-        var observationQuantity = MeasureScoreCalculator.collectQuantities(qualifyingResources);
+        // MIGRATION-NOTE (typed-subjectResources): qualifyingResources is sourced via the
+        // popDefToResources Function from PopulationDef.getAllSubjectResources() (List<Object>) or
+        // getResultsForStratum (List<Object>). When PopulationDef returns typed wrappers, this
+        // boundary wrap and the popDefToResources signature both update: Function<PopulationDef,
+        // Collection<CqlExpressionValue>>. The wrap-and-toList step here goes away.
+        //
+        // Test focus: continuous-variable scoring (group-level + stratum-level, both proportion
+        // and ratio variants) — those are the only consumers of this aggregate path.
+        var wrapped = qualifyingResources.stream()
+                .map(o -> CqlExpressionValue.ofRaw(o, null))
+                .toList();
+        var observationQuantity = MeasureScoreCalculator.collectQuantities(wrapped);
         return MeasureScoreCalculator.aggregateContinuousVariable(observationQuantity, aggregateMethod);
     }
 

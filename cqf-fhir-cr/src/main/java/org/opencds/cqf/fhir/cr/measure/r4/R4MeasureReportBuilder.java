@@ -263,6 +263,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         // This is a temporary list carried forward to stratifiers
         // subjectResult set defined by basis of Measure
+        // MIGRATION-NOTE (typed-subjectResources): when getAllSubjectResources() returns
+        // List<CqlExpressionValue>, the filter chain becomes
+        // .map(CqlExpressionValue::raw).filter(Resource.class::isInstance) — preserve the
+        // existing "non-Resource entries are silently dropped" behaviour. The stratifier path
+        // downstream consumes populationSet as Set<String>, so wrapper boundary stops here.
+        //
+        // Test focus: subject-list reports (where populationSet drives subject references); ratio
+        // measures (which carry FHIR Resource lookups across both numerator and denominator).
         Set<String> populationSet;
         if (groupDef.isBooleanBasis()) {
             populationSet = populationDef.getSubjects().stream()

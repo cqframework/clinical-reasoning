@@ -280,6 +280,14 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         reportPopulation.setCode(measurePopulation.getCode());
         reportPopulation.setId(measurePopulation.getId());
 
+        // MIGRATION-NOTE (typed-subjectResources): the .size() call only needs the count, so the
+        // typed migration is transparent here. The MEASUREOBSERVATION branch below at line ~320
+        // hands getAllSubjectResources() into buildMeasureObservations(...), which expects raw
+        // Object items — that signature needs to change to consume CqlExpressionValue or unwrap
+        // via .stream().map(CqlExpressionValue::raw).
+        //
+        // Test focus: DSTU3 measure reports for continuous-variable measures (the only ones that
+        // hit buildMeasureObservations); DSTU3 patient-list reports.
         if (!measureDef.groups().isEmpty() && !measureDef.groups().get(0).isBooleanBasis()) {
             reportPopulation.setCount(populationDef.getAllSubjectResources().size());
         } else {

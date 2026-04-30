@@ -29,6 +29,15 @@ public class MeasureObservationHandler {
      * @param measurePopulationExclusionDef population containing resources to exclude (e.g., cancelled encounters)
      * @param measureObservationDef population containing observation maps to filter
      */
+    // MIGRATION-NOTE (typed-subjectResources): consumes both populationDef.getResourcesForSubject
+    // (Set<Object> today) and the HashSetForFhirResourcesAndCqlTypes copy. When subjectResources
+    // is typed, observationResources becomes Set<CqlExpressionValue>; the copy constructor needs
+    // a wrapper-aware HashSet variant that preserves FHIR-identity dedup on the underlying raw
+    // resources. The lambda inside ifPresent already operates on a Map view, so the body holds.
+    //
+    // Test focus: continuous-variable measures with measure-population-exclusion that filters
+    // observations by FHIR resource identity (different Java instances of the same FHIR resource
+    // must still match — the existing HashSetForFhirResourcesAndCqlTypes guarantee).
     static void removeObservationResourcesInPopulation(
             String subjectId, PopulationDef measurePopulationExclusionDef, PopulationDef measureObservationDef) {
 

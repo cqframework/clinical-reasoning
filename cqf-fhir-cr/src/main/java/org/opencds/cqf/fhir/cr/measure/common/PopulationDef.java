@@ -29,6 +29,27 @@ public class PopulationDef {
     private Double aggregationResult;
 
     protected Set<Object> evaluatedResources;
+
+    // MIGRATION-NOTE (typed-subjectResources): the central data model for population results.
+    // For most population types each item is a FHIR resource / CQL value; for MEASUREOBSERVATION
+    // populations each item is actually a Map<inputResource, outputValue> accumulator. The Set
+    // is a HashSetForFhirResourcesAndCqlTypes — its identity semantics (resource type + logical
+    // ID for IBaseResource, CQL .equal for CqlType) are load-bearing for retainAll / removeAll
+    // / removeIf in observation filtering and stratifier intersection.
+    //
+    // To migrate to Map<String, Set<CqlExpressionValue>> (or a new PopulationResultSet container):
+    //   1. Decide the wrapper's equals/hashCode story — delegating to FhirResourceAndCqlTypeUtils
+    //      .areObjectsEqual is the obvious path but pollutes a generic wrapper. The alternative is
+    //      a new HashSet variant that compares on raw() instead of on the wrapper.
+    //   2. Update every accessor below (addResource, getResourcesForSubject, getAllSubjectResources,
+    //      getSubjectResources, retainAllResources, removeAllResources,
+    //      removeExcludedMeasureObservationResource, countObservations, getCount).
+    //   3. Update every consumer — MeasureEvaluator observation methods, MeasureMultiSubjectEvaluator,
+    //      MeasureReportDefScorer, MeasureObservationHandler, R4/Dstu3/R5 MeasureReportBuilders.
+    //
+    // Test focus: ratio + continuous-variable measures (exercise observation accumulators end-to-end);
+    // measures with stratifiers that intersect populations (exercise FHIR-identity equality on
+    // retainAll/removeAll); measures with duplicate resources across subjects (countObservations).
     protected Map<String, Set<Object>> subjectResources = new HashMap<>();
 
     public PopulationDef(
@@ -219,6 +240,15 @@ public class PopulationDef {
     }
 
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
+    //
+    // MIGRATION-NOTE (typed-subjectResources): the only entry point for inserting into
+    // subjectResources. Once the field is typed, this is where Object → CqlExpressionValue
+    // wrapping happens (via CqlExpressionValue.ofRaw(value, null), preserving the lack of
+    // evaluatedResources at this granularity). Callers in MeasureEvaluator.evaluatePopulation
+    // Membership and FunctionEvaluationHandler.aggregateFunctionResults still pass raw Object;
+    // the wrap should land here, not at every caller.
+    //
+    // Test focus: any measure that lands resources in a population — every flavour exercises this.
     public void addResource(String key, Object value) {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())

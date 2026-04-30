@@ -426,6 +426,15 @@ public class MeasureEvaluator {
      * Keeps Measure-Observation values found in measurePopulation
      * are not found in the corresponding measurePopulation set.
      */
+    // MIGRATION-NOTE (typed-subjectResources): both parameters are PopulationDef.subjectResources
+    // map references handed in from callers. When the field type changes, both signatures here
+    // (and in removeObservationSubjectResourcesInPopulation / removeObservatorySubjectResource)
+    // change in lockstep — Map<String, Set<CqlExpressionValue>>. The asMap() inside the removeIf
+    // already operates on a wrapper view, so the body stays nearly identical: drop the per-item
+    // CqlExpressionValue.ofRaw(...) and call item.asMap() directly.
+    //
+    // Test focus: ratio measures (numerator-and-denominator filtering); continuous-variable
+    // measures with measure-population-exclusion (exercises retain + remove flow).
     public void retainObservationSubjectResourcesInPopulation(
             Map<String, Set<Object>> measurePopulation, Map<String, Set<Object>> measureObservation) {
 
@@ -471,6 +480,14 @@ public class MeasureEvaluator {
         }
     }
 
+    // MIGRATION-NOTE (typed-subjectResources): walks the observation accumulator set directly via
+    // measureObservationDef.getResourcesForSubject(subjectId). When that returns Set<CqlExpression
+    // Value>, the lambda becomes (wrapper) -> wrapper.asMap()... — drop the local ofRaw wrap. The
+    // measurePopulationResourcesForSubject contains() check on map keys still operates on raw FHIR
+    // resources (the keys, not the values), so its semantics don't change.
+    //
+    // Test focus: continuous-variable measures with both numerator and denominator observations,
+    // where some observation keys aren't in the corresponding population (exclusion flow).
     protected void retainObservationResourcesInPopulation(
             String subjectId,
             //        MeasurePopulationType.MEASUREPOPULATION
@@ -526,6 +543,15 @@ public class MeasureEvaluator {
         }
     }
 
+    // MIGRATION-NOTE (typed-subjectResources): the unsafe (Set<Object>) cast at the body's
+    // `obsSet` line goes away when `entryValue` is already Set<CqlExpressionValue>. The
+    // `firstEntryValue.isMap()` check stays — it's a structural sanity check, not a type
+    // discrimination. Note: the InternalErrorException for "expected a Map but wasn't" is left
+    // in place by convention; converting to a domain exception is the responsibility of the
+    // separate exception-handling pass.
+    //
+    // Test focus: ratio measures with denominator-exclusion populations (the "remove if matches"
+    // inverse flow); empty observation sets after filtering.
     private void removeObservatorySubjectResource(
             Map<String, Set<Object>> measurePopulation,
             Set<?> entryValue,

@@ -137,12 +137,15 @@ public class PopulationDef {
         }
 
         // Remove the key from all inner maps
-        resourcesForSubject.forEach(
-                element -> element.asMap().ifPresent(innerMap -> innerMap.remove(measureObservationResourceKey)));
+        resourcesForSubject.forEach(element -> {
+            if (element != null) {
+                element.asMap().ifPresent(innerMap -> innerMap.remove(measureObservationResourceKey));
+            }
+        });
 
         // Remove empty inner maps - critical for correct counting
         resourcesForSubject.removeIf(
-                element -> element.asMap().map(Map::isEmpty).orElse(false));
+                element -> element != null && element.asMap().map(Map::isEmpty).orElse(false));
 
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {

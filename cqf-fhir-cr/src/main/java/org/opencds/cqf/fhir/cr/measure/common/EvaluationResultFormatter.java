@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -262,6 +263,7 @@ public class EvaluationResultFormatter {
         }
 
         final String toString = resources.stream()
+                .filter(Objects::nonNull)
                 .map(CqlExpressionValue::raw)
                 .map(EvaluationResultFormatter::printValue)
                 .collect(Collectors.joining(", "));

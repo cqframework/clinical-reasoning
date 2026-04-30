@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -774,8 +775,11 @@ public class MeasureMultiSubjectEvaluator {
                     populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
 
             for (CqlExpressionValue wrapper : populationResultsPerSubject) {
-                Object raw = wrapper == null ? null : wrapper.raw();
-                if (stratifierResultsPerSubject.contains(raw)) {
+                if (wrapper == null) {
+                    continue;
+                }
+                Object raw = wrapper.raw();
+                if (raw != null && stratifierResultsPerSubject.contains(raw)) {
                     allPopulationStratumIntersectingResources.add(raw);
                 }
             }
@@ -891,13 +895,16 @@ public class MeasureMultiSubjectEvaluator {
             if (resources != null) {
                 if (isResourceType) {
                     resources.stream()
+                            .filter(Objects::nonNull)
                             .map(CqlExpressionValue::raw)
                             .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
-                            .filter(java.util.Objects::nonNull)
+                            .filter(Objects::nonNull)
                             .forEach(resourceIds::add);
                 } else {
                     resources.stream()
+                            .filter(Objects::nonNull)
                             .map(CqlExpressionValue::raw)
+                            .filter(Objects::nonNull)
                             .map(Object::toString)
                             .forEach(resourceIds::add);
                 }
@@ -939,25 +946,29 @@ public class MeasureMultiSubjectEvaluator {
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
                         // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
+                                .filter(Objects::nonNull)
                                 .map(CqlExpressionValue::asMap)
                                 .flatMap(java.util.Optional::stream)
                                 .flatMap(m -> m.keySet().stream())
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
-                                .filter(java.util.Objects::nonNull)
+                                .filter(Objects::nonNull)
                                 .map(SubjectResourceKey::resourceOnly)
                                 .forEach(resourceKeys::add);
                     } else if (isResourceType) {
                         // FHIR resource types have globally unique IDs - no subject qualification needed
                         resources.stream()
+                                .filter(Objects::nonNull)
                                 .map(CqlExpressionValue::raw)
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
-                                .filter(java.util.Objects::nonNull)
+                                .filter(Objects::nonNull)
                                 .map(SubjectResourceKey::resourceOnly)
                                 .forEach(resourceKeys::add);
                     } else {
                         // Primitive types (like Date) - include subject context to preserve duplicates
                         resources.stream()
+                                .filter(Objects::nonNull)
                                 .map(CqlExpressionValue::raw)
+                                .filter(Objects::nonNull)
                                 .map(obj -> SubjectResourceKey.of(qualifiedSubject, obj.toString()))
                                 .forEach(resourceKeys::add);
                     }

@@ -452,6 +452,9 @@ public class MeasureEvaluator {
 
             // remove observation accumulators whose keys aren't all in the valid population
             obsSet.removeIf(item -> {
+                if (item == null) {
+                    return false;
+                }
                 Map<Object, Object> obsMap = item.asMap().orElse(null);
                 if (obsMap == null) {
                     return false; // not an observation accumulator, leave alone
@@ -483,6 +486,9 @@ public class MeasureEvaluator {
         Set<CqlExpressionValue> measurePopulationResourcesForSubject =
                 measurePopulationDef.getResourcesForSubject(subjectId);
         measureObservationDef.getResourcesForSubject(subjectId).removeIf(populationResource -> {
+            if (populationResource == null) {
+                return false;
+            }
             Map<Object, Object> obsMap = populationResource.asMap().orElse(null);
             if (obsMap == null) {
                 return false;
@@ -537,8 +543,9 @@ public class MeasureEvaluator {
         }
         final CqlExpressionValue firstEntryValue = entryValue.iterator().next();
 
-        if (!firstEntryValue.isMap()) {
-            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue.raw()));
+        if (firstEntryValue == null || !firstEntryValue.isMap()) {
+            throw new InternalErrorException("Expected a Map<?,?> but was not: %s"
+                    .formatted(firstEntryValue == null ? "null" : firstEntryValue.raw()));
         }
 
         // population values for this subject
@@ -552,12 +559,16 @@ public class MeasureEvaluator {
 
         // Remove observations that *do* match population values
         entryValue.removeIf(item -> {
+            if (item == null) {
+                return false;
+            }
             Map<Object, Object> obsMap = item.asMap().orElse(null);
             if (obsMap == null) {
                 return false;
             }
             for (Object key : obsMap.keySet()) {
-                if (populationValues.contains(key)) {
+                if (key instanceof CqlExpressionValue expressionValueKey
+                        && populationValues.contains(expressionValueKey)) {
                     // This observation map is backed by a population resource -> remove iterator
                     return true;
                 }

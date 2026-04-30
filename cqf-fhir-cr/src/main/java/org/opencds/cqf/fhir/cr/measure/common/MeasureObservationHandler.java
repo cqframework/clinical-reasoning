@@ -87,6 +87,9 @@ public class MeasureObservationHandler {
 
         // Find observation map keys that match any exclusion resource
         for (CqlExpressionValue exclusionResource : exclusionResources) {
+            if (exclusionResource == null) {
+                continue;
+            }
             Object exclusionRaw = exclusionResource.raw();
             // Check if this exclusion resource matches any key in the observation map
             // Must use custom equality that compares FHIR resource identity, not object instance

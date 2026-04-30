@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -542,6 +543,7 @@ public class MeasureReportDefScorer {
         if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
             return populationDef.getSubjectResources().values().stream()
                     .flatMap(Collection::stream)
+                    .filter(Objects::nonNull)
                     .map(CqlExpressionValue::asMap)
                     .flatMap(Optional::stream)
                     .map(map -> {
@@ -569,6 +571,7 @@ public class MeasureReportDefScorer {
         // For non-MEASUREOBSERVATION populations, filter resources directly
         return populationDef.getSubjectResources().values().stream()
                 .flatMap(Collection::stream)
+                .filter(Objects::nonNull)
                 .filter(wrapper -> {
                     Object raw = wrapper.raw();
                     if (raw instanceof IBaseResource baseResource) {

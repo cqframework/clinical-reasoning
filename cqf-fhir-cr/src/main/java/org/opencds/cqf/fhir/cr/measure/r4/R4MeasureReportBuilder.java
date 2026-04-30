@@ -198,8 +198,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
                         && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue =
-                            docPopDef.getAllSubjectResources().iterator().next().raw();
+                    var firstWrapper =
+                            docPopDef.getAllSubjectResources().iterator().next();
+                    var docValue = firstWrapper == null ? null : firstWrapper.raw();
                     if (docValue != null) {
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
@@ -230,7 +231,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private String getPopulationResourceIds(CqlExpressionValue wrapper) {
-        if (wrapper.raw() instanceof IBaseResource resource) {
+        if (wrapper != null && wrapper.raw() instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
         return null;
@@ -272,7 +273,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
-                    .filter(wrapper -> wrapper.raw() instanceof Resource)
+                    .filter(wrapper -> wrapper != null && wrapper.raw() instanceof Resource)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }

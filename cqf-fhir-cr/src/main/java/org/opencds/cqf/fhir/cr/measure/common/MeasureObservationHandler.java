@@ -85,7 +85,7 @@ public class MeasureObservationHandler {
             String subjectId) {
 
         // Find observation map keys that match any exclusion resource
-        for (Object exclusionResource : exclusionResources) {
+        for (var exclusionResource : exclusionResources) {
             // Check if this exclusion resource matches any key in the observation map
             // Must use custom equality that compares FHIR resource identity, not object instance
             boolean matchFound = observationMap.keySet().stream()

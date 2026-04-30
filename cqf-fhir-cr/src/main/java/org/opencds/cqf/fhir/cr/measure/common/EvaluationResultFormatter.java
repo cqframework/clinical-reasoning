@@ -1,21 +1,16 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.List;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
@@ -73,7 +68,7 @@ public class EvaluationResultFormatter {
             if (expressionResult.getEvaluatedResources() != null
                     && !expressionResult.getEvaluatedResources().isEmpty()) {
                 sb.append(indent(baseIndent + 1)).append("Evaluated Resources:\n");
-                for (Object resource : expressionResult.getEvaluatedResources()) {
+                for (var resource : expressionResult.getEvaluatedResources()) {
                     sb.append(indent(baseIndent + 2))
                             .append(formatResource(resource))
                             .append("\n");
@@ -81,7 +76,7 @@ public class EvaluationResultFormatter {
             }
 
             // Format value
-            Object value = expressionResult.getValue();
+            var value = expressionResult.getValue();
             sb.append(indent(baseIndent + 1)).append("Value: ");
             sb.append(formatValue(value)).append("\n");
         }
@@ -127,7 +122,7 @@ public class EvaluationResultFormatter {
      * @param value the value to format (may be a collection, resource, primitive, date, etc.)
      * @return formatted string representation
      */
-    public static String formatExpressionValue(Object value) {
+    public static String formatExpressionValue(Value value) {
         return formatValue(value);
     }
 
@@ -137,25 +132,26 @@ public class EvaluationResultFormatter {
      * @param value the value to format
      * @return formatted string representation
      */
-    private static String formatValue(Object value) {
+    private static String formatValue(Value value) {
         if (value == null) {
             return "null";
         }
 
         // Handle iterables and collections
-        if (value instanceof Iterable<?> iterable) {
-            String items = StreamSupport.stream(iterable.spliterator(), false)
+        if (value instanceof List list) {
+            String items = StreamSupport.stream(list.spliterator(), false)
                     .map(EvaluationResultFormatter::formatSingleValue)
                     .collect(Collectors.joining(", "));
             return "[" + items + "]";
         }
 
-        if (value instanceof Map<?, ?> map) {
-            return map.entrySet().stream()
-                    .map(entry -> "%s -> %s"
-                            .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
-                    .collect(Collectors.joining(", "));
-        }
+        //        if (value instanceof Map<?, ?> map) {
+        //            return map.entrySet().stream()
+        //                    .map(entry -> "%s -> %s"
+        //                            .formatted(formatSingleValue(entry.getKey()),
+        // formatSingleValue(entry.getValue())))
+        //                    .collect(Collectors.joining(", "));
+        //        }
 
         return formatSingleValue(value);
     }
@@ -166,27 +162,27 @@ public class EvaluationResultFormatter {
      * @param value the value to format
      * @return formatted string representation
      */
-    private static String formatSingleValue(Object value) {
+    private static String formatSingleValue(Value value) {
         if (value == null) {
             return "null";
         }
 
         // Handle FHIR resources
-        if (value instanceof IBaseResource) {
+        if (value instanceof ClassInstance classInstance) {
             return formatResource(value);
         }
 
         // Handle dates
-        if (value instanceof LocalDate) {
-            return ((LocalDate) value).format(DateTimeFormatter.ofPattern(DATE_FORMAT));
-        }
-        if (value instanceof LocalDateTime) {
-            return ((LocalDateTime) value).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
-        }
-        if (value instanceof Date) {
-            SimpleDateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
-            return formatter.format((Date) value);
-        }
+        //        if (value instanceof LocalDate) {
+        //            return ((LocalDate) value).format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+        //        }
+        //        if (value instanceof LocalDateTime) {
+        //            return ((LocalDateTime) value).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+        //        }
+        //        if (value instanceof Date) {
+        //            SimpleDateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
+        //            return formatter.format((Date) value);
+        //        }
 
         // Fallback to toString for other types
         return value.toString();
@@ -198,16 +194,17 @@ public class EvaluationResultFormatter {
      * @param resource the resource object
      * @return formatted resource ID string (e.g., "Encounter/patient-4-encounter-1")
      */
-    public static String formatResource(Object resource) {
-        if (!(resource instanceof IBaseResource baseResource)) {
+    public static String formatResource(Value resource) {
+        if (!(resource instanceof ClassInstance classInstance)) {
             return resource.toString();
         }
 
-        if (baseResource.getIdElement() == null || baseResource.getIdElement().getValue() == null) {
+        var id = classInstance.get("id");
+        if (id == null || StringUtils.isBlank(id.toString())) {
             return "(resource with no ID)";
+        } else {
+            return id.toString();
         }
-
-        return baseResource.getIdElement().toUnqualifiedVersionless().getValue();
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import java.time.ZoneOffset;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
@@ -27,5 +28,10 @@ public class CrBaseConfig {
     @Bean
     MeasurePeriodValidator measurePeriodValidator() {
         return new MeasurePeriodValidator();
+    }
+
+    @Bean
+    FhirValidatorRegistry validatorCache(DaoRegistry daoRegistry) {
+        return new FhirValidatorRegistry(daoRegistry);
     }
 }

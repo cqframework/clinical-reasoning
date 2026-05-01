@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.hapi.config;
 
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.IRepositoryFactory;
 import java.util.List;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -85,10 +84,12 @@ public class CrProcessorConfig {
     }
 
     @Bean
-    IBundleProcessorFactory bundleProcessorFactory(IRepositoryFactory repositoryFactory, DaoRegistry daoRegistry) {
+    IBundleProcessorFactory bundleProcessorFactory(
+            IRepositoryFactory repositoryFactory, FhirValidatorRegistry fhirValidatorRegistry) {
         return rd -> {
             var repository = repositoryFactory.create(rd);
-            return new BundleProcessor(repository, new HapiValidateProcessor(repository.fhirContext(), daoRegistry));
+            return new BundleProcessor(
+                    repository, new HapiValidateProcessor(repository.fhirContext(), fhirValidatorRegistry));
         };
     }
 

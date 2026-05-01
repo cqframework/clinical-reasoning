@@ -38,6 +38,7 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.InvalidMeasureDefinitionException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -401,7 +402,8 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             return null;
         }
 
-        final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria();
+        final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria()
+                && measureGroupStratifierComponent.getCriteria().hasExpression();
 
         final boolean hasAnyComponentCriteria = measureGroupStratifierComponent.getComponent().stream()
                 .anyMatch(MeasureGroupStratifierComponentComponent::hasCriteria);
@@ -413,8 +415,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         }
 
         if (!hasCriteria && !hasAnyComponentCriteria) {
-            throw new InvalidRequestException(
-                    "Stratifier cannot have neither criteria nor component for measure: %s".formatted(measureUrl));
+            throw new InvalidMeasureDefinitionException(
+                    "Stratifier '%s' has no criteria.expression and no components for measure: %s"
+                            .formatted(measureGroupStratifierComponent.getId(), measureUrl));
         }
 
         if (hasCriteria) {

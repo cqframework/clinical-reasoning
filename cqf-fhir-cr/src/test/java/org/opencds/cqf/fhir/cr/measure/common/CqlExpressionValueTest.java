@@ -221,9 +221,11 @@ class CqlExpressionValueTest {
     void resolveForPopulation_trueButNoSubjectResultThrows() {
         EvaluationResult evaluationResult = new EvaluationResult();
 
+        final CqlExpressionValue cqlExpressionValue = CqlExpressionValue.ofRaw(true, null);
+
         CqlExpressionValueException ex = assertThrows(
                 CqlExpressionValueException.class,
-                () -> CqlExpressionValue.ofRaw(true, null).resolveForPopulation("Patient", evaluationResult));
+                () -> cqlExpressionValue.resolveForPopulation("Patient", evaluationResult));
 
         assertTrue(ex.getMessage().contains("Patient"));
     }

@@ -187,8 +187,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return Collections.emptyList();
         }
-        if (raw instanceof Boolean b) {
-            if (!b) {
+        if (raw instanceof Boolean aBoolean) {
+            if (Boolean.FALSE.equals(aBoolean)) {
                 return Collections.emptyList();
             }
             ExpressionResult subjectResult = evaluationResult.get(subjectType);

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -500,19 +501,17 @@ public class MeasureMultiSubjectEvaluator {
                 CqlExpressionValue result = entry.getValue();
 
                 // Only process function results (FunctionResultAccumulator)
-                if (result == null) {
+                final Optional<FunctionResultAccumulator> optFunctionResults = getFunctionResultAccumulator(result);
+
+                if (optFunctionResults.isEmpty()) {
                     continue;
                 }
-                FunctionResultAccumulator functionResults =
-                        result.asFunctionResultAccumulator().orElse(null);
-                if (functionResults == null) {
-                    continue;
-                }
+
                 String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
                 Set<StratifierRowKey> rowKeys =
                         functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 
-                for (FunctionResultEntry fnEntry : functionResults.entries()) {
+                for (FunctionResultEntry fnEntry : optFunctionResults.get().entries()) {
                     String normalizedKey = normalizeResourceKey(fnEntry.input());
                     rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
                 }
@@ -520,6 +519,14 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         return functionRowKeysBySubject;
+    }
+
+    private static Optional<FunctionResultAccumulator> getFunctionResultAccumulator(CqlExpressionValue result) {
+        if (result == null) {
+            return Optional.empty();
+        }
+
+        return result.asFunctionResultAccumulator();
     }
 
     private static List<StratumTableRow> mapToListOfTableEntries(

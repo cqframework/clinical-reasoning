@@ -89,7 +89,7 @@ public class MeasureObservationHandler {
                             entry -> FhirResourceAndCqlTypeUtils.areObjectsEqual(entry.inputResource(), exclusionRaw));
 
             if (matchFound) {
-                logger.debug(
+                logger.atDebug().log(
                         "Removing observation for excluded resource: {}",
                         EvaluationResultFormatter.formatResource(exclusionRaw));
                 // Delegate to PopulationDef so empty accumulators get purged from the subject set

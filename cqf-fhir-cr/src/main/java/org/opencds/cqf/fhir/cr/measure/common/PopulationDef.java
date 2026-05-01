@@ -142,21 +142,7 @@ public class PopulationDef {
         // we drop the wrapper entirely so the count stays correct.
         Set<CqlExpressionValue> rebuilt = new HashSetForCqlExpressionValues();
         for (CqlExpressionValue element : resourcesForSubject) {
-            if (element == null) {
-                continue;
-            }
-            ObservationAccumulator acc = element.asObservationAccumulator().orElse(null);
-            if (acc == null) {
-                rebuilt.add(element); // not an observation accumulator, leave alone
-                continue;
-            }
-            List<ObservationEntry> filtered = acc.entries().stream()
-                    .filter(e -> !FhirResourceAndCqlTypeUtils.areObjectsEqual(
-                            e.inputResource(), measureObservationResourceKey))
-                    .toList();
-            if (!filtered.isEmpty()) {
-                rebuilt.add(CqlExpressionValue.ofRaw(new ObservationAccumulator(filtered), null));
-            }
+            processSingleCqlExpressionValue(measureObservationResourceKey, element, rebuilt);
         }
         resourcesForSubject.clear();
         resourcesForSubject.addAll(rebuilt);
@@ -164,6 +150,25 @@ public class PopulationDef {
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {
             subjectResources.remove(subjectId);
+        }
+    }
+
+    private static void processSingleCqlExpressionValue(
+            Object measureObservationResourceKey, CqlExpressionValue element, Set<CqlExpressionValue> rebuilt) {
+        if (element == null) {
+            return;
+        }
+        ObservationAccumulator acc = element.asObservationAccumulator().orElse(null);
+        if (acc == null) {
+            rebuilt.add(element); // not an observation accumulator, leave alone
+            return;
+        }
+        List<ObservationEntry> filtered = acc.entries().stream()
+                .filter(e ->
+                        !FhirResourceAndCqlTypeUtils.areObjectsEqual(e.inputResource(), measureObservationResourceKey))
+                .toList();
+        if (!filtered.isEmpty()) {
+            rebuilt.add(CqlExpressionValue.ofRaw(new ObservationAccumulator(filtered), null));
         }
     }
 

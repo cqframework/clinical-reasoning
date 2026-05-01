@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -407,7 +406,7 @@ public class FunctionEvaluationHandler {
             // make new expression name for uniquely extracting results
             // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
             var expressionName = popDef.id() + "-" + stratifierExpression;
-            final Map<Object, Object> functionResults = new HashMap<>();
+            final List<FunctionResultEntry> functionResults = new ArrayList<>();
             final Set<Object> evaluatedResources = new HashSet<>();
 
             for (Object result : resultsIter) {
@@ -417,13 +416,10 @@ public class FunctionEvaluationHandler {
                         stratifierExpression,
                         getFunctionArguments(groupDef, result),
                         exceptionMessageIfNotFunction);
-                // add function results to existing EvaluationResult under new expression
-                // name
-                // need a way to capture input parameter here too, otherwise we have no way
-                // to connect input objects related to output object
-                // key= input parameter to function
-                // value= the output Observation resource containing calculated value
-                functionResults.put(result, functionResult.getValue());
+                // Each entry pairs the input parameter passed to the stratifier function with the
+                // heterogeneous CQL value the function returned. Iteration order is the order
+                // populationDef results were iterated.
+                functionResults.add(new FunctionResultEntry(result, functionResult.getValue()));
                 Set<Object> evaluated = functionResult.getEvaluatedResources();
                 if (evaluated == null) {
                     throw new IllegalStateException("CQL function '" + stratifierExpression
@@ -433,7 +429,8 @@ public class FunctionEvaluationHandler {
                 evaluatedResources.addAll(functionResult.getEvaluatedResources());
             }
             // add to EvaluationResult
-            addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
+            addToEvaluationResult(
+                    evalResult, expressionName, new FunctionResultAccumulator(functionResults), evaluatedResources);
         }
     }
 
@@ -658,10 +655,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static void addToEvaluationResult(
-            EvaluationResult result,
-            String expressionName,
-            Map<Object, Object> functionResults,
-            Set<Object> evaluatedResources) {
+            EvaluationResult result, String expressionName, Object functionResults, Set<Object> evaluatedResources) {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));

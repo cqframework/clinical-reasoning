@@ -345,6 +345,51 @@ class CqlExpressionValueTest {
         assertEquals(0, opt.get().size());
     }
 
+    // -- asFunctionResultAccumulator ---------------------------------------------
+
+    @Test
+    void asFunctionResultAccumulator_emptyOptionalForNonAccumulatorInputs() {
+        assertEquals(
+                java.util.Optional.empty(), CqlExpressionValue.ofRaw(null, null).asFunctionResultAccumulator());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw("scalar", null).asFunctionResultAccumulator());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw(Map.of("k", "v"), null).asFunctionResultAccumulator());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw(List.of(), null).asFunctionResultAccumulator());
+    }
+
+    @Test
+    void asFunctionResultAccumulator_returnsAccumulatorWhenWrapped() {
+        Encounter enc = new Encounter();
+        enc.setId("Encounter/1");
+        FunctionResultAccumulator acc =
+                new FunctionResultAccumulator(List.of(new FunctionResultEntry(enc, "stratum-value")));
+
+        java.util.Optional<FunctionResultAccumulator> opt =
+                CqlExpressionValue.ofRaw(acc, null).asFunctionResultAccumulator();
+
+        assertTrue(opt.isPresent());
+        assertSame(acc, opt.get());
+        assertEquals(1, opt.get().size());
+        assertSame(enc, opt.get().entries().get(0).input());
+        assertEquals("stratum-value", opt.get().entries().get(0).output());
+    }
+
+    @Test
+    void asFunctionResultAccumulator_isNotConfusedWithObservationAccumulator() {
+        ObservationAccumulator obsAcc =
+                new ObservationAccumulator(List.of(new ObservationEntry("k", new QuantityDef(1.0))));
+
+        // Same wrapper held only as the OTHER accumulator type returns the right narrowing
+        CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(obsAcc, null);
+        assertTrue(wrapper.asObservationAccumulator().isPresent());
+        assertEquals(java.util.Optional.empty(), wrapper.asFunctionResultAccumulator());
+    }
+
     // -- valueAsSet --------------------------------------------------------------
 
     @Test

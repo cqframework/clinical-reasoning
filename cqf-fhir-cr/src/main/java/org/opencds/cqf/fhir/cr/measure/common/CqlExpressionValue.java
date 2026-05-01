@@ -129,6 +129,16 @@ public final class CqlExpressionValue {
     }
 
     /**
+     * Returns the underlying value as the {@link FunctionResultAccumulator} produced by
+     * {@code FunctionEvaluationHandler.processNonSubValueStratifier}, or empty otherwise.
+     * Mirrors {@link #asObservationAccumulator()}: non-Iterable record so the upstream
+     * {@link #asIterable()} path doesn't unroll it into individual entries.
+     */
+    public Optional<FunctionResultAccumulator> asFunctionResultAccumulator() {
+        return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
+    }
+
+    /**
      * Normalizes the value to an {@link Iterable}: null becomes an empty list, an existing
      * iterable is returned as-is, and a scalar is wrapped in a single-element list.
      */

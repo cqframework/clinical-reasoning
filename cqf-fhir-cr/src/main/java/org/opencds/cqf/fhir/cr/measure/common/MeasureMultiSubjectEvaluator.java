@@ -499,11 +499,12 @@ public class MeasureMultiSubjectEvaluator {
                 String subjectId = entry.getKey();
                 CqlExpressionValue result = entry.getValue();
 
-                // Only process function results (Map values)
+                // Only process function results (FunctionResultAccumulator)
                 if (result == null) {
                     continue;
                 }
-                Map<Object, Object> functionResults = result.asMap().orElse(null);
+                FunctionResultAccumulator functionResults =
+                        result.asFunctionResultAccumulator().orElse(null);
                 if (functionResults == null) {
                     continue;
                 }
@@ -511,8 +512,8 @@ public class MeasureMultiSubjectEvaluator {
                 Set<StratifierRowKey> rowKeys =
                         functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 
-                for (Object key : functionResults.keySet()) {
-                    String normalizedKey = normalizeResourceKey(key);
+                for (FunctionResultEntry fnEntry : functionResults.entries()) {
+                    String normalizedKey = normalizeResourceKey(fnEntry.input());
                     rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
                 }
             }
@@ -538,8 +539,12 @@ public class MeasureMultiSubjectEvaluator {
         final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
         final Object rawValue = result == null ? null : result.raw();
 
-        if (result != null && result.isMap()) {
-            return addFunctionResultRows(qualifiedSubject, result.asMap().orElseThrow());
+        if (result != null) {
+            FunctionResultAccumulator functionResults =
+                    result.asFunctionResultAccumulator().orElse(null);
+            if (functionResults != null) {
+                return addFunctionResultRows(qualifiedSubject, functionResults);
+            }
         }
         if (result != null && result.isIterable()) {
             return addIterableValueRows(qualifiedSubject, (Iterable<?>) rawValue);
@@ -577,18 +582,20 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Adds rows for non-subject value stratifiers with function results (Map&lt;inputResource, outputValue&gt;).
+     * Adds rows for non-subject value stratifiers with function results (one entry per inputResource
+     * paired with the outputValue the stratifier function produced).
      *
-     * <p>For each entry in the map:
+     * <p>For each entry:
      * <ul>
      *   <li>Build composite row key: "Patient/xxx|Resource/yyy"</li>
      *   <li>The output value becomes the stratum value (what's displayed)</li>
      *   <li>Null values are allowed - they will be grouped into a special "null" stratum</li>
      * </ul>
      */
-    private static List<StratumTableRow> addFunctionResultRows(String qualifiedSubject, Map<?, ?> functionResults) {
+    private static List<StratumTableRow> addFunctionResultRows(
+            String qualifiedSubject, FunctionResultAccumulator functionResults) {
 
-        return functionResults.entrySet().stream()
+        return functionResults.entries().stream()
                 .map(entry ->
                         // The output value becomes the stratum value (what's displayed)
                         // Null values are allowed - they will be grouped into a special "null" stratum
@@ -596,8 +603,8 @@ public class MeasureMultiSubjectEvaluator {
                                 StratifierRowKey.withInput(
                                         qualifiedSubject,
                                         // Build composite row key: "Patient/xxx|Resource/yyy"
-                                        normalizeResourceKey(entry.getKey())),
-                                new StratumValueWrapper(entry.getValue())))
+                                        normalizeResourceKey(entry.input())),
+                                new StratumValueWrapper(entry.output())))
                 .toList();
     }
 
@@ -765,9 +772,9 @@ public class MeasureMultiSubjectEvaluator {
 
         // For each subject, we intersect between the population (Set<CqlExpressionValue>) and
         // stratifier results (Set<Object> of raw resources). Iterate the population side and
-        // delegate to the stratifier set's contains(): for Map-based stratifier results that's
-        // plain Object.equals on map keys; for non-Map results that's FHIR-identity equality
-        // via HashSetForFhirResourcesAndCqlTypes.
+        // delegate to the stratifier set's contains(): for FunctionResultAccumulator-based
+        // stratifier results that's plain Object.equals on the entry inputs; for non-accumulator
+        // results that's FHIR-identity equality via HashSetForFhirResourcesAndCqlTypes.
         for (Entry<String, CqlExpressionValue> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
             final Set<Object> stratifierResultsPerSubject =
                     stratifierResultAsIntersectionSet(stratifierEntryBySubject.getValue());
@@ -792,17 +799,19 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Convert a stratifier result into the set that should be used for intersection.
      *
-     * <p>For Map-based results (Map<inputParam, producedValue>), the input parameters (map keys)
-     * are the intersectable items.
+     * <p>For function-result accumulators (one entry per input parameter / produced value), the
+     * input parameters are the intersectable items.
      */
     private static Set<Object> stratifierResultAsIntersectionSet(CqlExpressionValue result) {
         if (result == null) {
             return Set.of();
         }
 
-        Map<Object, Object> m = result.asMap().orElse(null);
-        if (m != null) {
-            return new HashSet<>(m.keySet());
+        FunctionResultAccumulator acc = result.asFunctionResultAccumulator().orElse(null);
+        if (acc != null) {
+            return acc.entries().stream()
+                    .map(FunctionResultEntry::input)
+                    .collect(java.util.stream.Collectors.toCollection(HashSet::new));
         }
 
         return result.valueAsSet();
@@ -925,8 +934,8 @@ public class MeasureMultiSubjectEvaluator {
      * (e.g., "patient1"), but StratifierRowKey uses QUALIFIED IDs (e.g., "Patient/patient1").
      * For primitive types, this method qualifies the subject ID to ensure proper matching.
      *
-     * <p>For MEASUREOBSERVATION populations, the subjectResources contain Set&lt;Map&lt;inputResource, outputValue&gt;&gt;
-     * so we extract the keys (input resources) from those maps.
+     * <p>For MEASUREOBSERVATION populations, the subjectResources hold {@link ObservationAccumulator}
+     * instances; we extract each entry's {@code inputResource} to drive stratification keys.
      */
     private static Set<SubjectResourceKey> getPopulationResourceKeySet(
             FhirContext fhirContext, GroupDef groupDef, PopulationDef populationDef) {

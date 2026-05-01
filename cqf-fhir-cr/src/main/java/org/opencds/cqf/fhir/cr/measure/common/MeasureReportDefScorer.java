@@ -537,34 +537,25 @@ public class MeasureReportDefScorer {
 
         Set<String> stratumResourceIds = stratumPopulationDef.resourceIdsAsSet();
 
-        // For MEASUREOBSERVATION, subjectResources contains Set<Map<inputResource, outputValue>>
-        // MeasureScoreCalculator.collectQuantities expects Map objects and extracts values from them.
-        // We need to return filtered Maps (not the values directly) so collectQuantities can process them.
+        // For MEASUREOBSERVATION, subjectResources contains observation accumulators. Filter
+        // each accumulator to only the entries whose input resource ID matches a stratum
+        // resource ID, drop empties, and re-wrap so MeasureScoreCalculator.collectQuantities
+        // sees one wrapped accumulator per subject.
         if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
             return populationDef.getSubjectResources().values().stream()
                     .flatMap(Collection::stream)
                     .filter(Objects::nonNull)
-                    .map(CqlExpressionValue::asMap)
+                    .map(CqlExpressionValue::asObservationAccumulator)
                     .flatMap(Optional::stream)
-                    .map(map -> {
-                        // Filter the map to only include entries matching stratum resource IDs
-                        Map<Object, Object> filteredMap = new java.util.HashMap<>();
-                        for (var entry : map.entrySet()) {
-                            Object key = entry.getKey();
-                            if (key instanceof IBaseResource baseResource) {
-                                String resourceId = baseResource
-                                        .getIdElement()
-                                        .toVersionless()
-                                        .getValue();
-                                if (stratumResourceIds.contains(resourceId)) {
-                                    filteredMap.put(key, entry.getValue());
-                                }
-                            }
-                        }
-                        return filteredMap;
-                    })
-                    .filter(map -> !map.isEmpty()) // Only include non-empty filtered maps
-                    .map(filteredMap -> CqlExpressionValue.ofRaw(filteredMap, null))
+                    .map(acc -> acc.entries().stream()
+                            .filter(entry -> entry.inputResource() instanceof IBaseResource baseResource
+                                    && stratumResourceIds.contains(baseResource
+                                            .getIdElement()
+                                            .toVersionless()
+                                            .getValue()))
+                            .toList())
+                    .filter(entries -> !entries.isEmpty())
+                    .map(entries -> CqlExpressionValue.ofRaw(new ObservationAccumulator(entries), null))
                     .collect(Collectors.toList());
         }
 

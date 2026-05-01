@@ -249,11 +249,11 @@ public class MeasureScoreCalculator {
      */
     public static List<QuantityDef> collectQuantities(Collection<CqlExpressionValue> resources) {
         return resources.stream()
-                .map(CqlExpressionValue::asMap)
+                .map(CqlExpressionValue::asObservationAccumulator)
                 .flatMap(Optional::stream)
-                .flatMap(map -> map.values().stream())
-                .filter(QuantityDef.class::isInstance)
-                .map(QuantityDef.class::cast)
+                .flatMap(acc -> acc.entries().stream())
+                .map(ObservationEntry::observation)
+                .filter(Objects::nonNull)
                 .toList();
     }
 

@@ -450,18 +450,18 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            // remove observation accumulators whose keys aren't all in the valid population
+            // remove observation accumulators whose inputs aren't all in the valid population
             obsSet.removeIf(item -> {
                 if (item == null) {
                     return false;
                 }
-                Map<Object, Object> obsMap = item.asMap().orElse(null);
-                if (obsMap == null) {
+                ObservationAccumulator acc = item.asObservationAccumulator().orElse(null);
+                if (acc == null) {
                     return false; // not an observation accumulator, leave alone
                 }
-                for (Object key : obsMap.keySet()) {
-                    if (!validPopulation.contains(key)) {
-                        return true; // remove this observation map
+                for (ObservationEntry obsEntry : acc.entries()) {
+                    if (!validPopulation.contains(obsEntry.inputResource())) {
+                        return true; // remove this observation accumulator
                     }
                 }
                 return false;
@@ -489,12 +489,13 @@ public class MeasureEvaluator {
             if (populationResource == null) {
                 return false;
             }
-            Map<Object, Object> obsMap = populationResource.asMap().orElse(null);
-            if (obsMap == null) {
+            ObservationAccumulator acc =
+                    populationResource.asObservationAccumulator().orElse(null);
+            if (acc == null) {
                 return false;
             }
-            for (Object key : obsMap.keySet()) {
-                if (!measurePopulationResourcesForSubject.contains(key)) {
+            for (ObservationEntry entry : acc.entries()) {
+                if (!measurePopulationResourcesForSubject.contains(entry.inputResource())) {
                     return true;
                 }
             }
@@ -543,8 +544,9 @@ public class MeasureEvaluator {
         }
         final CqlExpressionValue firstEntryValue = entryValue.iterator().next();
 
-        if (firstEntryValue == null || !firstEntryValue.isMap()) {
-            throw new InternalErrorException("Expected a Map<?,?> but was not: %s"
+        if (firstEntryValue == null
+                || firstEntryValue.asObservationAccumulator().isEmpty()) {
+            throw new InternalErrorException("Expected an observation accumulator but was not: %s"
                     .formatted(firstEntryValue == null ? "null" : firstEntryValue.raw()));
         }
 
@@ -562,14 +564,13 @@ public class MeasureEvaluator {
             if (item == null) {
                 return false;
             }
-            Map<Object, Object> obsMap = item.asMap().orElse(null);
-            if (obsMap == null) {
+            ObservationAccumulator acc = item.asObservationAccumulator().orElse(null);
+            if (acc == null) {
                 return false;
             }
-            for (Object key : obsMap.keySet()) {
-                if (key instanceof CqlExpressionValue expressionValueKey
-                        && populationValues.contains(expressionValueKey)) {
-                    // This observation map is backed by a population resource -> remove iterator
+            for (ObservationEntry entry : acc.entries()) {
+                if (populationValues.contains(entry.inputResource())) {
+                    // This observation accumulator is backed by a population resource -> drop it
                     return true;
                 }
             }

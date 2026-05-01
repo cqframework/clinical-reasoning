@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -205,17 +205,16 @@ class PopulationDefTest {
         PopulationDef popDef = new PopulationDef(
                 "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, "MeasureObservation", booleanBasis, null);
 
-        // Add observations (Maps) for subjects
-        // Each observation is a Map with key-value pairs
-        Map<String, Object> obs1 = Map.of("value", 10.0);
-        Map<String, Object> obs2 = Map.of("value", 20.0, "unit", "mg");
-        Map<String, Object> obs3 = Map.of("value", 30.0);
+        // Add observation accumulators for subjects, one entry each
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("Patient/1", new QuantityDef(10.0))));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("Patient/2", new QuantityDef(20.0))));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("Patient/3", new QuantityDef(30.0))));
 
         popDef.addResource("Patient/1", obs1);
         popDef.addResource("Patient/2", obs2);
         popDef.addResource("Patient/3", obs3);
 
-        // For MEASUREOBSERVATION, getCount() should count subjects
+        // For MEASUREOBSERVATION, getCount() should count observation entries across accumulators
         assertEquals(3, popDef.getCount(), "MEASUREOBSERVATION should count observation entries");
     }
 
@@ -243,16 +242,13 @@ class PopulationDefTest {
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
         // Add observations for three subjects
-        Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMap1.put(enc1, new QuantityDef(100.0));
+        var obsMap1 = new ObservationAccumulator(List.of(new ObservationEntry(enc1, new QuantityDef(100.0))));
         popDef.addResource("Patient/1", obsMap1);
 
-        Map<Object, Object> obsMap2 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMap2.put(enc2, new QuantityDef(200.0));
+        var obsMap2 = new ObservationAccumulator(List.of(new ObservationEntry(enc2, new QuantityDef(200.0))));
         popDef.addResource("Patient/2", obsMap2);
 
-        Map<Object, Object> obsMap3 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMap3.put(enc3, new QuantityDef(300.0));
+        var obsMap3 = new ObservationAccumulator(List.of(new ObservationEntry(enc3, new QuantityDef(300.0))));
         popDef.addResource("Patient/3", obsMap3);
 
         // Initial count should be 3
@@ -296,13 +292,12 @@ class PopulationDefTest {
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
-        Map<Object, Object> obsMapSubject1 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMapSubject1.put(enc1, new QuantityDef(100.0));
-        obsMapSubject1.put(enc2, new QuantityDef(200.0));
+        var obsMapSubject1 = new ObservationAccumulator(List.of(
+                new ObservationEntry(enc1, new QuantityDef(100.0)),
+                new ObservationEntry(enc2, new QuantityDef(200.0))));
         popDef.addResource("Patient/1", obsMapSubject1);
 
-        Map<Object, Object> obsMapSubject2 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMapSubject2.put(enc3, new QuantityDef(300.0));
+        var obsMapSubject2 = new ObservationAccumulator(List.of(new ObservationEntry(enc3, new QuantityDef(300.0))));
         popDef.addResource("Patient/2", obsMapSubject2);
 
         // Initial: Patient/1 has 2 entries, Patient/2 has 1 entry = 3 total
@@ -341,9 +336,9 @@ class PopulationDefTest {
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
 
         // Patient/1 has 2 observations
-        Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMap1.put(enc1, new QuantityDef(100.0));
-        obsMap1.put(enc2, new QuantityDef(200.0));
+        var obsMap1 = new ObservationAccumulator(List.of(
+                new ObservationEntry(enc1, new QuantityDef(100.0)),
+                new ObservationEntry(enc2, new QuantityDef(200.0))));
         popDef.addResource("Patient/1", obsMap1);
 
         assertEquals(2, popDef.getCount(), "Should have 2 observations initially");
@@ -690,14 +685,13 @@ class PopulationDefTest {
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
         // Patient/1 has 2 observations
-        Map<Object, Object> obsMap1 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMap1.put(enc1, new QuantityDef(100.0));
-        obsMap1.put(enc2, new QuantityDef(200.0));
+        var obsMap1 = new ObservationAccumulator(List.of(
+                new ObservationEntry(enc1, new QuantityDef(100.0)),
+                new ObservationEntry(enc2, new QuantityDef(200.0))));
         popDef.addResource("Patient/1", obsMap1);
 
         // Patient/2 has 1 observation
-        Map<Object, Object> obsMap2 = new HashMapForFhirResourcesAndCqlTypes<>();
-        obsMap2.put(enc3, new QuantityDef(300.0));
+        var obsMap2 = new ObservationAccumulator(List.of(new ObservationEntry(enc3, new QuantityDef(300.0))));
         popDef.addResource("Patient/2", obsMap2);
 
         assertEquals(3, popDef.countObservations(), "Should count all observation entries across all maps");

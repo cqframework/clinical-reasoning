@@ -941,15 +941,16 @@ public class MeasureMultiSubjectEvaluator {
                 String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
                 Set<CqlExpressionValue> resources = entry.getValue();
                 if (resources != null) {
-                    // For MEASUREOBSERVATION, resources are Map<inputResource, outputValue>
-                    // We need to extract the keys (input resources)
+                    // For MEASUREOBSERVATION, resources hold ObservationAccumulator entries.
+                    // Extract the input resource of each entry to drive stratification keys.
                     if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
                         // MEASUREOBSERVATION always deals with FHIR resources, so no subject qualification needed
                         resources.stream()
                                 .filter(Objects::nonNull)
-                                .map(CqlExpressionValue::asMap)
+                                .map(CqlExpressionValue::asObservationAccumulator)
                                 .flatMap(java.util.Optional::stream)
-                                .flatMap(m -> m.keySet().stream())
+                                .flatMap(acc -> acc.entries().stream())
+                                .map(ObservationEntry::inputResource)
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(Objects::nonNull)
                                 .map(SubjectResourceKey::resourceOnly)

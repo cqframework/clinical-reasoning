@@ -269,9 +269,12 @@ public class FunctionEvaluationHandler {
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        // VERY IMPORTANT: We need a custom Map to ensure remove by FHIR resource key does not
-        // use object identity (AKA ==)
-        final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
+        // Each entry pairs an input from the population with the QuantityDef that the observation
+        // function produced for it. Consumers (PopulationDef, MeasureEvaluator, MeasureScoreCalculator,
+        // MeasureObservationHandler) iterate this list and apply FHIR-identity comparisons via
+        // FhirResourceAndCqlTypeUtils.areObjectsEqual where needed; nothing in the downstream pipeline
+        // does random-access lookup by input, so a List is sufficient and self-documenting.
+        final List<ObservationEntry> functionResults = new ArrayList<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
         final String exceptionMessageIfNotFunction = """
@@ -291,17 +294,11 @@ public class FunctionEvaluationHandler {
                     exceptionMessageIfNotFunction);
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
-            // add function results to existing EvaluationResult under new expression
-            // name
-            // need a way to capture input parameter here too, otherwise we have no way
-            // to connect input objects related to output object
-            // key= input parameter to function
-            // value= the output Observation resource containing calculated value
-            functionResults.put(result, quantity);
+            functionResults.add(new ObservationEntry(result, quantity));
             Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::addAll);
         }
 
-        return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
+        return buildEvaluationResult(expressionName, new ObservationAccumulator(functionResults), evaluatedResources);
     }
 
     /**
@@ -650,7 +647,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static EvaluationResult buildEvaluationResult(
-            String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
+            String expressionName, Object functionResults, Set<Object> evaluatedResources) {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 

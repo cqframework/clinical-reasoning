@@ -300,6 +300,51 @@ class CqlExpressionValueTest {
         assertTrue(opt.get().isEmpty());
     }
 
+    // -- asObservationAccumulator ------------------------------------------------
+
+    @Test
+    void asObservationAccumulator_emptyOptionalForNonAccumulatorInputs() {
+        assertEquals(
+                java.util.Optional.empty(), CqlExpressionValue.ofRaw(null, null).asObservationAccumulator());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw("scalar", null).asObservationAccumulator());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw(Map.of("k", "v"), null).asObservationAccumulator());
+        assertEquals(
+                java.util.Optional.empty(),
+                CqlExpressionValue.ofRaw(List.of(), null).asObservationAccumulator());
+    }
+
+    @Test
+    void asObservationAccumulator_returnsAccumulatorWhenWrapped() {
+        Encounter enc = new Encounter();
+        enc.setId("Encounter/1");
+        ObservationAccumulator acc =
+                new ObservationAccumulator(List.of(new ObservationEntry(enc, new QuantityDef(42.0))));
+
+        java.util.Optional<ObservationAccumulator> opt =
+                CqlExpressionValue.ofRaw(acc, null).asObservationAccumulator();
+
+        assertTrue(opt.isPresent());
+        assertSame(acc, opt.get());
+        assertEquals(1, opt.get().size());
+        assertSame(enc, opt.get().entries().get(0).inputResource());
+    }
+
+    @Test
+    void asObservationAccumulator_emptyAccumulatorYieldsEmptyAccumulator() {
+        ObservationAccumulator empty = new ObservationAccumulator(List.of());
+
+        java.util.Optional<ObservationAccumulator> opt =
+                CqlExpressionValue.ofRaw(empty, null).asObservationAccumulator();
+
+        assertTrue(opt.isPresent());
+        assertTrue(opt.get().isEmpty());
+        assertEquals(0, opt.get().size());
+    }
+
     // -- valueAsSet --------------------------------------------------------------
 
     @Test

@@ -136,16 +136,30 @@ public class PopulationDef {
             return;
         }
 
-        // Remove the key from all inner maps
-        resourcesForSubject.forEach(element -> {
-            if (element != null) {
-                element.asMap().ifPresent(innerMap -> innerMap.remove(measureObservationResourceKey));
+        // Drop accumulators whose entries all match (or, after filtering, none remain).
+        // Each ObservationAccumulator is immutable, so we replace its containing wrapper with a
+        // freshly-constructed one carrying the filtered entries; if the filtered list is empty,
+        // we drop the wrapper entirely so the count stays correct.
+        Set<CqlExpressionValue> rebuilt = new HashSetForCqlExpressionValues();
+        for (CqlExpressionValue element : resourcesForSubject) {
+            if (element == null) {
+                continue;
             }
-        });
-
-        // Remove empty inner maps - critical for correct counting
-        resourcesForSubject.removeIf(
-                element -> element != null && element.asMap().map(Map::isEmpty).orElse(false));
+            ObservationAccumulator acc = element.asObservationAccumulator().orElse(null);
+            if (acc == null) {
+                rebuilt.add(element); // not an observation accumulator, leave alone
+                continue;
+            }
+            List<ObservationEntry> filtered = acc.entries().stream()
+                    .filter(e -> !FhirResourceAndCqlTypeUtils.areObjectsEqual(
+                            e.inputResource(), measureObservationResourceKey))
+                    .toList();
+            if (!filtered.isEmpty()) {
+                rebuilt.add(CqlExpressionValue.ofRaw(new ObservationAccumulator(filtered), null));
+            }
+        }
+        resourcesForSubject.clear();
+        resourcesForSubject.addAll(rebuilt);
 
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {
@@ -198,9 +212,9 @@ public class PopulationDef {
     // Extracted from R4MeasureReportBuilder.countObservations() by Claude Sonnet 4.5
     public int countObservations() {
         return this.getAllSubjectResources().stream()
-                .map(CqlExpressionValue::asMap)
+                .map(CqlExpressionValue::asObservationAccumulator)
                 .flatMap(Optional::stream)
-                .mapToInt(Map::size)
+                .mapToInt(ObservationAccumulator::size)
                 .sum();
     }
 

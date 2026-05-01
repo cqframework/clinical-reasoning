@@ -2,9 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
@@ -299,16 +297,13 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Add QuantityDef observations for each subject
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
         measureObsPop.addResource("p3", obs3);
 
         GroupDef groupDef = new GroupDef(
@@ -359,16 +354,13 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
         measureObsPop.addResource("p3", obs3);
 
         GroupDef groupDef = new GroupDef(
@@ -419,16 +411,13 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.MIN,
                 null);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
         measureObsPop.addResource("p3", obs3);
 
         GroupDef groupDef = new GroupDef(
@@ -479,16 +468,13 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.MAX,
                 null);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
         measureObsPop.addResource("p3", obs3);
 
         GroupDef groupDef = new GroupDef(
@@ -932,16 +918,13 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Add numerator observations
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-1", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p1", numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-2", new QuantityDef(20.0))));
         numeratorMeasureObs.addResource("p2", numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-3", new QuantityDef(30.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Create denominator MEASUREOBSERVATION with criteriaReference to denominator
@@ -957,16 +940,13 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Add denominator observations
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(5.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-2", new QuantityDef(10.0))));
         denominatorMeasureObs.addResource("p2", denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-3", new QuantityDef(15.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         // Create GroupDef with RATIO scoring
@@ -1092,16 +1072,13 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Add denominator observations
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(5.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-2", new QuantityDef(10.0))));
         denominatorMeasureObs.addResource("p2", denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-3", new QuantityDef(15.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         GroupDef groupDef = new GroupDef(
@@ -1151,16 +1128,13 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Add numerator observations
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-1", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p1", numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-2", new QuantityDef(20.0))));
         numeratorMeasureObs.addResource("p2", numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-3", new QuantityDef(30.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         GroupDef groupDef = new GroupDef(
@@ -1264,8 +1238,7 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(10.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(10.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
 
         GroupDef groupDef = new GroupDef(
@@ -1320,16 +1293,13 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null); // AVG instead of SUM
 
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-1", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p1", numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-2", new QuantityDef(20.0))));
         numeratorMeasureObs.addResource("p2", numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-3", new QuantityDef(30.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Create denominator MEASUREOBSERVATION with AVG aggregation
@@ -1344,16 +1314,13 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null); // AVG instead of SUM
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(5.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-2", new QuantityDef(10.0))));
         denominatorMeasureObs.addResource("p2", denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-3", new QuantityDef(15.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         GroupDef groupDef = new GroupDef(
@@ -1424,25 +1391,20 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Male numerator observations: 10 + 15 + 15 = 40
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p1", numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(15.0));
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(15.0))));
         numeratorMeasureObs.addResource("p2", numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(15.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(15.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Female numerator observations: 10 + 20 = 30
-        Map<String, QuantityDef> numObs4 = new HashMap<>();
-        numObs4.put("p4", new QuantityDef(10.0));
+        var numObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p4", numObs4);
 
-        Map<String, QuantityDef> numObs5 = new HashMap<>();
-        numObs5.put("p5", new QuantityDef(20.0));
+        var numObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(20.0))));
         numeratorMeasureObs.addResource("p5", numObs5);
 
         // Create denominator MEASUREOBSERVATION
@@ -1458,25 +1420,20 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Male denominator observations: 5 + 7 + 8 = 20
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(5.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(5.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(7.0));
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(7.0))));
         denominatorMeasureObs.addResource("p2", denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(8.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(8.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         // Female denominator observations: 4 + 6 = 10
-        Map<String, QuantityDef> denObs4 = new HashMap<>();
-        denObs4.put("p4", new QuantityDef(4.0));
+        var denObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(4.0))));
         denominatorMeasureObs.addResource("p4", denObs4);
 
-        Map<String, QuantityDef> denObs5 = new HashMap<>();
-        denObs5.put("p5", new QuantityDef(6.0));
+        var denObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(6.0))));
         denominatorMeasureObs.addResource("p5", denObs5);
 
         // Create stratum populations for Male stratum
@@ -1610,20 +1567,15 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p1", numObs1);
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(15.0));
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(15.0))));
         numeratorMeasureObs.addResource("p2", numObs2);
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(15.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(15.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
-        Map<String, QuantityDef> numObs4 = new HashMap<>();
-        numObs4.put("p4", new QuantityDef(10.0));
+        var numObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p4", numObs4);
-        Map<String, QuantityDef> numObs5 = new HashMap<>();
-        numObs5.put("p5", new QuantityDef(20.0));
+        var numObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(20.0))));
         numeratorMeasureObs.addResource("p5", numObs5);
 
         // Denominator MEASUREOBSERVATION with SUM
@@ -1638,20 +1590,15 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(5.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(5.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(7.0));
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(7.0))));
         denominatorMeasureObs.addResource("p2", denObs2);
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(8.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(8.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
-        Map<String, QuantityDef> denObs4 = new HashMap<>();
-        denObs4.put("p4", new QuantityDef(4.0));
+        var denObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(4.0))));
         denominatorMeasureObs.addResource("p4", denObs4);
-        Map<String, QuantityDef> denObs5 = new HashMap<>();
-        denObs5.put("p5", new QuantityDef(6.0));
+        var denObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(6.0))));
         denominatorMeasureObs.addResource("p5", denObs5);
 
         // Male stratum populations
@@ -1768,22 +1715,17 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Male observations: 10, 20, 30
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
         measureObsPop.addResource("p1", obs1);
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
         measureObsPop.addResource("p2", obs2);
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
         measureObsPop.addResource("p3", obs3);
 
         // Female observations: 5, 15
-        Map<String, QuantityDef> obs4 = new HashMap<>();
-        obs4.put("obs-4", new QuantityDef(5.0));
+        var obs4 = new ObservationAccumulator(List.of(new ObservationEntry("obs-4", new QuantityDef(5.0))));
         measureObsPop.addResource("p4", obs4);
-        Map<String, QuantityDef> obs5 = new HashMap<>();
-        obs5.put("obs-5", new QuantityDef(15.0));
+        var obs5 = new ObservationAccumulator(List.of(new ObservationEntry("obs-5", new QuantityDef(15.0))));
         measureObsPop.addResource("p5", obs5);
 
         // Male stratum
@@ -2189,24 +2131,19 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Add observations in non-sorted order
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(20.0));
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(20.0))));
         measureObsPop.addResource("p1", obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(5.0));
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(5.0))));
         measureObsPop.addResource("p2", obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(25.0));
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(25.0))));
         measureObsPop.addResource("p3", obs3);
 
-        Map<String, QuantityDef> obs4 = new HashMap<>();
-        obs4.put("obs-4", new QuantityDef(10.0));
+        var obs4 = new ObservationAccumulator(List.of(new ObservationEntry("obs-4", new QuantityDef(10.0))));
         measureObsPop.addResource("p4", obs4);
 
-        Map<String, QuantityDef> obs5 = new HashMap<>();
-        obs5.put("obs-5", new QuantityDef(15.0));
+        var obs5 = new ObservationAccumulator(List.of(new ObservationEntry("obs-5", new QuantityDef(15.0))));
         measureObsPop.addResource("p5", obs5);
 
         GroupDef groupDef = new GroupDef(
@@ -2259,18 +2196,18 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Patient 1 has 4 observations
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        obs1.put("obs-2", new QuantityDef(20.0));
-        obs1.put("obs-3", new QuantityDef(30.0));
-        obs1.put("obs-4", new QuantityDef(40.0));
+        var obs1 = new ObservationAccumulator(List.of(
+                new ObservationEntry("obs-1", new QuantityDef(10.0)),
+                new ObservationEntry("obs-2", new QuantityDef(20.0)),
+                new ObservationEntry("obs-3", new QuantityDef(30.0)),
+                new ObservationEntry("obs-4", new QuantityDef(40.0))));
         measureObsPop.addResource("p1", obs1);
 
         // Patient 2 has 3 observations
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-5", new QuantityDef(50.0));
-        obs2.put("obs-6", new QuantityDef(60.0));
-        obs2.put("obs-7", new QuantityDef(70.0));
+        var obs2 = new ObservationAccumulator(List.of(
+                new ObservationEntry("obs-5", new QuantityDef(50.0)),
+                new ObservationEntry("obs-6", new QuantityDef(60.0)),
+                new ObservationEntry("obs-7", new QuantityDef(70.0))));
         measureObsPop.addResource("p2", obs2);
 
         GroupDef groupDef = new GroupDef(
@@ -2333,11 +2270,9 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(10.0))));
         numeratorMeasureObs.addResource("p1", numObs1);
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(20.0));
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(20.0))));
         numeratorMeasureObs.addResource("p2", numObs2);
 
         // Denominator MEASUREOBSERVATION with NO observations for p1 or p2
@@ -2354,8 +2289,7 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Only add denominator obs for p3 (NOT in this stratum)
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(50.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(50.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         // Stratum populations: subjects p1, p2
@@ -2449,8 +2383,7 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Only add numerator obs for p3 (NOT in this stratum)
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(99.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(99.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Denominator MEASUREOBSERVATION with observations for p1 and p2
@@ -2465,11 +2398,9 @@ class MeasureReportDefScorerTest {
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(15.0));
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(15.0))));
         denominatorMeasureObs.addResource("p1", denObs1);
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(25.0));
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(25.0))));
         denominatorMeasureObs.addResource("p2", denObs2);
 
         // Stratum populations: subjects p1, p2
@@ -2561,8 +2492,7 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Only add numerator obs for p3 (NOT in stratum)
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(99.0));
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(99.0))));
         numeratorMeasureObs.addResource("p3", numObs3);
 
         // Denominator MEASUREOBSERVATION with NO observations for stratum subjects
@@ -2578,8 +2508,7 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Only add denominator obs for p3 (NOT in stratum)
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(50.0));
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(50.0))));
         denominatorMeasureObs.addResource("p3", denObs3);
 
         // Stratum populations: subjects p1, p2

@@ -108,12 +108,24 @@ public final class CqlExpressionValue {
     /**
      * Returns the underlying value as a typed {@link Map} when it is one, otherwise empty.
      * The single unchecked cast is localized here so call sites do not have to repeat it.
-     * Used for measure-observation accumulators where the CQL engine produces
-     * {@code Map<inputResource, outputValue>}.
+     * Used for arbitrary CQL Map values (e.g. supporting evidence, formatting). For
+     * measure-observation accumulators produced by
+     * {@code FunctionEvaluationHandler.processMeasureObservation}, prefer
+     * {@link #asObservationAccumulator()}.
      */
     @SuppressWarnings("unchecked")
     public Optional<Map<Object, Object>> asMap() {
         return raw instanceof Map<?, ?> map ? Optional.of((Map<Object, Object>) map) : Optional.empty();
+    }
+
+    /**
+     * Returns the underlying value as the {@link ObservationAccumulator} produced by
+     * {@code FunctionEvaluationHandler.processMeasureObservation}, or empty otherwise.
+     * The accumulator wraps a {@code List<ObservationEntry>} in a non-Iterable record so the
+     * upstream {@link #asIterable()} path doesn't unroll it into individual entries.
+     */
+    public Optional<ObservationAccumulator> asObservationAccumulator() {
+        return raw instanceof ObservationAccumulator acc ? Optional.of(acc) : Optional.empty();
     }
 
     /**

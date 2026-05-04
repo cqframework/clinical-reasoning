@@ -1,18 +1,21 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.cql.engine.runtime.List;
-import org.opencds.cqf.cql.engine.runtime.Tuple;
-import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
  * Utility class for formatting EvaluationResult objects into human-readable strings.
@@ -22,6 +25,7 @@ public class EvaluationResultFormatter {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd:HH:mm:ss";
     private static final String INDENT = "  ";
+    private static final String SEPARATOR = "----------------------------------------";
 
     private EvaluationResultFormatter() {
         // Static utility class
@@ -68,7 +72,7 @@ public class EvaluationResultFormatter {
             if (expressionResult.getEvaluatedResources() != null
                     && !expressionResult.getEvaluatedResources().isEmpty()) {
                 sb.append(indent(baseIndent + 1)).append("Evaluated Resources:\n");
-                for (var resource : expressionResult.getEvaluatedResources()) {
+                for (Object resource : expressionResult.getEvaluatedResources()) {
                     sb.append(indent(baseIndent + 2))
                             .append(formatResource(resource))
                             .append("\n");
@@ -76,7 +80,7 @@ public class EvaluationResultFormatter {
             }
 
             // Format value
-            var value = expressionResult.getValue();
+            Object value = expressionResult.getValue();
             sb.append(indent(baseIndent + 1)).append("Value: ");
             sb.append(formatValue(value)).append("\n");
         }
@@ -122,7 +126,7 @@ public class EvaluationResultFormatter {
      * @param value the value to format (may be a collection, resource, primitive, date, etc.)
      * @return formatted string representation
      */
-    public static String formatExpressionValue(Value value) {
+    public static String formatExpressionValue(Object value) {
         return formatValue(value);
     }
 
@@ -132,28 +136,26 @@ public class EvaluationResultFormatter {
      * @param value the value to format
      * @return formatted string representation
      */
-    private static String formatValue(Value value) {
-        if (value == null) {
+    private static String formatValue(Object value) {
+        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        if (wrapper.isNull()) {
             return "null";
         }
 
         // Handle iterables and collections
-        if (value instanceof List list) {
-            String items = StreamSupport.stream(list.spliterator(), false)
+        if (wrapper.isIterable()) {
+            String items = StreamSupport.stream(wrapper.asIterable().spliterator(), false)
                     .map(EvaluationResultFormatter::formatSingleValue)
                     .collect(Collectors.joining(", "));
             return "[" + items + "]";
         }
 
-        //        if (value instanceof Map<?, ?> map) {
-        //            return map.entrySet().stream()
-        //                    .map(entry -> "%s -> %s"
-        //                            .formatted(formatSingleValue(entry.getKey()),
-        // formatSingleValue(entry.getValue())))
-        //                    .collect(Collectors.joining(", "));
-        //        }
-
-        return formatSingleValue(value);
+        return wrapper.asMap()
+                .map(map -> map.entrySet().stream()
+                        .map(entry -> "%s -> %s"
+                                .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
+                        .collect(Collectors.joining(", ")))
+                .orElseGet(() -> formatSingleValue(value));
     }
 
     /**
@@ -162,27 +164,27 @@ public class EvaluationResultFormatter {
      * @param value the value to format
      * @return formatted string representation
      */
-    private static String formatSingleValue(Value value) {
+    private static String formatSingleValue(Object value) {
         if (value == null) {
             return "null";
         }
 
         // Handle FHIR resources
-        if (value instanceof ClassInstance classInstance) {
+        if (value instanceof IBaseResource) {
             return formatResource(value);
         }
 
         // Handle dates
-        //        if (value instanceof LocalDate) {
-        //            return ((LocalDate) value).format(DateTimeFormatter.ofPattern(DATE_FORMAT));
-        //        }
-        //        if (value instanceof LocalDateTime) {
-        //            return ((LocalDateTime) value).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
-        //        }
-        //        if (value instanceof Date) {
-        //            SimpleDateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
-        //            return formatter.format((Date) value);
-        //        }
+        if (value instanceof LocalDate) {
+            return ((LocalDate) value).format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+        }
+        if (value instanceof LocalDateTime) {
+            return ((LocalDateTime) value).format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+        }
+        if (value instanceof Date) {
+            SimpleDateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
+            return formatter.format((Date) value);
+        }
 
         // Fallback to toString for other types
         return value.toString();
@@ -194,17 +196,16 @@ public class EvaluationResultFormatter {
      * @param resource the resource object
      * @return formatted resource ID string (e.g., "Encounter/patient-4-encounter-1")
      */
-    public static String formatResource(Value resource) {
-        if (!(resource instanceof ClassInstance classInstance)) {
+    public static String formatResource(Object resource) {
+        if (!(resource instanceof IBaseResource baseResource)) {
             return resource.toString();
         }
 
-        var id = classInstance.get("id");
-        if (id == null || StringUtils.isBlank(id.toString())) {
+        if (baseResource.getIdElement() == null || baseResource.getIdElement().getValue() == null) {
             return "(resource with no ID)";
-        } else {
-            return id.toString();
         }
+
+        return baseResource.getIdElement().toUnqualifiedVersionless().getValue();
     }
 
     /**
@@ -217,19 +218,55 @@ public class EvaluationResultFormatter {
         return INDENT.repeat(Math.max(0, level));
     }
 
-    public static String printSubjectResources(PopulationDef populationDef, String subjectId) {
+    /**
+     * Formats evaluation results for a single measure, with separator lines between subjects.
+     *
+     * @param measureId the measure ID for the header
+     * @param evaluationResults map of subject ID to EvaluationResult
+     * @return formatted string
+     */
+    public static String formatMeasureEvaluationResults(
+            String measureId, Map<String, EvaluationResult> evaluationResults) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(SEPARATOR).append("\n");
+        sb.append("Evaluation Results for Measure: ").append(measureId).append("\n");
+        sb.append(SEPARATOR).append("\n");
+
+        if (evaluationResults.isEmpty()) {
+            sb.append("  (no evaluation results available)\n");
+        } else {
+            boolean first = true;
+            for (Map.Entry<String, EvaluationResult> entry : evaluationResults.entrySet()) {
+                if (!first) {
+                    sb.append("  ").append(SEPARATOR).append("\n");
+                }
+                first = false;
+                sb.append("  Subject: ").append(entry.getKey()).append("\n");
+                sb.append(format(entry.getValue(), 2));
+            }
+        }
+
+        sb.append(SEPARATOR).append("\n");
+        return sb.toString();
+    }
+
+    public static Object printSubjectResources(PopulationDef populationDef, String subjectId) {
         if (populationDef == null) {
             return "{empty}";
         }
 
-        final Set<Value> resources = populationDef.getSubjectResources().get(subjectId);
+        final Set<CqlExpressionValue> resources =
+                populationDef.getSubjectResources().get(subjectId);
 
         if (CollectionUtils.isEmpty(resources)) {
             return subjectId + ": {empty}";
         }
 
-        final String toString =
-                resources.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
+        final String toString = resources.stream()
+                .filter(Objects::nonNull)
+                .map(CqlExpressionValue::raw)
+                .map(EvaluationResultFormatter::printValue)
+                .collect(Collectors.joining(", "));
 
         if (StringUtils.isBlank(toString)) {
             return subjectId + ": {empty}";
@@ -238,7 +275,7 @@ public class EvaluationResultFormatter {
         return subjectId + ": " + toString;
     }
 
-    public static String printValues(Collection<Value> values) {
+    public static String printValues(Collection<Object> values) {
 
         if (values == null || values.isEmpty()) {
             return "{empty}";
@@ -247,30 +284,23 @@ public class EvaluationResultFormatter {
         return values.stream().map(EvaluationResultFormatter::printValue).collect(Collectors.joining(", "));
     }
 
-    public static String printValue(Value value) {
+    public static String printValue(Object value) {
         if (value == null) {
             return "null";
         }
 
-        if (value instanceof ClassInstance classInstance && classInstance.has("id")) {
-            return "%s/%s".formatted(classInstance.getTypeAsString(), classInstance.get("id"));
-        }
-        //        if (value instanceof IBaseResource resource) {
-        //            return resource.getIdElement().getValueAsString();
-        //        }
-
-        if (value instanceof Tuple map) {
-            final String toString = map.getElements().entrySet().stream()
-                    .map(entry -> entry.getKey() + " -> " + printValue(entry.getValue()))
-                    .collect(Collectors.joining(", "));
-
-            if (StringUtils.isBlank(toString)) {
-                return "{empty}";
-            }
-
-            return toString;
+        if (value instanceof IBaseResource resource) {
+            return resource.getIdElement().getValueAsString();
         }
 
-        return value.toString();
+        return CqlExpressionValue.ofRaw(value, null)
+                .asMap()
+                .map(map -> {
+                    final String toString = map.entrySet().stream()
+                            .map(entry -> printValue(entry.getKey()) + " -> " + printValue(entry.getValue()))
+                            .collect(Collectors.joining(", "));
+                    return StringUtils.isBlank(toString) ? "{empty}" : toString;
+                })
+                .orElseGet(value::toString);
     }
 }

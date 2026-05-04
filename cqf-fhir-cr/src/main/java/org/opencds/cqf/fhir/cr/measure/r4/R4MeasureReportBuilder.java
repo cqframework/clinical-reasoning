@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
@@ -40,11 +38,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -201,7 +198,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
                         && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue = docPopDef.getAllSubjectResources().iterator().next();
+                    var firstWrapper =
+                            docPopDef.getAllSubjectResources().iterator().next();
+                    var docValue = firstWrapper == null ? null : firstWrapper.raw();
                     if (docValue != null) {
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
@@ -231,11 +230,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof ClassInstance classInstance) {
-            return getId(classInstance);
-        }
-        if (resourceObject instanceof IBaseResource resource) {
+    private String getPopulationResourceIds(CqlExpressionValue wrapper) {
+        if (wrapper != null && wrapper.raw() instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
         return null;
@@ -277,8 +273,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
+                    .filter(wrapper -> wrapper != null && wrapper.raw() instanceof Resource)
                     .map(this::getPopulationResourceIds)
-                    .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         }
 
@@ -311,15 +307,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addEvaluatedResourceReferences(
-            R4MeasureReportBuilderContext bc, String criteriaId, Set<Value> evaluatedResources) {
+            R4MeasureReportBuilderContext bc, String criteriaId, Set<Object> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }
 
-        for (var object : evaluatedResources) {
-            var classInstance = (ClassInstance) object;
-            var resourceId = getId(classInstance);
-            bc.addCriteriaExtensionToEvaluatedResource(resourceId, criteriaId);
+        for (Object object : evaluatedResources) {
+            Resource resource = (Resource) object;
+            bc.addCriteriaExtensionToEvaluatedResource(resource, criteriaId);
         }
     }
 
@@ -352,9 +347,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         for (Map.Entry<StratumValueWrapper, Long> accumulator :
                 sde.getAccumulatedValues().entrySet()) {
 
-            var value = convertToFhirR4IfNeeded(accumulator.getKey().getValue());
             Resource obs;
-            if (!(value instanceof Resource resource)) {
+            if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
                 String valueCode = accumulator.getKey().getValueAsString();
                 Long valueCount = accumulator.getValue();
 

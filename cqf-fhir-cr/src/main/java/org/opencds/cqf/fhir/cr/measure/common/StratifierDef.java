@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 public class StratifierDef {
@@ -24,7 +22,7 @@ public class StratifierDef {
     private final List<StratumDef> stratum = new ArrayList<>();
 
     @Nullable
-    private Map<String, CriteriaResult> results;
+    private Map<String, CqlExpressionValue> results;
 
     public StratifierDef(String id, ConceptDef code, String expression, MeasureStratifierType stratifierType) {
         this(id, code, expression, stratifierType, Collections.emptyList());
@@ -75,12 +73,14 @@ public class StratifierDef {
         return this.components;
     }
 
-    public void putResult(String subject, Value value, Set<Value> evaluatedResources) {
+    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
         this.getResults()
-                .put(subject, new CriteriaResult(value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
+                .put(
+                        subject,
+                        CqlExpressionValue.ofRaw(value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
     }
 
-    public Map<String, CriteriaResult> getResults() {
+    public Map<String, CqlExpressionValue> getResults() {
         if (this.results == null) {
             this.results = new HashMap<>();
         }
@@ -89,27 +89,14 @@ public class StratifierDef {
     }
 
     // Ensure we handle FHIR resource identity properly
-    public Set<Value> getAllCriteriaResultValues() {
+    public Set<Object> getAllCriteriaResultValues() {
         return new HashSetForFhirResourcesAndCqlTypes<>(this.getResults().values().stream()
-                .map(CriteriaResult::rawValue)
-                .map(this::toSet)
+                .map(CqlExpressionValue::valueAsSet)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet()));
     }
 
     public MeasureStratifierType getStratifierType() {
         return stratifierType;
-    }
-
-    private Set<Value> toSet(Value value) {
-        if (value == null) {
-            return Set.of();
-        }
-
-        if (value instanceof org.opencds.cqf.cql.engine.runtime.List iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
-        } else {
-            return Set.of(value);
-        }
     }
 }

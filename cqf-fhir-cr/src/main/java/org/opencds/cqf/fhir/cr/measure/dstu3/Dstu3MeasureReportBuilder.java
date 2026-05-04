@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
-
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,13 +29,13 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.engine.runtime.Value;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
@@ -204,8 +202,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // equals
         // the StratumValueWrapper does it for them.
         Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(
-                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
+                .collect(Collectors.groupingBy(x -> {
+                    var wrapper = subjectValues.get(x);
+                    return new StratumValueWrapper(wrapper == null ? null : wrapper.raw());
+                }));
 
         for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(
@@ -327,7 +327,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    protected void buildMeasureObservations(String observationName, Collection<Value> resources) {
+    protected void buildMeasureObservations(String observationName, Collection<CqlExpressionValue> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation =
@@ -356,10 +356,11 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Value> evaluatedResources) {
+    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Object> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
-            for (var object : evaluatedResources) {
-                var resourceId = getId((ClassInstance) object);
+            for (Object object : evaluatedResources) {
+                Resource resource = (Resource) object;
+                String resourceId = resource.getId();
                 Reference reference = this.getEvaluatedResourceReference(resourceId);
                 Extension ext = createStringExtension(
                         MeasureConstants.EXT_DAVINCI_POPULATION_REFERENCE, measurePopulationType.toCode());

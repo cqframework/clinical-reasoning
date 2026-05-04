@@ -7,10 +7,8 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import org.opencds.cqf.cql.engine.runtime.Tuple;
-import org.opencds.cqf.cql.engine.runtime.Value;
+import java.util.Optional;
 
 /**
  * Pure mathematical functions for measure scoring calculations.
@@ -229,10 +227,11 @@ public class MeasureScoreCalculator {
     }
 
     /**
-     * Collect QuantityDef objects from nested Map structures in resources.
+     * Collect QuantityDef objects from observation-accumulator wrappers.
      *
-     * <p>Helper for continuous variable scoring. Extracts QuantityDef values from
-     * resources that contain {@code Map<?, ?>} structures with QuantityDef values.
+     * <p>Helper for continuous variable scoring. Each {@link CqlExpressionValue} that
+     * wraps a {@code Map<inputResource, outputValue>} accumulator contributes its
+     * QuantityDef-typed values; non-Map and non-QuantityDef entries are filtered out.
      *
      * <p><strong>Usage Pattern:</strong>
      * <pre>
@@ -244,21 +243,17 @@ public class MeasureScoreCalculator {
      *     quantities, ContinuousVariableObservationAggregateMethod.SUM);
      * </pre>
      *
-     * @param resources Collection of objects that may contain Maps with QuantityDef values
+     * @param resources Collection of CqlExpressionValue wrappers that may contain
+     *     observation-accumulator Maps with QuantityDef values
      * @return List of QuantityDef objects found
      */
-    public static List<QuantityDef> collectQuantities(Collection<Value> resources) {
-        var mapValues = resources.stream()
-                .filter(x -> x instanceof Tuple)
-                .map(x -> (Tuple) x)
-                .map(Tuple::getElements)
-                .map(Map::values)
-                .flatMap(Collection::stream)
-                .toList();
-
-        return mapValues.stream()
-                .filter(QuantityDef.class::isInstance)
-                .map(QuantityDef.class::cast)
+    public static List<QuantityDef> collectQuantities(Collection<CqlExpressionValue> resources) {
+        return resources.stream()
+                .map(CqlExpressionValue::asObservationAccumulator)
+                .flatMap(Optional::stream)
+                .flatMap(acc -> acc.entries().stream())
+                .map(ObservationEntry::observation)
+                .filter(Objects::nonNull)
                 .toList();
     }
 

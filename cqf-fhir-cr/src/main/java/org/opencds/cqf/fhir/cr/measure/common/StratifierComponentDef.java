@@ -3,14 +3,13 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class StratifierComponentDef {
     private final String id;
     private final ConceptDef code;
     private final String expression;
 
-    private Map<String, CriteriaResult> results;
+    private Map<String, CqlExpressionValue> results;
 
     public StratifierComponentDef(String id, ConceptDef code, String expression) {
         this.id = id;
@@ -30,11 +29,11 @@ public class StratifierComponentDef {
         return this.code;
     }
 
-    public void putResult(String subject, Value value, Set<Value> evaluatedResources) {
-        this.getResults().put(subject, new CriteriaResult(value, evaluatedResources));
+    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
+        this.getResults().put(subject, CqlExpressionValue.ofRaw(value, evaluatedResources));
     }
 
-    public Map<String, CriteriaResult> getResults() {
+    public Map<String, CqlExpressionValue> getResults() {
         if (this.results == null) {
             this.results = new HashMap<>();
         }

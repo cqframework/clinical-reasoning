@@ -18,6 +18,9 @@ import org.opencds.cqf.cql.engine.runtime.Value;
  * <p/>
  * This class exists strictly to compensate for the fact that FHIR resource classes and CQL types
  * do not implement equals() and hashCode().
+ *
+ * <p/>For a wrapper-aware sister type used by {@code PopulationDef.subjectResources}, see
+ * {@link HashSetForCqlExpressionValues}.
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
  *           or a {@link Value}
  */

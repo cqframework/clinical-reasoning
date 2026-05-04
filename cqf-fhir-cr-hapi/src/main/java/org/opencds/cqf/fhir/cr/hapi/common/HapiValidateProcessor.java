@@ -11,11 +11,9 @@ import org.opencds.cqf.fhir.cr.hapi.config.FhirValidatorRegistry;
 
 public class HapiValidateProcessor implements IValidateProcessor {
 
-    private final FhirContext fhirContext;
     private final FhirValidator fhirValidator;
 
     public HapiValidateProcessor(FhirContext fhirContext, FhirValidatorRegistry fhirValidatorRegistry) {
-        this.fhirContext = fhirContext;
         this.fhirValidator =
                 fhirValidatorRegistry.getValidator(fhirContext.getVersion().getVersion());
     }

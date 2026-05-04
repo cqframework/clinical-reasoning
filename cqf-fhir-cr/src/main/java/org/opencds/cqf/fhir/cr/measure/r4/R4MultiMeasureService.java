@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureLookupException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
@@ -227,6 +228,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             String productLine,
             String reporter,
             @Nullable String practitioner) {
+
+        if (measureRefs == null || measureRefs.isEmpty()) {
+            throw new MeasureLookupException(
+                    "At least one of measureId, measureIdentifier, or measureUrl must be supplied");
+        }
 
         measurePeriodValidator.validatePeriodStartAndEnd(periodStart, periodEnd);
 

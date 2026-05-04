@@ -1,6 +1,6 @@
 [versions]
 hapi = "8.8.1"
-cql = "4.8.0-engine-structured-types-162aee1d9-SNAPSHOT"
+cql = "4.8.0-v5-a75935e58-SNAPSHOT"
 junit = "5.14.3"
 slf4j = "2.0.17"
 spring-boot = "3.4.11"

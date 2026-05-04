@@ -165,6 +165,14 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
 
             gatherDependenciesWithClassification(adapter, new ArrayList<>(), relatedArtifacts, ctx);
 
+            // Surface key bindings the dependency walk missed. Some bindings (e.g., on
+            // sliced elements whose binding lives on a complex element type) aren't
+            // reachable through differential + baseDefinition walking, but the snapshot-based
+            // KeyElementAnalyzer correctly identifies them. Promote each transitiveKeyCanonical
+            // not already in relatedArtifacts to a synthetic depends-on entry with role=key,
+            // matching what the IG-publisher's Key Elements Table would show.
+            synthesizeMissingKeyDependencies(relatedArtifacts, transitiveKeyCanonicals, conformanceResolver);
+
             // Add root IG as a composed-of entry
             if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide
                     || adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide) {
@@ -421,6 +429,53 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
                 extensionList.add(ExtensionBuilders.buildReferenceSourceExt(
                         fhirVersion(), dependency.getReferenceSource(), path));
             }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends ICompositeType & IBaseHasExtensions> void synthesizeMissingKeyDependencies(
+            List<T> relatedArtifacts,
+            Set<String> transitiveKeyCanonicals,
+            ConformanceResourceResolver conformanceResolver) {
+        if (transitiveKeyCanonicals == null || transitiveKeyCanonicals.isEmpty()) {
+            return;
+        }
+
+        var existingUrls = relatedArtifacts.stream()
+                .map(IKnowledgeArtifactAdapter::getRelatedArtifactReference)
+                .filter(StringUtils::isNotBlank)
+                .map(Canonicals::getUrl)
+                .collect(Collectors.toSet());
+
+        for (var keyCanonical : transitiveKeyCanonicals) {
+            var url = Canonicals.getUrl(keyCanonical);
+            if (url == null || existingUrls.contains(url)) {
+                continue;
+            }
+
+            var indexedVersion = conformanceResolver != null ? conformanceResolver.getVersion(url) : null;
+            var enrichedRef = indexedVersion != null ? url + "|" + indexedVersion : url;
+
+            var newDep = (T) IKnowledgeArtifactAdapter.newRelatedArtifact(
+                    fhirVersion(), Constants.RELATEDARTIFACT_TYPE_DEPENDSON, enrichedRef, null);
+
+            var extensionList = (List<IBaseExtension<?, ?>>) newDep.getExtension();
+            extensionList.add(ExtensionBuilders.buildDependencyRoleExt(fhirVersion(), "key"));
+
+            if (conformanceResolver != null) {
+                var resourceType = conformanceResolver.getResourceType(url);
+                if (resourceType != null) {
+                    addResourceTypeExtension(resourceType, newDep);
+                }
+                var pkgInfo = conformanceResolver.getPackageInfo(url);
+                if (pkgInfo != null) {
+                    extensionList.add(ExtensionBuilders.buildComplexPackageSourceExt(
+                            fhirVersion(), pkgInfo.packageId(), pkgInfo.version(), pkgInfo.canonical()));
+                }
+            }
+
+            relatedArtifacts.add(newDep);
+            existingUrls.add(url);
         }
     }
 

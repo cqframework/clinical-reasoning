@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**

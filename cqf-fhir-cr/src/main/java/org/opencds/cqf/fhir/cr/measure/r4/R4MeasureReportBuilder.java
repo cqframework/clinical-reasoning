@@ -42,7 +42,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Value;
-import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;

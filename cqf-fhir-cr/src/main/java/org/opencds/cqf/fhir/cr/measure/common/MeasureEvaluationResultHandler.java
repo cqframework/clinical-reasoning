@@ -187,13 +187,8 @@ public class MeasureEvaluationResultHandler {
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
                     // function evaluation
-                    final var functionEvaluationResults =
-                            FunctionEvaluationHandler.cqlFunctionEvaluation(
-                                    context,
-                                    measureDefs,
-                                    libraryVersionedIdentifier,
-                                    evaluationResult,
-                                    subjectTypePart);
+                    final var functionEvaluationResults = FunctionEvaluationHandler.cqlFunctionEvaluation(
+                            context, measureDefs, libraryVersionedIdentifier, evaluationResult, subjectTypePart);
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, functionEvaluationResults);
 

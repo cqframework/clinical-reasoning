@@ -103,7 +103,9 @@ public final class CqlExpressionValue {
     }
 
     public Optional<Boolean> asBoolean() {
-        return raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean b ? Optional.of(b.getValue()) : Optional.empty();
+        return raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean b
+                ? Optional.of(b.getValue())
+                : Optional.empty();
     }
 
     /**

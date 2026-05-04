@@ -668,7 +668,7 @@ public class FunctionEvaluationHandler {
     private static boolean isExpressionFunctionRef(
             CqlEngine cqlEngine, VersionedIdentifier libraryIdentifier, String expressionName) {
         if (expressionName == null || expressionName.isBlank()) {
-            throw new InvalidRequestException("Expresion name is null or blank");
+            throw new InvalidRequestException("Expression name is null or blank");
         }
 
         return isExpressionFunctionRef(resolveExpressionRef(cqlEngine, libraryIdentifier, expressionName));

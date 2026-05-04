@@ -26,8 +26,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
+import org.opencds.cqf.cql.engine.runtime.String;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 class CqlExpressionValueTest {
+    static final FhirModelResolver modelResolver = new R4FhirModelResolver();
 
     @Test
     void of_nullExpressionResult_returnsEmpty() {
@@ -41,9 +46,8 @@ class CqlExpressionValueTest {
 
     @Test
     void of_expressionResult_propagatesValueAndResources() {
-        Patient patient = new Patient();
-        patient.setId("p1");
-        Set<Object> resources = new HashSet<>(List.of(patient));
+        var patient = modelResolver.toCqlValue(new Patient().setId("p1"), false);
+        Set<Value> resources = new HashSet<>(List.of(patient));
         ExpressionResult result = new ExpressionResult(patient, resources);
 
         CqlExpressionValue wrapper = CqlExpressionValue.of(result);
@@ -54,7 +58,7 @@ class CqlExpressionValueTest {
 
     @Test
     void of_expressionResultWithNullResources_substitutesEmptySet() {
-        ExpressionResult result = new ExpressionResult("v", null);
+        ExpressionResult result = new ExpressionResult(new String("v"), null);
 
         CqlExpressionValue wrapper = CqlExpressionValue.of(result);
 
@@ -194,7 +198,8 @@ class CqlExpressionValueTest {
     @Test
     void resolveForPopulation_falseReturnsEmpty() {
         EvaluationResult evaluationResult = new EvaluationResult();
-        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), Set.of()));
+        var patient = modelResolver.toCqlValue(new Patient(), false);
+        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Set.of()));
 
         Iterable<Object> result =
                 CqlExpressionValue.ofRaw(false, null).resolveForPopulation("Patient", evaluationResult);
@@ -204,8 +209,7 @@ class CqlExpressionValueTest {
 
     @Test
     void resolveForPopulation_trueLooksUpSubjectContextValue() {
-        Patient patient = new Patient();
-        patient.setId("p1");
+        var patient = modelResolver.toCqlValue(new Patient().setId("p1"), false);
         EvaluationResult evaluationResult = new EvaluationResult();
         evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Set.of()));
 
@@ -459,7 +463,7 @@ class CqlExpressionValueTest {
 
     @Test
     void evaluatedResources_returnsTheBackingSet() {
-        Set<Object> resources = new HashSet<>(List.of("r1", "r2"));
+        Set<Value> resources = new HashSet<>(List.of(new String("r1"), new String("r2")));
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw("v", resources);
 
         assertSame(resources, wrapper.evaluatedResources());

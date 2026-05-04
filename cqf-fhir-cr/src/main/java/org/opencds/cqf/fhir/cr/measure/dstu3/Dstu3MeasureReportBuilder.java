@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,7 +31,6 @@ import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
@@ -52,8 +53,6 @@ import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 
 public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, MeasureReport, DomainResource> {
 

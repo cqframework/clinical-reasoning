@@ -1,12 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class SdeDef {
 

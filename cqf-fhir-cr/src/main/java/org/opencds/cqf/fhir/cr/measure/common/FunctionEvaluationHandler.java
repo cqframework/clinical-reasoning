@@ -24,6 +24,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,7 +275,7 @@ public class FunctionEvaluationHandler {
         // FhirResourceAndCqlTypeUtils.areObjectsEqual where needed; nothing in the downstream pipeline
         // does random-access lookup by input, so a List is sufficient and self-documenting.
         final List<ObservationEntry> functionResults = new ArrayList<>();
-        final Set<Object> evaluatedResources = new HashSet<>();
+        final Set<Value> evaluatedResources = new HashSet<>();
 
         final String exceptionMessageIfNotFunction = """
             Measure: '%s', MeasureObservation population expression '%s' must be a CQL function
@@ -407,7 +408,7 @@ public class FunctionEvaluationHandler {
             // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
             var expressionName = popDef.id() + "-" + stratifierExpression;
             final List<FunctionResultEntry> functionResults = new ArrayList<>();
-            final Set<Object> evaluatedResources = new HashSet<>();
+            final Set<Value> evaluatedResources = new HashSet<>();
 
             for (Object result : resultsIter) {
                 final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
@@ -420,7 +421,7 @@ public class FunctionEvaluationHandler {
                 // heterogeneous CQL value the function returned. Iteration order is the order
                 // populationDef results were iterated.
                 functionResults.add(new FunctionResultEntry(result, functionResult.getValue()));
-                Set<Object> evaluated = functionResult.getEvaluatedResources();
+                var evaluated = functionResult.getEvaluatedResources();
                 if (evaluated == null) {
                     throw new IllegalStateException("CQL function '" + stratifierExpression
                             + "' returned null evaluatedResources for measure: " + measureUrl);
@@ -474,7 +475,7 @@ public class FunctionEvaluationHandler {
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
             boolean isBooleanBasis,
-            List<Object> functionArguments,
+            List<Value> functionArguments,
             String exceptionMessageIfNotFunction) {
 
         if (!(resolveExpressionRef(cqlEngine, libraryIdentifier, functionExpression)
@@ -506,7 +507,7 @@ public class FunctionEvaluationHandler {
             CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            List<Object> functionArguments,
+            List<Value> functionArguments,
             String exceptionMessageIfNotFunction) {
 
         return executeCqlFunction(
@@ -517,7 +518,7 @@ public class FunctionEvaluationHandler {
             CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            List<Object> functionArguments,
+            List<Value> functionArguments,
             String exceptionMessageIfNotFunction) {
 
         try {
@@ -547,7 +548,7 @@ public class FunctionEvaluationHandler {
             CqlEngine engine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            List<Object> functionArguments) {
+            List<Value> functionArguments) {
 
         final EvaluationFunctionRef evaluationFunctionRef =
                 buildEvaluationFunctionRef(functionExpression, functionArguments);
@@ -564,7 +565,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static EvaluationFunctionRef buildEvaluationFunctionRef(
-            String criteriaExpression, List<?> functionArguments) {
+            String criteriaExpression, List<Value> functionArguments) {
         return new EvaluationFunctionRef(criteriaExpression, null, functionArguments);
     }
 
@@ -596,11 +597,14 @@ public class FunctionEvaluationHandler {
         return CqlExpressionValue.of(expressionResult).resolveForPopulation(subjectTypePart, evaluationResult);
     }
 
-    private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {
-        return groupDef.isBooleanBasis() ? List.of() : List.of(result);
+    private static List<Value> getFunctionArguments(GroupDef groupDef, Object result) {
+        // CQL arguments must be a valid CQL Value
+        // TODO: Handle transformation
+        var value = (Value) result;
+        return groupDef.isBooleanBasis() ? List.of() : List.of(value);
     }
 
-    private static void validateObservationResult(List<Object> functionArguments, Object observationResult) {
+    private static void validateObservationResult(List<Value> functionArguments, Object observationResult) {
         if (!(observationResult instanceof String
                 || observationResult instanceof Integer
                 || observationResult instanceof Double)) {
@@ -644,7 +648,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static EvaluationResult buildEvaluationResult(
-            String expressionName, Object functionResults, Set<Object> evaluatedResources) {
+            String expressionName, Object functionResults, Set<Value> evaluatedResources) {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
@@ -655,7 +659,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static void addToEvaluationResult(
-            EvaluationResult result, String expressionName, Object functionResults, Set<Object> evaluatedResources) {
+            EvaluationResult result, String expressionName, Object functionResults, Set<Value> evaluatedResources) {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));

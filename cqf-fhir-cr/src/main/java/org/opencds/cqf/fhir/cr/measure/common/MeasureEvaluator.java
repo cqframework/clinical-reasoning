@@ -23,6 +23,7 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,7 @@ public class MeasureEvaluator {
             String subjectType,
             ExpressionResult expressionResult,
             EvaluationResult evaluationResult,
-            Set<Object> outEvaluatedResources) {
+            Set<Value> outEvaluatedResources) {
 
         var wrapper = CqlExpressionValue.of(expressionResult);
         outEvaluatedResources.addAll(wrapper.evaluatedResources());
@@ -641,13 +642,7 @@ public class MeasureEvaluator {
             if (expressionResult == null) {
                 throw new ExpressionResultNotFoundException("SDE", sde.expression());
             }
-            Object result = expressionResult.getValue();
-            // TODO: This is a hack-around for an cql engine bug. Need to investigate.
-            if ((result instanceof List<?> list) && (list.size() == 1) && list.get(0) == null) {
-                result = null;
-            }
-
-            sde.putResult(subjectId, result, expressionResult.getEvaluatedResources());
+            sde.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
         }
     }
 

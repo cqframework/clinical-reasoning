@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 public class StratifierDef {
@@ -73,7 +74,7 @@ public class StratifierDef {
         return this.components;
     }
 
-    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
+    public void putResult(String subject, Object value, Set<Value> evaluatedResources) {
         this.getResults()
                 .put(
                         subject,

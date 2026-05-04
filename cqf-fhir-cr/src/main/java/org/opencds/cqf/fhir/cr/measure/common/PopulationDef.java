@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class PopulationDef {
     @Nullable
     private Double aggregationResult;
 
-    protected Set<Object> evaluatedResources;
+    protected Set<Value> evaluatedResources;
 
     /**
      * Per-subject results from CQL evaluation, stored as wrappers so the FHIR-identity / CQL-type
@@ -104,7 +105,7 @@ public class PopulationDef {
         return populationType == this.measurePopulationType;
     }
 
-    public Set<Object> getEvaluatedResources() {
+    public Set<Value> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
             this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
         }

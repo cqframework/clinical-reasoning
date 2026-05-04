@@ -25,7 +25,7 @@ public class StratumPopulationDef {
      * (ex: [Patient/pat1, Patient/pat2] or [pat1, pat2]
      */
     private final Set<String> subjectsQualifiedOrUnqualified;
-    private final Set<Value> populationDefEvaluationResultIntersection;
+    private final Set<Object> populationDefEvaluationResultIntersection;
     private final List<String> resourceIdsForSubjectList;
     private final MeasureStratifierType measureStratifierType;
     private final CodeDef populationBasis;
@@ -36,7 +36,7 @@ public class StratumPopulationDef {
     public StratumPopulationDef(
             PopulationDef populationDef,
             Set<String> subjectsQualifiedOrUnqualified,
-            Set<Value> populationDefEvaluationResultIntersection,
+            Set<Object> populationDefEvaluationResultIntersection,
             List<String> resourceIdsForSubjectList,
             MeasureStratifierType measureStratifierType,
             CodeDef populationBasis) {
@@ -57,7 +57,7 @@ public class StratumPopulationDef {
         return subjectsQualifiedOrUnqualified;
     }
 
-    public Set<Value> populationDefEvaluationResultIntersection() {
+    public Set<Object> populationDefEvaluationResultIntersection() {
         return populationDefEvaluationResultIntersection;
     }
 

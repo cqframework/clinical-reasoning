@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
  * Utility class for formatting EvaluationResult objects into human-readable strings.
@@ -275,7 +276,7 @@ public class EvaluationResultFormatter {
         return subjectId + ": " + toString;
     }
 
-    public static String printValues(Collection<Object> values) {
+    public static String printValues(Collection<Value> values) {
 
         if (values == null || values.isEmpty()) {
             return "{empty}";

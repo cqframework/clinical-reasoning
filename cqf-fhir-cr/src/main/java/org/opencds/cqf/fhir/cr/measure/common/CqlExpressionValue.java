@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.StreamSupport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
  * Wrapper around the raw {@code Object} returned by
@@ -28,9 +29,9 @@ public final class CqlExpressionValue {
     private static final CqlExpressionValue EMPTY = new CqlExpressionValue(null, Collections.emptySet());
 
     private final @Nullable Object raw;
-    private final Set<Object> evaluatedResources;
+    private final Set<Value> evaluatedResources;
 
-    private CqlExpressionValue(@Nullable Object raw, Set<Object> evaluatedResources) {
+    private CqlExpressionValue(@Nullable Object raw, Set<Value> evaluatedResources) {
         this.raw = raw;
         this.evaluatedResources = evaluatedResources;
     }
@@ -42,7 +43,7 @@ public final class CqlExpressionValue {
         if (result == null) {
             return EMPTY;
         }
-        Set<Object> resources = result.getEvaluatedResources();
+        var resources = result.getEvaluatedResources();
         return new CqlExpressionValue(result.getValue(), resources != null ? resources : Collections.emptySet());
     }
 
@@ -50,7 +51,7 @@ public final class CqlExpressionValue {
      * Wraps a raw value plus its evaluated-resource set directly. Useful for tests and
      * for callers that already hold the underlying value.
      */
-    public static CqlExpressionValue ofRaw(@Nullable Object value, @Nullable Set<Object> evaluatedResources) {
+    public static CqlExpressionValue ofRaw(@Nullable Object value, @Nullable Set<Value> evaluatedResources) {
         return new CqlExpressionValue(value, evaluatedResources != null ? evaluatedResources : Collections.emptySet());
     }
 
@@ -66,11 +67,11 @@ public final class CqlExpressionValue {
     }
 
     public boolean isBoolean() {
-        return raw instanceof Boolean;
+        return raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean;
     }
 
     public boolean isTrue() {
-        return Boolean.TRUE.equals(raw);
+        return raw != null && ((org.opencds.cqf.cql.engine.runtime.Boolean) raw).getValue();
     }
 
     public boolean isIterable() {
@@ -95,14 +96,14 @@ public final class CqlExpressionValue {
         if (raw instanceof Map<?, ?> map) {
             return map.isEmpty();
         }
-        if (raw instanceof Iterable<?> iterable) {
-            return !iterable.iterator().hasNext();
+        if (raw instanceof org.opencds.cqf.cql.engine.runtime.List list) {
+            return !list.iterator().hasNext();
         }
         return false;
     }
 
     public Optional<Boolean> asBoolean() {
-        return raw instanceof Boolean b ? Optional.of(b) : Optional.empty();
+        return raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean b ? Optional.of(b.getValue()) : Optional.empty();
     }
 
     /**
@@ -187,8 +188,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return Collections.emptyList();
         }
-        if (raw instanceof Boolean aBoolean) {
-            if (Boolean.FALSE.equals(aBoolean)) {
+        if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean bool) {
+            if (bool.getValue()) {
                 return Collections.emptyList();
             }
             ExpressionResult subjectResult = evaluationResult.get(subjectType);
@@ -206,13 +207,13 @@ public final class CqlExpressionValue {
      * identity semantics: scalars are wrapped in a single-element set, iterables are flattened
      * into the set, and a null value yields an empty set.
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     public Set<Object> valueAsSet() {
         if (raw == null) {
             return new HashSetForFhirResourcesAndCqlTypes<>();
         }
         if (raw instanceof Iterable<?>) {
-            return new HashSetForFhirResourcesAndCqlTypes<>((Iterable) raw);
+            return new HashSetForFhirResourcesAndCqlTypes<>((Iterable<Object>) raw);
         }
         return new HashSetForFhirResourcesAndCqlTypes<>(raw);
     }
@@ -234,7 +235,7 @@ public final class CqlExpressionValue {
         return List.of(raw);
     }
 
-    public Set<Object> evaluatedResources() {
+    public Set<Value> evaluatedResources() {
         return evaluatedResources;
     }
 

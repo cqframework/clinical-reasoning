@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
@@ -38,7 +39,10 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
@@ -307,14 +311,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addEvaluatedResourceReferences(
-            R4MeasureReportBuilderContext bc, String criteriaId, Set<Object> evaluatedResources) {
+            R4MeasureReportBuilderContext bc, String criteriaId, Set<Value> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }
 
-        for (Object object : evaluatedResources) {
-            Resource resource = (Resource) object;
-            bc.addCriteriaExtensionToEvaluatedResource(resource, criteriaId);
+        for (var resource : evaluatedResources) {
+            if (resource instanceof ClassInstance classInstance) {
+                bc.addCriteriaExtensionToEvaluatedResource(getId(classInstance), criteriaId);
+            }
         }
     }
 

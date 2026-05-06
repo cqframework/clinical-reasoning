@@ -32,6 +32,8 @@ public class StratifierUtils {
         if (!value.isIterable()) {
             if (raw instanceof ClassInstance classInstance) {
                 return List.of(ClassInstanceHelper.getClassName(classInstance));
+            } else if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean ) {
+                return List.of(org.opencds.cqf.cql.engine.runtime.Boolean.class.getName());
             }
             return Collections.emptyList();
         }

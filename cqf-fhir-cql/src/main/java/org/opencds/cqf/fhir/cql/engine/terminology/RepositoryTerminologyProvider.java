@@ -103,7 +103,7 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
             var distinctSystems = codes.stream().map(Code::getSystem).distinct().count();
             if (distinctSystems > 1) {
                 throw new IllegalArgumentException(
-                        "The 'in' operation is ambiguous because the the code system is not provided and the resolved value set contains codes from multiple code systems");
+                        "The 'in' operation is ambiguous because the code system is not provided and the resolved value set contains codes from multiple code systems");
             }
         }
 

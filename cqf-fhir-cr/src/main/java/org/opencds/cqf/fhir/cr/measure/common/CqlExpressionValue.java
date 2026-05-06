@@ -151,7 +151,7 @@ public final class CqlExpressionValue {
      * {@link #asIterable()} path doesn't unroll it into individual entries.
      */
     public Optional<FunctionResultAccumulator> asFunctionResultAccumulator() {
-        return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
+         return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
     }
 
     /**
@@ -204,7 +204,7 @@ public final class CqlExpressionValue {
             return Collections.emptyList();
         }
         if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean bool) {
-            if (! bool.getValue()) {
+            if (!bool.getValue()) {
                 return Collections.emptyList();
             }
             var subjectResult = evaluationResult.get(subjectType);

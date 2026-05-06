@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -548,11 +550,7 @@ public class MeasureReportDefScorer {
                     .map(CqlExpressionValue::asObservationAccumulator)
                     .flatMap(Optional::stream)
                     .map(acc -> acc.entries().stream()
-                            .filter(entry -> entry.inputResource() instanceof IBaseResource baseResource
-                                    && stratumResourceIds.contains(baseResource
-                                            .getIdElement()
-                                            .toVersionless()
-                                            .getValue()))
+                            .filter(entry -> containsResourceIds(entry, stratumResourceIds))
                             .toList())
                     .filter(entries -> !entries.isEmpty())
                     // TODO: use populationDef.expression() here?
@@ -574,6 +572,20 @@ public class MeasureReportDefScorer {
                     return false;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static boolean containsResourceIds(ObservationEntry entry, Set<String> stratumResourceIds) {
+        final Object inputResource = entry.inputResource();
+        if (inputResource instanceof ClassInstance classInstance) {
+            final Object fhirResourceFromClassInstance = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
+            return fhirResourceFromClassInstance instanceof IBaseResource baseResource
+                && stratumResourceIds.contains(baseResource
+                .getIdElement()
+                .toVersionless()
+                .getValue());
+
+        }
+        return false;
     }
 
     /**

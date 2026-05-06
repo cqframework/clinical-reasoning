@@ -17,6 +17,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
@@ -653,13 +655,19 @@ public class MeasureMultiSubjectEvaluator {
      * Normalize a resource to its ID string for use as a row key component.
      */
     private static String normalizeResourceKey(Object obj) {
-        if (obj instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return resource.getIdElement().toVersionless().getValue();
+        if (obj instanceof ClassInstance classInstance) {
+            final Object convertedToFhir = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
+            if (convertedToFhir instanceof IBaseResource resource
+                    && resource.getIdElement() != null
+                    && !resource.getIdElement().isEmpty()) {
+
+                return resource.getIdElement().toVersionless().getValue();
+            }
         }
+
         return String.valueOf(obj);
     }
+
     /**
      * Groups stratifier results into strata by the full set of component values.
      *
@@ -999,12 +1007,15 @@ public class MeasureMultiSubjectEvaluator {
         if (obj == null) {
             return null;
         }
-        if (obj instanceof IBaseResource resource) {
-            if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
-                return resource.getIdElement().toVersionless().getValueAsString();
+        if (obj instanceof ClassInstance classInstance) {
+            final Object fhirFromClassInstance = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
+            if (fhirFromClassInstance instanceof IBaseResource resource) {
+                if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
+                    return resource.getIdElement().toVersionless().getValueAsString();
+                }
+                // If the resource is present but has no id, fall back to toString for best-effort logging/debug.
+                return resource.toString();
             }
-            // If the resource is present but has no id, fall back to toString for best-effort logging/debug.
-            return resource.toString();
         }
         return String.valueOf(obj);
     }

@@ -1,13 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,7 @@ public interface PopulationBasisValidator {
      * <p/>
      * Default returns an empty set. Implementations that enable validation must override this.
      */
-    default Set<Class<?>> allowedStratifierValueTypes() {
+    default Set<String> allowedStratifierValueTypes() {
         return Set.of();
     }
 
@@ -45,9 +43,9 @@ public interface PopulationBasisValidator {
      * for version-specific resource type resolution. Returns {@link Optional#empty()} if the code
      * does not map to a known type (e.g. for primitive types like "string").
      */
-    default Optional<Class<?>> extractResourceType(String groupPopulationBasisCode) {
+    default Optional<String> extractResourceType(String groupPopulationBasisCode) {
         if (BOOLEAN_BASIS.equals(groupPopulationBasisCode)) {
-            return Optional.of(Boolean.class);
+            return Optional.of(org.opencds.cqf.cql.engine.runtime.Boolean.class.getName());
         }
         return extractFhirResourceType(groupPopulationBasisCode);
     }
@@ -58,7 +56,7 @@ public interface PopulationBasisValidator {
      * <p/>
      * Default returns empty. Implementations must override this to enable resource type validation.
      */
-    default Optional<Class<?>> extractFhirResourceType(String groupPopulationBasisCode) {
+    default Optional<String> extractFhirResourceType(String groupPopulationBasisCode) {
         return Optional.empty();
     }
 
@@ -74,38 +72,30 @@ public interface PopulationBasisValidator {
      * @param resourceTypeNames the valid resource type names for the FHIR version (e.g. from ResourceType enum)
      * @param fhirModelPackage the FHIR model package prefix (e.g. "org.hl7.fhir.r4.model.")
      */
-    default Optional<Class<?>> resolveResourceType(
+    default Optional<String> resolveResourceType(
             String groupPopulationBasisCode, Collection<String> resourceTypeNames, String fhirModelPackage) {
 
-        final Optional<String> optResourceClassName = resourceTypeNames.stream()
+        return resourceTypeNames.stream()
                 .filter(theName -> theName.equals(groupPopulationBasisCode))
                 .map(typeName -> fhirModelPackage + typeName)
                 .findFirst();
-
-        if (optResourceClassName.isPresent()) {
-            try {
-                return Optional.of(Class.forName(optResourceClassName.get()));
-            } catch (ClassNotFoundException exception) {
-                throw new InternalErrorException(exception);
-            }
-        }
-        return Optional.empty();
     }
 
-    default void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
+    default void validateGroupPopulations(
+            MeasureDef measureDef, GroupDef groupDef, CqlEvaluationResult evaluationResult) {
         groupDef.populations()
                 .forEach(population ->
                         validateGroupPopulationBasisType(measureDef.url(), groupDef, population, evaluationResult));
     }
 
-    default void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
+    default void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, CqlEvaluationResult evaluationResult) {
         groupDef.stratifiers()
                 .forEach(stratifier -> validateStratifierPopulationBasisType(
                         measureDef.url(), groupDef, stratifier, evaluationResult));
     }
 
     private void validateGroupPopulationBasisType(
-            String url, GroupDef groupDef, PopulationDef populationDef, EvaluationResult evaluationResult) {
+            String url, GroupDef groupDef, PopulationDef populationDef, CqlEvaluationResult evaluationResult) {
 
         var scoring = groupDef.measureScoring();
         var populationExpression = populationDef.expression();
@@ -113,9 +103,9 @@ public interface PopulationBasisValidator {
             return;
         }
 
-        var wrapper = CqlExpressionValue.of(evaluationResult.get(populationExpression));
+        var wrapper = evaluationResult.get(populationExpression);
 
-        if (wrapper.isNull()) {
+        if (wrapper == null || wrapper.isNull()) {
             return;
         }
 
@@ -126,7 +116,7 @@ public interface PopulationBasisValidator {
         if (optResourceClass.isPresent()) {
 
             var resultMatchingClasses = resultClasses.stream()
-                    .filter(it -> optResourceClass.get().isAssignableFrom(it))
+                    .filter(it -> optResourceClass.get().equals(it))
                     .toList();
 
             if (resultMatchingClasses.size() != resultClasses.size()) {
@@ -137,14 +127,14 @@ public interface PopulationBasisValidator {
                                         scoring,
                                         groupPopulationBasisCode,
                                         url,
-                                        prettyClassNames(resultClasses),
-                                        prettyClassNames(resultMatchingClasses)));
+                                        resultClasses,
+                                        resultMatchingClasses));
             }
         }
     }
 
     private void validateStratifierPopulationBasisType(
-            String url, GroupDef groupDef, StratifierDef stratifierDef, EvaluationResult evaluationResult) {
+            String url, GroupDef groupDef, StratifierDef stratifierDef, CqlEvaluationResult evaluationResult) {
 
         if (stratifierDef.isCriteriaStratifier()) {
             validateExpressionResultType(groupDef, stratifierDef, stratifierDef.expression(), evaluationResult, url);
@@ -159,15 +149,15 @@ public interface PopulationBasisValidator {
             GroupDef groupDef,
             StratifierDef stratifierDef,
             String expression,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             String url) {
         if (StringUtils.isBlank(expression)) {
             return;
         }
 
-        var wrapper = CqlExpressionValue.of(evaluationResult.get(expression));
+        var wrapper = evaluationResult.get(expression);
 
-        if (wrapper.isNull()) {
+        if (wrapper == null || wrapper.isNull()) {
             return;
         }
 
@@ -185,7 +175,7 @@ public interface PopulationBasisValidator {
 
                 throw new InvalidRequestException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
-                                .formatted(expression, groupPopulationBasisCode, prettyClassNames(resultClasses), url));
+                                .formatted(expression, groupPopulationBasisCode, resultClasses, url));
             }
 
             // skip validation below since for criteria-based stratifier, the boolean basis test is irrelevant
@@ -193,8 +183,8 @@ public interface PopulationBasisValidator {
         }
 
         var resultMatchingClasses = resultClasses.stream()
-                .filter(resultClass ->
-                        allowedStratifierValueTypes().contains(resultClass) || Boolean.class == resultClass)
+                .filter(resultClass -> allowedStratifierValueTypes().contains(resultClass)
+                        || Boolean.class.getName().equals(resultClass))
                 .toList();
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
@@ -202,7 +192,7 @@ public interface PopulationBasisValidator {
                     .filter(c -> !resultMatchingClasses.contains(c))
                     .toList();
             throw new InvalidStratifierExpressionTypeException(buildValueStratifierErrorMessage(
-                    stratifierDef, expression, groupPopulationBasisCode, url, resultClasses, invalidTypes));
+                    stratifierDef, expression, groupPopulationBasisCode, url, invalidTypes));
         }
     }
 
@@ -211,32 +201,31 @@ public interface PopulationBasisValidator {
             String expression,
             String groupPopulationBasisCode,
             String url,
-            List<Class<?>> resultClasses,
-            List<Class<?>> invalidTypes) {
+            List<String> invalidTypes) {
 
-        var distinctInvalidTypes = prettyDistinctClassNames(invalidTypes);
+        // var distinctInvalidTypes = prettyDistinctClassNames(invalidTypes);
 
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
             return "non-subject value stratifier is invalid for expression: [%s] with result types: %s for population basis: [%s] for measure URL: %s. Expected a scalar or scalar-returning function"
-                    .formatted(expression, distinctInvalidTypes, groupPopulationBasisCode, url);
+                    .formatted(expression, invalidTypes, groupPopulationBasisCode, url);
         }
 
         return "value stratifier is invalid for expression: [%s] with result types: %s for measure URL: %s. Expected a scalar type"
-                .formatted(expression, distinctInvalidTypes, url);
+                .formatted(expression, invalidTypes, url);
     }
 
-    private boolean doesBasisMatchResource(Class<?> resultClass, String groupPopulationBasisCode) {
+    private boolean doesBasisMatchResource(String resultClass, String groupPopulationBasisCode) {
         // FHIR primitive type codes are lowercase ("boolean", "string") but Java class simple names
         // are uppercase ("Boolean", "String"). Handle these explicitly to match only the valid
         // lowercase FHIR codes and reject invalid uppercase variants like "String" or "Boolean".
-        if (resultClass == Boolean.class) {
+        if (Boolean.class.getName().equals(resultClass)) {
             return BOOLEAN_BASIS.equals(groupPopulationBasisCode);
         }
-        if (resultClass == String.class) {
+        if (String.class.getName().equals(resultClass)) {
             return STRING_BASIS.equals(groupPopulationBasisCode);
         }
 
-        return resultClass.getSimpleName().equals(groupPopulationBasisCode);
+        return resultClass.equals(groupPopulationBasisCode);
     }
 
     private List<String> prettyClassNames(List<Class<?>> classes) {

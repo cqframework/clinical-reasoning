@@ -344,7 +344,10 @@ public class CqlFhirParametersConverter {
         parameters.forEach((k, v) -> {
             var className = v.getClass().getName();
             Value value;
-            if (className.contains("org.hl7.fhir") && className.contains("Tuple")) {
+            if (v instanceof List<?> list) {
+                value = new org.opencds.cqf.cql.engine.runtime.List(
+                        list.stream().map(this::convertToCqlIfNeeded).toList());
+            } else if (className.contains("org.hl7.fhir") && className.contains("Tuple")) {
                 Map<String, Value> elements = adapterFactory.createTuple((IBase) v).getProperties().entrySet().stream()
                         .map(entry -> {
                             var listValue = ((List<?>) entry.getValue())
@@ -359,11 +362,16 @@ public class CqlFhirParametersConverter {
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 value = new Tuple().withElements(elements);
             } else {
-                value = className.contains("org.hl7.fhir") ? modelResolver.toCqlValue(v, false) : (Value) v;
+                value = convertToCqlIfNeeded(v);
             }
             parameterMap.put(k, value);
         });
         return parameterMap;
+    }
+
+    private Value convertToCqlIfNeeded(Object value) {
+        var className = value.getClass().getName();
+        return className.contains("org.hl7.fhir") ? modelResolver.toCqlValue(value, false) : (Value) value;
     }
 
     @SuppressWarnings("rawtypes")

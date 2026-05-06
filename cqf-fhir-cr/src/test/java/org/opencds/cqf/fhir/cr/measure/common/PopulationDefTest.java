@@ -25,8 +25,8 @@ class PopulationDefTest {
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
 
-        popDef1.addResource("subj1", "string1");
-        popDef2.addResource("subj1", "string1");
+        popDef1.addResource("subj1", null, "string1");
+        popDef2.addResource("subj1", null, "string1");
 
         popDef1.retainAllResources("subj1", popDef2);
         assertEquals(1, popDef1.getAllSubjectResources().size());
@@ -42,8 +42,8 @@ class PopulationDefTest {
         assertFalse(popDef1.isBooleanBasis());
         assertFalse(popDef2.isBooleanBasis());
 
-        popDef1.addResource("subj1", 123);
-        popDef2.addResource("subj1", 123);
+        popDef1.addResource("subj1", null, 123);
+        popDef2.addResource("subj1", null, 123);
 
         popDef1.retainAllResources("subj1", popDef2);
         assertEquals(1, popDef1.getAllSubjectResources().size());
@@ -62,8 +62,8 @@ class PopulationDefTest {
         final Encounter enc1a = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
         final Encounter enc1b = (Encounter) new Encounter().setId(new IdType(ResourceType.Encounter.name(), "enc1"));
 
-        popDef1.addResource("subj1", enc1a);
-        popDef2.addResource("subj1", enc1b);
+        popDef1.addResource("subj1", null, enc1a);
+        popDef2.addResource("subj1", null, enc1b);
 
         popDef1.retainAllResources("subj1", popDef2);
 
@@ -78,6 +78,7 @@ class PopulationDefTest {
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .map(CqlExpressionValue::raw)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableSet()));
     }
 
@@ -121,14 +122,15 @@ class PopulationDefTest {
      */
     @Test
     void testGetCount_BooleanBasis_CountsUniqueSubjects() {
+        var expression = "InitialPopulation";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression, booleanBasis, null);
 
         // Add 3 unique subjects
-        popDef.addResource("Patient/1", true);
-        popDef.addResource("Patient/2", true);
-        popDef.addResource("Patient/3", true);
+        popDef.addResource("Patient/1", expression, true);
+        popDef.addResource("Patient/2", expression, true);
+        popDef.addResource("Patient/3", expression, true);
 
         assertTrue(popDef.isBooleanBasis());
         assertEquals(3, popDef.getCount(), "Boolean basis should count unique subjects");
@@ -140,17 +142,18 @@ class PopulationDefTest {
      */
     @Test
     void testGetCount_EncounterBasis_CountsAllResources() {
+        var expression = "InitialPopulation";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression, encounterBasis, null);
 
         // Subject 1 has 2 encounters
-        popDef.addResource("Patient/1", new Encounter().setId("Encounter/1"));
-        popDef.addResource("Patient/1", new Encounter().setId("Encounter/2"));
+        popDef.addResource("Patient/1", expression, new Encounter().setId("Encounter/1"));
+        popDef.addResource("Patient/1", expression, new Encounter().setId("Encounter/2"));
         // Subject 2 has 3 encounters
-        popDef.addResource("Patient/2", new Encounter().setId("Encounter/3"));
-        popDef.addResource("Patient/2", new Encounter().setId("Encounter/4"));
-        popDef.addResource("Patient/2", new Encounter().setId("Encounter/5"));
+        popDef.addResource("Patient/2", expression, new Encounter().setId("Encounter/3"));
+        popDef.addResource("Patient/2", expression, new Encounter().setId("Encounter/4"));
+        popDef.addResource("Patient/2", expression, new Encounter().setId("Encounter/5"));
 
         assertFalse(popDef.isBooleanBasis());
         assertEquals(5, popDef.getCount(), "Encounter basis should count all resources");
@@ -162,15 +165,16 @@ class PopulationDefTest {
      */
     @Test
     void testGetCount_StringBasis_CountsAllResources() {
+        var expression = "Numerator";
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, expression, stringBasis, null);
 
         // Add string values for different subjects
         // Even if the same string value appears for different subjects, count all
-        popDef.addResource("Patient/1", "value1");
-        popDef.addResource("Patient/2", "value2");
-        popDef.addResource("Patient/3", "value1"); // Duplicate value but different subject
+        popDef.addResource("Patient/1", expression, "value1");
+        popDef.addResource("Patient/2", expression, "value2");
+        popDef.addResource("Patient/3", expression, "value1"); // Duplicate value but different subject
 
         assertFalse(popDef.isBooleanBasis());
         assertEquals(3, popDef.getCount(), "String basis should count all resources including duplicates");
@@ -182,14 +186,15 @@ class PopulationDefTest {
      */
     @Test
     void testGetCount_DateBasis_CountsAllResources() {
+        var expression = "Denominator";
         CodeDef dateBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "date");
         PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.DENOMINATOR, "Denominator", dateBasis, null);
+                new PopulationDef("pop-1", null, MeasurePopulationType.DENOMINATOR, expression, dateBasis, null);
 
         // Add date values for subjects
-        popDef.addResource("Patient/1", "2024-01-01");
-        popDef.addResource("Patient/2", "2024-01-02");
-        popDef.addResource("Patient/3", "2024-01-01"); // Duplicate date value
+        popDef.addResource("Patient/1", expression, "2024-01-01");
+        popDef.addResource("Patient/2", expression, "2024-01-02");
+        popDef.addResource("Patient/3", expression, "2024-01-01"); // Duplicate date value
 
         assertFalse(popDef.isBooleanBasis());
         assertEquals(3, popDef.getCount(), "Date basis should count all resources");
@@ -201,18 +206,19 @@ class PopulationDefTest {
      */
     @Test
     void testGetCount_MeasureObservation_CountsObservations() {
+        var expression = "MeasureObservation";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
-                "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, "MeasureObservation", booleanBasis, null);
+                "pop-obs", null, MeasurePopulationType.MEASUREOBSERVATION, expression, booleanBasis, null);
 
         // Add observation accumulators for subjects, one entry each
         var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("Patient/1", new QuantityDef(10.0))));
         var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("Patient/2", new QuantityDef(20.0))));
         var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("Patient/3", new QuantityDef(30.0))));
 
-        popDef.addResource("Patient/1", obs1);
-        popDef.addResource("Patient/2", obs2);
-        popDef.addResource("Patient/3", obs3);
+        popDef.addResource("Patient/1", expression, obs1);
+        popDef.addResource("Patient/2", expression, obs2);
+        popDef.addResource("Patient/3", expression, obs3);
 
         // For MEASUREOBSERVATION, getCount() should count observation entries across accumulators
         assertEquals(3, popDef.getCount(), "MEASUREOBSERVATION should count observation entries");
@@ -225,12 +231,13 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveExcludedMeasureObservationResource_BooleanBasis_RemovesEmptyMaps() {
+        var expression = "MeasureObservation";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef = new PopulationDef(
                 "pop-obs",
                 null,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "MeasureObservation",
+                expression,
                 booleanBasis,
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.SUM,
@@ -243,13 +250,13 @@ class PopulationDefTest {
 
         // Add observations for three subjects
         var obsMap1 = new ObservationAccumulator(List.of(new ObservationEntry(enc1, new QuantityDef(100.0))));
-        popDef.addResource("Patient/1", obsMap1);
+        popDef.addResource("Patient/1", expression, obsMap1);
 
         var obsMap2 = new ObservationAccumulator(List.of(new ObservationEntry(enc2, new QuantityDef(200.0))));
-        popDef.addResource("Patient/2", obsMap2);
+        popDef.addResource("Patient/2", expression, obsMap2);
 
         var obsMap3 = new ObservationAccumulator(List.of(new ObservationEntry(enc3, new QuantityDef(300.0))));
-        popDef.addResource("Patient/3", obsMap3);
+        popDef.addResource("Patient/3", expression, obsMap3);
 
         // Initial count should be 3
         assertEquals(3, popDef.getCount(), "Should have 3 observations before removal");
@@ -276,12 +283,13 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveExcludedMeasureObservationResource_EncounterBasis_PartialRemoval() {
+        var expression = "MeasureObservation";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
                 "pop-obs",
                 null,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "MeasureObservation",
+                expression,
                 encounterBasis,
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.SUM,
@@ -295,10 +303,10 @@ class PopulationDefTest {
         var obsMapSubject1 = new ObservationAccumulator(List.of(
                 new ObservationEntry(enc1, new QuantityDef(100.0)),
                 new ObservationEntry(enc2, new QuantityDef(200.0))));
-        popDef.addResource("Patient/1", obsMapSubject1);
+        popDef.addResource("Patient/1", expression, obsMapSubject1);
 
         var obsMapSubject2 = new ObservationAccumulator(List.of(new ObservationEntry(enc3, new QuantityDef(300.0))));
-        popDef.addResource("Patient/2", obsMapSubject2);
+        popDef.addResource("Patient/2", expression, obsMapSubject2);
 
         // Initial: Patient/1 has 2 entries, Patient/2 has 1 entry = 3 total
         assertEquals(3, popDef.getCount(), "Should have 3 observations before removal");
@@ -321,12 +329,13 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveExcludedMeasureObservationResource_RemovesAllEntries_SubjectNotCounted() {
+        var expression = "MeasureObservation";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
                 "pop-obs",
                 null,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "MeasureObservation",
+                expression,
                 encounterBasis,
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.COUNT,
@@ -339,7 +348,7 @@ class PopulationDefTest {
         var obsMap1 = new ObservationAccumulator(List.of(
                 new ObservationEntry(enc1, new QuantityDef(100.0)),
                 new ObservationEntry(enc2, new QuantityDef(200.0))));
-        popDef.addResource("Patient/1", obsMap1);
+        popDef.addResource("Patient/1", expression, obsMap1);
 
         assertEquals(2, popDef.getCount(), "Should have 2 observations initially");
         assertEquals(1, popDef.getSubjects().size(), "Should have 1 subject");
@@ -364,21 +373,23 @@ class PopulationDefTest {
      */
     @Test
     void testRetainAllSubjects_WithCommonSubjects() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "Denominator";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, booleanBasis, null);
         PopulationDef popDef2 =
-                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, expression2, booleanBasis, null);
 
         // popDef1 has subjects 1, 2, 3
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
-        popDef1.addResource("Patient/3", true);
+        popDef1.addResource("Patient/1", expression1, true);
+        popDef1.addResource("Patient/2", expression1, true);
+        popDef1.addResource("Patient/3", expression1, true);
 
         // popDef2 has subjects 2, 3, 4
-        popDef2.addResource("Patient/2", true);
-        popDef2.addResource("Patient/3", true);
-        popDef2.addResource("Patient/4", true);
+        popDef2.addResource("Patient/2", expression2, true);
+        popDef2.addResource("Patient/3", expression2, true);
+        popDef2.addResource("Patient/4", expression2, true);
 
         // Retain only common subjects (2 and 3)
         popDef1.retainAllSubjects(popDef2);
@@ -395,19 +406,21 @@ class PopulationDefTest {
      */
     @Test
     void testRetainAllSubjects_WithNoCommonSubjects() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "Denominator";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, booleanBasis, null);
         PopulationDef popDef2 =
-                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, expression2, booleanBasis, null);
 
         // popDef1 has subjects 1, 2
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        popDef1.addResource("Patient/1", expression1, true);
+        popDef1.addResource("Patient/2", expression1, true);
 
         // popDef2 has subjects 3, 4
-        popDef2.addResource("Patient/3", true);
-        popDef2.addResource("Patient/4", true);
+        popDef2.addResource("Patient/3", expression2, true);
+        popDef2.addResource("Patient/4", expression2, true);
 
         // Retain only common subjects (none)
         popDef1.retainAllSubjects(popDef2);
@@ -420,18 +433,20 @@ class PopulationDefTest {
      */
     @Test
     void testRetainAllSubjects_WithAllSubjectsCommon() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "Denominator";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, booleanBasis, null);
         PopulationDef popDef2 =
-                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+                new PopulationDef("pop-2", null, MeasurePopulationType.DENOMINATOR, expression2, booleanBasis, null);
 
         // Both have the same subjects
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        popDef1.addResource("Patient/1", expression1, true);
+        popDef1.addResource("Patient/2", expression1, true);
 
-        popDef2.addResource("Patient/1", true);
-        popDef2.addResource("Patient/2", true);
+        popDef2.addResource("Patient/1", expression2, true);
+        popDef2.addResource("Patient/2", expression2, true);
 
         popDef1.retainAllSubjects(popDef2);
 
@@ -445,31 +460,28 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveAllResources_WithCommonResources() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "DenominatorExclusion";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, encounterBasis, null);
         PopulationDef popDef2 = new PopulationDef(
-                "pop-2",
-                null,
-                MeasurePopulationType.DENOMINATOREXCLUSION,
-                "DenominatorExclusion",
-                encounterBasis,
-                null);
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, expression2, encounterBasis, null);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
         // popDef1 Patient/1 has encounters 1, 2, 3
-        popDef1.addResource("Patient/1", enc1);
-        popDef1.addResource("Patient/1", enc2);
-        popDef1.addResource("Patient/1", enc3);
+        popDef1.addResource("Patient/1", expression1, enc1);
+        popDef1.addResource("Patient/1", expression1, enc2);
+        popDef1.addResource("Patient/1", expression1, enc3);
 
         // popDef2 Patient/1 has encounters 2, 3 (exclusions)
         Encounter enc2b = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3b = (Encounter) new Encounter().setId("Encounter/3");
-        popDef2.addResource("Patient/1", enc2b);
-        popDef2.addResource("Patient/1", enc3b);
+        popDef2.addResource("Patient/1", expression2, enc2b);
+        popDef2.addResource("Patient/1", expression2, enc3b);
 
         // Remove encounters that are in both (2 and 3)
         popDef1.removeAllResources("Patient/1", popDef2);
@@ -484,25 +496,22 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveAllResources_WithNoCommonResources() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "DenominatorExclusion";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, encounterBasis, null);
         PopulationDef popDef2 = new PopulationDef(
-                "pop-2",
-                null,
-                MeasurePopulationType.DENOMINATOREXCLUSION,
-                "DenominatorExclusion",
-                encounterBasis,
-                null);
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, expression2, encounterBasis, null);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
 
         // popDef1 Patient/1 has encounter 1
-        popDef1.addResource("Patient/1", enc1);
+        popDef1.addResource("Patient/1", expression1, enc1);
 
         // popDef2 Patient/1 has encounter 2
-        popDef2.addResource("Patient/1", enc2);
+        popDef2.addResource("Patient/1", expression2, enc2);
 
         // Remove resources that are in both (none)
         popDef1.removeAllResources("Patient/1", popDef2);
@@ -516,28 +525,25 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveAllResources_WithAllResourcesCommon() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "DenominatorExclusion";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, encounterBasis, null);
         PopulationDef popDef2 = new PopulationDef(
-                "pop-2",
-                null,
-                MeasurePopulationType.DENOMINATOREXCLUSION,
-                "DenominatorExclusion",
-                encounterBasis,
-                null);
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, expression2, encounterBasis, null);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
 
         // Both have the same encounters for Patient/1
-        popDef1.addResource("Patient/1", enc1);
-        popDef1.addResource("Patient/1", enc2);
+        popDef1.addResource("Patient/1", expression1, enc1);
+        popDef1.addResource("Patient/1", expression1, enc2);
 
         Encounter enc1b = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2b = (Encounter) new Encounter().setId("Encounter/2");
-        popDef2.addResource("Patient/1", enc1b);
-        popDef2.addResource("Patient/1", enc2b);
+        popDef2.addResource("Patient/1", expression2, enc1b);
+        popDef2.addResource("Patient/1", expression2, enc2b);
 
         // Remove all common resources
         popDef1.removeAllResources("Patient/1", popDef2);
@@ -550,20 +556,22 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveAllSubjects_WithCommonSubjects() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "DenominatorExclusion";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, booleanBasis, null);
         PopulationDef popDef2 = new PopulationDef(
-                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, expression2, booleanBasis, null);
 
         // popDef1 has subjects 1, 2, 3
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
-        popDef1.addResource("Patient/3", true);
+        popDef1.addResource("Patient/1", expression1, true);
+        popDef1.addResource("Patient/2", expression1, true);
+        popDef1.addResource("Patient/3", expression1, true);
 
         // popDef2 has subjects 2, 3 (exclusions)
-        popDef2.addResource("Patient/2", true);
-        popDef2.addResource("Patient/3", true);
+        popDef2.addResource("Patient/2", expression2, true);
+        popDef2.addResource("Patient/3", expression2, true);
 
         // Remove subjects that are in both (2 and 3)
         popDef1.removeAllSubjects(popDef2);
@@ -579,19 +587,21 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveAllSubjects_WithNoCommonSubjects() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "DenominatorExclusion";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, booleanBasis, null);
         PopulationDef popDef2 = new PopulationDef(
-                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, expression2, booleanBasis, null);
 
         // popDef1 has subjects 1, 2
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        popDef1.addResource("Patient/1", expression1, true);
+        popDef1.addResource("Patient/2", expression1, true);
 
         // popDef2 has subjects 3, 4
-        popDef2.addResource("Patient/3", true);
-        popDef2.addResource("Patient/4", true);
+        popDef2.addResource("Patient/3", expression2, true);
+        popDef2.addResource("Patient/4", expression2, true);
 
         // Remove subjects that are in both (none)
         popDef1.removeAllSubjects(popDef2);
@@ -606,18 +616,20 @@ class PopulationDefTest {
      */
     @Test
     void testRemoveAllSubjects_WithAllSubjectsCommon() {
+        var expression1 = "InitialPopulation";
+        var expression2 = "DenominatorExclusion";
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
         PopulationDef popDef1 = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", booleanBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression1, booleanBasis, null);
         PopulationDef popDef2 = new PopulationDef(
-                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, "DenominatorExclusion", booleanBasis, null);
+                "pop-2", null, MeasurePopulationType.DENOMINATOREXCLUSION, expression2, booleanBasis, null);
 
         // Both have the same subjects
-        popDef1.addResource("Patient/1", true);
-        popDef1.addResource("Patient/2", true);
+        popDef1.addResource("Patient/1", expression1, true);
+        popDef1.addResource("Patient/2", expression1, true);
 
-        popDef2.addResource("Patient/1", true);
-        popDef2.addResource("Patient/2", true);
+        popDef2.addResource("Patient/1", expression2, true);
+        popDef2.addResource("Patient/2", expression2, true);
 
         // Remove all common subjects
         popDef1.removeAllSubjects(popDef2);
@@ -630,17 +642,18 @@ class PopulationDefTest {
      */
     @Test
     void testGetAllSubjectResources_MultipleSubjectsAndResources() {
+        var expression = "InitialPopulation";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
-                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, "InitialPopulation", encounterBasis, null);
+                "pop-1", null, MeasurePopulationType.INITIALPOPULATION, expression, encounterBasis, null);
 
         Encounter enc1 = (Encounter) new Encounter().setId("Encounter/1");
         Encounter enc2 = (Encounter) new Encounter().setId("Encounter/2");
         Encounter enc3 = (Encounter) new Encounter().setId("Encounter/3");
 
-        popDef.addResource("Patient/1", enc1);
-        popDef.addResource("Patient/1", enc2);
-        popDef.addResource("Patient/2", enc3);
+        popDef.addResource("Patient/1", expression, enc1);
+        popDef.addResource("Patient/1", expression, enc2);
+        popDef.addResource("Patient/2", expression, enc3);
 
         assertEquals(3, popDef.getAllSubjectResources().size(), "Should have 3 total resources");
     }
@@ -650,12 +663,13 @@ class PopulationDefTest {
      */
     @Test
     void testAddResource_SameValueDifferentSubjects() {
+        var expression = "Numerator";
         CodeDef stringBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "String");
         PopulationDef popDef =
-                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, "Numerator", stringBasis, null);
+                new PopulationDef("pop-1", null, MeasurePopulationType.NUMERATOR, expression, stringBasis, null);
 
-        popDef.addResource("Patient/1", "common-value");
-        popDef.addResource("Patient/2", "common-value");
+        popDef.addResource("Patient/1", expression, "common-value");
+        popDef.addResource("Patient/2", expression, "common-value");
 
         assertEquals(2, popDef.getSubjects().size(), "Should have 2 subjects");
         assertEquals(
@@ -669,12 +683,13 @@ class PopulationDefTest {
      */
     @Test
     void testCountObservations_WithMultipleMaps() {
+        var expression = "MeasureObservation";
         CodeDef encounterBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "Encounter");
         PopulationDef popDef = new PopulationDef(
                 "pop-obs",
                 null,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "MeasureObservation",
+                expression,
                 encounterBasis,
                 "measure-population",
                 ContinuousVariableObservationAggregateMethod.SUM,
@@ -688,11 +703,11 @@ class PopulationDefTest {
         var obsMap1 = new ObservationAccumulator(List.of(
                 new ObservationEntry(enc1, new QuantityDef(100.0)),
                 new ObservationEntry(enc2, new QuantityDef(200.0))));
-        popDef.addResource("Patient/1", obsMap1);
+        popDef.addResource("Patient/1", expression, obsMap1);
 
         // Patient/2 has 1 observation
         var obsMap2 = new ObservationAccumulator(List.of(new ObservationEntry(enc3, new QuantityDef(300.0))));
-        popDef.addResource("Patient/2", obsMap2);
+        popDef.addResource("Patient/2", expression, obsMap2);
 
         assertEquals(3, popDef.countObservations(), "Should count all observation entries across all maps");
         assertEquals(3, popDef.getCount(), "getCount() should match countObservations() for MEASUREOBSERVATION");

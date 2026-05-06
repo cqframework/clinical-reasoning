@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Map;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
 
     private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureDefCollection.class);
 
-    private final Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure;
+    private final Map<MeasureDef, Map<String, CqlEvaluationResult>> evaluationResultsPerMeasure;
 
     public SelectedMeasureDefCollection(List<MeasureDef> measureDefs, P parent) {
         this(measureDefs, parent, Map.of());
@@ -26,7 +27,7 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
     public SelectedMeasureDefCollection(
             List<MeasureDef> measureDefs,
             P parent,
-            Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure) {
+            Map<MeasureDef, Map<String, CqlEvaluationResult>> evaluationResultsPerMeasure) {
         super(measureDefs, parent);
         this.evaluationResultsPerMeasure = evaluationResultsPerMeasure;
     }
@@ -61,9 +62,8 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         for (MeasureDef def : value) {
-            Map<String, EvaluationResult> results = evaluationResultsPerMeasure.getOrDefault(def, Map.of());
-            // TODO: merge stompage?
-            // sb.append(EvaluationResultFormatter.formatMeasureEvaluationResults(def.id(), results));
+            var results = evaluationResultsPerMeasure.getOrDefault(def, Map.of());
+            sb.append(EvaluationResultFormatter.formatMeasureEvaluationResults(def.id(), results));
         }
         logger.info(sb.toString());
         return this;

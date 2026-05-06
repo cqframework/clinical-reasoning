@@ -1,7 +1,8 @@
 package org.opencds.cqf.fhir.cql;
 
+import static org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver.fhirModelNamespaceUri;
+
 import ca.uhn.fhir.context.FhirContext;
-import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
@@ -17,8 +18,7 @@ public class ClassInstanceHelper {
     }
 
     public static String getId(ClassInstance classInstance) {
-        if (classInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
-                && classInstance.has("id")) {
+        if (classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri) && classInstance.has("id")) {
             var resourceIdInstance = (ClassInstance) classInstance.get("id");
             var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.get("value");
             if (resourceIdValue != null) {
@@ -31,5 +31,13 @@ public class ClassInstanceHelper {
 
     public static Object convertToFhirR4IfNeeded(Object value) {
         return r4Converter.convertToFhirIfNeeded(value);
+    }
+
+    public static String getClassName(ClassInstance classInstance) {
+        // TODO: Need to fix version determination
+        var version = "r4";
+        var qName = classInstance.getType();
+        var system = qName.getNamespaceURI().equals(fhirModelNamespaceUri) ? "org.hl7.fhir" : qName.getNamespaceURI();
+        return "%s.%s.model.%s".formatted(system, version, qName.getLocalPart());
     }
 }

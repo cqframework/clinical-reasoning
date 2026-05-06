@@ -22,19 +22,19 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
  */
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
-    private static final Set<Class<?>> ALLOWED_STRATIFIER_VALUE_TYPES = new HashSet<>(Arrays.asList(
-            CodeableConcept.class,
-            Quantity.class,
-            Range.class,
-            Reference.class,
-            Coding.class,
-            Enumeration.class,
-            Boolean.class,
+    private static final Set<String> ALLOWED_STRATIFIER_VALUE_TYPES = new HashSet<>(Arrays.asList(
+            CodeableConcept.class.getName(),
+            Quantity.class.getName(),
+            Range.class.getName(),
+            Reference.class.getName(),
+            Coding.class.getName(),
+            Enumeration.class.getName(),
+            Boolean.class.getName(),
             // added Integer and String for examples like age or gender
-            Integer.class,
-            String.class,
+            Integer.class.getName(),
+            String.class.getName(),
             // CQL type returned by some stratifier expression that don't map neatly to FHIR types
-            Code.class));
+            Code.class.getName()));
 
     private static final String FHIR_MODEL_PACKAGE = "org.hl7.fhir.r4.model.";
 
@@ -42,12 +42,12 @@ public class R4PopulationBasisValidator implements PopulationBasisValidator {
             Arrays.stream(ResourceType.values()).map(ResourceType::name).toList();
 
     @Override
-    public Set<Class<?>> allowedStratifierValueTypes() {
+    public Set<String> allowedStratifierValueTypes() {
         return ALLOWED_STRATIFIER_VALUE_TYPES;
     }
 
     @Override
-    public Optional<Class<?>> extractFhirResourceType(String groupPopulationBasisCode) {
+    public Optional<String> extractFhirResourceType(String groupPopulationBasisCode) {
         return resolveResourceType(groupPopulationBasisCode, RESOURCE_TYPE_NAMES, FHIR_MODEL_PACKAGE);
     }
 }

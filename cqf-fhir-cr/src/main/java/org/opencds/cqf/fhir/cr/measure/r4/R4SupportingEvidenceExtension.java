@@ -199,7 +199,7 @@ public class R4SupportingEvidenceExtension {
      * - NORMAL: everything else
      */
     private static ValueKind classifyValue(Object value) {
-        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         if (wrapper.isNull()) {
             return ValueKind.NULL_RESULT;
         }
@@ -279,7 +279,7 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
 
         // Flatten lists & sets
         if (wrapper.isIterable()) {

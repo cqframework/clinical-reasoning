@@ -74,11 +74,16 @@ public class StratifierDef {
         return this.components;
     }
 
-    public void putResult(String subject, Object value, Set<Value> evaluatedResources) {
+    public void putResult(String subject, CqlExpressionValue expressionValue) {
+        this.getResults().put(subject, expressionValue);
+    }
+
+    public void putResult(String subject, String expression, Object value, Set<Value> evaluatedResources) {
         this.getResults()
                 .put(
                         subject,
-                        CqlExpressionValue.ofRaw(value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
+                        CqlExpressionValue.ofRaw(
+                                expression, value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
     }
 
     public Map<String, CqlExpressionValue> getResults() {

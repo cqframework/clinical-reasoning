@@ -555,7 +555,8 @@ public class MeasureReportDefScorer {
                                             .getValue()))
                             .toList())
                     .filter(entries -> !entries.isEmpty())
-                    .map(entries -> CqlExpressionValue.ofRaw(new ObservationAccumulator(entries), null))
+                    // TODO: use populationDef.expression() here?
+                    .map(entries -> CqlExpressionValue.ofRaw(null, new ObservationAccumulator(entries), null))
                     .collect(Collectors.toList());
         }
 

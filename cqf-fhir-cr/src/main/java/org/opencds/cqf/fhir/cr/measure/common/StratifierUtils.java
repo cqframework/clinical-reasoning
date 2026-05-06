@@ -1,10 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getClassName;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 
 /**
  * Various FHIR version-agnostic utilities for working with Stratifiers.
@@ -15,25 +18,26 @@ public class StratifierUtils {
         // Static utility class
     }
 
-    public static List<Class<?>> extractClassesFromSingleOrListResult(CqlExpressionValue value) {
+    public static List<String> extractClassesFromSingleOrListResult(CqlExpressionValue value) {
         if (value.isNull()) {
             return Collections.emptyList();
         }
 
         Object raw = value.raw();
         if (raw instanceof Class<?> clazz) {
-            return List.of(clazz);
+            return List.of(clazz.getName());
         }
 
         if (!value.isIterable()) {
-            return List.of(raw.getClass());
+            return List.of(raw.getClass().getName());
         }
 
-        // Need to this to return List<Class<?>> and get rid of Sonar warnings.
-        final Stream<Class<?>> classStream =
-                getStream(value.asIterable()).filter(Objects::nonNull).map(Object::getClass);
-
-        return classStream.toList();
+        return getStream(value.asIterable())
+                .filter(Objects::nonNull)
+                .map(o -> o instanceof ClassInstance classInstance
+                        ? getClassName(classInstance)
+                        : o.getClass().getName())
+                .toList();
     }
 
     private static Stream<?> getStream(Iterable<?> iterable) {

@@ -393,7 +393,7 @@ class MeasureEvaluationApplyScoringTests {
                 .getFirstMeasureReport()
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
-                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: Encounter");
+                        "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: {http://hl7.org/fhir}Encounter");
     }
 
     @Test

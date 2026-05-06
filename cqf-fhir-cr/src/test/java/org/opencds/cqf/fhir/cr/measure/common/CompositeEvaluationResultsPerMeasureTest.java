@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -49,13 +51,13 @@ class CompositeEvaluationResultsPerMeasureTest {
         CompositeEvaluationResultsPerMeasure composite = builder.build();
 
         // Act
-        Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
+        Map<MeasureDef, Map<String, CqlEvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
         Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
 
         // Assert: results present for m1, none for m2
         assertTrue(resultsPerMeasure.containsKey(measureDef1));
         assertFalse(resultsPerMeasure.containsKey(measureDef2));
-        Map<String, EvaluationResult> m1Results = resultsPerMeasure.get(measureDef1);
+        Map<String, CqlEvaluationResult> m1Results = resultsPerMeasure.get(measureDef1);
         assertNotNull(m1Results);
         assertTrue(m1Results.containsKey("subject-123"));
 
@@ -69,17 +71,17 @@ class CompositeEvaluationResultsPerMeasureTest {
         var measureDef1 = MeasureDef.fromIdAndUrl(
                 new IdType(ResourceType.Measure.name(), "measureimmutable"), "http://example.com/Measure/immutable");
 
-        EvaluationResult er = new EvaluationResult();
-        er.getExpressionResults().put("s", null);
+        var er = new CqlEvaluationResult();
+        er.addExpressionResult(CqlExpressionValue.ofRaw("s", null, null));
 
         CompositeEvaluationResultsPerMeasure composite =
                 CompositeEvaluationResultsPerMeasure.builder().build(); // empty instance to test top-level immutability
 
         // Top-level maps should be unmodifiable
-        Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
+        Map<MeasureDef, Map<String, CqlEvaluationResult>> resultsPerMeasure = composite.getResultsPerMeasure();
         Map<MeasureDef, List<String>> errorsPerMeasure = composite.getErrorsPerMeasure();
 
-        final Map<String, EvaluationResult> evalMap = Map.of("s", er);
+        final Map<String, CqlEvaluationResult> evalMap = Map.of("s", er);
 
         assertThrows(UnsupportedOperationException.class, () -> resultsPerMeasure.put(measureDef1, evalMap));
 
@@ -225,11 +227,13 @@ class CompositeEvaluationResultsPerMeasureTest {
         // Create EvaluationResult with date values
         EvaluationResult er = new EvaluationResult();
 
-        var localDate = modelResolver.toCqlValue(LocalDate.of(2024, 1, 15), false);
+        var localDate =
+                modelResolver.toCqlValue(new DateType(LocalDate.of(2024, 1, 15).toString()), false);
         ExpressionResult dateResult = new ExpressionResult(localDate, Set.of());
         er.set(new EvaluationExpressionRef("Date Expression"), dateResult);
 
-        var localDateTime = modelResolver.toCqlValue(LocalDateTime.of(2024, 1, 15, 14, 30, 45), false);
+        var localDateTime = modelResolver.toCqlValue(
+                new DateTimeType(LocalDateTime.of(2024, 1, 15, 14, 30, 45).toString()), false);
         ExpressionResult dateTimeResult = new ExpressionResult(localDateTime, Set.of());
         er.set(new EvaluationExpressionRef("DateTime Expression"), dateTimeResult);
 
@@ -246,7 +250,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         assertTrue(result.contains("Expression: \"Date Expression\""));
         assertTrue(result.contains("2024-01-15"));
         assertTrue(result.contains("Expression: \"DateTime Expression\""));
-        assertTrue(result.contains("2024-01-15:14:30:45"));
+        assertTrue(result.contains("2024-01-15T14:30:45"));
     }
 
     @Test
@@ -295,10 +299,9 @@ class CompositeEvaluationResultsPerMeasureTest {
         var debugResult = new DebugResult();
         er.setDebugResult(debugResult);
 
-        EvaluationResult observationResult = new EvaluationResult();
-        observationResult.set(
-                new EvaluationExpressionRef("obs1"),
-                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Integer(42), Set.of()));
+        var observationResult = new CqlEvaluationResult();
+        observationResult.setExpressionResults(List.of(
+                CqlExpressionValue.ofRaw("obs1", new org.opencds.cqf.cql.engine.runtime.Integer(42), Set.of())));
 
         var builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef, "patient-1", er, List.of(observationResult));
@@ -308,9 +311,9 @@ class CompositeEvaluationResultsPerMeasureTest {
         var mergedResult = results.get("patient-1");
 
         assertNotNull(mergedResult);
-        assertTrue(mergedResult.getExpressionResults().containsKey("expr1"));
-        assertTrue(mergedResult.getExpressionResults().containsKey("obs1"));
-        assertEquals(debugResult, mergedResult.getDebugResult());
+        assertNotNull(mergedResult.get("expr1"));
+        assertNotNull(mergedResult.get("obs1"));
+        assertEquals(debugResult, mergedResult.getResult().getDebugResult());
     }
 
     @Test
@@ -334,7 +337,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         var mergedResult = results.get("patient-1");
 
         assertNotNull(mergedResult);
-        assertEquals(trace, mergedResult.getTrace());
+        assertEquals(trace, mergedResult.getResult().getTrace());
     }
 
     @Test
@@ -355,7 +358,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         var mergedResult = results.get("patient-1");
 
         assertNotNull(mergedResult);
-        assertNull(mergedResult.getDebugResult());
-        assertNull(mergedResult.getTrace());
+        assertNull(mergedResult.getResult().getDebugResult());
+        assertNull(mergedResult.getResult().getTrace());
     }
 }

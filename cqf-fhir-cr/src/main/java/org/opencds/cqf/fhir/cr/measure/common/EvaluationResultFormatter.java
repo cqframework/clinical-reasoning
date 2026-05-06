@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,8 +16,7 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
@@ -35,45 +36,37 @@ public class EvaluationResultFormatter {
     /**
      * Formats an EvaluationResult into a human-readable, indented string.
      * Formats expression results with proper indentation. Debug results and trace
-     * information are not included; use {@link #format(EvaluationResult, int, boolean)}
+     * information are not included; use {@link #format(CqlEvaluationResult, int, boolean)}
      * with {@code includeDebugInfo=true} to include them.
      *
      * @param evaluationResult the EvaluationResult to format
      * @param baseIndent the base indentation level (number of indent units)
      * @return formatted string representation
      */
-    public static String format(EvaluationResult evaluationResult, int baseIndent) {
+    public static String format(CqlEvaluationResult evaluationResult, int baseIndent) {
         if (evaluationResult == null) {
             return indent(baseIndent) + "null";
         }
 
-        Map<String, ExpressionResult> expressionResults = evaluationResult.getExpressionResults();
+        var expressionResults = evaluationResult.getExpressionResults();
         if (expressionResults.isEmpty()) {
             return indent(baseIndent) + "(no expression results)";
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, ExpressionResult> entry : expressionResults.entrySet()) {
-            String expressionName = entry.getKey();
-            ExpressionResult expressionResult = entry.getValue();
+        for (var expressionResult : expressionResults) {
+            var expressionName = expressionResult.expressionName();
 
             sb.append(indent(baseIndent))
                     .append("Expression: \"")
                     .append(expressionName)
                     .append("\"\n");
 
-            if (expressionResult == null) {
-                sb.append(indent(baseIndent + 1))
-                        .append("(null expression result)")
-                        .append("\n");
-                continue;
-            }
-
             // Format evaluated resources
-            if (expressionResult.getEvaluatedResources() != null
-                    && !expressionResult.getEvaluatedResources().isEmpty()) {
+            if (expressionResult.evaluatedResources() != null
+                    && !expressionResult.evaluatedResources().isEmpty()) {
                 sb.append(indent(baseIndent + 1)).append("Evaluated Resources:\n");
-                for (Object resource : expressionResult.getEvaluatedResources()) {
+                for (var resource : expressionResult.evaluatedResources()) {
                     sb.append(indent(baseIndent + 2))
                             .append(formatResource(resource))
                             .append("\n");
@@ -81,9 +74,9 @@ public class EvaluationResultFormatter {
             }
 
             // Format value
-            Object value = expressionResult.getValue();
+            // Object value = expressionResult.raw();
             sb.append(indent(baseIndent + 1)).append("Value: ");
-            sb.append(formatValue(value)).append("\n");
+            sb.append(formatValue(expressionResult)).append("\n");
         }
 
         return sb.toString();
@@ -98,21 +91,21 @@ public class EvaluationResultFormatter {
      * @param includeDebugInfo whether to include debug result and trace information
      * @return formatted string representation
      */
-    public static String format(EvaluationResult evaluationResult, int baseIndent, boolean includeDebugInfo) {
+    public static String format(CqlEvaluationResult evaluationResult, int baseIndent, boolean includeDebugInfo) {
         StringBuilder sb = new StringBuilder();
         sb.append(format(evaluationResult, baseIndent));
 
         if (includeDebugInfo && evaluationResult != null) {
-            if (evaluationResult.getDebugResult() != null) {
+            if (evaluationResult.getResult().getDebugResult() != null) {
                 sb.append(indent(baseIndent))
                         .append("Debug Result: ")
-                        .append(evaluationResult.getDebugResult())
+                        .append(evaluationResult.getResult().getDebugResult())
                         .append("\n");
             }
-            if (evaluationResult.getTrace() != null) {
+            if (evaluationResult.getResult().getTrace() != null) {
                 sb.append(indent(baseIndent))
                         .append("Trace: ")
-                        .append(evaluationResult.getTrace())
+                        .append(evaluationResult.getResult().getTrace())
                         .append("\n");
             }
         }
@@ -120,16 +113,16 @@ public class EvaluationResultFormatter {
         return sb.toString();
     }
 
-    /**
-     * Formats an expression result value according to its type.
-     * Public API for formatting values from ExpressionResult.getValue().
-     *
-     * @param value the value to format (may be a collection, resource, primitive, date, etc.)
-     * @return formatted string representation
-     */
-    public static String formatExpressionValue(Object value) {
-        return formatValue(value);
-    }
+    //    /**
+    //     * Formats an expression result value according to its type.
+    //     * Public API for formatting values from ExpressionResult.getValue().
+    //     *
+    //     * @param value the value to format (may be a collection, resource, primitive, date, etc.)
+    //     * @return formatted string representation
+    //     */
+    //    public static String formatExpressionValue(Object value) {
+    //        return formatValue(value);
+    //    }
 
     /**
      * Formats a value according to its type: collections, resources, primitives, dates, etc.
@@ -137,21 +130,21 @@ public class EvaluationResultFormatter {
      * @param value the value to format
      * @return formatted string representation
      */
-    private static String formatValue(Object value) {
-        var wrapper = CqlExpressionValue.ofRaw(value, null);
-        if (wrapper.isNull()) {
+    private static String formatValue(CqlExpressionValue value) {
+        // var wrapper = CqlExpressionValue.ofRaw(null, value, null);
+        if (value == null || value.isNull()) {
             return "null";
         }
 
         // Handle iterables and collections
-        if (wrapper.isIterable()) {
-            String items = StreamSupport.stream(wrapper.asIterable().spliterator(), false)
+        if (value.isIterable()) {
+            String items = StreamSupport.stream(value.asIterable().spliterator(), false)
                     .map(EvaluationResultFormatter::formatSingleValue)
                     .collect(Collectors.joining(", "));
             return "[" + items + "]";
         }
 
-        return wrapper.asMap()
+        return value.asMap()
                 .map(map -> map.entrySet().stream()
                         .map(entry -> "%s -> %s"
                                 .formatted(formatSingleValue(entry.getKey()), formatSingleValue(entry.getValue())))
@@ -170,6 +163,10 @@ public class EvaluationResultFormatter {
             return "null";
         }
 
+        if (value instanceof CqlExpressionValue expressionValue) {
+            return formatSingleValue(expressionValue.raw());
+        }
+
         // Handle FHIR resources
         if (value instanceof IBaseResource) {
             return formatResource(value);
@@ -186,6 +183,16 @@ public class EvaluationResultFormatter {
             SimpleDateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
             return formatter.format((Date) value);
         }
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.Date cqlDate) {
+            SimpleDateFormat formatter = new SimpleDateFormat(DATE_TIME_FORMAT);
+            return formatter.format(cqlDate.toJavaDate());
+        }
+        if (value instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
+            if (StringUtils.isNotBlank(id)) {
+                return id;
+            }
+        }
 
         // Fallback to toString for other types
         return value.toString();
@@ -198,6 +205,12 @@ public class EvaluationResultFormatter {
      * @return formatted resource ID string (e.g., "Encounter/patient-4-encounter-1")
      */
     public static String formatResource(Object resource) {
+        if (resource instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
+            if (StringUtils.isNotBlank(id)) {
+                return id;
+            }
+        }
         if (!(resource instanceof IBaseResource baseResource)) {
             return resource.toString();
         }
@@ -227,7 +240,7 @@ public class EvaluationResultFormatter {
      * @return formatted string
      */
     public static String formatMeasureEvaluationResults(
-            String measureId, Map<String, EvaluationResult> evaluationResults) {
+            String measureId, Map<String, CqlEvaluationResult> evaluationResults) {
         StringBuilder sb = new StringBuilder();
         sb.append(SEPARATOR).append("\n");
         sb.append("Evaluation Results for Measure: ").append(measureId).append("\n");
@@ -237,7 +250,7 @@ public class EvaluationResultFormatter {
             sb.append("  (no evaluation results available)\n");
         } else {
             boolean first = true;
-            for (Map.Entry<String, EvaluationResult> entry : evaluationResults.entrySet()) {
+            for (var entry : evaluationResults.entrySet()) {
                 if (!first) {
                     sb.append("  ").append(SEPARATOR).append("\n");
                 }
@@ -294,7 +307,7 @@ public class EvaluationResultFormatter {
             return resource.getIdElement().getValueAsString();
         }
 
-        return CqlExpressionValue.ofRaw(value, null)
+        return CqlExpressionValue.ofRaw(null, value, null)
                 .asMap()
                 .map(map -> {
                     final String toString = map.entrySet().stream()

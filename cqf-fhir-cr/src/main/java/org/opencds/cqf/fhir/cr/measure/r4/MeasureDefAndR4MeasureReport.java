@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.Map;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 
 /**
@@ -21,7 +22,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  */
 @VisibleForTesting
 public record MeasureDefAndR4MeasureReport(
-        MeasureDef measureDef, MeasureReport measureReport, Map<String, EvaluationResult> evaluationResults) {
+        MeasureDef measureDef, MeasureReport measureReport, Map<String, CqlEvaluationResult> evaluationResults) {
 
     /**
      * Backwards-compatible constructor for callers that do not need evaluation results.

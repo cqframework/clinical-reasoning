@@ -264,29 +264,40 @@ class Dstu3MeasureReportBuilderTest {
     private static MeasureDef buildMeasureDefWithQualifiedStratumIds(String id, String url) {
         CodeDef booleanBasis = new CodeDef("http://hl7.org/fhir/fhir-types", "boolean");
 
+        var expressionNumerator = "Numerator";
         // Create populations with UNQUALIFIED subject IDs (e.g., "patient-1")
         ConceptDef numCode = new ConceptDef(
                 List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "numerator")),
                 "numerator");
-        PopulationDef numeratorPop =
-                new PopulationDef("num-1", numCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
+        PopulationDef numeratorPop = new PopulationDef(
+                "num-1", numCode, MeasurePopulationType.NUMERATOR, expressionNumerator, booleanBasis, null);
         // Add resources with UNQUALIFIED IDs
-        numeratorPop.addResource("patient-1", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        numeratorPop.addResource("patient-2", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        numeratorPop.addResource("patient-3", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        numeratorPop.addResource("patient-4", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource(
+                "patient-1", expressionNumerator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource(
+                "patient-2", expressionNumerator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource(
+                "patient-3", expressionNumerator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        numeratorPop.addResource(
+                "patient-4", expressionNumerator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
 
+        var expressionDenominator = "Denominator";
         ConceptDef denCode = new ConceptDef(
                 List.of(new CodeDef("http://terminology.hl7.org/CodeSystem/measure-population", "denominator")),
                 "denominator");
         PopulationDef denominatorPop = new PopulationDef(
-                "den-1", denCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis, null);
+                "den-1", denCode, MeasurePopulationType.DENOMINATOR, expressionDenominator, booleanBasis, null);
         // Add resources with UNQUALIFIED IDs
-        denominatorPop.addResource("patient-1", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        denominatorPop.addResource("patient-2", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        denominatorPop.addResource("patient-3", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        denominatorPop.addResource("patient-4", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
-        denominatorPop.addResource("patient-5", new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource(
+                "patient-1", expressionDenominator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource(
+                "patient-2", expressionDenominator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource(
+                "patient-3", expressionDenominator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource(
+                "patient-4", expressionDenominator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
+        denominatorPop.addResource(
+                "patient-5", expressionDenominator, new org.opencds.cqf.cql.engine.runtime.Boolean(true));
 
         // Create stratum populations with QUALIFIED subject IDs (e.g., "Patient/patient-1")
         StratumPopulationDef stratumNumPop = new StratumPopulationDef(

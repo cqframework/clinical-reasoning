@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -501,9 +500,10 @@ public class MeasureMultiSubjectEvaluator {
                 CqlExpressionValue result = entry.getValue();
 
                 // Only process function results (FunctionResultAccumulator)
-                final Optional<FunctionResultAccumulator> optFunctionResults = getFunctionResultAccumulator(result);
+                final var optFunctionResults =
+                        result.asFunctionResultAccumulator().orElse(null);
 
-                if (optFunctionResults.isEmpty()) {
+                if (optFunctionResults == null) {
                     continue;
                 }
 
@@ -511,7 +511,8 @@ public class MeasureMultiSubjectEvaluator {
                 Set<StratifierRowKey> rowKeys =
                         functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 
-                for (FunctionResultEntry fnEntry : optFunctionResults.get().entries()) {
+                // TODO: Function results are always resources?
+                for (FunctionResultEntry fnEntry : optFunctionResults.entries()) {
                     String normalizedKey = normalizeResourceKey(fnEntry.input());
                     rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
                 }
@@ -519,14 +520,6 @@ public class MeasureMultiSubjectEvaluator {
         }
 
         return functionRowKeysBySubject;
-    }
-
-    private static Optional<FunctionResultAccumulator> getFunctionResultAccumulator(CqlExpressionValue result) {
-        if (result == null) {
-            return Optional.empty();
-        }
-
-        return result.asFunctionResultAccumulator();
     }
 
     private static List<StratumTableRow> mapToListOfTableEntries(
@@ -783,16 +776,16 @@ public class MeasureMultiSubjectEvaluator {
         // stratifier results that's plain Object.equals on the entry inputs; for non-accumulator
         // results that's FHIR-identity equality via HashSetForFhirResourcesAndCqlTypes.
         for (Entry<String, CqlExpressionValue> stratifierEntryBySubject : stratifierResultsBySubject.entrySet()) {
-            final Set<Object> stratifierResultsPerSubject =
+            final var stratifierResultsPerSubject =
                     stratifierResultAsIntersectionSet(stratifierEntryBySubject.getValue());
-            final Set<CqlExpressionValue> populationResultsPerSubject =
+            final var populationResultsPerSubject =
                     populationDef.getResourcesForSubject(stratifierEntryBySubject.getKey());
 
             for (CqlExpressionValue wrapper : populationResultsPerSubject) {
                 if (wrapper == null) {
                     continue;
                 }
-                Object raw = wrapper.raw();
+                var raw = wrapper.raw();
                 if (raw != null && stratifierResultsPerSubject.contains(raw)) {
                     allPopulationStratumIntersectingResources.add(raw);
                 }
@@ -809,7 +802,7 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For function-result accumulators (one entry per input parameter / produced value), the
      * input parameters are the intersectable items.
      */
-    private static Set<Object> stratifierResultAsIntersectionSet(CqlExpressionValue result) {
+    private static Set<?> stratifierResultAsIntersectionSet(CqlExpressionValue result) {
         if (result == null) {
             return Set.of();
         }

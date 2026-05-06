@@ -26,13 +26,13 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
@@ -105,7 +105,7 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             @Nonnull List<String> subjectIds,
-            @Nonnull Map<String, EvaluationResult> results) {
+            @Nonnull Map<String, CqlEvaluationResult> results) {
 
         return evaluateMeasureCaptureDef(measure, periodStart, periodEnd, reportType, subjectIds, results)
                 .measureReport();
@@ -169,7 +169,7 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             @Nonnull List<String> subjectIds,
-            @Nonnull Map<String, EvaluationResult> results) {
+            @Nonnull Map<String, CqlEvaluationResult> results) {
 
         checkMeasureLibrary(measure);
 
@@ -230,7 +230,7 @@ public class R4MeasureProcessor {
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
-        final Map<String, EvaluationResult> resultForThisMeasure =
+        final var resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         measureEvaluationResultHandler.processResults(fhirContext, resultForThisMeasure, measureDef, evaluationType);

@@ -47,8 +47,8 @@ public class SdeDef {
         return this.description;
     }
 
-    public void putResult(String subject, Object value, Set<Value> evaluatedResources) {
-        this.results.put(subject, CqlExpressionValue.ofRaw(value, evaluatedResources));
+    public void putResult(String subject, String expression, Object value, Set<Value> evaluatedResources) {
+        this.results.put(subject, CqlExpressionValue.ofRaw(expression, value, evaluatedResources));
     }
 
     public Map<StratumValueWrapper, Long> getAccumulatedValues() {

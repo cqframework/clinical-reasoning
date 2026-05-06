@@ -75,7 +75,7 @@ public class StratumValueWrapper {
     private static final String EMPTY_STRATUM_VALUE = "empty";
 
     public String getKey() {
-        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         // Handle null values - group them into a special "null" stratum
         if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
@@ -123,7 +123,7 @@ public class StratumValueWrapper {
     }
 
     public String getDescription() {
-        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
@@ -170,7 +170,7 @@ public class StratumValueWrapper {
     }
 
     private String getValueAsString(Object valueInner) {
-        var wrapper = CqlExpressionValue.ofRaw(valueInner, null);
+        var wrapper = CqlExpressionValue.ofRaw(null, valueInner, null);
         if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }

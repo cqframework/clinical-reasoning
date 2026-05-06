@@ -21,8 +21,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
-import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
 import org.slf4j.Logger;
@@ -61,7 +59,7 @@ public class MeasureEvaluator {
             MeasureEvalType measureEvalType,
             String subjectType,
             String subjectId,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             boolean applyScoring) {
         Objects.requireNonNull(measureDef, "measureDef is a required argument");
         Objects.requireNonNull(subjectId, "subjectIds is a required argument");
@@ -103,7 +101,7 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             boolean applyScoring) {
         evaluateSdes(subjectId, measureDef.sdes(), evaluationResult);
         for (GroupDef groupDef : measureDef.groups()) {
@@ -114,21 +112,20 @@ public class MeasureEvaluator {
 
     protected Iterable<Object> evaluatePopulationCriteria(
             String subjectType,
-            ExpressionResult expressionResult,
-            EvaluationResult evaluationResult,
+            CqlExpressionValue expressionResult,
+            CqlEvaluationResult evaluationResult,
             Set<Value> outEvaluatedResources) {
 
-        var wrapper = CqlExpressionValue.of(expressionResult);
-        outEvaluatedResources.addAll(wrapper.evaluatedResources());
-        return wrapper.resolveForPopulation(subjectType, evaluationResult);
+        outEvaluatedResources.addAll(expressionResult.evaluatedResources());
+        return expressionResult.resolveForPopulation(subjectType, evaluationResult.getResult());
     }
 
-    protected Iterable<Object> evaluateSupportingCriteria(ExpressionResult expressionResult) {
-        return CqlExpressionValue.of(expressionResult).asIterableOrNull();
+    protected Iterable<Object> evaluateSupportingCriteria(CqlExpressionValue expressionResult) {
+        return expressionResult.asIterableOrNull();
     }
 
     protected PopulationDef evaluatePopulationMembership(
-            String subjectType, String subjectId, PopulationDef inclusionDef, EvaluationResult evaluationResult) {
+            String subjectType, String subjectId, PopulationDef inclusionDef, CqlEvaluationResult evaluationResult) {
         return evaluatePopulationMembership(subjectType, subjectId, inclusionDef, evaluationResult, null);
     }
 
@@ -136,24 +133,21 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             PopulationDef inclusionDef,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             String expression) {
         // use expressionName passed in instead of criteria expression defined on populationDef
         // this is mainly for measureObservation functions
 
-        ExpressionResult matchingResult;
-        if (expression == null || expression.isEmpty()) {
-            // find matching expression
-            matchingResult = evaluationResult.get(inclusionDef.expression());
-        } else {
-            matchingResult = evaluationResult.get(expression);
-        }
+        var expressionName = expression == null || expression.isEmpty() ? inclusionDef.expression() : expression;
+        var matchingResult = evaluationResult.get(expressionName);
 
-        // Add Resources from SubjectId
-        for (Object resource : evaluatePopulationCriteria(
-                subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
-            // hashmap instead of set
-            inclusionDef.addResource(subjectId, resource);
+        if (matchingResult != null) {
+            // Add Resources from SubjectId
+            for (Object resource : evaluatePopulationCriteria(
+                    subjectType, matchingResult, evaluationResult, inclusionDef.getEvaluatedResources())) {
+                // hashmap instead of set
+                inclusionDef.addResource(subjectId, expressionName, resource);
+            }
         }
 
         return inclusionDef;
@@ -202,7 +196,7 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             boolean applyScoring) {
         // check populations
         R4MeasureScoringTypePopulations.validateScoringTypePopulations(
@@ -297,7 +291,7 @@ public class MeasureEvaluator {
         }
         if (reportType.equals(MeasureReportType.INDIVIDUAL) && dateOfCompliance != null) {
             var doc = evaluateDateOfCompliance(dateOfCompliance, evaluationResult);
-            dateOfCompliance.addResource(subjectId, doc);
+            dateOfCompliance.addResource(subjectId, dateOfCompliance.expression(), doc);
         }
         for (PopulationDef p : groupDef.populations()) {
             populateSupportingEvidence(p, reportType, evaluationResult, subjectId);
@@ -340,7 +334,7 @@ public class MeasureEvaluator {
     protected void populateSupportingEvidence(
             PopulationDef populationDef,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             String subjectId) {
         // only enabled for subject level reports
         if (reportType == MeasureReportType.INDIVIDUAL
@@ -367,7 +361,7 @@ public class MeasureEvaluator {
             GroupDef groupDef,
             String subjectType,
             String subjectId,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             boolean applyScoring,
             MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
@@ -588,7 +582,7 @@ public class MeasureEvaluator {
             GroupDef groupDef,
             String subjectType,
             String subjectId,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             MeasureReportType reportType) {
         PopulationDef initialPopulation = groupDef.getSingle(INITIALPOPULATION);
         // Validate Required Populations are Present
@@ -609,7 +603,7 @@ public class MeasureEvaluator {
             String subjectType,
             String subjectId,
             MeasureReportType reportType,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             boolean applyScoring) {
 
         populationBasisValidator.validateGroupPopulations(measureDef, groupDef, evaluationResult);
@@ -632,24 +626,24 @@ public class MeasureEvaluator {
         }
     }
 
-    protected Object evaluateDateOfCompliance(PopulationDef populationDef, EvaluationResult evaluationResult) {
-        return evaluationResult.get(populationDef.expression()).getValue();
+    protected Object evaluateDateOfCompliance(PopulationDef populationDef, CqlEvaluationResult evaluationResult) {
+        return evaluationResult.get(populationDef.expression()).raw();
     }
 
-    protected void evaluateSdes(String subjectId, List<SdeDef> sdes, EvaluationResult evaluationResult) {
+    protected void evaluateSdes(String subjectId, List<SdeDef> sdes, CqlEvaluationResult evaluationResult) {
         for (SdeDef sde : sdes) {
             var expressionResult = evaluationResult.get(sde.expression());
             if (expressionResult == null) {
                 throw new ExpressionResultNotFoundException("SDE", sde.expression());
             }
-            sde.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+            sde.putResult(subjectId, sde.expression(), expressionResult.raw(), expressionResult.evaluatedResources());
         }
     }
 
     protected void evaluateStratifiers(
             String subjectId,
             List<StratifierDef> stratifierDefs,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             GroupDef groupDef) {
         for (StratifierDef stratifierDef : stratifierDefs) {
 
@@ -658,7 +652,7 @@ public class MeasureEvaluator {
     }
 
     private void evaluateStratifier(
-            String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
+            String subjectId, CqlEvaluationResult evaluationResult, StratifierDef stratifierDef, GroupDef groupDef) {
         if (stratifierDef.isCriteriaStratifier()) {
             addCriteriaStratifierResult(subjectId, evaluationResult, stratifierDef);
         } else {
@@ -674,7 +668,7 @@ public class MeasureEvaluator {
      */
     void addValueOrNonSubjectValueStratifierResult(
             List<StratifierComponentDef> components,
-            EvaluationResult evaluationResult,
+            CqlEvaluationResult evaluationResult,
             String subjectId,
             GroupDef groupDef) {
 
@@ -688,11 +682,11 @@ public class MeasureEvaluator {
     }
 
     private void handleBooleanBasisComponent(
-            StratifierComponentDef component, EvaluationResult evaluationResult, String subjectId) {
+            StratifierComponentDef component, CqlEvaluationResult evaluationResult, String subjectId) {
 
         var expressionResult = evaluationResult.get(component.expression());
 
-        if (expressionResult == null || expressionResult.getValue() == null) {
+        if (expressionResult == null || expressionResult.raw() == null) {
             logger.warn(
                     "Stratifier component expression '{}' returned null result for subject '{}'",
                     component.expression(),
@@ -700,11 +694,14 @@ public class MeasureEvaluator {
             return; // short-circuit
         }
 
-        component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+        component.putResult(subjectId, expressionResult);
     }
 
     private void handleNonBooleanBasisComponent(
-            StratifierComponentDef component, EvaluationResult evaluationResult, String subjectId, GroupDef groupDef) {
+            StratifierComponentDef component,
+            CqlEvaluationResult evaluationResult,
+            String subjectId,
+            GroupDef groupDef) {
 
         // First: look for function results on INITIALPOPULATION
         for (PopulationDef popDef : groupDef.populations()) {
@@ -714,15 +711,15 @@ public class MeasureEvaluator {
 
             var expressionResult = evaluationResult.get(popDef.id() + "-" + component.expression());
 
-            if (expressionResult != null && expressionResult.getValue() != null) {
-                component.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+            if (expressionResult != null && expressionResult.raw() != null) {
+                component.putResult(subjectId, expressionResult);
                 return; // short-circuit once function result is found
             }
         }
 
         // Fallback: scalar (non-function) expression
         var fallbackResult = evaluationResult.get(component.expression());
-        if (fallbackResult == null || fallbackResult.getValue() == null) {
+        if (fallbackResult == null || fallbackResult.raw() == null) {
             logger.warn(
                     "Stratifier component expression '{}' returned null result for subject '{}' (fallback)",
                     component.expression(),
@@ -730,7 +727,7 @@ public class MeasureEvaluator {
             return; // short-circuit
         }
 
-        component.putResult(subjectId, fallbackResult.getValue(), fallbackResult.getEvaluatedResources());
+        component.putResult(subjectId, fallbackResult);
     }
 
     /**
@@ -738,11 +735,12 @@ public class MeasureEvaluator {
      * Replaced Optional.ofNullable() pattern with explicit null checks and added logger.warn()
      * for better observability when stratifier expressions return null.
      */
-    void addCriteriaStratifierResult(String subjectId, EvaluationResult evaluationResult, StratifierDef stratifierDef) {
+    void addCriteriaStratifierResult(
+            String subjectId, CqlEvaluationResult evaluationResult, StratifierDef stratifierDef) {
 
         var expressionResult = evaluationResult.get(stratifierDef.expression());
 
-        if (expressionResult == null || expressionResult.getValue() == null) {
+        if (expressionResult == null || expressionResult.raw() == null) {
             logger.warn(
                     "Stratifier expression '{}' returned null result for subject '{}'",
                     stratifierDef.expression(),
@@ -750,6 +748,6 @@ public class MeasureEvaluator {
             return;
         }
 
-        stratifierDef.putResult(subjectId, expressionResult.getValue(), expressionResult.getEvaluatedResources());
+        stratifierDef.putResult(subjectId, expressionResult);
     }
 }

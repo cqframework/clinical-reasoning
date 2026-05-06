@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
 /**
@@ -21,13 +20,13 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResult;
  */
 public class CompositeEvaluationResultsPerMeasure {
     // The same measure may have successful results AND errors, so account for both
-    private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure;
+    private final Map<MeasureDef, Map<String, CqlEvaluationResult>> resultsPerMeasure;
     // We may get several errors for a given measure
     private final Map<MeasureDef, List<String>> errorsPerMeasure;
 
     private CompositeEvaluationResultsPerMeasure(Builder builder) {
 
-        var resultsBuilder = ImmutableMap.<MeasureDef, Map<String, EvaluationResult>>builder();
+        var resultsBuilder = ImmutableMap.<MeasureDef, Map<String, CqlEvaluationResult>>builder();
         builder.resultsPerMeasure.forEach((key, value) -> resultsBuilder.put(key, ImmutableMap.copyOf(value)));
         resultsPerMeasure = resultsBuilder.build();
 
@@ -44,7 +43,7 @@ public class CompositeEvaluationResultsPerMeasure {
      *
      * @return a map of evaluation results per subject, or an empty map if none exist
      */
-    public Map<String, EvaluationResult> processMeasureForSuccessOrFailure(MeasureDef measureDef) {
+    public Map<String, CqlEvaluationResult> processMeasureForSuccessOrFailure(MeasureDef measureDef) {
         errorsPerMeasure.getOrDefault(measureDef, List.of()).forEach(measureDef::addError);
 
         // We are explicitly maintaining the logic of accepting the lack of any sort of results,
@@ -58,7 +57,7 @@ public class CompositeEvaluationResultsPerMeasure {
      * and associated EvaluationResult produced from CQL expression evaluation
      * @return {@code Map<IIdType, Map<String, EvaluationResult>>}
      */
-    public Map<MeasureDef, Map<String, EvaluationResult>> getResultsPerMeasure() {
+    public Map<MeasureDef, Map<String, CqlEvaluationResult>> getResultsPerMeasure() {
         return this.resultsPerMeasure;
     }
 
@@ -81,9 +80,9 @@ public class CompositeEvaluationResultsPerMeasure {
         if (resultsPerMeasure.isEmpty()) {
             sb.append("  (none)\n");
         } else {
-            for (Map.Entry<MeasureDef, Map<String, EvaluationResult>> measureEntry : resultsPerMeasure.entrySet()) {
-                MeasureDef measureDef = measureEntry.getKey();
-                Map<String, EvaluationResult> subjectResults = measureEntry.getValue();
+            for (var measureEntry : resultsPerMeasure.entrySet()) {
+                var measureDef = measureEntry.getKey();
+                var subjectResults = measureEntry.getValue();
 
                 sb.append("  Measure ID: ").append(measureDef.id()).append("\n");
                 sb.append("  Measure URL: ")
@@ -93,9 +92,9 @@ public class CompositeEvaluationResultsPerMeasure {
                 if (subjectResults.isEmpty()) {
                     sb.append("    (no subject results)\n");
                 } else {
-                    for (Map.Entry<String, EvaluationResult> subjectEntry : subjectResults.entrySet()) {
-                        String subjectId = subjectEntry.getKey();
-                        EvaluationResult evaluationResult = subjectEntry.getValue();
+                    for (var subjectEntry : subjectResults.entrySet()) {
+                        var subjectId = subjectEntry.getKey();
+                        var evaluationResult = subjectEntry.getValue();
 
                         sb.append("    Subject: ").append(subjectId).append("\n");
                         sb.append(EvaluationResultFormatter.format(evaluationResult, 3));
@@ -139,7 +138,7 @@ public class CompositeEvaluationResultsPerMeasure {
     }
 
     public static class Builder {
-        private final Map<MeasureDef, Map<String, EvaluationResult>> resultsPerMeasure = new HashMap<>();
+        private final Map<MeasureDef, Map<String, CqlEvaluationResult>> resultsPerMeasure = new HashMap<>();
         private final Map<MeasureDef, List<String>> errorsPerMeasure = new HashMap<>();
 
         public CompositeEvaluationResultsPerMeasure build() {
@@ -150,7 +149,7 @@ public class CompositeEvaluationResultsPerMeasure {
                 List<MeasureDef> measureDefs,
                 String subjectId,
                 EvaluationResult evaluationResult,
-                List<EvaluationResult> measureObservationResults) {
+                List<CqlEvaluationResult> measureObservationResults) {
             for (MeasureDef measureDef : measureDefs) {
                 addResult(measureDef, subjectId, evaluationResult, measureObservationResults);
             }
@@ -160,7 +159,7 @@ public class CompositeEvaluationResultsPerMeasure {
                 MeasureDef measureDef,
                 String subjectId,
                 EvaluationResult evaluationResult,
-                List<EvaluationResult> measureObservationResults) {
+                List<CqlEvaluationResult> measureObservationResults) {
 
             // if we have no results, we don't need to add anything
             if (evaluationResult == null
@@ -193,29 +192,43 @@ public class CompositeEvaluationResultsPerMeasure {
             errorsPerMeasure.computeIfAbsent(measureDef, k -> new ArrayList<>()).add(error);
         }
 
-        private EvaluationResult mergeEvaluationResults(
-                EvaluationResult origEvaluationResult, List<EvaluationResult> measureObservationResults) {
-            final EvaluationResult evaluationResult = new EvaluationResult();
-
-            var copyOfExpressionResults = new HashMap<>(origEvaluationResult.getExpressionResults());
-
-            for (EvaluationResult measureObservationResult : measureObservationResults) {
-                copyOfExpressionResults.putAll(measureObservationResult.getExpressionResults());
-            }
-
-            copyOfExpressionResults.entrySet().forEach(e -> {
-                evaluationResult.set(new EvaluationExpressionRef(e.getKey()), e.getValue());
-            });
-
+        private CqlEvaluationResult mergeEvaluationResults(
+                EvaluationResult origEvaluationResult, List<CqlEvaluationResult> measureObservationResults) {
             // Preserve debug information from the original evaluation result
-            if (origEvaluationResult.getDebugResult() != null) {
-                evaluationResult.setDebugResult(origEvaluationResult.getDebugResult());
-            }
-            if (origEvaluationResult.getTrace() != null) {
-                evaluationResult.setTrace(origEvaluationResult.getTrace());
-            }
+            final var evaluationResult = new CqlEvaluationResult(origEvaluationResult);
+            measureObservationResults.forEach(
+                    r -> r.getExpressionResults().forEach(evaluationResult::addExpressionResult));
 
             return evaluationResult;
+
+            //            var copyOfExpressionResults =
+            //                    new ArrayList<>(origEvaluationResult.getExpressionResults().entrySet().stream()
+            //                            .map(entry -> CqlExpressionValue.of(entry.getKey(), entry.getValue()))
+            //                            .toList());
+
+            //            for (var measureObservationResult : measureObservationResults) {
+            //                copyOfExpressionResults.addAll(
+            //                        measureObservationResult.getResult().getExpressionResults().entrySet().stream()
+            //                                .map(entry -> CqlExpressionValue.of(entry.getKey(), entry.getValue()))
+            //                                .toList());
+            //                copyOfExpressionResults.add(measureObservationResult.getFunctionResult());
+            //            }
+
+            //            evaluationResult.setExpressionResults(copyOfExpressionResults);
+
+            //            copyOfExpressionResults.entrySet().forEach(e -> {
+            //                evaluationResult.set(new EvaluationExpressionRef(e.getKey()), e.getValue());
+            //            });
+
+            // Preserve debug information from the original evaluation result
+            //            if (origEvaluationResult.getDebugResult() != null) {
+            //                evaluationResult.setDebugResult(origEvaluationResult.getDebugResult());
+            //            }
+            //            if (origEvaluationResult.getTrace() != null) {
+            //                evaluationResult.setTrace(origEvaluationResult.getTrace());
+            //            }
+
+            //            return evaluationResult;
         }
     }
 }

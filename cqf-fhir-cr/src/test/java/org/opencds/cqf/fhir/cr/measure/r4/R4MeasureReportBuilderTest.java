@@ -261,6 +261,7 @@ class R4MeasureReportBuilderTest {
         if (evaluatedResources != null) {
             sdeDef.putResult(
                     "subject",
+                    null,
                     isKeyResource
                             ? modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "patient1")), false)
                             : new org.opencds.cqf.cql.engine.runtime.String("nonResource"),
@@ -296,7 +297,7 @@ class R4MeasureReportBuilderTest {
                 null);
 
         if (resources != null) {
-            resources.forEach(res -> populationDef.addResource("subj", res));
+            resources.forEach(res -> populationDef.addResource("subj", null, res));
         }
 
         return populationDef;

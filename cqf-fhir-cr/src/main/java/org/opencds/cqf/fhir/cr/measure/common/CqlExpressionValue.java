@@ -15,23 +15,23 @@ import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
- * Wrapper around the raw {@code Object} returned by
+ * Wrapper around the raw {@code Value} returned by
  * {@link ExpressionResult#getValue()}.
  * <p>
  * Centralizes the null / Boolean / Iterable / scalar normalization that was previously
  * scattered across measure-evaluation call sites, so the contract between the CQL engine
- * and the measure pipeline is testable in one place. The internal {@code raw} field is
- * intentionally typed as {@code Object} so a future migration to the upstream sealed
- * {@code Value} type touches only this class, not its callers.
+ * and the measure pipeline is testable in one place.
  */
 public final class CqlExpressionValue {
 
-    private static final CqlExpressionValue EMPTY = new CqlExpressionValue(null, Collections.emptySet());
+    private static final CqlExpressionValue EMPTY = new CqlExpressionValue(null, null, Collections.emptySet());
 
+    private final @Nullable String expressionName;
     private final @Nullable Object raw;
     private final Set<Value> evaluatedResources;
 
-    private CqlExpressionValue(@Nullable Object raw, Set<Value> evaluatedResources) {
+    private CqlExpressionValue(@Nullable String expressionName, @Nullable Object raw, Set<Value> evaluatedResources) {
+        this.expressionName = expressionName;
         this.raw = raw;
         this.evaluatedResources = evaluatedResources;
     }
@@ -39,20 +39,23 @@ public final class CqlExpressionValue {
     /**
      * Wraps an {@link ExpressionResult}. Accepts a null result and yields an empty wrapper.
      */
-    public static CqlExpressionValue of(@Nullable ExpressionResult result) {
+    public static CqlExpressionValue of(@Nullable String expressionName, @Nullable ExpressionResult result) {
         if (result == null) {
             return EMPTY;
         }
         var resources = result.getEvaluatedResources();
-        return new CqlExpressionValue(result.getValue(), resources != null ? resources : Collections.emptySet());
+        return new CqlExpressionValue(
+                expressionName, result.getValue(), resources != null ? resources : Collections.emptySet());
     }
 
     /**
      * Wraps a raw value plus its evaluated-resource set directly. Useful for tests and
      * for callers that already hold the underlying value.
      */
-    public static CqlExpressionValue ofRaw(@Nullable Object value, @Nullable Set<Value> evaluatedResources) {
-        return new CqlExpressionValue(value, evaluatedResources != null ? evaluatedResources : Collections.emptySet());
+    public static CqlExpressionValue ofRaw(
+            @Nullable String expressionName, @Nullable Object value, @Nullable Set<Value> evaluatedResources) {
+        return new CqlExpressionValue(
+                expressionName, value, evaluatedResources != null ? evaluatedResources : Collections.emptySet());
     }
 
     /**
@@ -62,16 +65,26 @@ public final class CqlExpressionValue {
         return EMPTY;
     }
 
+    public @Nullable String expressionName() {
+        return expressionName;
+    }
+
     public boolean isNull() {
         return raw == null;
     }
 
     public boolean isBoolean() {
-        return raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean;
+        return raw instanceof Boolean || raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean;
     }
 
     public boolean isTrue() {
-        return raw != null && ((org.opencds.cqf.cql.engine.runtime.Boolean) raw).getValue();
+        if (raw instanceof Boolean bool) {
+            return bool;
+        }
+        if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean cqlBool) {
+            return cqlBool.getValue();
+        }
+        return false;
     }
 
     public boolean isIterable() {
@@ -138,7 +151,9 @@ public final class CqlExpressionValue {
      * {@link #asIterable()} path doesn't unroll it into individual entries.
      */
     public Optional<FunctionResultAccumulator> asFunctionResultAccumulator() {
-        return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
+        // TODO: What needs to be done here?
+        // return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
+        return Optional.empty();
     }
 
     /**
@@ -150,8 +165,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return Collections.emptyList();
         }
-        if (raw instanceof Iterable<?>) {
-            return (Iterable<Object>) raw;
+        if (raw instanceof Iterable<?> iterable) {
+            return (Iterable<Object>) iterable;
         }
         return Collections.singletonList(raw);
     }
@@ -166,8 +181,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return null;
         }
-        if (raw instanceof Iterable<?>) {
-            return (Iterable<Object>) raw;
+        if (raw instanceof Iterable<?> iterable) {
+            return (Iterable<Object>) iterable;
         }
         return Collections.singletonList(raw);
     }
@@ -194,7 +209,7 @@ public final class CqlExpressionValue {
             if (bool.getValue()) {
                 return Collections.emptyList();
             }
-            ExpressionResult subjectResult = evaluationResult.get(subjectType);
+            var subjectResult = evaluationResult.get(subjectType);
             if (subjectResult == null) {
                 throw new CqlExpressionValueException(
                         "expression result is null for subject type: %s".formatted(subjectType));
@@ -214,8 +229,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return new HashSetForFhirResourcesAndCqlTypes<>();
         }
-        if (raw instanceof Iterable<?>) {
-            return new HashSetForFhirResourcesAndCqlTypes<>((Iterable<Object>) raw);
+        if (raw instanceof Iterable<?> iterable) {
+            return new HashSetForFhirResourcesAndCqlTypes<>((Iterable<Object>) iterable);
         }
         return new HashSetForFhirResourcesAndCqlTypes<>(raw);
     }
@@ -229,8 +244,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return Collections.emptyList();
         }
-        if (raw instanceof Iterable<?> iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false)
+        if (raw instanceof org.opencds.cqf.cql.engine.runtime.List list) {
+            return StreamSupport.stream(list.spliterator(), false)
                     .filter(Objects::nonNull)
                     .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         }
@@ -241,11 +256,6 @@ public final class CqlExpressionValue {
         return evaluatedResources;
     }
 
-    /**
-     * Escape hatch for callers that still need the underlying {@link Object}. Preserved
-     * during the migration from the legacy {@code Object}-typed pipeline to the eventual
-     * sealed {@code Value} type.
-     */
     public @Nullable Object raw() {
         return raw;
     }

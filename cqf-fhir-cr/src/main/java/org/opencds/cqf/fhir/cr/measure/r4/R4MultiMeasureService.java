@@ -25,10 +25,10 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
@@ -485,7 +485,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             List<List<MeasureDefAndR4MeasureReport>> results) {
 
         final List<MeasureDef> measureDefs = new ArrayList<>();
-        final Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure = new HashMap<>();
+        final Map<MeasureDef, Map<String, CqlEvaluationResult>> evaluationResultsPerMeasure = new HashMap<>();
 
         // Create Parameters to hold the bundle(s)
         final Parameters parameters = new Parameters();

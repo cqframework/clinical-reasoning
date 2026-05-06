@@ -169,7 +169,7 @@ public class PopulationDef {
                         !FhirResourceAndCqlTypeUtils.areObjectsEqual(e.inputResource(), measureObservationResourceKey))
                 .toList();
         if (!filtered.isEmpty()) {
-            rebuilt.add(CqlExpressionValue.ofRaw(new ObservationAccumulator(filtered), null));
+            rebuilt.add(CqlExpressionValue.ofRaw(element.expressionName(), new ObservationAccumulator(filtered), null));
         }
     }
 
@@ -247,10 +247,10 @@ public class PopulationDef {
      * {@link CqlExpressionValue} so the underlying Set ({@link HashSetForCqlExpressionValues})
      * can dedupe by FHIR-resource / CQL-type identity rather than Java object identity.
      */
-    public void addResource(String key, Object value) {
+    public void addResource(String key, String expression, Object value) {
         subjectResources
                 .computeIfAbsent(key, k -> new HashSetForCqlExpressionValues())
-                .add(CqlExpressionValue.ofRaw(value, null));
+                .add(CqlExpressionValue.ofRaw(expression, value, null));
     }
 
     @Nullable

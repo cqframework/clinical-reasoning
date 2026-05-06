@@ -374,7 +374,7 @@ class MeasureScoreCalculatorTest {
 
     private static List<CqlExpressionValue> wrap(Object... items) {
         return java.util.Arrays.stream(items)
-                .map(item -> CqlExpressionValue.ofRaw(item, null))
+                .map(item -> CqlExpressionValue.ofRaw(null, item, null))
                 .toList();
     }
 

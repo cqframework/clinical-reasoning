@@ -206,7 +206,7 @@ public final class CqlExpressionValue {
             return Collections.emptyList();
         }
         if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean bool) {
-            if (bool.getValue()) {
+            if (! bool.getValue()) {
                 return Collections.emptyList();
             }
             var subjectResult = evaluationResult.get(subjectType);

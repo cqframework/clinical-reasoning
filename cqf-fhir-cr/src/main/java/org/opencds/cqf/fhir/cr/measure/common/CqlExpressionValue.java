@@ -151,9 +151,7 @@ public final class CqlExpressionValue {
      * {@link #asIterable()} path doesn't unroll it into individual entries.
      */
     public Optional<FunctionResultAccumulator> asFunctionResultAccumulator() {
-        // TODO: What needs to be done here?
-        // return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
-        return Optional.empty();
+        return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
     }
 
     /**

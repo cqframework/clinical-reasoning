@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 
 /**
  * Various FHIR version-agnostic utilities for working with Stratifiers.
@@ -29,7 +30,10 @@ public class StratifierUtils {
         }
 
         if (!value.isIterable()) {
-            return List.of(raw.getClass().getName());
+            if (raw instanceof ClassInstance classInstance) {
+                return List.of(ClassInstanceHelper.getClassName(classInstance));
+            }
+            return Collections.emptyList();
         }
 
         return getStream(value.asIterable())

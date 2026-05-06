@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
@@ -116,7 +118,7 @@ public interface PopulationBasisValidator {
         if (optResourceClass.isPresent()) {
 
             var resultMatchingClasses = resultClasses.stream()
-                    .filter(it -> optResourceClass.get().equals(it))
+                    .filter(it -> doClassesMatch(it, optResourceClass.orElse(null)))
                     .toList();
 
             if (resultMatchingClasses.size() != resultClasses.size()) {
@@ -131,6 +133,10 @@ public interface PopulationBasisValidator {
                                         resultMatchingClasses));
             }
         }
+    }
+
+    private static boolean doClassesMatch(String it, @Nullable String resourceClassName) {
+        return Objects.equals(resourceClassName, it);
     }
 
     private void validateStratifierPopulationBasisType(

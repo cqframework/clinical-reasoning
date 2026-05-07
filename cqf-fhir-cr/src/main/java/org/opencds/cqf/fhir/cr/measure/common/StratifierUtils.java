@@ -32,7 +32,7 @@ public class StratifierUtils {
         if (!value.isIterable()) {
             if (raw instanceof ClassInstance classInstance) {
                 return List.of(ClassInstanceHelper.getClassName(classInstance));
-            } else if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean ) {
+            } else if (raw instanceof org.opencds.cqf.cql.engine.runtime.Boolean) {
                 return List.of(org.opencds.cqf.cql.engine.runtime.Boolean.class.getName());
             }
             return Collections.emptyList();
@@ -46,8 +46,8 @@ public class StratifierUtils {
 
     private static String toClassName(Object object) {
         return object instanceof ClassInstance classInstance
-            ? toSimpleClassName(classInstance)
-            : object.getClass().getName();
+                ? toSimpleClassName(classInstance)
+                : object.getClass().getName();
     }
 
     private static String toSimpleClassName(ClassInstance classInstance) {

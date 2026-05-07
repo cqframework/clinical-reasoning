@@ -579,11 +579,8 @@ public class MeasureReportDefScorer {
         if (inputResource instanceof ClassInstance classInstance) {
             final Object fhirResourceFromClassInstance = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
             return fhirResourceFromClassInstance instanceof IBaseResource baseResource
-                && stratumResourceIds.contains(baseResource
-                .getIdElement()
-                .toVersionless()
-                .getValue());
-
+                    && stratumResourceIds.contains(
+                            baseResource.getIdElement().toVersionless().getValue());
         }
         return false;
     }

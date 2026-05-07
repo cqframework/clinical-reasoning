@@ -137,9 +137,9 @@ public interface PopulationBasisValidator {
 
     private List<String> simpleNamesFromTypes(List<String> classNames) {
         return classNames.stream()
-            .map(PopulationBasisValidator::simpleNameFromType)
-            .distinct()
-            .toList();
+                .map(PopulationBasisValidator::simpleNameFromType)
+                .distinct()
+                .toList();
     }
 
     private static boolean doClassesMatch(String it, @Nullable String resourceClassName) {
@@ -188,16 +188,19 @@ public interface PopulationBasisValidator {
 
                 throw new InvalidRequestException(
                         "criteria-based stratifier is invalid for expression: [%s] due to mismatch between population basis: [%s] and result types: %s for measure URL: %s"
-                                .formatted(expression, groupPopulationBasisCode, simpleNamesFromTypes(resultClasses), url));
+                                .formatted(
+                                        expression,
+                                        groupPopulationBasisCode,
+                                        simpleNamesFromTypes(resultClasses),
+                                        url));
             }
 
             // skip validation below since for criteria-based stratifier, the boolean basis test is irrelevant
             return;
         }
 
-        var resultMatchingClasses = resultClasses.stream()
-                .filter(this::isResultClassAllowed)
-                .toList();
+        var resultMatchingClasses =
+                resultClasses.stream().filter(this::isResultClassAllowed).toList();
 
         if (resultMatchingClasses.size() != resultClasses.size()) {
             var invalidTypes = resultClasses.stream()
@@ -220,7 +223,7 @@ public interface PopulationBasisValidator {
             return invalidType;
         }
 
-        return split[split.length -1];
+        return split[split.length - 1];
     }
 
     private String buildValueStratifierErrorMessage(
@@ -243,7 +246,7 @@ public interface PopulationBasisValidator {
 
     private boolean isResultClassAllowed(String resultClass) {
         return allowedStratifierValueTypes().contains(resultClass)
-            || org.opencds.cqf.cql.engine.runtime.Boolean.class.getName().equals(resultClass);
+                || org.opencds.cqf.cql.engine.runtime.Boolean.class.getName().equals(resultClass);
     }
 
     private boolean doesBasisMatchResource(String resultClass, String groupPopulationBasisCode) {

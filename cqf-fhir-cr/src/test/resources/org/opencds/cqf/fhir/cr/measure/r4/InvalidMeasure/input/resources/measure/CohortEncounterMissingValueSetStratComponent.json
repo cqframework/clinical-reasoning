@@ -1,0 +1,67 @@
+{
+  "resourceType": "Measure",
+  "id": "CohortEncounterMissingValueSetStratComponent",
+  "url": "http://example.com/Measure/CohortEncounterMissingValueSetStratComponent",
+  "name": "CohortEncounterMissingValueSetStratComponent",
+  "status": "active",
+  "library": [
+    "http://example.com/Library/CohortEncounterMissingValueSet"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-gender",
+          "code": {
+            "text": "Patient Gender"
+          },
+          "component": [
+            {
+              "id": "stratifier-gender-comp-1",
+              "code": {
+                "text": "Patient Gender"
+              },
+              "criteria": {
+                "language": "text/cql-identifier",
+                "expression": "Patient Gender String"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

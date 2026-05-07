@@ -2,9 +2,13 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 /**
  * FHIR agnostic Object to store Measure Population supporting evidence definition and expression results
@@ -89,9 +93,52 @@ public class SupportingEvidenceDef {
 
     // Add an element to Set<Object> under a key (Creates a new set if key is missing)
     public void addResource(String key, Object value) {
-        subjectResources
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.List objectAsCqlList) {
+            final List<Object> fhirConverted = convertToFhir(objectAsCqlList);
+            subjectResources
                 .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
-                .add(value);
+                .addAll(fhirConverted);
+        }
+
+        if (value instanceof ClassInstance classInstance) {
+            final Object fhirFromClassInstance = convertToFhir(classInstance);
+
+            subjectResources
+                .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
+                .add(fhirFromClassInstance);
+        }
+    }
+
+    private static List<Object> convertToFhir(org.opencds.cqf.cql.engine.runtime.List cqlList) {
+        return StreamSupport.stream(cqlList.spliterator(), false)
+            .map(SupportingEvidenceDef::convertToFhir)
+            .toList();
+    }
+
+    private static List<Object> convertToFhir(List<?> list) {
+        return list.stream()
+            .map(SupportingEvidenceDef::convertToFhir)
+            .toList();
+    }
+
+    private static Object convertToFhir(Object object) {
+        if (object instanceof org.opencds.cqf.cql.engine.runtime.Boolean cqlBoolean) {
+            return cqlBoolean.getValue();
+        }
+
+        if (object instanceof org.opencds.cqf.cql.engine.runtime.Decimal cqlDecimal) {
+            return cqlDecimal.getValue();
+        }
+
+        if (object instanceof org.opencds.cqf.cql.engine.runtime.Integer cqlInteger) {
+            return cqlInteger.getValue();
+        }
+
+        if (object instanceof ClassInstance classInstance) {
+            return ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
+        }
+
+        return object;
     }
 
     private static String requireNonBlank(String value, String fieldName) {

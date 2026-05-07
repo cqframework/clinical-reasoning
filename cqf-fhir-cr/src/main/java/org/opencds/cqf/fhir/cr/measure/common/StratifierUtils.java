@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getClassName;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
 
 import java.util.Collections;
 import java.util.List;
@@ -40,10 +40,19 @@ public class StratifierUtils {
 
         return getStream(value.asIterable())
                 .filter(Objects::nonNull)
-                .map(o -> o instanceof ClassInstance classInstance
-                        ? getClassName(classInstance)
-                        : o.getClass().getName())
+                .map(StratifierUtils::toClassName)
                 .toList();
+    }
+
+    private static String toClassName(Object object) {
+        return object instanceof ClassInstance classInstance
+            ? toSimpleClassName(classInstance)
+            : object.getClass().getName();
+    }
+
+    private static String toSimpleClassName(ClassInstance classInstance) {
+        final Object fhirFromClassInstance = convertToFhirR4IfNeeded(classInstance);
+        return fhirFromClassInstance.getClass().getName();
     }
 
     private static Stream<?> getStream(Iterable<?> iterable) {

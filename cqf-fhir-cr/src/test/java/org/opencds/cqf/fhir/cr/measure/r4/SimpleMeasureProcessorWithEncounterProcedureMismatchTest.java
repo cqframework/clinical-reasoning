@@ -23,6 +23,6 @@ class SimpleMeasureProcessorWithEncounterProcedureMismatchTest {
                 .then()
                 .hasStatus(MeasureReportStatus.ERROR)
                 .hasContainedOperationOutcomeMsg(
-                        "Exception for subjectId: Patient/numer-EXM108, Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [http://content.alphora.com/fhir/dqm/Measure/CMS68v12] due to mismatch between total result classes: [org.opencds.cqf.cql.engine.runtime.Boolean] and matching result classes: []");
+                        "Exception for subjectId: Patient/numer-EXM108, Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [Encounter] for Measure: [http://content.alphora.com/fhir/dqm/Measure/CMS68v12] due to mismatch between total result classes: [Boolean] and matching result classes: []");
     }
 }

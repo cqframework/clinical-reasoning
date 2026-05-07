@@ -54,6 +54,9 @@ public final class CqlExpressionValue {
      */
     public static CqlExpressionValue ofRaw(
             @Nullable String expressionName, @Nullable Object value, @Nullable Set<Value> evaluatedResources) {
+        if (value instanceof ExpressionResult expressionResult) {
+            return of(expressionName, expressionResult);
+        }
         return new CqlExpressionValue(
                 expressionName, value, evaluatedResources != null ? evaluatedResources : Collections.emptySet());
     }
@@ -151,7 +154,7 @@ public final class CqlExpressionValue {
      * {@link #asIterable()} path doesn't unroll it into individual entries.
      */
     public Optional<FunctionResultAccumulator> asFunctionResultAccumulator() {
-         return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
+        return raw instanceof FunctionResultAccumulator acc ? Optional.of(acc) : Optional.empty();
     }
 
     /**
@@ -242,8 +245,8 @@ public final class CqlExpressionValue {
         if (raw == null) {
             return Collections.emptyList();
         }
-        if (raw instanceof org.opencds.cqf.cql.engine.runtime.List list) {
-            return StreamSupport.stream(list.spliterator(), false)
+        if (raw instanceof Iterable<?> iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false)
                     .filter(Objects::nonNull)
                     .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         }

@@ -113,16 +113,16 @@ public class EvaluationResultFormatter {
         return sb.toString();
     }
 
-    //    /**
-    //     * Formats an expression result value according to its type.
-    //     * Public API for formatting values from ExpressionResult.getValue().
-    //     *
-    //     * @param value the value to format (may be a collection, resource, primitive, date, etc.)
-    //     * @return formatted string representation
-    //     */
-    //    public static String formatExpressionValue(Object value) {
-    //        return formatValue(value);
-    //    }
+    /**
+     * Formats an expression result value according to its type.
+     * Public API for formatting values from ExpressionResult.getValue().
+     *
+     * @param value the value to format (may be a collection, resource, primitive, date, etc.)
+     * @return formatted string representation
+     */
+    public static String formatExpressionValue(Object value) {
+        return formatValue(CqlExpressionValue.ofRaw(null, value, null));
+    }
 
     /**
      * Formats a value according to its type: collections, resources, primitives, dates, etc.
@@ -301,6 +301,13 @@ public class EvaluationResultFormatter {
     public static String printValue(Object value) {
         if (value == null) {
             return "null";
+        }
+
+        if (value instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
+            if (StringUtils.isNotBlank(id)) {
+                return id;
+            }
         }
 
         if (value instanceof IBaseResource resource) {

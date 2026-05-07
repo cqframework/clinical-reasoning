@@ -29,7 +29,7 @@ import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 
 class CompositeEvaluationResultsPerMeasureTest {
-    static final FhirModelResolver modelResolver = new R4FhirModelResolver();
+    static final FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver = new R4FhirModelResolver();
 
     @Test
     void gettersContainExpectedData() {

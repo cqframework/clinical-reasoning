@@ -283,7 +283,7 @@ class SimpleMeasureProcessorTest {
                     .hasStatus(MeasureReportStatus.ERROR)
                     .hasContainedOperationOutcome()
                     .hasContainedOperationOutcomeMsg(
-                            "group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean] due to mismatch between total result classes: [Encounter] and matching result classes: []")
+                            "group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean] due to mismatch between total result classes: [org.hl7.fhir.r4.model.Encounter] and matching result classes: []")
                     .report();
         }
 
@@ -298,7 +298,7 @@ class SimpleMeasureProcessorTest {
                     .hasStatus(MeasureReportStatus.ERROR)
                     .hasContainedOperationOutcome()
                     .hasContainedOperationOutcomeMsg(
-                            "Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean] due to mismatch between total result classes: [Encounter] and matching result classes: []")
+                            "Message: group expression criteria results for expression: [Initial Population] and scoring: [PROPORTION] must fall within accepted types for population basis: [boolean] for Measure: [http://hl7.org/fhir/us/cqfmeasures/Measure/EXM108-basis-boolean] due to mismatch between total result classes: [org.hl7.fhir.r4.model.Encounter] and matching result classes: []")
                     .report();
         }
 

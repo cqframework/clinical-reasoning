@@ -18,7 +18,7 @@ public class ClassInstanceHelper {
     }
 
     public static String getId(ClassInstance classInstance) {
-        if (classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri) && classInstance.has("id")) {
+        if (isFhirResource(classInstance)) {
             var resourceIdInstance = (ClassInstance) classInstance.get("id");
             var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.get("value");
             if (resourceIdValue != null) {
@@ -39,5 +39,9 @@ public class ClassInstanceHelper {
         var qName = classInstance.getType();
         var system = qName.getNamespaceURI().equals(fhirModelNamespaceUri) ? "org.hl7.fhir" : qName.getNamespaceURI();
         return "%s.%s.model.%s".formatted(system, version, qName.getLocalPart());
+    }
+
+    public static boolean isFhirResource(ClassInstance classInstance) {
+        return classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri) && classInstance.has("id");
     }
 }

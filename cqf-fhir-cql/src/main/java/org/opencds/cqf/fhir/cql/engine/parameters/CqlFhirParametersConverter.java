@@ -33,6 +33,7 @@ import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Decimal;
+import org.opencds.cqf.cql.engine.runtime.NamedTypeValue;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
@@ -404,13 +405,23 @@ public class CqlFhirParametersConverter {
                 : value;
     }
 
-    public IBase toFhirValue(ClassInstance classInstance) {
-        return toFhirValue(classInstance, null);
+    public IBase toFhirValue(Value value) {
+        return toFhirValue(value, null);
     }
 
-    public IBase toFhirValue(ClassInstance classInstance, String parentName) {
-        var typeName = classInstance.getType().getLocalPart();
-        var clazz = modelResolver.resolveType(typeName);
+    public IBase toFhirValue(Value valueToConvert, String parentName) {
+        Class<?> clazz;
+        String typeName;
+        if (valueToConvert instanceof ClassInstance classInstance) {
+            typeName = classInstance.getType().getLocalPart();
+            clazz = modelResolver.resolveType(typeName);
+        } else if (valueToConvert instanceof NamedTypeValue namedTypeValue) {
+            typeName = namedTypeValue.getType().getLocalPart();
+            clazz = modelResolver.resolveType(typeName);
+        } else {
+            typeName = valueToConvert.getTypeAsString();
+            clazz = null;
+        }
         if (clazz == null) {
             throw new IllegalArgumentException("Could not resolve FHIR type: " + typeName);
         }
@@ -439,27 +450,30 @@ public class CqlFhirParametersConverter {
         }
 
         if (instance instanceof IBaseEnumeration<?> enumeration) {
-            var value = classInstance.get("value");
-            if (value != null) {
-                enumeration.setValueAsString(value.toString());
+            if (valueToConvert instanceof ClassInstance classInstance) {
+                var enumValue = classInstance.get("value");
+                if (enumValue != null) {
+                    enumeration.setValueAsString(enumValue.toString());
+                }
             }
             return instance;
         }
 
         if (instance instanceof IPrimitiveType<?> primitive) {
-            var value = classInstance.get("value");
-            if (value instanceof DateTime dateTime) {
+            var primitiveValue =
+                    valueToConvert instanceof ClassInstance classInstance ? classInstance.get("value") : valueToConvert;
+            if (primitiveValue instanceof DateTime dateTime) {
                 modelResolver.setPrimitiveValue(dateTime, primitive);
-            } else if (value instanceof Date date) {
+            } else if (primitiveValue instanceof Date date) {
                 modelResolver.setPrimitiveValue(date, primitive);
-            } else if (value instanceof org.opencds.cqf.cql.engine.runtime.Boolean bool) {
+            } else if (primitiveValue instanceof org.opencds.cqf.cql.engine.runtime.Boolean bool) {
                 modelResolver.setPrimitiveValue(bool.getValue(), primitive);
-            } else if (value instanceof org.opencds.cqf.cql.engine.runtime.Integer integer) {
+            } else if (primitiveValue instanceof org.opencds.cqf.cql.engine.runtime.Integer integer) {
                 modelResolver.setPrimitiveValue(integer.getValue(), primitive);
-            } else if (value instanceof Decimal decimal) {
+            } else if (primitiveValue instanceof Decimal decimal) {
                 modelResolver.setPrimitiveValue(decimal.getValue(), primitive);
-            } else if (value != null) {
-                modelResolver.setPrimitiveValue(value.toString(), primitive);
+            } else if (primitiveValue != null) {
+                modelResolver.setPrimitiveValue(primitiveValue.toString(), primitive);
             }
             return instance;
         }
@@ -474,18 +488,16 @@ public class CqlFhirParametersConverter {
         }
 
         for (var child : definition.getChildren()) {
-            var elementValue = classInstance.get(child.getElementName());
+            var elementValue = ((ClassInstance) valueToConvert).get(child.getElementName());
             if (elementValue == null) {
                 continue;
             }
             if (elementValue instanceof org.opencds.cqf.cql.engine.runtime.List list) {
                 for (var item : list) {
-                    if (item instanceof ClassInstance childCci) {
-                        child.getMutator().addValue(instance, toFhirValue(childCci, typeName));
-                    }
+                    child.getMutator().addValue(instance, toFhirValue(item, typeName));
                 }
-            } else if (elementValue instanceof ClassInstance childCci) {
-                child.getMutator().addValue(instance, toFhirValue(childCci, typeName));
+            } else {
+                child.getMutator().addValue(instance, toFhirValue(elementValue, typeName));
             }
         }
         return instance;

@@ -1,5 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import jakarta.annotation.Nullable;
 import java.util.Collection;
@@ -12,7 +16,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -576,13 +579,13 @@ public class MeasureReportDefScorer {
 
     private static boolean containsResourceIds(ObservationEntry entry, Set<String> stratumResourceIds) {
         final Object inputResource = entry.inputResource();
-        if (inputResource instanceof ClassInstance classInstance) {
-            final Object fhirResourceFromClassInstance = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
-            return fhirResourceFromClassInstance instanceof IBaseResource baseResource
-                    && stratumResourceIds.contains(
-                            baseResource.getIdElement().toVersionless().getValue());
+        if (inputResource instanceof ClassInstance classInstance && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+            var id = getId(classInstance);
+            return stratumResourceIds.contains(id);
         }
-        return false;
+        return inputResource instanceof IBaseResource baseResource
+                && stratumResourceIds.contains(
+                        baseResource.getIdElement().toVersionless().getValue());
     }
 
     /**

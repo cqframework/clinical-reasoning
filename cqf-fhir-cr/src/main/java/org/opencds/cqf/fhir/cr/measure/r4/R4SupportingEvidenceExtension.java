@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
@@ -273,12 +273,6 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        // Preserve CQL runtime wrappers (encode later)
-        if (value instanceof Value) {
-            out.add(value);
-            return;
-        }
-
         var wrapper = CqlExpressionValue.ofRaw(null, value, null);
 
         // Flatten lists & sets
@@ -337,10 +331,8 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        var value = convertToFhirR4IfNeeded(leaf);
-
         // Interval<DateTime>/Interval<Date> -> Period
-        Interval interval = asInterval(value);
+        Interval interval = asInterval(leaf);
         if (interval != null) {
             Period p = tryBuildPeriod(interval);
             if (p != null) {
@@ -351,7 +343,7 @@ public class R4SupportingEvidenceExtension {
         }
 
         // Tuple -> represented as nested extensions under this "value"
-        if (value instanceof Tuple tuple) {
+        if (leaf instanceof Tuple tuple) {
             for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
                 Extension fieldExt = new Extension(entry.getKey());
                 // field values become repeated nested "value" slices under the field extension
@@ -360,6 +352,8 @@ public class R4SupportingEvidenceExtension {
             }
             return;
         }
+
+        var value = leaf instanceof Value cqlValue ? convertToFhirR4(cqlValue) : leaf;
 
         // Scalars / resources / numeric
         if (value instanceof Boolean b) {
@@ -375,7 +369,7 @@ public class R4SupportingEvidenceExtension {
         } else if (value instanceof org.hl7.fhir.r4.model.Type t) {
             valueExt.setValue(t);
         } else {
-            valueExt.setValue(new StringType(String.valueOf(value)));
+            valueExt.setValue(new StringType(String.valueOf(leaf)));
         }
     }
 

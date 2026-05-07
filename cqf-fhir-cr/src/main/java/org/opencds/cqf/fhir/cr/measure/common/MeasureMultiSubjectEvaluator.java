@@ -1,6 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import com.apicatalog.jsonld.StringUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -18,7 +23,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
@@ -655,14 +659,17 @@ public class MeasureMultiSubjectEvaluator {
      * Normalize a resource to its ID string for use as a row key component.
      */
     private static String normalizeResourceKey(Object obj) {
-        if (obj instanceof ClassInstance classInstance) {
-            final Object convertedToFhir = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
-            if (convertedToFhir instanceof IBaseResource resource
-                    && resource.getIdElement() != null
-                    && !resource.getIdElement().isEmpty()) {
-
-                return resource.getIdElement().toVersionless().getValue();
+        if (obj instanceof ClassInstance classInstance && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+            var id = getId(classInstance);
+            if (StringUtils.isNotBlank(id)) {
+                return id;
             }
+        }
+        if (obj instanceof IBaseResource resource
+                && resource.getIdElement() != null
+                && !resource.getIdElement().isEmpty()) {
+
+            return resource.getIdElement().toVersionless().getValue();
         }
 
         return String.valueOf(obj);
@@ -976,7 +983,6 @@ public class MeasureMultiSubjectEvaluator {
                         // FHIR resource types have globally unique IDs - no subject qualification needed
                         resources.stream()
                                 .filter(Objects::nonNull)
-                                .map(CqlExpressionValue::raw)
                                 .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                                 .filter(Objects::nonNull)
                                 .map(SubjectResourceKey::resourceOnly)
@@ -1003,19 +1009,24 @@ public class MeasureMultiSubjectEvaluator {
      * For resources, we use the versionless reference (e.g., "Encounter/123").
      * For non-resource FHIR types and primitives, we fall back to {@code String.valueOf(obj)}.
      */
-    private static String normalizePopulationKey(Object obj) {
+    private static String normalizePopulationKey(Object o) {
+        var obj = o instanceof CqlExpressionValue cqlValue ? cqlValue.raw() : o;
         if (obj == null) {
             return null;
         }
-        if (obj instanceof ClassInstance classInstance) {
-            final Object fhirFromClassInstance = ClassInstanceHelper.convertToFhirR4IfNeeded(classInstance);
-            if (fhirFromClassInstance instanceof IBaseResource resource) {
-                if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
-                    return resource.getIdElement().toVersionless().getValueAsString();
-                }
-                // If the resource is present but has no id, fall back to toString for best-effort logging/debug.
-                return resource.toString();
+        if (obj instanceof ClassInstance classInstance && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+            var id = getId(classInstance);
+            if (StringUtils.isNotBlank(id)) {
+                return id;
             }
+            return classInstance.toString();
+        }
+        if (obj instanceof IBaseResource resource) {
+            if (resource.getIdElement() != null && !resource.getIdElement().isEmpty()) {
+                return resource.getIdElement().toVersionless().getValueAsString();
+            }
+            // If the resource is present but has no id, fall back to toString for best-effort logging/debug.
+            return resource.toString();
         }
         return String.valueOf(obj);
     }

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import ca.uhn.fhir.context.FhirContext;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
+
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
@@ -22,8 +23,7 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.fhir.cql.Engines;
+import org.opencds.cqf.cql.engine.runtime.NamedTypeValue;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
@@ -154,15 +154,14 @@ class R4StratifierBuilder {
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
         boolean isComponent = values.size() > 1;
-        var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
         for (StratumValueDef valuePair : values) {
             StratumValueWrapper stratumValue = valuePair.value();
             var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
             Object value;
-            if (stratumValue.getValueClass().equals(ClassInstance.class)) {
-                value = cqlFhirParametersConverter.toFhirValue((ClassInstance) stratumValue.getValue());
+            if (stratumValue.getValue() instanceof NamedTypeValue cqlValue) {
+                value = convertToFhirR4(cqlValue);
             } else {
                 value = stratumValue;
             }

@@ -23,12 +23,12 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.cli.argument.MeasureCommandArgument;
 import org.opencds.cqf.fhir.cr.cli.command.CqlCommand.SubjectAndResult;
 import org.opencds.cqf.fhir.cr.cli.command.EngineFactory.EngineBundle;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -141,9 +141,9 @@ public class MeasureCommand implements Callable<Integer> {
             ZonedDateTime end,
             SubjectAndResult subjectAndResult) {
 
-        Map<String, EvaluationResult> resultMap = new HashMap<>();
+        Map<String, CqlEvaluationResult> resultMap = new HashMap<>();
         var subjectId = subjectAndResult.subject().subjectId();
-        resultMap.put(subjectId, subjectAndResult.result());
+        resultMap.put(subjectId, new CqlEvaluationResult(subjectAndResult.result()));
 
         var report = processor.evaluateMeasureResults(
                 measure, start, end, "subject", Collections.singletonList(subjectId), resultMap);

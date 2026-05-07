@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
 import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
@@ -237,8 +237,14 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private String getPopulationResourceIds(CqlExpressionValue wrapper) {
-        if (wrapper != null && wrapper.raw() instanceof IBaseResource resource) {
-            return resource.getIdElement().toVersionless().getValueAsString();
+        if (wrapper != null) {
+            if (wrapper.raw() instanceof IBaseResource resource) {
+                return resource.getIdElement().toVersionless().getValueAsString();
+            }
+            if (wrapper.raw() instanceof ClassInstance classInstance
+                    && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+                return getId(classInstance);
+            }
         }
         return null;
     }
@@ -279,7 +285,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
-                    .filter(wrapper -> wrapper != null && wrapper.raw() instanceof Resource)
+                    .filter(wrapper -> wrapper != null
+                            && (wrapper.raw() instanceof Resource
+                                    || (wrapper.raw() instanceof ClassInstance classInstance
+                                            && isFhirResource(FhirVersionEnum.R4, classInstance))))
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }
@@ -360,7 +369,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
             } else if (key.getValue() instanceof ClassInstance classInstance
                     && isFhirResource(FhirVersionEnum.R4, classInstance)) {
-                var resource = (Resource) convertToFhirR4IfNeeded(classInstance);
+                var resource = (Resource) convertToFhirR4(classInstance);
                 bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
             } else {
                 String valueCode = key.getValueAsString();

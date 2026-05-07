@@ -7,7 +7,9 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Arrays;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.ResourceType;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
 /**
@@ -42,6 +44,10 @@ public class ClassInstanceHelper {
         return r4Converter.convertToFhirIfNeeded(value);
     }
 
+    public static IBase convertToFhirR4(Value value) {
+        return r4Converter.toFhirValue(value);
+    }
+
     public static String getClassName(ClassInstance classInstance) {
         // TODO: Need to fix version determination
         var version = "r4";
@@ -58,7 +64,7 @@ public class ClassInstanceHelper {
                         case R4 -> R4_RESOURCE_TYPE_NAMES;
                         default -> List.of();
                     };
-            return resourceTypes.contains(classInstance.getTypeAsString());
+            return resourceTypes.contains(classInstance.getType().getLocalPart());
         }
         return false;
     }

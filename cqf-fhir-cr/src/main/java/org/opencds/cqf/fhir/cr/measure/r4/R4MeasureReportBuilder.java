@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4IfNeeded;
 import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
@@ -352,7 +354,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 sde.getAccumulatedValues().entrySet()) {
 
             Resource obs;
-            if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
+            var key = accumulator.getKey();
+            if (key.getValue() instanceof Resource resource) {
+                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
+            } else
+//            if (key.getValue() instanceof ClassInstance classInstance && isFhirResource(classInstance)) {
+//                var resource = (Resource) convertToFhirR4IfNeeded(classInstance);
+//                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
+//            } else
+            {
                 String valueCode = accumulator.getKey().getValueAsString();
                 Long valueCount = accumulator.getValue();
 
@@ -366,8 +376,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 }
 
                 bc.addCriteriaExtensionToSupplementalData(obs, sde.id(), sde.description());
-            } else {
-                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
             }
         }
     }

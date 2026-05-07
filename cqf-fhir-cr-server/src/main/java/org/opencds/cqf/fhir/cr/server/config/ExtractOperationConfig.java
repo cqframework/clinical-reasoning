@@ -6,14 +6,12 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireResponseProcessorFactory;
-import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.r4.questionnaireresponse.QuestionnaireResponseExtractProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
 public class ExtractOperationConfig {

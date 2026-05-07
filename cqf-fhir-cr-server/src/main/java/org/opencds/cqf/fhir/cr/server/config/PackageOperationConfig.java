@@ -10,7 +10,6 @@ import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
-import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.r4.graphdefinition.GraphDefinitionPackageProvider;
@@ -21,7 +20,6 @@ import org.opencds.cqf.fhir.cr.hapi.r4.valueset.ValueSetPackageProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
 public class PackageOperationConfig {

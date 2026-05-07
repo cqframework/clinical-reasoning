@@ -409,7 +409,7 @@ class CliTest {
                         "SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
         assertTrue(
                 output.contains(
-                        "SDE Payer=[Tuple {\n  code: Concept {\n\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n}\n  period: Interval[2011-05-23, 2012-05-23]\n}]"));
+                        "SDE Payer=[Tuple {\n  code: Concept {\n    codes: List(value=[Code { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }])\n  }\n  period: Interval[2011-05-23, 2012-05-23]\n}]"));
         assertTrue(
                 output.contains(
                         "SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
@@ -438,7 +438,7 @@ class CliTest {
                         "SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
         assertTrue(
                 output.contains(
-                        "SDE Payer=[Tuple {\n  code: Concept {\n\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n}\n  period: Interval[2011-05-23, 2012-05-23]\n}]"));
+                        "SDE Payer=[Tuple {\n  code: Concept {\n    codes: List(value=[Code { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }])\n  }\n  period: Interval[2011-05-23, 2012-05-23]\n}]"));
         assertTrue(
                 output.contains(
                         "SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));

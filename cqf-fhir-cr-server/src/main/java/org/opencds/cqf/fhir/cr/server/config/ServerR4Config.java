@@ -37,13 +37,14 @@ import org.springframework.context.annotation.Configuration;
  * {@code RepositoryConfig} (requires {@code DaoRegistry}). The relevant beans are recreated here
  * with {@link IRepositoryFactory} returning the in-memory repository instead.
  */
+@SuppressWarnings("UnstableApiUsage")
 @Configuration
 @EnableConfigurationProperties(ServerProperties.class)
 public class ServerR4Config {
 
     @Bean
-    public FhirContext fhirContext() {
-        return FhirContext.forR4Cached();
+    public FhirContext fhirContext(ServerProperties properties) {
+        return FhirContext.forCached(FhirVersionEnum.valueOf(properties.getFhirVersion()));
     }
 
     @Bean
@@ -86,7 +87,12 @@ public class ServerR4Config {
 
     @Bean
     public EvaluationSettings evaluationSettings() {
-        return EvaluationSettings.getDefault();
+        return EvaluationSettings.getDefault()
+                .withRegisteredNamespaces(Map.of(
+                        "hl7.fhir.uv.cql",
+                        "http://hl7.org/fhir/uv/cql",
+                        "nhl7.fhir.us.cql",
+                        "http://hl7.org/fhir/us/cql"));
     }
 
     @Bean

@@ -20,6 +20,7 @@ import org.springframework.context.event.EventListener;
  * {@link FhirContext} is registered. Pass an explicit list to scope the surface (e.g. expose
  * only knowledge artifacts).
  */
+@SuppressWarnings("UnstableApiUsage")
 public class RepositoryRestProviderRegistrar {
 
     private static final Logger logger = LoggerFactory.getLogger(RepositoryRestProviderRegistrar.class);

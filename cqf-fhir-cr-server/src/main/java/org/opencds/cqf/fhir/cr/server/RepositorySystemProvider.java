@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
  * System-level provider (no resource type) that handles {@code POST /} bundle transactions and
  * batches by delegating to {@link ca.uhn.fhir.repository.IRepository#transaction}.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class RepositorySystemProvider {
 
     private final IRepositoryFactory repositoryFactory;

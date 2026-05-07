@@ -38,6 +38,7 @@ import org.opencds.cqf.fhir.cr.server.search.SearchParameterTranslator;
  * (conditional update/delete) to {@code @ConditionalUrlParam}; these flow into the request headers
  * map passed to {@code IRepository}, where supporting backends can act on them.
  */
+@SuppressWarnings("UnstableApiUsage")
 public class RepositoryResourceProvider<T extends IBaseResource> implements IResourceProvider {
 
     private final Class<T> resourceType;

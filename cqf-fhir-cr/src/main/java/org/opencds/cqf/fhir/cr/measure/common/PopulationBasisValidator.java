@@ -253,10 +253,12 @@ public interface PopulationBasisValidator {
         // FHIR primitive type codes are lowercase ("boolean", "string") but Java class simple names
         // are uppercase ("Boolean", "String"). Handle these explicitly to match only the valid
         // lowercase FHIR codes and reject invalid uppercase variants like "String" or "Boolean".
-        if (Boolean.class.getName().equals(resultClass)) {
+        if (Boolean.class.getName().equals(resultClass)
+                || org.opencds.cqf.cql.engine.runtime.Boolean.class.getName().equals(resultClass)) {
             return BOOLEAN_BASIS.equals(groupPopulationBasisCode);
         }
-        if (String.class.getName().equals(resultClass)) {
+        if (String.class.getName().equals(resultClass)
+                || org.opencds.cqf.cql.engine.runtime.String.class.getName().equals(resultClass)) {
             return STRING_BASIS.equals(groupPopulationBasisCode);
         }
         var classSplit = resultClass.split("\\.");

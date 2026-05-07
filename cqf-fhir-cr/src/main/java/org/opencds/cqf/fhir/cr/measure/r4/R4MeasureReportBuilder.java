@@ -7,6 +7,7 @@ import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEO
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
@@ -357,13 +358,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
             var key = accumulator.getKey();
             if (key.getValue() instanceof Resource resource) {
                 bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
-            } else
-//            if (key.getValue() instanceof ClassInstance classInstance && isFhirResource(classInstance)) {
-//                var resource = (Resource) convertToFhirR4IfNeeded(classInstance);
-//                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
-//            } else
-            {
-                String valueCode = accumulator.getKey().getValueAsString();
+            } else if (key.getValue() instanceof ClassInstance classInstance
+                    && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+                var resource = (Resource) convertToFhirR4IfNeeded(classInstance);
+                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
+            } else {
+                String valueCode = key.getValueAsString();
                 Long valueCount = accumulator.getValue();
 
                 Coding valueCoding = new Coding().setCode(valueCode);

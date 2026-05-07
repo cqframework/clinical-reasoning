@@ -3,6 +3,10 @@ package org.opencds.cqf.fhir.cql;
 import static org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver.fhirModelNamespaceUri;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.Arrays;
+import java.util.List;
+import org.hl7.fhir.dstu3.model.ResourceType;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 
@@ -12,13 +16,18 @@ import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 public class ClassInstanceHelper {
     public static CqlFhirParametersConverter r4Converter =
             Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
+    public static final List<String> DSTU3_RESOURCE_TYPE_NAMES =
+            Arrays.stream(ResourceType.values()).map(ResourceType::name).toList();
+    public static final List<String> R4_RESOURCE_TYPE_NAMES = Arrays.stream(org.hl7.fhir.r4.model.ResourceType.values())
+            .map(org.hl7.fhir.r4.model.ResourceType::name)
+            .toList();
 
     private ClassInstanceHelper() {
         // intentionally empty
     }
 
     public static String getId(ClassInstance classInstance) {
-        if (isFhirResource(classInstance)) {
+        if (classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri) && classInstance.has("id")) {
             var resourceIdInstance = (ClassInstance) classInstance.get("id");
             var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.get("value");
             if (resourceIdValue != null) {
@@ -41,7 +50,16 @@ public class ClassInstanceHelper {
         return "%s.%s.model.%s".formatted(system, version, qName.getLocalPart());
     }
 
-    public static boolean isFhirResource(ClassInstance classInstance) {
-        return classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri) && classInstance.has("id");
+    public static boolean isFhirResource(FhirVersionEnum fhirVersion, ClassInstance classInstance) {
+        if (classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri)) {
+            var resourceTypes =
+                    switch (fhirVersion) {
+                        case DSTU3 -> DSTU3_RESOURCE_TYPE_NAMES;
+                        case R4 -> R4_RESOURCE_TYPE_NAMES;
+                        default -> List.of();
+                    };
+            return resourceTypes.contains(classInstance.getTypeAsString());
+        }
+        return false;
     }
 }

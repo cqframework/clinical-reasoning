@@ -23,6 +23,8 @@ import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
 public class R4PopulationBasisValidator implements PopulationBasisValidator {
 
     private static final Set<String> ALLOWED_STRATIFIER_VALUE_TYPES = new HashSet<>(Arrays.asList(
+            // hack to get around HAPI enums
+            "org.hl7.fhir.r4.model.AdministrativeGender",
             CodeableConcept.class.getName(),
             Quantity.class.getName(),
             Range.class.getName(),

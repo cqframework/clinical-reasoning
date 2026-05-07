@@ -259,8 +259,9 @@ public interface PopulationBasisValidator {
         if (String.class.getName().equals(resultClass)) {
             return STRING_BASIS.equals(groupPopulationBasisCode);
         }
-
-        return resultClass.equals(groupPopulationBasisCode);
+        var classSplit = resultClass.split("\\.");
+        var simpleName = classSplit[classSplit.length - 1];
+        return groupPopulationBasisCode.equals(simpleName);
     }
 
     private List<String> prettyClassNames(List<Class<?>> classes) {

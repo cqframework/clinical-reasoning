@@ -327,18 +327,28 @@ public class R4MeasureUtils {
     }
 
     /**
-     * Check if a criteria reference matches a specific population type.
+     * Check if a criteria reference resolves to a population of the specified type within the group.
      *
-     * @param criteriaReference the criteria reference string
+     * <p>The criteria reference is a FHIR population ID, not a type code. This method resolves
+     * the reference to the actual population and checks its type code.
+     *
+     * @param criteriaReference the criteria reference string (a population ID)
+     * @param group the MeasureGroupComponent containing the populations
      * @param populationType the MeasurePopulationType to check against
-     * @return true if the criteria reference matches the population type ID
+     * @return true if the referenced population has the specified type
      */
-    public static boolean criteriaReferenceMatches(String criteriaReference, MeasurePopulationType populationType) {
+    public static boolean criteriaReferenceResolvesToType(
+            String criteriaReference, MeasureGroupComponent group, MeasurePopulationType populationType) {
         if (criteriaReference == null || populationType == null) {
             return false;
         }
-        // Common pattern: criteria references use lowercase IDs like "numerator", "denominator"
-        return criteriaReference.equalsIgnoreCase(populationType.toCode());
+        return group.getPopulation().stream()
+                .filter(pop -> criteriaReference.equals(pop.getId()))
+                .findFirst()
+                .map(pop -> populationType
+                        .toCode()
+                        .equals(pop.getCode().getCodingFirstRep().getCode()))
+                .orElse(false);
     }
 
     /**

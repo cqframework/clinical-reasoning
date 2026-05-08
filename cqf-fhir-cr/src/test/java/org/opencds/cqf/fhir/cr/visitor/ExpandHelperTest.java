@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,6 +56,9 @@ class ExpandHelperTest {
         // should not be used
         var client = mockTerminologyServerWithValueSetR4(leaf);
 
+        assertTrue(
+                grouper.getExpansion().getContains().isEmpty(), "Precondition failed: grouper should start unexpanded");
+
         var expandHelper = new ExpandHelper(rep, client);
         expandHelper.expandValueSet(
                 (IValueSetAdapter) this.factory.createKnowledgeArtifactAdapter(grouper),
@@ -64,7 +68,16 @@ class ExpandHelperTest {
                 new ArrayList<IValueSetAdapter>(),
                 new ArrayList<String>(),
                 expansionDate);
-        assertEquals(3, grouper.getExpansion().getContains().size());
+        var contains = grouper.getExpansion().getContains();
+
+        // This should ONLY contain final merged results (3 codes)
+        assertEquals(3, contains.size(), "Final expansion size mismatch");
+
+        // Mutation detection: ensure no intermediate expansion polluted the result
+        assertFalse(
+                contains.stream().anyMatch(c -> c.getSystem() == null || c.getCode() == null),
+                "Detected malformed expansion entries, likely due to intermediate mutation");
+
         assertEquals(
                 expansionDate.getTime(), grouper.getExpansion().getTimestamp().getTime());
         verify(rep, times(1)).search(any(), any(), any(Multimap.class), any());
@@ -586,6 +599,249 @@ class ExpandHelperTest {
         var parameters = initiallyNoVersionNoExpansion.getExpansion().getParameter();
         assertNotNull(parameters);
         assertFalse(parameters.stream().anyMatch(p -> "warning".equals(p.getName())));
+    }
+
+    @Test
+    void expandValueSet_withExplicitConceptsAndIncludes_mergesCorrectly() {
+        var leafUrl = "http://test.org/ValueSet/leaf";
+
+        // referenced leaf VS
+        var leaf = createLeafWithUrl(leafUrl);
+
+        // grouper VS with BOTH explicit codes and include
+        var grouper = new ValueSet();
+        var include = grouper.getCompose().addInclude();
+        include.addValueSet(leafUrl);
+        include.setSystem("http://explicit-system").addConcept().setCode("explicit-code");
+
+        var repo = mockRepositoryWithValueSetR4(leaf);
+        var client = mockTerminologyServerWithValueSetR4(leaf);
+        var helper = new ExpandHelper(repo, client);
+        var timestamp = new Date();
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                timestamp);
+
+        var expansion = grouper.getExpansion();
+        assertNotNull(expansion);
+
+        // should contain:
+        //   3 from leaf
+        //   1 explicit
+        assertEquals(4, expansion.getContains().size());
+
+        // verify that specific, explicit code is present
+        assertTrue(expansion.getContains().stream().anyMatch(c -> "explicit-code".equals(c.getCode())));
+
+        // verify that the naive parameter present
+        assertTrue(expansion.getParameter().stream().anyMatch(p -> "naive".equals(p.getName())));
+
+        // verify timestamp preserved
+        assertEquals(timestamp.getTime(), expansion.getTimestamp().getTime());
+    }
+
+    @Test
+    void expandValueSet_mixedExpansion_hasOnlyOneNaiveParameter() {
+        var leafUrl = "http://test.org/ValueSet/leaf";
+        var leaf = createLeafWithUrl(leafUrl);
+
+        var grouper = new ValueSet();
+        var include = grouper.getCompose().addInclude();
+        include.addValueSet(leafUrl);
+        include.setSystem("http://explicit-system").addConcept().setCode("explicit-code");
+
+        var repo = mockRepositoryWithValueSetR4(leaf);
+        var client = mockTerminologyServerWithValueSetR4(leaf);
+        var helper = new ExpandHelper(repo, client);
+
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        var naiveCount = grouper.getExpansion().getParameter().stream()
+                .filter(p -> "naive".equals(p.getName()))
+                .count();
+
+        assertEquals(1, naiveCount);
+    }
+
+    @Test
+    void expandValueSet_withFilter_fallsThroughToTerminologyServer_andFails() {
+        // setup tx server endpoint
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var url = baseUrl + "/ValueSet/with-filter";
+
+        // ValueSet with a filter (should NOT be eligible for local expansion)
+        var vs = new ValueSet();
+        vs.setUrl(url);
+
+        var include = vs.getCompose().addInclude();
+        include.setSystem("http://loinc.org");
+        include.addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.EQUAL)
+                .setValue("1234-5");
+
+        // repository should not be used
+        var repo = mockRepositoryWithValueSetR4(new ValueSet());
+
+        // terminology server should be attempted but FAIL
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenThrow(new RuntimeException("tx server failure"));
+
+        var helper = new ExpandHelper(repo, client);
+
+        Exception thrown = null;
+        try {
+            helper.expandValueSet(
+                    (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                    factory.createParameters(new Parameters()),
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
+        } catch (Exception e) {
+            thrown = e;
+        }
+
+        // we expect failure because:
+        // - local expansion is disallowed (filter present)
+        // - terminology server throws
+        assertNotNull(thrown);
+
+        // verify terminology server was attempted
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+
+        // verify repository fallback was NOT used
+        verify(repo, never()).search(any(), any(), any(Multimap.class), any());
+    }
+
+    @Test
+    void expandValueSet_withExclude_fallsThroughToTerminologyServer_andFails() {
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var vs = new ValueSet();
+        vs.setUrl(baseUrl + "/ValueSet/with-exclude");
+
+        vs.getCompose().addInclude().setSystem("http://loinc.org").addConcept().setCode("1234-5");
+
+        vs.getCompose().addExclude().setSystem("http://loinc.org").addConcept().setCode("9999-9");
+
+        var repo = mockRepositoryWithValueSetR4(new ValueSet());
+
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenThrow(new RuntimeException("tx server failure"));
+
+        var helper = new ExpandHelper(repo, client);
+
+        assertThrows(
+                Exception.class,
+                () -> helper.expandValueSet(
+                        (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                        factory.createParameters(new Parameters()),
+                        Optional.of(factory.createEndpoint(endpoint)),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new Date()));
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+        verify(repo, never()).search(any(), any(), any(Multimap.class), any());
+    }
+
+    @Test
+    void expandGrouper_rollsUpNaiveParameter() {
+
+        var leafUrl = "http://test.org/ValueSet/leaf";
+
+        var leaf = createLeafWithUrl(leafUrl);
+        leaf.getExpansion().addParameter().setName("naive").setValue(new UriType("true"));
+
+        var grouper = new ValueSet();
+        grouper.getCompose().addInclude().addValueSet(leafUrl);
+
+        var repo = mockRepositoryWithValueSetR4(leaf);
+        var client = mockTerminologyServerWithValueSetR4(leaf);
+
+        var helper = new ExpandHelper(repo, client);
+
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        var params = grouper.getExpansion().getParameter();
+
+        assertTrue(params.stream().anyMatch(p -> "naive".equals(p.getName())), "naive parameter should be rolled up");
+    }
+
+    @Test
+    void expandGrouper_setsTimestampOnFinalExpansion() {
+
+        var leafUrl = "http://test.org/ValueSet/leaf";
+        var leaf = createLeafWithUrl(leafUrl);
+
+        var grouper = new ValueSet();
+        grouper.getCompose().addInclude().addValueSet(leafUrl);
+
+        var repo = mockRepositoryWithValueSetR4(leaf);
+        var client = mockTerminologyServerWithValueSetR4(leaf);
+
+        var helper = new ExpandHelper(repo, client);
+
+        var timestamp = new Date();
+
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(grouper),
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                timestamp);
+
+        assertNotNull(grouper.getExpansion().getTimestamp());
+
+        assertEquals(timestamp.getTime(), grouper.getExpansion().getTimestamp().getTime());
+    }
+
+    @Test
+    void expandExplicitConcepts_setsNaiveParameter() {
+
+        var vs = new ValueSet();
+
+        vs.getCompose().addInclude().setSystem("http://test").addConcept().setCode("A");
+
+        var repo = mockRepositoryWithValueSetR4(new ValueSet());
+        var client = mockTerminologyServerWithValueSetR4(new ValueSet());
+
+        var helper = new ExpandHelper(repo, client);
+
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                factory.createParameters(new Parameters()),
+                Optional.empty(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        assertTrue(vs.getExpansion().getParameter().stream().anyMatch(p -> "naive".equals(p.getName())));
     }
 
     ValueSet createLeafWithUrl(String url) {

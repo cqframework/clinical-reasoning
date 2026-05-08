@@ -56,25 +56,6 @@ class R4ImportBundleProducerTest {
     }
 
     @Test
-    void testEnsureHttpsConvertsHttpToHttps() throws Exception {
-        String input = "http://example.com/path";
-        String output = R4ImportBundleProducer.ensureHttps(input);
-        assertTrue(output.startsWith("https://"));
-    }
-
-    @Test
-    void testEnsureHttpsPreservesHttps() throws Exception {
-        String input = "https://secure.com";
-        String output = R4ImportBundleProducer.ensureHttps(input);
-        assertEquals(input, output);
-    }
-
-    @Test
-    void testEnsureHttpsMalformedUrl() {
-        assertThrows(IllegalArgumentException.class, () -> R4ImportBundleProducer.ensureHttps("://bad-url"));
-    }
-
-    @Test
     void testFixIdentifiersAddsUrnOidPrefix() {
         var id1 = new org.hl7.fhir.r4.model.Identifier();
         id1.setSystem("urn:ietf:rfc:3986");

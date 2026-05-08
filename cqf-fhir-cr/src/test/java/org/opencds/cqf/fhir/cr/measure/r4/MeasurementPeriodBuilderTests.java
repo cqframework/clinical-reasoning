@@ -10,6 +10,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings({"java:S2699", "java:S125"})
@@ -85,10 +86,10 @@ class MeasurementPeriodBuilderTests {
                         LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasSubjectReference("Patient/female-1914")
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1);
     }
 
@@ -116,10 +117,10 @@ class MeasurementPeriodBuilderTests {
                         LocalDateTime.of(2020, Month.JANUARY, 16, 23, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasSubjectReference("Patient/female-1914")
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(0);
     }
 
@@ -147,10 +148,10 @@ class MeasurementPeriodBuilderTests {
                         LocalDateTime.of(2020, Month.JANUARY, 16, 20, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasSubjectReference("Patient/female-1914")
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(0);
     }
 
@@ -181,10 +182,10 @@ class MeasurementPeriodBuilderTests {
                         LocalDateTime.of(2020, Month.JANUARY, 16, 21, 0, 0).toInstant(ZoneOffset.UTC)))
                 .hasSubjectReference("Patient/female-1914")
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1);
     }
 }

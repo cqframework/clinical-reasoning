@@ -138,8 +138,9 @@ public class KnowledgeArtifactProcessor {
 
     public static List<IDependencyInfo> getRelatedArtifactsWithPreservedExtensions(List<IDependencyInfo> deps) {
         return deps.stream()
-                .filter(ra -> preservedExtensionUrls.stream().anyMatch(url -> ra.getExtension().stream()
-                        .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
+                .filter(ra -> preservedExtensionUrls.stream()
+                        .anyMatch(url -> ra.getExtension().stream()
+                                .anyMatch(ext -> ext.getUrl().equalsIgnoreCase(url))))
                 .collect(Collectors.toList());
     }
 
@@ -163,6 +164,18 @@ public class KnowledgeArtifactProcessor {
      */
     public static boolean isGrouper(MetadataResource resource) {
         return resource.getResourceType() == ResourceType.ValueSet
+                && resource.getUseContext().stream()
+                        .anyMatch(uc -> uc.hasCode() && uc.getCode().getCode().equals(TransformProperties.grouperType));
+    }
+
+    public static boolean isGrouper(org.hl7.fhir.r5.model.MetadataResource resource) {
+        return resource.getResourceType() == org.hl7.fhir.r5.model.ResourceType.ValueSet
+                && resource.getUseContext().stream()
+                        .anyMatch(uc -> uc.hasCode() && uc.getCode().getCode().equals(TransformProperties.grouperType));
+    }
+
+    public static boolean isGrouper(org.hl7.fhir.dstu3.model.MetadataResource resource) {
+        return resource.getResourceType() == org.hl7.fhir.dstu3.model.ResourceType.ValueSet
                 && resource.getUseContext().stream()
                         .anyMatch(uc -> uc.hasCode() && uc.getCode().getCode().equals(TransformProperties.grouperType));
     }

@@ -46,10 +46,13 @@ public class R4RepositorySubjectProvider implements SubjectProvider {
                 || subjectIds.get(0) == null
                 || subjectIds.get(0).isEmpty()) {
             var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
-            return new BundleMappingIterable<>(repository, bundle, x -> x.getResource()
-                            .getIdElement()
-                            .toUnqualifiedVersionless()
-                            .getValue())
+            return new BundleMappingIterable<>(
+                            repository,
+                            bundle,
+                            x -> x.getResource()
+                                    .getIdElement()
+                                    .toUnqualifiedVersionless()
+                                    .getValue())
                     .toStream();
         }
 

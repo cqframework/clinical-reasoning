@@ -31,6 +31,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
@@ -48,6 +49,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.cr.visitor.VisitorHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -59,6 +61,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
 import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
 import org.opencds.cqf.fhir.utility.dstu3.MetadataResourceHelper;
+import org.opencds.cqf.fhir.utility.dstu3.SearchHelper;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.slf4j.event.Level;
 
@@ -535,6 +538,56 @@ class ReleaseVisitorTests {
                 Canonicals.getVersion(leafRelatedArtifact.get().getResource().getReference()));
     }
 
+    @Test
+    void release_latest_from_tx_server_ensure_authoritative_source_is_set() {
+        // Load & prepare data
+        final var leafOid = "2.16.840.1.113762.1.4.1146.6";
+        final var authoritativeSource = "https://cts.nlm.nih.gov/fhir/";
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft-leaf-unversioned.json"));
+        repo.transaction(bundle);
+        removeVersionsFromLibraryAndGrouperAndUpdate(repo, leafOid);
+        var originalVset = repo.read(ValueSet.class, new IdType("ValueSet/2.16.840.1.113762.1.4.1146.6"));
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var endpoint = createEndpoint(authoritativeSource);
+
+        // Return versioned ValueSet, without Authoritative Source Extension - replicates Terminology Server behavior
+        var latestVset = originalVset.copy();
+        latestVset.setVersion("3.0.0");
+        latestVset.getExtension().removeIf(ext -> ext.getUrl().equals(TransformProperties.authoritativeSourceExtUrl));
+        var clientMock = mock(ITerminologyServerClient.class, new ReturnsDeepStubs());
+        when(clientMock.getLatestValueSetResource(any(IEndpointAdapter.class), any()))
+                .thenReturn(Optional.of(latestVset));
+
+        // Perform release
+        var releaseVisitor = new ReleaseVisitor(repo, clientMock);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var params = parameters(
+                part("version", new StringType("1.2.7")),
+                part("versionBehavior", new CodeType("default")),
+                booleanPart("latestFromTxServer", true),
+                part("terminologyEndpoint", (Endpoint) endpoint.get()));
+        libraryAdapter.accept(releaseVisitor, params);
+
+        // Retrieve Leaf ValueSet resource & ensure Authoritative Source has been added
+        var updatedLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"));
+        var leafRelatedArtifact = updatedLibrary.getRelatedArtifact().stream()
+                .filter(ra -> ra.getResource().getReference().contains(leafOid))
+                .findAny();
+        assertTrue(leafRelatedArtifact.isPresent());
+        var leaf = (ValueSet) SearchHelper.searchRepositoryByCanonical(
+                repo, new StringType(leafRelatedArtifact.get().getResource().getReference()));
+        assertTrue(leaf.hasExtension(TransformProperties.authoritativeSourceExtUrl));
+        assertTrue(leaf.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl)
+                .hasValue());
+        assertEquals(
+                authoritativeSource + "ValueSet/" + leafOid,
+                ((UriType) leaf.getExtensionByUrl(TransformProperties.authoritativeSourceExtUrl)
+                                .getValue())
+                        .getValue());
+    }
+
     private IEndpointAdapter createEndpoint(String authoritativeSource) {
         var factory = IAdapterFactory.forFhirVersion(FhirVersionEnum.DSTU3);
         var endpoint = factory.createEndpoint(new org.hl7.fhir.dstu3.model.Endpoint());
@@ -662,6 +715,51 @@ class ReleaseVisitorTests {
                 .findFirst();
         assertTrue(maybeReleaseLabel.isPresent());
         assertEquals(((StringType) maybeReleaseLabel.get().getValue()).getValue(), releaseLabel);
+    }
+
+    @Test
+    void release_releaseLabel_not_provided_should_preserve_existing() {
+        Bundle bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+        repo.transaction(bundle);
+
+        ReleaseVisitor releaseVisitor = new ReleaseVisitor(repo);
+
+        // Load and PRE-SET an existing releaseLabel on the resource
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        String existingLabel = "existing-release-label";
+
+        Extension existingExtension = new Extension();
+        existingExtension.setUrl(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL);
+        existingExtension.setValue(new StringType(existingLabel));
+        library.addExtension(existingExtension);
+
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+
+        // IMPORTANT: Do NOT include releaseLabel parameter
+        Parameters params = parameters(part("version", "1.2.3"), part("versionBehavior", new CodeType("default")));
+
+        Bundle returnResource = (Bundle) libraryAdapter.accept(releaseVisitor, params);
+
+        Optional<BundleEntryComponent> maybeLib = returnResource.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+
+        assertTrue(maybeLib.isPresent());
+
+        Library releasedLibrary =
+                repo.read(Library.class, new IdType(maybeLib.get().getResponse().getLocation()));
+
+        Optional<Extension> maybeReleaseLabel = releasedLibrary.getExtension().stream()
+                .filter(ext -> ext.getUrl().equals(IKnowledgeArtifactAdapter.RELEASE_LABEL_URL))
+                .findFirst();
+
+        // ASSERT: it is still there
+        assertTrue(maybeReleaseLabel.isPresent());
+
+        // ASSERT: value unchanged
+        assertEquals(existingLabel, ((StringType) maybeReleaseLabel.get().getValue()).getValue());
     }
 
     @Test

@@ -13,11 +13,7 @@ kotlin {
     // src/test/java. The Kotlin compiler picks up .kt files from these dirs;
     // the Java compiler independently processes .java files there as before.
     sourceSets {
-        main {
-            kotlin.srcDir("src/main/java")
-        }
-        test {
-            kotlin.srcDir("src/test/java")
-        }
+        main { kotlin.srcDir("src/main/java") }
+        test { kotlin.srcDir("src/test/java") }
     }
 }

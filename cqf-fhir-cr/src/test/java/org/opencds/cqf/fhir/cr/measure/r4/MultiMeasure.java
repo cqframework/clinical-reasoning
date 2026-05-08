@@ -48,6 +48,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
@@ -298,7 +299,8 @@ class MultiMeasure {
          * @return SelectedMeasureDefCollection for fluent MeasureDef collection assertions
          */
         public SelectedMeasureDefCollection<Then> defs() {
-            return new SelectedMeasureDefCollection<>(evaluation.measureDefs(), this);
+            return new SelectedMeasureDefCollection<>(
+                    evaluation.measureDefs(), this, evaluation.evaluationResultsPerMeasure());
         }
 
         // Backward compatibility - delegate to report()
@@ -639,6 +641,10 @@ class MultiMeasure {
             return this;
         }
 
+        public SelectedPopulation population(MeasurePopulationType type) {
+            return population(type.toCode());
+        }
+
         public SelectedPopulation population(String name) {
             return this.population(g -> g.getPopulation().stream()
                     .filter(x -> x.hasCode()
@@ -782,6 +788,10 @@ class MultiMeasure {
 
         public SelectedStratumPopulation firstPopulation() {
             return population(MeasureReport.StratifierGroupComponent::getPopulationFirstRep);
+        }
+
+        public SelectedStratumPopulation population(MeasurePopulationType type) {
+            return population(type.toCode());
         }
 
         public SelectedStratumPopulation population(String name) {

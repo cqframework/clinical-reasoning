@@ -499,7 +499,7 @@ class R4MeasureUtilsTest {
     void testGetAggregateMethod_WithAvgExtension() {
         String measureUrl = "http://example.com/Measure/test";
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
-        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("avg"));
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("average"));
 
         ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
 
@@ -521,7 +521,7 @@ class R4MeasureUtilsTest {
     void testGetAggregateMethod_WithMinExtension() {
         String measureUrl = "http://example.com/Measure/test";
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
-        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("min"));
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("minimum"));
 
         ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
 
@@ -532,7 +532,7 @@ class R4MeasureUtilsTest {
     void testGetAggregateMethod_WithMaxExtension() {
         String measureUrl = "http://example.com/Measure/test";
         MeasureGroupPopulationComponent population = new MeasureGroupPopulationComponent();
-        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("max"));
+        population.addExtension(EXT_CQFM_AGGREGATE_METHOD_URL, new StringType("maximum"));
 
         ContinuousVariableObservationAggregateMethod result = R4MeasureUtils.getAggregateMethod(measureUrl, population);
 
@@ -588,7 +588,7 @@ class R4MeasureUtilsTest {
 
         MeasureGroupComponent group = new MeasureGroupComponent();
         MeasureGroupPopulationComponent measureObs = createPopulation(MeasurePopulationType.MEASUREOBSERVATION);
-        addAggregateMethodExtension(measureObs, "avg");
+        addAggregateMethodExtension(measureObs, "average");
         group.addPopulation(measureObs);
 
         boolean result = R4MeasureUtils.isRatioContinuousVariable(scoring, group);
@@ -794,92 +794,69 @@ class R4MeasureUtilsTest {
     }
 
     // ========================================
-    // Tests for criteriaReferenceMatches
+    // Tests for criteriaReferenceResolvesToType
     // ========================================
 
-    @Test
-    void testCriteriaReferenceMatches_NumeratorExactMatch() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("numerator", MeasurePopulationType.NUMERATOR);
-
-        assertTrue(result);
+    private MeasureGroupComponent createGroupWithPopulation(String popId, String typeCode) {
+        var group = new MeasureGroupComponent();
+        var pop = new MeasureGroupPopulationComponent();
+        pop.setId(popId);
+        pop.setCode(new CodeableConcept(
+                new Coding("http://terminology.hl7.org/CodeSystem/measure-population", typeCode, typeCode)));
+        group.addPopulation(pop);
+        return group;
     }
 
     @Test
-    void testCriteriaReferenceMatches_NumeratorCaseInsensitive() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("NUMERATOR", MeasurePopulationType.NUMERATOR);
+    void testCriteriaReferenceResolvesToType_IdMatchesTypeCode() {
+        var group = createGroupWithPopulation("numerator", "numerator");
 
-        assertTrue(result);
+        assertTrue(R4MeasureUtils.criteriaReferenceResolvesToType("numerator", group, MeasurePopulationType.NUMERATOR));
     }
 
     @Test
-    void testCriteriaReferenceMatches_NumeratorMixedCase() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("Numerator", MeasurePopulationType.NUMERATOR);
+    void testCriteriaReferenceResolvesToType_ArbitraryIdResolvesToNumerator() {
+        var group = createGroupWithPopulation("Numerator_1", "numerator");
 
-        assertTrue(result);
+        assertTrue(
+                R4MeasureUtils.criteriaReferenceResolvesToType("Numerator_1", group, MeasurePopulationType.NUMERATOR));
     }
 
     @Test
-    void testCriteriaReferenceMatches_DenominatorExactMatch() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("denominator", MeasurePopulationType.DENOMINATOR);
+    void testCriteriaReferenceResolvesToType_ArbitraryIdResolvesToDenominator() {
+        var group = createGroupWithPopulation("denom-pop", "denominator");
 
-        assertTrue(result);
+        assertTrue(
+                R4MeasureUtils.criteriaReferenceResolvesToType("denom-pop", group, MeasurePopulationType.DENOMINATOR));
     }
 
     @Test
-    void testCriteriaReferenceMatches_DenominatorCaseInsensitive() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("DENOMINATOR", MeasurePopulationType.DENOMINATOR);
+    void testCriteriaReferenceResolvesToType_WrongType() {
+        var group = createGroupWithPopulation("numerator", "numerator");
 
-        assertTrue(result);
+        assertFalse(
+                R4MeasureUtils.criteriaReferenceResolvesToType("numerator", group, MeasurePopulationType.DENOMINATOR));
     }
 
     @Test
-    void testCriteriaReferenceMatches_NoMatch() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("numerator", MeasurePopulationType.DENOMINATOR);
+    void testCriteriaReferenceResolvesToType_IdNotFound() {
+        var group = createGroupWithPopulation("numerator", "numerator");
 
-        assertFalse(result);
+        assertFalse(
+                R4MeasureUtils.criteriaReferenceResolvesToType("nonexistent", group, MeasurePopulationType.NUMERATOR));
     }
 
     @Test
-    void testCriteriaReferenceMatches_NullCriteriaReference() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches(null, MeasurePopulationType.NUMERATOR);
+    void testCriteriaReferenceResolvesToType_NullCriteriaReference() {
+        var group = createGroupWithPopulation("numerator", "numerator");
 
-        assertFalse(result);
+        assertFalse(R4MeasureUtils.criteriaReferenceResolvesToType(null, group, MeasurePopulationType.NUMERATOR));
     }
 
     @Test
-    void testCriteriaReferenceMatches_NullPopulationType() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("numerator", null);
+    void testCriteriaReferenceResolvesToType_NullPopulationType() {
+        var group = createGroupWithPopulation("numerator", "numerator");
 
-        assertFalse(result);
-    }
-
-    @Test
-    void testCriteriaReferenceMatches_BothNull() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches(null, null);
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testCriteriaReferenceMatches_EmptyCriteriaReference() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches("", MeasurePopulationType.NUMERATOR);
-
-        assertFalse(result);
-    }
-
-    @Test
-    void testCriteriaReferenceMatches_MeasureObservation() {
-        boolean result = R4MeasureUtils.criteriaReferenceMatches(
-                "measure-observation", MeasurePopulationType.MEASUREOBSERVATION);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void testCriteriaReferenceMatches_InitialPopulation() {
-        boolean result =
-                R4MeasureUtils.criteriaReferenceMatches("initial-population", MeasurePopulationType.INITIALPOPULATION);
-
-        assertTrue(result);
+        assertFalse(R4MeasureUtils.criteriaReferenceResolvesToType("numerator", group, null));
     }
 }

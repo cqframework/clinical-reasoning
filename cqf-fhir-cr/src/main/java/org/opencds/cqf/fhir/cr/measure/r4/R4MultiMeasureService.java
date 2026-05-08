@@ -260,9 +260,11 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         var context = Engines.forRepository(resolvedRepo, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
-        var preparedContext = r4ProcessorToUse.prepareEvaluateMultiMeasuresWithCqlEngine(measures, periodStart, periodEnd, parameters, context);
+        var preparedContext = r4ProcessorToUse.prepareEvaluateMultiMeasuresWithCqlEngine(
+                measures, periodStart, periodEnd, parameters, context);
 
-        var subjects = getSubjects(subjectProvider, subjectToUse, measures, context, r4ProcessorToUse, preparedContext, resolvedRepo);
+        var subjects = getSubjects(
+                subjectProvider, subjectToUse, measures, context, r4ProcessorToUse, preparedContext, resolvedRepo);
 
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
                 r4ProcessorToUse.preparedEvaluateMultiMeasuresWithCqlEngine(
@@ -528,8 +530,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     @Nonnull
-    private List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId, List<Measure> measures, CqlEngine context, R4MeasureProcessor processor, MultiMeasuresPreparedContext preparedContext, IRepository repository) {
-        log.info("No selective data requirements identified for subject filtering, continuing with default subject determination");
+    private List<String> getSubjects(
+            R4RepositorySubjectProvider subjectProvider,
+            String subjectId,
+            List<Measure> measures,
+            CqlEngine context,
+            R4MeasureProcessor processor,
+            MultiMeasuresPreparedContext preparedContext,
+            IRepository repository) {
+        log.info(
+                "No selective data requirements identified for subject filtering, continuing with default subject determination");
         return subjectProvider.getSubjects(repository, subjectId).toList();
     }
 }

@@ -82,7 +82,7 @@ public class TestGroup {
 
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
-                fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+                    fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
             return this;
         }
 
@@ -162,27 +162,27 @@ public class TestGroup {
 
         public When data(String dataAssetName) {
             dataRepository = new InMemoryFhirRepository(
-                repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
             return this;
         }
 
         public When content(String dataAssetName) {
             contentRepository = new InMemoryFhirRepository(
-                repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
             return this;
         }
 
         public When terminology(String dataAssetName) {
             terminologyRepository = new InMemoryFhirRepository(
-                repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
+                    repository.fhirContext(), (IBaseBundle) jsonParser.parseResource(open(dataAssetName)));
             return this;
         }
 
         private void loadAdditionalData(IBaseResource resource) {
             var fhirVersion = repository.fhirContext().getVersion().getVersion();
             additionalData = resource.getIdElement().getResourceType().equals("Bundle")
-                ? (IBaseBundle) resource
-                : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
+                    ? (IBaseBundle) resource
+                    : addEntry(newBundle(fhirVersion), newEntryWithResource(resource));
         }
 
         public When additionalData(String dataAssetName) {
@@ -207,10 +207,10 @@ public class TestGroup {
                 throw new IllegalArgumentException("prefetch data asset must be a Bundle");
             }
             prefetchData = List.of((IBaseBackboneElement) newPart(
-                repository.fhirContext(),
-                "prefetchData",
-                newStringPart(repository.fhirContext(), "key", name),
-                newPart(repository.fhirContext(), "data", data)));
+                    repository.fhirContext(),
+                    "prefetchData",
+                    newStringPart(repository.fhirContext(), "key", name),
+                    newPart(repository.fhirContext(), "data", data)));
             return this;
         }
 
@@ -227,21 +227,21 @@ public class TestGroup {
         public GeneratedPackage thenPackage() {
             if (isPackagePut == null) {
                 return new GeneratedPackage(
-                    processor.packageGroup(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", groupId))),
-                    repository.fhirContext());
+                        processor.packageGroup(
+                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", groupId))),
+                        repository.fhirContext());
             } else {
                 return new GeneratedPackage(
-                    processor.packageGroup(
-                        Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", groupId)),
-                        isPackagePut),
-                    repository.fhirContext());
+                        processor.packageGroup(
+                                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", groupId)),
+                                isPackagePut),
+                        repository.fhirContext());
             }
         }
 
         public DataRequirementsLibrary thenDataRequirements() {
             return new DataRequirementsLibrary(processor.dataRequirements(
-                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", groupId)), parameters));
+                    Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", groupId)), parameters));
         }
 
         public Evaluation thenEvaluate() {
@@ -249,29 +249,27 @@ public class TestGroup {
                 loadAdditionalData(readRepository(repository, additionalDataId));
             }
             return new Evaluation(
-                repository,
-                processor.evaluate(
-                    Eithers.for3(
-                        groupUrl == null
-                            ? null
-                            : canonicalTypeForVersion(
-                                repository
-                                    .fhirContext()
-                                    .getVersion()
-                                    .getVersion(),
-                                groupUrl),
-                        groupId == null
-                            ? null
-                            : Ids.newId(repository.fhirContext(), "Group", groupId),
-                        null),
-                    subjectId,
-                    parameters,
-                    useServerData,
-                    additionalData,
-                    prefetchData,
-                    dataRepository,
-                    contentRepository,
-                    terminologyRepository));
+                    repository,
+                    processor.evaluate(
+                            Eithers.for3(
+                                    groupUrl == null
+                                            ? null
+                                            : canonicalTypeForVersion(
+                                                    repository
+                                                            .fhirContext()
+                                                            .getVersion()
+                                                            .getVersion(),
+                                                    groupUrl),
+                                    groupId == null ? null : Ids.newId(repository.fhirContext(), "Group", groupId),
+                                    null),
+                            subjectId,
+                            parameters,
+                            useServerData,
+                            additionalData,
+                            prefetchData,
+                            dataRepository,
+                            contentRepository,
+                            terminologyRepository));
         }
     }
 
@@ -290,7 +288,7 @@ public class TestGroup {
             this.result = result;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
-                this.repository.fhirContext().getVersion().getVersion());
+                    this.repository.fhirContext().getVersion().getVersion());
             adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
             parameter = ((List<IBase>) modelResolver.resolvePath(result, "parameter"));
         }
@@ -308,8 +306,8 @@ public class TestGroup {
         @SuppressWarnings("unchecked")
         public Evaluation resultHasValue(Integer index, IBase value) {
             var actual = adapterFactory
-                .createParametersParameter(parameter.get(index))
-                .getValue();
+                    .createParametersParameter(parameter.get(index))
+                    .getValue();
             if (value instanceof IPrimitiveType<?> primitiveValue) {
                 assertEquals(primitiveValue.getValueAsString(), ((IPrimitiveType<String>) actual).getValueAsString());
             } else {

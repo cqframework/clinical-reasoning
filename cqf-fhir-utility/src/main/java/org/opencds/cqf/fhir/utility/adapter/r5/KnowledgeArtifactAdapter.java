@@ -10,9 +10,9 @@ import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DomainResource;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.RelatedArtifact;
@@ -46,12 +46,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
         return adaptedResource;
     }
 
-    // TODO: All these elements should be implemented as a super that handles the case where the element does not exist, but the appropriate artifact-xxx extension does
+    // TODO: All these elements should be implemented as a super that handles the case where the element does not exist,
+    // but the appropriate artifact-xxx extension does
     protected void checkAdaptedResource() {
         if (adaptedResource == null) {
-            throw new IllegalArgumentException(
-                "resource passed as a resource argument is not a MetadataResource"
-            );
+            throw new IllegalArgumentException("resource passed as a resource argument is not a MetadataResource");
         }
     }
 
@@ -107,7 +106,9 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
 
     @Override
     public String getStatus() {
-        return getCanonicalResource().getStatus() == null ? null : getCanonicalResource().getStatus().toCode();
+        return getCanonicalResource().getStatus() == null
+                ? null
+                : getCanonicalResource().getStatus().toCode();
     }
 
     @Override

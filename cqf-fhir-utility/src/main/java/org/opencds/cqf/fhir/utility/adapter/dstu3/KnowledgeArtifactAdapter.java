@@ -46,12 +46,11 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
         return adaptedResource;
     }
 
-    // TODO: All these elements should be implemented as a super that handles the case where the element does not exist, but the appropriate artifact-xxx extension does
+    // TODO: All these elements should be implemented as a super that handles the case where the element does not exist,
+    // but the appropriate artifact-xxx extension does
     protected void checkAdaptedResource() {
         if (adaptedResource == null) {
-            throw new IllegalArgumentException(
-                "resource passed as a resource argument is not a MetadataResource"
-            );
+            throw new IllegalArgumentException("resource passed as a resource argument is not a MetadataResource");
         }
     }
 
@@ -107,7 +106,9 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
 
     @Override
     public String getStatus() {
-        return getMetadataResource().getStatus() == null ? null : getMetadataResource().getStatus().toCode();
+        return getMetadataResource().getStatus() == null
+                ? null
+                : getMetadataResource().getStatus().toCode();
     }
 
     @Override

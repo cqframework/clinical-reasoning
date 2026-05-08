@@ -9,8 +9,8 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UriType;
@@ -120,15 +120,15 @@ public class GroupAdapter extends KnowledgeArtifactAdapter implements IGroupAdap
                 .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
                 .forEach(references::add);
 
-        for (var expressionExtension : getGroup().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/characteristicExpression")) {
+        for (var expressionExtension :
+                getGroup().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/characteristicExpression")) {
             if (expressionExtension.getValue() instanceof Expression expression) {
                 if (expression.hasReference()) {
                     references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        reference -> expression.setReference(reference)
-                    ));
+                            referenceSource,
+                            expression.getReference(),
+                            expression.getExtension(),
+                            reference -> expression.setReference(reference)));
                 }
             }
         }

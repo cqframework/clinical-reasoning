@@ -9,6 +9,14 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -23,7 +31,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -46,14 +53,6 @@ import org.opencds.cqf.fhir.cr.group.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.group.evaluate.IEvaluateProcessor;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 public class EvaluateProcessor implements IEvaluateProcessor {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EvaluateProcessor.class);
@@ -73,7 +72,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         if (!(request.getGroup() instanceof Group)) {
             throw new IllegalArgumentException("Expected R4 group instance");
         }
-        Group groupDefinition = (Group)request.getGroup();
+        Group groupDefinition = (Group) request.getGroup();
         log.info("Evaluating group definition {}", groupDefinition.getId());
 
         Group groupResult = new Group();
@@ -83,9 +82,13 @@ public class EvaluateProcessor implements IEvaluateProcessor {
 
             // TODO: Maybe set an ID?
             // Set a description
-            groupResult.setCode(new CodeableConcept().setText(String.format("Group as determined by evaluation of Group definition %s", groupDefinition.getId())));
+            groupResult.setCode(new CodeableConcept()
+                    .setText(String.format(
+                            "Group as determined by evaluation of Group definition %s", groupDefinition.getId())));
             // TODO: Get this from the GroupAdapter.url and version if present
-            groupResult.addExtension("http://hl7.org/fhir/StructureDefinition/workflow-generatedFrom",new UriType("Group/" + groupDefinition.getId()));
+            groupResult.addExtension(
+                    "http://hl7.org/fhir/StructureDefinition/workflow-generatedFrom",
+                    new UriType("Group/" + groupDefinition.getId()));
             if (request.getParameters() instanceof Parameters) {
                 var inputParameters = ((Parameters) request.getParameters()).copy();
                 inputParameters.setId("input-parameters");
@@ -93,29 +96,34 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                     inputParameters.addParameter("subject", request.getSubject());
                 }
                 groupResult.addContained(inputParameters);
-                groupResult.addExtension("http://hl7.org/fhir/StructureDefinition/cqf-inputParameters", new Reference().setReference("#input-parameters"));
+                groupResult.addExtension(
+                        "http://hl7.org/fhir/StructureDefinition/cqf-inputParameters",
+                        new Reference().setReference("#input-parameters"));
             }
 
             // Get the expression
             var expressionExtension = groupDefinition.getExtensionByUrl(
-                "http://hl7.org/fhir/StructureDefinition/characteristicExpression");
+                    "http://hl7.org/fhir/StructureDefinition/characteristicExpression");
             if (expressionExtension == null || !(expressionExtension.getValue() instanceof Expression)) {
                 throw new IllegalArgumentException("Expected a characteristic expression");
             }
-            var expression = (Expression)expressionExtension.getValue();
+            var expression = (Expression) expressionExtension.getValue();
 
             // TODO: Add support for inline expressions
             if (!expression.hasLanguage() || !expression.getLanguage().startsWith("text/cql-identifier")) {
-                throw new UnsupportedOperationException("Group membership evaluation is only supported for cql-identifier expressions at this time.");
+                throw new UnsupportedOperationException(
+                        "Group membership evaluation is only supported for cql-identifier expressions at this time.");
             }
 
             if (expression.getExpression() == null || expression.getExpression().isEmpty()) {
                 throw new IllegalArgumentException("Group membership expression is empty");
             }
 
-            var libraryExtensions = groupDefinition.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/cqf-library");
+            var libraryExtensions =
+                    groupDefinition.getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/cqf-library");
             if (libraryExtensions.size() != 1) {
-                throw new UnsupportedOperationException("Group membership evaluation is only supported for Groups with one and only one primary library (as identified with a cqf-library extension");
+                throw new UnsupportedOperationException(
+                        "Group membership evaluation is only supported for Groups with one and only one primary library (as identified with a cqf-library extension");
             }
             var libraryUrl = libraryExtensions.get(0).getValueAsPrimitive().getValueAsString();
             if (libraryUrl == null || libraryUrl.isEmpty()) {
@@ -127,38 +135,46 @@ public class EvaluateProcessor implements IEvaluateProcessor {
             // TODO: This needs to be set to the clients evaluation request timestamp
             var zonedDateTime = ZonedDateTime.now();
             groupResult.addExtension(
-                "http://hl7.org/fhir/StructureDefinition/workflow-generatedOn",
-                new DateTimeType(zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-            );
+                    "http://hl7.org/fhir/StructureDefinition/workflow-generatedOn",
+                    new DateTimeType(zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
 
             var parametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
             var evaluationParameters = parametersConverter.toCqlParameters(request.getParameters());
 
             // Determine initial membership
-            var subjects = getSubjects(request.getSubject(), context, request.getModelResolver(), libraryUrl, expression.getExpression(), evaluationParameters, zonedDateTime);
+            var subjects = getSubjects(
+                    request.getSubject(),
+                    context,
+                    request.getModelResolver(),
+                    libraryUrl,
+                    expression.getExpression(),
+                    evaluationParameters,
+                    zonedDateTime);
 
             var expressions = Set.of(expression.getExpression());
 
             // Evaluate membership criteria for each subject, and add them to the resulting group
             var subjectResults = new HashSet<String>();
             for (var subject : subjects) {
-                var results = (Parameters)request.getLibraryEngine().evaluate(
-                    libraryUrl,
-                    subject,
-                    request.getParameters(),
-                    evaluationParameters,
-                    request.getData(),
-                    zonedDateTime,
-                    expressions
-                );
+                var results = (Parameters) request.getLibraryEngine()
+                        .evaluate(
+                                libraryUrl,
+                                subject,
+                                request.getParameters(),
+                                evaluationParameters,
+                                request.getData(),
+                                zonedDateTime,
+                                expressions);
 
                 var resultParameter = results.getParameter(expression.getExpression());
                 if (resultParameter.hasValue()) {
                     if (!(resultParameter.getValue() instanceof BooleanType)) {
-                        outcome.addIssue().setSeverity(IssueSeverity.ERROR).setCode(IssueType.VALUE).setDetails(new CodeableConcept().setText("Expression must evaluate to a boolean"));
+                        outcome.addIssue()
+                                .setSeverity(IssueSeverity.ERROR)
+                                .setCode(IssueType.VALUE)
+                                .setDetails(new CodeableConcept().setText("Expression must evaluate to a boolean"));
                         break;
-                    }
-                    else if (((BooleanType)resultParameter.getValue()).getValue()) {
+                    } else if (((BooleanType) resultParameter.getValue()).getValue()) {
                         subjectResults.add(subject);
                     }
                 }
@@ -168,41 +184,51 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                 groupResult.addMember().setEntity(new Reference().setReference(subject));
             }
             groupResult.setQuantity(subjectResults.size());
-        }
-        catch (Exception ex) {
-            outcome.addIssue().setSeverity(IssueSeverity.FATAL).setCode(IssueType.EXCEPTION).setDetails(new CodeableConcept().setText(ex.getMessage()));
+        } catch (Exception ex) {
+            outcome.addIssue()
+                    .setSeverity(IssueSeverity.FATAL)
+                    .setCode(IssueType.EXCEPTION)
+                    .setDetails(new CodeableConcept().setText(ex.getMessage()));
         }
 
         if (outcome.hasIssue()) {
             groupResult.addContained(outcome);
-            groupResult.addExtension("http://hl7.org/fhir/StructureDefinition/cqf-messages", new Reference().setReference("#messages"));
+            groupResult.addExtension(
+                    "http://hl7.org/fhir/StructureDefinition/cqf-messages", new Reference().setReference("#messages"));
         }
 
         return groupResult;
     }
 
     private String getPatientReference(Resource resource, ModelResolver modelResolver) {
-        var reference = modelResolver.resolvePath(resource, (String)modelResolver.getContextPath("Patient", resource.fhirType()));
+        var reference = modelResolver.resolvePath(
+                resource, (String) modelResolver.getContextPath("Patient", resource.fhirType()));
         if (reference instanceof Reference) {
-            return ((Reference)reference).getReference();
+            return ((Reference) reference).getReference();
         }
 
         return null;
     }
 
-    private List<String> getSubjects(String subject, CqlEngine context, ModelResolver modelResolver, String libraryUrl, String expression, Map<String, Object> parameters, ZonedDateTime zonedDateTime) {
+    private List<String> getSubjects(
+            String subject,
+            CqlEngine context,
+            ModelResolver modelResolver,
+            String libraryUrl,
+            String expression,
+            Map<String, Object> parameters,
+            ZonedDateTime zonedDateTime) {
         if (subject != null && !subject.isEmpty()) {
             return List.of(subject);
         }
 
         // Attempt to determine initial membership criteria via data requirements inference
         var selectiveDataRequirements = getSelectiveDataRequirements(
-            Objects.requireNonNull(context.getEnvironment().getLibraryManager()),
-            VersionedIdentifiers.forUrl(libraryUrl),
-            expression,
-            parameters,
-            zonedDateTime
-        );
+                Objects.requireNonNull(context.getEnvironment().getLibraryManager()),
+                VersionedIdentifiers.forUrl(libraryUrl),
+                expression,
+                parameters,
+                zonedDateTime);
 
         for (var dr : selectiveDataRequirements) {
             log.info("Processing patient-selective data requirement for {}", dr.getType());
@@ -213,32 +239,32 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                 log.info("Processing code filter for {}", codeFilter.getPath());
                 var sp = searchParameterResolver.getSearchParameterDefinition(dr.getType(), codeFilter.getPath());
                 if (sp != null) {
-                    log.info("Processing code filter using search parameter {}",
-                        sp.getName());
+                    log.info("Processing code filter using search parameter {}", sp.getName());
                     if (codeFilter.hasCode()) {
                         List<IQueryParameterType> codeList = new ArrayList<>();
                         for (var code : codeFilter.getCode()) {
                             log.info("Adding code {}", code.getCode());
-                            codeList.add(new TokenParam(new InternalCodingDt().setSystem(code.getSystem()).setCode(code.getCode()).setVersion(code.getVersion())));
+                            codeList.add(new TokenParam(new InternalCodingDt()
+                                    .setSystem(code.getSystem())
+                                    .setCode(code.getCode())
+                                    .setVersion(code.getVersion())));
                         }
                         searchParams.put(sp.getName(), codeList);
-                    }
-                    else if (codeFilter.hasValueSet()) {
+                    } else if (codeFilter.hasValueSet()) {
                         var valueSet = codeFilter.getValueSet();
                         // Inline the codes into the retrieve e.g.
                         // Observation?code=system|code,system|code
                         log.info("Adding codes from value set {}", valueSet);
                         List<IQueryParameterType> codeList = new ArrayList<>();
                         for (Code code : context.getEnvironment()
-                            .getTerminologyProvider()
-                            .expand(new ValueSetInfo().withId(valueSet))) {
+                                .getTerminologyProvider()
+                                .expand(new ValueSetInfo().withId(valueSet))) {
                             codeList.add(new TokenParam(new InternalCodingDt()
-                                .setSystem(code.getSystem())
-                                .setCode(code.getCode())));
+                                    .setSystem(code.getSystem())
+                                    .setCode(code.getCode())));
                         }
                         searchParams.put(sp.getName(), codeList);
-                    }
-                    else {
+                    } else {
                         log.info("Skipped code filter because it had neither codes nor a value set");
                     }
                 }
@@ -249,33 +275,32 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                 if (sp != null) {
                     if (dateFilter.getValueDateTimeType() != null) {
                         List<IQueryParameterType> dateList = new ArrayList<>();
-                        dateList.add(new DateParam(
-                            ParamPrefixEnum.EQUAL,  dateFilter.getValueDateTimeType()));
+                        dateList.add(new DateParam(ParamPrefixEnum.EQUAL, dateFilter.getValueDateTimeType()));
                         searchParams.put(sp.getName(), dateList);
-                    }
-                    else if (dateFilter.getValuePeriod() != null) {
+                    } else if (dateFilter.getValuePeriod() != null) {
                         List<IQueryParameterType> dateList = new ArrayList<>();
 
                         DateParam gte = null;
                         DateParam lte = null;
                         if (dateFilter.getValuePeriod().getStart() != null) {
-                            gte = new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, dateFilter.getValuePeriod().getStart());
+                            gte = new DateParam(
+                                    ParamPrefixEnum.GREATERTHAN_OR_EQUALS,
+                                    dateFilter.getValuePeriod().getStart());
                         }
                         if (dateFilter.getValuePeriod().getEnd() != null) {
-                            lte = new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, dateFilter.getValuePeriod().getEnd());
+                            lte = new DateParam(
+                                    ParamPrefixEnum.LESSTHAN_OR_EQUALS,
+                                    dateFilter.getValuePeriod().getEnd());
                         }
 
                         if (gte != null && lte != null) {
                             searchParams.put(sp.getName(), List.of(new CompositeParam<>(gte, lte)));
-                        }
-                        else if (gte != null) {
+                        } else if (gte != null) {
                             searchParams.put(sp.getName(), List.of(gte));
-                        }
-                        else if (lte != null) {
+                        } else if (lte != null) {
                             searchParams.put(sp.getName(), List.of(lte));
                         }
-                    }
-                    else if (dateFilter.getValueDuration() != null) {
+                    } else if (dateFilter.getValueDuration() != null) {
                         // TODO: This needs to resolve based on the evaluation request time
                         log.warn("dateFilter with duration is not currently supported");
                     }
@@ -283,7 +308,10 @@ public class EvaluateProcessor implements IEvaluateProcessor {
             }
 
             if (!searchParams.isEmpty()) {
-                var resourceClass = repository.fhirContext().getResourceDefinition(dr.getType()).getImplementingClass();
+                var resourceClass = repository
+                        .fhirContext()
+                        .getResourceDefinition(dr.getType())
+                        .getImplementingClass();
                 Bundle results = repository.search(Bundle.class, resourceClass, searchParams);
 
                 var subjects = new HashSet<String>();
@@ -300,8 +328,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
 
                     var nextLink = results.getLink("next");
                     if (nextLink != null && nextLink.hasUrl()) {
-                        results = repository.link(Bundle.class,
-                            nextLink.getUrl());
+                        results = repository.link(Bundle.class, nextLink.getUrl());
                     } else {
                         results = null; // No next link, drop out
                     }
@@ -314,14 +341,19 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         log.info("Could not determine initial membership via data requirements inference, defaulting to all subjects");
         var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
         return new BundleMappingIterable<>(repository, bundle, x -> x.getResource()
-            .getIdElement()
-            .toUnqualifiedVersionless()
-            .getValue())
-            .toStream()
-            .toList();
+                        .getIdElement()
+                        .toUnqualifiedVersionless()
+                        .getValue())
+                .toStream()
+                .toList();
     }
 
-    private Library getEffectiveDataRequirements(LibraryManager libraryManager, VersionedIdentifier libraryIdentifier, String expression, Map<String, Object> parameters, ZonedDateTime zonedDateTime) {
+    private Library getEffectiveDataRequirements(
+            LibraryManager libraryManager,
+            VersionedIdentifier libraryIdentifier,
+            String expression,
+            Map<String, Object> parameters,
+            ZonedDateTime zonedDateTime) {
         CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(libraryIdentifier);
         DataRequirementsProcessor drp = new DataRequirementsProcessor();
         CqlCompilerOptions o = libraryManager.getCqlCompilerOptions();
@@ -329,18 +361,10 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         o.setAnalyzeDataRequirements(true);
         o.setReportSelectivity(true);
         var r5Library = drp.gatherDataRequirements(
-            libraryManager,
-            compiledLibrary,
-            o,
-            Set.of(expression),
-            parameters,
-            zonedDateTime,
-            false,
-            true
-        );
+                libraryManager, compiledLibrary, o, Set.of(expression), parameters, zonedDateTime, false, true);
 
         VersionConvertor_40_50 converter = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-        return (Library)converter.convertResource(r5Library);
+        return (Library) converter.convertResource(r5Library);
     }
 
     /*
@@ -399,36 +423,60 @@ public class EvaluateProcessor implements IEvaluateProcessor {
             case "ServiceRequest":
             case "Specimen":
             case "Task":
-            case "VisionPrescription": return true;
-            default: return false;
+            case "VisionPrescription":
+                return true;
+            default:
+                return false;
         }
     }
 
-    private List<DataRequirement> getSelectiveDataRequirements(LibraryManager libraryManager, VersionedIdentifier libraryIdentifier, String expression, Map<String, Object> parameters, ZonedDateTime zonedDateTime) {
+    private List<DataRequirement> getSelectiveDataRequirements(
+            LibraryManager libraryManager,
+            VersionedIdentifier libraryIdentifier,
+            String expression,
+            Map<String, Object> parameters,
+            ZonedDateTime zonedDateTime) {
         var results = new ArrayList<DataRequirement>();
-        var effectiveDataRequirements = getEffectiveDataRequirements(libraryManager, libraryIdentifier, expression, parameters, zonedDateTime);
+        var effectiveDataRequirements =
+                getEffectiveDataRequirements(libraryManager, libraryIdentifier, expression, parameters, zonedDateTime);
         var selectivity = effectiveDataRequirements.getExtensionsByUrl(CqlConstants.SELECTIVITY_EXT_URL);
         for (var e : selectivity) {
-            if (e.getExtensionByUrl("expressionIdentifier").getValueAsPrimitive().getValueAsString().equals(expression)) {
+            if (e.getExtensionByUrl("expressionIdentifier")
+                    .getValueAsPrimitive()
+                    .getValueAsString()
+                    .equals(expression)) {
                 // For now, pick the first conjunctive, maybe inclusive, patient selective data requirement
                 var formExtension = e.getExtensionByUrl("form");
-                if (formExtension != null && formExtension.hasValue() && formExtension.getValueAsPrimitive().hasValue() && formExtension.getValueAsPrimitive().getValueAsString().equals("conjunctive")) {
+                if (formExtension != null
+                        && formExtension.hasValue()
+                        && formExtension.getValueAsPrimitive().hasValue()
+                        && formExtension
+                                .getValueAsPrimitive()
+                                .getValueAsString()
+                                .equals("conjunctive")) {
                     var inclusivityExtension = e.getExtensionByUrl("inclusivity");
-                    if (inclusivityExtension == null || (inclusivityExtension.hasValue() && inclusivityExtension.getValueAsPrimitive().hasValue() && inclusivityExtension.getValueAsPrimitive().getValueAsString().equals("inclusion"))) {
+                    if (inclusivityExtension == null
+                            || (inclusivityExtension.hasValue()
+                                    && inclusivityExtension
+                                            .getValueAsPrimitive()
+                                            .hasValue()
+                                    && inclusivityExtension
+                                            .getValueAsPrimitive()
+                                            .getValueAsString()
+                                            .equals("inclusion"))) {
                         for (var clause : e.getExtensionsByUrl("clause")) {
                             for (var term : clause.getExtensionsByUrl("term")) {
                                 if (term.hasValue() && term.getValue() instanceof DataRequirement) {
-                                    var dr = (DataRequirement)term.getValue();
-                                    if (isPatientSelectiveType(dr.getType()) && dr.hasCodeFilter() || dr.hasDateFilter()) {
+                                    var dr = (DataRequirement) term.getValue();
+                                    if (isPatientSelectiveType(dr.getType()) && dr.hasCodeFilter()
+                                            || dr.hasDateFilter()) {
                                         results.add(dr);
-
                                     }
                                 }
                             }
                         }
                     }
                 }
-
             }
         }
         return results;

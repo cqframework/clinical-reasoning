@@ -67,7 +67,7 @@ public class AdapterFactory implements IAdapterFactory {
             return createParameters(parameters);
         } else if (resource instanceof Group group) {
             return createGroup(group);
-        }else {
+        } else {
             return new ResourceAdapter(resource);
         }
     }
@@ -115,7 +115,7 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new GraphDefinitionAdapter(graphDefinition);
         } else if (resource instanceof Group group) {
             adapter = createGroup(resource);
-        }else {
+        } else {
             if (resource instanceof MetadataResource metadataResource) {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
             } else {

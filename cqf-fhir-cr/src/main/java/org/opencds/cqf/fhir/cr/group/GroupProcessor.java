@@ -1,7 +1,13 @@
 package org.opencds.cqf.fhir.cr.group;
 
+import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
+import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -38,12 +44,6 @@ import org.opencds.cqf.fhir.cr.group.r4.EvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
-import java.util.List;
-
-import static java.util.Objects.requireNonNull;
-import static org.opencds.cqf.fhir.utility.PackageHelper.packageParameters;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.createRestRepository;
-import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 public class GroupProcessor {
     protected final ModelResolver modelResolver;
@@ -71,7 +71,7 @@ public class GroupProcessor {
     }
 
     public GroupProcessor(
-        IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
+            IRepository repository, CrSettings crSettings, List<? extends IOperationProcessor> operationProcessors) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
@@ -113,23 +113,22 @@ public class GroupProcessor {
         return crSettings;
     }
 
-    protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveGroup(
-        Either3<C, IIdType, R> group) {
+    protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveGroup(Either3<C, IIdType, R> group) {
         return new ResourceResolver("Group", repository).resolve(group);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageGroup(
-        Either3<C, IIdType, R> group) {
+            Either3<C, IIdType, R> group) {
         return packageGroup(group, false);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageGroup(
-        Either3<C, IIdType, R> group, boolean isPut) {
+            Either3<C, IIdType, R> group, boolean isPut) {
         return packageGroup(group, packageParameters(fhirVersion, null, isPut));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle packageGroup(
-        Either3<C, IIdType, R> group, IBaseParameters parameters) {
+            Either3<C, IIdType, R> group, IBaseParameters parameters) {
         return packageGroup(resolveGroup(group), parameters);
     }
 
@@ -139,126 +138,125 @@ public class GroupProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseGroup(
-        Either3<C, IIdType, R> group) {
+            Either3<C, IIdType, R> group) {
         return releaseGroup(group, false);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseGroup(
-        Either3<C, IIdType, R> group, boolean isPut) {
+            Either3<C, IIdType, R> group, boolean isPut) {
         return releaseGroup(group, packageParameters(fhirVersion, null, isPut));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle releaseGroup(
-        Either3<C, IIdType, R> group, IBaseParameters parameters) {
+            Either3<C, IIdType, R> group, IBaseParameters parameters) {
         return releaseGroup(resolveGroup(group), parameters);
     }
 
     public IBaseBundle releaseGroup(IBaseResource group, IBaseParameters parameters) {
         var processor = releaseProcessor != null
-            ? releaseProcessor
-            : new ReleaseProcessor(repository, crSettings.getTerminologyServerClientSettings());
+                ? releaseProcessor
+                : new ReleaseProcessor(repository, crSettings.getTerminologyServerClientSettings());
         return processor.releaseResource(group, parameters);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource dataRequirements(
-        Either3<C, IIdType, R> group, IBaseParameters parameters) {
+            Either3<C, IIdType, R> group, IBaseParameters parameters) {
         return dataRequirements(resolveGroup(group), parameters);
     }
 
     public IBaseResource dataRequirements(IBaseResource group, IBaseParameters parameters) {
         var processor = dataRequirementsProcessor != null
-            ? dataRequirementsProcessor
-            : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
+                ? dataRequirementsProcessor
+                : new DataRequirementsProcessor(repository, crSettings.getEvaluationSettings());
         return processor.getDataRequirements(group, parameters);
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> EvaluateRequest buildEvaluateRequest(
-        Either3<C, IIdType, R> group,
-        String subject,
-        IBaseParameters parameters,
-        IBaseBundle data,
-        List<? extends IBaseBackboneElement> prefetchData,
-        LibraryEngine libraryEngine) {
+            Either3<C, IIdType, R> group,
+            String subject,
+            IBaseParameters parameters,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
+            LibraryEngine libraryEngine) {
         return new EvaluateRequest(
-            resolveGroup(group),
-            StringUtils.isBlank(subject) ? null : Ids.newId(fhirVersion, subject),
-            parameters,
-            data,
-            prefetchData,
-            libraryEngine,
-            modelResolver);
+                resolveGroup(group),
+                StringUtils.isBlank(subject) ? null : Ids.newId(fhirVersion, subject),
+                parameters,
+                data,
+                prefetchData,
+                libraryEngine,
+                modelResolver);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R evaluate(
-        Either3<C, IIdType, R> group,
-        String subject,
-        IBaseParameters parameters,
-        boolean useServerData,
-        IBaseBundle data,
-        List<? extends IBaseBackboneElement> prefetchData,
-        IBaseResource dataEndpoint,
-        IBaseResource contentEndpoint,
-        IBaseResource terminologyEndpoint) {
+            Either3<C, IIdType, R> group,
+            String subject,
+            IBaseParameters parameters,
+            boolean useServerData,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
+            IBaseResource dataEndpoint,
+            IBaseResource contentEndpoint,
+            IBaseResource terminologyEndpoint) {
         return evaluate(
-            group,
-            subject,
-            parameters,
-            useServerData,
-            data,
-            prefetchData,
-            createRestRepository(repository.fhirContext(), dataEndpoint),
-            createRestRepository(repository.fhirContext(), contentEndpoint),
-            createRestRepository(repository.fhirContext(), terminologyEndpoint));
+                group,
+                subject,
+                parameters,
+                useServerData,
+                data,
+                prefetchData,
+                createRestRepository(repository.fhirContext(), dataEndpoint),
+                createRestRepository(repository.fhirContext(), contentEndpoint),
+                createRestRepository(repository.fhirContext(), terminologyEndpoint));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R evaluate(
-        Either3<C, IIdType, R> group,
-        String subject,
-        IBaseParameters parameters,
-        boolean useServerData,
-        IBaseBundle data,
-        List<? extends IBaseBackboneElement> prefetchData,
-        IRepository dataRepository,
-        IRepository contentRepository,
-        IRepository terminologyRepository) {
+            Either3<C, IIdType, R> group,
+            String subject,
+            IBaseParameters parameters,
+            boolean useServerData,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
+            IRepository dataRepository,
+            IRepository contentRepository,
+            IRepository terminologyRepository) {
         repository = proxy(repository, useServerData, dataRepository, contentRepository, terminologyRepository);
         return evaluate(
-            group,
-            subject,
-            parameters,
-            data,
-            prefetchData,
-            new LibraryEngine(repository, crSettings.getEvaluationSettings()));
+                group,
+                subject,
+                parameters,
+                data,
+                prefetchData,
+                new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R evaluate(
-        Either3<C, IIdType, R> group,
-        String subject,
-        IBaseParameters parameters,
-        IBaseBundle data,
-        List<? extends IBaseBackboneElement> prefetchData,
-        LibraryEngine libraryEngine) {
+            Either3<C, IIdType, R> group,
+            String subject,
+            IBaseParameters parameters,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
+            LibraryEngine libraryEngine) {
         var processor = evaluateProcessor != null
-            ? evaluateProcessor
-            : new EvaluateProcessor(repository, crSettings.getEvaluationSettings());
-        return processor.evaluate(
-            buildEvaluateRequest(group, subject, parameters, data, prefetchData, libraryEngine));
+                ? evaluateProcessor
+                : new EvaluateProcessor(repository, crSettings.getEvaluationSettings());
+        return processor.evaluate(buildEvaluateRequest(group, subject, parameters, data, prefetchData, libraryEngine));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle deleteGroup(
-        Either3<C, IIdType, R> group, IBaseParameters parameters) {
+            Either3<C, IIdType, R> group, IBaseParameters parameters) {
         var processor = deleteProcessor != null ? deleteProcessor : new DeleteProcessor(repository);
         return processor.deleteResource(resolveGroup(group), parameters);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle retireGroup(
-        Either3<C, IIdType, R> group, IBaseParameters parameters) {
+            Either3<C, IIdType, R> group, IBaseParameters parameters) {
         var processor = retireProcessor != null ? retireProcessor : new RetireProcessor(repository);
         return processor.retireResource(resolveGroup(group), parameters);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseBundle withdrawGroup(
-        Either3<C, IIdType, R> group, IBaseParameters parameters) {
+            Either3<C, IIdType, R> group, IBaseParameters parameters) {
         var processor = withdrawProcessor != null ? withdrawProcessor : new WithdrawProcessor(repository);
         return processor.withdrawResource(resolveGroup(group), parameters);
     }
@@ -269,28 +267,25 @@ public class GroupProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters artifactDiff(
-        Either3<C, IIdType, R> sourceGroup,
-        Either3<C, IIdType, R> targetGroup,
-        Boolean compareComputable,
-        Boolean compareExecutable,
-        IBaseResource terminologyEndpoint) {
+            Either3<C, IIdType, R> sourceGroup,
+            Either3<C, IIdType, R> targetGroup,
+            Boolean compareComputable,
+            Boolean compareExecutable,
+            IBaseResource terminologyEndpoint) {
         var processor = artifactDiffProcessor != null ? artifactDiffProcessor : new ArtifactDiffProcessor();
         return processor.getArtifactDiff(
-            resolveGroup(sourceGroup),
-            resolveGroup(targetGroup),
-            compareComputable,
-            compareExecutable,
-            null,
-            terminologyEndpoint);
+                resolveGroup(sourceGroup),
+                resolveGroup(targetGroup),
+                compareComputable,
+                compareExecutable,
+                null,
+                terminologyEndpoint);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource createChangelog(
-        Either3<C, IIdType, R> sourceGroup,
-        Either3<C, IIdType, R> targetGroup,
-        IBaseResource terminologyEndpoint) {
+            Either3<C, IIdType, R> sourceGroup, Either3<C, IIdType, R> targetGroup, IBaseResource terminologyEndpoint) {
         var processor =
-            createChangelogProcessor != null ? createChangelogProcessor : new CreateChangelogProcessor(repository);
-        return processor.createChangelog(
-            resolveGroup(sourceGroup), resolveGroup(targetGroup), terminologyEndpoint);
+                createChangelogProcessor != null ? createChangelogProcessor : new CreateChangelogProcessor(repository);
+        return processor.createChangelog(resolveGroup(sourceGroup), resolveGroup(targetGroup), terminologyEndpoint);
     }
 }

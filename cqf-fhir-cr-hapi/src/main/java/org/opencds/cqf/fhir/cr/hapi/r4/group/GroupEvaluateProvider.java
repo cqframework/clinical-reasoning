@@ -1,29 +1,27 @@
 package org.opencds.cqf.fhir.cr.hapi.r4.group;
 
+import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.newCanonicalType;
+import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
+import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.hapi.common.IGroupProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
-import java.util.List;
-
-import static org.opencds.cqf.fhir.cr.hapi.common.CanonicalHelper.newCanonicalType;
-import static org.opencds.cqf.fhir.cr.hapi.common.ParameterHelper.getStringValue;
-import static org.opencds.cqf.fhir.utility.EndpointHelper.getEndpoint;
 
 public class GroupEvaluateProvider {
     private final IGroupProcessorFactory groupProcessorFactory;
@@ -112,28 +110,28 @@ public class GroupEvaluateProvider {
      */
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Group.class)
     public Group evaluate(
-        @IdParam IdType id,
-        @OperationParam(name = "subject") StringType subject,
-        @OperationParam(name = "parameters") Parameters parameters,
-        @OperationParam(name = "useServerData") BooleanType useServerData,
-        @OperationParam(name = "data") Bundle data,
-        @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
-        @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
-        @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
-        @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
-        RequestDetails requestDetails) {
+            @IdParam IdType id,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "parameters") Parameters parameters,
+            @OperationParam(name = "useServerData") BooleanType useServerData,
+            @OperationParam(name = "data") Bundle data,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            RequestDetails requestDetails) {
         return (Group) groupProcessorFactory
-            .create(requestDetails)
-            .evaluate(
-                Eithers.forMiddle3(id),
-                getStringValue(subject),
-                parameters,
-                useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
-                data,
-                prefetchData,
-                getEndpoint(fhirVersion, dataEndpoint),
-                getEndpoint(fhirVersion, contentEndpoint),
-                getEndpoint(fhirVersion, terminologyEndpoint));
+                .create(requestDetails)
+                .evaluate(
+                        Eithers.forMiddle3(id),
+                        getStringValue(subject),
+                        parameters,
+                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
+                        data,
+                        prefetchData,
+                        getEndpoint(fhirVersion, dataEndpoint),
+                        getEndpoint(fhirVersion, contentEndpoint),
+                        getEndpoint(fhirVersion, terminologyEndpoint));
     }
 
     /**
@@ -224,28 +222,28 @@ public class GroupEvaluateProvider {
      */
     @Operation(name = ProviderConstants.CR_OPERATION_EVALUATE, idempotent = true, type = Group.class)
     public Group evaluate(
-        @OperationParam(name = "group") Group group,
-        @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
-        @OperationParam(name = "subject") StringType subject,
-        @OperationParam(name = "parameters") Parameters parameters,
-        @OperationParam(name = "useServerData") BooleanType useServerData,
-        @OperationParam(name = "data") Bundle data,
-        @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
-        @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
-        @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
-        @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
-        RequestDetails requestDetails) {
+            @OperationParam(name = "group") Group group,
+            @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
+            @OperationParam(name = "subject") StringType subject,
+            @OperationParam(name = "parameters") Parameters parameters,
+            @OperationParam(name = "useServerData") BooleanType useServerData,
+            @OperationParam(name = "data") Bundle data,
+            @OperationParam(name = "prefetchData") List<ParametersParameterComponent> prefetchData,
+            @OperationParam(name = "dataEndpoint") ParametersParameterComponent dataEndpoint,
+            @OperationParam(name = "contentEndpoint") ParametersParameterComponent contentEndpoint,
+            @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
+            RequestDetails requestDetails) {
         return (Group) groupProcessorFactory
-            .create(requestDetails)
-            .evaluate(
-                Eithers.for3(newCanonicalType(fhirVersion, getStringValue(url)), null, group),
-                getStringValue(subject),
-                parameters,
-                useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
-                data,
-                prefetchData,
-                getEndpoint(fhirVersion, dataEndpoint),
-                getEndpoint(fhirVersion, contentEndpoint),
-                getEndpoint(fhirVersion, terminologyEndpoint));
+                .create(requestDetails)
+                .evaluate(
+                        Eithers.for3(newCanonicalType(fhirVersion, getStringValue(url)), null, group),
+                        getStringValue(subject),
+                        parameters,
+                        useServerData == null ? Boolean.TRUE : useServerData.booleanValue(),
+                        data,
+                        prefetchData,
+                        getEndpoint(fhirVersion, dataEndpoint),
+                        getEndpoint(fhirVersion, contentEndpoint),
+                        getEndpoint(fhirVersion, terminologyEndpoint));
     }
 }

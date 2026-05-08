@@ -87,10 +87,9 @@ public class CrProcessorConfig {
         return rd -> {
             var repository = repositoryFactory.create(rd);
             return new GroupProcessor(
-                repository,
-                crSettings,
-                List.of(new HapiArtifactDiffProcessor(repository), new HapiCreateChangelogProcessor(repository))
-            );
+                    repository,
+                    crSettings,
+                    List.of(new HapiArtifactDiffProcessor(repository), new HapiCreateChangelogProcessor(repository)));
         };
     }
 

@@ -12,7 +12,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -28,8 +27,8 @@ import org.opencds.cqf.fhir.cr.common.ReleaseProcessor;
 import org.opencds.cqf.fhir.cr.common.RetireProcessor;
 import org.opencds.cqf.fhir.cr.common.ReviseProcessor;
 import org.opencds.cqf.fhir.cr.common.WithdrawProcessor;
-import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.cr.group.r4.EvaluateProcessor;
+import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -46,8 +45,8 @@ class GroupProcessorTests {
 
     @Test
     void defaultSettings() {
-        var repository =
-            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/group-sr"));
+        var repository = new IgRepository(
+                fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/group-sr"));
         var processor = new GroupProcessor(repository);
         assertNotNull(processor.settings());
     }
@@ -63,25 +62,25 @@ class GroupProcessorTests {
 
     @Test
     void processor() {
-        var repository =
-            new IgRepository(fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/group-sr"));
+        var repository = new IgRepository(
+                fhirContextR4, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/r4/group-sr"));
         var processor = new GroupProcessor(
-            repository,
-            CrSettings.getDefault(),
-            List.of(
-                new PackageProcessor(repository),
-                new ReleaseProcessor(repository),
-                new DataRequirementsProcessor(repository),
-                new EvaluateProcessor(repository, EvaluationSettings.getDefault()),
-                new DeleteProcessor(repository),
-                new RetireProcessor(repository),
-                new WithdrawProcessor(repository),
-                new ReviseProcessor(repository),
-                new ArtifactDiffProcessor()));
+                repository,
+                CrSettings.getDefault(),
+                List.of(
+                        new PackageProcessor(repository),
+                        new ReleaseProcessor(repository),
+                        new DataRequirementsProcessor(repository),
+                        new EvaluateProcessor(repository, EvaluationSettings.getDefault()),
+                        new DeleteProcessor(repository),
+                        new RetireProcessor(repository),
+                        new WithdrawProcessor(repository),
+                        new ReviseProcessor(repository),
+                        new ArtifactDiffProcessor()));
 
         assertNotNull(processor.settings());
-        var result = processor.resolveGroup(Eithers.forMiddle3(
-            Ids.newId(repository.fhirContext(), "Group", "DefaultSearchParameter")));
+        var result = processor.resolveGroup(
+                Eithers.forMiddle3(Ids.newId(repository.fhirContext(), "Group", "DefaultSearchParameter")));
         assertNotNull(result);
     }
 
@@ -144,10 +143,10 @@ class GroupProcessorTests {
     @Test
     void evaluateR4() {
         given().repositoryFor(fhirContextR4, "r4/group-sr")
-            .when()
-            .groupId("DefaultSearchParameter")
-            .thenEvaluate()
-            .hasResults(0);
+                .when()
+                .groupId("DefaultSearchParameter")
+                .thenEvaluate()
+                .hasResults(0);
     }
 
     /*

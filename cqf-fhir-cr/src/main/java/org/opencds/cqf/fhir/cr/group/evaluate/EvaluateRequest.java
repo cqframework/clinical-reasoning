@@ -1,6 +1,11 @@
 package org.opencds.cqf.fhir.cr.group.evaluate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
+
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -13,12 +18,6 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
 
 public class EvaluateRequest implements ICqlOperationRequest {
     private final IGroupAdapter groupAdapter;
@@ -31,13 +30,13 @@ public class EvaluateRequest implements ICqlOperationRequest {
     private IBaseOperationOutcome operationOutcome;
 
     public EvaluateRequest(
-        IBaseResource group,
-        IIdType subjectId,
-        IBaseParameters parameters,
-        IBaseBundle data,
-        List<? extends IBaseBackboneElement> prefetchData,
-        LibraryEngine libraryEngine,
-        ModelResolver modelResolver) {
+            IBaseResource group,
+            IIdType subjectId,
+            IBaseParameters parameters,
+            IBaseBundle data,
+            List<? extends IBaseBackboneElement> prefetchData,
+            LibraryEngine libraryEngine,
+            ModelResolver modelResolver) {
         checkNotNull(group, "expected non-null value for group");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         fhirVersion = group.getStructureFhirVersionEnum();
@@ -53,7 +52,7 @@ public class EvaluateRequest implements ICqlOperationRequest {
         this.data = data;
         this.libraryEngine = libraryEngine;
         this.modelResolver =
-            modelResolver != null ? modelResolver : FhirModelResolverCache.resolverForVersion(fhirVersion);
+                modelResolver != null ? modelResolver : FhirModelResolverCache.resolverForVersion(fhirVersion);
     }
 
     public IBaseResource getGroup() {

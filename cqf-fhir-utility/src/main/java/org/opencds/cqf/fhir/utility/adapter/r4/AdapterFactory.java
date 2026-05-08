@@ -115,7 +115,7 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new GraphDefinitionAdapter(graphDefinition);
         } else if (resource instanceof Group group) {
             adapter = createGroup(resource);
-        }else {
+        } else {
             if (resource instanceof MetadataResource metadataResource) {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
             } else {
@@ -133,7 +133,7 @@ public class AdapterFactory implements IAdapterFactory {
 
     @Override
     public IGroupAdapter createGroup(IBaseResource group) {
-        return new GroupAdapter((IDomainResource)group);
+        return new GroupAdapter((IDomainResource) group);
     }
 
     @Override

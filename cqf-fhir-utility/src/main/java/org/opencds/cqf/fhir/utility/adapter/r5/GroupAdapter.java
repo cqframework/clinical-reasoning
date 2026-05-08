@@ -9,8 +9,8 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Expression;
 import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Group;
+import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.UriType;
@@ -53,22 +53,22 @@ public class GroupAdapter extends KnowledgeArtifactAdapter implements IGroupAdap
 
     private String getEdrReferenceString(Extension edrExtension) {
         return edrExtension.getUrl().contains("cqfm")
-            ? ((Reference) edrExtension.getValue()).getReference()
-            : ((UriType) edrExtension.getValue()).getValue();
+                ? ((Reference) edrExtension.getValue()).getReference()
+                : ((UriType) edrExtension.getValue()).getValue();
     }
 
     private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
         return edrExtension.getUrl().contains("cqfm")
-            ? reference -> edrExtension.setValue(new Reference(reference))
-            : reference -> edrExtension.setValue(new CanonicalType(reference));
+                ? reference -> edrExtension.setValue(new Reference(reference))
+                : reference -> edrExtension.setValue(new CanonicalType(reference));
     }
 
     private void findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
             var edrExtensions = this.getGroup().getExtension().stream()
-                .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
-                .filter(Extension::hasValue)
-                .collect(Collectors.toList());
+                    .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
+                    .filter(Extension::hasValue)
+                    .collect(Collectors.toList());
 
             var edrExtension = edrExtensions.size() == 1 ? edrExtensions.get(0) : null;
             // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a canonical
@@ -77,8 +77,8 @@ public class GroupAdapter extends KnowledgeArtifactAdapter implements IGroupAdap
                 var edrReference = maybeEdrReference.get();
                 for (var c : getGroup().getContained()) {
                     if (c.hasId()
-                        && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId()))
-                        && c instanceof Library library) {
+                            && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId()))
+                            && c instanceof Library library) {
                         effectiveDataRequirements = library;
                         effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
                     }
@@ -116,19 +116,19 @@ public class GroupAdapter extends KnowledgeArtifactAdapter implements IGroupAdap
 
         // relatedArtifact[].resource
         getRelatedArtifactsOfType(DEPENDSON).stream()
-            .filter(RelatedArtifact::hasResource)
-            .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-            .forEach(references::add);
+                .filter(RelatedArtifact::hasResource)
+                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
+                .forEach(references::add);
 
-        for (var expressionExtension : getGroup().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/characteristicExpression")) {
+        for (var expressionExtension :
+                getGroup().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/characteristicExpression")) {
             if (expressionExtension.getValue() instanceof Expression expression) {
                 if (expression.hasReference()) {
                     references.add(new DependencyInfo(
-                        referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        reference -> expression.setReference(reference)
-                    ));
+                            referenceSource,
+                            expression.getReference(),
+                            expression.getExtension(),
+                            reference -> expression.setReference(reference)));
                 }
             }
         }
@@ -136,30 +136,30 @@ public class GroupAdapter extends KnowledgeArtifactAdapter implements IGroupAdap
         // extension[cqfm-effectiveDataRequirements]
         // extension[crmi-effectiveDataRequirements]
         get().getExtension().stream()
-            .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
-            .forEach(referenceExt -> references.add(new DependencyInfo(
-                referenceSource,
-                getEdrReferenceString(referenceExt),
-                referenceExt.getExtension(),
-                getEdrReferenceConsumer(referenceExt))));
+                .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
+                .forEach(referenceExt -> references.add(new DependencyInfo(
+                        referenceSource,
+                        getEdrReferenceString(referenceExt),
+                        referenceExt.getExtension(),
+                        getEdrReferenceConsumer(referenceExt))));
 
         // extension[cqfm-inputParameters][]
         // extension[cqfm-expansionParameters][]
         // extension[cqfm-cqlOptions]
         get().getExtension().stream()
-            .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
-            .forEach(referenceExt -> references.add(new DependencyInfo(
-                referenceSource,
-                ((Reference) referenceExt.getValue()).getReference(),
-                referenceExt.getExtension(),
-                reference -> referenceExt.setValue(new Reference(reference)))));
+                .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
+                .forEach(referenceExt -> references.add(new DependencyInfo(
+                        referenceSource,
+                        ((Reference) referenceExt.getValue()).getReference(),
+                        referenceExt.getExtension(),
+                        reference -> referenceExt.setValue(new Reference(reference)))));
 
         // extension[cqfm-component][].resource
         get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach(ext -> {
             final var ref = (RelatedArtifact) ext.getValue();
             if (ref.hasResource()) {
                 final var dep =
-                    new DependencyInfo(referenceSource, ref.getResource(), ref.getExtension(), ref::setResource);
+                        new DependencyInfo(referenceSource, ref.getResource(), ref.getExtension(), ref::setResource);
                 references.add(dep);
             }
         });

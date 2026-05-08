@@ -34,7 +34,8 @@ public class EvaluateOperationConfig {
     public ProviderLoader evaluateOperationLoader(
             ApplicationContext applicationContext, FhirContext fhirContext, RestfulServer restfulServer) {
         var selector = new ProviderSelector(
-                fhirContext, Map.of(FhirVersionEnum.R4, Arrays.asList(LibraryEvaluateProvider.class, GroupEvaluateProvider.class)));
+                fhirContext,
+                Map.of(FhirVersionEnum.R4, Arrays.asList(LibraryEvaluateProvider.class, GroupEvaluateProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
     }

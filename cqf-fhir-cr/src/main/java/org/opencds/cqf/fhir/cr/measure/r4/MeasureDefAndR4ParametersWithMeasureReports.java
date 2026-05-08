@@ -2,7 +2,9 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
+import java.util.Map;
 import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 
 /**
@@ -35,4 +37,15 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
  * @param parameters Parameters resource containing bundled R4 MeasureReports
  */
 @VisibleForTesting
-public record MeasureDefAndR4ParametersWithMeasureReports(List<MeasureDef> measureDefs, Parameters parameters) {}
+public record MeasureDefAndR4ParametersWithMeasureReports(
+        List<MeasureDef> measureDefs,
+        Parameters parameters,
+        Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure) {
+
+    /**
+     * Backwards-compatible constructor for callers that do not need evaluation results.
+     */
+    public MeasureDefAndR4ParametersWithMeasureReports(List<MeasureDef> measureDefs, Parameters parameters) {
+        this(measureDefs, parameters, Map.of());
+    }
+}

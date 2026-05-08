@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings({"squid:S2699", "squid:S1135"})
@@ -21,10 +22,10 @@ class DaVinciExtensionMeasureProcessorTest {
                 .then()
                 .firstGroup()
                 .hasScore("1.0")
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 .hasCount(1)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 .hasCount(1)
                 .up()
                 .up()

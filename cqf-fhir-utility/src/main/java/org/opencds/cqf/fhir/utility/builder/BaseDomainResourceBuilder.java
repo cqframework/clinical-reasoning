@@ -76,100 +76,110 @@ public abstract class BaseDomainResourceBuilder<SELF, T extends IDomainResource>
     protected void initializeDstu3(T resource) {
         super.initializeDstu3(resource);
 
-        getExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept =
-                            new org.hl7.fhir.dstu3.model.CodeableConcept()
-                                    .addCoding(new org.hl7.fhir.dstu3.model.Coding()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = resource.addExtension();
-                    extension.setUrl(extensionSetting.getKey());
-                    extension.setValue(codeableConcept);
-                }));
+        getExtensions()
+                .forEach(extensionSetting -> extensionSetting
+                        .getValue()
+                        .getCodingSettings()
+                        .forEach(coding -> {
+                            org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept =
+                                    new org.hl7.fhir.dstu3.model.CodeableConcept()
+                                            .addCoding(new org.hl7.fhir.dstu3.model.Coding()
+                                                    .setSystem(coding.getSystem())
+                                                    .setCode(coding.getCode())
+                                                    .setDisplay(coding.getDisplay()));
+                            IBaseExtension<?, ?> extension = resource.addExtension();
+                            extension.setUrl(extensionSetting.getKey());
+                            extension.setValue(codeableConcept);
+                        }));
 
-        getModifierExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept =
-                            new org.hl7.fhir.dstu3.model.CodeableConcept()
-                                    .addCoding(new org.hl7.fhir.dstu3.model.Coding()
-                                            .setSystem(coding.getSystem())
-                                            .setCode(coding.getCode())
-                                            .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
-                    modifierExtension.setUrl(extensionSetting.getKey());
-                    modifierExtension.setValue(codeableConcept);
-                }));
+        getModifierExtensions()
+                .forEach(extensionSetting -> extensionSetting
+                        .getValue()
+                        .getCodingSettings()
+                        .forEach(coding -> {
+                            org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept =
+                                    new org.hl7.fhir.dstu3.model.CodeableConcept()
+                                            .addCoding(new org.hl7.fhir.dstu3.model.Coding()
+                                                    .setSystem(coding.getSystem())
+                                                    .setCode(coding.getCode())
+                                                    .setDisplay(coding.getDisplay()));
+                            IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
+                            modifierExtension.setUrl(extensionSetting.getKey());
+                            modifierExtension.setValue(codeableConcept);
+                        }));
     }
 
     @Override
     protected void initializeR4(T resource) {
         super.initializeR4(resource);
 
-        getExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.r4.model.CodeableConcept codeableConcept = new org.hl7.fhir.r4.model.CodeableConcept()
-                            .addCoding(new org.hl7.fhir.r4.model.Coding()
-                                    .setSystem(coding.getSystem())
-                                    .setCode(coding.getCode())
-                                    .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = resource.addExtension();
-                    extension.setUrl(extensionSetting.getKey());
-                    extension.setValue(codeableConcept);
-                }));
+        getExtensions()
+                .forEach(extensionSetting -> extensionSetting
+                        .getValue()
+                        .getCodingSettings()
+                        .forEach(coding -> {
+                            org.hl7.fhir.r4.model.CodeableConcept codeableConcept =
+                                    new org.hl7.fhir.r4.model.CodeableConcept()
+                                            .addCoding(new org.hl7.fhir.r4.model.Coding()
+                                                    .setSystem(coding.getSystem())
+                                                    .setCode(coding.getCode())
+                                                    .setDisplay(coding.getDisplay()));
+                            IBaseExtension<?, ?> extension = resource.addExtension();
+                            extension.setUrl(extensionSetting.getKey());
+                            extension.setValue(codeableConcept);
+                        }));
 
-        getModifierExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.r4.model.CodeableConcept codeableConcept = new org.hl7.fhir.r4.model.CodeableConcept()
-                            .addCoding(new org.hl7.fhir.r4.model.Coding()
-                                    .setSystem(coding.getSystem())
-                                    .setCode(coding.getCode())
-                                    .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
-                    modifierExtension.setUrl(extensionSetting.getKey());
-                    modifierExtension.setValue(codeableConcept);
-                }));
+        getModifierExtensions()
+                .forEach(extensionSetting -> extensionSetting
+                        .getValue()
+                        .getCodingSettings()
+                        .forEach(coding -> {
+                            org.hl7.fhir.r4.model.CodeableConcept codeableConcept =
+                                    new org.hl7.fhir.r4.model.CodeableConcept()
+                                            .addCoding(new org.hl7.fhir.r4.model.Coding()
+                                                    .setSystem(coding.getSystem())
+                                                    .setCode(coding.getCode())
+                                                    .setDisplay(coding.getDisplay()));
+                            IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
+                            modifierExtension.setUrl(extensionSetting.getKey());
+                            modifierExtension.setValue(codeableConcept);
+                        }));
     }
 
     @Override
     protected void initializeR5(T resource) {
         super.initializeR5(resource);
 
-        getExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.r5.model.CodeableConcept codeableConcept = new org.hl7.fhir.r5.model.CodeableConcept()
-                            .addCoding(new org.hl7.fhir.r5.model.Coding()
-                                    .setSystem(coding.getSystem())
-                                    .setCode(coding.getCode())
-                                    .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> extension = resource.addExtension();
-                    extension.setUrl(extensionSetting.getKey());
-                    extension.setValue(codeableConcept);
-                }));
+        getExtensions()
+                .forEach(extensionSetting -> extensionSetting
+                        .getValue()
+                        .getCodingSettings()
+                        .forEach(coding -> {
+                            org.hl7.fhir.r5.model.CodeableConcept codeableConcept =
+                                    new org.hl7.fhir.r5.model.CodeableConcept()
+                                            .addCoding(new org.hl7.fhir.r5.model.Coding()
+                                                    .setSystem(coding.getSystem())
+                                                    .setCode(coding.getCode())
+                                                    .setDisplay(coding.getDisplay()));
+                            IBaseExtension<?, ?> extension = resource.addExtension();
+                            extension.setUrl(extensionSetting.getKey());
+                            extension.setValue(codeableConcept);
+                        }));
 
-        getModifierExtensions().forEach(extensionSetting -> extensionSetting
-                .getValue()
-                .getCodingSettings()
-                .forEach(coding -> {
-                    org.hl7.fhir.r5.model.CodeableConcept codeableConcept = new org.hl7.fhir.r5.model.CodeableConcept()
-                            .addCoding(new org.hl7.fhir.r5.model.Coding()
-                                    .setSystem(coding.getSystem())
-                                    .setCode(coding.getCode())
-                                    .setDisplay(coding.getDisplay()));
-                    IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
-                    modifierExtension.setUrl(extensionSetting.getKey());
-                    modifierExtension.setValue(codeableConcept);
-                }));
+        getModifierExtensions()
+                .forEach(extensionSetting -> extensionSetting
+                        .getValue()
+                        .getCodingSettings()
+                        .forEach(coding -> {
+                            org.hl7.fhir.r5.model.CodeableConcept codeableConcept =
+                                    new org.hl7.fhir.r5.model.CodeableConcept()
+                                            .addCoding(new org.hl7.fhir.r5.model.Coding()
+                                                    .setSystem(coding.getSystem())
+                                                    .setCode(coding.getCode())
+                                                    .setDisplay(coding.getDisplay()));
+                            IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
+                            modifierExtension.setUrl(extensionSetting.getKey());
+                            modifierExtension.setValue(codeableConcept);
+                        }));
     }
 }

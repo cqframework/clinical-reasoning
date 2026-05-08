@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,7 @@ import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
+import org.opencds.cqf.fhir.cr.helpers.DataDateRollingIgRepository;
 import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
@@ -94,6 +96,22 @@ public class TestPlanDefinition {
         public Given repositoryFor(FhirContext fhirContext, String repositoryPath) {
             this.repository = new IgRepository(
                     fhirContext, Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath));
+            return this;
+        }
+
+        /**
+         * Like {@link #repositoryFor(FhirContext, String)} but applies the CDC
+         * {@code dataDateRoller} extension to fixtures on read/search. Use this
+         * for tests whose CQL has wall-clock-relative windows
+         * (e.g. {@code Today() - 12 months}) so the data stays inside those
+         * windows regardless of when the test runs. See
+         * {@link org.opencds.cqf.fhir.cr.helpers.DataDateRollerHelper}.
+         */
+        public Given repositoryForWithDataDateRolling(FhirContext fhirContext, String repositoryPath) {
+            this.repository = new DataDateRollingIgRepository(
+                    fhirContext,
+                    Path.of(getResourcePath(this.getClass()) + "/" + CLASS_PATH + "/" + repositoryPath),
+                    LocalDate.now());
             return this;
         }
 

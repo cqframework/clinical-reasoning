@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings("squid:S2699")
@@ -19,7 +20,7 @@ class MultipleRateMeasureProcessorTest {
                 .evaluate()
                 .then()
                 .firstGroup()
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(1);
     }
 }

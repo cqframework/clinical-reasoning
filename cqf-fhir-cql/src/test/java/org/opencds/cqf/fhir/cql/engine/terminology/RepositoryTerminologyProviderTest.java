@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cql.engine.terminology;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -24,6 +25,7 @@ class RepositoryTerminologyProviderTest {
     private static final String VALID_VALUE_SET_URL = "http://example.com/ValueSet/ValidValueSet";
     private static final String MISSING_SYSTEM_VALUE_SET_URL = "http://example.com/ValueSet/MissingSystemValueSet";
     private static final String MISSING_CODE_VALUE_SET_URL = "http://example.com/ValueSet/MissingCodeValueSet";
+    private static final String MULTIPLE_SYSTEMS_VALUE_SET_URL = "http://example.com/ValueSet/MultipleSystemsValueSet";
 
     @Test
     void validCodesInValueSet() {
@@ -38,6 +40,15 @@ class RepositoryTerminologyProviderTest {
     }
 
     @Test
+    void failOnCodeWithoutSystemAndMultiSystemValueSet() {
+        var terminologyProvider = terminologyProviderWith("MultipleSystemsValueSet");
+        var vsInfo = new ValueSetInfo().withId(MULTIPLE_SYSTEMS_VALUE_SET_URL);
+
+        var code = new Code().withCode("123");
+        assertThrows(IllegalArgumentException.class, () -> terminologyProvider.in(code, vsInfo));
+    }
+
+    @Test
     void missingCodeValueSetMatches() {
         var terminologyProvider = terminologyProviderWith("MissingCodeValueSet");
         var vsInfo = new ValueSetInfo().withId(MISSING_CODE_VALUE_SET_URL);
@@ -49,7 +60,7 @@ class RepositoryTerminologyProviderTest {
         assertFalse(terminologyProvider.in(codeMissingCode, vsInfo));
 
         var codeMissingSystem = new Code().withCode("123");
-        assertFalse(terminologyProvider.in(codeMissingSystem, vsInfo));
+        assertTrue(terminologyProvider.in(codeMissingSystem, vsInfo));
     }
 
     @Test
@@ -64,7 +75,7 @@ class RepositoryTerminologyProviderTest {
         assertFalse(terminologyProvider.in(codeMissingCode, vsInfo));
 
         var codeMissingSystem = new Code().withCode("123");
-        assertFalse(terminologyProvider.in(codeMissingSystem, vsInfo));
+        assertTrue(terminologyProvider.in(codeMissingSystem, vsInfo));
     }
 
     IRepository mockRepositoryFor(String id) {

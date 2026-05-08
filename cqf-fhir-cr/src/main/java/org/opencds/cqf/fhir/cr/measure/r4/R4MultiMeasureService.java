@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
@@ -484,6 +485,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             List<List<MeasureDefAndR4MeasureReport>> results) {
 
         final List<MeasureDef> measureDefs = new ArrayList<>();
+        final Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure = new HashMap<>();
 
         // Create Parameters to hold the bundle(s)
         final Parameters parameters = new Parameters();
@@ -495,6 +497,12 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             Bundle bundle;
             for (MeasureDefAndR4MeasureReport measureDefAndR4MeasureReport : result) {
                 measureDefs.add(measureDefAndR4MeasureReport.measureDef());
+
+                if (!measureDefAndR4MeasureReport.evaluationResults().isEmpty()) {
+                    evaluationResultsPerMeasure.put(
+                            measureDefAndR4MeasureReport.measureDef(),
+                            measureDefAndR4MeasureReport.evaluationResults());
+                }
 
                 // add report to bundle
                 final MeasureReport measureReport = measureDefAndR4MeasureReport.measureReport();
@@ -515,7 +523,7 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
             }
         }
 
-        return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, parameters);
+        return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, parameters, evaluationResultsPerMeasure);
     }
 
     protected void initializeReport(MeasureReport measureReport) {

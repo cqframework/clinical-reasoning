@@ -3,8 +3,9 @@ plugins {
     alias(libs.plugins.buildconfig)
 }
 
-fun Provider<PluginDependency>.asDep() =
-    map { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" }
+fun Provider<PluginDependency>.asDep() = map {
+    "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}"
+}
 
 repositories {
     gradlePluginPortal()

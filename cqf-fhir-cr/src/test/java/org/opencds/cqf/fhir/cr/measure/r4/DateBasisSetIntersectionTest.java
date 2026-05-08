@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 @SuppressWarnings({"squid:S125", "java:S2699"})
@@ -16,11 +17,11 @@ class DateBasisSetIntersectionTest {
                 .hasGroupCount(1)
                 .firstGroup()
                 .hasPopulationCount(3)
-                .population("initial-population")
+                .population(MeasurePopulationType.INITIALPOPULATION)
                 // This works because we have { @2024-01-01, @2024-01-02, @2024-01-03 }
                 .hasCount(6)
                 .up()
-                .population("denominator")
+                .population(MeasurePopulationType.DENOMINATOR)
                 // This should be 2 because the intersection of
                 // { @2024-01-01, @2024-01-02, @2024-01-03 }
                 // and
@@ -29,7 +30,7 @@ class DateBasisSetIntersectionTest {
                 // { @2024-01-01, @2024-01-02 }
                 .hasCount(4)
                 .up()
-                .population("numerator")
+                .population(MeasurePopulationType.NUMERATOR)
                 // This should be 1 because the intersection of
                 // { @2024-01-01, @2024-01-02 }
                 // and

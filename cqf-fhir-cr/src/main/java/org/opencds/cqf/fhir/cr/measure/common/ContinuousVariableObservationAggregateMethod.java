@@ -1,16 +1,17 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nullable;
+import java.util.Objects;
 
 /**
  * All continuous variable scoring aggregation methods.
  */
 public enum ContinuousVariableObservationAggregateMethod {
-    AVG("avg"),
+    AVG("average"),
     COUNT("count"),
-    MAX("max"),
+    MAX("maximum"),
     MEDIAN("median"),
-    MIN("min"),
+    MIN("minimum"),
     SUM("sum"),
     N_A(null);
 
@@ -29,7 +30,7 @@ public enum ContinuousVariableObservationAggregateMethod {
     @Nullable
     public static ContinuousVariableObservationAggregateMethod fromString(@Nullable String text) {
         for (ContinuousVariableObservationAggregateMethod value : values()) {
-            if (text.equals(value.getText())) {
+            if (Objects.equals(text, value.getText())) {
                 return value;
             }
         }

@@ -340,10 +340,13 @@ public class EvaluateProcessor implements IEvaluateProcessor {
 
         log.info("Could not determine initial membership via data requirements inference, defaulting to all subjects");
         var bundle = repository.search(Bundle.class, Patient.class, Searches.ALL);
-        return new BundleMappingIterable<>(repository, bundle, x -> x.getResource()
-                        .getIdElement()
-                        .toUnqualifiedVersionless()
-                        .getValue())
+        return new BundleMappingIterable<>(
+                        repository,
+                        bundle,
+                        x -> x.getResource()
+                                .getIdElement()
+                                .toUnqualifiedVersionless()
+                                .getValue())
                 .toStream()
                 .toList();
     }

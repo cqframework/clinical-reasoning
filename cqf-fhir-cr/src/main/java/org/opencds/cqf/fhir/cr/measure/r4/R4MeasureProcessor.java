@@ -362,32 +362,18 @@ public class R4MeasureProcessor {
                 context);
     }
 
-    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
-            List<String> subjects,
-            List<Measure> measures,
-            @Nullable ZonedDateTime periodStart,
-            @Nullable ZonedDateTime periodEnd,
-            Parameters parameters,
-            CqlEngine context) {
-
-        log.info(
-                "Evaluating CQL for SINGLE/MULITPLE: {} measure(s): {}, subjectCount: {}, periodStart: {}, periodEnd: {}",
-                measures.size() > 1 ? "MULTIPLE" : "SINGLE",
-                measures.stream()
-                        .map(m -> "%s (id=%s)"
-                                .formatted(
-                                        m.getUrl() != null ? m.getUrl() : "unknown-url",
-                                        m.getIdPart() != null ? m.getIdPart() : "unknown-id"))
-                        .toList(),
-                subjects.size(),
-                periodStart,
-                periodEnd);
+    public MultiMeasuresPreparedContext prepareEvaluateMultiMeasuresWithCqlEngine(
+        List<Measure> measures,
+        @Nullable ZonedDateTime periodStart,
+        @Nullable ZonedDateTime periodEnd,
+        Parameters parameters,
+        CqlEngine context) {
 
         measures.forEach(this::checkMeasureLibrary);
 
         var measurementPeriodParams = buildMeasurementPeriod(periodStart, periodEnd);
         var zonedMeasurementPeriod = MeasureProcessorTimeUtils.getZonedTimeZoneForEval(
-                MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
+            MeasureProcessorTimeUtils.getDefaultMeasurementPeriod(measurementPeriodParams, context));
 
         // Do this to be backwards compatible with the previous single-library evaluation:
         // Trigger first-pass validation on measure scoring as well as other aspects of the Measures
@@ -396,22 +382,88 @@ public class R4MeasureProcessor {
         var multiLibraryIdMeasureEngineDetails = getMultiLibraryIdMeasureEngineDetails(measures);
 
         var measureUrls = measures.stream()
-                .map(Measure::getUrl)
-                .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
-                .toList();
+            .map(Measure::getUrl)
+            .map(url -> Optional.ofNullable(url).orElse("Unknown Measure URL"))
+            .toList();
 
         final Map<String, Object> parametersMap = new HashMap<>(resolveParameterMap(parameters));
 
         MeasureProcessorTimeUtils.resolveMeasurementPeriodIntoParameters(
-                measurementPeriodParams,
-                context,
-                multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
-                measureUrls,
-                parametersMap);
+            measurementPeriodParams,
+            context,
+            multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers(),
+            measureUrls,
+            parametersMap);
+
+        return new MultiMeasuresPreparedContext(
+            zonedMeasurementPeriod,
+            multiLibraryIdMeasureEngineDetails,
+            parametersMap
+        );
+    }
+
+    public class MultiMeasuresPreparedContext {
+        private final ZonedDateTime zonedMeasurementPeriod;
+        public ZonedDateTime getZonedMeasurementPeriod() {
+            return zonedMeasurementPeriod;
+        }
+        private final MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails;
+        public MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails() {
+            return multiLibraryIdMeasureEngineDetails;
+        }
+        private final Map<String, Object> parametersMap;
+        public Map<String, Object> getParametersMap() {
+            return parametersMap;
+        }
+
+        public MultiMeasuresPreparedContext(
+            ZonedDateTime zonedMeasurementPeriod,
+            MultiLibraryIdMeasureEngineDetails multiLibraryIdMeasureEngineDetails,
+            Map<String, Object> parametersMap
+        ) {
+            this.zonedMeasurementPeriod = zonedMeasurementPeriod;
+            this.multiLibraryIdMeasureEngineDetails = multiLibraryIdMeasureEngineDetails;
+            this.parametersMap = parametersMap;
+        }
+    }
+
+    public CompositeEvaluationResultsPerMeasure evaluateMultiMeasuresWithCqlEngine(
+            List<String> subjects,
+            List<Measure> measures,
+            @Nullable ZonedDateTime periodStart,
+            @Nullable ZonedDateTime periodEnd,
+            Parameters parameters,
+            CqlEngine context) {
+
+        var preparedContext = prepareEvaluateMultiMeasuresWithCqlEngine(measures, periodStart, periodEnd, parameters, context);
+        return preparedEvaluateMultiMeasuresWithCqlEngine(subjects, measures, periodStart, periodEnd, parameters, context, preparedContext);
+    }
+
+    public CompositeEvaluationResultsPerMeasure preparedEvaluateMultiMeasuresWithCqlEngine(
+        List<String> subjects,
+        List<Measure> measures,
+        @Nullable ZonedDateTime periodStart,
+        @Nullable ZonedDateTime periodEnd,
+        Parameters parameters,
+        CqlEngine context,
+        MultiMeasuresPreparedContext preparedContext) {
+
+        log.info(
+            "Evaluating CQL for SINGLE/MULITPLE: {} measure(s): {}, subjectCount: {}, periodStart: {}, periodEnd: {}",
+            measures.size() > 1 ? "MULTIPLE" : "SINGLE",
+            measures.stream()
+                .map(m -> "%s (id=%s)"
+                    .formatted(
+                        m.getUrl() != null ? m.getUrl() : "unknown-url",
+                        m.getIdPart() != null ? m.getIdPart() : "unknown-id"))
+                .toList(),
+            subjects.size(),
+            periodStart,
+            periodEnd);
 
         // populate results from Library $evaluate
         return MeasureEvaluationResultHandler.getEvaluationResults(
-                subjects, zonedMeasurementPeriod, context, multiLibraryIdMeasureEngineDetails, parametersMap);
+            subjects, preparedContext.zonedMeasurementPeriod, context, preparedContext.multiLibraryIdMeasureEngineDetails, preparedContext.parametersMap);
     }
 
     private MultiLibraryIdMeasureEngineDetails getMultiLibraryIdMeasureEngineDetails(List<Measure> measures) {
@@ -456,7 +508,7 @@ public class R4MeasureProcessor {
      * @param measure resource that has desired Library
      * @return version identifier of Library
      */
-    private VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
+    public VersionedIdentifier getLibraryVersionIdentifier(Measure measure) {
 
         if (measure == null) {
             throw new InvalidRequestException("Measure provided is null");
@@ -489,7 +541,7 @@ public class R4MeasureProcessor {
      * @param parameters resource used to store cql parameters
      * @return mapped parameters
      */
-    private Map<String, Object> resolveParameterMap(Parameters parameters) {
+    public static Map<String, Object> resolveParameterMap(Parameters parameters) {
         if (parameters == null) {
             return Map.of();
         }
@@ -528,7 +580,7 @@ public class R4MeasureProcessor {
         return parameterMap;
     }
 
-    public Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
+    public static Interval buildMeasurementPeriod(ZonedDateTime periodStart, ZonedDateTime periodEnd) {
         Interval measurementPeriod = null;
         if (periodStart != null && periodEnd != null) {
             // Operation parameter defined measurementPeriod

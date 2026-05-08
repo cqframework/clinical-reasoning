@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
@@ -26,11 +27,9 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
 
     public KnowledgeArtifactAdapter(IDomainResource resource) {
         super(resource);
-        if (!(resource instanceof MetadataResource)) {
-            throw new IllegalArgumentException(
-                    "resource passed as resource argument is not a MetadataResource resource");
+        if (resource instanceof MetadataResource) {
+            adaptedResource = (MetadataResource) resource;
         }
-        adaptedResource = (MetadataResource) resource;
     }
 
     public KnowledgeArtifactAdapter(MetadataResource resource) {
@@ -39,12 +38,26 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
     }
 
     @Override
-    public MetadataResource get() {
+    public DomainResource get() {
         return adaptedResource;
     }
 
+    public MetadataResource getMetadataResource() {
+        checkAdaptedResource();
+        return adaptedResource;
+    }
+
+    // TODO: All these elements should be implemented as a super that handles the case where the element does not exist, but the appropriate artifact-xxx extension does
+    protected void checkAdaptedResource() {
+        if (adaptedResource == null) {
+            throw new IllegalArgumentException(
+                "resource passed as a resource argument is not a MetadataResource"
+            );
+        }
+    }
+
     @Override
-    public MetadataResource copy() {
+    public DomainResource copy() {
         return get().copy();
     }
 
@@ -67,7 +80,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
     @SuppressWarnings("unchecked")
     @Override
     public List<UsageContext> getUseContext() {
-        return get().getUseContext();
+        return getMetadataResource().getUseContext();
     }
 
     @Override
@@ -90,7 +103,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
 
     @Override
     public String getStatus() {
-        return get().getStatus() == null ? null : get().getStatus().toCode();
+        return adaptedResource.getStatus() == null ? null : adaptedResource.getStatus().toCode();
     }
 
     @Override
@@ -101,7 +114,7 @@ public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowle
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Invalid status code");
         }
-        get().setStatus(status);
+        adaptedResource.setStatus(status);
     }
 
     @Override

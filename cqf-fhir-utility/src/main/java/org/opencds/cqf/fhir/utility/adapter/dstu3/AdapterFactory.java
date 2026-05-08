@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.GraphDefinition;
+import org.hl7.fhir.dstu3.model.Group;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
@@ -33,6 +34,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -63,7 +65,10 @@ public class AdapterFactory implements IAdapterFactory {
             return createEndpoint(resource);
         } else if (resource instanceof Parameters parameters) {
             return createParameters(parameters);
-        } else {
+        } else if (resource instanceof Group group) {
+            return createGroup(group);
+        }
+        else {
             return new ResourceAdapter(resource);
         }
     }
@@ -109,7 +114,9 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new ValueSetAdapter(valueSet);
         } else if (resource instanceof GraphDefinition graphDefinition) {
             adapter = new GraphDefinitionAdapter(graphDefinition);
-        } else {
+        } else if (resource instanceof Group group) {
+            adapter = createGroup(group);
+        }else {
             if (resource instanceof MetadataResource metadataResource) {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
             } else {
@@ -123,6 +130,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public ILibraryAdapter createLibrary(IBaseResource library) {
         return new LibraryAdapter((IDomainResource) library);
+    }
+
+    @Override
+    public IGroupAdapter createGroup(IBaseResource group) {
+        throw new UnsupportedOperationException("Groups a knowledge artifact are not supported in DSTU3 at this time.");
     }
 
     @Override

@@ -7,10 +7,7 @@ plugins {
 }
 
 // Required for the JaCoCo ant dependency used by the aggregate report task
-repositories {
-    mavenLocal()
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 sonar {
     properties {

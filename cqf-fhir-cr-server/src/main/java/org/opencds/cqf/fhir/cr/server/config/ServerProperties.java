@@ -16,7 +16,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "cqf.server")
 public class ServerProperties {
 
+    // S1075 ("hardcoded URI") doesn't apply: this *is* the customizable parameter — the default
+    // for a @ConfigurationProperties field overridden via cqf.server.base-path in application.yml.
+    @SuppressWarnings("java:S1075")
     private String basePath = "/fhir";
+
     private String fhirVersion = "R4";
 
     public String getBasePath() {

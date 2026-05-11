@@ -49,25 +49,33 @@ public final class SearchParameterTranslator {
         var def = fhirContext.getResourceDefinition(resourceType);
         var out = ArrayListMultimap.<String, List<IQueryParameterType>>create();
         for (var entry : rawParams.entrySet()) {
-            String fullName = entry.getKey();
-            String[] values = entry.getValue();
-            if (values == null || values.length == 0) continue;
-
-            int colonIdx = fullName.indexOf(':');
-            String name = colonIdx < 0 ? fullName : fullName.substring(0, colonIdx);
-            String qualifier = colonIdx < 0 ? null : fullName.substring(colonIdx);
-
-            if (RESPONSE_SHAPING.contains(name)) continue;
-
-            var type = resolveType(name, def);
-            for (String raw : values) {
-                IQueryParameterType param = create(type, fhirContext, name, qualifier, raw);
-                if (param != null) {
-                    out.put(name, List.of(param));
-                }
-            }
+            translateEntry(fhirContext, def, entry.getKey(), entry.getValue(), out);
         }
         return out;
+    }
+
+    private static void translateEntry(
+            FhirContext fhirContext,
+            RuntimeResourceDefinition def,
+            String fullName,
+            String[] values,
+            Multimap<String, List<IQueryParameterType>> out) {
+        if (values == null || values.length == 0) {
+            return;
+        }
+        int colonIdx = fullName.indexOf(':');
+        String name = colonIdx < 0 ? fullName : fullName.substring(0, colonIdx);
+        String qualifier = colonIdx < 0 ? null : fullName.substring(colonIdx);
+        if (RESPONSE_SHAPING.contains(name)) {
+            return;
+        }
+        var type = resolveType(name, def);
+        for (String raw : values) {
+            IQueryParameterType param = create(type, fhirContext, name, qualifier, raw);
+            if (param != null) {
+                out.put(name, List.of(param));
+            }
+        }
     }
 
     private static RestSearchParameterTypeEnum resolveType(String name, RuntimeResourceDefinition def) {

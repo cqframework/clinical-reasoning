@@ -1,7 +1,9 @@
 package org.opencds.cqf.fhir.cr.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -140,12 +142,10 @@ class ServerIntegrationTest {
                 resp.statusCode() >= 200 && resp.statusCode() < 300,
                 () -> "expected 2xx; got " + resp.statusCode() + ": " + resp.body());
 
-        try {
-            repo.read(Patient.class, new IdType("Patient", "to-delete"));
-            org.junit.jupiter.api.Assertions.fail("Patient should be gone from in-memory repo");
-        } catch (ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException expected) {
-            // good
-        }
+        assertThrows(
+                ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException.class,
+                () -> repo.read(Patient.class, new IdType("Patient", "to-delete")),
+                "Patient should be gone from in-memory repo");
     }
 
     /**
@@ -254,7 +254,7 @@ class ServerIntegrationTest {
 
         // Either a successful evaluation or an OperationOutcome from the processor — both prove
         // the dispatcher reached the operation, which reached IRepository to read the Measure.
-        assertTrue(resp.statusCode() != 404, "operation route not found");
+        assertNotEquals(404, resp.statusCode(), "operation route not found");
         assertTrue(
                 resp.body().contains("MeasureReport") || resp.body().contains("OperationOutcome"),
                 () -> "expected MeasureReport/OperationOutcome; got: " + resp.body());

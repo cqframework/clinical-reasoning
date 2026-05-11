@@ -1,0 +1,24 @@
+{
+  "resourceType": "Library",
+  "id": "ImagingStudyFeasibilityTest",
+  "url": "https://research.balgrist.ch/Library/ImagingStudyFeasibilityTest",
+  "version": "1.0.0",
+  "name": "ImagingStudyFeasibilityTest",
+  "title": "CQL Library for performance tests",
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      }
+    ]
+  },
+  "publisher":"DMU Balgrist",
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "../cql/ImagingStudyFeasibilityTest.cql"
+    }
+  ]
+}

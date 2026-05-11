@@ -76,6 +76,14 @@ public interface IAdapterFactory {
     ILibraryAdapter createLibrary(IBaseResource library);
 
     /**
+     * Creates an adapter that exposes common Group operations across multiple versions of FHIR
+     *
+     * @param group a FHIR Group Resource
+     * @return an adapter exposing common api calls
+     */
+    IGroupAdapter createGroup(IBaseResource group);
+
+    /**
      * Creates an adapter that exposes common PlanDefinition operations across multiple versions of FHIR
      *
      * @param planDefinition a FHIR PlanDefinition Resource

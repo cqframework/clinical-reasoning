@@ -1,6 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -90,6 +92,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
  *      FHIR Clinical Reasoning - Stratification</a>
  */
 public class MeasureMultiSubjectEvaluator {
+    private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);
 
     private MeasureMultiSubjectEvaluator() {
         // static class
@@ -888,6 +891,8 @@ public class MeasureMultiSubjectEvaluator {
                 }
             }
         }
+
+        logger.info("1234: population: {}, \nsubjectIds: {}, \nresourceIds: {}", populationDef.id(), subjectIds, resourceIds);
 
         return resourceIds;
     }

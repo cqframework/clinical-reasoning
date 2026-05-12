@@ -1,0 +1,26 @@
+{
+  "resourceType": "ValueSet",
+  "id": "CTImagingModality",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2026-04-10T12:02:08.585-06:00"
+  },
+  "url": "https://research.balgrist.ch/ValueSet/CTImagingModality",
+  "version": "1.0.0",
+  "name": "CTImagingModality",
+  "title": "CT Imaging Modality",
+  "status": "active",
+  "experimental": true,
+  "date": "2026-04-10T11:27:43-06:00",
+  "expansion": {
+    "identifier": "20260409",
+    "timestamp": "2026-04-09T13:54:14-07:00",
+    "contains": [
+      {
+        "system": "http://dicom.nema.org/resources/ontology/DCM",
+        "code": "CT",
+        "display": "Computed Tomography"
+      }
+    ]
+  }
+}

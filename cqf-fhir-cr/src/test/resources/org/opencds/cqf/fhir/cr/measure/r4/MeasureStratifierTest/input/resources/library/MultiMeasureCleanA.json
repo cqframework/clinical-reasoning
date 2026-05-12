@@ -1,0 +1,21 @@
+{
+  "resourceType": "Library",
+  "id": "MultiMeasureCleanA",
+  "url": "http://example.com/Library/MultiMeasureCleanA",
+  "name": "MultiMeasureCleanA",
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/library-type",
+        "code": "logic-library"
+      }
+    ]
+  },
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "../../cql/MultiMeasureCleanA.cql"
+    }
+  ]
+}

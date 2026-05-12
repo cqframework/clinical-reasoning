@@ -24,6 +24,7 @@ public class EvaluationResultFormatter {
     private static final String DATE_FORMAT = "yyyy-MM-dd";
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd:HH:mm:ss";
     private static final String INDENT = "  ";
+    private static final String SEPARATOR = "----------------------------------------";
 
     private EvaluationResultFormatter() {
         // Static utility class
@@ -215,6 +216,38 @@ public class EvaluationResultFormatter {
      */
     private static String indent(int level) {
         return INDENT.repeat(Math.max(0, level));
+    }
+
+    /**
+     * Formats evaluation results for a single measure, with separator lines between subjects.
+     *
+     * @param measureId the measure ID for the header
+     * @param evaluationResults map of subject ID to EvaluationResult
+     * @return formatted string
+     */
+    public static String formatMeasureEvaluationResults(
+            String measureId, Map<String, EvaluationResult> evaluationResults) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(SEPARATOR).append("\n");
+        sb.append("Evaluation Results for Measure: ").append(measureId).append("\n");
+        sb.append(SEPARATOR).append("\n");
+
+        if (evaluationResults.isEmpty()) {
+            sb.append("  (no evaluation results available)\n");
+        } else {
+            boolean first = true;
+            for (Map.Entry<String, EvaluationResult> entry : evaluationResults.entrySet()) {
+                if (!first) {
+                    sb.append("  ").append(SEPARATOR).append("\n");
+                }
+                first = false;
+                sb.append("  Subject: ").append(entry.getKey()).append("\n");
+                sb.append(format(entry.getValue(), 2));
+            }
+        }
+
+        sb.append(SEPARATOR).append("\n");
+        return sb.toString();
     }
 
     public static Object printSubjectResources(PopulationDef populationDef, String subjectId) {

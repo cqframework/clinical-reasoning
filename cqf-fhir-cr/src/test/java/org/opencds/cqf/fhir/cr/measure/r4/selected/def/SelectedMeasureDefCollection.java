@@ -3,16 +3,33 @@ package org.opencds.cqf.fhir.cr.measure.r4.selected.def;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import java.util.Map;
+import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Fluent API for asserting on collections of MeasureDefs from multi-measure evaluation.
  */
 public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<MeasureDef>, P> {
 
+    private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureDefCollection.class);
+
+    private final Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure;
+
     public SelectedMeasureDefCollection(List<MeasureDef> measureDefs, P parent) {
+        this(measureDefs, parent, Map.of());
+    }
+
+    public SelectedMeasureDefCollection(
+            List<MeasureDef> measureDefs,
+            P parent,
+            Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure) {
         super(measureDefs, parent);
+        this.evaluationResultsPerMeasure = evaluationResultsPerMeasure;
     }
 
     // Assert count
@@ -26,7 +43,8 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
         assertTrue(
                 index >= 0 && index < value.size(),
                 "Index " + index + " out of bounds for " + value.size() + " MeasureDefs");
-        return new SelectedMeasureDef<>(value.get(index), this);
+        MeasureDef def = value.get(index);
+        return new SelectedMeasureDef<>(def, this, evaluationResultsPerMeasure.getOrDefault(def, Map.of()));
     }
 
     // Access first
@@ -34,12 +52,29 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
         return get(0);
     }
 
+    /**
+     * Log evaluation results for all measures in this collection at once.
+     * Each measure's results are formatted with separator lines between subjects and between measures.
+     *
+     * @return this SelectedMeasureDefCollection for chaining
+     */
+    public SelectedMeasureDefCollection<P> logAllMeasureEvaluationResults() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        for (MeasureDef def : value) {
+            Map<String, EvaluationResult> results = evaluationResultsPerMeasure.getOrDefault(def, Map.of());
+            sb.append(EvaluationResultFormatter.formatMeasureEvaluationResults(def.id(), results));
+        }
+        logger.info(sb.toString());
+        return this;
+    }
+
     // Access by measure URL - returns collection (can be multiple in subject evaluation)
     public SelectedMeasureDefCollection<SelectedMeasureDefCollection<P>> byMeasureUrl(String measureUrl) {
         List<MeasureDef> found =
                 value.stream().filter(def -> measureUrl.equals(def.url())).toList();
         assertFalse(found.isEmpty(), "No MeasureDefs found for measure URL: " + measureUrl);
-        return new SelectedMeasureDefCollection<>(found, this);
+        return new SelectedMeasureDefCollection<>(found, this, evaluationResultsPerMeasure);
     }
 
     // Access by measure ID - returns collection (can be multiple in subject evaluation)
@@ -47,7 +82,7 @@ public class SelectedMeasureDefCollection<P> extends Measure.Selected<List<Measu
         List<MeasureDef> found =
                 value.stream().filter(def -> measureId.equals(def.id())).toList();
         assertFalse(found.isEmpty(), "No MeasureDefs found for measure ID: " + measureId);
-        return new SelectedMeasureDefCollection<>(found, this);
+        return new SelectedMeasureDefCollection<>(found, this, evaluationResultsPerMeasure);
     }
 
     // TODO: Implement subject-level filtering once subject tracking API is clarified

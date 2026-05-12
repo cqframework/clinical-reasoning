@@ -289,6 +289,17 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
             IKnowledgeArtifactAdapter dependencyAdapter,
             ConformanceResourceResolver conformanceResolver) {
         if (dependencyAdapter != null) {
+            var url = dependencyAdapter.getUrl();
+            // External CodeSystems shipped as "stub" entries (CodeSystem.content = not-present)
+            // carry a version field that reflects the publishing package, not the actual
+            // terminology version. NpmRepository excludes these from the version index, so a
+            // present URL with a missing indexed version identifies a stub. Skip the pin.
+            if (conformanceResolver != null
+                    && url != null
+                    && conformanceResolver.getResourceType(url) != null
+                    && conformanceResolver.getVersion(url) == null) {
+                return url;
+            }
             return dependencyAdapter.getCanonical();
         }
         var reference = dependency.getReference();

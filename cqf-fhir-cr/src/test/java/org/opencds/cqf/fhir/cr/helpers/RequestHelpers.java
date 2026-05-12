@@ -140,4 +140,16 @@ public class RequestHelpers {
                 null,
                 libraryEngine);
     }
+
+    public static org.opencds.cqf.fhir.cr.group.evaluate.EvaluateRequest newGroupEvaluateRequestForVersion(
+            FhirVersionEnum fhirVersion, LibraryEngine libraryEngine, IBaseResource group) {
+        return new org.opencds.cqf.fhir.cr.group.evaluate.EvaluateRequest(
+                group,
+                Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
+                null,
+                null,
+                null,
+                libraryEngine,
+                FhirModelResolverCache.resolverForVersion(fhirVersion));
+    }
 }

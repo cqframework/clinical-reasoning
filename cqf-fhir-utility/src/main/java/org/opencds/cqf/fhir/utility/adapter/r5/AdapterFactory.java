@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r5.model.ActivityDefinition;
 import org.hl7.fhir.r5.model.Endpoint;
 import org.hl7.fhir.r5.model.GraphDefinition;
+import org.hl7.fhir.r5.model.Group;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
@@ -35,6 +36,7 @@ import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
@@ -65,6 +67,8 @@ public class AdapterFactory implements IAdapterFactory {
             return createEndpoint(resource);
         } else if (resource instanceof Parameters parameters) {
             return createParameters(parameters);
+        } else if (resource instanceof Group group) {
+            return createGroup(group);
         } else {
             return new ResourceAdapter(resource);
         }
@@ -112,6 +116,8 @@ public class AdapterFactory implements IAdapterFactory {
             adapter = new ValueSetAdapter(valueSet);
         } else if (resource instanceof GraphDefinition graphDefinition) {
             adapter = new GraphDefinitionAdapter(graphDefinition);
+        } else if (resource instanceof Group group) {
+            adapter = createGroup(resource);
         } else {
             if (resource instanceof MetadataResource metadataResource) {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);
@@ -126,6 +132,11 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public ILibraryAdapter createLibrary(IBaseResource library) {
         return new LibraryAdapter((IDomainResource) library);
+    }
+
+    @Override
+    public IGroupAdapter createGroup(IBaseResource group) {
+        return new GroupAdapter((IDomainResource) group);
     }
 
     @Override

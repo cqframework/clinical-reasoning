@@ -1416,4 +1416,54 @@ class PackageVisitorTests {
         byte[] bytes = Base64.getDecoder().decode(base64);
         return new String(bytes, StandardCharsets.UTF_8);
     }
+
+    @Test
+    void filterUnversionedCanonicalParams_dropsUrlsWithoutPin_keepsOthers() throws Exception {
+        var visitor = new PackageVisitor(repo);
+
+        var params = parameters();
+        params.addParameter("system-version", "http://snomed.info/sct"); // unversioned canonical — drop
+        params.addParameter("system-version", "http://loinc.org|2.81"); // versioned — keep
+        params.addParameter(
+                "canonicalVersion", "http://example.org/ValueSet/foo"); // unversioned canonical — drop
+        params.addParameter("canonicalVersion", "http://example.org/ValueSet/bar|1.0.0"); // versioned — keep
+        params.addParameter("displayLanguage", "en-US"); // non-URL — keep
+        params.addParameter("activeOnly", true); // boolean — keep
+
+        var adapter = (IParametersAdapter) IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
+                .createParameters(params);
+
+        var method = PackageVisitor.class.getDeclaredMethod("filterUnversionedCanonicalParams", IParametersAdapter.class);
+        method.setAccessible(true);
+        method.invoke(visitor, adapter);
+
+        var remainingValues = adapter.getParameter().stream()
+                .map(p -> p.getName() + "=" + (p.hasValue() ? p.getPrimitiveValue() : "<no-value>"))
+                .toList();
+
+        assertEquals(4, remainingValues.size(), "should drop both unversioned canonical entries");
+        assertTrue(remainingValues.contains("system-version=http://loinc.org|2.81"));
+        assertTrue(remainingValues.contains("canonicalVersion=http://example.org/ValueSet/bar|1.0.0"));
+        assertTrue(remainingValues.contains("displayLanguage=en-US"));
+        assertTrue(remainingValues.contains("activeOnly=true"));
+        assertFalse(remainingValues.stream().anyMatch(v -> v.equals("system-version=http://snomed.info/sct")));
+        assertFalse(
+                remainingValues.stream().anyMatch(v -> v.equals("canonicalVersion=http://example.org/ValueSet/foo")));
+    }
+
+    @Test
+    void filterUnversionedCanonicalParams_handlesNullAndEmptyInputs() throws Exception {
+        var visitor = new PackageVisitor(repo);
+        var method = PackageVisitor.class.getDeclaredMethod("filterUnversionedCanonicalParams", IParametersAdapter.class);
+        method.setAccessible(true);
+
+        // Null adapter — should not throw
+        method.invoke(visitor, new Object[] {null});
+
+        // Empty parameters — should not throw, no-op
+        var empty = (IParametersAdapter) IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
+                .createParameters(parameters());
+        method.invoke(visitor, empty);
+        assertTrue(empty.getParameter().isEmpty());
+    }
 }

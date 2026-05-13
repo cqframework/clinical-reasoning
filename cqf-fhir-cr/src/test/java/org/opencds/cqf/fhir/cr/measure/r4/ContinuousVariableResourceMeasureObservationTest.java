@@ -64,8 +64,6 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     .up()
                     .up()
                     // MeasureReport assertions (post-scoring) - verify FHIR resource output
-                    .report()
-                    .logReportJson()
                     .firstGroup()
                     .population(MeasurePopulationType.INITIALPOPULATION)
                     .hasCount(12)

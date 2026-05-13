@@ -368,9 +368,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     /**
      * Removes expansion-parameter entries whose values are unversioned canonical URLs.
-     * Logs a warning per dropped entry. Non-URL-valued params (booleans, codes, etc.)
-     * are kept. A value is considered a canonical URL if it looks like a URI scheme
-     * (contains "://") and is considered versioned if it contains a "|" version pin.
+     * Logs a warning per dropped entry. Non-canonical-valued params (booleans, codes,
+     * language tags, etc.) are kept. A value is treated as canonical when
+     * {@link Canonicals#getUrl(String)} parses it (handles http/https URLs plus
+     * urn:uuid / urn:oid forms) and versioned when {@link Canonicals#getVersion(String)}
+     * returns non-null.
      */
     private void filterUnversionedCanonicalParams(IParametersAdapter params) {
         if (params == null || params.getParameter() == null) {
@@ -382,10 +384,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         return true;
                     }
                     var value = p.getPrimitiveValue();
-                    if (value == null || !value.contains("://")) {
+                    if (value == null || Canonicals.getUrl(value) == null) {
                         return true;
                     }
-                    if (value.contains("|")) {
+                    if (Canonicals.getVersion(value) != null) {
                         return true;
                     }
                     myLogger.warn(

@@ -97,12 +97,22 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
 
         List<Code> codes = this.expand(valueSet);
 
+        if (code.getSystem() == null) {
+            // If the system is not provided and the resolved value set contains codes from multiple code systems, a
+            // run-time error is thrown because the operation is ambiguous
+            var distinctSystems = codes.stream().map(Code::getSystem).distinct().count();
+            if (distinctSystems > 1) {
+                throw new IllegalArgumentException(
+                        "The 'in' operation is ambiguous because the code system is not provided and the resolved value set contains codes from multiple code systems");
+            }
+        }
+
         // This range includes all codes that have an equivalent code value,
         // So we only need to check the code system.
         Range range = this.getSearchRange(code, codes);
         for (int i = range.start; i < range.end; i++) {
             var c = codes.get(i);
-            if (c.getSystem().equals(code.getSystem())) {
+            if (code.getSystem() == null || c.getSystem().equals(code.getSystem())) {
                 return true;
             }
         }

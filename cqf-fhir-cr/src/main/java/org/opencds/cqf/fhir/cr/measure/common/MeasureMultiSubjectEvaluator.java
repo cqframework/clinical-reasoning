@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Aggregates individual subject evaluation results into stratum definitions for measure reporting
@@ -92,7 +90,6 @@ import org.slf4j.LoggerFactory;
  *      FHIR Clinical Reasoning - Stratification</a>
  */
 public class MeasureMultiSubjectEvaluator {
-    private static final Logger logger = LoggerFactory.getLogger(MeasureMultiSubjectEvaluator.class);
 
     private MeasureMultiSubjectEvaluator() {
         // static class

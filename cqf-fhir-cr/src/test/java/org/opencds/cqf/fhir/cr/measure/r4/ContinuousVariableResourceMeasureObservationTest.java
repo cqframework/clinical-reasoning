@@ -30,13 +30,13 @@ public class ContinuousVariableResourceMeasureObservationTest {
     @Nested
     class Avg {
         private static final Given GIVEN_NON_FUNCTION_STRATIFIER =
-                Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasisNonFunctionStratifier");
+                Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasisNonFuncStrat");
 
         @Test
         void continuousVariableObservationEncounterBasisNonFunctionStratifier() {
             GIVEN_NON_FUNCTION_STRATIFIER
                     .when()
-                    .measureId("ContinuousVariableObservationEncounterBasisNonFunctionStratifier")
+                    .measureId("ContinuousVariableObservationEncounterBasisNonFuncStrat")
                     .evaluate()
                     .then()
                     // MeasureDef assertions (pre-scoring) - verify internal state after processing

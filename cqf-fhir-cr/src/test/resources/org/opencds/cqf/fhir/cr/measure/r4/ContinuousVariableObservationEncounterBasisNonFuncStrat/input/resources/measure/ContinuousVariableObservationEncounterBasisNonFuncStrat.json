@@ -1,10 +1,10 @@
 {
-    "id": "ContinuousVariableObservationEncounterBasisNonFunctionStratifier",
+    "id": "ContinuousVariableObservationEncounterBasisNonFuncStrat",
     "resourceType": "Measure",
-    "url": "http://example.com/Measure/ContinuousVariableObservationEncounterBasisNonFunctionStratifier",
-    "name": "ContinuousVariableObservationEncounterBasisNonFunctionStratifier",
+    "url": "http://example.com/Measure/ContinuousVariableObservationEncounterBasisNonFuncStrat",
+    "name": "ContinuousVariableObservationEncounterBasisNonFuncStrat",
     "library": [
-      "http://example.com/Library/ContinuousVariableObservationEncounterBasisNonFunctionStratifier"
+      "http://example.com/Library/ContinuousVariableObservationEncounterBasisNonFuncStrat"
     ],
     "extension": [
       {

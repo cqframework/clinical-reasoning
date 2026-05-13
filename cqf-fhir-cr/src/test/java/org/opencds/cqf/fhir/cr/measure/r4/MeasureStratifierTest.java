@@ -267,7 +267,15 @@ class MeasureStratifierTest {
                 // Patients are stratified by age - the scalar expression applies to all encounters
                 // for each patient. The exact number of strata depends on how many unique ages exist.
                 // Test data has 2 unique ages (35 and 38 based on patient birth dates and measurement period)
-                .hasStratumCount(2);
+                .hasStratumCount(2)
+                // Locks in case 2 (non-subject basis + scalar expression) scoring per #909.
+                // Without that fix the Encounter IDs flowing into ratio stratum scoring are
+                // empty for scalar stratifiers, leaving stratum measureScore unset.
+                .stratumByText("38")
+                .hasScore("0.3333333333333333")
+                .up()
+                .stratumByText("35")
+                .hasScore("0.14285714285714285");
     }
 
     /**
@@ -1398,6 +1406,25 @@ class MeasureStratifierTest {
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
                         "Exception for subjectId: Patient/patient-9, Message: CQL Exception while evaluating function: Age of Period");
+    }
+
+    /**
+     * Per issue #909 case 3: subject (boolean) basis stratifier whose component expression is a CQL
+     * function must be rejected. Exercises FunctionEvaluationHandler.validateNotFunction at line
+     * 209-227 via the VALUE (subject-based) branch of validateStratifierExpressionTypes
+     * (FunctionEvaluationHandler.java:177-195).
+     */
+    @Test
+    void cohortBooleanValueStratFunctionStratifierInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortBooleanValueStratFunctionStratifier")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "VALUE (subject-based) stratifier expression 'Encounter Status Stratifier' must NOT be a CQL function definition");
     }
 
     /**

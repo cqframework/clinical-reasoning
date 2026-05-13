@@ -1,8 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -19,6 +17,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Aggregates individual subject evaluation results into stratum definitions for measure reporting
@@ -881,7 +881,17 @@ public class MeasureMultiSubjectEvaluator {
 
             Set<Object> resources = entry.getValue();
             if (resources != null) {
-                if (isResourceType) {
+                // MEASUREOBSERVATION populations store Set<Map<inputResource, outputValue>>,
+                // so the input resource IDs we need are the Map keys.
+                if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+                    resources.stream()
+                            .filter(Map.class::isInstance)
+                            .map(m -> (Map<?, ?>) m)
+                            .flatMap(m -> m.keySet().stream())
+                            .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                            .filter(java.util.Objects::nonNull)
+                            .forEach(resourceIds::add);
+                } else if (isResourceType) {
                     resources.stream()
                             .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                             .filter(java.util.Objects::nonNull)
@@ -891,8 +901,6 @@ public class MeasureMultiSubjectEvaluator {
                 }
             }
         }
-
-        logger.info("1234: population: {}, \nsubjectIds: {}, \nresourceIds: {}", populationDef.id(), subjectIds, resourceIds);
 
         return resourceIds;
     }

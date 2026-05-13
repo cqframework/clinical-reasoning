@@ -208,7 +208,7 @@ public class MeasureEvaluationResultHandler {
                     // "Expression result: <pop> is missing" error that masks the underlying
                     // CqlException ("Unable to locate ValueSet", etc.) and — by escaping the inner
                     // loop into the outer catch — pollutes sibling libraries' measure defs.
-                    final List<EvaluationResult> functionEvaluationResults = (libraryException == null)
+                    final List<CqlEvaluationResult> functionEvaluationResults = (libraryException == null)
                             ? FunctionEvaluationHandler.cqlFunctionEvaluation(
                                     context, measureDefs, libraryVersionedIdentifier, evaluationResult, subjectTypePart)
                             : List.of();

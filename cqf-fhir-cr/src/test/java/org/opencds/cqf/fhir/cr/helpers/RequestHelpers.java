@@ -149,7 +149,6 @@ public class RequestHelpers {
                 null,
                 null,
                 null,
-                libraryEngine,
-                FhirModelResolverCache.resolverForVersion(fhirVersion));
+                libraryEngine);
     }
 }

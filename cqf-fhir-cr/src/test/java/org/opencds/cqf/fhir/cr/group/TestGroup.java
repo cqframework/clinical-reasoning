@@ -40,6 +40,8 @@ import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
@@ -276,7 +278,7 @@ public class TestGroup {
     @SuppressWarnings("UnstableApiUsage")
     public static class Evaluation {
         final IRepository repository;
-        final IBaseResource result;
+        final IGroupAdapter result;
         final IParser jsonParser;
         final ModelResolver modelResolver;
         final List<IBase> parameter;
@@ -285,12 +287,12 @@ public class TestGroup {
         @SuppressWarnings("unchecked")
         public Evaluation(IRepository repository, IBaseResource result) {
             this.repository = repository;
-            this.result = result;
+            adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
+            this.result = adapterFactory.createGroup(result);
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
             modelResolver = FhirModelResolverCache.resolverForVersion(
                     this.repository.fhirContext().getVersion().getVersion());
-            adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
-            parameter = ((List<IBase>) modelResolver.resolvePath(result, "parameter"));
+            parameter = ((List<IBase>) this.result.resolvePath(result, "parameter"));
         }
 
         public Evaluation hasResults(Integer count) {
@@ -299,7 +301,7 @@ public class TestGroup {
         }
 
         public Evaluation hasOperationOutcome() {
-            assertTrue(modelResolver.resolvePath(parameter.get(0), "resource") instanceof IBaseOperationOutcome);
+            assertTrue(result.resolvePath(parameter.get(0), "resource") instanceof IBaseOperationOutcome);
             return this;
         }
 

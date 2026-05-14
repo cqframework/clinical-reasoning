@@ -9,12 +9,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Constants.CPG_ACTIVITY_TYPE_CODE;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
 public class ActionResolver {
 
     public void resolveAction(
             ApplyRequest request,
-            IBaseResource requestOrchestration,
+            IResourceAdapter requestOrchestration,
             IBaseResource result,
             IPlanDefinitionActionAdapter action) {
         if ("Task".equals(result.fhirType())) {
@@ -24,7 +25,7 @@ public class ActionResolver {
 
     protected void resolveTask(
             ApplyRequest request,
-            IBaseResource requestOrchestration,
+            IResourceAdapter requestOrchestration,
             IBaseResource task,
             IPlanDefinitionActionAdapter action) {
         var actionId = action.getId();

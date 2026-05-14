@@ -217,22 +217,22 @@ public class ApplyProcessor implements IApplyProcessor {
                 "Performing $apply operation on PlanDefinition/{}",
                 request.getPlanDefinition().getIdElement().getIdPart());
 
-        var requestOrchestration = processRequest.generateRequestOrchestration(request);
-        var adapter = request.getAdapterFactory().createResource(requestOrchestration);
-        extensionProcessor.processExtensions(request, adapter, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
-        processGoals(request, adapter);
+        var requestOrchestration =
+                request.getAdapterFactory().createResource(processRequest.generateRequestOrchestration(request));
+        extensionProcessor.processExtensions(
+                request, requestOrchestration, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
+        processGoals(request, requestOrchestration);
         var metConditions = new ArrayList<String>();
         for (var action : request.getPlanDefinitionAdapter().getAction()) {
-            adapter.setValue(
-                    requestOrchestration,
+            requestOrchestration.setValue(
                     "action",
                     Collections.singletonList(
                             processAction.processAction(request, requestOrchestration, metConditions, action)));
         }
 
         return Boolean.TRUE.equals(request.getContainResources())
-                ? liftContainedResourcesToParent(request, requestOrchestration)
-                : requestOrchestration;
+                ? liftContainedResourcesToParent(request, requestOrchestration.get())
+                : requestOrchestration.get();
     }
 
     public IBaseResource applyActivityDefinition(

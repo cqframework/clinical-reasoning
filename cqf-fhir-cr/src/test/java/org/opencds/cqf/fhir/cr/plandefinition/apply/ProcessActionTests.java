@@ -186,7 +186,7 @@ class ProcessActionTests {
     @Test
     void testProcessChildActionsApplicabilityBehavior() {
         var action = actionWithChildren();
-        var requestOrchestration = new RequestGroup();
+        var requestOrchestration = IAdapterFactory.createAdapterForResource(new RequestGroup());
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var requestAction = fixture.generateRequestAction(actionAdapter);
@@ -211,7 +211,7 @@ class ProcessActionTests {
     void testProcessChildActionsDoesNotThrowOnInvalidApplicabilityBehavior() {
         var action = actionWithChildren();
         action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new BooleanType(true));
-        var requestOrchestration = new RequestGroup();
+        var requestOrchestration = IAdapterFactory.createAdapterForResource(new RequestGroup());
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var requestAction = fixture.generateRequestAction(actionAdapter);

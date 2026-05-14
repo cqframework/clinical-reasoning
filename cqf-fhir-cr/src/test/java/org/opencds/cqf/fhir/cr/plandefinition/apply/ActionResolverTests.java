@@ -42,7 +42,7 @@ class ActionResolverTests {
                         Constants.CPG_ACTIVITY_TYPE_CS,
                         CPG_ACTIVITY_TYPE_CODE.COLLECT_INFORMATION.code,
                         CPG_ACTIVITY_TYPE_CODE.COLLECT_INFORMATION.name())));
-        var requestGroup = new org.hl7.fhir.r4.model.RequestGroup();
+        var requestGroup = IAdapterFactory.createAdapterForResource(new org.hl7.fhir.r4.model.RequestGroup());
         requestGroup.setId("RequestGroup/TestQuestionnaireTask");
         var request = RequestHelpers.newPDApplyRequestForVersion(
                         fhirVersion, libraryEngine, null, inputParameterResolver)

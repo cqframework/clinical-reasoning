@@ -2,18 +2,18 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static java.util.Objects.requireNonNull;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
+import static org.opencds.cqf.fhir.utility.BundleHelper.*;
+import static org.opencds.cqf.fhir.utility.Canonicals.*;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.repository.IRepository;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r5.model.Enumerations.FHIRTypes;
-import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
@@ -83,24 +83,20 @@ public class ProcessDefinition {
         var referenceToContained = definition.getValue().startsWith("#");
         var resource = referenceToContained
                 ? resolveContained(request, definition.getValue())
-                : resolveCanonicalByType(definition);
+                : resolveCanonicalByType(request, definition);
         if (resource == null) {
             return null;
         }
-        return switch (FHIRTypes.fromCode(resource.fhirType())) {
-            case PLANDEFINITION -> applyNestedPlanDefinition(request, resource);
-            case ACTIVITYDEFINITION -> applyActivityDefinition(request, resource);
-            case QUESTIONNAIRE -> applyQuestionnaireDefinition(request, definition);
+        return switch (resource.fhirType()) {
+            case "PlanDefinition" -> applyNestedPlanDefinition(request, resource);
+            case "ActivityDefinition" -> applyActivityDefinition(request, resource);
             default -> resource;
         };
     }
 
-    // Class shadow: Added method to resolve canonical reference by searching across all supported definition resource
-    // types using transaction Bundle.
     /**
-     * Resolves a canonical reference by searching across all supported definition resource
-     * types using a batch Bundle. This avoids the upstream URL-based type detection which
-     * is case-sensitive and defaults to CodeSystem for unrecognized URL patterns (HAAS-1930).
+     * Resolves a canonical reference by issuing a single transaction Bundle that searches every
+     * supported definition resource type in parallel, instead of inferring the type from the URL.
      *
      * <p>Resolution rules:
      * <ul>
@@ -109,24 +105,21 @@ public class ProcessDefinition {
      *   <li>If multiple resources match — throw an {@link IllegalStateException}.</li>
      * </ul>
      */
-    private IBaseResource resolveCanonicalByType(IPrimitiveType<String> definition) {
+    private IBaseResource resolveCanonicalByType(ApplyRequest request, IPrimitiveType<String> definition) {
         var canonical = definition.getValue();
-        var url = Canonicals.getUrl(canonical);
-        var version = Canonicals.getVersion(canonical);
+        var url = getUrl(canonical);
+        var version = getVersion(canonical);
         var hasVersion = version != null && !version.isEmpty();
+        var fhirVersion = request.getFhirVersion();
 
-        var transaction = new org.hl7.fhir.r4.model.Bundle();
-        transaction.setType(Bundle.BundleType.TRANSACTION);
-
+        var transaction = newBundle(fhirVersion, "transaction");
         for (var type : SUPPORTED_DEFINITION_TYPES) {
             var searchUrl = hasVersion
                     ? "%s?url=%s&version=%s".formatted(type, url, version)
                     : "%s?url=%s".formatted(type, url);
-            transaction
-                    .addEntry()
-                    .getRequest()
-                    .setMethod(org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET)
-                    .setUrl(searchUrl);
+            var requestEntry = newRequest(fhirVersion, "GET", searchUrl);
+            var entry = setEntryRequest(fhirVersion, newEntry(fhirVersion), requestEntry);
+            addEntry(transaction, entry);
         }
 
         var response = repository.transaction(transaction);
@@ -145,15 +138,11 @@ public class ProcessDefinition {
                 "Multiple resources (%d) found for canonical '%s'. %s".formatted(matches.size(), canonical, errorHint));
     }
 
-    private List<IBaseResource> collectMatchesFromResponse(Bundle response) {
-        var matches = new java.util.ArrayList<IBaseResource>();
-        for (var entry : response.getEntry()) {
-            if (entry.getResource() instanceof org.hl7.fhir.r4.model.Bundle resultBundle) {
-                for (var resultEntry : resultBundle.getEntry()) {
-                    if (resultEntry.getResource() != null) {
-                        matches.add(resultEntry.getResource());
-                    }
-                }
+    private List<IBaseResource> collectMatchesFromResponse(IBaseBundle response) {
+        var matches = new ArrayList<IBaseResource>();
+        for (var resource : getEntryResources(response)) {
+            if (resource instanceof IBaseBundle resultBundle) {
+                matches.addAll(getEntryResources(resultBundle));
             }
         }
         return matches;
@@ -175,25 +164,6 @@ public class ProcessDefinition {
             case R5 -> definition instanceof org.hl7.fhir.r5.model.UriType;
             default -> Boolean.FALSE;
         };
-    }
-
-    protected IBaseResource applyQuestionnaireDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
-        requireNonNull(definition);
-        IBaseResource result = null;
-        try {
-            var referenceToContained = definition.getValue().startsWith("#");
-            if (referenceToContained) {
-                result = resolveContained(request, definition.getValue());
-            } else {
-                result = resolveRepository(definition);
-            }
-        } catch (Exception e) {
-            var message = "ERROR: Questionnaire %s could not be applied and threw exception %s"
-                    .formatted(definition.getValue(), e.toString());
-            logger.error(message);
-            request.logException(message);
-        }
-        return result;
     }
 
     protected IBaseResource applyActivityDefinition(ApplyRequest request, IPrimitiveType<String> definition) {
@@ -263,21 +233,6 @@ public class ProcessDefinition {
 
     protected IBaseResource resolveRepository(IPrimitiveType<String> definition) {
         return searchRepositoryByCanonical(repository, definition);
-    }
-
-    protected String resolveResourceName(ApplyRequest request, IPrimitiveType<String> canonical) {
-        requireNonNull(canonical);
-        if (canonical.hasValue()) {
-            var id = canonical.getValue();
-            if (id.contains("/")) {
-                id = id.replace(id.substring(id.lastIndexOf("/")), "");
-                return id.contains("/") ? id.substring(id.lastIndexOf("/") + 1) : id;
-            } else if (id.startsWith("#")) {
-                return resolveContained(request, id).fhirType();
-            }
-            return null;
-        }
-        throw new FHIRException("CanonicalType must have a value for resource name extraction");
     }
 
     protected IBaseResource resolveContained(ApplyRequest request, String id) {

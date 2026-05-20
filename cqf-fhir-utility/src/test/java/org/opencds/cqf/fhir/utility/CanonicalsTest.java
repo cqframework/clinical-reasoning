@@ -59,6 +59,17 @@ class CanonicalsTest {
     }
 
     @Test
+    void selfReferentialUrlResolvesResourceType() {
+        // Regression: previously String.replace() stripped both occurrences of
+        // "/StructureDefinition" and returned "fhir" for this self-referential URL.
+        String selfRef = "http://hl7.org/fhir/StructureDefinition/StructureDefinition";
+
+        assertEquals("StructureDefinition", Canonicals.getResourceType(selfRef));
+        assertEquals("StructureDefinition", Canonicals.getIdPart(selfRef));
+        assertEquals(selfRef, Canonicals.getUrl(selfRef));
+    }
+
+    @Test
     void canonicalParts() {
         CanonicalType testUrl = new CanonicalType("http://fhir.acme.com/Questionnaire/example|1.0#vs1");
 

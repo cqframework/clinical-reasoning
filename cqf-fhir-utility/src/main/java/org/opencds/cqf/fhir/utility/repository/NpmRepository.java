@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.utility.repository;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.Multimap;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,13 +13,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +48,7 @@ public class NpmRepository extends InMemoryFhirRepository {
     private Map<String, String> resourceTypeIndex; // canonical URL → FHIR resource type
     private Map<String, String> versionIndex; // canonical URL → version
     private Map<String, PackageInfo> packageIndex; // canonical URL → owning package info
+    private Map<String, String> idIndex; // canonical URL → resource id (for canonical-by-URL search)
 
     /** Package provenance information for a resource. */
     public record PackageInfo(String packageId, String version, String canonical) {}
@@ -88,6 +96,70 @@ public class NpmRepository extends InMemoryFhirRepository {
             logger.debug("Resource {}/{} not found in any loaded NPM package", id.getResourceType(), id.getIdPart());
             throw e;
         }
+    }
+
+    /**
+     * Canonical-by-URL search support: when an in-memory search comes up empty and the
+     * search includes a {@code url} parameter, look up the URL in the package index and
+     * trigger {@link #read} to lazy-load the resource. Then re-run the in-memory search.
+     *
+     * <p>Without this override, callers that resolve canonicals via search (e.g.
+     * {@code SearchHelper.searchRepositoryByCanonicalWithPaging}) silently miss
+     * NPM-only resources because lazy loading is only wired into {@code read()}.
+     */
+    @Override
+    public <B extends IBaseBundle, T extends IBaseResource> B search(
+            Class<B> bundleType,
+            Class<T> resourceType,
+            Multimap<String, List<IQueryParameterType>> searchParameters,
+            Map<String, String> headers) {
+
+        var result = super.search(bundleType, resourceType, searchParameters, headers);
+
+        if (!BundleHelper.getEntry(result).isEmpty() || dependsOnPackages.isEmpty()) {
+            return result;
+        }
+
+        var url = extractUrlSearchParam(searchParameters);
+        if (url == null) {
+            return result;
+        }
+
+        ensurePackagesLoaded();
+
+        var indexedType = resourceTypeIndex.get(url);
+        if (indexedType == null || !indexedType.equals(resourceType.getSimpleName())) {
+            return result;
+        }
+
+        var indexedId = idIndex.get(url);
+        if (indexedId == null) {
+            return result;
+        }
+
+        try {
+            IIdType id = Ids.newId(fhirContext(), indexedType, indexedId);
+            read(resourceType, id, headers);
+        } catch (Exception e) {
+            logger.debug("NPM lazy-load by URL '{}' failed: {}", url, e.getMessage());
+            return result;
+        }
+
+        return super.search(bundleType, resourceType, searchParameters, headers);
+    }
+
+    private static String extractUrlSearchParam(Multimap<String, List<IQueryParameterType>> searchParameters) {
+        if (searchParameters == null || !searchParameters.containsKey("url")) {
+            return null;
+        }
+        return searchParameters.get("url").stream()
+                .flatMap(List::stream)
+                .filter(UriParam.class::isInstance)
+                .map(UriParam.class::cast)
+                .map(UriParam::getValue)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -142,10 +214,11 @@ public class NpmRepository extends InMemoryFhirRepository {
         var typeIndex = new HashMap<String, String>();
         var verIndex = new HashMap<String, String>();
         var pkgIndex = new HashMap<String, PackageInfo>();
+        var idMap = new HashMap<String, String>();
         logger.info("Loading NPM packages from {} seed(s)", dependsOnPackages.size());
         try {
             var mgr = createPackageCacheManager();
-            loadPackagesTransitively(mgr, result, typeIndex, verIndex, pkgIndex);
+            loadPackagesTransitively(mgr, result, typeIndex, verIndex, pkgIndex, idMap);
             logger.info("NPM package loading complete: {} package(s) loaded", result.size());
         } catch (Exception e) {
             logger.warn("Could not initialize NPM package cache manager: {}", e.getMessage(), e);
@@ -153,6 +226,7 @@ public class NpmRepository extends InMemoryFhirRepository {
         resourceTypeIndex = typeIndex;
         versionIndex = verIndex;
         packageIndex = pkgIndex;
+        idIndex = idMap;
         loadedPackages = result;
     }
 
@@ -170,7 +244,8 @@ public class NpmRepository extends InMemoryFhirRepository {
             List<NpmPackage> result,
             Map<String, String> typeIndex,
             Map<String, String> verIndex,
-            Map<String, PackageInfo> pkgIndex) {
+            Map<String, PackageInfo> pkgIndex,
+            Map<String, String> idMap) {
         Set<String> loaded = new HashSet<>();
         Queue<String[]> toLoad = new LinkedList<>(dependsOnPackages);
         while (!toLoad.isEmpty()) {
@@ -182,7 +257,7 @@ public class NpmRepository extends InMemoryFhirRepository {
             if (!loaded.add(key)) {
                 continue;
             }
-            loadSinglePackage(mgr, pkgInfo, key, result, typeIndex, verIndex, pkgIndex, toLoad);
+            loadSinglePackage(mgr, pkgInfo, key, result, typeIndex, verIndex, pkgIndex, idMap, toLoad);
         }
     }
 
@@ -194,6 +269,7 @@ public class NpmRepository extends InMemoryFhirRepository {
             Map<String, String> typeIndex,
             Map<String, String> verIndex,
             Map<String, PackageInfo> pkgIndex,
+            Map<String, String> idMap,
             Queue<String[]> toLoad) {
         try {
             var npmPkg = mgr.loadPackage(pkgInfo[0], pkgInfo[1]);
@@ -204,7 +280,7 @@ public class NpmRepository extends InMemoryFhirRepository {
             result.add(npmPkg);
             logger.info("Loaded NPM package: {}", key);
 
-            indexPackageResources(npmPkg, key, typeIndex, verIndex, pkgIndex);
+            indexPackageResources(npmPkg, key, typeIndex, verIndex, pkgIndex, idMap);
 
             for (var dep : npmPkg.dependencies()) {
                 var parts = dep.split("#", 2);
@@ -222,7 +298,8 @@ public class NpmRepository extends InMemoryFhirRepository {
             String key,
             Map<String, String> typeIndex,
             Map<String, String> verIndex,
-            Map<String, PackageInfo> pkgIndex) {
+            Map<String, PackageInfo> pkgIndex,
+            Map<String, String> idMap) {
         try {
             var owningPackage = new PackageInfo(npmPkg.id(), npmPkg.version(), npmPkg.canonical());
             for (var info : npmPkg.listIndexedResources()) {
@@ -231,6 +308,9 @@ public class NpmRepository extends InMemoryFhirRepository {
                 }
                 if (info.getResourceType() != null) {
                     typeIndex.putIfAbsent(info.getUrl(), info.getResourceType());
+                }
+                if (info.getId() != null) {
+                    idMap.putIfAbsent(info.getUrl(), info.getId());
                 }
                 // Stub CodeSystems (content: not-present) are placeholders —
                 // their version and package provenance are not meaningful.

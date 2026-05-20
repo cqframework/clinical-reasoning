@@ -1409,6 +1409,48 @@ class MeasureStratifierTest {
     }
 
     /**
+     * Non-subject value stratifier whose component expression is a patient-context scalar that
+     * evaluates to a List instead of a single value. Uses "Distinct Encounter Statuses"
+     * (patient-level distinct of the patient's Encounter.status), which for patient-9
+     * (one finished, one in-progress Encounter) returns {'finished', 'in-progress'}.
+     * Exercises the iterable-value branch in
+     * MeasureMultiSubjectEvaluator.mapToListOfTableEntries via addIterableValueRows.
+     * <p/>
+     * Issue #909 only specified scalar (single value) behavior for the non-subject + scalar
+     * quadrant; a list-returning expression on a non-subject basis is treated as "subject
+     * appears in each stratum derived from a list element, with all of that subject's
+     * resources counted in each such stratum" — the same semantics as the scalar case but
+     * fanned out across N strata. Patient-9 therefore appears in both the "finished" and
+     * "in-progress" strata with both of their Encounters counted in each.
+     */
+    @Test
+    void cohortResourceValueStratListScalar() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratListScalar")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .def()
+                .logEvaluationResults()
+                .up()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(2)
+                .stratumByText("finished")
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .up()
+                .stratumByText("in-progress")
+                .firstPopulation()
+                .hasCount(2);
+    }
+
+    /**
      * Per issue #909 case 3: subject (boolean) basis stratifier whose component expression is a CQL
      * function must be rejected. Exercises FunctionEvaluationHandler.validateNotFunction at line
      * 209-227 via the VALUE (subject-based) branch of validateStratifierExpressionTypes

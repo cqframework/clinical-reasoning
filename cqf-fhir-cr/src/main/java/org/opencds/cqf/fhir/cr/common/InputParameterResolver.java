@@ -94,7 +94,7 @@ public class InputParameterResolver implements IInputParameterResolver {
         if (baseParameters != null) {
             adapterFactory.createParameters(baseParameters).getParameter().forEach(p -> params.addParameter(p.get()));
         }
-        if (subjectId != null) {
+        if (subjectId != null && !params.hasParameter("%subject")) {
             var subjectClass = fhirContext()
                     .getResourceDefinition(subjectId.getResourceType())
                     .getImplementingClass();
@@ -103,7 +103,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                 params.addParameter("%subject", subject);
             }
         }
-        if (encounterId != null) {
+        if (encounterId != null && !params.hasParameter("%encounter")) {
             var encounterClass = fhirContext()
                     .getResourceDefinition(encounterId.getResourceType())
                     .getImplementingClass();
@@ -112,7 +112,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                 params.addParameter("%encounter", encounter);
             }
         }
-        if (practitionerId != null) {
+        if (practitionerId != null && !params.hasParameter("%practitioner")) {
             var practitionerClass = fhirContext()
                     .getResourceDefinition(practitionerId.getResourceType())
                     .getImplementingClass();

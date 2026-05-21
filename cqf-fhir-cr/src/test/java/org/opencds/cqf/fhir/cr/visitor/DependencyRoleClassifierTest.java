@@ -524,4 +524,46 @@ class DependencyRoleClassifierTest {
         assertFalse(roles.contains("key"));
         assertTrue(roles.contains("default"));
     }
+
+    @Test
+    void testTransitiveKeyMatchesWhenSetHasVersionPinAndDepDoesNot() {
+        // FHIR core writes some bindings with version pins (e.g.
+        // "http://hl7.org/fhir/ValueSet/publication-status|4.0.1") and others without.
+        // When KeyElementAnalyzer collects these into the transitive key set, dep
+        // references discovered through other paths may be version-stripped. The
+        // classifier must normalize so set membership is URL-only.
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var transitiveKeySet = Set.of("http://hl7.org/fhir/ValueSet/publication-status|4.0.1");
+        var dependency = createDependency("http://hl7.org/fhir/ValueSet/publication-status");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeySet);
+
+        assertTrue(
+                roles.contains("key"), "Should match version-pinned set entry against version-stripped dep reference");
+    }
+
+    @Test
+    void testTransitiveKeyMatchesWhenDepHasVersionPinAndSetDoesNot() {
+        // Symmetric case: set entry has no pin, dep reference does. Classifier
+        // strips dep on lookup, so this branch already worked, but lock it down.
+        var resolver = createResolver();
+
+        var library = new Library();
+        library.setUrl("http://example.org/Library/main");
+        var libraryAdapter = (IKnowledgeArtifactAdapter) adapterFactory.createKnowledgeArtifactAdapter(library);
+
+        var transitiveKeySet = Set.of("http://hl7.org/fhir/ValueSet/library-type");
+        var dependency = createDependency("http://hl7.org/fhir/ValueSet/library-type|4.0.1");
+
+        var roles = DependencyRoleClassifier.classifyDependencyRoles(
+                dependency, libraryAdapter, null, resolver, transitiveKeySet);
+
+        assertTrue(roles.contains("key"));
+    }
 }

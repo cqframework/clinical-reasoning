@@ -28,6 +28,14 @@ public class SelectedMeasureReportStratumComponent
         return this;
     }
 
+    public SelectedMeasureReportStratumComponent hasId(String expectedId) {
+        assertEquals(
+                expectedId,
+                value().getId(),
+                "Expected component id: %s, but got: %s".formatted(expectedId, value().getId()));
+        return this;
+    }
+
     public SelectedMeasureReportStratumComponent hasValueText(String expectedValueText) {
         assertTrue(
                 value().hasValue() && value().getValue().hasText(),

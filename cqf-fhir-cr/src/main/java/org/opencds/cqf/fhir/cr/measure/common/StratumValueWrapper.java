@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.Collection;
-import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -77,13 +75,14 @@ public class StratumValueWrapper {
     private static final String EMPTY_STRATUM_VALUE = "empty";
 
     public String getKey() {
+        var wrapper = CqlExpressionValue.ofRaw(value, null);
         // Handle null values - group them into a special "null" stratum
-        if (value == null) {
+        if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
 
         // Handle empty collections - group them into a special "empty" stratum
-        if (isEmptyCollection(value)) {
+        if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
 
@@ -124,10 +123,11 @@ public class StratumValueWrapper {
     }
 
     public String getDescription() {
-        if (value == null) {
+        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
-        if (isEmptyCollection(value)) {
+        if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
         if (value instanceof IBaseCoding) {
@@ -169,29 +169,13 @@ public class StratumValueWrapper {
         return String.join("-", elements);
     }
 
-    /**
-     * Check if the value is an empty collection (List, Set, Map, or other Iterable).
-     * CQL's empty list "{}" evaluates to an empty collection, which should be treated
-     * as a distinct stratum value rather than causing an error.
-     */
-    private static boolean isEmptyCollection(Object value) {
-        if (value instanceof Collection<?> collection) {
-            return collection.isEmpty();
-        }
-        if (value instanceof Map<?, ?> map) {
-            return map.isEmpty();
-        }
-        if (value instanceof Iterable<?> iterable) {
-            return !iterable.iterator().hasNext();
-        }
-        return false;
-    }
-
     private String getValueAsString(Object valueInner) {
-        if (valueInner == null) {
+        var wrapper = CqlExpressionValue.ofRaw(valueInner, null);
+        if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
-        if (isEmptyCollection(valueInner)) {
+        // CQL's empty list "{}" should be a distinct stratum value, not an error
+        if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
         if (valueInner instanceof IBaseCoding) {

@@ -22,6 +22,7 @@ import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 
@@ -194,15 +195,16 @@ public class R4SupportingEvidenceExtension {
      * - NORMAL: everything else
      */
     private static ValueKind classifyValue(Object value) {
-        if (value == null) {
+        var wrapper = CqlExpressionValue.ofRaw(value, null);
+        if (wrapper.isNull()) {
             return ValueKind.NULL_RESULT;
         }
 
-        if (value instanceof Iterable<?> it) {
+        if (wrapper.isIterable()) {
             boolean sawAny = false;
             boolean sawNonNull = false;
 
-            for (Object o : it) {
+            for (Object o : wrapper.asIterable()) {
                 sawAny = true;
                 if (o != null) {
                     sawNonNull = true;
@@ -220,8 +222,8 @@ public class R4SupportingEvidenceExtension {
             return ValueKind.NORMAL;
         }
 
-        if (value instanceof Map<?, ?> m) {
-            return m.isEmpty() ? ValueKind.EMPTY_LIST : ValueKind.NORMAL;
+        if (wrapper.isMap()) {
+            return wrapper.isEmpty() ? ValueKind.EMPTY_LIST : ValueKind.NORMAL;
         }
 
         return ValueKind.NORMAL;
@@ -273,17 +275,20 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
+        var wrapper = CqlExpressionValue.ofRaw(value, null);
+
         // Flatten lists & sets
-        if (value instanceof Iterable<?> it) {
-            for (Object item : it) {
+        if (wrapper.isIterable()) {
+            for (Object item : wrapper.asIterable()) {
                 collectLeavesInto(item, out, depth + 1);
             }
             return;
         }
 
         // Optional: flatten map values (if you still want)
-        if (value instanceof Map<?, ?> map) {
-            for (Object v : map.values()) {
+        var asMap = wrapper.asMap();
+        if (asMap.isPresent()) {
+            for (Object v : asMap.get().values()) {
                 collectLeavesInto(v, out, depth + 1);
             }
             return;

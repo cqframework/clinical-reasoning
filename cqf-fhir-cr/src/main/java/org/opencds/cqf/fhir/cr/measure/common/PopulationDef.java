@@ -29,7 +29,15 @@ public class PopulationDef {
     private Double aggregationResult;
 
     protected Set<Object> evaluatedResources;
-    protected Map<String, Set<Object>> subjectResources = new HashMap<>();
+
+    /**
+     * Per-subject results from CQL evaluation, stored as wrappers so the FHIR-identity / CQL-type
+     * equality rules live in one place ({@link HashSetForCqlExpressionValues}). For most
+     * population types each wrapper holds a FHIR resource or CQL value; for
+     * {@link MeasurePopulationType#MEASUREOBSERVATION} populations each wrapper holds a
+     * {@code Map<inputResource, outputValue>} accumulator.
+     */
+    protected Map<String, Set<CqlExpressionValue>> subjectResources = new HashMap<>();
 
     public PopulationDef(
             String id,
@@ -123,24 +131,44 @@ public class PopulationDef {
             return;
         }
 
-        final Set<Object> resourcesForSubject = subjectResources.get(subjectId);
+        final Set<CqlExpressionValue> resourcesForSubject = subjectResources.get(subjectId);
         if (resourcesForSubject == null) {
             return;
         }
 
-        // Remove the key from all inner maps
-        resourcesForSubject.forEach(element -> {
-            if (element instanceof Map<?, ?> innerMap) {
-                innerMap.remove(measureObservationResourceKey);
-            }
-        });
-
-        // Remove empty inner maps - critical for correct counting
-        resourcesForSubject.removeIf(element -> element instanceof Map<?, ?> m && m.isEmpty());
+        // Drop accumulators whose entries all match (or, after filtering, none remain).
+        // Each ObservationAccumulator is immutable, so we replace its containing wrapper with a
+        // freshly-constructed one carrying the filtered entries; if the filtered list is empty,
+        // we drop the wrapper entirely so the count stays correct.
+        Set<CqlExpressionValue> rebuilt = new HashSetForCqlExpressionValues();
+        for (CqlExpressionValue element : resourcesForSubject) {
+            processSingleCqlExpressionValue(measureObservationResourceKey, element, rebuilt);
+        }
+        resourcesForSubject.clear();
+        resourcesForSubject.addAll(rebuilt);
 
         // If the subject's resource set is now empty, remove the subject from the map entirely
         if (resourcesForSubject.isEmpty()) {
             subjectResources.remove(subjectId);
+        }
+    }
+
+    private static void processSingleCqlExpressionValue(
+            Object measureObservationResourceKey, CqlExpressionValue element, Set<CqlExpressionValue> rebuilt) {
+        if (element == null) {
+            return;
+        }
+        ObservationAccumulator acc = element.asObservationAccumulator().orElse(null);
+        if (acc == null) {
+            rebuilt.add(element); // not an observation accumulator, leave alone
+            return;
+        }
+        List<ObservationEntry> filtered = acc.entries().stream()
+                .filter(e ->
+                        !FhirResourceAndCqlTypeUtils.areObjectsEqual(e.inputResource(), measureObservationResourceKey))
+                .toList();
+        if (!filtered.isEmpty()) {
+            rebuilt.add(CqlExpressionValue.ofRaw(new ObservationAccumulator(filtered), null));
         }
     }
 
@@ -179,7 +207,7 @@ public class PopulationDef {
      * </pre>
      *
      */
-    public List<Object> getAllSubjectResources() {
+    public List<CqlExpressionValue> getAllSubjectResources() {
         return subjectResources.values().stream()
                 .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
@@ -188,14 +216,10 @@ public class PopulationDef {
 
     // Extracted from R4MeasureReportBuilder.countObservations() by Claude Sonnet 4.5
     public int countObservations() {
-        if (this.getAllSubjectResources() == null) {
-            return 0;
-        }
-
         return this.getAllSubjectResources().stream()
-                .filter(Map.class::isInstance)
-                .map(Map.class::cast)
-                .mapToInt(Map::size)
+                .map(CqlExpressionValue::asObservationAccumulator)
+                .flatMap(Optional::stream)
+                .mapToInt(ObservationAccumulator::size)
                 .sum();
     }
 
@@ -209,19 +233,23 @@ public class PopulationDef {
     }
 
     // Getter method
-    public Map<String, Set<Object>> getSubjectResources() {
+    public Map<String, Set<CqlExpressionValue>> getSubjectResources() {
         return subjectResources;
     }
 
-    public Set<Object> getResourcesForSubject(String subjectId) {
-        return subjectResources.getOrDefault(subjectId, new HashSetForFhirResourcesAndCqlTypes<>());
+    public Set<CqlExpressionValue> getResourcesForSubject(String subjectId) {
+        return subjectResources.getOrDefault(subjectId, new HashSetForCqlExpressionValues());
     }
 
-    // Add an element to Set<Object> under a key (Creates a new set if key is missing)
+    /**
+     * The single insertion point for population results. Wraps raw {@link Object} in a
+     * {@link CqlExpressionValue} so the underlying Set ({@link HashSetForCqlExpressionValues})
+     * can dedupe by FHIR-resource / CQL-type identity rather than Java object identity.
+     */
     public void addResource(String key, Object value) {
         subjectResources
-                .computeIfAbsent(key, k -> new HashSetForFhirResourcesAndCqlTypes<>())
-                .add(value);
+                .computeIfAbsent(key, k -> new HashSetForCqlExpressionValues())
+                .add(CqlExpressionValue.ofRaw(value, null));
     }
 
     @Nullable

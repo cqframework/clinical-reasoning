@@ -4,8 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -270,9 +268,12 @@ public class FunctionEvaluationHandler {
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        // VERY IMPORTANT: We need a custom Map to ensure remove by FHIR resource key does not
-        // use object identity (AKA ==)
-        final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
+        // Each entry pairs an input from the population with the QuantityDef that the observation
+        // function produced for it. Consumers (PopulationDef, MeasureEvaluator, MeasureScoreCalculator,
+        // MeasureObservationHandler) iterate this list and apply FHIR-identity comparisons via
+        // FhirResourceAndCqlTypeUtils.areObjectsEqual where needed; nothing in the downstream pipeline
+        // does random-access lookup by input, so a List is sufficient and self-documenting.
+        final List<ObservationEntry> functionResults = new ArrayList<>();
         final Set<Object> evaluatedResources = new HashSet<>();
 
         final String exceptionMessageIfNotFunction = """
@@ -292,17 +293,11 @@ public class FunctionEvaluationHandler {
                     exceptionMessageIfNotFunction);
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
-            // add function results to existing EvaluationResult under new expression
-            // name
-            // need a way to capture input parameter here too, otherwise we have no way
-            // to connect input objects related to output object
-            // key= input parameter to function
-            // value= the output Observation resource containing calculated value
-            functionResults.put(result, quantity);
+            functionResults.add(new ObservationEntry(result, quantity));
             Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::addAll);
         }
 
-        return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
+        return buildEvaluationResult(expressionName, new ObservationAccumulator(functionResults), evaluatedResources);
     }
 
     /**
@@ -411,7 +406,7 @@ public class FunctionEvaluationHandler {
             // make new expression name for uniquely extracting results
             // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
             var expressionName = popDef.id() + "-" + stratifierExpression;
-            final Map<Object, Object> functionResults = new HashMap<>();
+            final List<FunctionResultEntry> functionResults = new ArrayList<>();
             final Set<Object> evaluatedResources = new HashSet<>();
 
             for (Object result : resultsIter) {
@@ -421,13 +416,10 @@ public class FunctionEvaluationHandler {
                         stratifierExpression,
                         getFunctionArguments(groupDef, result),
                         exceptionMessageIfNotFunction);
-                // add function results to existing EvaluationResult under new expression
-                // name
-                // need a way to capture input parameter here too, otherwise we have no way
-                // to connect input objects related to output object
-                // key= input parameter to function
-                // value= the output Observation resource containing calculated value
-                functionResults.put(result, functionResult.getValue());
+                // Each entry pairs the input parameter passed to the stratifier function with the
+                // heterogeneous CQL value the function returned. Iteration order is the order
+                // populationDef results were iterated.
+                functionResults.add(new FunctionResultEntry(result, functionResult.getValue()));
                 Set<Object> evaluated = functionResult.getEvaluatedResources();
                 if (evaluated == null) {
                     throw new IllegalStateException("CQL function '" + stratifierExpression
@@ -437,7 +429,8 @@ public class FunctionEvaluationHandler {
                 evaluatedResources.addAll(functionResult.getEvaluatedResources());
             }
             // add to EvaluationResult
-            addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
+            addToEvaluationResult(
+                    evalResult, expressionName, new FunctionResultAccumulator(functionResults), evaluatedResources);
         }
     }
 
@@ -600,32 +593,7 @@ public class FunctionEvaluationHandler {
 
     private static Iterable<?> getResultIterable(
             EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
-        if (expressionResult.getValue() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
-                // if Boolean, returns context by SubjectType
-                var expressionResultForSubjectId = evaluationResult.get(subjectTypePart);
-
-                if (expressionResultForSubjectId == null) {
-                    throw new InternalErrorException(
-                            "expression result is null for subject type: %s".formatted(subjectTypePart));
-                }
-
-                Object booleanResult = expressionResultForSubjectId.getValue();
-
-                // remove evaluated resources
-                return Collections.singletonList(booleanResult);
-            } else {
-                // false result shows nothing
-                return Collections.emptyList();
-            }
-        }
-
-        Object value = expressionResult.getValue();
-        if (value instanceof Iterable<?> iterable) {
-            return iterable;
-        } else {
-            return Collections.singletonList(value);
-        }
+        return CqlExpressionValue.of(expressionResult).resolveForPopulation(subjectTypePart, evaluationResult);
     }
 
     private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {
@@ -676,7 +644,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static EvaluationResult buildEvaluationResult(
-            String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
+            String expressionName, Object functionResults, Set<Object> evaluatedResources) {
 
         final EvaluationResult evaluationResultToReturn = new EvaluationResult();
 
@@ -687,10 +655,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static void addToEvaluationResult(
-            EvaluationResult result,
-            String expressionName,
-            Map<Object, Object> functionResults,
-            Set<Object> evaluatedResources) {
+            EvaluationResult result, String expressionName, Object functionResults, Set<Object> evaluatedResources) {
 
         result.set(
                 new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));

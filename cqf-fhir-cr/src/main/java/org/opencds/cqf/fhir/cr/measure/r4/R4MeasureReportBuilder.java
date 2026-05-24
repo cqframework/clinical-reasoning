@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -197,7 +198,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
                         && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue = docPopDef.getAllSubjectResources().iterator().next();
+                    var firstWrapper =
+                            docPopDef.getAllSubjectResources().iterator().next();
+                    var docValue = firstWrapper == null ? null : firstWrapper.raw();
                     if (docValue != null) {
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
@@ -227,8 +230,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof IBaseResource resource) {
+    private String getPopulationResourceIds(CqlExpressionValue wrapper) {
+        if (wrapper != null && wrapper.raw() instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValueAsString();
         }
         return null;
@@ -270,7 +273,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
-                    .filter(Resource.class::isInstance)
+                    .filter(wrapper -> wrapper != null && wrapper.raw() instanceof Resource)
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }

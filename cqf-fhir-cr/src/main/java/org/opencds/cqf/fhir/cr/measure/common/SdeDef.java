@@ -13,7 +13,7 @@ public class SdeDef {
     private final ConceptDef code;
     private final String expression;
     private final String description;
-    private final Map<String, CriteriaResult> results = new HashMap<>();
+    private final Map<String, CqlExpressionValue> results = new HashMap<>();
 
     // Pre-accumulated state (populated by MeasureMultiSubjectEvaluator)
     private final Map<StratumValueWrapper, Long> accumulatedValues = new HashMap<>();
@@ -47,7 +47,7 @@ public class SdeDef {
     }
 
     public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.results.put(subject, new CriteriaResult(value, evaluatedResources));
+        this.results.put(subject, CqlExpressionValue.ofRaw(value, evaluatedResources));
     }
 
     public Map<StratumValueWrapper, Long> getAccumulatedValues() {
@@ -64,7 +64,7 @@ public class SdeDef {
      */
     public void accumulate() {
         // Merge all evaluated resources across subjects
-        for (CriteriaResult result : results.values()) {
+        for (CqlExpressionValue result : results.values()) {
             allEvaluatedResources.addAll(result.evaluatedResources());
         }
 

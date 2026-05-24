@@ -35,6 +35,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureInfo;
@@ -201,8 +202,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         // equals
         // the StratumValueWrapper does it for them.
         Map<StratumValueWrapper, List<String>> subjectsByValue = subjectValues.keySet().stream()
-                .collect(Collectors.groupingBy(
-                        x -> new StratumValueWrapper(subjectValues.get(x).rawValue())));
+                .collect(Collectors.groupingBy(x -> {
+                    var wrapper = subjectValues.get(x);
+                    return new StratumValueWrapper(wrapper == null ? null : wrapper.raw());
+                }));
 
         for (Map.Entry<StratumValueWrapper, List<String>> stratValue : subjectsByValue.entrySet()) {
             buildStratum(
@@ -324,7 +327,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         }
     }
 
-    protected void buildMeasureObservations(String observationName, Collection<Object> resources) {
+    protected void buildMeasureObservations(String observationName, Collection<CqlExpressionValue> resources) {
         for (int i = 0; i < resources.size(); i++) {
             // TODO: Do something with the resource...
             Observation observation =

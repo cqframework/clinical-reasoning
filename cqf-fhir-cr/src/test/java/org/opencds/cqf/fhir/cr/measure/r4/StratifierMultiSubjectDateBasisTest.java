@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -44,7 +43,7 @@ class StratifierMultiSubjectDateBasisTest {
      */
     @Test
     void stratifierPreservesMultiSubjectDateCounts() {
-        var allDatesStratum = new CodeableConcept().setText("all-dates");
+        var allDatesStratum = "all-dates";
 
         // 2 patients × 5 dates each = 10 total dates
         // All dates map to the same stratum 'all-dates'
@@ -62,7 +61,7 @@ class StratifierMultiSubjectDateBasisTest {
                 .firstStratifier()
                 .hasCodeText("Constant Stratifier")
                 .hasStratumCount(1)
-                .stratum(allDatesStratum)
+                .stratumByComponentValueText(allDatesStratum)
                 .population(MeasurePopulationType.INITIALPOPULATION)
                 // Stratum count should also be 10 (all dates map to this stratum)
                 // BUG: Before fix, this was 5 due to deduplication
@@ -82,7 +81,7 @@ class StratifierMultiSubjectDateBasisTest {
      */
     @Test
     void stratifierCountsCorrectlyForSingleSubject() {
-        var allDatesStratum = new CodeableConcept().setText("all-dates");
+        var allDatesStratum = "all-dates";
 
         GIVEN.when()
                 .measureId("StratifierMultiSubjectDateBasisMeasure")
@@ -97,7 +96,7 @@ class StratifierMultiSubjectDateBasisTest {
                 .up()
                 .firstStratifier()
                 .hasStratumCount(1)
-                .stratum(allDatesStratum)
+                .stratumByComponentValueText(allDatesStratum)
                 .population(MeasurePopulationType.INITIALPOPULATION)
                 .hasCount(5)
                 .up()

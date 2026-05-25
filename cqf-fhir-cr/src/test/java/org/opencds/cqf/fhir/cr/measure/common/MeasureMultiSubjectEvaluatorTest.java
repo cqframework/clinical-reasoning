@@ -1,7 +1,10 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -435,5 +438,383 @@ class MeasureMultiSubjectEvaluatorTest {
             }
             return byValue;
         }
+    }
+
+    /**
+     * Case 5: non-subject value stratifier whose component expression returns a {@link List}.
+     *
+     * <p>This is the "fifth quadrant" added on this branch, not in the original #909 quadrant table.
+     * Each list element produces a row via {@code addIterableValueRows}; for non-resource elements
+     * those rows carry a {@link StratifierRowValue.Scalar} inputParam, which {@code isIntersectable()
+     * == false}. The {@code getResourceIdsForValueStratifier} filter routes those rows to the
+     * subject-level resource-attribution fallback instead of intersection — so every Encounter the
+     * subject owns is counted under every stratum derived from one of the subject's list elements.
+     */
+    @Nested
+    class ListReturningNonSubjectValueStratifier {
+
+        @Test
+        void listOfScalars_perValueStrata_allSubjectResourcesCountedInEachStratum() {
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+            var enc2 = encounter("enc-2");
+            var enc3 = encounter("enc-3");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+            pop.addResource("p1", enc2);
+            pop.addResource("p2", enc3);
+
+            var component = new StratifierComponentDef(
+                    "strat-1-c1", textConcept("Distinct Statuses"), "Distinct Encounter Statuses");
+            // p1's list contains both "finished" and "in-progress" → p1 appears in BOTH strata
+            // with all of p1's encounters (the scalar fallback fanned out across strata).
+            component.putResult("p1", List.of("finished", "in-progress"), Set.of());
+            component.putResult("p2", List.of("finished"), Set.of());
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1",
+                    textConcept("Distinct Statuses"),
+                    "Distinct Encounter Statuses",
+                    MeasureStratifierType.NON_SUBJECT_VALUE,
+                    List.of(component));
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            assertEquals(2, stratifierDef.getStratum().size());
+
+            var byValue = indexStrataByValueText(stratifierDef);
+
+            // "finished" stratum: p1 (2 encounters) + p2 (1 encounter) = 3 resources.
+            // "in-progress" stratum: p1 only (2 encounters) = 2 resources.
+            assertEquals(3, byValue.get("finished").getPopulationCount(pop));
+            assertEquals(2, byValue.get("in-progress").getPopulationCount(pop));
+
+            // Resource IDs in each stratum reflect the subject-level fallback, not per-element
+            // intersection — the iterable expansion's synthetic Scalar inputParams (e.g.,
+            // "value_0_finished") would never intersect real Encounter IDs.
+            var finishedIds = byValue.get("finished").getStratumPopulation(pop).resourceIdsForSubjectList();
+            assertTrue(finishedIds.contains("Encounter/enc-1"));
+            assertTrue(finishedIds.contains("Encounter/enc-2"));
+            assertTrue(finishedIds.contains("Encounter/enc-3"));
+        }
+
+        @Test
+        void listWithNullElement_nullCollectedAsItsOwnStratum() {
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+
+            var component = new StratifierComponentDef("strat-1-c1", textConcept("Statuses"), "Statuses");
+            // The list contains a null element. ofIterableElement(null, i) creates a Scalar with
+            // null value (legacy form "null_<i>"). The StratumValueWrapper for null wraps null
+            // and produces a "null" stratum.
+            component.putResult("p1", Arrays.asList("finished", null), Set.of());
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1",
+                    textConcept("Statuses"),
+                    "Statuses",
+                    MeasureStratifierType.NON_SUBJECT_VALUE,
+                    List.of(component));
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            // Two strata: "finished" and the null stratum.
+            assertEquals(2, stratifierDef.getStratum().size());
+        }
+
+        @Test
+        void listOfResources_perResourceStrataWithIntersection() {
+            // When the iterable elements ARE FHIR resources, ofIterableElement returns a Resource
+            // (intersectable) row value. Each resource becomes its own stratum (resources compare
+            // by identity in StratumValueWrapper), and the intersection against population resource
+            // keys produces a single matching resource per stratum.
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+            var enc2 = encounter("enc-2");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+            pop.addResource("p1", enc2);
+
+            var component = new StratifierComponentDef("strat-1-c1", textConcept("Encounters"), "All Encounters");
+            component.putResult("p1", List.of(enc1, enc2), Set.of());
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1",
+                    textConcept("Encounters"),
+                    "All Encounters",
+                    MeasureStratifierType.NON_SUBJECT_VALUE,
+                    List.of(component));
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            // Two encounters → two strata, each containing exactly one resource (its own).
+            assertEquals(2, stratifierDef.getStratum().size());
+            for (StratumDef stratum : stratifierDef.getStratum()) {
+                assertEquals(1, stratum.getPopulationCount(pop));
+            }
+        }
+    }
+
+    /**
+     * Mixed function + scalar components on the same stratifier. The scalar value is expanded
+     * to match the row keys produced by the function component (see
+     * {@code MeasureMultiSubjectEvaluator.expandScalarToMatchFunctionRowKeys}). Each composite
+     * row carries the per-encounter function value alongside the subject's scalar value.
+     */
+    @Nested
+    class MixedComponents {
+
+        @Test
+        void functionAndScalarComponents_scalarExpandedToMatchFunctionRowKeys() {
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+            var enc2 = encounter("enc-2");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+            pop.addResource("p1", enc2);
+
+            // Component 1: per-encounter function result.
+            var funcComponent = new StratifierComponentDef("c-status", textConcept("Status"), "Encounter Status");
+            Map<Object, Object> p1Function = new LinkedHashMap<>();
+            p1Function.put(enc1, "finished");
+            p1Function.put(enc2, "in-progress");
+            funcComponent.putResult("p1", p1Function, Set.of());
+
+            // Component 2: per-subject scalar — must be expanded across both function rows.
+            var scalarComponent = new StratifierComponentDef("c-gender", textConcept("Gender"), "Patient Gender");
+            scalarComponent.putResult("p1", "male", Set.of());
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1",
+                    textConcept("Status+Gender"),
+                    "Status+Gender",
+                    MeasureStratifierType.NON_SUBJECT_VALUE,
+                    List.of(funcComponent, scalarComponent));
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            // Two distinct (status, gender) combinations → two strata.
+            assertEquals(2, stratifierDef.getStratum().size());
+            // Each stratum has TWO component values (one per component).
+            for (StratumDef stratum : stratifierDef.getStratum()) {
+                assertEquals(2, stratum.valueDefs().size());
+                // Each stratum counts exactly one Encounter (the function inputParams partition).
+                assertEquals(1, stratum.getPopulationCount(pop));
+            }
+        }
+    }
+
+    /**
+     * Criteria stratifiers: {@code stratifierDef.results} (subject → CriteriaResult) is intersected
+     * against the population's per-subject resources. Two cases:
+     * <ul>
+     *   <li>Regular CriteriaResult: {@code valueAsSet()} used for intersection</li>
+     *   <li>Map-shaped CriteriaResult: {@code map.keySet()} used for intersection</li>
+     * </ul>
+     */
+    @Nested
+    class CriteriaStratifiers {
+
+        @Test
+        void criteriaStratifier_intersectsResourcesWithPopulation() {
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+            var enc2 = encounter("enc-2");
+            var enc3 = encounter("enc-3");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+            pop.addResource("p1", enc2);
+            pop.addResource("p2", enc3);
+
+            // Criteria stratifier produces a single stratum; its count equals the intersection
+            // of stratifier-selected resources with population resources, per subject.
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1", textConcept("Selected"), "Selected Encounters", MeasureStratifierType.CRITERIA);
+            // p1: stratifier selects enc1 + a non-population encounter → only enc1 intersects.
+            stratifierDef.putResult("p1", List.of(enc1, encounter("enc-not-in-pop")), Set.of());
+            // p2: stratifier selects enc3 → matches population.
+            stratifierDef.putResult("p2", enc3, Set.of());
+
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            // Exactly one stratum for criteria stratifiers.
+            assertEquals(1, stratifierDef.getStratum().size());
+            // enc1 (p1) + enc3 (p2) intersect; enc-not-in-pop and enc2 do not.
+            assertEquals(2, stratifierDef.getStratum().get(0).getPopulationCount(pop));
+        }
+
+        @Test
+        void criteriaStratifier_mapResult_usesKeysForIntersection() {
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+            var enc2 = encounter("enc-2");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+            pop.addResource("p1", enc2);
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1", textConcept("Mapped"), "Mapped Encounters", MeasureStratifierType.CRITERIA);
+            // Map-shaped CriteriaResult: criteriaResultAsIntersectionSet uses map.keySet().
+            // Keys are enc1 and enc2 → both intersect the population.
+            Map<Object, Object> p1Map = new LinkedHashMap<>();
+            p1Map.put(enc1, "finished");
+            p1Map.put(enc2, "in-progress");
+            stratifierDef.putResult("p1", p1Map, Set.of());
+
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            assertEquals(1, stratifierDef.getStratum().size());
+            assertEquals(2, stratifierDef.getStratum().get(0).getPopulationCount(pop));
+        }
+
+        @Test
+        void criteriaStratifier_nullResult_emptyIntersection() {
+            var basis = basisCode("Encounter");
+            var enc1 = encounter("enc-1");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", enc1);
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1", textConcept("Nothing"), "Nothing", MeasureStratifierType.CRITERIA);
+            // null result → criteriaResultAsIntersectionSet returns Set.of().
+            stratifierDef.putResult("p1", null, Set.of());
+
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            assertEquals(1, stratifierDef.getStratum().size());
+            assertEquals(0, stratifierDef.getStratum().get(0).getPopulationCount(pop));
+        }
+    }
+
+    /**
+     * Direct unit coverage of {@link StratifierRowValue}, the typed-inputParam type introduced
+     * on this branch. The factory methods subsume the previously hand-rolled
+     * {@code normalizeResourceKey} and {@code normalizeValueKey} helpers; pinning each branch
+     * here keeps the encode/recognize sides from drifting.
+     */
+    @Nested
+    class StratifierRowValueFactories {
+
+        @Test
+        void ofFunctionInput_resourceWithId_producesIntersectableResource() {
+            var enc = encounter("enc-1");
+            StratifierRowValue value = StratifierRowValue.ofFunctionInput(enc);
+
+            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertTrue(value.isIntersectable());
+            assertEquals("Encounter/enc-1", value.legacyString());
+        }
+
+        @Test
+        void ofFunctionInput_nonResource_fallsBackToStringValueOf() {
+            StratifierRowValue value = StratifierRowValue.ofFunctionInput("some-id");
+
+            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertTrue(value.isIntersectable());
+            assertEquals("some-id", value.legacyString());
+        }
+
+        @Test
+        void ofFunctionInput_resourceWithoutId_fallsBackToStringValueOf() {
+            // IBaseResource with empty id-element falls through to String.valueOf.
+            var enc = new Encounter();
+            StratifierRowValue value = StratifierRowValue.ofFunctionInput(enc);
+
+            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertTrue(value.isIntersectable());
+        }
+
+        @Test
+        void ofIterableElement_null_producesNonIntersectableScalarWithNullLegacyForm() {
+            StratifierRowValue value = StratifierRowValue.ofIterableElement(null, 0);
+
+            assertTrue(value instanceof StratifierRowValue.Scalar);
+            assertFalse(value.isIntersectable());
+            assertEquals("null_0", value.legacyString());
+        }
+
+        @Test
+        void ofIterableElement_nonResource_producesNonIntersectableScalarWithIndexAndValue() {
+            StratifierRowValue value = StratifierRowValue.ofIterableElement("finished", 3);
+
+            assertTrue(value instanceof StratifierRowValue.Scalar);
+            assertFalse(value.isIntersectable());
+            assertEquals("value_3_finished", value.legacyString());
+        }
+
+        @Test
+        void ofIterableElement_resource_producesIntersectableResource() {
+            var enc = encounter("enc-42");
+            StratifierRowValue value = StratifierRowValue.ofIterableElement(enc, 0);
+
+            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertTrue(value.isIntersectable());
+            assertEquals("Encounter/enc-42", value.legacyString());
+        }
+
+        @Test
+        void ofResourceId_happyPath() {
+            StratifierRowValue value = StratifierRowValue.ofResourceId("Encounter/abc");
+
+            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertTrue(value.isIntersectable());
+            assertEquals("Encounter/abc", value.legacyString());
+        }
+
+        @Test
+        void ofResourceId_null_throws() {
+            assertThrows(NullPointerException.class, () -> StratifierRowValue.ofResourceId(null));
+        }
+
+        @Test
+        void resourceRecord_nullResourceId_throws() {
+            assertThrows(NullPointerException.class, () -> new StratifierRowValue.Resource(null));
+        }
+
+        @Test
+        void scalarRecord_accessorsExposeIndexAndValue() {
+            var scalar = new StratifierRowValue.Scalar(7, "abc");
+
+            assertEquals(7, scalar.index());
+            assertEquals("abc", scalar.value());
+            assertFalse(scalar.isIntersectable());
+            assertEquals("value_7_abc", scalar.legacyString());
+        }
+
+        @Test
+        void scalarRecord_nullValueAccessor() {
+            var scalar = new StratifierRowValue.Scalar(2, null);
+
+            assertNull(scalar.value());
+            assertEquals("null_2", scalar.legacyString());
+        }
+    }
+
+    private static Map<String, StratumDef> indexStrataByValueText(StratifierDef stratifierDef) {
+        Map<String, StratumDef> byValue = new LinkedHashMap<>();
+        for (StratumDef stratum : stratifierDef.getStratum()) {
+            String key = stratum.valueDefs().iterator().next().value().getValueAsString();
+            byValue.put(key, stratum);
+        }
+        return byValue;
     }
 }

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,6 +21,8 @@ import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierRowValue.Resource;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierRowValue.Scalar;
 
 class MeasureMultiSubjectEvaluatorTest {
 
@@ -192,7 +195,7 @@ class MeasureMultiSubjectEvaluatorTest {
 
     /**
      * Direct unit coverage of the four #909 scenarios at the {@link MeasureMultiSubjectEvaluator}
-     * level — see https://github.com/cqframework/clinical-reasoning/issues/909.
+     * level — see <a href='https://github.com/cqframework/clinical-reasoning/issues/909'>...</a>.
      *
      * <p>MMSE itself only sees cases 1, 2, and 4: case 3 (subject-basis + CQL function) is rejected
      * by {@link FunctionEvaluationHandler#cqlFunctionEvaluation} before MMSE runs. The case-3 test
@@ -719,7 +722,7 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc = encounter("enc-1");
             StratifierRowValue value = StratifierRowValue.ofFunctionInput(enc);
 
-            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertInstanceOf(Resource.class, value);
             assertTrue(value.isIntersectable());
             assertEquals("Encounter/enc-1", value.legacyString());
         }
@@ -728,7 +731,7 @@ class MeasureMultiSubjectEvaluatorTest {
         void ofFunctionInput_nonResource_fallsBackToStringValueOf() {
             StratifierRowValue value = StratifierRowValue.ofFunctionInput("some-id");
 
-            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertInstanceOf(Resource.class, value);
             assertTrue(value.isIntersectable());
             assertEquals("some-id", value.legacyString());
         }
@@ -739,7 +742,7 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc = new Encounter();
             StratifierRowValue value = StratifierRowValue.ofFunctionInput(enc);
 
-            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertInstanceOf(Resource.class, value);
             assertTrue(value.isIntersectable());
         }
 
@@ -747,7 +750,7 @@ class MeasureMultiSubjectEvaluatorTest {
         void ofIterableElement_null_producesNonIntersectableScalarWithNullLegacyForm() {
             StratifierRowValue value = StratifierRowValue.ofIterableElement(null, 0);
 
-            assertTrue(value instanceof StratifierRowValue.Scalar);
+            assertInstanceOf(Scalar.class, value);
             assertFalse(value.isIntersectable());
             assertEquals("null_0", value.legacyString());
         }
@@ -756,7 +759,7 @@ class MeasureMultiSubjectEvaluatorTest {
         void ofIterableElement_nonResource_producesNonIntersectableScalarWithIndexAndValue() {
             StratifierRowValue value = StratifierRowValue.ofIterableElement("finished", 3);
 
-            assertTrue(value instanceof StratifierRowValue.Scalar);
+            assertInstanceOf(Scalar.class, value);
             assertFalse(value.isIntersectable());
             assertEquals("value_3_finished", value.legacyString());
         }
@@ -766,7 +769,7 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc = encounter("enc-42");
             StratifierRowValue value = StratifierRowValue.ofIterableElement(enc, 0);
 
-            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertInstanceOf(Resource.class, value);
             assertTrue(value.isIntersectable());
             assertEquals("Encounter/enc-42", value.legacyString());
         }
@@ -775,7 +778,7 @@ class MeasureMultiSubjectEvaluatorTest {
         void ofResourceId_happyPath() {
             StratifierRowValue value = StratifierRowValue.ofResourceId("Encounter/abc");
 
-            assertTrue(value instanceof StratifierRowValue.Resource);
+            assertInstanceOf(Resource.class, value);
             assertTrue(value.isIntersectable());
             assertEquals("Encounter/abc", value.legacyString());
         }

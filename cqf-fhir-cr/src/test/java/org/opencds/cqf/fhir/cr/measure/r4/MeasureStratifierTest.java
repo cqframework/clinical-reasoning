@@ -257,10 +257,10 @@ class MeasureStratifierTest {
                 // Locks in case 2 (non-subject basis + scalar expression) scoring per #909.
                 // Without that fix the Encounter IDs flowing into ratio stratum scoring are
                 // empty for scalar stratifiers, leaving stratum measureScore unset.
-                .stratumByText("38")
+                .stratumByComponentValueText("38")
                 .hasScore("0.3333333333333333")
                 .up()
-                .stratumByText("35")
+                .stratumByComponentValueText("35")
                 .hasScore("0.14285714285714285");
     }
 
@@ -1458,12 +1458,12 @@ class MeasureStratifierTest {
                 .up()
                 .firstStratifier()
                 .hasStratumCount(2)
-                .stratumByText("finished")
+                .stratumByComponentValueText("finished")
                 .firstPopulation()
                 .hasCount(2)
                 .up()
                 .up()
-                .stratumByText("in-progress")
+                .stratumByComponentValueText("in-progress")
                 .firstPopulation()
                 .hasCount(2);
     }

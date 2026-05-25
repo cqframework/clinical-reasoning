@@ -88,7 +88,7 @@ public class ContinuousVariableResourceMeasureObservationTest {
                     .hasScore("268.44444444444446")
                     .stratifierById("stratifier-1")
                     .hasStratumCount(3)
-                    .stratumByText("84")
+                    .stratumByComponentValueText("84")
                     .hasScore("120.0")
                     .up()
                     .up()

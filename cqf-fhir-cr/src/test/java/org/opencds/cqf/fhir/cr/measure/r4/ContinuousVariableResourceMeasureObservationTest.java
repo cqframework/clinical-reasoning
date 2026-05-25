@@ -29,6 +29,72 @@ public class ContinuousVariableResourceMeasureObservationTest {
 
     @Nested
     class Avg {
+        private static final Given GIVEN_NON_FUNCTION_STRATIFIER =
+                Measure.given().repositoryFor("ContinuousVariableObservationEncounterBasisNonFuncStrat");
+
+        @Test
+        void continuousVariableObservationEncounterBasisNonFunctionStratifier() {
+            GIVEN_NON_FUNCTION_STRATIFIER
+                    .when()
+                    .measureId("ContinuousVariableObservationEncounterBasisNonFuncStrat")
+                    .evaluate()
+                    .then()
+                    // MeasureDef assertions (pre-scoring) - verify internal state after processing
+                    .def()
+                    .hasNoErrors()
+                    .firstGroup()
+                    .population(MeasurePopulationType.INITIALPOPULATION)
+                    .hasCount(12)
+                    .hasNoAggregationResult()
+                    .up()
+                    .population(MeasurePopulationType.MEASUREPOPULATION)
+                    .hasCount(12)
+                    .hasNoAggregationResult()
+                    .up()
+                    .population(MeasurePopulationType.MEASUREPOPULATIONEXCLUSION)
+                    .hasCount(3)
+                    .hasNoAggregationResult()
+                    .up()
+                    .population(MeasurePopulationType.MEASUREOBSERVATION)
+                    .hasCount(9)
+                    .hasAggregationResult(268.44444444444446)
+                    .hasAggregateMethod(ContinuousVariableObservationAggregateMethod.AVG)
+                    .up()
+                    .hasScore(268.44444444444446)
+                    .up()
+                    .up()
+                    // MeasureReport assertions (post-scoring) - verify FHIR resource output
+                    .firstGroup()
+                    .population(MeasurePopulationType.INITIALPOPULATION)
+                    .hasCount(12)
+                    .hasNoAggregationResultsExtensionValue()
+                    .hasNoAggregateMethodExtension()
+                    .up()
+                    .population(MeasurePopulationType.MEASUREPOPULATION)
+                    .hasCount(12)
+                    .hasNoAggregationResultsExtensionValue()
+                    .hasNoAggregateMethodExtension()
+                    .up()
+                    .population(MeasurePopulationType.MEASUREPOPULATIONEXCLUSION)
+                    .hasCount(3)
+                    .hasNoAggregationResultsExtensionValue()
+                    .hasNoAggregateMethodExtension()
+                    .up()
+                    .population(MeasurePopulationType.MEASUREOBSERVATION)
+                    .hasCount(9)
+                    .hasAggregationResultsExtensionValue(268.44444444444446)
+                    .hasAggregateMethodExtension(ContinuousVariableObservationAggregateMethod.AVG)
+                    .up()
+                    .hasScore("268.44444444444446")
+                    .stratifierById("stratifier-1")
+                    .hasStratumCount(3)
+                    .stratumByComponentValueText("84")
+                    .hasScore("120.0")
+                    .up()
+                    .up()
+                    .up()
+                    .report();
+        }
 
         @Test
         void continuousVariableResourceMeasureObservationBooleanBasisAvg() {

@@ -185,15 +185,15 @@ public class MeasureMultiSubjectEvaluator {
      *
      * <pre>
      * rowKeys = [
-     *   StratifierRowKey.withInput("Patient/123", "Encounter/enc-1"),
-     *   StratifierRowKey.withInput("Patient/123", "Encounter/enc-2"),
-     *   StratifierRowKey.withInput("Patient/456", "Encounter/enc-9")
+     *   StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("Encounter/enc-1")),
+     *   StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("Encounter/enc-2")),
+     *   StratifierRowKey.withInput("Patient/456", StratifierRowValue.ofResourceId("Encounter/enc-9"))
      * ]
      * </pre>
      *
      * <ul>
      *   <li>{@code subjectQualified()} returns the subject (e.g., "Patient/123")</li>
-     *   <li>{@code inputParamId()} returns the input resource used by the stratifier function</li>
+     *   <li>{@code inputParam()} returns the input resource used by the stratifier function</li>
      *   <li>Intersection with populations is performed at the resource level</li>
      *   <li>Population counts are resource counts, not subject counts</li>
      * </ul>
@@ -506,8 +506,8 @@ public class MeasureMultiSubjectEvaluator {
                             functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 
                     for (Object key : functionResults.keySet()) {
-                        String normalizedKey = normalizeResourceKey(key);
-                        rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
+                        rowKeys.add(
+                                StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
                     }
                 }
             }
@@ -591,7 +591,7 @@ public class MeasureMultiSubjectEvaluator {
                                 StratifierRowKey.withInput(
                                         qualifiedSubject,
                                         // Build composite row key: "Patient/xxx|Resource/yyy"
-                                        normalizeResourceKey(entry.getKey())),
+                                        StratifierRowValue.ofFunctionInput(entry.getKey())),
                                 new StratumValueWrapper(entry.getValue())))
                 .toList();
     }
@@ -615,8 +615,8 @@ public class MeasureMultiSubjectEvaluator {
         for (Object value : iterableValue) {
             // Use value-based key to create unique row per value.
             // This allows groupSubjectsByValueDefSet to group rows by value, not by subject.
-            String valueKey = normalizeValueKey(value, index);
-            StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, valueKey);
+            StratifierRowValue rowValue = StratifierRowValue.ofIterableElement(value, index);
+            StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, rowValue);
             StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(value);
             tableRows.add(new StratumTableRow(rowKey, stratumValueWrapper));
             index++;
@@ -637,17 +637,6 @@ public class MeasureMultiSubjectEvaluator {
         return new StratumTableRow(StratifierRowKey.subjectOnly(qualifiedSubject), new StratumValueWrapper(rawValue));
     }
 
-    /**
-     * Normalize a resource to its ID string for use as a row key component.
-     */
-    private static String normalizeResourceKey(Object obj) {
-        if (obj instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return resource.getIdElement().toVersionless().getValue();
-        }
-        return String.valueOf(obj);
-    }
     /**
      * Groups stratifier results into strata by the full set of component values.
      *
@@ -799,7 +788,7 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For NON_SUBJECT_VALUE stratifiers with function results, the row keys contain composite keys
      * with both subject and input parameter. We need to:
      * <ol>
-     *   <li>Extract the resource IDs from the row keys (the inputParamId)</li>
+     *   <li>Extract the resource IDs from the row keys (the inputParam)</li>
      *   <li>Intersect those with the population's resources to get only resources that qualify</li>
      * </ol>
      *
@@ -821,8 +810,13 @@ public class MeasureMultiSubjectEvaluator {
             // Convert row keys to SubjectResourceKey for type-safe comparison
             // For FHIR resources: uses resource ID only (globally unique)
             // For primitive types: includes subject context (same value can appear for multiple patients)
+            // Skip rows whose inputParam is a Scalar (iterable-of-non-resource expansion); those
+            // are synthetic value keys, not resource IDs, and would never intersect the
+            // population's actual resources. Such rows fall through to the subject-level lookup.
             List<SubjectResourceKey> stratumResourceKeys = rowKeys.stream()
-                    .filter(StratifierRowKey::hasInputParam)
+                    .filter(key -> key.inputParam()
+                            .map(StratifierRowValue::isIntersectable)
+                            .orElse(false))
                     .map(key -> SubjectResourceKey.fromRowKey(key, isPrimitiveBasis))
                     .toList();
 
@@ -878,7 +872,17 @@ public class MeasureMultiSubjectEvaluator {
 
             Set<Object> resources = entry.getValue();
             if (resources != null) {
-                if (isResourceType) {
+                // MEASUREOBSERVATION populations store Set<Map<inputResource, outputValue>>,
+                // so the input resource IDs we need are the Map keys.
+                if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+                    resources.stream()
+                            .filter(Map.class::isInstance)
+                            .map(m -> (Map<?, ?>) m)
+                            .flatMap(m -> m.keySet().stream())
+                            .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                            .filter(java.util.Objects::nonNull)
+                            .forEach(resourceIds::add);
+                } else if (isResourceType) {
                     resources.stream()
                             .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                             .filter(java.util.Objects::nonNull)
@@ -969,22 +973,5 @@ public class MeasureMultiSubjectEvaluator {
             return resource.toString();
         }
         return String.valueOf(obj);
-    }
-
-    /**
-     * Normalize a value to a string key for use in composite row keys when expanding Iterables.
-     * Uses the index as a fallback for null values to ensure unique keys.
-     */
-    private static String normalizeValueKey(Object value, int index) {
-        if (value == null) {
-            return "null_" + index;
-        }
-        if (value instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return resource.getIdElement().toVersionless().getValue();
-        }
-
-        return "value_" + index + "_" + value;
     }
 }

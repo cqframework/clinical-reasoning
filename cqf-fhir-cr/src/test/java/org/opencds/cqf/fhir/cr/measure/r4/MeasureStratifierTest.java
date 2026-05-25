@@ -253,7 +253,15 @@ class MeasureStratifierTest {
                 // Patients are stratified by age - the scalar expression applies to all encounters
                 // for each patient. The exact number of strata depends on how many unique ages exist.
                 // Test data has 2 unique ages (35 and 38 based on patient birth dates and measurement period)
-                .hasStratumCount(2);
+                .hasStratumCount(2)
+                // Locks in case 2 (non-subject basis + scalar expression) scoring per #909.
+                // Without that fix the Encounter IDs flowing into ratio stratum scoring are
+                // empty for scalar stratifiers, leaving stratum measureScore unset.
+                .stratumByComponentValueText("38")
+                .hasScore("0.3333333333333333")
+                .up()
+                .stratumByComponentValueText("35")
+                .hasScore("0.14285714285714285");
     }
 
     /**
@@ -1416,6 +1424,67 @@ class MeasureStratifierTest {
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
                         "Exception for subjectId: Patient/patient-9, Message: CQL Exception while evaluating function: Age of Period");
+    }
+
+    /**
+     * Non-subject value stratifier whose component expression is a patient-context scalar that
+     * evaluates to a List instead of a single value. Uses "Distinct Encounter Statuses"
+     * (patient-level distinct of the patient's Encounter.status), which for patient-9
+     * (one finished, one in-progress Encounter) returns {'finished', 'in-progress'}.
+     * Exercises the iterable-value branch in
+     * MeasureMultiSubjectEvaluator.mapToListOfTableEntries via addIterableValueRows.
+     * <p/>
+     * Issue #909 only specified scalar (single value) behavior for the non-subject + scalar
+     * quadrant; a list-returning expression on a non-subject basis is treated as "subject
+     * appears in each stratum derived from a list element, with all of that subject's
+     * resources counted in each such stratum" — the same semantics as the scalar case but
+     * fanned out across N strata. Patient-9 therefore appears in both the "finished" and
+     * "in-progress" strata with both of their Encounters counted in each.
+     */
+    @Test
+    void cohortResourceValueStratListScalar() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortResourceValueStratListScalar")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .def()
+                .logEvaluationResults()
+                .up()
+                .firstGroup()
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(2)
+                .stratumByComponentValueText("finished")
+                .firstPopulation()
+                .hasCount(2)
+                .up()
+                .up()
+                .stratumByComponentValueText("in-progress")
+                .firstPopulation()
+                .hasCount(2);
+    }
+
+    /**
+     * Per issue #909 case 3: subject (boolean) basis stratifier whose component expression is a CQL
+     * function must be rejected. Exercises FunctionEvaluationHandler.validateNotFunction at line
+     * 209-227 via the VALUE (subject-based) branch of validateStratifierExpressionTypes
+     * (FunctionEvaluationHandler.java:177-195).
+     */
+    @Test
+    void cohortBooleanValueStratFunctionStratifierInvalid() {
+        GIVEN_SIMPLE
+                .when()
+                .measureId("CohortBooleanValueStratFunctionStratifier")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .hasContainedOperationOutcome()
+                .hasContainedOperationOutcomeMsg(
+                        "VALUE (subject-based) stratifier expression 'Encounter Status Stratifier' must NOT be a CQL function definition");
     }
 
     /**

@@ -299,7 +299,8 @@ class MultiMeasure {
          * @return SelectedMeasureDefCollection for fluent MeasureDef collection assertions
          */
         public SelectedMeasureDefCollection<Then> defs() {
-            return new SelectedMeasureDefCollection<>(evaluation.measureDefs(), this);
+            return new SelectedMeasureDefCollection<>(
+                    evaluation.measureDefs(), this, evaluation.evaluationResultsPerMeasure());
         }
 
         // Backward compatibility - delegate to report()

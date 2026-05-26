@@ -189,7 +189,8 @@ class SubjectResourceKeyTest {
 
         @Test
         void fromRowKey_withPrimitiveBasis_includesSubject() {
-            StratifierRowKey rowKey = StratifierRowKey.withInput("Patient/123", "2024-01-01");
+            StratifierRowKey rowKey =
+                    StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("2024-01-01"));
 
             SubjectResourceKey result = SubjectResourceKey.fromRowKey(rowKey, true);
 
@@ -200,7 +201,8 @@ class SubjectResourceKeyTest {
 
         @Test
         void fromRowKey_withResourceBasis_excludesSubject() {
-            StratifierRowKey rowKey = StratifierRowKey.withInput("Patient/123", "Encounter/456");
+            StratifierRowKey rowKey =
+                    StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("Encounter/456"));
 
             SubjectResourceKey result = SubjectResourceKey.fromRowKey(rowKey, false);
 
@@ -218,8 +220,10 @@ class SubjectResourceKeyTest {
 
         @Test
         void fromRowKey_primitiveKeys_differentSubjectsSameValue_areNotEqual() {
-            StratifierRowKey rowKeyA = StratifierRowKey.withInput("Patient/A", "2024-01-01");
-            StratifierRowKey rowKeyB = StratifierRowKey.withInput("Patient/B", "2024-01-01");
+            StratifierRowKey rowKeyA =
+                    StratifierRowKey.withInput("Patient/A", StratifierRowValue.ofResourceId("2024-01-01"));
+            StratifierRowKey rowKeyB =
+                    StratifierRowKey.withInput("Patient/B", StratifierRowValue.ofResourceId("2024-01-01"));
 
             SubjectResourceKey keyA = SubjectResourceKey.fromRowKey(rowKeyA, true);
             SubjectResourceKey keyB = SubjectResourceKey.fromRowKey(rowKeyB, true);
@@ -230,8 +234,10 @@ class SubjectResourceKeyTest {
 
         @Test
         void fromRowKey_resourceKeys_sameResource_areEqual() {
-            StratifierRowKey rowKeyA = StratifierRowKey.withInput("Patient/A", "Encounter/123");
-            StratifierRowKey rowKeyB = StratifierRowKey.withInput("Patient/B", "Encounter/123");
+            StratifierRowKey rowKeyA =
+                    StratifierRowKey.withInput("Patient/A", StratifierRowValue.ofResourceId("Encounter/123"));
+            StratifierRowKey rowKeyB =
+                    StratifierRowKey.withInput("Patient/B", StratifierRowValue.ofResourceId("Encounter/123"));
 
             SubjectResourceKey keyA = SubjectResourceKey.fromRowKey(rowKeyA, false);
             SubjectResourceKey keyB = SubjectResourceKey.fromRowKey(rowKeyB, false);

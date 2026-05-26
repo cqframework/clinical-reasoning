@@ -124,7 +124,9 @@ public class R4MeasureReportUtils {
     public static boolean matchesStratumValue(
             StratifierGroupComponent reportStratum, StratumDef stratumDef, StratifierDef stratifierDef) {
 
-        if (stratumDef.isComponent()) {
+        // A stratifier defined with `Measure.stratifier.component[]` always emits component-shaped
+        // strata, even for a single component — gate on the definition, not the runtime value count.
+        if (!stratifierDef.components().isEmpty()) {
             return matchesComponentStratumValues(reportStratum, stratumDef);
         }
 

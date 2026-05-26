@@ -303,6 +303,13 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         var params = (IParametersAdapter) createAdapterForResource(
                 createAdapterForResource(expansionParams).copy());
 
+        // Drop any expansion-parameter whose value is an unversioned canonical URL.
+        // Terminology servers reject expansions when system-version / canonicalVersion
+        // entries lack a `|version` pin (the expansion would be non-deterministic),
+        // so excluding them here keeps the Tx call viable. Non-URL-valued params
+        // (booleans, codes, etc.) pass through unchanged.
+        filterUnversionedCanonicalParams(params);
+
         var valueSets = BundleHelper.getEntryResources(packagedBundle).stream()
                 .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
@@ -357,6 +364,41 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 addMessageIssue("warning", e.getMessage());
             }
         });
+    }
+
+    /**
+     * Removes expansion-parameter entries whose values are unversioned canonical URLs.
+     * Logs a warning per dropped entry. Non-canonical-valued params (booleans, codes,
+     * language tags, etc.) are kept. A value is treated as canonical when
+     * {@link Canonicals#getUrl(String)} parses it (handles http/https URLs plus
+     * urn:uuid / urn:oid forms) and versioned when {@link Canonicals#getVersion(String)}
+     * returns non-null.
+     */
+    private void filterUnversionedCanonicalParams(IParametersAdapter params) {
+        if (params == null || params.getParameter() == null) {
+            return;
+        }
+        var kept = params.getParameter().stream()
+                .filter(p -> {
+                    if (!p.hasValue()) {
+                        return true;
+                    }
+                    var value = p.getPrimitiveValue();
+                    if (value == null || Canonicals.getUrl(value) == null) {
+                        return true;
+                    }
+                    if (Canonicals.getVersion(value) != null) {
+                        return true;
+                    }
+                    myLogger.warn(
+                            "Excluding unversioned canonical from $package expansion parameters: {}={}",
+                            p.getName(),
+                            value);
+                    return false;
+                })
+                .map(IParametersParameterComponentAdapter::get)
+                .toList();
+        params.setParameter(kept);
     }
 
     // Helper to surface expansion parameter warnings as OperationOutcome issues

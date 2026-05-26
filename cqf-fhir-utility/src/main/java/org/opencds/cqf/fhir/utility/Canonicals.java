@@ -38,7 +38,10 @@ public class Canonicals {
             return null;
         }
 
-        canonical = canonical.replace(canonical.substring(canonical.lastIndexOf("/")), "");
+        // Drop only the trailing /<id> segment. Using substring rather than replace,
+        // since replace is global and would mangle self-referential URLs like
+        // http://hl7.org/fhir/StructureDefinition/StructureDefinition.
+        canonical = canonical.substring(0, canonical.lastIndexOf("/"));
         return canonical.contains("/") ? canonical.substring(canonical.lastIndexOf("/") + 1) : canonical;
     }
 

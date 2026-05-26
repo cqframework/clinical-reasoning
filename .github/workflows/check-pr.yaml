@@ -36,7 +36,7 @@ jobs:
         with:
             distribution: 'temurin'
             java-version: '21'
-      - uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
       - name: Resolve linked builds
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -53,7 +53,7 @@ jobs:
             SONAR_TOKEN: ${{ secrets.SONAR_QUBE_022026 }}
         run: ./gradlew sonar -Dsonar.token=$SONAR_TOKEN
       - name: Publish test report
-        uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v6.3.1
+        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
         if: (success() || failure()) && matrix.os == 'ubuntu-latest'
         with:
           report_paths: "**/build/test-results/test/TEST-*.xml"

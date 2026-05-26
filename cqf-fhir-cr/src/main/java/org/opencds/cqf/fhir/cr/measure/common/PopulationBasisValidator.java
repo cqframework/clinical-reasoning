@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.slf4j.Logger;
@@ -160,6 +161,10 @@ public interface PopulationBasisValidator {
             String expression,
             EvaluationResult evaluationResult,
             String url) {
+
+        if (StringUtils.isBlank(expression)) {
+            return;
+        }
 
         var expressionResult = evaluationResult.get(expression);
 

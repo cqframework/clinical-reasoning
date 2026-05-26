@@ -90,13 +90,32 @@ public class DependencyRoleClassifier {
     /**
      * Checks if a dependency is in the set of transitive key canonicals discovered
      * via ValueSet compose chain walking.
+     * <p>
+     * Normalizes both sides on version: dependency references and key-set entries are
+     * compared on URL only. The set may contain version-pinned URLs (FHIR core writes
+     * bindings inconsistently — e.g. {@code publication-status|4.0.1} pinned but
+     * {@code library-type} not), and dep references are version-stripped at lookup, so
+     * symmetric stripping is required to avoid spurious misses.
      */
     private static boolean isTransitiveKeyDependency(IDependencyInfo dependency, Set<String> transitiveKeyCanonicals) {
         if (transitiveKeyCanonicals == null || transitiveKeyCanonicals.isEmpty()) {
             return false;
         }
         var canonical = getDependencyCanonical(dependency.getReference());
-        return canonical != null && transitiveKeyCanonicals.contains(canonical);
+        if (canonical == null) {
+            return false;
+        }
+        // Fast path: exact URL hit (covers entries that are already version-stripped).
+        if (transitiveKeyCanonicals.contains(canonical)) {
+            return true;
+        }
+        // Fallback: strip versions on the key-set side and compare URLs.
+        for (var keyEntry : transitiveKeyCanonicals) {
+            if (canonical.equals(getDependencyCanonical(keyEntry))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -1,0 +1,22 @@
+{
+  "resourceType": "Group",
+  "id": "DefaultSearchParameter",
+  "extension": [{
+    "url": "http://hl7.org/fhir/StructureDefinition/artifact-url",
+    "valueUri": "https://research.balgrist.ch/Group/DefaultSearchParameter"
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+    "valueCanonical": "https://research.balgrist.ch/Library/ImagingStudyFeasibilityTest"
+  }, {
+    "url": "http://hl7.org/fhir/StructureDefinition/characteristicExpression",
+    "valueExpression": {
+      "language": "text/cql-identifier",
+      "expression": "HasStudyWithModality"
+    }
+  }],
+  "active": true,
+  "type": "person",
+  "actual": false,
+  "code": { "text": "TODO: How do we specify subjectType" },
+  "name": "DefaultSearchParameter"
+}

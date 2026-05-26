@@ -7,7 +7,6 @@ import jakarta.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
@@ -111,14 +110,30 @@ public class MeasureEvaluationResultHandler {
         // measure -> subject -> results
         var resultsBuilder = CompositeEvaluationResultsPerMeasure.builder();
 
+        // Pre-validate ValueSet references against the terminology provider before any
+        // per-subject evaluation runs. Libraries with unresolvable ValueSets are recorded with
+        // an error and excluded from the per-subject loop entirely — keeping the original
+        // diagnostic ("Unable to locate ValueSet …") and avoiding wasted per-subject work.
+        var preValidationFailedLibraries =
+                new MeasureLibraryPreValidator(context).validate(multiLibraryIdMeasureEngineDetails, resultsBuilder);
+
+        final List<VersionedIdentifier> activeLibraryIdentifiers =
+                multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers().stream()
+                        .filter(id -> !preValidationFailedLibraries.contains(id))
+                        .toList();
+
         // Library $evaluate each subject
         // The goal here is to do each measure/library evaluation within the context of a single subject.
         // This means that we will not switch between subject contexts while evaluating measures.
         // Once we've switched to a different subject context, the previous expression cache is dropped.
 
-        final List<String> libraryIdentIds = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers().stream()
+        final List<String> libraryIdentIds = activeLibraryIdentifiers.stream()
                 .map(VersionedIdentifier::getId)
                 .toList();
+
+        if (activeLibraryIdentifiers.isEmpty()) {
+            return resultsBuilder.build();
+        }
 
         logger.atDebug()
                 .setMessage(
@@ -150,7 +165,6 @@ public class MeasureEvaluationResultHandler {
             String subjectIdPart = subjectInfo.getRight();
             context.getState().setContextValue(subjectTypePart, subjectIdPart);
             try {
-                var libraryIdentifiers = multiLibraryIdMeasureEngineDetails.getLibraryIdentifiers();
 
                 final long startPerLibraryPerSubject = System.currentTimeMillis();
                 throttledDebug(shouldLog)
@@ -161,7 +175,7 @@ public class MeasureEvaluationResultHandler {
                 var evaluationResultsForMultiLib = multiLibraryIdMeasureEngineDetails
                         .getLibraryEngine()
                         .getEvaluationResult(
-                                libraryIdentifiers,
+                                activeLibraryIdentifiers,
                                 subjectId,
                                 null,
                                 parametersMap,
@@ -177,7 +191,7 @@ public class MeasureEvaluationResultHandler {
                         .addArgument(() -> showSubsetOfTotal(libraryIdentIds))
                         .log();
 
-                for (var libraryVersionedIdentifier : libraryIdentifiers) {
+                for (var libraryVersionedIdentifier : activeLibraryIdentifiers) {
                     validateEvaluationResultExistsForIdentifier(
                             libraryVersionedIdentifier, evaluationResultsForMultiLib);
 
@@ -186,24 +200,28 @@ public class MeasureEvaluationResultHandler {
                     var measureDefs =
                             multiLibraryIdMeasureEngineDetails.getMeasureDefsForLibrary(libraryVersionedIdentifier);
 
-                    // function evaluation
-                    final List<EvaluationResult> functionEvaluationResults =
-                            FunctionEvaluationHandler.cqlFunctionEvaluation(
-                                    context,
-                                    measureDefs,
-                                    libraryVersionedIdentifier,
-                                    evaluationResult,
-                                    subjectTypePart);
+                    final var libraryException =
+                            evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier);
+
+                    // Skip function evaluation when the base CQL eval already failed for this
+                    // library/subject. Otherwise the function path (e.g. processNonSubValueStratifier)
+                    // observes missing expression results and throws a higher-level
+                    // "Expression result: <pop> is missing" error that masks the underlying
+                    // CqlException ("Unable to locate ValueSet", etc.) and — by escaping the inner
+                    // loop into the outer catch — pollutes sibling libraries' measure defs.
+                    final List<EvaluationResult> functionEvaluationResults = (libraryException == null)
+                            ? FunctionEvaluationHandler.cqlFunctionEvaluation(
+                                    context, measureDefs, libraryVersionedIdentifier, evaluationResult, subjectTypePart)
+                            : List.of();
 
                     resultsBuilder.addResults(measureDefs, subjectId, evaluationResult, functionEvaluationResults);
 
-                    Optional.ofNullable(evaluationResultsForMultiLib.getExceptionFor(libraryVersionedIdentifier))
-                            .ifPresent(exception -> {
-                                var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
-                                        subjectId, exception.getMessage());
-                                resultsBuilder.addErrors(measureDefs, error);
-                                logger.error(error, exception);
-                            });
+                    if (libraryException != null) {
+                        var error = EXCEPTION_FOR_SUBJECT_ID_MESSAGE_TEMPLATE.formatted(
+                                subjectId, libraryException.getMessage());
+                        resultsBuilder.addErrors(measureDefs, error);
+                        logger.error(error, libraryException);
+                    }
                 }
 
             } catch (Exception e) {

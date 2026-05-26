@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ParametersUtil;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +73,18 @@ public class ExpandHelper {
         });
     }
 
+    private boolean canDoLocalExpansion(IValueSetAdapter valueSet) {
+        if (valueSet == null || !valueSet.hasCompose()) {
+            return false;
+        }
+        // Hard exclusions first (these force a fallback to the terminology server)
+        if (valueSet.hasComposeExclude() || valueSet.hasComposeFilters()) {
+            return false;
+        }
+        // Is there anything defined that we can actually expand
+        return valueSet.hasExplicitConcepts() || valueSet.hasValueSetReferences();
+    }
+
     public void expandValueSet(
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,
@@ -95,9 +106,8 @@ public class ExpandHelper {
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .map(url -> ITerminologyServerClient.getAddressBase(url, fhirContext()))
                 .orElse(null);
-        // If terminologyEndpoint exists, and we have no authoritativeSourceUrl or the authoritativeSourceUrl matches
-        // the
-        // terminologyEndpoint address then we will use the terminologyEndpoint for expansion
+        // If terminologyEndpoint exists, and we have no authoritativeSourceUrl or the authoritativeSourceUrl
+        // matches the terminologyEndpoint address then we will use the terminologyEndpoint for expansion
         if (terminologyEndpoint.isPresent()
                 && (authoritativeSourceUrl == null
                         || authoritativeSourceUrl.equals(
@@ -112,38 +122,89 @@ public class ExpandHelper {
                         e.getMessage());
             }
         }
-        // Else if the ValueSet has a simple compose then we will perform naive expansion.
-        if (valueSet.hasSimpleCompose()) {
-            valueSet.naiveExpand();
+
+        // Hybrid local expansion for ValueSets with explicit concepts and/or valueSet
+        // references
+        if (canDoLocalExpansion(valueSet) && (valueSet.hasExplicitConcepts() || valueSet.hasValueSetReferences())) {
+            var expansion = valueSet.newExpansion();
+            boolean isNaive = false;
+
+            // Expand referenced ValueSets first
+            if (valueSet.hasValueSetReferences()) {
+                var includeExpansion = expandIncludes(
+                        valueSet,
+                        expansionParameters,
+                        terminologyEndpoint,
+                        valueSets,
+                        expandedList,
+                        repository,
+                        expansionTimestamp);
+
+                var copyAdapter = (IValueSetAdapter) adapterFactory.createResource(valueSet.copy());
+                copyAdapter.setExpansion(includeExpansion);
+
+                addCodesToExpansion(expansion, copyAdapter);
+
+                if (copyAdapter.hasNaiveParameter()) {
+                    isNaive = true;
+                }
+            }
+
+            // Expand explicit concepts
+            if (valueSet.hasExplicitConcepts()) {
+                var explicitAdapter = (IValueSetAdapter) adapterFactory.createResource(valueSet.copy());
+                explicitAdapter.naiveExpand();
+
+                addCodesToExpansion(expansion, explicitAdapter);
+                isNaive = true;
+            }
+
+            // Apply naive parameter if any naive expansions occurred
+            if (isNaive) {
+                addParameterToExpansion(fhirContext(), expansion, valueSet.createNaiveParameter());
+            }
+
+            // Set timestamp
+            try {
+                ValueSets.setExpansionTimestamp(
+                        fhirContext(), expansion, expansionTimestamp == null ? new Date() : expansionTimestamp);
+            } catch (Exception e) {
+                throw new UnprocessableEntityException(e.getMessage());
+            }
+
+            valueSet.setExpansion(expansion);
+            expandedList.add(valueSet.getUrl());
+            return;
         }
-        // Else if the ValueSet has a grouping compose then we will attempt to group.
-        else if (valueSet.hasGroupingCompose()) {
-            groupExpand(
-                    valueSet,
-                    expansionParameters,
-                    terminologyEndpoint,
-                    valueSets,
-                    expandedList,
-                    repository,
-                    expansionTimestamp);
-        } else if (valueSet.hasCompose()) {
+
+        // Fallback: repository $expand (for remaining ValueSets with compose)
+        if (valueSet.hasCompose()) {
             try {
                 var headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/json");
+
                 var vs = repository.invoke(
                         valueSet.get().getClass(),
                         "$expand",
                         (IBaseParameters) expansionParameters.get(),
                         valueSet.get().getClass(),
                         headers);
-                valueSet = (IValueSetAdapter) IAdapterFactory.createAdapterForResource(vs);
+
+                var expandedValueSet = (IValueSetAdapter) adapterFactory.createResource(vs);
+
+                // expansions are only valid for a particular version
+                if (!valueSet.hasVersion()) {
+                    valueSet.setVersion(expandedValueSet.getVersion());
+                }
+                valueSet.setExpansion(expandedValueSet.getExpansion());
                 // Validate that the expansion parameters reflect what we asked for
                 validateExpansionParameters(valueSet, expansionParameters);
             } catch (Exception e) {
                 throw new UnprocessableEntityException(
-                        "Cannot expand ValueSet without a terminology server: " + valueSet.getId());
+                        "Cannot expand ValueSet without terminology server: " + valueSet.getUrl());
             }
         }
+
         expandedList.add(valueSet.getUrl());
     }
 
@@ -212,36 +273,6 @@ public class ExpandHelper {
         valueSet.setExpansion(expandedValueSet.getExpansion());
         // Validate that the expansion parameters reflect what we asked for
         validateExpansionParameters(valueSet, expansionParameters);
-    }
-
-    private void groupExpand(
-            IValueSetAdapter valueSet,
-            IParametersAdapter expansionParameters,
-            Optional<IEndpointAdapter> terminologyEndpoint,
-            List<IValueSetAdapter> valueSets,
-            List<String> expandedList,
-            IRepository repository,
-            Date expansionTimestamp) {
-        var expansion = expandIncludes(
-                valueSet,
-                expansionParameters,
-                terminologyEndpoint,
-                valueSets,
-                expandedList,
-                repository,
-                expansionTimestamp);
-        try {
-            ValueSets.setExpansionTimestamp(
-                    fhirContext(), expansion, expansionTimestamp == null ? new Date() : expansionTimestamp);
-        } catch (InstantiationException
-                | IllegalAccessException
-                | IllegalArgumentException
-                | InvocationTargetException
-                | NoSuchMethodException
-                | SecurityException e) {
-            throw new UnprocessableEntityException(e.getMessage());
-        }
-        valueSet.setExpansion(expansion);
     }
 
     private IBaseBackboneElement expandIncludes(

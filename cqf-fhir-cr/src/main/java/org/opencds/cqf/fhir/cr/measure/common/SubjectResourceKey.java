@@ -84,13 +84,14 @@ public record SubjectResourceKey(@Nullable String subjectId, String resourceValu
      * @return a SubjectResourceKey with appropriate subject context
      */
     public static SubjectResourceKey fromRowKey(StratifierRowKey rowKey, boolean isPrimitiveBasis) {
-        String inputParam = rowKey.inputParamId()
-                .orElseThrow(() -> new IllegalArgumentException("RowKey must have an inputParamId"));
+        String resourceValue = rowKey.inputParam()
+                .map(StratifierRowValue::legacyString)
+                .orElseThrow(() -> new IllegalArgumentException("RowKey must have an inputParam"));
 
         if (isPrimitiveBasis) {
-            return of(rowKey.subjectQualified(), inputParam);
+            return of(rowKey.subjectQualified(), resourceValue);
         } else {
-            return resourceOnly(inputParam);
+            return resourceOnly(resourceValue);
         }
     }
 

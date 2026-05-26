@@ -1,0 +1,67 @@
+{
+  "resourceType": "Measure",
+  "id": "CohortEncounterMissingValueSetStratFunction",
+  "url": "http://example.com/Measure/CohortEncounterMissingValueSetStratFunction",
+  "name": "CohortEncounterMissingValueSetStratFunction",
+  "status": "active",
+  "library": [
+    "http://example.com/Library/CohortEncounterMissingValueSet"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "Encounter"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "stratifier-encounter-status",
+          "code": {
+            "text": "Encounter Status"
+          },
+          "component": [
+            {
+              "id": "stratifier-encounter-status-comp-1",
+              "code": {
+                "text": "Encounter Status"
+              },
+              "criteria": {
+                "language": "text/cql-identifier",
+                "expression": "Encounter Status Function"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

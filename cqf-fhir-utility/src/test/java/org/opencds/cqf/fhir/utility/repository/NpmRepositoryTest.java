@@ -16,7 +16,9 @@ import java.util.List;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 class NpmRepositoryTest {
 
@@ -101,6 +103,42 @@ class NpmRepositoryTest {
                 repo.search(org.hl7.fhir.r4.model.Bundle.class, Patient.class, searchParams, Collections.emptyMap());
         assertNotNull(bundle);
         assertEquals(1, bundle.getEntry().size());
+    }
+
+    @Test
+    void searchByUrlReturnsCachedResourceWithoutLoadingPackages() {
+        // Canonical-by-URL search should hit the in-memory cache first, before any
+        // NPM-package work. With no packages configured, this exercises only the
+        // super.search() pass-through.
+        var repo = new NpmRepository(fhirContext, Collections.emptyList());
+
+        var vs = new ValueSet();
+        vs.setId("ValueSet/test-vs");
+        vs.setUrl("http://example.org/ValueSet/test-vs");
+        repo.update(vs);
+
+        var bundle = repo.search(
+                org.hl7.fhir.r4.model.Bundle.class,
+                ValueSet.class,
+                Searches.byUrl("http://example.org/ValueSet/test-vs"),
+                Collections.emptyMap());
+        assertNotNull(bundle);
+        assertEquals(1, bundle.getEntry().size());
+    }
+
+    @Test
+    void searchByUrlReturnsEmptyWhenNotCachedAndNoPackages() {
+        // Without packages and without a prior read, search-by-URL must not throw
+        // or attempt NPM lazy-load.
+        var repo = new NpmRepository(fhirContext, Collections.emptyList());
+
+        var bundle = repo.search(
+                org.hl7.fhir.r4.model.Bundle.class,
+                ValueSet.class,
+                Searches.byUrl("http://example.org/ValueSet/missing"),
+                Collections.emptyMap());
+        assertNotNull(bundle);
+        assertTrue(bundle.getEntry().isEmpty());
     }
 
     @Test

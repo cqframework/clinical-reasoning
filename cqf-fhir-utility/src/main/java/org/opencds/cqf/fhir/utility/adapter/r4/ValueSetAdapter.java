@@ -204,6 +204,22 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
     }
 
     @Override
+    public boolean hasComposeExclude() {
+        return getValueSet().hasCompose()
+                && getValueSet().getCompose().hasExclude()
+                && !getValueSet().getCompose().getExclude().isEmpty();
+    }
+
+    @Override
+    public boolean hasComposeFilters() {
+        return getValueSet().hasCompose()
+                && (getValueSet().getCompose().getInclude().stream()
+                                .anyMatch(i -> i.hasFilter() && !i.getFilter().isEmpty())
+                        || getValueSet().getCompose().getExclude().stream()
+                                .anyMatch(e -> e.hasFilter() && !e.getFilter().isEmpty()));
+    }
+
+    @Override
     public List<IValueSetConceptSetAdapter> getComposeInclude() {
         return getValueSet().getCompose().getInclude().stream()
                 .map(ValueSetConceptSetAdapter::new)
@@ -235,6 +251,20 @@ public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueS
                 && !getValueSet().getCompose().hasExclude()
                 && getValueSet().getCompose().getInclude().stream()
                         .noneMatch(csc -> !csc.hasValueSet() || csc.hasFilter());
+    }
+
+    @Override
+    public boolean hasExplicitConcepts() {
+        return getValueSet().hasCompose()
+                && getValueSet().getCompose().getInclude().stream()
+                        .anyMatch(i -> i.hasConcept() && !i.getConcept().isEmpty());
+    }
+
+    @Override
+    public boolean hasValueSetReferences() {
+        return getValueSet().hasCompose()
+                && getValueSet().getCompose().getInclude().stream()
+                        .anyMatch(i -> i.hasValueSet() && !i.getValueSet().isEmpty());
     }
 
     @Override

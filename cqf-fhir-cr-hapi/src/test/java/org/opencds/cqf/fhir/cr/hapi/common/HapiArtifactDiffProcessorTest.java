@@ -343,7 +343,7 @@ class HapiArtifactDiffProcessorTest {
                                 && part.getValue() instanceof StringType st
                                 && st.getValue() != null
                                 && st.getValue().contains(pathFragment)))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static Library manifestWithExpansionParams(String version, String... systemVersions) {

@@ -5,11 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Objects;
-import java.util.Optional;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportGroupStratifierComponent;
-import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponent;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selector;
 
@@ -35,16 +33,6 @@ public class SelectedMeasureReportStratifier
         assertTrue(value().getStratum().size() >= position && position > 0);
 
         return new SelectedMeasureReportStratum(value().getStratum().get(position - 1), this);
-    }
-
-    public SelectedMeasureReportStratum stratumByText(String stratumText) {
-        final Optional<StratifierGroupComponent> optMatchingStratum = value().getStratum().stream()
-                .filter(stratum -> stratumText.equals(stratum.getValue().getText()))
-                .findFirst();
-
-        assertTrue(optMatchingStratum.isPresent(), "Could not find stratum with text: %s".formatted(stratumText));
-
-        return new SelectedMeasureReportStratum(optMatchingStratum.get(), this);
     }
 
     public SelectedMeasureReportStratifier hasStratum(String textValue) {

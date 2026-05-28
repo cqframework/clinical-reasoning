@@ -26,6 +26,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.runtime.NamedTypeValue;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
+import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
@@ -153,7 +154,10 @@ class R4StratifierBuilder {
             Set<StratumValueDef> values,
             List<MeasureGroupPopulationComponent> populations,
             GroupDef groupDef) {
-        boolean isComponent = values.size() > 1;
+        // Drive output structure from the Measure definition, not the runtime value count:
+        // a stratifier declared with `Measure.stratifier.component[]` always emits values into
+        // `stratum.component[].value` per FHIR, even when it has only a single component.
+        boolean isComponent = !stratifierDef.components().isEmpty();
         for (StratumValueDef valuePair : values) {
             StratumValueWrapper stratumValue = valuePair.value();
             var componentDef = valuePair.def();
@@ -171,15 +175,9 @@ class R4StratifierBuilder {
 
             if (value instanceof CodeableConcept codeableConcept) {
                 if (isComponent) {
-                    StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
                     // component stratifier example: code: "gender", value: 'M'
                     // value being stratified: 'M'
-                    sgcc.setValue(codeableConcept);
-                    // code specified from componentDef: "gender"
-                    sgcc.setCode(
-                            new CodeableConcept().setText(componentDef.code().text()));
-                    // set component on MeasureReport
-                    stratum.addComponent(sgcc);
+                    stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value)));
                 } else {
                     // non-component stratifiers only set stratified value, code is set on stratifier object
                     // value being stratified: 'M'
@@ -187,16 +185,11 @@ class R4StratifierBuilder {
                 }
             } else if (isComponent) {
                 // component stratifier example: code: "gender", value: 'M'
-                StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
                 // value being stratified: 'M'
-                sgcc.setValue(expressionResultToCodableConcept(stratumValue.getValueAsString()));
-                // code specified from componentDef: "gender"
-                sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
-                // set component on MeasureReport
-                stratum.addComponent(sgcc);
+                stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value)));
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()
                     || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
-                // non-component stratifiers (single-component or non-component) only set stratified value
+                // non-component value stratifiers only set stratified value
                 // value being stratified: 'M', '35', etc.
                 stratum.setValue(expressionResultToCodableConcept(stratumValue.getValueAsString()));
             }
@@ -242,6 +235,18 @@ class R4StratifierBuilder {
     // which was previously unsupported.  So for now, comma-delim the first five values.
     private static CodeableConcept expressionResultToCodableConcept(String value) {
         return new CodeableConcept().setText(value);
+    }
+
+    private static StratifierGroupComponentComponent buildStratumComponent(
+            StratifierComponentDef componentDef, CodeableConcept value) {
+        StratifierGroupComponentComponent sgcc = new StratifierGroupComponentComponent();
+        sgcc.setId(componentDef.id());
+        sgcc.setValue(value);
+        // component code text comes from Measure.stratifier.component[].code.text; may be null
+        if (componentDef.code() != null) {
+            sgcc.setCode(new CodeableConcept().setText(componentDef.code().text()));
+        }
+        return sgcc;
     }
 
     // TODO: LD: take the StratumDef and use it to figure out the subject ID intersection instead of

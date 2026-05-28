@@ -55,6 +55,8 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollect
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("squid:S1135")
 class MultiMeasure {
@@ -475,6 +477,10 @@ class MultiMeasure {
     }
 
     public static class SelectedMeasureReport extends MultiMeasure.Selected<MeasureReport, SelectedReport> {
+        private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureReport.class);
+        private static final IParser JSON_PARSER =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true);
+
         public MeasureReport report() {
             return this.value();
         }
@@ -625,6 +631,13 @@ class MultiMeasure {
         public SelectedMeasureReport hasPeriodEnd(Date periodEnd) {
             var period = this.report().getPeriod();
             assertEquals(periodEnd, period.getEnd());
+            return this;
+        }
+
+        // Log the JSON corresponding to the report at this point:
+        public SelectedMeasureReport logReportJson() {
+            logger.info(JSON_PARSER.encodeResourceToString(report()));
+
             return this;
         }
     }

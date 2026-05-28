@@ -1,0 +1,18 @@
+{
+  "resourceType": "Library",
+  "id": "DuplicateTypeIntraSubject",
+  "url": "http://example.com/Library/DuplicateTypeIntraSubject",
+  "name": "DuplicateTypeIntraSubject",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/DuplicateTypeIntraSubject.cql"
+    }
+  ]
+}

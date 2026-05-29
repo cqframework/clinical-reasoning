@@ -78,15 +78,20 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
             }
         }
 
-        final CqlType newElementCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newElement);
-
-        if (newElementCqlType != null) {
-            if (this.contains(newElementCqlType)) {
-                return false;
-            } else {
-                return super.add(newElement);
-            }
-        }
+        // CDO-714 tactical fix: the CqlType dedup branch is disabled so distinct runtime.Date
+        // (and other no-equals-override CqlType) instances survive default HashSet identity
+        // semantics. The holistic, basis-aware design is captured in
+        // PRPs/prp-population-basis-primitive-duplicate-counting.md and is sequenced after the
+        // CQL 5.0 (cql1) ExpressionResult type changes land.
+        //        final CqlType newElementCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newElement);
+        //
+        //        if (newElementCqlType != null) {
+        //            if (this.contains(newElementCqlType)) {
+        //                return false;
+        //            } else {
+        //                return super.add(newElement);
+        //            }
+        //        }
 
         return super.add(newElement);
     }
@@ -116,17 +121,21 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
             return false;
         }
 
-        final CqlType removalCandidateCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(removalCandidate);
-
-        if (removalCandidateCqlType != null) {
-            for (T next : this) {
-                if (next instanceof CqlType nextCqlType
-                        && FhirResourceAndCqlTypeUtils.areEqualCqlTypes(nextCqlType, removalCandidateCqlType)) {
-                    return super.remove(nextCqlType);
-                }
-            }
-            return false;
-        }
+        // CDO-714 tactical fix: matching CqlType remove path disabled. See add() above and
+        // PRPs/prp-population-basis-primitive-duplicate-counting.md.
+        //        final CqlType removalCandidateCqlType =
+        // FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(removalCandidate);
+        //
+        //        if (removalCandidateCqlType != null) {
+        //            for (T next : this) {
+        //                if (next instanceof CqlType nextCqlType
+        //                        && FhirResourceAndCqlTypeUtils.areEqualCqlTypes(nextCqlType, removalCandidateCqlType))
+        // {
+        //                    return super.remove(nextCqlType);
+        //                }
+        //            }
+        //            return false;
+        //        }
 
         return super.remove(removalCandidate);
     }
@@ -165,10 +174,13 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
 
     private static boolean contains(Collection<?> collection, Object obj) {
         final IBaseResource otherResource = FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(obj);
-        final CqlType otherCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(obj);
+        // CDO-714 tactical fix: CqlType detection disabled here too. See add() above and
+        // PRPs/prp-population-basis-primitive-duplicate-counting.md.
+        //        final CqlType otherCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(obj);
 
         // prevent infinite recursion
-        if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResourcesAndCqlTypes) {
+        if (otherResource != null
+                || /*otherCqlType != null ||*/ collection instanceof HashSetForFhirResourcesAndCqlTypes) {
             return containsInner(collection, obj);
         }
 

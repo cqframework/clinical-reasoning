@@ -10,6 +10,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Precision;
@@ -56,6 +57,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertFalse(set.contains(patient2));
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void removeCqlDateRemovesCorrectCqlDate() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -88,6 +90,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(1, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void retainAllKeepsOnlyMatchingCqlDate() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -104,6 +107,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(1, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void retainAllKeepsOnlyMatchingCqlDateWithMatchingPrecision() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -120,6 +124,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(1, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void retainAllKeepsOnlyMatchingCqlDateWithPrecisionMismatch() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -153,6 +158,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(1, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void removeAllRemovesMatchingCqlDate() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -169,6 +175,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(1, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void removeAllRemovesMatchingCqlDateWithPrecision() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -185,6 +192,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(1, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void removeAllRemovesMatchingCqlDateMismatchPrecision() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();
@@ -218,6 +226,7 @@ class HashSetForFhirResourcesAndCqlTypesTest {
         assertEquals(2, set.size());
     }
 
+    @Disabled("CDO-714 — CqlType dedup branch disabled; see PRPs/prp-population-basis-primitive-duplicate-counting.md")
     @Test
     void addAllAddsNoDuplicateCqlDates() {
         var set = new HashSetForFhirResourcesAndCqlTypes<Date>();

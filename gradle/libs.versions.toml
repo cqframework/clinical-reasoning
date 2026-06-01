@@ -64,6 +64,10 @@ jakarta-servlet-api = { module = "jakarta.servlet:jakarta.servlet-api" }
 # Spring
 spring-context = { module = "org.springframework:spring-context", version.ref = "spring" }
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring" }
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter", version.ref = "spring-boot" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+spring-boot-autoconfigure = { module = "org.springframework.boot:spring-boot-autoconfigure", version.ref = "spring-boot" }
 
 # Logging
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

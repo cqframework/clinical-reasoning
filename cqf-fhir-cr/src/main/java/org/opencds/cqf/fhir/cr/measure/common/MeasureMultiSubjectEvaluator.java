@@ -507,35 +507,37 @@ public class MeasureMultiSubjectEvaluator {
 
         for (StratifierComponentDef componentDef : componentDefs) {
             for (var entry : componentDef.getResults().entrySet()) {
-                String subjectId = entry.getKey();
-                CriteriaResult result = entry.getValue();
-                Object rawValue = result == null ? null : result.rawValue();
-
-                if (rawValue instanceof Map<?, ?> functionResults) {
-                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-                    Set<StratifierRowKey> rowKeys =
-                            alignmentRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
-
-                    for (Object key : functionResults.keySet()) {
-                        rowKeys.add(
-                                StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
-                    }
-                } else if (rawValue instanceof Iterable<?> iterableResults) {
-                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-                    Set<StratifierRowKey> rowKeys =
-                            alignmentRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
-
-                    int index = 0;
-                    for (Object value : iterableResults) {
-                        rowKeys.add(StratifierRowKey.withInput(
-                                qualifiedSubject, StratifierRowValue.ofIterableElement(value, index)));
-                        index++;
-                    }
-                }
+                collectAlignmentRowKeysForEntry(entry.getKey(), entry.getValue(), alignmentRowKeysBySubject);
             }
         }
 
         return alignmentRowKeysBySubject;
+    }
+
+    private static void collectAlignmentRowKeysForEntry(
+            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject) {
+
+        final Object rawValue = result == null ? null : result.rawValue();
+        if (!(rawValue instanceof Map<?, ?>) && !(rawValue instanceof Iterable<?>)) {
+            return;
+        }
+
+        final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+        final Set<StratifierRowKey> rowKeys =
+                alignmentRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+
+        if (rawValue instanceof Map<?, ?> functionResults) {
+            for (Object key : functionResults.keySet()) {
+                rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
+            }
+        } else {
+            int index = 0;
+            for (Object value : (Iterable<?>) rawValue) {
+                rowKeys.add(StratifierRowKey.withInput(
+                        qualifiedSubject, StratifierRowValue.ofIterableElement(value, index)));
+                index++;
+            }
+        }
     }
 
     private static List<StratumTableRow> mapToListOfTableEntries(

@@ -72,9 +72,7 @@ public final class SearchParameterTranslator {
         var type = resolveType(name, def);
         for (String raw : values) {
             IQueryParameterType param = create(type, fhirContext, name, qualifier, raw);
-            if (param != null) {
-                out.put(name, List.of(param));
-            }
+            out.put(name, List.of(param));
         }
     }
 

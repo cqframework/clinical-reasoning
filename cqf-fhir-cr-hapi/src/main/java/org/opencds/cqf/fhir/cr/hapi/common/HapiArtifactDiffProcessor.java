@@ -31,6 +31,7 @@ import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -192,8 +193,14 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                         combinedReferenceList.getSourceMatches().get(i).getResource();
                 var targetCanonical =
                         combinedReferenceList.getTargetMatches().get(i).getResource();
+                // Identical version-pinned canonicals reference the same immutable artifact — there
+                // is nothing to diff, so skip the resolve/recurse entirely. This avoids both wasted
+                // fetches and spurious "could not be retrieved" entries for unchanged dependencies.
+                if (Objects.equals(sourceCanonical, targetCanonical)) {
+                    continue;
+                }
                 boolean diffNotAlreadyComputedAndPresent =
-                        baseDiff.getParameter(Canonicals.getUrl(targetCanonical)) == null;
+                        !hasParameterNamed(baseDiff, Canonicals.getUrl(targetCanonical));
                 if (diffNotAlreadyComputedAndPresent) {
                     var source = checkOrUpdateResourceCache(
                             sourceCanonical, cache, repository, true, ctx, terminologyEndpoint, compareExecutable);
@@ -227,14 +234,19 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                                                 terminologyEndpoint);
                                     },
                                     () -> {
+                                        // A side couldn't be resolved (commonly external code systems
+                                        // like LOINC/SNOMED that aren't stored as full resources). There
+                                        // is no sub-diff to add, and any reference-level change is already
+                                        // captured in the relatedArtifact operations — so log rather than
+                                        // emitting a diagnostic string into the diff payload.
                                         if (target == null) {
-                                            var component = baseDiff.addParameter();
-                                            component.setName(Canonicals.getUrl(sourceCanonical));
-                                            component.setValue(new StringType("Target could not be retrieved"));
+                                            logger.debug(
+                                                    "Target resource could not be retrieved for {}; skipping sub-diff",
+                                                    sourceCanonical);
                                         } else if (source == null) {
-                                            var component = baseDiff.addParameter();
-                                            component.setName(Canonicals.getUrl(targetCanonical));
-                                            component.setValue(new StringType("Source could not be retrieved"));
+                                            logger.debug(
+                                                    "Source resource could not be retrieved for {}; skipping sub-diff",
+                                                    targetCanonical);
                                         }
                                     });
                 }
@@ -255,7 +267,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         for (var addition : combinedReferenceList.getInsertions()) {
             if (addition.hasResource()) {
                 boolean diffNotAlreadyComputedAndPresent =
-                        baseDiff.getParameter(Canonicals.getUrl(addition.getResource())) == null;
+                        !hasParameterNamed(baseDiff, Canonicals.getUrl(addition.getResource()));
                 if (diffNotAlreadyComputedAndPresent) {
                     var targetResource = checkOrUpdateResourceCache(
                             addition.getResource(),
@@ -297,7 +309,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         for (var deletion : combinedReferenceList.getDeletions()) {
             if (deletion.hasResource()) {
                 boolean diffNotAlreadyComputedAndPresent =
-                        baseDiff.getParameter(Canonicals.getUrl(deletion.getResource())) == null;
+                        !hasParameterNamed(baseDiff, Canonicals.getUrl(deletion.getResource()));
                 if (diffNotAlreadyComputedAndPresent) {
                     var sourceResource = checkOrUpdateResourceCache(
                             deletion.getResource(),
@@ -554,9 +566,40 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             return valueSetContainsEquals(sourceVSECC, targetVSECC);
         } else if (sourceObj instanceof Extension sourceExt && targetObj instanceof Extension targetExt) {
             return extensionEquals(sourceExt, targetExt);
+        } else if (sourceObj instanceof ParametersParameterComponent sourcePpc
+                && targetObj instanceof ParametersParameterComponent targetPpc) {
+            return parametersParameterEquals(sourcePpc, targetPpc);
         } else {
             return false;
         }
+    }
+
+    /**
+     * Identity match for expansion-parameter entries (contained Parameters.parameter[]). Two entries
+     * are the "same" entry when they share a name and — for canonical-valued params like
+     * system-version / canonicalVersion — the same version-stripped URL. This lets reordering produce
+     * no operations while a genuine version bump on the same system surfaces as a single replace. For
+     * non-canonical-valued params (booleans, codes, language tags) it falls back to deep equality.
+     */
+    private static boolean parametersParameterEquals(
+            ParametersParameterComponent source, ParametersParameterComponent target) {
+        if (!Objects.equals(source.getName(), target.getName())) {
+            return false;
+        }
+        var sourceUrl = canonicalValueUrl(source);
+        var targetUrl = canonicalValueUrl(target);
+        if (sourceUrl != null && targetUrl != null) {
+            return sourceUrl.equals(targetUrl);
+        }
+        return source.equalsDeep(target);
+    }
+
+    private static String canonicalValueUrl(ParametersParameterComponent p) {
+        if (p.getValue() instanceof IPrimitiveType<?> primitive) {
+            var value = primitive.getValueAsString();
+            return value == null ? null : Canonicals.getUrl(value);
+        }
+        return null;
     }
 
     private static boolean relatedArtifactEquals(RelatedArtifact ref1, RelatedArtifact ref2) {
@@ -590,23 +633,47 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         return ref1.getSystem().equals(ref2.getSystem()) && ref1.getCode().equals(ref2.getCode());
     }
 
-    private static boolean extensionEquals(Extension source, Extension target) {
-        if (!source.getValue().getClass().equals(target.getValue().getClass())) {
+    /**
+     * Null-safe variant of {@link Parameters#getParameter(String)} membership check. HAPI's
+     * built-in iterates components and calls {@code component.getName().equals(name)} which NPEs
+     * if any component in the list has a null name — a state that occurs here whenever a malformed
+     * relatedArtifact URL passes through {@link Canonicals#getUrl(String)} and the resulting null
+     * is stored on a component (see e.g. {@code handleSourceMatches} fall-through paths).
+     */
+    private static boolean hasParameterNamed(Parameters params, String name) {
+        if (params == null || name == null) {
             return false;
         }
-        if (source.getValue() instanceof IPrimitiveType<?> sourcePrimitive) {
-            return (sourcePrimitive.getValue()).equals((((IPrimitiveType<?>) target.getValue()).getValue()));
-        } else if (source.getValue() instanceof CodeableConcept sourceCodableConcept) {
+        return params.getParameter().stream()
+                .filter(ParametersParameterComponent::hasName)
+                .anyMatch(p -> name.equals(p.getName()));
+    }
+
+    private static boolean extensionEquals(Extension source, Extension target) {
+        var sourceValue = source.getValue();
+        var targetValue = target.getValue();
+        // Complex extensions (e.g. package-source) carry no top-level value — only
+        // nested sub-extensions. Fall back to deep equality (which compares URLs +
+        // nested extensions) rather than dereferencing a null value.
+        if (sourceValue == null || targetValue == null) {
+            return sourceValue == null && targetValue == null && source.equalsDeep(target);
+        }
+        if (!sourceValue.getClass().equals(targetValue.getClass())) {
+            return false;
+        }
+        if (sourceValue instanceof IPrimitiveType<?> sourcePrimitive) {
+            return (sourcePrimitive.getValue()).equals(((IPrimitiveType<?>) targetValue).getValue());
+        } else if (sourceValue instanceof CodeableConcept sourceCodableConcept) {
             return sourceCodableConcept
                             .getCodingFirstRep()
                             .getSystem()
-                            .equals(((CodeableConcept) target.getValue())
+                            .equals(((CodeableConcept) targetValue)
                                     .getCodingFirstRep()
                                     .getSystem())
-                    && ((CodeableConcept) source.getValue())
+                    && sourceCodableConcept
                             .getCodingFirstRep()
                             .getCode()
-                            .equals(((CodeableConcept) target.getValue())
+                            .equals(((CodeableConcept) targetValue)
                                     .getCodingFirstRep()
                                     .getCode());
         } else {
@@ -651,6 +718,13 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         updateSource.setRelatedArtifact(processedRelatedArtifacts.getSourceMatches());
         updateTarget.setRelatedArtifact(processedRelatedArtifacts.getTargetMatches());
 
+        // Align order-independent contained expansion parameters before the positional diff, so a
+        // reordered-but-unchanged parameter doesn't surface as a spurious replace. Matched entries
+        // end up at the same indices on both sides; source-only entries (deletions) and target-only
+        // entries (insertions) are appended last.
+        reorderContainedExpansionParameters(
+                (MetadataResource) updateSource.get(), (MetadataResource) updateTarget.get());
+
         // get the diff of the RelatedArtifacts without Extensions
         var updateOperations = (Parameters) patch.diff(
                 removeRelatedArtifactExtensions(updateSource), removeRelatedArtifactExtensions(updateTarget));
@@ -685,7 +759,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
         for (ParametersParameterComponent parameter : parameters) {
             Optional<ParametersParameterComponent> path = parameter.getPart().stream()
                     .filter(ParametersParameterComponent::hasName)
-                    .filter(part -> part.getName().equals("path"))
+                    .filter(part -> "path".equals(part.getName()))
                     .findFirst();
             if (path.isPresent()) {
                 var pathString = ((StringType) path.get().getValue()).getValue();
@@ -694,6 +768,59 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                 path.get().setValue(new StringType(indexedPathString));
             }
         }
+    }
+
+    /**
+     * Reorders the contained expansion-parameters ({@code Parameters.parameter[]}) on both sides so
+     * matched entries occupy the same indices before the positional {@code patch.diff}. Without this,
+     * a manifest whose expansion parameters are merely reordered yields a cascade of meaningless
+     * replace operations pairing unrelated entries by position. Mutates the working copies in place,
+     * consistent with the existing relatedArtifact reordering.
+     */
+    private static void reorderContainedExpansionParameters(
+            MetadataResource sourceLibrary, MetadataResource targetLibrary) {
+        var sourceParams = getContainedExpansionParameters(sourceLibrary);
+        var targetParams = getContainedExpansionParameters(targetLibrary);
+        if (sourceParams == null || targetParams == null) {
+            return;
+        }
+        var processed = extractAdditionsAndDeletions(
+                sourceParams.getParameter(), targetParams.getParameter(), ParametersParameterComponent.class);
+        sourceParams.setParameter(
+                new ArrayList<>(Stream.concat(processed.getSourceMatches().stream(), processed.getDeletions().stream())
+                        .toList()));
+        targetParams.setParameter(
+                new ArrayList<>(Stream.concat(processed.getTargetMatches().stream(), processed.getInsertions().stream())
+                        .toList()));
+    }
+
+    /**
+     * Resolves the contained Parameters carrying expansion parameters. Prefers the contained resource
+     * referenced by the {@code cqf-expansionParameters} extension; falls back to the first contained
+     * Parameters. Returns null when there is none.
+     */
+    private static Parameters getContainedExpansionParameters(MetadataResource resource) {
+        if (resource == null) {
+            return null;
+        }
+        var containedParams = resource.getContained().stream()
+                .filter(Parameters.class::isInstance)
+                .map(Parameters.class::cast)
+                .toList();
+        if (containedParams.isEmpty()) {
+            return null;
+        }
+        var ext = resource.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        if (ext != null && ext.getValue() instanceof Reference reference && reference.getReference() != null) {
+            var localId = reference.getReference().replace("#", "");
+            var match = containedParams.stream()
+                    .filter(p -> localId.equals(p.getIdPart()))
+                    .findFirst();
+            if (match.isPresent()) {
+                return match.get();
+            }
+        }
+        return containedParams.get(0);
     }
 
     private static IDomainResource removeRelatedArtifactExtensions(IKnowledgeArtifactAdapter resource) {
@@ -885,7 +1012,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
                 ParametersParameterComponent parameter = parameters.get(i);
                 Optional<ParametersParameterComponent> path = parameter.getPart().stream()
                         .filter(ParametersParameterComponent::hasName)
-                        .filter(part -> part.getName().equals("path"))
+                        .filter(part -> "path".equals(part.getName()))
                         .findFirst();
                 if (path.isPresent()) {
 
@@ -947,13 +1074,13 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             int opCounter = 0;
             for (ParametersParameterComponent parameter : parameters) {
                 Optional<ParametersParameterComponent> index = parameter.getPart().stream()
-                        .filter(part -> part.getName().equals("index"))
+                        .filter(part -> "index".equals(part.getName()))
                         .findFirst();
                 Optional<ParametersParameterComponent> value = parameter.getPart().stream()
-                        .filter(part -> part.getName().equals("value"))
+                        .filter(part -> "value".equals(part.getName()))
                         .findFirst();
                 Optional<ParametersParameterComponent> path = parameter.getPart().stream()
-                        .filter(part -> part.getName().equals("path"))
+                        .filter(part -> "path".equals(part.getName()))
                         .findFirst();
                 if (path.isPresent()) {
                     var pathString = ((StringType) path.get().getValue()).getValue();

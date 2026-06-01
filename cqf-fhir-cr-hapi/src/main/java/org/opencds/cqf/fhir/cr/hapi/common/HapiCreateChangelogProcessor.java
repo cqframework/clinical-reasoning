@@ -221,12 +221,12 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             MetadataResource sourceResource,
             Page<?> page) {
         if (change.hasName()
-                && !change.getName().equals("operation")
+                && !"operation".equals(change.getName())
                 && change.hasResource()
                 && change.getResource() instanceof Parameters parameters) {
             // Nested Parameters objects get recursively processed
             processChanges(parameters.getParameter(), changelog, cache, change.getName());
-        } else if (change.getName().equals("operation")) {
+        } else if ("operation".equals(change.getName())) {
             // 1) For each operation get the relevant parameters
             var type = getStringParameter(change, "type")
                     .orElseThrow(() -> new UnprocessableEntityException(
@@ -266,7 +266,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
 
     private Optional<String> getStringParameter(Parameters.ParametersParameterComponent part, String name) {
         return part.getPart().stream()
-                .filter(p -> p.getName().equalsIgnoreCase(name))
+                .filter(p -> name.equalsIgnoreCase(p.getName()))
                 .filter(p -> p.getValue() instanceof IPrimitiveType)
                 .map(p -> (IPrimitiveType<?>) p.getValue())
                 .map(s -> (String) s.getValue())
@@ -275,7 +275,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
 
     private Optional<IBase> getParameter(Parameters.ParametersParameterComponent part, String name) {
         return part.getPart().stream()
-                .filter(p -> p.getName().equalsIgnoreCase(name))
+                .filter(p -> name.equalsIgnoreCase(p.getName()))
                 .filter(ParametersParameterComponent::hasValue)
                 .map(p -> (IBase) p.getValue())
                 .findAny();

@@ -13,15 +13,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jspecify.annotations.NonNull;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -503,41 +506,39 @@ public class MeasureMultiSubjectEvaluator {
         for (StratifierComponentDef componentDef : componentDefs) {
             for (var entry : componentDef.getResults().entrySet()) {
                 String subjectId = entry.getKey();
-//<<<<<<< HEAD
-//                CqlExpressionValue result = entry.getValue();
+                var result = entry.getValue();
+
+                // Only process function results (FunctionResultAccumulator)
+                final var optFunctionResults =
+                        result.asFunctionResultAccumulator().orElse(null);
+
+                if (optFunctionResults == null) {
+                    continue;
+                }
+
+                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+                Set<StratifierRowKey> rowKeys =
+                        functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+
+                // TODO: Function results are always resources?
+                for (FunctionResultEntry fnEntry : optFunctionResults.entries()) {
+                    String normalizedKey =  normalizeResourceKey(fnEntry.input());
+                    rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(normalizedKey)));
+
+//                                var result = entry.getValue();
+//                                var rawValue = result == null ? null : result.raw();
 //
-//                // Only process function results (FunctionResultAccumulator)
-//                final var optFunctionResults =
-//                        result.asFunctionResultAccumulator().orElse(null);
+//                                // Only process function results (Map values)
+//                                if (rawValue instanceof Map<?, ?> functionResults) {
+//                                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+//                                    Set<StratifierRowKey> rowKeys =
+//                                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 //
-//                if (optFunctionResults == null) {
-//                    continue;
-//                }
-//
-//                String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-//                Set<StratifierRowKey> rowKeys =
-//                        functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
-//
-//                // TODO: Function results are always resources?
-//                for (FunctionResultEntry fnEntry : optFunctionResults.entries()) {
-//                    String normalizedKey = normalizeResourceKey(fnEntry.input());
-//                    rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
-//=======
-//                CriteriaResult result = entry.getValue();
-//                Object rawValue = result == null ? null : result.rawValue();
-//
-//                // Only process function results (Map values)
-//                if (rawValue instanceof Map<?, ?> functionResults) {
-//                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-//                    Set<StratifierRowKey> rowKeys =
-//                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
-//
-//                    for (Object key : functionResults.keySet()) {
-//                        rowKeys.add(
-//                                StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
-//                    }
-//>>>>>>> main
-//                }
+//                                    for (Object key : functionResults.keySet()) {
+//                                        rowKeys.add(
+//                                                StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
+//                                    }
+                                }
             }
         }
 
@@ -625,13 +626,13 @@ public class MeasureMultiSubjectEvaluator {
                                 StratifierRowKey.withInput(
                                         qualifiedSubject,
                                         // Build composite row key: "Patient/xxx|Resource/yyy"
-//<<<<<<< HEAD
-                                    StratifierRowValue.ofFunctionInput(entry.input())),
+                                        // <<<<<<< HEAD
+                                        StratifierRowValue.ofFunctionInput(entry.input())),
                                 new StratumValueWrapper(entry.output())))
-//=======
-//                                        StratifierRowValue.ofFunctionInput(entry.getKey())),
-//                                new StratumValueWrapper(entry.getValue())))
-//>>>>>>> main
+                // =======
+                //                                        StratifierRowValue.ofFunctionInput(entry.getKey())),
+                //                                new StratumValueWrapper(entry.getValue())))
+                // >>>>>>> main
                 .toList();
     }
 
@@ -679,7 +680,7 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Normalize a resource to its ID string for use as a row key component.
      */
-    private static String normalizeResourceKey(Object obj) {
+    public static String normalizeResourceKey(Object obj) {
         if (obj instanceof ClassInstance classInstance && isFhirResource(FhirVersionEnum.R4, classInstance)) {
             var id = getId(classInstance);
             if (StringUtils.isNotBlank(id)) {
@@ -821,15 +822,32 @@ public class MeasureMultiSubjectEvaluator {
                 if (wrapper == null) {
                     continue;
                 }
-                var raw = wrapper.raw();
-                if (raw != null && stratifierResultsPerSubject.contains(raw)) {
-                    allPopulationStratumIntersectingResources.add(raw);
+                var id = wrapper.raw() == null ? null : normalizeResourceKey(wrapper.raw());
+                var stratifierResultIds = getStratifierResultIds(stratifierResultsPerSubject);
+                if (id != null && stratifierResultIds.contains(id)) {
+                    allPopulationStratumIntersectingResources.add(wrapper.raw());
                 }
             }
         }
 
         // We add up all the results of the intersections here:
         return new HashSetForFhirResourcesAndCqlTypes<>(allPopulationStratumIntersectingResources);
+    }
+
+    private static List<String> getStratifierResultIds(Set<?> stratifierResultsPerSubject) {
+        var ids = new ArrayList<String>();
+        ids.addAll(stratifierResultsPerSubject.stream()
+            .filter(LinkedHashMap.class::isInstance)
+            .map(LinkedHashMap.class::cast)
+            .map(LinkedHashMap::keySet)
+            .flatMap(m -> m.stream())
+            .map(MeasureMultiSubjectEvaluator::normalizeResourceKey)
+            .toList());
+        ids.addAll(stratifierResultsPerSubject.stream()
+            .filter(o -> !(o instanceof Iterable<?>))
+            .map(MeasureMultiSubjectEvaluator::normalizeResourceKey)
+            .toList());
+        return ids;
     }
 
     /**
@@ -947,8 +965,9 @@ public class MeasureMultiSubjectEvaluator {
                 // so the input resource IDs we need are the Map keys.
                 if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
                     resources.stream()
-                            .filter(Map.class::isInstance)
-                            .map(m -> (Map<?, ?>) m)
+                            .map(CqlExpressionValue::asMap)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
                             .flatMap(m -> m.keySet().stream())
                             .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                             .filter(java.util.Objects::nonNull)

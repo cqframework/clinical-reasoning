@@ -177,7 +177,7 @@ class R4StratifierBuilder {
                 if (isComponent) {
                     // component stratifier example: code: "gender", value: 'M'
                     // value being stratified: 'M'
-                    stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value)));
+                    stratum.addComponent(buildStratumComponent(componentDef, codeableConcept));
                 } else {
                     // non-component stratifiers only set stratified value, code is set on stratifier object
                     // value being stratified: 'M'
@@ -186,7 +186,7 @@ class R4StratifierBuilder {
             } else if (isComponent) {
                 // component stratifier example: code: "gender", value: 'M'
                 // value being stratified: 'M'
-                stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value)));
+                stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value.toString())));
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()
                     || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
                 // non-component value stratifiers only set stratified value

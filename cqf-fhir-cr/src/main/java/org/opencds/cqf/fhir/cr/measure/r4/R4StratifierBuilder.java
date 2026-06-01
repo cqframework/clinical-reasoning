@@ -186,7 +186,8 @@ class R4StratifierBuilder {
             } else if (isComponent) {
                 // component stratifier example: code: "gender", value: 'M'
                 // value being stratified: 'M'
-                stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value.toString())));
+                stratum.addComponent(
+                        buildStratumComponent(componentDef, expressionResultToCodableConcept(value.toString())));
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()
                     || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
                 // non-component value stratifiers only set stratified value

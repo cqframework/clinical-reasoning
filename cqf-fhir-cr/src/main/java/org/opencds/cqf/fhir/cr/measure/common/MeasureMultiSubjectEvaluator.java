@@ -24,7 +24,6 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jspecify.annotations.NonNull;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -509,8 +508,7 @@ public class MeasureMultiSubjectEvaluator {
                 var result = entry.getValue();
 
                 // Only process function results (FunctionResultAccumulator)
-                final var optFunctionResults =
-                        result.asFunctionResultAccumulator().orElse(null);
+                final var optFunctionResults = result.asMap().orElse(null);
 
                 if (optFunctionResults == null) {
                     continue;
@@ -520,25 +518,26 @@ public class MeasureMultiSubjectEvaluator {
                 Set<StratifierRowKey> rowKeys =
                         functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
 
-                // TODO: Function results are always resources?
-                for (FunctionResultEntry fnEntry : optFunctionResults.entries()) {
-                    String normalizedKey =  normalizeResourceKey(fnEntry.input());
-                    rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(normalizedKey)));
+                //                // TODO: Function results are always resources?
+                //                for (FunctionResultEntry fnEntry : optFunctionResults.entries()) {
+                //                    String normalizedKey = normalizeResourceKey(fnEntry.input());
+                //                    rowKeys.add(StratifierRowKey.withInput(
+                //                            qualifiedSubject, StratifierRowValue.ofFunctionInput(normalizedKey)));
 
-//                                var result = entry.getValue();
-//                                var rawValue = result == null ? null : result.raw();
-//
-//                                // Only process function results (Map values)
-//                                if (rawValue instanceof Map<?, ?> functionResults) {
-//                                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-//                                    Set<StratifierRowKey> rowKeys =
-//                                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
-//
-//                                    for (Object key : functionResults.keySet()) {
-//                                        rowKeys.add(
-//                                                StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
-//                                    }
-                                }
+                //                                var result = entry.getValue();
+                //                                var rawValue = result == null ? null : result.raw();
+                //
+                //                                // Only process function results (Map values)
+                //                                if (rawValue instanceof Map<?, ?> functionResults) {
+                //                                    String qualifiedSubject =
+                // FhirResourceUtils.addPatientQualifier(subjectId);
+                //                                    Set<StratifierRowKey> rowKeys =
+                //
+                // functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+                //
+                for (Object key : optFunctionResults.keySet()) {
+                    rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
+                }
             }
         }
 
@@ -837,16 +836,16 @@ public class MeasureMultiSubjectEvaluator {
     private static List<String> getStratifierResultIds(Set<?> stratifierResultsPerSubject) {
         var ids = new ArrayList<String>();
         ids.addAll(stratifierResultsPerSubject.stream()
-            .filter(LinkedHashMap.class::isInstance)
-            .map(LinkedHashMap.class::cast)
-            .map(LinkedHashMap::keySet)
-            .flatMap(m -> m.stream())
-            .map(MeasureMultiSubjectEvaluator::normalizeResourceKey)
-            .toList());
+                .filter(LinkedHashMap.class::isInstance)
+                .map(LinkedHashMap.class::cast)
+                .map(LinkedHashMap::keySet)
+                .flatMap(m -> m.stream())
+                .map(MeasureMultiSubjectEvaluator::normalizeResourceKey)
+                .toList());
         ids.addAll(stratifierResultsPerSubject.stream()
-            .filter(o -> !(o instanceof Iterable<?>))
-            .map(MeasureMultiSubjectEvaluator::normalizeResourceKey)
-            .toList());
+                .filter(o -> !(o instanceof Iterable<?>))
+                .map(MeasureMultiSubjectEvaluator::normalizeResourceKey)
+                .toList());
         return ids;
     }
 

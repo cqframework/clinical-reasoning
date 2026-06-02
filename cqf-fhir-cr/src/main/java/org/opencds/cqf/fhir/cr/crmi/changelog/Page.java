@@ -63,21 +63,35 @@ public class Page<T extends PageBase> {
         if (!type.equals(ChangeLog.INSERT)) {
             throw new UnprocessableEntityException(ChangeLog.WRONG_TYPE);
         }
-        this.newData.addOperation(type, path, currentValue, null);
+        // newData can be null when the page represents a deleted-only resource (source had it,
+        // target doesn't). An insert against the missing side has no meaningful target.
+        if (this.newData != null) {
+            this.newData.addOperation(type, path, currentValue, null);
+        }
     }
 
     void addDeleteOperation(String type, String path, Object originalValue) {
         if (!type.equals(ChangeLog.DELETE)) {
             throw new UnprocessableEntityException(ChangeLog.WRONG_TYPE);
         }
-        this.oldData.addOperation(type, path, null, originalValue);
+        // oldData can be null when the page represents an inserted-only resource (target has it,
+        // source didn't). A delete against the missing side has no meaningful source.
+        if (this.oldData != null) {
+            this.oldData.addOperation(type, path, null, originalValue);
+        }
     }
 
     void addReplaceOperation(String type, String path, Object currentValue, Object originalValue) {
         if (!type.equals(ChangeLog.REPLACE)) {
             throw new UnprocessableEntityException(ChangeLog.WRONG_TYPE);
         }
-        this.oldData.addOperation(type, path, currentValue, null);
-        this.newData.addOperation(type, path, null, originalValue);
+        // Either side may be null when the page represents a resource that exists on only one
+        // side of the diff (insert-only or delete-only). Record what we have rather than NPE.
+        if (this.oldData != null) {
+            this.oldData.addOperation(type, path, currentValue, null);
+        }
+        if (this.newData != null) {
+            this.newData.addOperation(type, path, null, originalValue);
+        }
     }
 }

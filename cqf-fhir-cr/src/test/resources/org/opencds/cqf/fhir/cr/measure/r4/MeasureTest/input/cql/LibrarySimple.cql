@@ -275,3 +275,8 @@ define function "Empty Function"(encounter Encounter):
 
 define function "Null Function"(encounter Encounter):
   null
+
+// Patient-context list expression: the set of distinct Encounter statuses the patient has had.
+// Used as a non-subject value stratifier to verify the list-returning scalar shape.
+define "Distinct Encounter Statuses":
+  distinct ([Encounter] E return Coalesce(E.status.value, 'unknown'))

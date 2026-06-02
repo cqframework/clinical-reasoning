@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +32,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureProcessor.MultiMeasuresPreparedContext;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.builder.BundleBuilder;
@@ -259,17 +259,17 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
 
         var evalType = r4MeasureServiceUtilsToUse.getMeasureEvalType(reportType, subjectToUse);
 
-        var subjects =
-                switch (singleOrMultiple) {
-                    case SINGLE -> getSubjectsForEvaluateSingle(subjectToUse, resolvedRepo);
-                    case MULTIPLE -> getSubjects(subjectProvider, subjectToUse);
-                };
-
         var context = Engines.forRepository(resolvedRepo, this.measureEvaluationOptions.getEvaluationSettings(), null);
 
+        var preparedContext = r4ProcessorToUse.prepareEvaluateMultiMeasuresWithCqlEngine(
+                measures, periodStart, periodEnd, parameters, context);
+
+        var subjects = getSubjects(
+                subjectProvider, subjectToUse, measures, context, r4ProcessorToUse, preparedContext, resolvedRepo);
+
         final CompositeEvaluationResultsPerMeasure compositeEvaluationResultsPerMeasure =
-                r4ProcessorToUse.evaluateMultiMeasuresWithCqlEngine(
-                        subjects, measures, periodStart, periodEnd, parameters, context);
+                r4ProcessorToUse.preparedEvaluateMultiMeasuresWithCqlEngine(
+                        subjects, measures, periodStart, periodEnd, parameters, context, preparedContext);
 
         if (SingleOrMultiple.SINGLE == singleOrMultiple
                 || evalType.equals(MeasureEvalType.POPULATION)
@@ -526,10 +526,6 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
         return new MeasureDefAndR4ParametersWithMeasureReports(measureDefs, parameters, evaluationResultsPerMeasure);
     }
 
-    protected List<String> getSubjects(R4RepositorySubjectProvider subjectProvider, String subjectId) {
-        return subjectProvider.getSubjects(repository, subjectId).toList();
-    }
-
     protected void initializeReport(MeasureReport measureReport) {
         if (Strings.isNullOrEmpty(measureReport.getId())) {
             IIdType id = Ids.newId(MeasureReport.class, UUID.randomUUID().toString());
@@ -542,11 +538,16 @@ public class R4MultiMeasureService implements R4MeasureEvaluatorSingle, R4Measur
     }
 
     @Nonnull
-    private List<String> getSubjectsForEvaluateSingle(String subjectId, IRepository subjectRepo) {
-        return subjectProvider
-                .getSubjects(
-                        subjectRepo,
-                        Optional.ofNullable(subjectId).map(List::of).orElse(List.of()))
-                .toList();
+    private List<String> getSubjects(
+            R4RepositorySubjectProvider subjectProvider,
+            String subjectId,
+            List<Measure> measures,
+            CqlEngine context,
+            R4MeasureProcessor processor,
+            MultiMeasuresPreparedContext preparedContext,
+            IRepository repository) {
+        log.info(
+                "No selective data requirements identified for subject filtering, continuing with default subject determination");
+        return subjectProvider.getSubjects(repository, subjectId).toList();
     }
 }

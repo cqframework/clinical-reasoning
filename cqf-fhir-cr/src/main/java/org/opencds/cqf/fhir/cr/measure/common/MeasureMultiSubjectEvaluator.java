@@ -185,15 +185,15 @@ public class MeasureMultiSubjectEvaluator {
      *
      * <pre>
      * rowKeys = [
-     *   StratifierRowKey.withInput("Patient/123", "Encounter/enc-1"),
-     *   StratifierRowKey.withInput("Patient/123", "Encounter/enc-2"),
-     *   StratifierRowKey.withInput("Patient/456", "Encounter/enc-9")
+     *   StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("Encounter/enc-1")),
+     *   StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("Encounter/enc-2")),
+     *   StratifierRowKey.withInput("Patient/456", StratifierRowValue.ofResourceId("Encounter/enc-9"))
      * ]
      * </pre>
      *
      * <ul>
      *   <li>{@code subjectQualified()} returns the subject (e.g., "Patient/123")</li>
-     *   <li>{@code inputParamId()} returns the input resource used by the stratifier function</li>
+     *   <li>{@code inputParam()} returns the input resource used by the stratifier function</li>
      *   <li>Intersection with populations is performed at the resource level</li>
      *   <li>Population counts are resource counts, not subject counts</li>
      * </ul>
@@ -412,10 +412,11 @@ public class MeasureMultiSubjectEvaluator {
      *       to match function row keys when mixed with function components.</li>
      * </ul>
      *
-     * <h3>Mixed Function and Scalar Components</h3>
-     * <p>When a stratifier has both function components (per-resource) and scalar components (per-subject),
-     * the scalar values are expanded to match the function row keys. This ensures all components align
-     * for proper grouping.
+     * <h3>Mixed Multi-Value and Scalar Components</h3>
+     * <p>When a stratifier has both multi-value components (function results per-resource OR iterable
+     * results per-subject) and scalar components (per-subject), the scalar values are expanded to match
+     * the multi-value row keys. This ensures all components align for proper grouping so that each
+     * resulting stratum contains a value from every declared component.
      *
      * <h4>Example: Stratifier with 3 components</h4>
      * <ul>
@@ -466,12 +467,14 @@ public class MeasureMultiSubjectEvaluator {
         final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
                 HashBasedTable.create();
 
-        // First pass: Collect all composite row keys (subject|resource) from function components
-        // These are needed to expand scalar components to match function row keys
-        final Map<String, Set<StratifierRowKey>> functionRowKeysBySubject = collectFunctionRowKeys(componentDefs);
+        // First pass: Collect alignment row keys from multi-value components (function Maps and
+        // iterable Lists). These are needed to expand scalar components so every alignment row
+        // carries a value from every declared component, producing one stratum per alignment row
+        // rather than one stratum per (subject, component) pair.
+        final Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject = collectAlignmentRowKeys(componentDefs);
 
         for (StratifierComponentDef componentDef : componentDefs) {
-            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef, functionRowKeysBySubject)) {
+            for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef, alignmentRowKeysBySubject)) {
                 subjectResultTable.put(
                         stratumTableRow.stratifierRowKey(), stratumTableRow.stratumValueWrapper(), componentDef);
             }
@@ -481,46 +484,67 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Collects all composite row keys (subject|resource) from function components.
+     * Collects the row keys produced by multi-value components, keyed by subject. These are used
+     * to expand scalar components so every alignment row carries a value from every declared
+     * component.
      *
-     * <p>This is used to expand scalar components to match the function row keys when
-     * stratifiers mix function and scalar components.
+     * <p>Two kinds of multi-value components contribute keys:
+     * <ul>
+     *   <li><b>Function (Map) results</b> — composite {@code (subject | functionInput)} row keys,
+     *       one per input resource.</li>
+     *   <li><b>Iterable (List) results</b> — composite {@code (subject | iterableElement(value, index))}
+     *       row keys, one per list element. Aligning scalars to these keys is what allows a stratifier
+     *       declared with one iterable component and one scalar component to emit strata that contain
+     *       both component values, instead of one stratum per component value.</li>
+     * </ul>
      *
-     * @return Map from subject (e.g., "Patient/123") to set of composite row keys
+     * @return Map from subject (e.g., "Patient/123") to set of alignment row keys
      */
-    private static Map<String, Set<StratifierRowKey>> collectFunctionRowKeys(
+    private static Map<String, Set<StratifierRowKey>> collectAlignmentRowKeys(
             List<StratifierComponentDef> componentDefs) {
 
-        final Map<String, Set<StratifierRowKey>> functionRowKeysBySubject = new HashMap<>();
+        final Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject = new HashMap<>();
 
         for (StratifierComponentDef componentDef : componentDefs) {
             for (var entry : componentDef.getResults().entrySet()) {
-                String subjectId = entry.getKey();
-                CriteriaResult result = entry.getValue();
-                Object rawValue = result == null ? null : result.rawValue();
-
-                // Only process function results (Map values)
-                if (rawValue instanceof Map<?, ?> functionResults) {
-                    String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
-                    Set<StratifierRowKey> rowKeys =
-                            functionRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
-
-                    for (Object key : functionResults.keySet()) {
-                        String normalizedKey = normalizeResourceKey(key);
-                        rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, normalizedKey));
-                    }
-                }
+                collectAlignmentRowKeysForEntry(entry.getKey(), entry.getValue(), alignmentRowKeysBySubject);
             }
         }
 
-        return functionRowKeysBySubject;
+        return alignmentRowKeysBySubject;
+    }
+
+    private static void collectAlignmentRowKeysForEntry(
+            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject) {
+
+        final Object rawValue = result == null ? null : result.rawValue();
+        if (!(rawValue instanceof Map<?, ?>) && !(rawValue instanceof Iterable<?>)) {
+            return;
+        }
+
+        final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
+        final Set<StratifierRowKey> rowKeys =
+                alignmentRowKeysBySubject.computeIfAbsent(qualifiedSubject, k -> new HashSet<>());
+
+        if (rawValue instanceof Map<?, ?> functionResults) {
+            for (Object key : functionResults.keySet()) {
+                rowKeys.add(StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(key)));
+            }
+        } else {
+            int index = 0;
+            for (Object value : (Iterable<?>) rawValue) {
+                rowKeys.add(StratifierRowKey.withInput(
+                        qualifiedSubject, StratifierRowValue.ofIterableElement(value, index)));
+                index++;
+            }
+        }
     }
 
     private static List<StratumTableRow> mapToListOfTableEntries(
-            StratifierComponentDef componentDef, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
+            StratifierComponentDef componentDef, Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject) {
 
         return componentDef.getResults().entrySet().stream()
-                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue(), functionRowKeysBySubject))
+                .map(entry -> mapToListOfTableEntries(entry.getKey(), entry.getValue(), alignmentRowKeysBySubject))
                 .flatMap(Collection::stream)
                 .toList();
     }
@@ -528,7 +552,7 @@ public class MeasureMultiSubjectEvaluator {
     private record StratumTableRow(StratifierRowKey stratifierRowKey, StratumValueWrapper stratumValueWrapper) {}
 
     private static List<StratumTableRow> mapToListOfTableEntries(
-            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> functionRowKeysBySubject) {
+            String subjectId, CriteriaResult result, Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject) {
 
         final String qualifiedSubject = FhirResourceUtils.addPatientQualifier(subjectId);
         final Object rawValue = result == null ? null : result.rawValue();
@@ -540,33 +564,41 @@ public class MeasureMultiSubjectEvaluator {
             return addIterableValueRows(qualifiedSubject, iterableValue);
         }
 
-        // Scalar value: check if we need to expand to match function row keys
-        Set<StratifierRowKey> functionRowKeys = functionRowKeysBySubject.get(qualifiedSubject);
-        if (CollectionUtils.isNotEmpty(functionRowKeys)) {
-            // Expand scalar to match function row keys for this subject
-            return expandScalarToMatchFunctionRowKeys(functionRowKeys, rawValue);
+        // Scalar value: expand to match the alignment row keys produced by any multi-value
+        // components (functions or iterables) on this subject, so the scalar lands in every stratum.
+        Set<StratifierRowKey> alignmentRowKeys = alignmentRowKeysBySubject.get(qualifiedSubject);
+        if (CollectionUtils.isNotEmpty(alignmentRowKeys)) {
+            return expandScalarToAlignmentRowKeys(alignmentRowKeys, rawValue);
         }
 
-        // No function row keys - use simple subject-only row key
+        // If the stratifier as a whole has multi-value components but this particular subject
+        // produced no alignment rows (empty Map / empty List), the subject contributes no
+        // stratum at all — same semantic as the single-component empty-list case. Otherwise
+        // (purely scalar stratifier), fall back to a subject-only row key.
+        if (!alignmentRowKeysBySubject.isEmpty()) {
+            return List.of();
+        }
         return List.of(addScalarValueRow(qualifiedSubject, rawValue));
     }
 
     /**
-     * Expands a scalar value to match the row keys from function components.
+     * Expands a scalar value to match the alignment row keys produced by multi-value components
+     * (function Maps or iterable Lists).
      *
-     * <p>When stratifiers mix function and scalar components, the scalar value applies
-     * to all resources for that subject. This method creates one row per function row key,
-     * all with the same scalar value.
+     * <p>When stratifiers mix multi-value and scalar components, the scalar value applies to every
+     * alignment row for that subject. Emitting one table row per alignment key, all with the same
+     * scalar value, lets the downstream group-by-value-set step produce strata where each stratum
+     * contains a value from every declared component.
      *
-     * @param functionRowKeys the row keys from function components for this subject
+     * @param alignmentRowKeys the row keys from multi-value components for this subject
      * @param scalarValue the scalar value to expand
-     * @return list of table rows, one per function row key
+     * @return list of table rows, one per alignment row key
      */
-    private static List<StratumTableRow> expandScalarToMatchFunctionRowKeys(
-            Set<StratifierRowKey> functionRowKeys, Object scalarValue) {
+    private static List<StratumTableRow> expandScalarToAlignmentRowKeys(
+            Set<StratifierRowKey> alignmentRowKeys, Object scalarValue) {
 
         StratumValueWrapper valueWrapper = new StratumValueWrapper(scalarValue);
-        return functionRowKeys.stream()
+        return alignmentRowKeys.stream()
                 .map(rowKey -> new StratumTableRow(rowKey, valueWrapper))
                 .toList();
     }
@@ -591,7 +623,7 @@ public class MeasureMultiSubjectEvaluator {
                                 StratifierRowKey.withInput(
                                         qualifiedSubject,
                                         // Build composite row key: "Patient/xxx|Resource/yyy"
-                                        normalizeResourceKey(entry.getKey())),
+                                        StratifierRowValue.ofFunctionInput(entry.getKey())),
                                 new StratumValueWrapper(entry.getValue())))
                 .toList();
     }
@@ -615,8 +647,8 @@ public class MeasureMultiSubjectEvaluator {
         for (Object value : iterableValue) {
             // Use value-based key to create unique row per value.
             // This allows groupSubjectsByValueDefSet to group rows by value, not by subject.
-            String valueKey = normalizeValueKey(value, index);
-            StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, valueKey);
+            StratifierRowValue rowValue = StratifierRowValue.ofIterableElement(value, index);
+            StratifierRowKey rowKey = StratifierRowKey.withInput(qualifiedSubject, rowValue);
             StratumValueWrapper stratumValueWrapper = new StratumValueWrapper(value);
             tableRows.add(new StratumTableRow(rowKey, stratumValueWrapper));
             index++;
@@ -637,17 +669,6 @@ public class MeasureMultiSubjectEvaluator {
         return new StratumTableRow(StratifierRowKey.subjectOnly(qualifiedSubject), new StratumValueWrapper(rawValue));
     }
 
-    /**
-     * Normalize a resource to its ID string for use as a row key component.
-     */
-    private static String normalizeResourceKey(Object obj) {
-        if (obj instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return resource.getIdElement().toVersionless().getValue();
-        }
-        return String.valueOf(obj);
-    }
     /**
      * Groups stratifier results into strata by the full set of component values.
      *
@@ -799,7 +820,7 @@ public class MeasureMultiSubjectEvaluator {
      * <p>For NON_SUBJECT_VALUE stratifiers with function results, the row keys contain composite keys
      * with both subject and input parameter. We need to:
      * <ol>
-     *   <li>Extract the resource IDs from the row keys (the inputParamId)</li>
+     *   <li>Extract the resource IDs from the row keys (the inputParam)</li>
      *   <li>Intersect those with the population's resources to get only resources that qualify</li>
      * </ol>
      *
@@ -821,8 +842,13 @@ public class MeasureMultiSubjectEvaluator {
             // Convert row keys to SubjectResourceKey for type-safe comparison
             // For FHIR resources: uses resource ID only (globally unique)
             // For primitive types: includes subject context (same value can appear for multiple patients)
+            // Skip rows whose inputParam is a Scalar (iterable-of-non-resource expansion); those
+            // are synthetic value keys, not resource IDs, and would never intersect the
+            // population's actual resources. Such rows fall through to the subject-level lookup.
             List<SubjectResourceKey> stratumResourceKeys = rowKeys.stream()
-                    .filter(StratifierRowKey::hasInputParam)
+                    .filter(key -> key.inputParam()
+                            .map(StratifierRowValue::isIntersectable)
+                            .orElse(false))
                     .map(key -> SubjectResourceKey.fromRowKey(key, isPrimitiveBasis))
                     .toList();
 
@@ -878,7 +904,17 @@ public class MeasureMultiSubjectEvaluator {
 
             Set<Object> resources = entry.getValue();
             if (resources != null) {
-                if (isResourceType) {
+                // MEASUREOBSERVATION populations store Set<Map<inputResource, outputValue>>,
+                // so the input resource IDs we need are the Map keys.
+                if (populationDef.type() == MeasurePopulationType.MEASUREOBSERVATION) {
+                    resources.stream()
+                            .filter(Map.class::isInstance)
+                            .map(m -> (Map<?, ?>) m)
+                            .flatMap(m -> m.keySet().stream())
+                            .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
+                            .filter(java.util.Objects::nonNull)
+                            .forEach(resourceIds::add);
+                } else if (isResourceType) {
                     resources.stream()
                             .map(MeasureMultiSubjectEvaluator::normalizePopulationKey)
                             .filter(java.util.Objects::nonNull)
@@ -969,22 +1005,5 @@ public class MeasureMultiSubjectEvaluator {
             return resource.toString();
         }
         return String.valueOf(obj);
-    }
-
-    /**
-     * Normalize a value to a string key for use in composite row keys when expanding Iterables.
-     * Uses the index as a fallback for null values to ensure unique keys.
-     */
-    private static String normalizeValueKey(Object value, int index) {
-        if (value == null) {
-            return "null_" + index;
-        }
-        if (value instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return resource.getIdElement().toVersionless().getValue();
-        }
-
-        return "value_" + index + "_" + value;
     }
 }

@@ -17,10 +17,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: gradle/actions/setup-gradle@0b6dd653ba04f4f93bf581ec31e66cbd7dcb644d # v4
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
       - name: spotlessCheck
         run: ./gradlew spotlessCheck
-      - uses: mshick/add-pr-comment@b8f338c590a895d50bcbfa6c5859251edc8952fc # v2
+      - uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
         if: always()
         with:
           message-success: |

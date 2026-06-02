@@ -23,7 +23,7 @@ The tactical CDO-714 fix (already landed on this branch) disables branch (2). Br
 
 ### Survey — what the CQL engine actually returns
 
-A walk through `/Users/luke/development/smile-digital-health/git/clintel-repos/cql/main` runtime + evaluators against `HashSetForFhirResourcesAndCqlTypes` behaviour:
+A walk through `{cql git repo directory}` runtime + evaluators against `HashSetForFhirResourcesAndCqlTypes` behaviour:
 
 | CQL System type | Java return type | `equals`/`hashCode` shape | Implements `CqlType`? | Dedup risk in `HashSet` |
 | --- | --- | --- | --- | --- |
@@ -45,7 +45,7 @@ The right question is not "which Java type to patch" but **"when should the per-
 
 ## Why this is deferred
 
-The CQL 5.0 work in `/Users/luke/development/smile-digital-health/git/clintel-repos/cql/cql1` will significantly change what types the engine's `ExpressionResult` returns. Landing the holistic, basis-aware redesign now would conflict with that work and force a difficult three-way merge. The survey table itself may shift (for example, if cql1 wraps Java boxed primitives in a structured value type), so the design needs a re-check after cql1 merges. The user has chosen to ship a tactical fix that covers the realistic CDO-714 surface (date, FHIR string, boolean) in the current PR and document the holistic plan here.
+The CQL 5.0 work in `{cql git repo directory}` will significantly change what types the engine's `ExpressionResult` returns. Landing the holistic, basis-aware redesign now would conflict with that work and force a difficult three-way merge. The survey table itself may shift (for example, if cql1 wraps Java boxed primitives in a structured value type), so the design needs a re-check after cql1 merges. The user has chosen to ship a tactical fix that covers the realistic CDO-714 surface (date, FHIR string, boolean) in the current PR and document the holistic plan here.
 
 ## Tactical state of `main` after the current PR
 
@@ -197,7 +197,7 @@ All readers outside `PopulationDef` either iterate the collection or call `Colle
 
 ## Adjustments required for cql1 compatibility
 
-Once cql1 (`/Users/luke/development/smile-digital-health/git/clintel-repos/cql/cql1`) merges, re-check the survey table. Specifically:
+Once cql1 (`{cql git repo directory}`) merges, re-check the survey table. Specifically:
 
 - If `ExpressionResult` no longer hands raw Java boxed primitives back (e.g., the engine wraps them in a structured value type), the design may simplify to "List for non-boolean non-FHIR-Resource basis" without per-row analysis. The `Object`-typed storage and the `areObjectsEqual` fallback would still work, but the dedup risk table reduces.
 - If `runtime.Date`/`DateTime`/etc. gain or lose `equals` overrides, re-check the regression-guard expectations for `runtime.DateTime`.

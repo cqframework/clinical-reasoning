@@ -219,7 +219,7 @@ callback.onDefCaptured(measureDef.createSnapshot());
 **Files to Create:**
 - `common/DefCaptureCallback.java` - Callback interface
 
-**Detailed Implementation:** See cr5 PRP: `/Users/lukedegruchy/development/smilecdr/git/clinical-reasoning-repos/clinical-reasoning-only/cr5/prp-def-snapshot-api.md`
+**Detailed Implementation:** See cr5 PRP: `{clinical-reasoning git repo directory}/prp-def-snapshot-api.md`
 
 **Status:** ✅ COMPLETE
 

@@ -396,13 +396,6 @@ public class MeasureMultiSubjectEvaluator {
     }
 
     /**
-     * Column key for the subject-results table. Pairs component identity with the stratum value so
-     * two components that resolve to the same value (e.g. Race and Ethnicity both AskedButNoAnswer)
-     * do not overwrite each other in the underlying {@link HashBasedTable} (CDO-789).
-     */
-    private record StratumTableColumnKey(StratifierComponentDef component, StratumValueWrapper value) {}
-
-    /**
      * Builds a Guava Table mapping row keys to stratifier component values for grouping into strata.
      *
      * <p>The table structure is:

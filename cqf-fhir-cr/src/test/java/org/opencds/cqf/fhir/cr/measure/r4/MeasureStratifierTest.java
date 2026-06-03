@@ -225,6 +225,59 @@ class MeasureStratifierTest {
     }
 
     /**
+     * CDO-789: Multi-component stratifier where two components resolve to the same scalar value
+     * for the same patient. Both components must appear in every stratum — they must not collapse
+     * because the assembly step keyed table cells by value alone.
+     *
+     * <p>Components: Sex-Code-A and Sex-Code-B both evaluate "Gender Stratification" (same Code
+     * value per patient); Age differs. Each stratum therefore carries Sex-Code-A=M/F,
+     * Sex-Code-B=M/F, and Age=35/38 — three components, not two.
+     */
+    @Test
+    void cohortBooleanValueStratComponentStratSameValueAcrossComponents() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratSameValueComponents")
+                .evaluate()
+                .then()
+            .report()
+            .logReportJson()
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .group("group-1")
+                .stratifierById("stratifier-1")
+                .hasCodeText("Sex-A and Sex-B and Age")
+                .hasStratumCount(2)
+                .stratumByComponentValueText("38")
+                .hasComponentStratifierCount(3)
+                .stratumComponentWithCodeText("Sex-Code-A")
+                .hasValueText("M")
+                .up()
+                .stratumComponentWithCodeText("Sex-Code-B")
+                .hasValueText("M")
+                .up()
+                .stratumComponentWithCodeText("Age")
+                .hasValueText("38")
+                .up()
+                .firstPopulation()
+                .hasCount(5)
+                .up()
+                .up()
+                .stratumByComponentValueText("35")
+                .hasComponentStratifierCount(3)
+                .stratumComponentWithCodeText("Sex-Code-A")
+                .hasValueText("F")
+                .up()
+                .stratumComponentWithCodeText("Sex-Code-B")
+                .hasValueText("F")
+                .up()
+                .stratumComponentWithCodeText("Age")
+                .hasValueText("35")
+                .up()
+                .firstPopulation()
+                .hasCount(5);
+    }
+
+    /**
      * Ratio Measure with Resource (Encounter) Basis where Stratifier uses stratifier.component[].criteria
      * with a non-function expression "Age". This is classified as NON_SUBJECT_VALUE stratifier because:
      * - hasCriteria=false (no stratifier.criteria)

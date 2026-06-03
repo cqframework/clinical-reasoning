@@ -230,18 +230,17 @@ class MeasureStratifierTest {
      * because the assembly step keyed table cells by value alone.
      *
      * <p>Components: Sex-Code-A and Sex-Code-B both evaluate "Gender Stratification" (same Code
-     * value per patient); Age differs. Each stratum therefore carries Sex-Code-A=M/F,
-     * Sex-Code-B=M/F, and Age=35/38 — three components, not two.
+     * value per patient); Age differs. Each stratum therefore carries Sex-Code-A and Sex-Code-B
+     * with the same gender code, plus the Age — three components, not two.
      */
     @Test
     void cohortBooleanValueStratComponentStratSameValueAcrossComponents() {
+        // Fixture: 5 female patients (1985-06-16 → age 38) and 5 male patients (1988-01-11 → age 35).
         GIVEN_MEASURE_STRATIFIER_TEST
                 .when()
                 .measureId("CohortBooleanStratSameValueComponents")
                 .evaluate()
                 .then()
-            .report()
-            .logReportJson()
                 .hasStatus(MeasureReportStatus.COMPLETE)
                 .group("group-1")
                 .stratifierById("stratifier-1")
@@ -250,10 +249,10 @@ class MeasureStratifierTest {
                 .stratumByComponentValueText("38")
                 .hasComponentStratifierCount(3)
                 .stratumComponentWithCodeText("Sex-Code-A")
-                .hasValueText("M")
+                .hasValueText("F")
                 .up()
                 .stratumComponentWithCodeText("Sex-Code-B")
-                .hasValueText("M")
+                .hasValueText("F")
                 .up()
                 .stratumComponentWithCodeText("Age")
                 .hasValueText("38")
@@ -265,10 +264,10 @@ class MeasureStratifierTest {
                 .stratumByComponentValueText("35")
                 .hasComponentStratifierCount(3)
                 .stratumComponentWithCodeText("Sex-Code-A")
-                .hasValueText("F")
+                .hasValueText("M")
                 .up()
                 .stratumComponentWithCodeText("Sex-Code-B")
-                .hasValueText("F")
+                .hasValueText("M")
                 .up()
                 .stratumComponentWithCodeText("Age")
                 .hasValueText("35")

@@ -632,12 +632,10 @@ class MeasureMultiSubjectEvaluatorTest {
             var pop = initialPopulation(basis);
             pop.addResource("p1", Boolean.TRUE);
 
-            var componentA =
-                    new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
+            var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
             componentA.putResult("p1", "shared-value", Set.of());
 
-            var componentB =
-                    new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
+            var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
             componentB.putResult("p1", "shared-value", Set.of());
 
             var stratifierDef = new StratifierDef(
@@ -669,16 +667,13 @@ class MeasureMultiSubjectEvaluatorTest {
             var pop = initialPopulation(basis);
             pop.addResource("p1", Boolean.TRUE);
 
-            var componentA =
-                    new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
+            var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
             componentA.putResult("p1", "distinct-value", Set.of());
 
-            var componentB =
-                    new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
+            var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
             componentB.putResult("p1", "shared-value", Set.of());
 
-            var componentC =
-                    new StratifierComponentDef("component-c", textConcept("Component C"), "Expression C");
+            var componentC = new StratifierComponentDef("component-c", textConcept("Component C"), "Expression C");
             componentC.putResult("p1", "shared-value", Set.of());
 
             var stratifierDef = new StratifierDef(

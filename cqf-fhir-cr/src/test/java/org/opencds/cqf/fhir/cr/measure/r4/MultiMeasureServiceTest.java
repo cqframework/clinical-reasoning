@@ -1114,7 +1114,8 @@ class MultiMeasureServiceTest {
             assertEquals(
                     3,
                     stratum.getComponent().size(),
-                    "expected 3 components in stratum but got " + stratum.getComponent().size());
+                    "expected 3 components in stratum but got "
+                            + stratum.getComponent().size());
         }
     }
 

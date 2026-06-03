@@ -1505,4 +1505,139 @@ class MeasureStratifierTest {
                 .hasContainedOperationOutcomeMsg(
                         "value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanValueStratListExpression. Expected a scalar type");
     }
+
+    /**
+     * boolean (subject) basis stratifier with two components — one returning a
+     * per-patient {@code List} ("Distinct Encounter Statuses") and one returning a per-patient
+     * scalar ("Gender Stratification String") — must emit one stratum per unique
+     * (list-element, scalar) tuple, with each stratum carrying BOTH component values.
+     * <p/>
+     * Before the fix, scalar components were only expanded to align with function (Map) row keys,
+     * never iterable row keys, so the iterable's composite row key and the scalar's subject-only
+     * row key landed in disjoint groups — producing one stratum per component value with only that
+     * single component, instead of strata with both components.
+     * <p/>
+     * Patient-9 has two Encounters (statuses {@code finished}, {@code in-progress}) and gender
+     * {@code male}, so two strata are expected:
+     * <ul>
+     *   <li>{Encounter Status: finished, Gender: male} — count 1</li>
+     *   <li>{Encounter Status: in-progress, Gender: male} — count 1</li>
+     * </ul>
+     */
+    @Test
+    void cohortBooleanMultiComponentListScalarStratPatient9() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiComponentListScalarStrat")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Encounter Status and Gender")
+                .hasStratumCount(2)
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "finished".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .stratumComponentWithCodeText("Encounter Status")
+                .hasValueText("finished")
+                .up()
+                .stratumComponentWithCodeText("Gender")
+                .hasValueText("male")
+                .up()
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "in-progress".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .stratumComponentWithCodeText("Encounter Status")
+                .hasValueText("in-progress")
+                .up()
+                .stratumComponentWithCodeText("Gender")
+                .hasValueText("male")
+                .up()
+                .firstPopulation()
+                .hasCount(1);
+    }
+
+    /**
+     * multi-subject variant of {@link #cohortBooleanMultiComponentListScalarStratPatient9()}.
+     * Across all patients (data per {@code cohortBooleanValueStratMultiValueListOverlapping}),
+     * the stratifier must produce one stratum per unique (encounter-status, gender) tuple, each
+     * with two components. The expected tuples are:
+     * <pre>
+     * (in-progress, female)  → patient-0
+     * (in-progress, male)    → patient-1, patient-9
+     * (finished,   female)   → patient-0, patient-8
+     * (finished,   male)     → patient-1, patient-9
+     * (arrived,    female)   → patient-2
+     * (arrived,    male)     → patient-3
+     * (triaged,    female)   → patient-4
+     * (triaged,    male)     → patient-5
+     * (cancelled,  female)   → patient-6
+     * (cancelled,  male)     → patient-7
+     * </pre>
+     */
+    @Test
+    void cohortBooleanMultiComponentListScalarStratAllPatients() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiComponentListScalarStrat")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Encounter Status and Gender")
+                .hasStratumCount(10)
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "finished".equals(c.getValue().getText())))
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "male".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(2) // patient-1, patient-9
+                .up()
+                .up()
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "finished".equals(c.getValue().getText())))
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "female".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(2) // patient-0, patient-8
+                .up()
+                .up()
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "cancelled".equals(c.getValue().getText())))
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "male".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(1); // patient-7
+    }
 }

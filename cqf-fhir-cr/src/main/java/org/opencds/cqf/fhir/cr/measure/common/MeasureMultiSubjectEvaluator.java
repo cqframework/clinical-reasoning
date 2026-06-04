@@ -353,7 +353,7 @@ public class MeasureMultiSubjectEvaluator {
     private static List<StratumDef> buildValueOrNonSubjectValueStrata(
             FhirContext fhirContext, StratifierDef stratifierDef, GroupDef groupDef) {
 
-        final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
+        final Table<StratifierRowKey, StratumTableColumnKey, StratifierComponentDef> subjectResultTable =
                 buildSubjectResultsTable(stratifierDef.components());
 
         // Stratifiers should be of the same basis as population
@@ -398,9 +398,12 @@ public class MeasureMultiSubjectEvaluator {
     /**
      * Builds a Guava Table mapping row keys to stratifier component values for grouping into strata.
      *
-     * <p>The table structure is: {@code Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef>}
-     * where StratifierRowKey identifies the subject (and optionally resource), StratumValueWrapper holds the
-     * component value, and StratifierComponentDef identifies which component produced the value.
+     * <p>The table structure is:
+     * {@code Table<StratifierRowKey, StratumTableColumnKey, StratifierComponentDef>}
+     * where StratifierRowKey identifies the subject (and optionally resource),
+     * {@link StratumTableColumnKey} pairs each component with its value (so equal values across
+     * components do not collide in the underlying HashBasedTable), and the cell value identifies
+     * which component produced the entry.
      *
      * <h3>Supported Expression Types</h3>
      * <ul>
@@ -461,10 +464,10 @@ public class MeasureMultiSubjectEvaluator {
      * @param componentDefs the list of stratifier component definitions with their evaluation results
      * @return a table mapping row keys to component values for grouping
      */
-    private static Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> buildSubjectResultsTable(
+    private static Table<StratifierRowKey, StratumTableColumnKey, StratifierComponentDef> buildSubjectResultsTable(
             List<StratifierComponentDef> componentDefs) {
 
-        final Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> subjectResultTable =
+        final Table<StratifierRowKey, StratumTableColumnKey, StratifierComponentDef> subjectResultTable =
                 HashBasedTable.create();
 
         // First pass: Collect alignment row keys from multi-value components (function Maps and
@@ -476,7 +479,9 @@ public class MeasureMultiSubjectEvaluator {
         for (StratifierComponentDef componentDef : componentDefs) {
             for (StratumTableRow stratumTableRow : mapToListOfTableEntries(componentDef, alignmentRowKeysBySubject)) {
                 subjectResultTable.put(
-                        stratumTableRow.stratifierRowKey(), stratumTableRow.stratumValueWrapper(), componentDef);
+                        stratumTableRow.stratifierRowKey(),
+                        new StratumTableColumnKey(componentDef, stratumTableRow.stratumValueWrapper()),
+                        componentDef);
             }
         }
 
@@ -743,15 +748,16 @@ public class MeasureMultiSubjectEvaluator {
      * Subject lists are derived from the row keys.
      */
     private static Map<Set<StratumValueDef>, List<StratifierRowKey>> groupSubjectsByValueDefSet(
-            Table<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> table) {
+            Table<StratifierRowKey, StratumTableColumnKey, StratifierComponentDef> table) {
 
         // Step 1: Build Map<RowKey, Set<ValueDef>>
         final Map<StratifierRowKey, Set<StratumValueDef>> rowKeyToValueDefs = new HashMap<>();
 
-        for (Table.Cell<StratifierRowKey, StratumValueWrapper, StratifierComponentDef> cell : table.cellSet()) {
+        for (Table.Cell<StratifierRowKey, StratumTableColumnKey, StratifierComponentDef> cell : table.cellSet()) {
+            StratumTableColumnKey columnKey = cell.getColumnKey();
             rowKeyToValueDefs
                     .computeIfAbsent(cell.getRowKey(), k -> new HashSet<>())
-                    .add(new StratumValueDef(cell.getColumnKey(), cell.getValue()));
+                    .add(new StratumValueDef(columnKey.value(), columnKey.component()));
         }
 
         // Step 2: Invert to Map<Set<ValueDef>, List<RowKey>>

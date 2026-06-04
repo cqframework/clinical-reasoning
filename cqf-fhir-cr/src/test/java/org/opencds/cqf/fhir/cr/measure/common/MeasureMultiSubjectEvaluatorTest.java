@@ -618,6 +618,80 @@ class MeasureMultiSubjectEvaluatorTest {
     }
 
     /**
+     * CDO-789: when two scalar components on the same stratifier resolve to the same value for the
+     * same subject, both must appear in the resulting stratum. They must not collapse into one
+     * because the assembly step keyed its table cells by value alone.
+     */
+    @Nested
+    class DuplicateValueAcrossComponents {
+
+        @Test
+        void twoScalarComponents_sameValue_bothAppearInStratum() {
+            var basis = basisCode("boolean");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", Boolean.TRUE);
+
+            var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
+            componentA.putResult("p1", "shared-value", Set.of());
+
+            var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
+            componentB.putResult("p1", "shared-value", Set.of());
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1",
+                    textConcept("Multi-component stratifier"),
+                    "Multi-component stratifier",
+                    MeasureStratifierType.VALUE,
+                    List.of(componentA, componentB));
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            assertEquals(1, stratifierDef.getStratum().size());
+            StratumDef stratum = stratifierDef.getStratum().get(0);
+            assertEquals(2, stratum.valueDefs().size());
+            assertTrue(stratum.valueDefs().stream()
+                    .anyMatch(v -> "component-a".equals(v.def().id())
+                            && "shared-value".equals(v.value().getValueAsString())));
+            assertTrue(stratum.valueDefs().stream()
+                    .anyMatch(v -> "component-b".equals(v.def().id())
+                            && "shared-value".equals(v.value().getValueAsString())));
+            assertEquals(1, stratum.getPopulationCount(pop));
+        }
+
+        @Test
+        void threeScalarComponents_twoShareValue_allThreeAppearInStratum() {
+            var basis = basisCode("boolean");
+
+            var pop = initialPopulation(basis);
+            pop.addResource("p1", Boolean.TRUE);
+
+            var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
+            componentA.putResult("p1", "distinct-value", Set.of());
+
+            var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
+            componentB.putResult("p1", "shared-value", Set.of());
+
+            var componentC = new StratifierComponentDef("component-c", textConcept("Component C"), "Expression C");
+            componentC.putResult("p1", "shared-value", Set.of());
+
+            var stratifierDef = new StratifierDef(
+                    "stratifier-1",
+                    textConcept("Multi-component stratifier"),
+                    "Multi-component stratifier",
+                    MeasureStratifierType.VALUE,
+                    List.of(componentA, componentB, componentC));
+            var groupDef = cohortGroup(basis, pop, stratifierDef);
+
+            MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(groupDef));
+
+            assertEquals(1, stratifierDef.getStratum().size());
+            assertEquals(3, stratifierDef.getStratum().get(0).valueDefs().size());
+        }
+    }
+
+    /**
      * Criteria stratifiers: {@code stratifierDef.results} (subject → CriteriaResult) is intersected
      * against the population's per-subject resources. Two cases:
      * <ul>

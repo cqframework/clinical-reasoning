@@ -10,6 +10,7 @@ import org.opencds.cqf.fhir.cr.cql.CqlProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.GraphDefinitionProcessor;
 import org.opencds.cqf.fhir.cr.graphdefinition.apply.ApplyRequestBuilder;
 import org.opencds.cqf.fhir.cr.group.GroupProcessor;
+import org.opencds.cqf.fhir.cr.hapi.common.FhirValidatorRegistry;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiCreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.hapi.common.HapiValidateProcessor;
@@ -98,12 +99,11 @@ public class CrProcessorConfig {
 
     @Bean
     IBundleProcessorFactory bundleProcessorFactory(
-        IRepositoryFactory repositoryFactory, FhirValidatorRegistry fhirValidatorRegistry) {
+            IRepositoryFactory repositoryFactory, FhirValidatorRegistry fhirValidatorRegistry) {
         return rd -> {
             var repository = repositoryFactory.create(rd);
             return new BundleProcessor(
-                repository,
-                new HapiValidateProcessor(repository.fhirContext(), fhirValidatorRegistry));
+                    repository, new HapiValidateProcessor(repository.fhirContext(), fhirValidatorRegistry));
         };
     }
 

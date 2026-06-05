@@ -1,4 +1,4 @@
-package org.opencds.cqf.fhir.cr.hapi.config;
+package org.opencds.cqf.fhir.cr.hapi.common;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.jspecify.annotations.NonNull;
+import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.utility.repository.NpmRepository;
 
 public class FhirValidatorRegistry {
@@ -30,9 +30,9 @@ public class FhirValidatorRegistry {
     private final ConcurrentHashMap<FhirVersionEnum, FhirValidator> validators = new ConcurrentHashMap<>();
     private final List<String[]> packagesToLoad = new ArrayList<>();
 
-    public FhirValidatorRegistry(DaoRegistry daoRegistry) {
+    public FhirValidatorRegistry(DaoRegistry daoRegistry, CrSettings crSettings) {
         this.daoRegistry = daoRegistry;
-        packagesToLoad.add(new String[] {"hl7.fhir.us.ecr", "2.1.2"});
+        packagesToLoad.addAll(crSettings.getValidatorPackages());
     }
 
     public FhirValidator getValidator(FhirVersionEnum version) {
@@ -41,7 +41,6 @@ public class FhirValidatorRegistry {
 
     private FhirValidator buildValidatorForVersion(FhirVersionEnum version) {
         FhirContext ctx = FhirContext.forVersion(version);
-        var npm = new NpmPackageValidationSupport(ctx);
         NpmRepository npmRepository = new NpmRepository(ctx, packagesToLoad);
         var fhirValidator = ctx.newValidator();
         fhirValidator.setValidateAgainstStandardSchema(false);
@@ -49,19 +48,14 @@ public class FhirValidatorRegistry {
 
         PrePopulatedValidationSupport prePopulatedValidationSupport = loadPrePopulatedValidationSupport(npmRepository);
 
-        var instanceValidatorModule = getFhirInstanceValidator(ctx, npm, prePopulatedValidationSupport);
+        var instanceValidatorModule = getFhirInstanceValidator(ctx, prePopulatedValidationSupport);
         fhirValidator.registerValidatorModule(instanceValidatorModule);
         return fhirValidator;
     }
 
     private @NonNull FhirInstanceValidator getFhirInstanceValidator(
-            FhirContext ctx,
-            NpmPackageValidationSupport npm,
-            PrePopulatedValidationSupport prePopulatedValidationSupport) {
-        var vsmIG = new NpmPackageValidationSupport(ctx);
+            FhirContext ctx, PrePopulatedValidationSupport prePopulatedValidationSupport) {
         var chain = new ValidationSupportChain(
-                npm,
-                vsmIG,
                 new DefaultProfileValidationSupport(ctx),
                 new InMemoryTerminologyServerValidationSupport(ctx),
                 new CommonCodeSystemsTerminologyService(ctx),

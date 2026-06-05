@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.bundle;
 
 import static java.util.Objects.requireNonNull;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -25,9 +24,7 @@ public class BundleProcessor {
     }
 
     public IBaseOperationOutcome validate(IBaseBundle resource, String mode, String profile) {
-        var processor = validateProcessor != null
-                ? validateProcessor
-                : new ValidateProcessor(FhirContext.forVersion(fhirVersion));
+        var processor = validateProcessor != null ? validateProcessor : new ValidateProcessor(repository.fhirContext());
         return processor.validate(resource, mode, profile);
     }
 }

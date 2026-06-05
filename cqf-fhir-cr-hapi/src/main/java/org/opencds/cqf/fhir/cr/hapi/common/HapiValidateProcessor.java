@@ -7,7 +7,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.opencds.cqf.fhir.cr.common.IValidateProcessor;
-import org.opencds.cqf.fhir.cr.hapi.config.FhirValidatorRegistry;
 
 public class HapiValidateProcessor implements IValidateProcessor {
 

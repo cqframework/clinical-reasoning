@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import java.time.ZoneOffset;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
+import org.opencds.cqf.fhir.cr.hapi.common.FhirValidatorRegistry;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
@@ -17,7 +18,8 @@ public class CrBaseConfig {
             EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
         return new CrSettings()
                 .withEvaluationSettings(evaluationSettings)
-                .withTerminologyServerClientSettings(terminologyServerClientSettings);
+                .withTerminologyServerClientSettings(terminologyServerClientSettings)
+                .withValidatorPackage(new String[] {"hl7.fhir.us.ecr", "2.1.2"});
     }
 
     @Bean
@@ -31,7 +33,7 @@ public class CrBaseConfig {
     }
 
     @Bean
-    FhirValidatorRegistry validatorCache(DaoRegistry daoRegistry) {
-        return new FhirValidatorRegistry(daoRegistry);
+    FhirValidatorRegistry validatorCache(DaoRegistry daoRegistry, CrSettings crSettings) {
+        return new FhirValidatorRegistry(daoRegistry, crSettings);
     }
 }

@@ -233,8 +233,6 @@ public interface PopulationBasisValidator {
             String url,
             List<String> invalidTypes) {
 
-        // var distinctInvalidTypes = prettyDistinctClassNames(invalidTypes);
-
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
             return "non-subject value stratifier is invalid for expression: [%s] with result types: %s for population basis: [%s] for measure URL: %s. Expected a scalar or scalar-returning function"
                     .formatted(expression, invalidTypes, groupPopulationBasisCode, url);
@@ -246,8 +244,21 @@ public interface PopulationBasisValidator {
 
     private boolean isResultClassAllowed(String resultClass) {
         return allowedStratifierValueTypes().contains(resultClass)
-                || org.opencds.cqf.cql.engine.runtime.Boolean.class.getName().equals(resultClass);
+                || CQL_PRIMITIVE_VALUE_TYPE_NAMES.contains(resultClass);
     }
+
+    /**
+     * CQL-5 stratifier expressions surface engine-native primitive wrappers
+     * (e.g. {@code org.opencds.cqf.cql.engine.runtime.String}) rather than {@code java.lang.*}
+     * types, especially as the element type of a list result. These map onto the same allowed
+     * value types as their Java counterparts, so accept them here alongside the FHIR-version
+     * specific {@link #allowedStratifierValueTypes()}.
+     */
+    Set<String> CQL_PRIMITIVE_VALUE_TYPE_NAMES = Set.of(
+            org.opencds.cqf.cql.engine.runtime.Boolean.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.String.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.Integer.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.Decimal.class.getName());
 
     private boolean doesBasisMatchResource(String resultClass, String groupPopulationBasisCode) {
         // FHIR primitive type codes are lowercase ("boolean", "string") but Java class simple names

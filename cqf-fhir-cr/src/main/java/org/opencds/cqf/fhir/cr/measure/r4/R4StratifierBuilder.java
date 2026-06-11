@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
-import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
-
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.Collection;
@@ -10,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Expression;
@@ -23,7 +20,6 @@ import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupComponentComponent;
 import org.hl7.fhir.r4.model.MeasureReport.StratifierGroupPopulationComponent;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.NamedTypeValue;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierComponentDef;
@@ -159,40 +155,29 @@ class R4StratifierBuilder {
         // `stratum.component[].value` per FHIR, even when it has only a single component.
         boolean isComponent = !stratifierDef.components().isEmpty();
         for (StratumValueDef valuePair : values) {
-            StratumValueWrapper stratumValue = valuePair.value();
+            StratumValueWrapper value = valuePair.value();
             var componentDef = valuePair.def();
             // Set Stratum value to indicate which value is displaying results
             // ex. for Gender stratifier, code 'Male'
-            Object value;
-            if (stratumValue.getValue() instanceof NamedTypeValue cqlValue) {
-                value = convertToFhirR4(cqlValue);
-            } else {
-                value = stratumValue;
-            }
-            if (value instanceof IBaseEnumeration<?> enumeration) {
-                value = expressionResultToCodableConcept(enumeration.getValueAsString());
-            }
-
-            if (value instanceof CodeableConcept codeableConcept) {
+            if (value.getValueClass().equals(CodeableConcept.class)) {
                 if (isComponent) {
                     // component stratifier example: code: "gender", value: 'M'
                     // value being stratified: 'M'
-                    stratum.addComponent(buildStratumComponent(componentDef, codeableConcept));
+                    stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value)));
                 } else {
                     // non-component stratifiers only set stratified value, code is set on stratifier object
                     // value being stratified: 'M'
-                    stratum.setValue(codeableConcept);
+                    stratum.setValue((CodeableConcept) value.getValue());
                 }
             } else if (isComponent) {
                 // component stratifier example: code: "gender", value: 'M'
                 // value being stratified: 'M'
-                stratum.addComponent(
-                        buildStratumComponent(componentDef, expressionResultToCodableConcept(value.toString())));
+                stratum.addComponent(buildStratumComponent(componentDef, expressionResultToCodableConcept(value)));
             } else if (MeasureStratifierType.VALUE == stratifierDef.getStratifierType()
                     || MeasureStratifierType.NON_SUBJECT_VALUE == stratifierDef.getStratifierType()) {
                 // non-component value stratifiers only set stratified value
                 // value being stratified: 'M', '35', etc.
-                stratum.setValue(expressionResultToCodableConcept(stratumValue.getValueAsString()));
+                stratum.setValue(expressionResultToCodableConcept(value));
             }
         }
 
@@ -234,8 +219,8 @@ class R4StratifierBuilder {
 
     // This is weird pattern where we have multiple qualifying values within a single stratum,
     // which was previously unsupported.  So for now, comma-delim the first five values.
-    private static CodeableConcept expressionResultToCodableConcept(String value) {
-        return new CodeableConcept().setText(value);
+    private static CodeableConcept expressionResultToCodableConcept(StratumValueWrapper value) {
+        return new CodeableConcept().setText(value.getValueAsString());
     }
 
     private static StratifierGroupComponentComponent buildStratumComponent(

@@ -158,6 +158,32 @@ public final class CqlExpressionValue {
     }
 
     /**
+     * Returns the function-result entries for a NON_SUBJECT_VALUE stratifier component, accepting
+     * both the typed {@link FunctionResultAccumulator} and a raw {@code Map<inputParam, functionOutput>}.
+     * <p>
+     * The accumulator is the modern shape produced by
+     * {@code FunctionEvaluationHandler.processNonSubValueStratifier}, but a function result may also
+     * arrive as a raw {@link Map} (e.g. populated directly via
+     * {@code StratifierComponentDef.putResult(subject, expression, value, resources)} or by other
+     * evaluation paths). Unlike {@link #asFunctionResultAccumulator()} — whose contract is strictly
+     * "only an accumulator" — this accessor normalizes both shapes so stratifier-table consumers
+     * produce one row per (input, output) entry instead of a single row keyed by {@code Map.toString()}.
+     * Returns empty for any other value.
+     */
+    public Optional<List<FunctionResultEntry>> functionResultEntries() {
+        if (raw instanceof FunctionResultAccumulator acc) {
+            return Optional.of(acc.entries());
+        }
+        if (raw instanceof Map<?, ?> map) {
+            List<FunctionResultEntry> entries = map.entrySet().stream()
+                    .map(entry -> new FunctionResultEntry(entry.getKey(), entry.getValue()))
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+            return Optional.of(entries);
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Normalizes the value to an {@link Iterable}: null becomes an empty list, an existing
      * iterable is returned as-is, and a scalar is wrapped in a single-element list.
      */

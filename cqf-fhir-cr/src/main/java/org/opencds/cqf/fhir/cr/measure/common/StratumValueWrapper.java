@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
@@ -22,7 +23,12 @@ public class StratumValueWrapper {
     protected Object value;
 
     public StratumValueWrapper(Object value) {
-        this.value = value;
+        // CQL-5 stratifier results may surface engine-native values (e.g. a ClassInstance wrapping a
+        // FHIR EncounterStatus). Normalize those to their FHIR R4 representation up front so key /
+        // value-string / description rendering matches the FHIR-typed branches below instead of
+        // falling through to the engine type's toString(). This is a no-op for values that are
+        // already FHIR or plain Java types.
+        this.value = value == null ? null : ClassInstanceHelper.convertToFhirR4IfNeeded(value);
     }
 
     @Override

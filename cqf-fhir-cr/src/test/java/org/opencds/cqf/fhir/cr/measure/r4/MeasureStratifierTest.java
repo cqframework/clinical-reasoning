@@ -225,6 +225,58 @@ class MeasureStratifierTest {
     }
 
     /**
+     * CDO-789: Multi-component stratifier where two components resolve to the same scalar value
+     * for the same patient. Both components must appear in every stratum — they must not collapse
+     * because the assembly step keyed table cells by value alone.
+     *
+     * <p>Components: Sex-Code-A and Sex-Code-B both evaluate "Gender Stratification" (same Code
+     * value per patient); Age differs. Each stratum therefore carries Sex-Code-A and Sex-Code-B
+     * with the same gender code, plus the Age — three components, not two.
+     */
+    @Test
+    void cohortBooleanValueStratComponentStratSameValueAcrossComponents() {
+        // Fixture: 5 female patients (1985-06-16 → age 38) and 5 male patients (1988-01-11 → age 35).
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanStratSameValueComponents")
+                .evaluate()
+                .then()
+                .hasStatus(MeasureReportStatus.COMPLETE)
+                .group("group-1")
+                .stratifierById("stratifier-1")
+                .hasCodeText("Sex-A and Sex-B and Age")
+                .hasStratumCount(2)
+                .stratumByComponentValueText("38")
+                .hasComponentStratifierCount(3)
+                .stratumComponentWithCodeText("Sex-Code-A")
+                .hasValueText("F")
+                .up()
+                .stratumComponentWithCodeText("Sex-Code-B")
+                .hasValueText("F")
+                .up()
+                .stratumComponentWithCodeText("Age")
+                .hasValueText("38")
+                .up()
+                .firstPopulation()
+                .hasCount(5)
+                .up()
+                .up()
+                .stratumByComponentValueText("35")
+                .hasComponentStratifierCount(3)
+                .stratumComponentWithCodeText("Sex-Code-A")
+                .hasValueText("M")
+                .up()
+                .stratumComponentWithCodeText("Sex-Code-B")
+                .hasValueText("M")
+                .up()
+                .stratumComponentWithCodeText("Age")
+                .hasValueText("35")
+                .up()
+                .firstPopulation()
+                .hasCount(5);
+    }
+
+    /**
      * Ratio Measure with Resource (Encounter) Basis where Stratifier uses stratifier.component[].criteria
      * with a non-function expression "Age". This is classified as NON_SUBJECT_VALUE stratifier because:
      * - hasCriteria=false (no stratifier.criteria)
@@ -1504,5 +1556,140 @@ class MeasureStratifierTest {
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg(
                         "value stratifier is invalid for expression: [All Encounters] with result types: [Encounter] for measure URL: http://example.com/Measure/CohortBooleanValueStratListExpression. Expected a scalar type");
+    }
+
+    /**
+     * boolean (subject) basis stratifier with two components — one returning a
+     * per-patient {@code List} ("Distinct Encounter Statuses") and one returning a per-patient
+     * scalar ("Gender Stratification String") — must emit one stratum per unique
+     * (list-element, scalar) tuple, with each stratum carrying BOTH component values.
+     * <p/>
+     * Before the fix, scalar components were only expanded to align with function (Map) row keys,
+     * never iterable row keys, so the iterable's composite row key and the scalar's subject-only
+     * row key landed in disjoint groups — producing one stratum per component value with only that
+     * single component, instead of strata with both components.
+     * <p/>
+     * Patient-9 has two Encounters (statuses {@code finished}, {@code in-progress}) and gender
+     * {@code male}, so two strata are expected:
+     * <ul>
+     *   <li>{Encounter Status: finished, Gender: male} — count 1</li>
+     *   <li>{Encounter Status: in-progress, Gender: male} — count 1</li>
+     * </ul>
+     */
+    @Test
+    void cohortBooleanMultiComponentListScalarStratPatient9() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiComponentListScalarStrat")
+                .subject("Patient/patient-9")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Encounter Status and Gender")
+                .hasStratumCount(2)
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "finished".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .stratumComponentWithCodeText("Encounter Status")
+                .hasValueText("finished")
+                .up()
+                .stratumComponentWithCodeText("Gender")
+                .hasValueText("male")
+                .up()
+                .firstPopulation()
+                .hasCount(1)
+                .up()
+                .up()
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "in-progress".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .stratumComponentWithCodeText("Encounter Status")
+                .hasValueText("in-progress")
+                .up()
+                .stratumComponentWithCodeText("Gender")
+                .hasValueText("male")
+                .up()
+                .firstPopulation()
+                .hasCount(1);
+    }
+
+    /**
+     * multi-subject variant of {@link #cohortBooleanMultiComponentListScalarStratPatient9()}.
+     * Across all patients (data per {@code cohortBooleanValueStratMultiValueListOverlapping}),
+     * the stratifier must produce one stratum per unique (encounter-status, gender) tuple, each
+     * with two components. The expected tuples are:
+     * <pre>
+     * (in-progress, female)  → patient-0
+     * (in-progress, male)    → patient-1, patient-9
+     * (finished,   female)   → patient-0, patient-8
+     * (finished,   male)     → patient-1, patient-9
+     * (arrived,    female)   → patient-2
+     * (arrived,    male)     → patient-3
+     * (triaged,    female)   → patient-4
+     * (triaged,    male)     → patient-5
+     * (cancelled,  female)   → patient-6
+     * (cancelled,  male)     → patient-7
+     * </pre>
+     */
+    @Test
+    void cohortBooleanMultiComponentListScalarStratAllPatients() {
+        GIVEN_MEASURE_STRATIFIER_TEST
+                .when()
+                .measureId("CohortBooleanMultiComponentListScalarStrat")
+                .evaluate()
+                .then()
+                .firstGroup()
+                .firstStratifier()
+                .hasCodeText("Encounter Status and Gender")
+                .hasStratumCount(10)
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "finished".equals(c.getValue().getText())))
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "male".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(2) // patient-1, patient-9
+                .up()
+                .up()
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "finished".equals(c.getValue().getText())))
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "female".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(2) // patient-0, patient-8
+                .up()
+                .up()
+                .stratum(s -> s.getStratum().stream()
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "cancelled".equals(c.getValue().getText())))
+                        .filter(st -> st.getComponent().stream()
+                                .anyMatch(c -> c.hasValue()
+                                        && "male".equals(c.getValue().getText())))
+                        .findFirst()
+                        .orElse(null))
+                .hasComponentStratifierCount(2)
+                .firstPopulation()
+                .hasCount(1); // patient-7
     }
 }

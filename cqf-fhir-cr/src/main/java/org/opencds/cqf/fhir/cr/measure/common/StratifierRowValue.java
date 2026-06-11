@@ -1,8 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 
 /**
  * The input-parameter slot of a {@link StratifierRowKey}.
@@ -52,10 +56,9 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
      * the now-removed {@code normalizeResourceKey} helper).
      */
     static StratifierRowValue ofFunctionInput(Object obj) {
-        if (obj instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return new Resource(resource.getIdElement().toVersionless().getValue());
+        String resourceId = resourceIdOrNull(obj);
+        if (resourceId != null) {
+            return new Resource(resourceId);
         }
         return new Resource(String.valueOf(obj));
     }
@@ -70,12 +73,35 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
         if (value == null) {
             return new Scalar(index, null);
         }
-        if (value instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return new Resource(resource.getIdElement().toVersionless().getValue());
+        String resourceId = resourceIdOrNull(value);
+        if (resourceId != null) {
+            return new Resource(resourceId);
         }
         return new Scalar(index, value);
+    }
+
+    /**
+     * Resolves the versionless resource ID of a FHIR resource carried either as a HAPI
+     * {@link IBaseResource} or as a CQL-engine {@link ClassInstance} (the CQL-5 representation of a
+     * FHIR resource). Returns {@code null} for non-resource values. Keeping resource detection here
+     * ensures the inputParam keys match the population resource keys produced by
+     * {@code MeasureMultiSubjectEvaluator#normalizePopulationKey}, which performs the same
+     * ClassInstance-aware normalization.
+     */
+    private static String resourceIdOrNull(Object obj) {
+        if (obj instanceof IBaseResource resource
+                && resource.getIdElement() != null
+                && !resource.getIdElement().isEmpty()) {
+            return resource.getIdElement().toVersionless().getValue();
+        }
+        if (obj instanceof ClassInstance classInstance
+                && ClassInstanceHelper.isFhirResource(FhirVersionEnum.R4, classInstance)) {
+            String id = ClassInstanceHelper.getId(classInstance);
+            if (StringUtils.isNotBlank(id)) {
+                return id;
+            }
+        }
+        return null;
     }
 
     /**

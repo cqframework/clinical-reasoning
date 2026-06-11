@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
@@ -572,7 +571,7 @@ public class MeasureMultiSubjectEvaluator {
         // Scalar value: expand to match the alignment row keys produced by any multi-value
         // components (functions or iterables) on this subject, so the scalar lands in every stratum.
         Set<StratifierRowKey> alignmentRowKeys = alignmentRowKeysBySubject.get(qualifiedSubject);
-        if (CollectionUtils.isNotEmpty(alignmentRowKeys)) {
+        if (!(alignmentRowKeys == null || alignmentRowKeys.isEmpty())) {
             return expandScalarToAlignmentRowKeys(alignmentRowKeys, rawValue);
         }
 

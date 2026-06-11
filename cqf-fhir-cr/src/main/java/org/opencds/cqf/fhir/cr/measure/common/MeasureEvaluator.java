@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureScoringTypePopulations;
@@ -384,7 +383,8 @@ public class MeasureEvaluator {
             String subjectId) {
         // only enabled for subject level reports
         if (reportType == MeasureReportType.INDIVIDUAL
-                && !CollectionUtils.isEmpty(populationDef.getSupportingEvidenceDefs())) {
+                && !(populationDef.getSupportingEvidenceDefs() == null
+                        || populationDef.getSupportingEvidenceDefs().isEmpty())) {
             var extDef = populationDef.getSupportingEvidenceDefs();
             for (SupportingEvidenceDef e : extDef) {
                 var result = evaluationResult.get(e.getExpression());
@@ -557,7 +557,7 @@ public class MeasureEvaluator {
 
             final Set<?> entryValue = entry.getValue();
 
-            if (CollectionUtils.isEmpty(entryValue)) {
+            if (entryValue == null || entryValue.isEmpty()) {
                 continue;
             }
 

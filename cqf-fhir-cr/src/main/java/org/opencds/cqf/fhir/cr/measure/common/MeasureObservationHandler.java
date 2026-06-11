@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +36,12 @@ public class MeasureObservationHandler {
         }
 
         final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
-        if (CollectionUtils.isEmpty(exclusionResources)) {
+        if (exclusionResources == null || exclusionResources.isEmpty()) {
             return;
         }
 
         final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
-        if (CollectionUtils.isEmpty(observationResources)) {
+        if (observationResources == null || observationResources.isEmpty()) {
             return;
         }
 

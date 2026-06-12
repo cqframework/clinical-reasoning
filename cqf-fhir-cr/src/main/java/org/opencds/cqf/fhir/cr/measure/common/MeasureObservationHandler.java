@@ -35,12 +35,12 @@ public class MeasureObservationHandler {
             return;
         }
 
-        final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
+        final var exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
         if (exclusionResources == null || exclusionResources.isEmpty()) {
             return;
         }
 
-        final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
+        final var observationResources = measureObservationDef.getResourcesForSubject(subjectId);
         if (observationResources == null || observationResources.isEmpty()) {
             return;
         }
@@ -53,7 +53,7 @@ public class MeasureObservationHandler {
 
         // Make a copy to avoid ConcurrentModificationException when removeExcludedMeasureObservationResource
         // removes empty maps from the original set
-        final Set<Object> observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
+        final var observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
 
         // Iterate over observation resources (which are Maps) and remove matching keys
         for (Object observationResource : observationResourcesCopy) {
@@ -78,7 +78,7 @@ public class MeasureObservationHandler {
      */
     private static void removeMatchingKeysFromObservationMap(
             Map<?, ?> observationMap,
-            Set<Object> exclusionResources,
+            Set<CqlExpressionValue> exclusionResources,
             PopulationDef measureObservationDef,
             String subjectId) {
 

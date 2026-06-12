@@ -637,13 +637,13 @@ class MeasureMultiSubjectEvaluatorTest {
             var basis = basisCode("boolean");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", Boolean.TRUE);
+            pop.addResource("p1", pop.expression(), Boolean.TRUE);
 
             var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
-            componentA.putResult("p1", "shared-value", Set.of());
+            componentA.putResult("p1", "Expression A", "shared-value", Set.of());
 
             var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
-            componentB.putResult("p1", "shared-value", Set.of());
+            componentB.putResult("p1", "Expression B", "shared-value", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -672,16 +672,16 @@ class MeasureMultiSubjectEvaluatorTest {
             var basis = basisCode("boolean");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", Boolean.TRUE);
+            pop.addResource("p1", pop.expression(), Boolean.TRUE);
 
             var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
-            componentA.putResult("p1", "distinct-value", Set.of());
+            componentA.putResult("p1", "Expression A", "distinct-value", Set.of());
 
             var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
-            componentB.putResult("p1", "shared-value", Set.of());
+            componentB.putResult("p1", "Expression B", "shared-value", Set.of());
 
             var componentC = new StratifierComponentDef("component-c", textConcept("Component C"), "Expression C");
-            componentC.putResult("p1", "shared-value", Set.of());
+            componentC.putResult("p1", "Expression C", "shared-value", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",

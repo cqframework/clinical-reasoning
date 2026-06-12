@@ -6,7 +6,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.apicatalog.jsonld.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
@@ -452,8 +452,8 @@ public class CqlFhirParametersConverter {
         if (instance instanceof IBaseEnumeration<?> enumeration) {
             if (valueToConvert instanceof ClassInstance classInstance) {
                 var enumValue = classInstance.get("value");
-                if (enumValue != null) {
-                    enumeration.setValueAsString(enumValue.toString());
+                if (enumValue instanceof org.opencds.cqf.cql.engine.runtime.String string) {
+                    enumeration.setValueAsString(string.getValue());
                 }
             }
             return instance;
@@ -472,6 +472,8 @@ public class CqlFhirParametersConverter {
                 modelResolver.setPrimitiveValue(integer.getValue(), primitive);
             } else if (primitiveValue instanceof Decimal decimal) {
                 modelResolver.setPrimitiveValue(decimal.getValue(), primitive);
+            } else if (primitiveValue instanceof org.opencds.cqf.cql.engine.runtime.String string) {
+                modelResolver.setPrimitiveValue(string.getValue(), primitive);
             } else if (primitiveValue != null) {
                 modelResolver.setPrimitiveValue(primitiveValue.toString(), primitive);
             }

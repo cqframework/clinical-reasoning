@@ -276,7 +276,7 @@ class CqlProcessorTests {
         var issue = outcome.getIssueFirstRep();
         assertEquals(OperationOutcome.IssueSeverity.ERROR, issue.getSeverity());
         assertEquals(
-                "Example Failure Code: This is an error messageReturn Value If Not Error",
+                "Example Failure Code: This is an error message'Return Value If Not Error'",
                 issue.getDiagnostics().replaceAll("[\\r\\n]", ""));
     }
 }

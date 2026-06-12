@@ -28,6 +28,11 @@ dependencies {
     api(libs.hapi.fhir.validation.resources.r4b)
     api(libs.hapi.fhir.validation.resources.r5)
 
+    // Apache Commons utilities used directly here and by downstream modules
+    // (declared explicitly rather than relied upon transitively).
+    api(libs.commons.lang3)
+    api(libs.commons.collections4)
+
     // Test dependencies
     testImplementation(libs.mockito.junit.jupiter)
     testImplementation(project(":cqf-fhir-test"))

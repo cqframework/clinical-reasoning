@@ -81,6 +81,8 @@ picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "pico
 # Commons
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commons-compress" }
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3" }
+commons-collections4 = { module = "org.apache.commons:commons-collections4" }
 
 # Testing
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }

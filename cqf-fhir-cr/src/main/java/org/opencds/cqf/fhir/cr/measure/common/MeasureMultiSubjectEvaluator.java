@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import com.apicatalog.jsonld.StringUtils;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
@@ -23,6 +22,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;

@@ -258,7 +258,7 @@ These bugs are **hidden during Part 1** because old scorers are still active and
 
 **Source of Fixes:**
 All implementations verified in cr1 codebase at:
-- `/Users/lukedegruchy/development/smilecdr/git/clinical-reasoning-repos/clinical-reasoning-only/cr1`
+- `{clinical-reasoning git repo directory}`
 
 ## Implementation Plan
 

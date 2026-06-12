@@ -85,6 +85,7 @@ commons-lang3 = { module = "org.apache.commons:commons-lang3" }
 commons-collections4 = { module = "org.apache.commons:commons-collections4" }
 commons-io = { module = "commons-io:commons-io" }
 guava = { module = "com.google.guava:guava" }
+jakarta-xml-bind = { module = "jakarta.xml.bind:jakarta.xml.bind-api" }
 
 # Testing
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }

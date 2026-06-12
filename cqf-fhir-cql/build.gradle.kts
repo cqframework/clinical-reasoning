@@ -11,6 +11,9 @@ dependencies {
     api(libs.cql.cqf.fhir.npm) { exclude(group = "junit", module = "junit") }
     api(libs.cql.quick)
 
+    // JAXB API used directly (jakarta.xml.bind.JAXB) — declared rather than transitive.
+    implementation(libs.jakarta.xml.bind)
+
     // Test dependencies
     testImplementation(libs.mockito.junit.jupiter)
     testImplementation(project(":cqf-fhir-test"))

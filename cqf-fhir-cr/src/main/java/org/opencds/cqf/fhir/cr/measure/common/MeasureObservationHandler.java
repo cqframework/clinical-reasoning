@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.Map;
 import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +35,13 @@ public class MeasureObservationHandler {
             return;
         }
 
-        final Set<CqlExpressionValue> exclusionResources =
-                measurePopulationExclusionDef.getResourcesForSubject(subjectId);
-        if (CollectionUtils.isEmpty(exclusionResources)) {
+        final Set<Object> exclusionResources = measurePopulationExclusionDef.getResourcesForSubject(subjectId);
+        if (exclusionResources == null || exclusionResources.isEmpty()) {
             return;
         }
 
-        final Set<CqlExpressionValue> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
-        if (CollectionUtils.isEmpty(observationResources)) {
+        final Set<Object> observationResources = measureObservationDef.getResourcesForSubject(subjectId);
+        if (observationResources == null || observationResources.isEmpty()) {
             return;
         }
 
@@ -54,46 +53,49 @@ public class MeasureObservationHandler {
 
         // Make a copy to avoid ConcurrentModificationException when removeExcludedMeasureObservationResource
         // removes empty maps from the original set
-        final Set<CqlExpressionValue> observationResourcesCopy =
-                new HashSetForCqlExpressionValues(observationResources);
+        final Set<Object> observationResourcesCopy = new HashSetForFhirResourcesAndCqlTypes<>(observationResources);
 
-        // Iterate observation accumulators and drop entries whose input matches any exclusion
-        for (CqlExpressionValue observationResource : observationResourcesCopy) {
-            observationResource
-                    .asObservationAccumulator()
-                    .ifPresent(acc -> removeMatchingEntriesFromObservationAccumulator(
-                            acc, exclusionResources, measureObservationDef, subjectId));
+        // Iterate over observation resources (which are Maps) and remove matching keys
+        for (Object observationResource : observationResourcesCopy) {
+            if (observationResource instanceof Map<?, ?> observationMap) {
+                removeMatchingKeysFromObservationMap(
+                        observationMap, exclusionResources, measureObservationDef, subjectId);
+            }
         }
     }
 
     /**
-     * Drops entries from an observation accumulator whose input matches an exclusion resource.
+     * Removes keys from an observation map that match exclusion resources.
      * <p/>
-     * Uses FHIR resource identity (resource type + logical ID) for matching rather than object
-     * instance equality, since the exclusion resources and observation entry inputs may be
-     * separate Java object instances representing the same FHIR resource.
+     * This method uses FHIR resource identity (resource type + logical ID) for matching
+     * rather than object instance equality, since the exclusion resources and observation
+     * map keys may be separate Java object instances representing the same FHIR resource.
+     *
+     * @param observationMap observation map containing Resource -> QuantityDef entries
+     * @param exclusionResources set of resources to exclude
+     * @param measureObservationDef the observation population definition
+     * @param subjectId the subject ID
      */
-    private static void removeMatchingEntriesFromObservationAccumulator(
-            ObservationAccumulator accumulator,
-            Set<CqlExpressionValue> exclusionResources,
+    private static void removeMatchingKeysFromObservationMap(
+            Map<?, ?> observationMap,
+            Set<Object> exclusionResources,
             PopulationDef measureObservationDef,
             String subjectId) {
 
-        for (CqlExpressionValue exclusionResource : exclusionResources) {
-            if (exclusionResource == null) {
-                continue;
-            }
-            Object exclusionRaw = exclusionResource.raw();
-            boolean matchFound = accumulator.entries().stream()
-                    .anyMatch(
-                            entry -> FhirResourceAndCqlTypeUtils.areObjectsEqual(entry.inputResource(), exclusionRaw));
+        // Find observation map keys that match any exclusion resource
+        for (Object exclusionResource : exclusionResources) {
+            // Check if this exclusion resource matches any key in the observation map
+            // Must use custom equality that compares FHIR resource identity, not object instance
+            boolean matchFound = observationMap.keySet().stream()
+                    .anyMatch(mapKey -> FhirResourceAndCqlTypeUtils.areObjectsEqual(mapKey, exclusionResource));
 
             if (matchFound) {
-                logger.atDebug().log(
+                logger.debug(
                         "Removing observation for excluded resource: {}",
-                        EvaluationResultFormatter.formatResource(exclusionRaw));
-                // Delegate to PopulationDef so empty accumulators get purged from the subject set
-                measureObservationDef.removeExcludedMeasureObservationResource(subjectId, exclusionRaw);
+                        EvaluationResultFormatter.formatResource(exclusionResource));
+                // Remove the entry from the inner map using the PopulationDef's removal method
+                // This ensures proper handling of the Map<String, Set<Map<Resource, QuantityDef>>> structure
+                measureObservationDef.removeExcludedMeasureObservationResource(subjectId, exclusionResource);
             }
         }
     }

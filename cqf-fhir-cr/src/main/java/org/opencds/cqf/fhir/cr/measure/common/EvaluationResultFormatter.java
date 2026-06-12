@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.ClassInstance;
@@ -272,7 +271,7 @@ public class EvaluationResultFormatter {
         final Set<CqlExpressionValue> resources =
                 populationDef.getSubjectResources().get(subjectId);
 
-        if (CollectionUtils.isEmpty(resources)) {
+        if (resources == null || resources.isEmpty()) {
             return subjectId + ": {empty}";
         }
 

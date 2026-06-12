@@ -34,10 +34,23 @@ public class ClassInstanceHelper {
             var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.get("value");
             if (resourceIdValue != null) {
                 var type = classInstance.getType().getLocalPart();
-                return "%s/%s".formatted(type, resourceIdValue);
+                return "%s/%s".formatted(type, plainStringValue(resourceIdValue));
             }
         }
         return null;
+    }
+
+    /**
+     * Renders the plain string form of a CQL id value. The {@code id.value} element is a CQL
+     * {@link org.opencds.cqf.cql.engine.runtime.String}, whose {@code toString()} adds CQL quoting
+     * (e.g. {@code 'enc-1'}); using that quoted form yields broken references like
+     * {@code Encounter/'enc-1'}. Unwrap the underlying Java value instead.
+     */
+    private static String plainStringValue(Object value) {
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.String cqlString) {
+            return cqlString.getValue();
+        }
+        return String.valueOf(value);
     }
 
     public static Object convertToFhirR4IfNeeded(Object value) {

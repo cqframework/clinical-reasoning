@@ -158,6 +158,63 @@ public final class CqlExpressionValue {
     }
 
     /**
+     * Returns the non-subject-value stratifier function results as a uniform
+     * {@code List<FunctionResultEntry>}, regardless of whether the underlying value arrived as a
+     * {@link FunctionResultAccumulator} (the production shape produced by
+     * {@code FunctionEvaluationHandler.processNonSubValueStratifier}) or as a raw
+     * {@code Map<input, output>} (the shape several unit tests construct directly). Any other
+     * underlying value yields an empty list.
+     * <p>
+     * Unlike {@link #asFunctionResultAccumulator()} — whose contract is deliberately strict ("raw
+     * Map → empty") — this accessor is the one downstream stratum-building call sites should use so
+     * both shapes are handled identically.
+     */
+    public List<FunctionResultEntry> functionResultEntries() {
+        if (raw instanceof FunctionResultAccumulator accumulator) {
+            return accumulator.entries();
+        }
+        if (raw instanceof Map<?, ?> map) {
+            return map.entrySet().stream()
+                    .map(entry -> new FunctionResultEntry(entry.getKey(), entry.getValue()))
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * True when the underlying value is a non-subject-value stratifier function result — either a
+     * {@link FunctionResultAccumulator} or a raw {@code Map}. Mirrors the two shapes handled by
+     * {@link #functionResultEntries()}.
+     */
+    public boolean isFunctionResult() {
+        return raw instanceof FunctionResultAccumulator || raw instanceof Map<?, ?>;
+    }
+
+    /**
+     * Returns the MEASUREOBSERVATION input resources (the per-observation inputs the observation
+     * function was evaluated against) regardless of whether the underlying value arrived as an
+     * {@link ObservationAccumulator} (the production shape produced by
+     * {@code FunctionEvaluationHandler.processMeasureObservation}) or as a raw {@code Map<input,
+     * QuantityDef>} (the shape some unit tests construct directly). Any other underlying value
+     * yields an empty list.
+     * <p>
+     * This is the accessor the stratum resource-key call sites should use for MEASUREOBSERVATION
+     * populations, so both shapes are handled identically (previously they read only the raw-Map
+     * shape via {@link #asMap()} and silently dropped accumulators).
+     */
+    public List<Object> observationInputs() {
+        if (raw instanceof ObservationAccumulator accumulator) {
+            return accumulator.entries().stream()
+                    .map(ObservationEntry::inputResource)
+                    .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        }
+        if (raw instanceof Map<?, ?> map) {
+            return new ArrayList<>(map.keySet());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * Normalizes the value to an {@link Iterable}: null becomes an empty list, an existing
      * iterable is returned as-is, and a scalar is wrapped in a single-element list.
      */

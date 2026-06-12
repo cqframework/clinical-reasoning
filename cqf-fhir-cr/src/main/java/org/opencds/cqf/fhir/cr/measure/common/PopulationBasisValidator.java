@@ -244,9 +244,21 @@ public interface PopulationBasisValidator {
                 .formatted(expression, invalidTypes, url);
     }
 
+    /**
+     * CQL-5 scalar stratifier expressions (e.g. a list-returning {@code define} over strings)
+     * produce engine-native primitive types rather than Java/FHIR primitives, so the allowed-type
+     * gate must accept them alongside {@link #allowedStratifierValueTypes()}. Without these, a valid
+     * scalar/list stratifier would be wrongly rejected as an invalid value-stratifier result type.
+     */
+    Set<String> CQL_RUNTIME_PRIMITIVE_TYPES = Set.of(
+            org.opencds.cqf.cql.engine.runtime.Boolean.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.String.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.Integer.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.Long.class.getName(),
+            org.opencds.cqf.cql.engine.runtime.Decimal.class.getName());
+
     private boolean isResultClassAllowed(String resultClass) {
-        return allowedStratifierValueTypes().contains(resultClass)
-                || org.opencds.cqf.cql.engine.runtime.Boolean.class.getName().equals(resultClass);
+        return allowedStratifierValueTypes().contains(resultClass) || CQL_RUNTIME_PRIMITIVE_TYPES.contains(resultClass);
     }
 
     private boolean doesBasisMatchResource(String resultClass, String groupPopulationBasisCode) {

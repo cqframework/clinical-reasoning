@@ -465,7 +465,6 @@ public class MeasureEvaluator {
      * Keeps Measure-Observation values found in measurePopulation
      * are not found in the corresponding measurePopulation set.
      */
-    @SuppressWarnings("unchecked")
     public void retainObservationSubjectResourcesInPopulation(
             Map<String, Set<CqlExpressionValue>> measurePopulation,
             Map<String, Set<CqlExpressionValue>> measureObservation) {
@@ -478,8 +477,8 @@ public class MeasureEvaluator {
             var entry = it.next();
             String subjectId = entry.getKey();
 
-            // Cast subject's observation set to the expected type
-            var obsSet = (Set<Map<Object, Object>>) (Set<?>) entry.getValue();
+            // Subject's observation set: each element wraps an ObservationAccumulator (or raw Map).
+            final Set<CqlExpressionValue> obsSet = entry.getValue();
 
             // get valid population values for this subject
             var validPopulation = measurePopulation.get(subjectId);
@@ -490,15 +489,10 @@ public class MeasureEvaluator {
                 continue;
             }
 
-            // remove observations not matching population values
-            obsSet.removeIf(obsMap -> {
-                for (Object key : obsMap.keySet()) {
-                    if (!validPopulation.contains(key)) {
-                        return true; // remove this observation map
-                    }
-                }
-                return false;
-            });
+            // remove observations whose input resource is not in the population values. validPopulation
+            // is a HashSetForCqlExpressionValues, whose contains() unwraps and compares by FHIR identity.
+            obsSet.removeIf(obs -> obs != null
+                    && obs.observationInputs().stream().anyMatch(input -> !validPopulation.contains(input)));
 
             // if no observations remain for this subject, remove it entirely
             if (obsSet.isEmpty()) {
@@ -513,21 +507,24 @@ public class MeasureEvaluator {
             PopulationDef measurePopulationDef,
             //        MeasurePopulationType.MEASUREOBSERVATION
             PopulationDef measureObservationDef) {
-        for (Object populationResource : measureObservationDef.getResourcesForSubject(subjectId)) {
-            if (populationResource instanceof Map<?, ?> measureObservationResourceAsMap) {
-                for (Entry<?, ?> measureObservationResourceMapEntry : measureObservationResourceAsMap.entrySet()) {
-                    final Object measureObservationSubjectResourceMapKey = measureObservationResourceMapEntry.getKey();
-                    if (measurePopulationDef != null) {
-                        final var measurePopulationResourcesForSubject =
-                                measurePopulationDef.getResourcesForSubject(subjectId);
-                        if (!measurePopulationResourcesForSubject.contains(measureObservationSubjectResourceMapKey)) {
-                            // remove observation results not found in measure population
-                            measureObservationDef
-                                    .getResourcesForSubject(subjectId)
-                                    .remove(populationResource);
-                        }
-                    }
-                }
+        if (measurePopulationDef == null) {
+            return;
+        }
+        // Each observation wrapper holds an ObservationAccumulator (or raw Map) of input -> value.
+        // Copy first since we mutate the underlying set while iterating.
+        final var observationResources =
+                new HashSetForCqlExpressionValues(measureObservationDef.getResourcesForSubject(subjectId));
+        final var measurePopulationResourcesForSubject = measurePopulationDef.getResourcesForSubject(subjectId);
+        for (CqlExpressionValue populationResource : observationResources) {
+            if (populationResource == null) {
+                continue;
+            }
+            // Remove the whole accumulator if any of its input resources is absent from the measure
+            // population (HashSetForCqlExpressionValues.contains unwraps + FHIR-identity-compares).
+            boolean anyInputMissing = populationResource.observationInputs().stream()
+                    .anyMatch(input -> !measurePopulationResourcesForSubject.contains(input));
+            if (anyInputMissing) {
+                measureObservationDef.getResourcesForSubject(subjectId).remove(populationResource);
             }
         }
     }
@@ -572,12 +569,13 @@ public class MeasureEvaluator {
         }
         final Object firstEntryValue = entryValue.iterator().next();
 
-        if (!(firstEntryValue instanceof Map<?, ?>)) {
-            throw new InternalErrorException("Expected a Map<?,?> but was not: %s".formatted(firstEntryValue));
+        if (!(firstEntryValue instanceof CqlExpressionValue)) {
+            throw new InternalErrorException(
+                    "Expected a CqlExpressionValue but was not: %s".formatted(firstEntryValue));
         }
 
         @SuppressWarnings("unchecked")
-        Set<Map<Object, Object>> obsSet = (Set<Map<Object, Object>>) entryValue;
+        Set<CqlExpressionValue> obsSet = (Set<CqlExpressionValue>) entryValue;
 
         // population values for this subject
         var populationValues = measurePopulation.get(subjectId);
@@ -588,16 +586,9 @@ public class MeasureEvaluator {
             return;
         }
 
-        // Remove observations that *do* match population values
-        obsSet.removeIf(obsMap -> {
-            for (Object key : obsMap.keySet()) {
-                if (populationValues.contains(key)) {
-                    // This observation map is backed by a population resource -> remove iterator
-                    return true;
-                }
-            }
-            return false;
-        });
+        // Remove observations whose input resource *does* match a population value (i.e. an exclusion).
+        // populationValues is a HashSetForCqlExpressionValues, whose contains() unwraps + FHIR-compares.
+        obsSet.removeIf(obs -> obs != null && obs.observationInputs().stream().anyMatch(populationValues::contains));
 
         // If no observations remain for this subject, remove the subject entry entirely
         if (obsSet.isEmpty()) {

@@ -83,6 +83,8 @@ commons-compress = { module = "org.apache.commons:commons-compress", version.ref
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commons-codec" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3" }
 commons-collections4 = { module = "org.apache.commons:commons-collections4" }
+commons-io = { module = "commons-io:commons-io" }
+guava = { module = "com.google.guava:guava" }
 
 # Testing
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }

@@ -28,10 +28,12 @@ dependencies {
     api(libs.hapi.fhir.validation.resources.r4b)
     api(libs.hapi.fhir.validation.resources.r5)
 
-    // Apache Commons utilities used directly here and by downstream modules
+    // Utilities used directly here and by downstream modules
     // (declared explicitly rather than relied upon transitively).
     api(libs.commons.lang3)
     api(libs.commons.collections4)
+    api(libs.commons.io)
+    api(libs.guava)
 
     // Test dependencies
     testImplementation(libs.mockito.junit.jupiter)

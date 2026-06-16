@@ -121,8 +121,8 @@ class CliTest {
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Patient=Patient(id='example')"));
-        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id='example')]"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
     }
 
     @Test
@@ -140,18 +140,18 @@ class CliTest {
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Patient=Patient(id='example')"));
-        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id='example')]"));
-        assertTrue(output.contains("TestPatientGender=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientActive=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientBirthDate=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id='example')"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
-        assertTrue(output.contains("TestSlices=[Observation(id='blood-pressure')]"));
-        assertTrue(output.contains("TestSimpleExtensions=Patient(id='example')"));
-        assertTrue(output.contains("TestComplexExtensions=Patient(id='example')"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
     }
 
     @Test
@@ -187,18 +187,18 @@ class CliTest {
 
         String output = outContent.toString();
 
-        assertTrue(output.contains("Patient=Patient(id='example')"));
-        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id='example')]"));
-        assertTrue(output.contains("TestPatientGender=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientActive=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientBirthDate=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id='example')"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("TestAdverseEvent=[AdverseEvent(id=example)]"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
-        assertTrue(output.contains("TestSlices=[Observation(id='blood-pressure')]"));
-        assertTrue(output.contains("TestSimpleExtensions=Patient(id='example')"));
-        assertTrue(output.contains("TestComplexExtensions=Patient(id='example')"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
     }
 
     @Test
@@ -215,16 +215,16 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("TestPatientGender=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientActive=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientBirthDate=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id='example')"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
-        assertTrue(output.contains("TestSlices=[Observation(id='blood-pressure')]"));
-        assertTrue(output.contains("TestSimpleExtensions=Patient(id='example')"));
-        assertTrue(output.contains("TestComplexExtensions=Patient(id='example')"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
     }
 
     @Test
@@ -241,48 +241,48 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("TestPatientGender=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientActive=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientBirthDate=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id='example')"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
         // TODO: This is because the engine is not validating on profile-based
         // retrieve...
-        assertTrue(output.contains("TestSimpleExtensions=Patient(id='example')"));
-        assertTrue(output.contains("TestComplexExtensions=Patient(id='example')"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
         assertTrue(output.contains("TestEncounterDiagnosisCardinality=true"));
         // NOTE: Testing combinations here because ordering is not guaranteed
         assertTrue(
                 output.contains(
-                                "TestGeneralDeviceNotRequested=[DeviceRequest(id='negation-example'), DeviceRequest(id='negation-with-code-example')]")
+                                "TestGeneralDeviceNotRequested=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]")
                         || output.contains(
-                                "TestGeneralDeviceNotRequested=[DeviceRequest(id='negation-with-code-example'), DeviceRequest(id='negation-example')]"));
+                                "TestGeneralDeviceNotRequested=[DeviceRequest(id=negation-with-code-example), DeviceRequest(id=negation-example)]"));
         assertTrue(
                 output.contains(
-                                "TestGeneralDeviceNotRequestedCode=[DeviceRequest(id='negation-example'), DeviceRequest(id='negation-with-code-example')]")
+                                "TestGeneralDeviceNotRequestedCode=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]")
                         || output.contains(
-                                "TestGeneralDeviceNotRequestedCode=[DeviceRequest(id='negation-with-code-example'), DeviceRequest(id='negation-example')]"));
+                                "TestGeneralDeviceNotRequestedCode=[DeviceRequest(id=negation-with-code-example), DeviceRequest(id=negation-example)]"));
         assertTrue(
                 output.contains(
-                                "TestGeneralDeviceNotRequestedValueSet=[DeviceRequest(id='negation-example'), DeviceRequest(id='negation-with-code-example')]")
+                                "TestGeneralDeviceNotRequestedValueSet=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]")
                         || output.contains(
-                                "TestGeneralDeviceNotRequestedValueSet=[DeviceRequest(id='negation-with-code-example'), DeviceRequest(id='negation-example')]"));
+                                "TestGeneralDeviceNotRequestedValueSet=[DeviceRequest(id=negation-with-code-example), DeviceRequest(id=negation-example)]"));
         assertTrue(
                 output.contains(
-                                "TestGeneralDeviceNotRequestedActual=[DeviceRequest(id='negation-example'), DeviceRequest(id='negation-with-code-example')]")
+                                "TestGeneralDeviceNotRequestedActual=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]")
                         || output.contains(
-                                "TestGeneralDeviceNotRequestedActual=[DeviceRequest(id='negation-with-code-example'), DeviceRequest(id='negation-example')]"));
+                                "TestGeneralDeviceNotRequestedActual=[DeviceRequest(id=negation-with-code-example), DeviceRequest(id=negation-example)]"));
         assertTrue(
                 output.contains(
-                                "TestGeneralDeviceNotRequestedExplicit=[DeviceRequest(id='negation-example'), DeviceRequest(id='negation-with-code-example')]")
+                                "TestGeneralDeviceNotRequestedExplicit=[DeviceRequest(id=negation-example), DeviceRequest(id=negation-with-code-example)]")
                         || output.contains(
-                                "TestGeneralDeviceNotRequestedExplicit=[DeviceRequest(id='negation-with-code-example'), DeviceRequest(id='negation-example')]"));
+                                "TestGeneralDeviceNotRequestedExplicit=[DeviceRequest(id=negation-with-code-example), DeviceRequest(id=negation-example)]"));
         assertTrue(output.contains(
-                "TestGeneralDeviceNotRequestedCodeExplicit=[DeviceRequest(id='negation-with-code-example')]"));
-        assertTrue(output.contains(
-                "TestGeneralDeviceNotRequestedValueSetExplicit=[DeviceRequest(id='negation-example')]"));
+                "TestGeneralDeviceNotRequestedCodeExplicit=[DeviceRequest(id=negation-with-code-example)]"));
+        assertTrue(
+                output.contains("TestGeneralDeviceNotRequestedValueSetExplicit=[DeviceRequest(id=negation-example)]"));
     }
 
     @Test
@@ -299,16 +299,16 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("TestPatientGender=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientActive=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientBirthDate=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id='example')"));
-        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id='example')"));
+        assertTrue(output.contains("TestPatientGender=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientActive=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientBirthDate=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMaritalStatusMembership=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientMartialStatusComparison=Patient(id=example)"));
+        assertTrue(output.contains("TestPatientDeceasedAsBoolean=Patient(id=example)"));
         assertTrue(output.contains("TestPatientDeceasedAsDateTime=null"));
-        assertTrue(output.contains("TestSlices=[Observation(id='blood-pressure')]"));
-        assertTrue(output.contains("TestSimpleExtensions=Patient(id='example')"));
-        assertTrue(output.contains("TestComplexExtensions=Patient(id='example')"));
+        assertTrue(output.contains("TestSlices=[Observation(id=blood-pressure)]"));
+        assertTrue(output.contains("TestSimpleExtensions=Patient(id=example)"));
+        assertTrue(output.contains("TestComplexExtensions=Patient(id=example)"));
     }
 
     @Test
@@ -325,7 +325,7 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='example')"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(output.contains("Four=4"));
         assertTrue(output.contains("TestPlus=true"));
         assertTrue(output.contains("Testplus=-8"));
@@ -362,9 +362,9 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("TestConditions=[Condition(id='Condition-17-94')]"));
-        assertTrue(output.contains("TestConditionsViaFunction=[Condition(id='Condition-17-94')]"));
-        assertTrue(output.contains("TestConditionsDirectly=[Condition(id='Condition-17-94')]"));
+        assertTrue(output.contains("TestConditions=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsViaFunction=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsDirectly=[Condition(id=Condition-17-94)]"));
     }
 
     @Test
@@ -381,9 +381,9 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("TestConditions=[Condition(id='Condition-17-94')]"));
-        assertTrue(output.contains("TestConditionsViaFunction=[Condition(id='Condition-17-94')]"));
-        assertTrue(output.contains("TestConditionsDirectly=[Condition(id='Condition-17-94')]"));
+        assertTrue(output.contains("TestConditions=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsViaFunction=[Condition(id=Condition-17-94)]"));
+        assertTrue(output.contains("TestConditionsDirectly=[Condition(id=Condition-17-94)]"));
     }
 
     @Test
@@ -400,7 +400,7 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='example')"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(
                 output.contains(
                         "SDE Ethnicity=[Code {\n  code: '2184-0',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Dominican'\n}, Code {\n  code: '2148-5',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Mexican'\n}]"));
@@ -429,7 +429,7 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='example')"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(
                 output.contains(
                         "SDE Ethnicity=[Code {\n  code: '2184-0',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Dominican'\n}, Code {\n  code: '2148-5',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Mexican'\n}]"));
@@ -462,7 +462,7 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='denom-EXM124')"));
+        assertTrue(output.contains("Patient=Patient(id=denom-EXM124)"));
         assertTrue(
                 output.contains(
                         "SDE Sex=Code {\n  code: 'F',\n  system: 'http:\\/\\/hl7.org\\/fhir\\/v3\\/AdministrativeGender',\n  version: null,\n  display: 'Female'\n}"));
@@ -486,7 +486,7 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='numer-EXM124')"));
+        assertTrue(output.contains("Patient=Patient(id=numer-EXM124)"));
         assertTrue(
                 output.contains(
                         "SDE Sex=Code {\n  code: 'F',\n  system: 'http:\\/\\/hl7.org\\/fhir\\/v3\\/AdministrativeGender',\n  version: null,\n  display: 'Female'\n}"));
@@ -552,10 +552,10 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='123')"));
-        assertTrue(output.contains("Encounters=[Encounter(id='ABC')]"));
-        assertTrue(output.contains("Patient=Patient(id='456')"));
-        assertTrue(output.contains("Encounters=[Encounter(id='DEF')]"));
+        assertTrue(output.contains("Patient=Patient(id=123)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=ABC)]"));
+        assertTrue(output.contains("Patient=Patient(id=456)"));
+        assertTrue(output.contains("Encounters=[Encounter(id=DEF)]"));
     }
 
     @ParameterizedTest
@@ -566,13 +566,13 @@ class CliTest {
         var subjectId2 = "Patient/456";
 
         var expectedTxtResult123 = """
-                Encounters=[Encounter(id='ABC')]
-                Patient=Patient(id='123')
+                Encounters=[Encounter(id=ABC)]
+                Patient=Patient(id=123)
                 """;
 
         var expectedTxtResult456 = """
-                Encounters=[Encounter(id='DEF')]
-                Patient=Patient(id='456')
+                Encounters=[Encounter(id=DEF)]
+                Patient=Patient(id=456)
                 """;
 
         String[] args = new String[] {
@@ -659,14 +659,14 @@ class CliTest {
         Main.run(args);
 
         String output = outContent.toString();
-        assertTrue(output.contains("Patient=Patient(id='example')"));
-        assertTrue(output.contains("Observation(id='example')"));
-        assertTrue(output.contains("Observation(id='negation-example')"));
-        assertTrue(output.contains("Observation(id='pediatric-bmi-example')"));
-        assertTrue(output.contains("Observation(id='pediatric-wt-example')"));
-        assertTrue(output.contains("Observation(id='satO2-fiO2')"));
-        assertFalse(output.contains("Observation(id='blood-glucose')"));
-        assertFalse(output.contains("Observation(id='blood-pressure')"));
+        assertTrue(output.contains("Patient=Patient(id=example)"));
+        assertTrue(output.contains("Observation(id=example)"));
+        assertTrue(output.contains("Observation(id=negation-example)"));
+        assertTrue(output.contains("Observation(id=pediatric-bmi-example)"));
+        assertTrue(output.contains("Observation(id=pediatric-wt-example)"));
+        assertTrue(output.contains("Observation(id=satO2-fiO2)"));
+        assertFalse(output.contains("Observation(id=blood-glucose)"));
+        assertFalse(output.contains("Observation(id=blood-pressure)"));
     }
 
     @Nonnull

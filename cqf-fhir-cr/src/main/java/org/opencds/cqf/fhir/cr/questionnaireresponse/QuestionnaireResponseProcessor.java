@@ -126,15 +126,7 @@ public class QuestionnaireResponseProcessor {
             LibraryEngine libraryEngine) {
         var questionnaireResponse = resolveQuestionnaireResponse(questionnaireResponseId);
         var questionnaire = resolveQuestionnaire(questionnaireResponse, questionnaireId);
-        // var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
-        var request = new ExtractRequest(
-                questionnaireResponse,
-                questionnaire,
-                // subject == null ? null : subject.getReferenceElement(),
-                parameters,
-                data,
-                libraryEngine,
-                null);
+        var request = new ExtractRequest(questionnaireResponse, questionnaire, parameters, data, libraryEngine, null);
         var processor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
         return processor.extract(request);
     }

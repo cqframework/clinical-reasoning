@@ -278,23 +278,6 @@ public class AdapterHelper {
                     break;
             }
         }
-        //
-        //        if (value instanceof org.hl7.fhir.r4.model.Tuple tuple) {
-        //            var tupleAdapter =
-        //                    IAdapterFactory.forFhirVersion(FhirVersionEnum.R4).createTuple(tuple);
-        //            switch (type.getSimpleName()) {
-        //                case "Coding":
-        //                    var system = tupleAdapter.getProperty("system") instanceof
-        // org.hl7.fhir.r4.model.StringType stringType ? stringType.asStringValue() : null;
-        //                    var code = tupleAdapter.getProperty("code") instanceof org.hl7.fhir.r4.model.StringType
-        // stringType ? stringType.asStringValue() : null;
-        //                    var display = tupleAdapter.getProperty("display") instanceof
-        // org.hl7.fhir.r4.model.StringType stringType ? stringType.asStringValue() : null;
-        //                    return new org.hl7.fhir.r4.model.Coding(system, code, display);
-        //                default:
-        //                    break;
-        //            }
-        //        }
 
         throw new IllegalArgumentException(
                 CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));
@@ -434,20 +417,6 @@ public class AdapterHelper {
                     break;
             }
         }
-        //
-        //        if (value instanceof org.hl7.fhir.r5.model.Tuple tuple) {
-        //            var tupleAdapter =
-        //                    IAdapterFactory.forFhirVersion(FhirVersionEnum.R5).createTuple(tuple);
-        //            switch (type.getSimpleName()) {
-        //                case "Coding":
-        //                    var system = (String) tupleAdapter.getProperty("system");
-        //                    var code = (String) tupleAdapter.getProperty("code");
-        //                    var display = (String) tupleAdapter.getProperty("display");
-        //                    return new org.hl7.fhir.r4.model.Coding(system, code, display);
-        //                default:
-        //                    break;
-        //            }
-        //        }
 
         throw new IllegalArgumentException(
                 CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));

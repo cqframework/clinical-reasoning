@@ -30,6 +30,22 @@ public class TupleAdapter extends BaseElementAdapter implements ITupleAdapter {
     }
 
     @Override
+    public Object resolvePath(Object target, String path) {
+        // A Tuple resolves its named members directly rather than through the FHIR runtime
+        // definitions used for structured elements.
+        var values = get().children().stream()
+                .filter(c -> c.getName().equals(path))
+                .filter(org.hl7.fhir.r5.model.Property::hasValues)
+                .map(org.hl7.fhir.r5.model.Property::getValues)
+                .findFirst()
+                .orElse(null);
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.size() == 1 ? values.get(0) : values;
+    }
+
+    @Override
     public LinkedHashMap<String, Object> getProperties() {
         var properties = new LinkedHashMap<String, Object>();
         get().children().forEach(c -> properties.put(c.getName(), c.getValues()));

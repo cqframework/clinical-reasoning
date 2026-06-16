@@ -123,13 +123,6 @@ public class LibraryEngine {
             // A Tuple requires each property to have a type.  If there is no value default ot a FHIR string.
             return list.isEmpty() ? "FHIR.string" : getModelName(list.get(0));
         }
-        //        if (base instanceof Tuple tuple) {
-        //            var properties = new ArrayList<String>();
-        //            tuple.getElements().forEach((propertyName, value) -> {
-        //                properties.add("%s %s".formatted(propertyName, getModelName(value)));
-        //            });
-        //            return "Tuple { %s }".formatted(String.join(", ", properties));
-        //        }
         var fhirType = ((IBase) base).fhirType();
         if (fhirType.equals("Tuple")) {
             var properties = new ArrayList<String>();

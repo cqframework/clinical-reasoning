@@ -73,7 +73,6 @@ public class EvaluationResultFormatter {
             }
 
             // Format value
-            // Object value = expressionResult.raw();
             sb.append(indent(baseIndent + 1)).append("Value: ");
             sb.append(formatValue(expressionResult)).append("\n");
         }
@@ -130,7 +129,6 @@ public class EvaluationResultFormatter {
      * @return formatted string representation
      */
     private static String formatValue(CqlExpressionValue value) {
-        // var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         if (value == null || value.isNull()) {
             return "null";
         }

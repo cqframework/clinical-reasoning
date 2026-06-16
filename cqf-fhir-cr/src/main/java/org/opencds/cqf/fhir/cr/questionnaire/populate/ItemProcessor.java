@@ -114,18 +114,13 @@ public class ItemProcessor {
                     expressionProcessor
                             .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
                             .stream()
-                            //                            .map(r -> {
-                            //                                if (r != null && r.fhirType().equals("Tuple")) {
-                            //                                    return new Tuple()
-                            //                                            .withElements(request.getAdapterFactory()
-                            //                                                    .createTuple(r)
-                            //                                                    .getProperties());
-                            //                                }
-                            //                                return r;
-                            //                            })
                             // filtering nulls here to prevent unnecessary duplicate responseItems
                             .filter(Objects::nonNull)
-                            .map(r -> request.getAdapterFactory().createBase(r))
+                            // A CQL Tuple must be wrapped as a TupleAdapter so its named members can be
+                            // resolved by path downstream; a plain ElementAdapter cannot resolve them.
+                            .map(r -> r.fhirType().equals("Tuple")
+                                    ? request.getAdapterFactory().createTuple(r)
+                                    : request.getAdapterFactory().createBase(r))
                             .collect(Collectors.toList());
 
         } catch (Exception e) {

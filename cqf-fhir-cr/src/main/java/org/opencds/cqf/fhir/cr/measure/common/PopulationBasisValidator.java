@@ -233,8 +233,6 @@ public interface PopulationBasisValidator {
             String url,
             List<String> invalidTypes) {
 
-        // var distinctInvalidTypes = prettyDistinctClassNames(invalidTypes);
-
         if (stratifierDef.getStratifierType() == MeasureStratifierType.NON_SUBJECT_VALUE) {
             return "non-subject value stratifier is invalid for expression: [%s] with result types: %s for population basis: [%s] for measure URL: %s. Expected a scalar or scalar-returning function"
                     .formatted(expression, invalidTypes, groupPopulationBasisCode, url);

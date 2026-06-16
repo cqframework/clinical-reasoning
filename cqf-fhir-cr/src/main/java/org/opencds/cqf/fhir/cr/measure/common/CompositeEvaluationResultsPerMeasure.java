@@ -200,35 +200,6 @@ public class CompositeEvaluationResultsPerMeasure {
                     r -> r.getExpressionResults().forEach(evaluationResult::addExpressionResult));
 
             return evaluationResult;
-
-            //            var copyOfExpressionResults =
-            //                    new ArrayList<>(origEvaluationResult.getExpressionResults().entrySet().stream()
-            //                            .map(entry -> CqlExpressionValue.of(entry.getKey(), entry.getValue()))
-            //                            .toList());
-
-            //            for (var measureObservationResult : measureObservationResults) {
-            //                copyOfExpressionResults.addAll(
-            //                        measureObservationResult.getResult().getExpressionResults().entrySet().stream()
-            //                                .map(entry -> CqlExpressionValue.of(entry.getKey(), entry.getValue()))
-            //                                .toList());
-            //                copyOfExpressionResults.add(measureObservationResult.getFunctionResult());
-            //            }
-
-            //            evaluationResult.setExpressionResults(copyOfExpressionResults);
-
-            //            copyOfExpressionResults.entrySet().forEach(e -> {
-            //                evaluationResult.set(new EvaluationExpressionRef(e.getKey()), e.getValue());
-            //            });
-
-            // Preserve debug information from the original evaluation result
-            //            if (origEvaluationResult.getDebugResult() != null) {
-            //                evaluationResult.setDebugResult(origEvaluationResult.getDebugResult());
-            //            }
-            //            if (origEvaluationResult.getTrace() != null) {
-            //                evaluationResult.setTrace(origEvaluationResult.getTrace());
-            //            }
-
-            //            return evaluationResult;
         }
     }
 }

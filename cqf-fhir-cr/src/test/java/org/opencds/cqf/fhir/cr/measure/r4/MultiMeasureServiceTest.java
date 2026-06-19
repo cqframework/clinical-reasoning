@@ -36,7 +36,7 @@ class MultiMeasureServiceTest {
                 // all MeasureReports
                 .hasBundleCount(1)
                 .hasMeasureReportCount(2)
-                .report();
+                .reportBundles();
     }
 
     @Test
@@ -230,12 +230,15 @@ class MultiMeasureServiceTest {
                 .up()
                 .up()
                 .up()
+                .reportBundles()
+                .logReportBundlesJson()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 // This is a population/summary report so we should have a single bundle containing
                 // all MeasureReports
                 .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .logReportJson()
                 .hasReportType("Summary")
                 .firstGroup()
                 .population(MeasurePopulationType.INITIALPOPULATION)

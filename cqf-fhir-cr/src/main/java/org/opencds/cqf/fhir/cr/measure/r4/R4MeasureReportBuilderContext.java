@@ -144,13 +144,16 @@ class R4MeasureReportBuilderContext {
 
     public void addOperationOutcomes() {
         var errorMsgs = this.measureDef.errors();
-        for (var error : errorMsgs) {
-            addContained(createOperationOutcome(error));
+        for (int i = 0; i < errorMsgs.size(); i++) {
+            // Distinct ids so addContained's putIfAbsent does not collapse
+            // multiple errors into a single contained OperationOutcome.
+            addContained(createOperationOutcome(errorMsgs.get(i), "operation-outcome-" + (i + 1)));
         }
     }
 
-    private OperationOutcome createOperationOutcome(String errorMsg) {
+    private OperationOutcome createOperationOutcome(String errorMsg, String id) {
         OperationOutcome op = new OperationOutcome();
+        op.setId(id);
         op.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(IssueType.EXCEPTION)

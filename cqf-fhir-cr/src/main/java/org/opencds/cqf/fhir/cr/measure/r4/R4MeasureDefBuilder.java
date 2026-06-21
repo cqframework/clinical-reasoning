@@ -37,7 +37,6 @@ import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.ContinuousVariableObservationAggregateMethod;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
-import org.opencds.cqf.fhir.cr.measure.common.InvalidMeasureDefinitionException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDefBuilder;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
@@ -52,6 +51,11 @@ import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureUtils;
 
 @SuppressWarnings("squid:S1135")
 public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
+
+    // Non-fatal structural issues collected during build (e.g. stratifiers with no
+    // criteria.expression and no components). Surfaced as MeasureReport contained
+    // OperationOutcomes so the rest of the measure still evaluates.
+    private final List<String> buildErrors = new ArrayList<>();
 
     @Override
     public MeasureDef build(Measure measure) {
@@ -72,9 +76,11 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             groups.add(groupDef);
         }
 
-        return new MeasureDef(
+        var measureDef = new MeasureDef(
                 // We don't need either the version of the "Measure" qualifier here
                 measure.getIdElement(), measure.getUrl(), measure.getVersion(), groups, getSdeDefs(measure));
+        buildErrors.forEach(measureDef::addError);
+        return measureDef;
     }
 
     private GroupDef buildGroupDef(
@@ -105,7 +111,9 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         final Optional<PopulationDef> optPopulationDefDateOfCompliance = buildPopulationDefForDateOfCompliance(
                 measure.getUrl(), group, populationsWithCriteriaReference, populationBasisDef);
 
-        // Stratifiers
+        // Stratifiers — empty stratifiers (no criteria.expression, no components) yield a
+        // StratifierDef with a null type that the evaluator and report builder skip.
+        // Errors collected in buildErrors are surfaced as contained OperationOutcomes.
         var stratifiers = group.getStratifier().stream()
                 .map(mgsc -> buildStratifierDef(measure.getUrl(), mgsc, populationBasisDef))
                 .toList();
@@ -348,6 +356,21 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             String measureUrl, MeasureGroupStratifierComponent mgsc, CodeDef populationBasisDef) {
         checkId(mgsc);
 
+        final boolean hasCriteriaExpression =
+                mgsc.hasCriteria() && mgsc.getCriteria().hasExpression();
+        final boolean hasAnyComponentCriteria =
+                mgsc.getComponent().stream().anyMatch(MeasureGroupStratifierComponentComponent::hasCriteria);
+
+        if (!hasCriteriaExpression && !hasAnyComponentCriteria) {
+            // Build an un-evaluable StratifierDef (null type) and record a non-fatal
+            // error so the rest of the measure still evaluates and the report contains
+            // an OperationOutcome. Keeping the StratifierDef in the list preserves the
+            // 1:1 ordering with Measure.group.stratifier expected by the report builder.
+            buildErrors.add("Stratifier '%s' has no criteria.expression and no components for measure: %s"
+                    .formatted(mgsc.getId(), measureUrl));
+            return new StratifierDef(mgsc.getId(), conceptToConceptDef(mgsc.getCode()), null, null, List.of());
+        }
+
         boolean isBooleanBasis = isBooleanPopulationBasis(populationBasisDef);
         // Components
         var components = new ArrayList<StratifierComponentDef>();
@@ -392,15 +415,10 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
         return sdes;
     }
 
-    @Nullable
     private static MeasureStratifierType getStratifierType(
             String measureUrl,
             MeasureGroupStratifierComponent measureGroupStratifierComponent,
             boolean isBooleanBasis) {
-        if (measureGroupStratifierComponent == null) {
-            return null;
-        }
-
         final boolean hasCriteria = measureGroupStratifierComponent.hasCriteria()
                 && measureGroupStratifierComponent.getCriteria().hasExpression();
 
@@ -411,12 +429,6 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
             throw new InvalidRequestException(
                     "Stratifier Cannot have both criteria: %s and any component criteria: %s for measure: %s"
                             .formatted(hasCriteria, hasAnyComponentCriteria, measureUrl));
-        }
-
-        if (!hasCriteria && !hasAnyComponentCriteria) {
-            throw new InvalidMeasureDefinitionException(
-                    "Stratifier '%s' has no criteria.expression and no components for measure: %s"
-                            .formatted(measureGroupStratifierComponent.getId(), measureUrl));
         }
 
         if (hasCriteria) {

@@ -55,6 +55,8 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollect
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("squid:S1135")
 class MultiMeasure {
@@ -287,10 +289,10 @@ class MultiMeasure {
         /**
          * Access the Parameters with bundled MeasureReports for post-scoring assertions.
          *
-         * @return SelectedReport for fluent MeasureReport assertions on Parameters
+         * @return SelectedReportBundles for fluent MeasureReport assertions on Parameters
          */
-        public MultiMeasure.SelectedReport report() {
-            return new MultiMeasure.SelectedReport(evaluation.parameters());
+        public MultiMeasure.SelectedReportBundles reportBundles() {
+            return new MultiMeasure.SelectedReportBundles(evaluation.parameters());
         }
 
         /**
@@ -303,32 +305,32 @@ class MultiMeasure {
                     evaluation.measureDefs(), this, evaluation.evaluationResultsPerMeasure());
         }
 
-        // Backward compatibility - delegate to report()
+        // Backward compatibility - delegate to reportBundles()
         public MultiMeasure.Then hasBundleCount(int count) {
-            report().hasBundleCount(count);
+            reportBundles().hasBundleCount(count);
             return this;
         }
 
         public MultiMeasure.Then hasMeasureReportCount(int count) {
-            report().hasMeasureReportCount(count);
+            reportBundles().hasMeasureReportCount(count);
             return this;
         }
 
         public MultiMeasure.Then hasMeasureReportCountPerUrl(int count, String measureUrl) {
-            report().hasMeasureReportCountPerUrl(count, measureUrl);
+            reportBundles().hasMeasureReportCountPerUrl(count, measureUrl);
             return this;
         }
 
         public MultiMeasure.SelectedMeasureReport measureReport(String measureUrl) {
-            return report().measureReport(measureUrl);
+            return reportBundles().measureReport(measureUrl);
         }
 
         public MultiMeasure.SelectedMeasureReport measureReport(String measureUrl, String subject) {
-            return report().measureReport(measureUrl, subject);
+            return reportBundles().measureReport(measureUrl, subject);
         }
 
         public MultiMeasure.SelectedMeasureReport getFirstMeasureReport() {
-            return report().getFirstMeasureReport();
+            return reportBundles().getFirstMeasureReport();
         }
 
         public MultiMeasure.Then hasSupplementalDataSearchParameter() {
@@ -343,20 +345,31 @@ class MultiMeasure {
         }
     }
 
-    public static class SelectedReport extends MultiMeasure.Selected<Parameters, Void> {
+    public static class SelectedReportBundles extends MultiMeasure.Selected<Parameters, Void> {
+        private static final Logger logger = LoggerFactory.getLogger(SelectedReportBundles.class);
+        private final IParser jsonParser =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true);
 
-        public SelectedReport(Parameters report) {
-            super(report, null);
+        public SelectedReportBundles(Parameters reportBundles) {
+            super(reportBundles, null);
         }
 
-        public Parameters report() {
+        public Parameters reportBundles() {
             return this.value();
         }
 
-        public MultiMeasure.SelectedReport hasBundleCount(int count) {
+        // Log the JSON corresponding to the Parameters result (containing the bundles of measure
+        // reports) at this point:
+        public SelectedReportBundles logReportBundlesJson() {
+            logger.info(jsonParser.encodeResourceToString(reportBundles()));
+
+            return this;
+        }
+
+        public MultiMeasure.SelectedReportBundles hasBundleCount(int count) {
             assertEquals(
                     count,
-                    report().getParameter().stream()
+                    reportBundles().getParameter().stream()
                             .map(ParametersParameterComponent::getResource)
                             .filter(Bundle.class::isInstance)
                             .toList()
@@ -364,10 +377,10 @@ class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.SelectedReport hasMeasureReportCount(int count) {
+        public MultiMeasure.SelectedReportBundles hasMeasureReportCount(int count) {
             assertEquals(
                     count,
-                    report().getParameter().stream()
+                    reportBundles().getParameter().stream()
                             .map(ParametersParameterComponent::getResource)
                             .filter(Bundle.class::isInstance)
                             .map(Bundle.class::cast)
@@ -378,8 +391,8 @@ class MultiMeasure {
             return this;
         }
 
-        public MultiMeasure.SelectedReport hasMeasureReportCountPerUrl(int count, String measureUrl) {
-            var reports = report().getParameter().stream()
+        public MultiMeasure.SelectedReportBundles hasMeasureReportCountPerUrl(int count, String measureUrl) {
+            var reports = reportBundles().getParameter().stream()
                     .map(ParametersParameterComponent::getResource)
                     .filter(Bundle.class::isInstance)
                     .map(Bundle.class::cast)
@@ -422,14 +435,15 @@ class MultiMeasure {
         }
 
         public SelectedMeasureReport getFirstMeasureReport() {
-            var mr = (MeasureReport) ((Bundle) report().getParameterFirstRep().getResource())
-                    .getEntryFirstRep()
-                    .getResource();
+            var mr = (MeasureReport)
+                    ((Bundle) reportBundles().getParameterFirstRep().getResource())
+                            .getEntryFirstRep()
+                            .getResource();
             return this.measureReport(g -> mr);
         }
 
         public SelectedMeasureReport getSecondMeasureReport() {
-            var entries = report().getParameter().stream()
+            var entries = reportBundles().getParameter().stream()
                     .flatMap(p -> ((Bundle) p.getResource()).getEntry().stream())
                     .toList();
             if (entries.size() < 2) {
@@ -474,13 +488,24 @@ class MultiMeasure {
         }
     }
 
-    public static class SelectedMeasureReport extends MultiMeasure.Selected<MeasureReport, SelectedReport> {
+    public static class SelectedMeasureReport extends MultiMeasure.Selected<MeasureReport, SelectedReportBundles> {
+        private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureReport.class);
+        private final IParser jsonParser =
+                FhirContext.forR4Cached().newJsonParser().setPrettyPrint(true);
+
         public MeasureReport report() {
             return this.value();
         }
 
-        public SelectedMeasureReport(MeasureReport value, SelectedReport parent) {
+        public SelectedMeasureReport(MeasureReport value, SelectedReportBundles parent) {
             super(value, parent);
+        }
+
+        // Log the JSON corresponding to the report at this point:
+        public SelectedMeasureReport logReportJson() {
+            logger.info(jsonParser.encodeResourceToString(report()));
+
+            return this;
         }
 
         public MeasureReport measureReport() {

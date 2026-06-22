@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
@@ -22,7 +23,41 @@ public class StratumValueWrapper {
     protected Object value;
 
     public StratumValueWrapper(Object value) {
-        this.value = value;
+        this.value = normalizeEngineNativeValue(value);
+    }
+
+    /**
+     * CQL-5 stratifier/SDE results arrive as engine-native values: FHIR resources and complex types
+     * as {@link org.opencds.cqf.cql.engine.runtime.ClassInstance}, and primitives as CQL
+     * {@link org.opencds.cqf.cql.engine.runtime.SimpleValue}s (e.g. CQL String, Integer). Their
+     * {@code toString()} adds CQL formatting (a CQL String renders as {@code 'male'}, not
+     * {@code male}), so left unnormalized they fall through the typed-rendering branches below to
+     * {@code toString()} and produce wrong stratum values/keys. Normalize once at construction so
+     * the FHIR-typed and primitive rendering branches apply.
+     */
+    private static Object normalizeEngineNativeValue(Object rawValue) {
+        // FHIR-namespaced ClassInstance -> HAPI FHIR R4 typed object (resource, CodeableConcept, ...)
+        var converted = ClassInstanceHelper.convertToFhirR4IfNeeded(rawValue);
+        if (converted != rawValue) {
+            return converted;
+        }
+        // CQL SimpleValue primitive -> underlying plain Java value
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.String cqlString) {
+            return cqlString.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Boolean cqlBoolean) {
+            return cqlBoolean.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Integer cqlInteger) {
+            return cqlInteger.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Long cqlLong) {
+            return cqlLong.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Decimal cqlDecimal) {
+            return cqlDecimal.getValue();
+        }
+        return rawValue;
     }
 
     @Override

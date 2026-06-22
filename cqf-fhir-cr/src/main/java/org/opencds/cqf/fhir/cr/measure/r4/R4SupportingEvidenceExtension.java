@@ -353,6 +353,14 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
+        // CQL-5 changed Code.toString() to a quoted, multi-line form; render the stable single-line
+        // representation the supporting-evidence string value has always carried. Handle this before
+        // convertToFhirR4, which would coerce the Code into a bare CodeType losing system/display.
+        if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Code cqlCode) {
+            valueExt.setValue(new StringType(formatCqlCode(cqlCode)));
+            return;
+        }
+
         var value = leaf instanceof Value cqlValue ? convertToFhirR4(cqlValue) : leaf;
 
         // Scalars / resources / numeric
@@ -371,6 +379,11 @@ public class R4SupportingEvidenceExtension {
         } else {
             valueExt.setValue(new StringType(String.valueOf(leaf)));
         }
+    }
+
+    private static String formatCqlCode(org.opencds.cqf.cql.engine.runtime.Code code) {
+        return "Code { code: %s, system: %s, version: %s, display: %s }"
+                .formatted(code.getCode(), code.getSystem(), code.getVersion(), code.getDisplay());
     }
 
     private static Period tryBuildPeriod(Interval interval) {

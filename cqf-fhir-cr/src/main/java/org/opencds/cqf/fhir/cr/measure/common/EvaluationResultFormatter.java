@@ -73,7 +73,6 @@ public class EvaluationResultFormatter {
             }
 
             // Format value
-            // Object value = expressionResult.raw();
             sb.append(indent(baseIndent + 1)).append("Value: ");
             sb.append(formatValue(expressionResult)).append("\n");
         }
@@ -130,7 +129,6 @@ public class EvaluationResultFormatter {
      * @return formatted string representation
      */
     private static String formatValue(CqlExpressionValue value) {
-        // var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         if (value == null || value.isNull()) {
             return "null";
         }
@@ -191,6 +189,25 @@ public class EvaluationResultFormatter {
             if (StringUtils.isNotBlank(id)) {
                 return id;
             }
+        }
+
+        // CQL-5 primitive SimpleValues render their plain underlying value, not the CQL-quoted
+        // toString() form (a CQL String prints as 'x', an Integer/Decimal carry no quoting issue but
+        // are handled uniformly here for consistency).
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.String cqlString) {
+            return cqlString.getValue();
+        }
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.Boolean cqlBoolean) {
+            return String.valueOf(cqlBoolean.getValue());
+        }
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.Integer cqlInteger) {
+            return String.valueOf(cqlInteger.getValue());
+        }
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.Long cqlLong) {
+            return String.valueOf(cqlLong.getValue());
+        }
+        if (value instanceof org.opencds.cqf.cql.engine.runtime.Decimal cqlDecimal) {
+            return String.valueOf(cqlDecimal.getValue());
         }
 
         // Fallback to toString for other types

@@ -663,7 +663,6 @@ public class FunctionEvaluationHandler {
 
         evaluationResultToReturn.addExpressionResult(
                 CqlExpressionValue.ofRaw(expressionName, functionResults, evaluatedResources));
-        // new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }
@@ -672,7 +671,6 @@ public class FunctionEvaluationHandler {
             CqlEvaluationResult result, String expressionName, Object functionResults, Set<Value> evaluatedResources) {
 
         result.addExpressionResult(CqlExpressionValue.ofRaw(expressionName, functionResults, evaluatedResources));
-        // new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
     }
 
     private static boolean isExpressionFunctionRef(

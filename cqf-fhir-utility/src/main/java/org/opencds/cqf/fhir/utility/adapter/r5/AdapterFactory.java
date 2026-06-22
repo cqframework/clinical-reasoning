@@ -76,7 +76,9 @@ public class AdapterFactory implements IAdapterFactory {
 
     @Override
     public IAdapter<?> createBase(IBase element) {
-        if (element instanceof IBaseResource resource) {
+        if (element.fhirType().equals("Tuple")) {
+            return createTuple(element);
+        } else if (element instanceof IBaseResource resource) {
             return createResource(resource);
         } else if (element instanceof QuestionnaireItemComponent item) {
             return createQuestionnaireItem(item);

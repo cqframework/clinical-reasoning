@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -27,6 +29,8 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Tuple;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -268,6 +272,70 @@ class ItemProcessorTests {
         var actual = itemProcessor.processContextItem(populateRequest, adapter);
         assertEquals(1, actual.size());
         assertTrue(actual.get(0).getAnswer().isEmpty());
+    }
+
+    @Test
+    void testTupleContextPopulatesGroupChildrenFromNamedMembers() {
+        // A population-context expression that returns a CQL Tuple (a value whose fhirType() is
+        // "Tuple") must be wrapped so its named members resolve when the group's child items are
+        // populated by definition. Previously the Tuple was wrapped with createBase (an
+        // ElementAdapter), whose resolvePath cannot resolve a Tuple's named members and throws; the
+        // exception was swallowed and the group was left silently unpopulated.
+        final var fhirVersion = FhirVersionEnum.R4;
+        final var profileUrl = "http://example.org/StructureDefinition/tuple-context-profile";
+        final var questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        final var populateRequest = newPopulateRequestForVersion(fhirVersion, libraryEngine, questionnaire);
+
+        // child item populated from the tuple member "gender" via its definition
+        final var childItem = new QuestionnaireItemComponent()
+                .setLinkId("1.1")
+                .setType(QuestionnaireItemType.STRING)
+                .setDefinition(profileUrl + "#Patient.gender");
+        final var groupItem = new QuestionnaireItemComponent()
+                .setLinkId("1")
+                .setType(QuestionnaireItemType.GROUP)
+                .setDefinition(profileUrl + "#Patient")
+                .addItem(childItem);
+        final var extensions = List.of(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
+        groupItem.setExtension(extensions);
+
+        final var profile = new StructureDefinition();
+        profile.setUrl(profileUrl);
+        final var genderElement = profile.getDifferential().addElement();
+        genderElement.setPath("Patient.gender");
+        genderElement.setId("Patient.gender");
+        genderElement.addType().setCode("code");
+        doReturn(new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(profile)))
+                .when(repository)
+                .search(eq(Bundle.class), eq(StructureDefinition.class), any(com.google.common.collect.Multimap.class));
+
+        // the population-context expression returns a CQL Tuple carrying named members
+        final var tuple = new Tuple();
+        tuple.addProperty("gender", List.<Base>of(new StringType("male")));
+        tuple.addProperty("name", List.<Base>of(new StringType("Smith")));
+        final var expression = new CqfExpression().setLanguage("text/cql").setExpression("DefineTuple");
+        doReturn(expression)
+                .when(expressionProcessor)
+                .getCqfExpression(populateRequest, extensions, Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
+        doReturn(List.<IBase>of(tuple))
+                .when(expressionProcessor)
+                .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
+
+        final var adapter =
+                (IQuestionnaireItemComponentAdapter) IAdapterFactory.createAdapterForBase(fhirVersion, groupItem);
+
+        // execute
+        final var actual = itemProcessor.processContextItem(populateRequest, adapter);
+
+        // validate: the group's child item is populated from the tuple's "gender" member
+        assertEquals(1, actual.size());
+        final var responseGroup =
+                (QuestionnaireResponseItemComponent) actual.get(0).get();
+        assertTrue(responseGroup.hasItem(), "group child items should be populated from the tuple");
+        final var responseChild = responseGroup.getItemFirstRep();
+        assertTrue(responseChild.hasAnswer(), "child item should have an answer populated from the tuple member");
+        assertEquals("male", ((StringType) responseChild.getAnswerFirstRep().getValue()).getValue());
     }
 
     @Test

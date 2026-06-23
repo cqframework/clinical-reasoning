@@ -426,9 +426,9 @@ public class CqlFhirParametersConverter {
             throw new IllegalArgumentException("Could not resolve FHIR type: " + typeName);
         }
         if (StringUtils.isNotBlank(parentName)
+                && !clazz.isEnum()
                 && clazz.getName().contains("$")
-                && !clazz.getEnclosingClass().getSimpleName().equals(parentName)
-                && !clazz.getEnclosingClass().getSimpleName().equals("Enumerations")) {
+                && !clazz.getEnclosingClass().getSimpleName().equals(parentName)) {
             var correctClassName =
                     clazz.getName().replace(clazz.getEnclosingClass().getSimpleName(), parentName);
             try {

@@ -91,7 +91,7 @@ public class ServerR4Config {
                 .withRegisteredNamespaces(Map.of(
                         "hl7.fhir.uv.cql",
                         "http://hl7.org/fhir/uv/cql",
-                        "nhl7.fhir.us.cql",
+                        "hl7.fhir.us.cql",
                         "http://hl7.org/fhir/us/cql"));
     }
 

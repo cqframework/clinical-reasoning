@@ -574,6 +574,11 @@ public class FunctionEvaluationHandler {
 
     private static Optional<ExpressionResult> tryGetExpressionResult(
             String expressionName, EvaluationResult evaluationResult) {
+        if (expressionName == null) {
+            throw new InternalErrorException(
+                    "PopulationDef criteria reference: expression name is missing for continuous variable observation");
+        }
+
         if (evaluationResult == null) {
             return Optional.empty();
         }

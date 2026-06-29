@@ -5,6 +5,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 
+/** This class serves as a wrapper for evaluation results from the CQL engine allowing a custom
+ * CqlExpressionValue to be stored for each expression while still preserving the metadata
+ * on the original EvaluationResult.
+ */
 public class CqlEvaluationResult {
     private final EvaluationResult result;
     private List<CqlExpressionValue> expressionResults;

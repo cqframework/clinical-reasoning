@@ -68,7 +68,8 @@ public final class CqlExpressionValue {
         return EMPTY;
     }
 
-    public @Nullable String expressionName() {
+    @Nullable
+    public String expressionName() {
         return expressionName;
     }
 

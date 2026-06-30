@@ -105,29 +105,6 @@ class R4MeasureReportBuilderTest {
         assertTrue(contained.isEmpty());
     }
 
-    // TODO: Is this testing something that can no longer be done?
-    //    @Test
-    //    void happyPathEmptySdesAllNullResources() {
-    //        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
-    //
-    //        var nullList = new ArrayList<>();
-    //        nullList.add(null);
-    //        var nulls = new org.opencds.cqf.cql.engine.runtime.List(List.of(null));
-    //
-    //        var measureReport = r4MeasureReportBuilder.build(
-    //                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-    //                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
-    //                MeasureReportType.INDIVIDUAL,
-    //                null,
-    //                List.of());
-    //
-    //        assertNotNull(measureReport);
-    //
-    //        final List<Resource> contained = measureReport.getContained();
-    //
-    //        assertTrue(contained.isEmpty());
-    //    }
-
     @Test
     void happyPathNonEmptySdes() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();

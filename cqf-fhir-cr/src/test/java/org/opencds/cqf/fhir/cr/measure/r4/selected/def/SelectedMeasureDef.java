@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.slf4j.Logger;
@@ -112,8 +113,7 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
      * @return this SelectedMeasureDef for chaining
      */
     public SelectedMeasureDef<P> logEvaluationResults() {
-        // TODO: merge stompage?
-        // logger.info(EvaluationResultFormatter.formatMeasureEvaluationResults(value().id(), evaluationResults));
+        logger.info(EvaluationResultFormatter.formatMeasureEvaluationResults(value().id(), evaluationResults));
         return this;
     }
 

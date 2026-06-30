@@ -556,9 +556,9 @@ public class MeasureReportDefScorer {
                             .filter(entry -> containsResourceIds(entry, stratumResourceIds))
                             .toList())
                     .filter(entries -> !entries.isEmpty())
-                    // TODO: use populationDef.expression() here?
-                    .map(entries -> CqlExpressionValue.ofRaw(null, new ObservationAccumulator(entries), null))
-                    .collect(Collectors.toList());
+                    .map(entries -> CqlExpressionValue.ofRaw(
+                            populationDef.expression(), new ObservationAccumulator(entries), null))
+                    .toList();
         }
 
         // For non-MEASUREOBSERVATION populations, filter resources directly
@@ -577,6 +577,7 @@ public class MeasureReportDefScorer {
                 .collect(Collectors.toList());
     }
 
+    // TODO: Consider pulling this method into a utility class
     private static boolean containsResourceIds(ObservationEntry entry, Set<String> stratumResourceIds) {
         final Object inputResource = entry.inputResource();
         if (inputResource instanceof ClassInstance classInstance && isFhirResource(FhirVersionEnum.R4, classInstance)) {

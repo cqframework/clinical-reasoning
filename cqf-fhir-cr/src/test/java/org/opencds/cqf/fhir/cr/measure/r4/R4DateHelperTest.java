@@ -62,21 +62,6 @@ class R4DateHelperTest {
         assertEquals("2019-12-31", formatter.format(period.getEnd().toInstant().atOffset(offset)));
     }
 
-    //    @Disabled("This test now fails because Interval accepts Java types and converts them to CQL type")
-    //    @Test
-    //    void checkNull() {
-    //        var helper = new R4DateHelper();
-    //        final Interval measurementPeriodInterval = new Interval(new java.util.Date(), true, new java.util.Date(),
-    // true);
-    //        try {
-    //            helper.buildMeasurementPeriod(measurementPeriodInterval);
-    //            fail();
-    //        } catch (IllegalArgumentException e) {
-    //            assertTrue(e.getMessage().contains("Measurement period should be an interval of CQL DateTime or
-    // Date"));
-    //        }
-    //    }
-
     private record ZonedDateTimesParams(ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {}
 
     public static Stream<ZonedDateTimesParams> zonedDateTimesParams() {

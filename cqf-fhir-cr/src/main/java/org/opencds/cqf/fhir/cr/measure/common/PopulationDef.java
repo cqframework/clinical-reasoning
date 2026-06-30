@@ -143,7 +143,7 @@ public class PopulationDef {
         // we drop the wrapper entirely so the count stays correct.
         Set<CqlExpressionValue> rebuilt = new HashSetForCqlExpressionValues();
         for (CqlExpressionValue element : resourcesForSubject) {
-            processSingleCqlExpressionValue(measureObservationResourceKey, element, rebuilt);
+            addExpressionValueIfNeeded(measureObservationResourceKey, element, rebuilt);
         }
         resourcesForSubject.clear();
         resourcesForSubject.addAll(rebuilt);
@@ -154,7 +154,7 @@ public class PopulationDef {
         }
     }
 
-    private static void processSingleCqlExpressionValue(
+    private static void addExpressionValueIfNeeded(
             Object measureObservationResourceKey, CqlExpressionValue element, Set<CqlExpressionValue> rebuilt) {
         if (element == null) {
             return;

@@ -65,6 +65,7 @@ public class R4MeasureReportUtils {
         // Fast path for non-component stratifiers (single value)
         if (!stratumDef.isComponent()) {
             var valuePair = valueDefs.iterator().next();
+            // TODO: Consider pulling this into a utility class
             var stratumValue = valuePair.value();
 
             var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());

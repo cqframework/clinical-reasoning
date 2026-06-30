@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import org.slf4j.Logger;
@@ -82,7 +83,7 @@ public class MeasureObservationHandler {
      * @param subjectId the subject ID
      */
     private static void removeMatchingObservationInputs(
-            java.util.List<Object> observationInputs,
+            List<Object> observationInputs,
             Set<CqlExpressionValue> exclusionResources,
             PopulationDef measureObservationDef,
             String subjectId) {

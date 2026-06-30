@@ -10,7 +10,6 @@ import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
  * Equivalent to the FHIR stratum population.
- *
  * This is meant to be the source of truth for all data points regarding stratum populations.
  * <p/>
  * Converted from record to class to support mutable aggregationResult field
@@ -181,7 +180,7 @@ public class StratumPopulationDef {
             return "null";
         }
 
-        // TODO: why 5?
+        // Limiting to 5 here to ensure we don't get flooded with values in the logs
         var limited = populationDefEvaluationResultIntersection.stream()
                 .limit(5)
                 .map(obj -> {

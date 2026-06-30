@@ -236,6 +236,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
+    // TODO: Consider pulling into a utility class
     private String getPopulationResourceIds(CqlExpressionValue wrapper) {
         if (wrapper != null) {
             if (wrapper.raw() instanceof IBaseResource resource) {

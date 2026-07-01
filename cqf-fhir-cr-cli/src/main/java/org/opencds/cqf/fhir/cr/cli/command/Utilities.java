@@ -1,5 +1,7 @@
 package org.opencds.cqf.fhir.cr.cli.command;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.io.BufferedWriter;
@@ -20,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cql.CqlOptions;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
@@ -34,6 +37,7 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.utility.repository.ProxyRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 public class Utilities {
 
     private Utilities() {}
@@ -93,6 +97,15 @@ public class Utilities {
     public static String tempConvert(Object value) {
         if (value == null) {
             return "null";
+        }
+
+        if (value instanceof ClassInstance classInstance) {
+            var id = getId(classInstance);
+            if (id != null) {
+                var idPart = id.contains("/") ? id.split("/")[1] : id;
+                return "%s(id=%s)".formatted(classInstance.getType().getLocalPart(), idPart);
+            }
+            return classInstance.getType().getLocalPart();
         }
 
         if (value instanceof Iterable<?> values) {

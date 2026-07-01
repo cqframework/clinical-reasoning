@@ -55,7 +55,7 @@ class ApplyRequestTests {
                 .addParameter(org.opencds.cqf.fhir.utility.dstu3.Parameters.part("param", "true"));
         var bundle = new org.hl7.fhir.dstu3.model.Bundle();
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.DSTU3, libraryEngine, null, null, inputParameterResolver)
+                        FhirVersionEnum.DSTU3, libraryEngine, null, inputParameterResolver)
                 .setData(bundle);
         var activityDef = new org.hl7.fhir.dstu3.model.ActivityDefinition();
         doReturn(params).when(inputParameterResolver).getParameters();
@@ -69,7 +69,7 @@ class ApplyRequestTests {
                 .addParameter(org.opencds.cqf.fhir.utility.r4.Parameters.part("param", "true"));
         var bundle = new org.hl7.fhir.r4.model.Bundle();
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver)
+                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
                 .setData(bundle);
         var activityDef = new org.hl7.fhir.r4.model.ActivityDefinition();
         doReturn(params).when(inputParameterResolver).getParameters();
@@ -83,7 +83,7 @@ class ApplyRequestTests {
                 .addParameter(org.opencds.cqf.fhir.utility.r5.Parameters.part("param", "true"));
         var bundle = new org.hl7.fhir.r5.model.Bundle();
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R5, libraryEngine, null, null, inputParameterResolver)
+                        FhirVersionEnum.R5, libraryEngine, null, inputParameterResolver)
                 .setData(bundle);
         var activityDef = new org.hl7.fhir.r5.model.ActivityDefinition();
         doReturn(params).when(inputParameterResolver).getParameters();
@@ -94,7 +94,7 @@ class ApplyRequestTests {
     @Test
     void toPopulateReturnsNullWithNoQuestionnaire() {
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                FhirVersionEnum.R4, libraryEngine, null, null, inputParameterResolver);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var populateRequest = request.toPopulateRequest();
         assertNull(populateRequest);
     }
@@ -130,7 +130,7 @@ class ApplyRequestTests {
         doReturn(FhirContext.forCached(fhirVersion)).when(repository).fhirContext();
         doReturn(patient).when(repository).read(any(), eq(new IdType("Patient/patientId")));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        fhirVersion, libraryEngine, null, params, inputParameterResolver)
+                        fhirVersion, libraryEngine, params, inputParameterResolver)
                 .setQuestionnaire(questionnaire);
         var populateRequest = request.toPopulateRequest();
         assertInstanceOf(PopulateRequest.class, populateRequest);

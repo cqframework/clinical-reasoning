@@ -277,6 +277,9 @@ public abstract class BaseRetrieveProvider implements RetrieveProvider {
         // "Medication/med-id"
         final String primitiveString = code.getValueAsString().replace(dataType + "/", "");
         for (final Object c : codes) {
+            if (c instanceof Code cCode && cCode.getCode().equals(primitiveString)) {
+                return true;
+            }
             if (c instanceof String s && s.equals(primitiveString)) {
                 return true;
             }

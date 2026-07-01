@@ -8,12 +8,12 @@ import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemC
 import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 
-public class QuestionnaireResponseItemAnswerComponentAdapter extends BaseAdapter
+public class QuestionnaireResponseItemAnswerComponentAdapter extends BaseElementAdapter
         implements IQuestionnaireResponseItemAnswerComponentAdapter {
 
     private final QuestionnaireResponseItemAnswerComponent answer;

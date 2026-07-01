@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import java.util.Collection;
-import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -12,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
@@ -24,7 +23,41 @@ public class StratumValueWrapper {
     protected Object value;
 
     public StratumValueWrapper(Object value) {
-        this.value = value;
+        this.value = normalizeEngineNativeValue(value);
+    }
+
+    /**
+     * CQL-5 stratifier/SDE results arrive as engine-native values: FHIR resources and complex types
+     * as {@link org.opencds.cqf.cql.engine.runtime.ClassInstance}, and primitives as CQL
+     * {@link org.opencds.cqf.cql.engine.runtime.SimpleValue}s (e.g. CQL String, Integer). Their
+     * {@code toString()} adds CQL formatting (a CQL String renders as {@code 'male'}, not
+     * {@code male}), so left unnormalized they fall through the typed-rendering branches below to
+     * {@code toString()} and produce wrong stratum values/keys. Normalize once at construction so
+     * the FHIR-typed and primitive rendering branches apply.
+     */
+    private static Object normalizeEngineNativeValue(Object rawValue) {
+        // FHIR-namespaced ClassInstance -> HAPI FHIR R4 typed object (resource, CodeableConcept, ...)
+        var converted = ClassInstanceHelper.convertToFhirR4IfNeeded(rawValue);
+        if (converted != rawValue) {
+            return converted;
+        }
+        // CQL SimpleValue primitive -> underlying plain Java value
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.String cqlString) {
+            return cqlString.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Boolean cqlBoolean) {
+            return cqlBoolean.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Integer cqlInteger) {
+            return cqlInteger.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Long cqlLong) {
+            return cqlLong.getValue();
+        }
+        if (rawValue instanceof org.opencds.cqf.cql.engine.runtime.Decimal cqlDecimal) {
+            return cqlDecimal.getValue();
+        }
+        return rawValue;
     }
 
     @Override
@@ -77,13 +110,14 @@ public class StratumValueWrapper {
     private static final String EMPTY_STRATUM_VALUE = "empty";
 
     public String getKey() {
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         // Handle null values - group them into a special "null" stratum
-        if (value == null) {
+        if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
 
         // Handle empty collections - group them into a special "empty" stratum
-        if (isEmptyCollection(value)) {
+        if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
 
@@ -124,10 +158,11 @@ public class StratumValueWrapper {
     }
 
     public String getDescription() {
-        if (value == null) {
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
+        if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
-        if (isEmptyCollection(value)) {
+        if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
         if (value instanceof IBaseCoding) {
@@ -169,29 +204,13 @@ public class StratumValueWrapper {
         return String.join("-", elements);
     }
 
-    /**
-     * Check if the value is an empty collection (List, Set, Map, or other Iterable).
-     * CQL's empty list "{}" evaluates to an empty collection, which should be treated
-     * as a distinct stratum value rather than causing an error.
-     */
-    private static boolean isEmptyCollection(Object value) {
-        if (value instanceof Collection<?> collection) {
-            return collection.isEmpty();
-        }
-        if (value instanceof Map<?, ?> map) {
-            return map.isEmpty();
-        }
-        if (value instanceof Iterable<?> iterable) {
-            return !iterable.iterator().hasNext();
-        }
-        return false;
-    }
-
     private String getValueAsString(Object valueInner) {
-        if (valueInner == null) {
+        var wrapper = CqlExpressionValue.ofRaw(null, valueInner, null);
+        if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;
         }
-        if (isEmptyCollection(valueInner)) {
+        // CQL's empty list "{}" should be a distinct stratum value, not an error
+        if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
         if (valueInner instanceof IBaseCoding) {

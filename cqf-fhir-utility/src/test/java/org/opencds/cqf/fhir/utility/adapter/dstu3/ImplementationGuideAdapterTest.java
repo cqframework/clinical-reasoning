@@ -14,7 +14,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.BooleanType;
@@ -22,6 +21,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.ImplementationGuide.ImplementationGuidePackageComponent;
 import org.hl7.fhir.dstu3.model.ImplementationGuide.ImplementationGuidePackageResourceComponent;
@@ -125,7 +125,7 @@ public class ImplementationGuideAdapterTest implements IImplementationGuideAdapt
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(implementationGuide);
         var copy = (ImplementationGuide) adapter.copy();
         var adapterCopy = new ImplementationGuideAdapter(copy);
-        adapterCopy.setId(new IdDt("ImplementationGuide", "implementationGuide-2"));
+        adapterCopy.setId(new IdType("ImplementationGuide", "implementationGuide-2"));
         assertNotEquals(implementationGuide.getId(), copy.getId());
         implementationGuide.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

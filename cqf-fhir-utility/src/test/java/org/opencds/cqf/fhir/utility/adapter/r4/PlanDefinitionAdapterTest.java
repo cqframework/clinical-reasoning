@@ -10,7 +10,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -19,6 +18,7 @@ import java.util.Map;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
@@ -154,7 +154,7 @@ class PlanDefinitionAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(planDef);
         var copy = (PlanDefinition) adapter.copy();
         var adapterCopy = new PlanDefinitionAdapter(copy);
-        adapterCopy.setId(new IdDt("PlanDefinition", "plan-2"));
+        adapterCopy.setId(new IdType("PlanDefinition", "plan-2"));
         assertNotEquals(planDef.getId(), copy.getId());
         planDef.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

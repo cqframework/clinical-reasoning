@@ -3,6 +3,8 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 
 /**
  * The input-parameter slot of a {@link StratifierRowKey}.
@@ -52,12 +54,31 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
      * the now-removed {@code normalizeResourceKey} helper).
      */
     static StratifierRowValue ofFunctionInput(Object obj) {
+        final String resourceId = resourceIdOrNull(obj);
+        if (resourceId != null) {
+            return new Resource(resourceId);
+        }
+        return new Resource(String.valueOf(obj));
+    }
+
+    /**
+     * Returns the versionless {@code Type/id} string for a FHIR-resource input — whether it arrives
+     * as a HAPI {@link IBaseResource} or as a CQL-5 engine-native {@link ClassInstance} FHIR
+     * resource — or {@code null} for anything else (primitives, resources without an id).
+     * Mirrors {@code MeasureMultiSubjectEvaluator.normalizePopulationKey} so a function input and
+     * the population resource it should intersect with produce the same key.
+     */
+    @Nullable
+    private static String resourceIdOrNull(@Nullable Object obj) {
         if (obj instanceof IBaseResource resource
                 && resource.getIdElement() != null
                 && !resource.getIdElement().isEmpty()) {
-            return new Resource(resource.getIdElement().toVersionless().getValue());
+            return resource.getIdElement().toVersionless().getValue();
         }
-        return new Resource(String.valueOf(obj));
+        if (obj instanceof ClassInstance classInstance) {
+            return ClassInstanceHelper.getId(classInstance);
+        }
+        return null;
     }
 
     /**
@@ -70,10 +91,9 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
         if (value == null) {
             return new Scalar(index, null);
         }
-        if (value instanceof IBaseResource resource
-                && resource.getIdElement() != null
-                && !resource.getIdElement().isEmpty()) {
-            return new Resource(resource.getIdElement().toVersionless().getValue());
+        final String resourceId = resourceIdOrNull(value);
+        if (resourceId != null) {
+            return new Resource(resourceId);
         }
         return new Scalar(index, value);
     }

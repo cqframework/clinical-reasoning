@@ -20,6 +20,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierRowValue.Resource;
 import org.opencds.cqf.fhir.cr.measure.common.StratifierRowValue.Scalar;
@@ -27,6 +29,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierRowValue.Scalar;
 class MeasureMultiSubjectEvaluatorTest {
 
     private static final FhirContext FHIR_CONTEXT = FhirContext.forR4Cached();
+    static final FhirModelResolver modelResolver = new R4FhirModelResolver();
 
     private static MeasureDef measureDefWith(SdeDef... sdes) {
         return new MeasureDef(
@@ -90,7 +93,7 @@ class MeasureMultiSubjectEvaluatorTest {
     @Test
     void singleSubject_singlePrimitiveValue() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        sde.putResult("Patient/p1", "male", Set.of());
+        sde.putResult("Patient/p1", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
@@ -104,9 +107,9 @@ class MeasureMultiSubjectEvaluatorTest {
     @Test
     void multipleSubjects_sameValue() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        sde.putResult("Patient/p1", "male", Set.of());
-        sde.putResult("Patient/p2", "male", Set.of());
-        sde.putResult("Patient/p3", "male", Set.of());
+        sde.putResult("Patient/p1", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
+        sde.putResult("Patient/p2", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
+        sde.putResult("Patient/p3", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
@@ -117,9 +120,9 @@ class MeasureMultiSubjectEvaluatorTest {
     @Test
     void multipleSubjects_differentValues() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        sde.putResult("Patient/p1", "male", Set.of());
-        sde.putResult("Patient/p2", "female", Set.of());
-        sde.putResult("Patient/p3", "male", Set.of());
+        sde.putResult("Patient/p1", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
+        sde.putResult("Patient/p2", null, new org.opencds.cqf.cql.engine.runtime.String("female"), Set.of());
+        sde.putResult("Patient/p3", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
@@ -132,10 +135,10 @@ class MeasureMultiSubjectEvaluatorTest {
 
     @Test
     void resourceTypedValues_accumulated() {
-        var patient = (Patient) new Patient().setId(new IdType("Patient", "patient1"));
+        var patient = modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "patient1")), false);
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        sde.putResult("Patient/p1", patient, Set.of());
-        sde.putResult("Patient/p2", patient, Set.of());
+        sde.putResult("Patient/p1", null, patient, Set.of());
+        sde.putResult("Patient/p2", null, patient, Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
@@ -146,7 +149,11 @@ class MeasureMultiSubjectEvaluatorTest {
     @Test
     void nullValues_filteredOut() {
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        sde.putResult("Patient/p1", Arrays.asList("male", null, "female"), Set.of());
+        var list = new org.opencds.cqf.cql.engine.runtime.List(Arrays.asList(
+                new org.opencds.cqf.cql.engine.runtime.String("male"),
+                null,
+                new org.opencds.cqf.cql.engine.runtime.String("female")));
+        sde.putResult("Patient/p1", null, list, Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
@@ -156,13 +163,13 @@ class MeasureMultiSubjectEvaluatorTest {
 
     @Test
     void evaluatedResources_aggregatedAcrossSubjects() {
-        var res1 = (Patient) new Patient().setId(new IdType("Patient", "res1"));
-        var res2 = (Patient) new Patient().setId(new IdType("Patient", "res2"));
-        var res3 = (Patient) new Patient().setId(new IdType("Patient", "res3"));
+        var res1 = modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "res1")), false);
+        var res2 = modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "res2")), false);
+        var res3 = modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "res3")), false);
 
         var sde = new SdeDef("sde-1", new ConceptDef(List.of(), null), null);
-        sde.putResult("Patient/p1", "male", Set.of(res1, res2));
-        sde.putResult("Patient/p2", "female", Set.of(res2, res3));
+        sde.putResult("Patient/p1", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of(res1, res2));
+        sde.putResult("Patient/p2", null, new org.opencds.cqf.cql.engine.runtime.String("female"), Set.of(res2, res3));
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde));
 
@@ -176,12 +183,12 @@ class MeasureMultiSubjectEvaluatorTest {
     @Test
     void multipleSdeDefs_accumulatedIndependently() {
         var sde1 = new SdeDef("sde-race", new ConceptDef(List.of(), null), null);
-        sde1.putResult("Patient/p1", "white", Set.of());
-        sde1.putResult("Patient/p2", "black", Set.of());
+        sde1.putResult("Patient/p1", null, new org.opencds.cqf.cql.engine.runtime.String("white"), Set.of());
+        sde1.putResult("Patient/p2", null, new org.opencds.cqf.cql.engine.runtime.String("black"), Set.of());
 
         var sde2 = new SdeDef("sde-sex", new ConceptDef(List.of(), null), null);
-        sde2.putResult("Patient/p1", "male", Set.of());
-        sde2.putResult("Patient/p2", "male", Set.of());
+        sde2.putResult("Patient/p1", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
+        sde2.putResult("Patient/p2", null, new org.opencds.cqf.cql.engine.runtime.String("male"), Set.of());
 
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(FHIR_CONTEXT, measureDefWith(sde1, sde2));
 
@@ -220,9 +227,9 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc3 = encounter("enc-3");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
-            pop.addResource("p1", enc2);
-            pop.addResource("p2", enc3);
+            pop.addResource("p1", null, enc1);
+            pop.addResource("p1", null, enc2);
+            pop.addResource("p2", null, enc3);
 
             var component =
                     new StratifierComponentDef("strat-1-c1", textConcept("Status"), "Encounter Status Stratifier");
@@ -230,8 +237,8 @@ class MeasureMultiSubjectEvaluatorTest {
             Map<Object, Object> p1Result = new LinkedHashMap<>();
             p1Result.put(enc1, "finished");
             p1Result.put(enc2, "in-progress");
-            component.putResult("p1", p1Result, Set.of());
-            component.putResult("p2", Map.of(enc3, "finished"), Set.of());
+            component.putResult("p1", null, p1Result, Set.of());
+            component.putResult("p2", null, Map.of(enc3, "finished"), Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -281,9 +288,9 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc3 = encounter("enc-3");
 
             var ipPop = initialPopulation(basis);
-            ipPop.addResource("p1", enc1);
-            ipPop.addResource("p1", enc2);
-            ipPop.addResource("p2", enc3);
+            ipPop.addResource("p1", null, enc1);
+            ipPop.addResource("p1", null, enc2);
+            ipPop.addResource("p2", null, enc3);
 
             // MEASUREOBSERVATION population: subjectResources values are Set<Map<input, output>>,
             // exactly how FunctionEvaluationHandler.processMeasureObservation populates them.
@@ -302,13 +309,13 @@ class MeasureMultiSubjectEvaluatorTest {
             Map<Object, Object> p1Observations = new LinkedHashMap<>();
             p1Observations.put(enc1, new QuantityDef(120.0));
             p1Observations.put(enc2, new QuantityDef(80.0));
-            measureObsPop.addResource("p1", p1Observations);
-            measureObsPop.addResource("p2", Map.of(enc3, new QuantityDef(60.0)));
+            measureObsPop.addResource("p1", null, p1Observations);
+            measureObsPop.addResource("p2", null, Map.of(enc3, new QuantityDef(60.0)));
 
             var component = new StratifierComponentDef("strat-1-c1", textConcept("Gender"), "Patient Gender");
             // Scalar value per subject — what MeasureEvaluator.handleNonBooleanBasisComponent writes.
-            component.putResult("p1", "male", Set.of());
-            component.putResult("p2", "female", Set.of());
+            component.putResult("p1", null, "male", Set.of());
+            component.putResult("p2", null, "female", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -372,12 +379,12 @@ class MeasureMultiSubjectEvaluatorTest {
             var basis = basisCode("boolean");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", Boolean.TRUE);
-            pop.addResource("p2", Boolean.TRUE);
+            pop.addResource("p1", null, Boolean.TRUE);
+            pop.addResource("p2", null, Boolean.TRUE);
 
             var component = new StratifierComponentDef("strat-1-c1", textConcept("Gender"), "Gender Stratification");
-            component.putResult("p1", "male", Set.of());
-            component.putResult("p2", "female", Set.of());
+            component.putResult("p1", null, "male", Set.of());
+            component.putResult("p2", null, "female", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -405,14 +412,14 @@ class MeasureMultiSubjectEvaluatorTest {
             var basis = basisCode("boolean");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", Boolean.TRUE);
-            pop.addResource("p2", Boolean.TRUE);
-            pop.addResource("p3", Boolean.TRUE);
+            pop.addResource("p1", null, Boolean.TRUE);
+            pop.addResource("p2", null, Boolean.TRUE);
+            pop.addResource("p3", null, Boolean.TRUE);
 
             var component = new StratifierComponentDef("strat-1-c1", textConcept("Gender"), "Gender Stratification");
-            component.putResult("p1", "male", Set.of());
-            component.putResult("p2", "female", Set.of());
-            component.putResult("p3", "male", Set.of());
+            component.putResult("p1", null, "male", Set.of());
+            component.putResult("p2", null, "female", Set.of());
+            component.putResult("p3", null, "male", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -464,16 +471,16 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc3 = encounter("enc-3");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
-            pop.addResource("p1", enc2);
-            pop.addResource("p2", enc3);
+            pop.addResource("p1", null, enc1);
+            pop.addResource("p1", null, enc2);
+            pop.addResource("p2", null, enc3);
 
             var component = new StratifierComponentDef(
                     "strat-1-c1", textConcept("Distinct Statuses"), "Distinct Encounter Statuses");
             // p1's list contains both "finished" and "in-progress" → p1 appears in BOTH strata
             // with all of p1's encounters (the scalar fallback fanned out across strata).
-            component.putResult("p1", List.of("finished", "in-progress"), Set.of());
-            component.putResult("p2", List.of("finished"), Set.of());
+            component.putResult("p1", null, List.of("finished", "in-progress"), Set.of());
+            component.putResult("p2", null, List.of("finished"), Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -509,13 +516,13 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc1 = encounter("enc-1");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
+            pop.addResource("p1", null, enc1);
 
             var component = new StratifierComponentDef("strat-1-c1", textConcept("Statuses"), "Statuses");
             // The list contains a null element. ofIterableElement(null, i) creates a Scalar with
             // null value (legacy form "null_<i>"). The StratumValueWrapper for null wraps null
             // and produces a "null" stratum.
-            component.putResult("p1", Arrays.asList("finished", null), Set.of());
+            component.putResult("p1", null, Arrays.asList("finished", null), Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -542,11 +549,11 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc2 = encounter("enc-2");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
-            pop.addResource("p1", enc2);
+            pop.addResource("p1", null, enc1);
+            pop.addResource("p1", null, enc2);
 
             var component = new StratifierComponentDef("strat-1-c1", textConcept("Encounters"), "All Encounters");
-            component.putResult("p1", List.of(enc1, enc2), Set.of());
+            component.putResult("p1", null, List.of(enc1, enc2), Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -582,19 +589,19 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc2 = encounter("enc-2");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
-            pop.addResource("p1", enc2);
+            pop.addResource("p1", null, enc1);
+            pop.addResource("p1", null, enc2);
 
             // Component 1: per-encounter function result.
             var funcComponent = new StratifierComponentDef("c-status", textConcept("Status"), "Encounter Status");
             Map<Object, Object> p1Function = new LinkedHashMap<>();
             p1Function.put(enc1, "finished");
             p1Function.put(enc2, "in-progress");
-            funcComponent.putResult("p1", p1Function, Set.of());
+            funcComponent.putResult("p1", null, p1Function, Set.of());
 
             // Component 2: per-subject scalar — must be expanded across both function rows.
             var scalarComponent = new StratifierComponentDef("c-gender", textConcept("Gender"), "Patient Gender");
-            scalarComponent.putResult("p1", "male", Set.of());
+            scalarComponent.putResult("p1", null, "male", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -630,13 +637,13 @@ class MeasureMultiSubjectEvaluatorTest {
             var basis = basisCode("boolean");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", Boolean.TRUE);
+            pop.addResource("p1", pop.expression(), Boolean.TRUE);
 
             var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
-            componentA.putResult("p1", "shared-value", Set.of());
+            componentA.putResult("p1", "Expression A", "shared-value", Set.of());
 
             var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
-            componentB.putResult("p1", "shared-value", Set.of());
+            componentB.putResult("p1", "Expression B", "shared-value", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -665,16 +672,16 @@ class MeasureMultiSubjectEvaluatorTest {
             var basis = basisCode("boolean");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", Boolean.TRUE);
+            pop.addResource("p1", pop.expression(), Boolean.TRUE);
 
             var componentA = new StratifierComponentDef("component-a", textConcept("Component A"), "Expression A");
-            componentA.putResult("p1", "distinct-value", Set.of());
+            componentA.putResult("p1", "Expression A", "distinct-value", Set.of());
 
             var componentB = new StratifierComponentDef("component-b", textConcept("Component B"), "Expression B");
-            componentB.putResult("p1", "shared-value", Set.of());
+            componentB.putResult("p1", "Expression B", "shared-value", Set.of());
 
             var componentC = new StratifierComponentDef("component-c", textConcept("Component C"), "Expression C");
-            componentC.putResult("p1", "shared-value", Set.of());
+            componentC.putResult("p1", "Expression C", "shared-value", Set.of());
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1",
@@ -710,18 +717,18 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc3 = encounter("enc-3");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
-            pop.addResource("p1", enc2);
-            pop.addResource("p2", enc3);
+            pop.addResource("p1", null, enc1);
+            pop.addResource("p1", null, enc2);
+            pop.addResource("p2", null, enc3);
 
             // Criteria stratifier produces a single stratum; its count equals the intersection
             // of stratifier-selected resources with population resources, per subject.
             var stratifierDef = new StratifierDef(
                     "stratifier-1", textConcept("Selected"), "Selected Encounters", MeasureStratifierType.CRITERIA);
             // p1: stratifier selects enc1 + a non-population encounter → only enc1 intersects.
-            stratifierDef.putResult("p1", List.of(enc1, encounter("enc-not-in-pop")), Set.of());
+            stratifierDef.putResult("p1", null, List.of(enc1, encounter("enc-not-in-pop")), Set.of());
             // p2: stratifier selects enc3 → matches population.
-            stratifierDef.putResult("p2", enc3, Set.of());
+            stratifierDef.putResult("p2", null, enc3, Set.of());
 
             var groupDef = cohortGroup(basis, pop, stratifierDef);
 
@@ -740,8 +747,8 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc2 = encounter("enc-2");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
-            pop.addResource("p1", enc2);
+            pop.addResource("p1", null, enc1);
+            pop.addResource("p1", null, enc2);
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1", textConcept("Mapped"), "Mapped Encounters", MeasureStratifierType.CRITERIA);
@@ -750,7 +757,7 @@ class MeasureMultiSubjectEvaluatorTest {
             Map<Object, Object> p1Map = new LinkedHashMap<>();
             p1Map.put(enc1, "finished");
             p1Map.put(enc2, "in-progress");
-            stratifierDef.putResult("p1", p1Map, Set.of());
+            stratifierDef.putResult("p1", null, p1Map, Set.of());
 
             var groupDef = cohortGroup(basis, pop, stratifierDef);
 
@@ -766,12 +773,12 @@ class MeasureMultiSubjectEvaluatorTest {
             var enc1 = encounter("enc-1");
 
             var pop = initialPopulation(basis);
-            pop.addResource("p1", enc1);
+            pop.addResource("p1", null, enc1);
 
             var stratifierDef = new StratifierDef(
                     "stratifier-1", textConcept("Nothing"), "Nothing", MeasureStratifierType.CRITERIA);
             // null result → criteriaResultAsIntersectionSet returns Set.of().
-            stratifierDef.putResult("p1", null, Set.of());
+            stratifierDef.putResult("p1", null, null, Set.of());
 
             var groupDef = cohortGroup(basis, pop, stratifierDef);
 

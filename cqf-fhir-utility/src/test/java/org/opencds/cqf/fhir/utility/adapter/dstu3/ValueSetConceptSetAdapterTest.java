@@ -25,7 +25,6 @@ class ValueSetConceptSetAdapterTest {
         assertNotNull(adapter);
         assertEquals(conceptSet, adapter.get());
         assertEquals(FhirVersionEnum.DSTU3, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.getModelResolver());
     }
 
     @Test

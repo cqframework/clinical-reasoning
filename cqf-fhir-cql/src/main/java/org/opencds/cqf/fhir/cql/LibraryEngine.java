@@ -28,11 +28,12 @@ import org.opencds.cqf.cql.engine.execution.EvaluationParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams.LibraryParams;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
-import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +46,15 @@ public class LibraryEngine {
     protected final FhirContext fhirContext;
     protected final EvaluationSettings settings;
     protected final IAdapterFactory adapterFactory;
+    protected final FhirModelResolver<?, ?, ?, ?, ?, ?, ?, ?> modelResolver;
 
     public LibraryEngine(IRepository repository, EvaluationSettings evaluationSettings) {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.settings = requireNonNull(evaluationSettings, "evaluationSettings can not be null");
         fhirContext = repository.fhirContext();
         adapterFactory = IAdapterFactory.forFhirContext(fhirContext);
+        modelResolver = FhirModelResolverCache.resolverForVersion(
+                fhirContext.getVersion().getVersion());
     }
 
     public IRepository getRepository() {
@@ -61,8 +65,8 @@ public class LibraryEngine {
         return settings;
     }
 
-    private kotlin.Pair<String, Object> buildContextParameter(String patientId) {
-        kotlin.Pair<String, Object> contextParameter = null;
+    private kotlin.Pair<String, String> buildContextParameter(String patientId) {
+        kotlin.Pair<String, String> contextParameter = null;
         if (patientId != null) {
             if (patientId.startsWith("Patient/")) {
                 patientId = patientId.replace("Patient/", "");
@@ -116,16 +120,18 @@ public class LibraryEngine {
 
     protected String getModelName(Object base) {
         if (base instanceof List<?> list) {
-            return getModelName(list.get(0));
+            // A Tuple requires each property to have a type.  If there is no value default ot a FHIR string.
+            return list.isEmpty() ? "FHIR.string" : getModelName(list.get(0));
         }
-        if (base instanceof Tuple tuple) {
+        var fhirType = ((IBase) base).fhirType();
+        if (fhirType.equals("Tuple")) {
             var properties = new ArrayList<String>();
-            tuple.getElements().forEach((propertyName, value) -> {
+            var tuple = adapterFactory.createTuple((IBase) base);
+            tuple.getProperties().forEach((propertyName, value) -> {
                 properties.add("%s %s".formatted(propertyName, getModelName(value)));
             });
             return "Tuple { %s }".formatted(String.join(", ", properties));
         }
-        var fhirType = ((IBase) base).fhirType();
         if (fhirType.contains(".")) {
             var split = fhirType.split("\\.");
             fhirType = Arrays.stream(split).map(StringUtils::capitalize).collect(Collectors.joining("."));
@@ -149,17 +155,19 @@ public class LibraryEngine {
         if (contextParameter != null) {
             var contextType = getModelName(contextParameter);
             cqlParameters.add(new CqlParameterDefinition("%context", contextType, false));
-            evaluationParameters.put("%context", contextParameter);
+            evaluationParameters.put("%context", modelResolver.toCqlValue(contextParameter, false));
 
             var resourceType = resourceParameter == null ? contextType : getModelName(resourceParameter);
             cqlParameters.add(new CqlParameterDefinition("%resource", resourceType, false));
-            evaluationParameters.put("%resource", resourceParameter == null ? contextParameter : resourceParameter);
+            evaluationParameters.put(
+                    "%resource",
+                    modelResolver.toCqlValue(resourceParameter == null ? contextParameter : resourceParameter, false));
         }
         if (rawParameters != null) {
             rawParameters.forEach((k, v) -> {
                 cqlParameters.add(new CqlParameterDefinition(k, getModelName(v), v instanceof List<?>));
-                evaluationParameters.put(k, v);
             });
+            evaluationParameters.putAll(cqlFhirParametersConverter.toCqlParameters(rawParameters));
         }
         var libraryName = "expression";
         var libraryVersion = "1.0.0";
@@ -323,8 +331,8 @@ public class LibraryEngine {
                 engine, () -> Engines.forRepository(repository, settings, additionalData));
 
         var evaluationParameters = cqlFhirParametersConverterToUse.toCqlParameters(parameters);
-        if (rawParameters != null && !rawParameters.isEmpty()) {
-            evaluationParameters.putAll(rawParameters);
+        if (rawParameters != null) {
+            evaluationParameters.putAll(cqlFhirParametersConverterToUse.toCqlParameters(rawParameters));
         }
 
         var paramsBuilder = new EvaluationParams.Builder();

@@ -1,16 +1,20 @@
 package org.opencds.cqf.fhir.cql.engine.parameters;
 
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver.fhirModelNamespaceUri;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
+import java.util.stream.StreamSupport;
+import javax.xml.namespace.QName;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -28,8 +32,10 @@ import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 class CqlFhirParametersConverterTests {
 
@@ -66,8 +72,12 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Numerator").setValue(new BooleanType(true));
 
         var testData = new EvaluationResult();
-        testData.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), null));
-        testData.set(new EvaluationExpressionRef("Numerator"), new ExpressionResult(true, null));
+        testData.set(
+                new EvaluationExpressionRef("Patient"),
+                new ExpressionResult(new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), null));
+        testData.set(
+                new EvaluationExpressionRef("Numerator"),
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), null));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -81,8 +91,12 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Encounters").setValue(emptyListMarker());
 
         var testData = new EvaluationResult();
-        testData.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), null));
-        testData.set(new EvaluationExpressionRef("Encounters"), new ExpressionResult(Collections.emptyList(), null));
+        testData.set(
+                new EvaluationExpressionRef("Patient"),
+                new ExpressionResult(new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), null));
+        testData.set(
+                new EvaluationExpressionRef("Encounters"),
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.List(emptyList()), null));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -90,17 +104,19 @@ class CqlFhirParametersConverterTests {
     }
 
     @Test
-    void evalutionResultsWithListContainingNullValue() {
+    void evaluationResultsWithListContainingNullValue() {
         var expected = new Parameters();
         expected.addParameter().setName("NullInList").setValue(nullValueMarker());
         expected.addParameter().setName("NullInList").setValue(new IntegerType(5));
 
-        var testList = new ArrayList<>();
+        var testList = new ArrayList<Value>();
         testList.add(null);
-        testList.add(5);
+        testList.add(new org.opencds.cqf.cql.engine.runtime.Integer(5));
+
+        var cqlList = new org.opencds.cqf.cql.engine.runtime.List(testList);
 
         var testData = new EvaluationResult();
-        testData.set(new EvaluationExpressionRef("NullInList"), new ExpressionResult(testList, null));
+        testData.set(new EvaluationExpressionRef("NullInList"), new ExpressionResult(cqlList, null));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -114,7 +130,9 @@ class CqlFhirParametersConverterTests {
         expected.addParameter().setName("Null").setValue(nullValueMarker());
 
         var testData = new EvaluationResult();
-        testData.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(new Patient(), null));
+        testData.set(
+                new EvaluationExpressionRef("Patient"),
+                new ExpressionResult(new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), null));
         testData.set(new EvaluationExpressionRef("Null"), new ExpressionResult(null, null));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
@@ -124,9 +142,9 @@ class CqlFhirParametersConverterTests {
 
     @Test
     void fhirParametersToCqlParameters() {
-        var expected = new HashMap<String, Object>();
+        var expected = new HashMap<String, Value>();
         expected.put("Measurement Period", new Interval(new Date("2020-01-01"), true, new Date("2021-01-01"), true));
-        expected.put("Product Line", "Medicare");
+        expected.put("Product Line", new org.opencds.cqf.cql.engine.runtime.String("Medicare"));
 
         var testData = new Parameters();
         testData.addParameter().setName("Product Line").setValue(new StringType("Medicare"));
@@ -144,7 +162,8 @@ class CqlFhirParametersConverterTests {
 
         assertEquals(expected.get("Product Line"), actual.get("Product Line"));
 
-        assertTrue(EqualEvaluator.equal(expected.get("Measurement Period"), actual.get("Measurement Period")));
+        assertTrue(EqualEvaluator.equal(expected.get("Measurement Period"), actual.get("Measurement Period"))
+                .getValue());
     }
 
     @Test
@@ -160,10 +179,14 @@ class CqlFhirParametersConverterTests {
 
         var value = actual.get("%encounters");
 
-        assertTrue(value instanceof List);
+        assertInstanceOf(org.opencds.cqf.cql.engine.runtime.List.class, value);
 
-        @SuppressWarnings("unchecked")
-        var encounters = (List<Encounter>) value;
+        var encounters = StreamSupport.stream(
+                        ((org.opencds.cqf.cql.engine.runtime.List) value)
+                                .getValue()
+                                .spliterator(),
+                        false)
+                .toList();
 
         assertEquals(2, encounters.size());
     }
@@ -184,10 +207,14 @@ class CqlFhirParametersConverterTests {
 
         var value = actual.get("%encounters");
 
-        assertTrue(value instanceof List);
+        assertInstanceOf(org.opencds.cqf.cql.engine.runtime.List.class, value);
 
-        @SuppressWarnings("unchecked")
-        var encounters = (List<Encounter>) value;
+        var encounters = StreamSupport.stream(
+                        ((org.opencds.cqf.cql.engine.runtime.List) value)
+                                .getValue()
+                                .spliterator(),
+                        false)
+                .toList();
 
         assertEquals(1, encounters.size());
     }
@@ -212,10 +239,14 @@ class CqlFhirParametersConverterTests {
 
         var value = actual.get("%encounters");
 
-        assertTrue(value instanceof List);
+        assertInstanceOf(org.opencds.cqf.cql.engine.runtime.List.class, value);
 
-        @SuppressWarnings("unchecked")
-        var encounters = (List<Encounter>) value;
+        var encounters = StreamSupport.stream(
+                        ((org.opencds.cqf.cql.engine.runtime.List) value)
+                                .getValue()
+                                .spliterator(),
+                        false)
+                .toList();
 
         assertEquals(1, encounters.size());
     }
@@ -254,10 +285,14 @@ class CqlFhirParametersConverterTests {
 
         var value = actual.get("%encounters");
 
-        assertTrue(value instanceof List);
+        assertInstanceOf(org.opencds.cqf.cql.engine.runtime.List.class, value);
 
-        @SuppressWarnings("unchecked")
-        var encounters = (List<Encounter>) value;
+        var encounters = StreamSupport.stream(
+                        ((org.opencds.cqf.cql.engine.runtime.List) value)
+                                .getValue()
+                                .spliterator(),
+                        false)
+                .toList();
 
         assertEquals(0, encounters.size());
     }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 public class StratifierDef {
@@ -23,7 +23,7 @@ public class StratifierDef {
     private final List<StratumDef> stratum = new ArrayList<>();
 
     @Nullable
-    private Map<String, CriteriaResult> results;
+    private Map<String, CqlExpressionValue> results;
 
     public StratifierDef(String id, ConceptDef code, String expression, MeasureStratifierType stratifierType) {
         this(id, code, expression, stratifierType, Collections.emptyList());
@@ -74,12 +74,19 @@ public class StratifierDef {
         return this.components;
     }
 
-    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.getResults()
-                .put(subject, new CriteriaResult(value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
+    public void putResult(String subject, CqlExpressionValue expressionValue) {
+        this.getResults().put(subject, expressionValue);
     }
 
-    public Map<String, CriteriaResult> getResults() {
+    public void putResult(String subject, String expression, Object value, Set<Value> evaluatedResources) {
+        this.getResults()
+                .put(
+                        subject,
+                        CqlExpressionValue.ofRaw(
+                                expression, value, new HashSetForFhirResourcesAndCqlTypes<>(evaluatedResources)));
+    }
+
+    public Map<String, CqlExpressionValue> getResults() {
         if (this.results == null) {
             this.results = new HashMap<>();
         }
@@ -90,25 +97,12 @@ public class StratifierDef {
     // Ensure we handle FHIR resource identity properly
     public Set<Object> getAllCriteriaResultValues() {
         return new HashSetForFhirResourcesAndCqlTypes<>(this.getResults().values().stream()
-                .map(CriteriaResult::rawValue)
-                .map(this::toSet)
+                .map(CqlExpressionValue::valueAsSet)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableSet()));
     }
 
     public MeasureStratifierType getStratifierType() {
         return stratifierType;
-    }
-
-    private Set<Object> toSet(Object value) {
-        if (value == null) {
-            return Set.of();
-        }
-
-        if (value instanceof Iterable<?> iterable) {
-            return StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toUnmodifiableSet());
-        } else {
-            return Set.of(value);
-        }
     }
 }

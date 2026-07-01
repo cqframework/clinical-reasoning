@@ -11,10 +11,8 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
@@ -24,7 +22,6 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.IExtractProcessor;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,6 @@ public class QuestionnaireResponseProcessor {
     protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireResponseProcessor.class);
     protected final ResourceResolver questionnaireResponseResolver;
     protected final ResourceResolver questionnaireResolver;
-    protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected final IAdapterFactory adapterFactory;
     protected IRepository repository;
@@ -56,7 +52,6 @@ public class QuestionnaireResponseProcessor {
         this.questionnaireResponseResolver = new ResourceResolver("QuestionnaireResponse", this.repository);
         this.questionnaireResolver = new ResourceResolver(QUESTIONNAIRE, this.repository);
         this.fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
@@ -131,15 +126,14 @@ public class QuestionnaireResponseProcessor {
             LibraryEngine libraryEngine) {
         var questionnaireResponse = resolveQuestionnaireResponse(questionnaireResponseId);
         var questionnaire = resolveQuestionnaire(questionnaireResponse, questionnaireId);
-        var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
+        // var subject = (IBaseReference) modelResolver.resolvePath(questionnaireResponse, "subject");
         var request = new ExtractRequest(
                 questionnaireResponse,
                 questionnaire,
-                subject == null ? null : subject.getReferenceElement(),
+                // subject == null ? null : subject.getReferenceElement(),
                 parameters,
                 data,
                 libraryEngine,
-                modelResolver,
                 null);
         var processor = extractProcessor != null ? extractProcessor : new ExtractProcessor();
         return processor.extract(request);

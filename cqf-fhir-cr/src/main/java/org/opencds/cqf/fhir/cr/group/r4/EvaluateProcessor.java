@@ -43,8 +43,8 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.UriType;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.opencds.cqf.fhir.cql.Engines;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -54,6 +54,7 @@ import org.opencds.cqf.fhir.cr.group.evaluate.IEvaluateProcessor;
 import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
 import org.opencds.cqf.fhir.utility.search.Searches;
 
+@SuppressWarnings("UnstableApiUsage")
 public class EvaluateProcessor implements IEvaluateProcessor {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EvaluateProcessor.class);
 
@@ -69,10 +70,9 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         // TODO: Validate that the Group conforms to the CQLGroupDefinition profile?
         // TODO: Validate that the Group conforms to the CRMIComputableGroupDefinition profile?
         // TODO: In theory we should be able to put all this in the adapter layer and do this version independently...
-        if (!(request.getGroup() instanceof Group)) {
+        if (!(request.getGroup() instanceof Group groupDefinition)) {
             throw new IllegalArgumentException("Expected R4 group instance");
         }
-        Group groupDefinition = (Group) request.getGroup();
         log.info("Evaluating group definition {}", groupDefinition.getId());
 
         Group groupResult = new Group();
@@ -104,10 +104,9 @@ public class EvaluateProcessor implements IEvaluateProcessor {
             // Get the expression
             var expressionExtension = groupDefinition.getExtensionByUrl(
                     "http://hl7.org/fhir/StructureDefinition/characteristicExpression");
-            if (expressionExtension == null || !(expressionExtension.getValue() instanceof Expression)) {
+            if (expressionExtension == null || !(expressionExtension.getValue() instanceof Expression expression)) {
                 throw new IllegalArgumentException("Expected a characteristic expression");
             }
-            var expression = (Expression) expressionExtension.getValue();
 
             // TODO: Add support for inline expressions
             if (!expression.hasLanguage() || !expression.getLanguage().startsWith("text/cql-identifier")) {
@@ -139,17 +138,11 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                     new DateTimeType(zonedDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)));
 
             var parametersConverter = Engines.getCqlFhirParametersConverter(repository.fhirContext());
-            var evaluationParameters = parametersConverter.toCqlParameters(request.getParameters());
+            var cqlParameters = parametersConverter.toCqlParameters(request.getParameters());
 
             // Determine initial membership
-            var subjects = getSubjects(
-                    request.getSubject(),
-                    context,
-                    request.getModelResolver(),
-                    libraryUrl,
-                    expression.getExpression(),
-                    evaluationParameters,
-                    zonedDateTime);
+            var subjects =
+                    getSubjects(request, context, libraryUrl, expression.getExpression(), cqlParameters, zonedDateTime);
 
             var expressions = Set.of(expression.getExpression());
 
@@ -161,7 +154,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                                 libraryUrl,
                                 subject,
                                 request.getParameters(),
-                                evaluationParameters,
+                                null,
                                 request.getData(),
                                 zonedDateTime,
                                 expressions);
@@ -200,24 +193,27 @@ public class EvaluateProcessor implements IEvaluateProcessor {
         return groupResult;
     }
 
-    private String getPatientReference(Resource resource, ModelResolver modelResolver) {
-        var reference = modelResolver.resolvePath(
-                resource, (String) modelResolver.getContextPath("Patient", resource.fhirType()));
-        if (reference instanceof Reference) {
-            return ((Reference) reference).getReference();
+    private String getPatientReference(Resource resource, EvaluateRequest request) {
+        var adapter = request.getAdapterFactory().createResource(resource);
+        if (resource != null && "Patient".equals(adapter.get().fhirType())) {
+            var reference =
+                    adapter.resolvePath(request.getModelResolver().getContextPath("Patient", resource.fhirType()));
+            if (reference instanceof Reference) {
+                return ((Reference) reference).getReference();
+            }
         }
 
         return null;
     }
 
     private List<String> getSubjects(
-            String subject,
+            EvaluateRequest request,
             CqlEngine context,
-            ModelResolver modelResolver,
             String libraryUrl,
             String expression,
-            Map<String, Object> parameters,
+            Map<String, Value> parameters,
             ZonedDateTime zonedDateTime) {
+        var subject = request.getSubject();
         if (subject != null && !subject.isEmpty()) {
             return List.of(subject);
         }
@@ -320,7 +316,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                 while (results != null) {
 
                     for (var entry : results.getEntry()) {
-                        var reference = getPatientReference(entry.getResource(), modelResolver);
+                        var reference = getPatientReference(entry.getResource(), request);
                         if (reference != null) {
                             subjects.add(reference);
                         }
@@ -355,7 +351,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
             LibraryManager libraryManager,
             VersionedIdentifier libraryIdentifier,
             String expression,
-            Map<String, Object> parameters,
+            Map<String, Value> parameters,
             ZonedDateTime zonedDateTime) {
         CompiledLibrary compiledLibrary = libraryManager.resolveLibrary(libraryIdentifier);
         DataRequirementsProcessor drp = new DataRequirementsProcessor();
@@ -437,7 +433,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
             LibraryManager libraryManager,
             VersionedIdentifier libraryIdentifier,
             String expression,
-            Map<String, Object> parameters,
+            Map<String, Value> parameters,
             ZonedDateTime zonedDateTime) {
         var results = new ArrayList<DataRequirement>();
         var effectiveDataRequirements =
@@ -469,8 +465,7 @@ public class EvaluateProcessor implements IEvaluateProcessor {
                                             .equals("inclusion"))) {
                         for (var clause : e.getExtensionsByUrl("clause")) {
                             for (var term : clause.getExtensionsByUrl("term")) {
-                                if (term.hasValue() && term.getValue() instanceof DataRequirement) {
-                                    var dr = (DataRequirement) term.getValue();
+                                if (term.hasValue() && term.getValue() instanceof DataRequirement dr) {
                                     if (isPatientSelectiveType(dr.getType()) && dr.hasCodeFilter()
                                             || dr.hasDateFilter()) {
                                         results.add(dr);

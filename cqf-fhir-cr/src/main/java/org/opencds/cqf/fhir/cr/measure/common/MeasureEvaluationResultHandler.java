@@ -10,7 +10,6 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.slf4j.Logger;
@@ -50,18 +49,18 @@ public class MeasureEvaluationResultHandler {
      */
     public void processResults(
             FhirContext fhirContext,
-            Map<String, EvaluationResult> evalResultsPerSubject,
+            Map<String, CqlEvaluationResult> evalResultsPerSubject,
             MeasureDef measureDef,
             @Nonnull MeasureEvalType measureEvalType) {
 
         // Populate MeasureDef using MeasureEvaluator
-        for (Map.Entry<String, EvaluationResult> entry : evalResultsPerSubject.entrySet()) {
+        for (var entry : evalResultsPerSubject.entrySet()) {
             // subject
             String subjectId = entry.getKey();
             var sub = getSubjectTypeAndId(subjectId);
             var subjectIdPart = sub.getRight();
             var subjectTypePart = sub.getLeft();
-            EvaluationResult evalResult = entry.getValue();
+            var evalResult = entry.getValue();
             try {
                 // populate CQL results into MeasureDef
                 measureEvaluator.evaluate(
@@ -209,7 +208,7 @@ public class MeasureEvaluationResultHandler {
                     // "Expression result: <pop> is missing" error that masks the underlying
                     // CqlException ("Unable to locate ValueSet", etc.) and — by escaping the inner
                     // loop into the outer catch — pollutes sibling libraries' measure defs.
-                    final List<EvaluationResult> functionEvaluationResults = (libraryException == null)
+                    final List<CqlEvaluationResult> functionEvaluationResults = (libraryException == null)
                             ? FunctionEvaluationHandler.cqlFunctionEvaluation(
                                     context, measureDefs, libraryVersionedIdentifier, evaluationResult, subjectTypePart)
                             : List.of();

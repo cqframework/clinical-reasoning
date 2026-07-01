@@ -27,12 +27,15 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
     }
 
     default <T extends IBaseExtension<?, ?>> void addLaunchContextExtensions(List<T> launchContextExts) {
+        if (getQuestionnaireAdapter() == null) {
+            return;
+        }
         if (launchContextExts != null && !launchContextExts.isEmpty()) {
             launchContextExts.forEach(e -> {
                 var code = e.getExtension().stream()
                         .map(c -> (IBaseExtension<?, ?>) c)
                         .filter(c -> c.getUrl().equals("name"))
-                        .map(c -> resolvePathString(c.getValue(), "code"))
+                        .map(c -> getQuestionnaireAdapter().resolvePathString(c.getValue(), "code"))
                         .findFirst()
                         .orElse(null);
                 if (StringUtils.isNotBlank(code)) {
@@ -43,7 +46,8 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
                                     .anyMatch(lc -> lc.getExtension().stream()
                                             .map(c -> (IBaseExtension<?, ?>) c)
                                             .anyMatch(c -> c.getUrl().equals("name")
-                                                    && resolvePathString(c.getValue(), "code")
+                                                    && getQuestionnaireAdapter()
+                                                            .resolvePathString(c.getValue(), "code")
                                                             .equals(code)));
                     if (!exists) {
                         getQuestionnaireAdapter().addExtension(e);
@@ -57,7 +61,7 @@ public interface IQuestionnaireRequest extends ICqlOperationRequest {
     default void addCqlLibraryExtension() {
         getReferencedLibraries().values().forEach(library -> {
             if (StringUtils.isNotBlank(library)
-                    && getExtensionsByUrl(getQuestionnaire(), Constants.CQF_LIBRARY).stream()
+                    && getQuestionnaireAdapter().getExtensionsByUrl(Constants.CQF_LIBRARY).stream()
                             .noneMatch(e -> ((IPrimitiveType<String>) e.getValue())
                                     .getValueAsString()
                                     .equals(library))) {

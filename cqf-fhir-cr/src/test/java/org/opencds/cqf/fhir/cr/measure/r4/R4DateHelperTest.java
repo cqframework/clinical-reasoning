@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -62,18 +60,6 @@ class R4DateHelperTest {
         assertEquals(
                 "2019-01-01", formatter.format(period.getStart().toInstant().atOffset(offset)));
         assertEquals("2019-12-31", formatter.format(period.getEnd().toInstant().atOffset(offset)));
-    }
-
-    @Test
-    void checkNull() {
-        var helper = new R4DateHelper();
-        final Interval measurementPeriodInterval = new Interval(new java.util.Date(), true, new java.util.Date(), true);
-        try {
-            helper.buildMeasurementPeriod(measurementPeriodInterval);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Measurement period should be an interval of CQL DateTime or Date"));
-        }
     }
 
     private record ZonedDateTimesParams(ZonedDateTime theZonedDateTime, Precision theExpectedPrecision) {}

@@ -21,11 +21,11 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 
-public class RequestActionAdapter extends BaseAdapter implements IRequestActionAdapter {
+public class RequestActionAdapter extends BaseElementAdapter implements IRequestActionAdapter {
 
     private final RequestGroupActionComponent requestAction;
 

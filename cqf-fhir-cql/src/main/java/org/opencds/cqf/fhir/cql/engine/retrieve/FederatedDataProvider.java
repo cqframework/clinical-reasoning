@@ -8,6 +8,7 @@ import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class FederatedDataProvider extends CompositeDataProvider {
     protected final List<RetrieveProvider> retrieveProviders;
@@ -34,10 +35,10 @@ public class FederatedDataProvider extends CompositeDataProvider {
      * @return
      */
     @Override
-    public Iterable<Object> retrieve(
+    public Iterable<Value> retrieve(
             String context,
             String contextPath,
-            Object contextValue,
+            String contextValue,
             String dataType,
             String templateId,
             String codePath,
@@ -47,7 +48,7 @@ public class FederatedDataProvider extends CompositeDataProvider {
             String dateLowPath,
             String dateHighPath,
             Interval dateRange) {
-        List<Iterable<Object>> results = new ArrayList<>();
+        List<Iterable<Value>> results = new ArrayList<>();
         for (var provider : this.retrieveProviders) {
             results.add(provider.retrieve(
                     context,

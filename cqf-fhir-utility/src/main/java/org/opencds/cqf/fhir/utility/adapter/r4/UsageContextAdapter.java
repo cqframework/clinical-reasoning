@@ -5,12 +5,12 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.UsageContext;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
 
-public class UsageContextAdapter extends BaseAdapter implements IUsageContextAdapter {
+public class UsageContextAdapter extends BaseElementAdapter implements IUsageContextAdapter {
 
     private final UsageContext usageContext;
 

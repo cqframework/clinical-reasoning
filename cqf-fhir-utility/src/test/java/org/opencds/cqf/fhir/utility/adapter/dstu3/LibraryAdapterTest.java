@@ -12,7 +12,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
@@ -170,7 +170,7 @@ class LibraryAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(library);
         var copy = (Library) adapter.copy();
         var adapterCopy = new LibraryAdapter(copy);
-        adapterCopy.setId(new IdDt("Library", "library-2"));
+        adapterCopy.setId(new IdType("Library", "library-2"));
         assertNotEquals(library.getId(), copy.getId());
         library.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

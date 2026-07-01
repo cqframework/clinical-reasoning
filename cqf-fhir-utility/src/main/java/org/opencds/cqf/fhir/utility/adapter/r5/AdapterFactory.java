@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -24,6 +25,7 @@ import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComp
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
+import org.opencds.cqf.fhir.utility.adapter.ElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -73,8 +75,12 @@ public class AdapterFactory implements IAdapterFactory {
     }
 
     @Override
-    public IAdapter<IBase> createBase(IBase element) {
-        if (element instanceof QuestionnaireItemComponent item) {
+    public IAdapter<?> createBase(IBase element) {
+        if (element.fhirType().equals("Tuple")) {
+            return createTuple(element);
+        } else if (element instanceof IBaseResource resource) {
+            return createResource(resource);
+        } else if (element instanceof QuestionnaireItemComponent item) {
             return createQuestionnaireItem(item);
         } else if (element instanceof QuestionnaireResponseItemComponent responseItem) {
             return createQuestionnaireResponseItem(responseItem);
@@ -87,8 +93,7 @@ public class AdapterFactory implements IAdapterFactory {
         } else if (element instanceof ParametersParameterComponent parametersParameterComponent) {
             return createParametersParameter(parametersParameterComponent);
         } else {
-            throw new UnprocessableEntityException(
-                    String.format("Unable to create an adapter for type: %s", element.fhirType()));
+            return new ElementAdapter(FhirVersionEnum.R5, element);
         }
     }
 

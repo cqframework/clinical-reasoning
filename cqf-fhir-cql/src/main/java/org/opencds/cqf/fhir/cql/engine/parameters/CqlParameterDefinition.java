@@ -1,12 +1,14 @@
 package org.opencds.cqf.fhir.cql.engine.parameters;
 
+import org.opencds.cqf.cql.engine.runtime.Value;
+
 public class CqlParameterDefinition {
 
     public CqlParameterDefinition(String name, String type, Boolean isList) {
         this(name, type, isList, null);
     }
 
-    public CqlParameterDefinition(String name, String type, Boolean isList, Object value) {
+    public CqlParameterDefinition(String name, String type, Boolean isList, Value value) {
         this.name = name;
         this.type = type;
         this.isList = isList;
@@ -15,7 +17,7 @@ public class CqlParameterDefinition {
 
     private String name;
     private String type;
-    private Object value;
+    private Value value;
     private Boolean isList;
 
     public String getName() {
@@ -30,7 +32,7 @@ public class CqlParameterDefinition {
         return this.isList;
     }
 
-    public Object getValue() {
+    public Value getValue() {
         return this.value;
     }
 }

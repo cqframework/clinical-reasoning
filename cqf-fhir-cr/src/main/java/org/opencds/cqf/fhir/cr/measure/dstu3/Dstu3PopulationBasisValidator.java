@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.dstu3;
 
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 import org.opencds.cqf.fhir.cr.measure.common.PopulationBasisValidator;
@@ -21,7 +21,8 @@ public class Dstu3PopulationBasisValidator implements PopulationBasisValidator {
      * results cannot mismatch a basis that does not exist.
      */
     @Override
-    public void validateGroupPopulations(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
+    public void validateGroupPopulations(
+            MeasureDef measureDef, GroupDef groupDef, CqlEvaluationResult evaluationResult) {
         // no-op
     }
 
@@ -31,7 +32,7 @@ public class Dstu3PopulationBasisValidator implements PopulationBasisValidator {
      * the allowed-types validation are R4+ (CQFMeasures IG) concepts.
      */
     @Override
-    public void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, EvaluationResult evaluationResult) {
+    public void validateStratifiers(MeasureDef measureDef, GroupDef groupDef, CqlEvaluationResult evaluationResult) {
         // no-op
     }
 }

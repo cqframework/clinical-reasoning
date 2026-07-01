@@ -50,7 +50,6 @@ import org.opencds.cqf.fhir.cr.crmi.changelog.ChangeLog;
 import org.opencds.cqf.fhir.cr.crmi.changelog.Page;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("UnstableApiUsage")
 public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
@@ -240,7 +239,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             // Parameters object
             try {
                 if (originalValue.isEmpty() && !type.equals("insert") && sourceResource != null && path.isPresent()) {
-                    originalValue = Optional.of(FhirModelResolverCache.resolverForVersion(fhirVersion)
+                    originalValue = Optional.of(IAdapterFactory.createAdapterForResource(sourceResource)
                             .resolvePath(sourceResource, path.get()));
                 }
             } catch (Exception e) {

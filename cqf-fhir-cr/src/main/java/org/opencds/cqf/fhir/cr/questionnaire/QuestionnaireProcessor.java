@@ -15,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
@@ -31,7 +30,6 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.IPopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -40,7 +38,6 @@ public class QuestionnaireProcessor {
 
     protected final ResourceResolver questionnaireResolver;
     protected final ResourceResolver structureDefResolver;
-    protected final ModelResolver modelResolver;
     protected final CrSettings crSettings;
     protected final FhirVersionEnum fhirVersion;
     protected IRepository repository;
@@ -64,7 +61,6 @@ public class QuestionnaireProcessor {
         this.questionnaireResolver = new ResourceResolver("Questionnaire", this.repository);
         this.structureDefResolver = new ResourceResolver("StructureDefinition", this.repository);
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
                 if (p instanceof IPackageProcessor pack) {
@@ -85,10 +81,6 @@ public class QuestionnaireProcessor {
 
     public CrSettings getSettings() {
         return crSettings;
-    }
-
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R resolveQuestionnaire(
@@ -159,8 +151,7 @@ public class QuestionnaireProcessor {
                 requiredOnly,
                 libraryEngine != null
                         ? libraryEngine
-                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()),
-                modelResolver);
+                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()));
         return generateQuestionnaire(request, id);
     }
 
@@ -216,8 +207,7 @@ public class QuestionnaireProcessor {
                 data,
                 libraryEngine != null
                         ? libraryEngine
-                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()),
-                modelResolver);
+                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource populate(

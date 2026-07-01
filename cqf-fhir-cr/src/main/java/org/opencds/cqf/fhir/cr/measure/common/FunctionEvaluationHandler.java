@@ -4,8 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +17,13 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.OperandDef;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationExpressionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationFunctionRef;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams.Builder;
 import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.execution.EvaluationResults;
 import org.opencds.cqf.cql.engine.execution.ExpressionResult;
 import org.opencds.cqf.cql.engine.execution.Libraries;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +43,7 @@ public class FunctionEvaluationHandler {
     // a CQL statement refers to an expression and NOT a function.  Calling the CQL evaluate API
     // to catch an Exception as a positive verification is the wrong approach.
     // See the validateNotFunction method of this class.
-    static List<EvaluationResult> cqlFunctionEvaluation(
+    static List<CqlEvaluationResult> cqlFunctionEvaluation(
             CqlEngine context,
             List<MeasureDef> measureDefs,
             VersionedIdentifier libraryIdentifier,
@@ -69,7 +67,7 @@ public class FunctionEvaluationHandler {
             return List.of();
         }
 
-        final List<EvaluationResult> finalResults = new ArrayList<>();
+        final List<CqlEvaluationResult> finalResults = new ArrayList<>();
 
         // one Library may be linked to multiple Measures
         for (MeasureDef measureDefWithFunctions : measureDefsWithFunctions) {
@@ -96,7 +94,7 @@ public class FunctionEvaluationHandler {
         return finalResults;
     }
 
-    private static List<EvaluationResult> evaluateMeasureObservations(
+    private static List<CqlEvaluationResult> evaluateMeasureObservations(
             CqlEngine context,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
@@ -113,7 +111,7 @@ public class FunctionEvaluationHandler {
             return List.of();
         }
 
-        final List<EvaluationResult> results = new ArrayList<>();
+        final List<CqlEvaluationResult> results = new ArrayList<>();
 
         for (PopulationDef populationDef : measureObservationPopulations) {
             // each measureObservation is evaluated
@@ -125,7 +123,7 @@ public class FunctionEvaluationHandler {
         return results;
     }
 
-    private static List<EvaluationResult> evaluateNonSubjectValueStratifiers(
+    private static List<CqlEvaluationResult> evaluateNonSubjectValueStratifiers(
             CqlEngine context,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
@@ -142,7 +140,7 @@ public class FunctionEvaluationHandler {
             return List.of();
         }
 
-        final List<EvaluationResult> results = new ArrayList<>();
+        final List<CqlEvaluationResult> results = new ArrayList<>();
 
         for (StratifierDef stratDef : stratifierDefs) {
             // each stratifier (could be multiple defined in component)
@@ -230,7 +228,7 @@ public class FunctionEvaluationHandler {
      * For a given measure observation population, do an ad-hoc function evaluation and
      * accumulate the results that will be subsequently added to the CQL evaluation result.
      */
-    private static EvaluationResult processMeasureObservation(
+    private static CqlEvaluationResult processMeasureObservation(
             CqlEngine context,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
@@ -257,23 +255,25 @@ public class FunctionEvaluationHandler {
                 .findFirst()
                 .orElse(null);
 
-        Optional<ExpressionResult> optExpressionResult =
-                tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
-
+        var optExpressionResult = tryGetExpressionResult(criteriaExpressionInput, evaluationResult);
         if (optExpressionResult.isEmpty()) {
-            return new EvaluationResult();
+            return new CqlEvaluationResult();
         }
 
-        final ExpressionResult expressionResult = optExpressionResult.get();
-        final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+        final var expressionResult = optExpressionResult.get();
+        final var resultsIter =
+                getResultIterable(criteriaExpressionInput, evaluationResult, expressionResult, subjectTypePart);
         // make new expression name for uniquely extracting results
         // this will be used in MeasureEvaluator
         var expressionName = criteriaPopulationId + "-" + observationExpression;
 
-        // VERY IMPORTANT: We need a custom Map to ensure remove by FHIR resource key does not
-        // use object identity (AKA ==)
-        final Map<Object, Object> functionResults = new HashMapForFhirResourcesAndCqlTypes<>();
-        final Set<Object> evaluatedResources = new HashSet<>();
+        // Each entry pairs an input from the population with the QuantityDef that the observation
+        // function produced for it. Consumers (PopulationDef, MeasureEvaluator, MeasureScoreCalculator,
+        // MeasureObservationHandler) iterate this list and apply FHIR-identity comparisons via
+        // FhirResourceAndCqlTypeUtils.areObjectsEqual where needed; nothing in the downstream pipeline
+        // does random-access lookup by input, so a List is sufficient and self-documenting.
+        final List<ObservationEntry> functionResults = new ArrayList<>();
+        final Set<Value> evaluatedResources = new HashSet<>();
 
         final String exceptionMessageIfNotFunction = """
             Measure: '%s', MeasureObservation population expression '%s' must be a CQL function
@@ -282,7 +282,7 @@ public class FunctionEvaluationHandler {
             CQL functions that take a parameter matching the population basis type.
             """.formatted(measureUrl, observationExpression);
 
-        for (Object result : resultsIter) {
+        for (var result : resultsIter) {
             final ExpressionResult observationResult = evaluateMeasureObservationFunction(
                     context,
                     libraryIdentifier,
@@ -292,17 +292,11 @@ public class FunctionEvaluationHandler {
                     exceptionMessageIfNotFunction);
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
-            // add function results to existing EvaluationResult under new expression
-            // name
-            // need a way to capture input parameter here too, otherwise we have no way
-            // to connect input objects related to output object
-            // key= input parameter to function
-            // value= the output Observation resource containing calculated value
-            functionResults.put(result, quantity);
+            functionResults.add(new ObservationEntry(result, quantity));
             Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::addAll);
         }
 
-        return buildEvaluationResult(expressionName, functionResults, evaluatedResources);
+        return buildEvaluationResult(expressionName, new ObservationAccumulator(functionResults), evaluatedResources);
     }
 
     /**
@@ -317,7 +311,7 @@ public class FunctionEvaluationHandler {
      *       Falls back to subject-level stratification - the scalar value applies to all resources for that subject.</li>
      * </ul>
      */
-    private static EvaluationResult processNonSubValueStratifiers(
+    private static CqlEvaluationResult processNonSubValueStratifiers(
             CqlEngine context,
             VersionedIdentifier libraryIdentifier,
             EvaluationResult evaluationResult,
@@ -326,7 +320,7 @@ public class FunctionEvaluationHandler {
             StratifierDef stratifierDef,
             String measureUrl) {
 
-        EvaluationResult evalResult = new EvaluationResult();
+        var evalResult = new CqlEvaluationResult();
 
         for (StratifierComponentDef componentDef : stratifierDef.components()) {
             processNonSubValueStratifier(
@@ -350,7 +344,7 @@ public class FunctionEvaluationHandler {
             GroupDef groupDef,
             String measureUrl,
             StratifierComponentDef componentDef,
-            EvaluationResult evalResult) {
+            CqlEvaluationResult evalResult) {
 
         if (componentDef.expression() == null || componentDef.expression().isEmpty()) {
             // We screwed up defining component correctly
@@ -407,28 +401,26 @@ public class FunctionEvaluationHandler {
                         .formatted(populationExpressionName, measureUrl));
             }
             final ExpressionResult expressionResult = optExpressionResult.get();
-            final Iterable<?> resultsIter = getResultIterable(evaluationResult, expressionResult, subjectTypePart);
+            final var resultsIter =
+                    getResultIterable(populationExpressionName, evaluationResult, expressionResult, subjectTypePart);
             // make new expression name for uniquely extracting results
             // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
             var expressionName = popDef.id() + "-" + stratifierExpression;
-            final Map<Object, Object> functionResults = new HashMap<>();
-            final Set<Object> evaluatedResources = new HashSet<>();
+            final List<FunctionResultEntry> functionResults = new ArrayList<>();
+            final Set<Value> evaluatedResources = new HashSet<>();
 
-            for (Object result : resultsIter) {
+            for (var result : resultsIter) {
                 final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
                         context,
                         libraryIdentifier,
                         stratifierExpression,
                         getFunctionArguments(groupDef, result),
                         exceptionMessageIfNotFunction);
-                // add function results to existing EvaluationResult under new expression
-                // name
-                // need a way to capture input parameter here too, otherwise we have no way
-                // to connect input objects related to output object
-                // key= input parameter to function
-                // value= the output Observation resource containing calculated value
-                functionResults.put(result, functionResult.getValue());
-                Set<Object> evaluated = functionResult.getEvaluatedResources();
+                // Each entry pairs the input parameter passed to the stratifier function with the
+                // heterogeneous CQL value the function returned. Iteration order is the order
+                // populationDef results were iterated.
+                functionResults.add(new FunctionResultEntry(result, functionResult.getValue()));
+                var evaluated = functionResult.getEvaluatedResources();
                 if (evaluated == null) {
                     throw new IllegalStateException("CQL function '" + stratifierExpression
                             + "' returned null evaluatedResources for measure: " + measureUrl);
@@ -437,7 +429,8 @@ public class FunctionEvaluationHandler {
                 evaluatedResources.addAll(functionResult.getEvaluatedResources());
             }
             // add to EvaluationResult
-            addToEvaluationResult(evalResult, expressionName, functionResults, evaluatedResources);
+            addToEvaluationResult(
+                    evalResult, expressionName, new FunctionResultAccumulator(functionResults), evaluatedResources);
         }
     }
 
@@ -450,20 +443,24 @@ public class FunctionEvaluationHandler {
      * @return QuantityDef containing the numeric value
      * @throws InvalidRequestException if result cannot be converted to a number
      */
-    private static QuantityDef convertCqlResultToQuantityDef(Object result) {
+    private static QuantityDef convertCqlResultToQuantityDef(Value result) {
         if (result == null) {
             return null;
         }
 
         // Handle Number (most common case)
-        if (result instanceof Number number) {
-            return new QuantityDef(number.doubleValue());
+        if (result instanceof org.opencds.cqf.cql.engine.runtime.Integer integer) {
+            return new QuantityDef(Double.parseDouble(integer.toString()));
+        }
+
+        if (result instanceof org.opencds.cqf.cql.engine.runtime.Long l) {
+            return new QuantityDef(Double.parseDouble(l.toString()));
         }
 
         // Handle String with validation
-        if (result instanceof String s) {
+        if (result instanceof org.opencds.cqf.cql.engine.runtime.String s) {
             try {
-                return new QuantityDef(Double.parseDouble(s));
+                return new QuantityDef(Double.parseDouble(s.getValue()));
             } catch (NumberFormatException e) {
                 throw new InvalidRequestException("String is not a valid number: " + s, e);
             }
@@ -481,7 +478,7 @@ public class FunctionEvaluationHandler {
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
             boolean isBooleanBasis,
-            List<Object> functionArguments,
+            List<Value> functionArguments,
             String exceptionMessageIfNotFunction) {
 
         if (!(resolveExpressionRef(cqlEngine, libraryIdentifier, functionExpression)
@@ -513,7 +510,7 @@ public class FunctionEvaluationHandler {
             CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            List<Object> functionArguments,
+            List<Value> functionArguments,
             String exceptionMessageIfNotFunction) {
 
         return executeCqlFunction(
@@ -524,7 +521,7 @@ public class FunctionEvaluationHandler {
             CqlEngine cqlEngine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            List<Object> functionArguments,
+            List<Value> functionArguments,
             String exceptionMessageIfNotFunction) {
 
         try {
@@ -554,7 +551,7 @@ public class FunctionEvaluationHandler {
             CqlEngine engine,
             VersionedIdentifier libraryIdentifier,
             String functionExpression,
-            List<Object> functionArguments) {
+            List<Value> functionArguments) {
 
         final EvaluationFunctionRef evaluationFunctionRef =
                 buildEvaluationFunctionRef(functionExpression, functionArguments);
@@ -571,7 +568,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static EvaluationFunctionRef buildEvaluationFunctionRef(
-            String criteriaExpression, List<?> functionArguments) {
+            String criteriaExpression, List<Value> functionArguments) {
         return new EvaluationFunctionRef(criteriaExpression, null, functionArguments);
     }
 
@@ -579,8 +576,7 @@ public class FunctionEvaluationHandler {
             String expressionName, EvaluationResult evaluationResult) {
         if (expressionName == null) {
             throw new InternalErrorException(
-                    "PopulationDef criteria reference: %s is missing for continuous variable observation"
-                            .formatted(expressionName));
+                    "PopulationDef criteria reference: expression name is missing for continuous variable observation");
         }
 
         if (evaluationResult == null) {
@@ -599,45 +595,28 @@ public class FunctionEvaluationHandler {
     }
 
     private static Iterable<?> getResultIterable(
-            EvaluationResult evaluationResult, ExpressionResult expressionResult, String subjectTypePart) {
-        if (expressionResult.getValue() instanceof Boolean) {
-            if ((Boolean.TRUE.equals(expressionResult.getValue()))) {
-                // if Boolean, returns context by SubjectType
-                var expressionResultForSubjectId = evaluationResult.get(subjectTypePart);
+            String expressionName,
+            EvaluationResult evaluationResult,
+            ExpressionResult expressionResult,
+            String subjectTypePart) {
+        return CqlExpressionValue.of(expressionName, expressionResult)
+                .resolveForPopulation(subjectTypePart, evaluationResult);
+    }
 
-                if (expressionResultForSubjectId == null) {
-                    throw new InternalErrorException(
-                            "expression result is null for subject type: %s".formatted(subjectTypePart));
-                }
-
-                Object booleanResult = expressionResultForSubjectId.getValue();
-
-                // remove evaluated resources
-                return Collections.singletonList(booleanResult);
-            } else {
-                // false result shows nothing
-                return Collections.emptyList();
-            }
-        }
-
-        Object value = expressionResult.getValue();
-        if (value instanceof Iterable<?> iterable) {
-            return iterable;
+    private static List<Value> getFunctionArguments(GroupDef groupDef, Object result) {
+        // CQL arguments must be a valid CQL Value
+        if (!groupDef.isBooleanBasis() && result instanceof Value value) {
+            return List.of(value);
         } else {
-            return Collections.singletonList(value);
+            return List.of();
         }
     }
 
-    private static List<Object> getFunctionArguments(GroupDef groupDef, Object result) {
-        return groupDef.isBooleanBasis() ? List.of() : List.of(result);
-    }
-
-    private static void validateObservationResult(List<Object> functionArguments, Object observationResult) {
-        if (!(observationResult instanceof String
-                || observationResult instanceof Integer
-                || observationResult instanceof Double)) {
+    private static void validateObservationResult(List<Value> functionArguments, Value observationResult) {
+        if (!(observationResult instanceof org.opencds.cqf.cql.engine.runtime.String
+                || observationResult instanceof org.opencds.cqf.cql.engine.runtime.Integer)) {
             throw new IllegalArgumentException(
-                    "continuous variable observation CQL \"MeasureObservation\" function result must be of type String, Integer or Double but was: %s"
+                    "continuous variable observation CQL \"MeasureObservation\" function result must be of type String or Integer but was: %s"
                             .formatted(
                                     functionArguments.size() > 1
                                             ? EvaluationResultFormatter.printValues(functionArguments)
@@ -675,31 +654,27 @@ public class FunctionEvaluationHandler {
                 .anyMatch(StratifierDef::isNonSubjectValueStratifier);
     }
 
-    private static EvaluationResult buildEvaluationResult(
-            String expressionName, Map<Object, Object> functionResults, Set<Object> evaluatedResources) {
+    private static CqlEvaluationResult buildEvaluationResult(
+            String expressionName, Object functionResults, Set<Value> evaluatedResources) {
 
-        final EvaluationResult evaluationResultToReturn = new EvaluationResult();
+        final var evaluationResultToReturn = new CqlEvaluationResult();
 
-        evaluationResultToReturn.set(
-                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+        evaluationResultToReturn.addExpressionResult(
+                CqlExpressionValue.ofRaw(expressionName, functionResults, evaluatedResources));
 
         return evaluationResultToReturn;
     }
 
     private static void addToEvaluationResult(
-            EvaluationResult result,
-            String expressionName,
-            Map<Object, Object> functionResults,
-            Set<Object> evaluatedResources) {
+            CqlEvaluationResult result, String expressionName, Object functionResults, Set<Value> evaluatedResources) {
 
-        result.set(
-                new EvaluationExpressionRef(expressionName), new ExpressionResult(functionResults, evaluatedResources));
+        result.addExpressionResult(CqlExpressionValue.ofRaw(expressionName, functionResults, evaluatedResources));
     }
 
     private static boolean isExpressionFunctionRef(
             CqlEngine cqlEngine, VersionedIdentifier libraryIdentifier, String expressionName) {
         if (expressionName == null || expressionName.isBlank()) {
-            throw new InvalidRequestException("Expresion name is null or blank");
+            throw new InvalidRequestException("Expression name is null or blank");
         }
 
         return isExpressionFunctionRef(resolveExpressionRef(cqlEngine, libraryIdentifier, expressionName));

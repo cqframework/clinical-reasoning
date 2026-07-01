@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
@@ -1012,7 +1013,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
             String candidateId = StringUtils.isBlank(version) ? tail : tail + "-" + version;
             if (isValidFhirId(candidateId)) {
-                adapter.setId(Ids.newId(fhirContext(), candidateId));
+                adapter.setId((IIdType) Ids.newId(fhirContext(), candidateId));
                 return;
             }
         }
@@ -1021,7 +1022,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
         String encoded = encodeToIdSafeBase64(identityString);
         String encodedId = CANONICAL_ENCODED_PREFIX + encoded;
         if (encodedId.length() <= MAX_ID_LENGTH) {
-            adapter.setId(Ids.newId(fhirContext(), encodedId));
+            adapter.setId((IIdType) Ids.newId(fhirContext(), encodedId));
             return;
         }
 

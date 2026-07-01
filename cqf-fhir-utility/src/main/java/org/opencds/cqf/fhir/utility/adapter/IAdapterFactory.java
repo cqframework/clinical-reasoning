@@ -39,7 +39,7 @@ public interface IAdapterFactory {
      * @param element A FHIR BaseBackboneElement
      * @return an adapter exposing common api calls
      */
-    static IAdapter<IBase> createAdapterForBase(FhirVersionEnum fhirVersion, IBase element) {
+    static IAdapter<?> createAdapterForBase(FhirVersionEnum fhirVersion, IBase element) {
         return forFhirVersion(fhirVersion).createBase(element);
     }
 
@@ -57,7 +57,7 @@ public interface IAdapterFactory {
      * @param element A FHIR Base Element
      * @return an adapter exposing common api calls
      */
-    IAdapter<IBase> createBase(IBase element);
+    IAdapter<?> createBase(IBase element);
 
     /**
      * Creates an adapter that exposes common MetadataResource operations across multiple versions of FHIR

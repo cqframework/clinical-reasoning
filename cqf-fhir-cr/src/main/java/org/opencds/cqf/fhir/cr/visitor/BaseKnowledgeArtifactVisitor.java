@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -39,6 +41,7 @@ import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRoute
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
     private static final Logger logger = LoggerFactory.getLogger(BaseKnowledgeArtifactVisitor.class);
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
@@ -94,14 +97,14 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
     protected List<IDomainResource> getComponents(
             IKnowledgeArtifactAdapter adapter, IRepository repository, ArrayList<IDomainResource> resourcesToUpdate) {
-        adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
+        adapter.getOwnedRelatedArtifacts().forEach(c -> {
             final var preReleaseReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<IKnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
                 if (resourcesToUpdate.stream()
-                        .noneMatch(rtu ->
-                                rtu.getId().equals(maybeArtifact.get().getId().toString()))) {
+                        .noneMatch(rtu -> Ids.simple(rtu.getIdElement())
+                                .equals(maybeArtifact.get().getId()))) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }
@@ -162,7 +165,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         if (adapter == null) {
             return;
         }
-        if (!gatheredResources.keySet().contains(adapter.getCanonical())) {
+        if (!gatheredResources.containsKey(adapter.getCanonical())) {
             gatheredResources.put(adapter.getCanonical(), adapter);
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, versionTuple);
@@ -201,7 +204,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                         }
                         return null;
                     })
-                    .filter(r -> r != null)
+                    .filter(Objects::nonNull)
                     .map(r -> IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(r))
                     .forEach(component -> recursiveGather(
                             component,
@@ -251,7 +254,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             IDependencyInfo ra, ITerminologyProviderRouter router, IEndpointAdapter endpoint) {
         if (router != null
                 && endpoint != null
-                && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
+                && Objects.equals(Canonicals.getResourceType(ra.getReference()), "ValueSet")) {
             return router.getValueSetResource(endpoint, ra.getReference()).orElse(null);
         }
         return null;

@@ -35,6 +35,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RepositoryRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.RepositoryTerminologyProvider;
+import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
@@ -181,7 +182,7 @@ public class Engines {
 
         var retrieveProvider = new RepositoryRetrieveProvider(repository, terminologyProvider, retrieveSettings);
         providers.add(retrieveProvider);
-        if (additionalData != null && modelResolver.resolvePath(additionalData, "entry") != null) {
+        if (additionalData != null && !BundleHelper.getEntry(additionalData).isEmpty()) {
             var bundleRepo = new InMemoryFhirRepository(repository.fhirContext(), additionalData);
             var provider = new RepositoryRetrieveProvider(bundleRepo, terminologyProvider, retrieveSettings);
             providers.add(provider);

@@ -6,11 +6,11 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementCodeFilterAdapter;
 
-public class DataRequirementCodeFilterAdapter extends BaseAdapter implements IDataRequirementCodeFilterAdapter {
+public class DataRequirementCodeFilterAdapter extends BaseElementAdapter implements IDataRequirementCodeFilterAdapter {
 
     private final DataRequirementCodeFilterComponent codeFilter;
 

@@ -403,16 +403,16 @@ class CliTest {
         assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(
                 output.contains(
-                        "SDE Ethnicity=[Code { code: 2184-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Dominican }, Code { code: 2148-5, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Mexican }]"));
+                        "SDE Ethnicity=[Code {\n  code: '2184-0',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Dominican'\n}, Code {\n  code: '2148-5',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Mexican'\n}]"));
         assertTrue(
                 output.contains(
-                        "SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
+                        "SDE Race=[Code {\n  code: '1586-7',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Shoshone'\n}, Code {\n  code: '2036-2',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Filipino'\n}, Code {\n  code: '1735-0',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Alaska Native'\n}]"));
         assertTrue(
                 output.contains(
-                        "SDE Payer=[Tuple {\n  code: Concept {\n\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n}\n  period: Interval[2011-05-23, 2012-05-23]\n}]"));
+                        "SDE Payer=[Tuple {\n  code: Concept {\n    codes: {\n      Code {\n        code: '59',\n        system: 'urn:oid:2.16.840.1.113883.3.221.5',\n        version: null,\n        display: 'Other Private Insurance'\n      }\n    }\n  },\n  period: Interval[@2011-05-23, @2012-05-23]\n}]"));
         assertTrue(
                 output.contains(
-                        "SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
+                        "SDE Sex=Code {\n  code: 'M',\n  system: 'http:\\/\\/hl7.org\\/fhir\\/v3\\/AdministrativeGender',\n  version: null,\n  display: 'Male'\n}"));
     }
 
     @Test
@@ -432,16 +432,16 @@ class CliTest {
         assertTrue(output.contains("Patient=Patient(id=example)"));
         assertTrue(
                 output.contains(
-                        "SDE Ethnicity=[Code { code: 2184-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Dominican }, Code { code: 2148-5, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Mexican }]"));
+                        "SDE Ethnicity=[Code {\n  code: '2184-0',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Dominican'\n}, Code {\n  code: '2148-5',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Mexican'\n}]"));
         assertTrue(
                 output.contains(
-                        "SDE Race=[Code { code: 1586-7, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Shoshone }, Code { code: 2036-2, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Filipino }, Code { code: 1735-0, system: urn:oid:2.16.840.1.113883.6.238, version: null, display: Alaska Native }]"));
+                        "SDE Race=[Code {\n  code: '1586-7',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Shoshone'\n}, Code {\n  code: '2036-2',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Filipino'\n}, Code {\n  code: '1735-0',\n  system: 'urn:oid:2.16.840.1.113883.6.238',\n  version: null,\n  display: 'Alaska Native'\n}]"));
         assertTrue(
                 output.contains(
-                        "SDE Payer=[Tuple {\n  code: Concept {\n\tCode { code: 59, system: urn:oid:2.16.840.1.113883.3.221.5, version: null, display: Other Private Insurance }\n}\n  period: Interval[2011-05-23, 2012-05-23]\n}]"));
+                        "SDE Payer=[Tuple {\n  code: Concept {\n    codes: {\n      Code {\n        code: '59',\n        system: 'urn:oid:2.16.840.1.113883.3.221.5',\n        version: null,\n        display: 'Other Private Insurance'\n      }\n    }\n  },\n  period: Interval[@2011-05-23, @2012-05-23]\n}]"));
         assertTrue(
                 output.contains(
-                        "SDE Sex=Code { code: M, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Male }"));
+                        "SDE Sex=Code {\n  code: 'M',\n  system: 'http:\\/\\/hl7.org\\/fhir\\/v3\\/AdministrativeGender',\n  version: null,\n  display: 'Male'\n}"));
         assertTrue(output.contains("Initial Population=false"));
         assertTrue(output.contains("Denominator=false"));
         assertTrue(output.contains("Denominator Exclusion=false"));
@@ -465,7 +465,7 @@ class CliTest {
         assertTrue(output.contains("Patient=Patient(id=denom-EXM124)"));
         assertTrue(
                 output.contains(
-                        "SDE Sex=Code { code: F, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Female }"));
+                        "SDE Sex=Code {\n  code: 'F',\n  system: 'http:\\/\\/hl7.org\\/fhir\\/v3\\/AdministrativeGender',\n  version: null,\n  display: 'Female'\n}"));
         assertTrue(output.contains("Initial Population=true"));
         assertTrue(output.contains("Denominator=true"));
         assertTrue(output.contains("Denominator Exclusion=false"));
@@ -489,7 +489,7 @@ class CliTest {
         assertTrue(output.contains("Patient=Patient(id=numer-EXM124)"));
         assertTrue(
                 output.contains(
-                        "SDE Sex=Code { code: F, system: http://hl7.org/fhir/v3/AdministrativeGender, version: null, display: Female }"));
+                        "SDE Sex=Code {\n  code: 'F',\n  system: 'http:\\/\\/hl7.org\\/fhir\\/v3\\/AdministrativeGender',\n  version: null,\n  display: 'Female'\n}"));
         assertTrue(output.contains("Initial Population=true"));
         assertTrue(output.contains("Denominator=true"));
         assertTrue(output.contains("Denominator Exclusion=false"));

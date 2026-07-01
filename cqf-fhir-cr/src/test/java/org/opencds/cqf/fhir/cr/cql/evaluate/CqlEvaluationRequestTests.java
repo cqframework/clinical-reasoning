@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.cql.evaluate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
@@ -43,9 +42,8 @@ class CqlEvaluationRequestTests {
     void test() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        var request = new CqlEvaluationRequest(null, "1+1", null, null, null, null, null, libraryEngine, null);
+        var request = new CqlEvaluationRequest(null, "1+1", null, null, null, null, null, libraryEngine);
         assertEquals("cql", request.getOperationName());
-        assertNotNull(request.getModelResolver());
     }
 
     @Test
@@ -54,7 +52,7 @@ class CqlEvaluationRequestTests {
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new CqlEvaluationRequest(null, null, null, null, null, null, null, libraryEngine, null));
+                () -> new CqlEvaluationRequest(null, null, null, null, null, null, null, libraryEngine));
     }
 
     @Test
@@ -62,7 +60,7 @@ class CqlEvaluationRequestTests {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request = new CqlEvaluationRequest(
-                null, "1+1", null, null, null, getPrefetchData(FhirContext.forR4Cached()), null, libraryEngine, null);
+                null, "1+1", null, null, null, getPrefetchData(FhirContext.forR4Cached()), null, libraryEngine);
         assertEquals(2, BundleHelper.getEntry(request.getData()).size());
     }
 
@@ -74,7 +72,7 @@ class CqlEvaluationRequestTests {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var request = new CqlEvaluationRequest(
-                null, "1+1", null, null, data, getPrefetchData(FhirContext.forR4Cached()), null, libraryEngine, null);
+                null, "1+1", null, null, data, getPrefetchData(FhirContext.forR4Cached()), null, libraryEngine);
         assertEquals(3, BundleHelper.getEntry(request.getData()).size());
     }
 

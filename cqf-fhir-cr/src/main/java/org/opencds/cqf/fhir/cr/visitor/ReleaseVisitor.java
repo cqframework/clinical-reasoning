@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.visitor;
 
-import static org.opencds.cqf.fhir.utility.Resources.newBaseForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.uriTypeForVersion;
 import static org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.createAdapterForResource;
 
@@ -559,14 +558,10 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
             } catch (URISyntaxException | MalformedURLException e) {
                 // Do nothing here and let the malformed URL flow through.
             }
-            var ext = (IBaseExtension<?, ?>) newBaseForVersion("Extension", fhirVersion());
-            adapter.getModelResolver()
-                    .setValue(
-                            ext,
-                            "url",
-                            uriTypeForVersion(fhirVersion(), TransformProperties.authoritativeSourceExtUrl));
-            adapter.getModelResolver().setValue(ext, "value", uriTypeForVersion(fhirVersion(), url));
-            adapter.addExtension(ext);
+            var ext = adapter.addExtension();
+            adapter.setValue(
+                    ext, "url", uriTypeForVersion(fhirVersion(), TransformProperties.authoritativeSourceExtUrl));
+            adapter.setValue(ext, "value", uriTypeForVersion(fhirVersion(), url));
         }
     }
 

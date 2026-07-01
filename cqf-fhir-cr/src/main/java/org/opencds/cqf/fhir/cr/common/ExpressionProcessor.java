@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +121,7 @@ public class ExpressionProcessor {
      * @param element the element to pull the Expression element from
      * @return a CqfExpression
      */
-    public CqfExpression getCqfExpressionForElement(IOperationRequest request, IBaseBackboneElement element) {
+    public CqfExpression getCqfExpressionForElement(IOperationRequest request, IAdapter<?> element) {
         if (element == null) {
             return null;
         }
@@ -129,16 +129,16 @@ public class ExpressionProcessor {
         return switch (request.getFhirVersion()) {
             case DSTU3 ->
                 new CqfExpression(
-                        request.resolvePathString(element, "language"),
-                        request.resolvePathString(element, expressionPath),
+                        element.resolvePathString("language"),
+                        element.resolvePathString(expressionPath),
                         request.getReferencedLibraries());
             case R4 ->
                 CqfExpression.of(
-                        request.resolvePath(element, expressionPath, org.hl7.fhir.r4.model.Expression.class),
+                        element.resolvePath(expressionPath, org.hl7.fhir.r4.model.Expression.class),
                         request.getReferencedLibraries());
             case R5 ->
                 CqfExpression.of(
-                        request.resolvePath(element, expressionPath, org.hl7.fhir.r5.model.Expression.class),
+                        element.resolvePath(expressionPath, org.hl7.fhir.r5.model.Expression.class),
                         request.getReferencedLibraries());
             default -> null;
         };

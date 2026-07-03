@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -27,20 +26,32 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.hapi.common.AsyncPackageOperationHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class LibraryPackageProvider {
     private final ILibraryProcessorFactory libraryProcessorFactory;
+    private final AsyncPackageOperationHelper asyncHelper;
     private final FhirVersionEnum fhirVersion;
 
     public LibraryPackageProvider(ILibraryProcessorFactory libraryProcessorFactory) {
+        this(libraryProcessorFactory, AsyncPackageOperationHelper.disabled());
+    }
+
+    public LibraryPackageProvider(
+            ILibraryProcessorFactory libraryProcessorFactory, AsyncPackageOperationHelper asyncHelper) {
         this.libraryProcessorFactory = libraryProcessorFactory;
+        this.asyncHelper = asyncHelper;
         fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
      *
      * @param id the id of the Resource.
      * @param offset                        Paging support - where to start if a subset is desired
@@ -66,10 +77,13 @@ public class LibraryPackageProvider {
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
      * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
-     * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
-    public IBaseBundle packageLibrary(
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = Library.class,
+            manualResponse = true)
+    public void packageLibrary(
             @IdParam IdType id,
             @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
             @OperationParam(name = "count", typeName = "integer") IPrimitiveType<Integer> count,
@@ -81,32 +95,38 @@ public class LibraryPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
-        List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
-                ? null
-                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
-        return libraryProcessorFactory
-                .create(requestDetails)
-                .packageLibrary(
-                        Eithers.forMiddle3(id),
-                        packageParameters(
-                                fhirVersion,
-                                offset,
-                                count,
-                                getStringValue(bundleType),
-                                include == null
-                                        ? null
-                                        : include.stream()
-                                                .distinct()
-                                                .map(PrimitiveType::getValueAsString)
-                                                .collect(Collectors.toList()),
-                                artifactEndpointConfigurationParam,
-                                terminologyEndpointParam,
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        asyncHelper.packageOrRespondAsync(requestDetails, rd -> {
+            var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
+            List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
+                    ? null
+                    : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
+            return libraryProcessorFactory
+                    .create(rd)
+                    .packageLibrary(
+                            Eithers.forMiddle3(id),
+                            packageParameters(
+                                    fhirVersion,
+                                    offset,
+                                    count,
+                                    getStringValue(bundleType),
+                                    include == null
+                                            ? null
+                                            : include.stream()
+                                                    .distinct()
+                                                    .map(PrimitiveType::getValueAsString)
+                                                    .collect(Collectors.toList()),
+                                    artifactEndpointConfigurationParam,
+                                    terminologyEndpointParam,
+                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        });
     }
 
     /**
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
      *
      * @param id the id of the Resource.
      * @param canonical the canonical identifier for the Resource (optionally version-specific).
@@ -133,10 +153,13 @@ public class LibraryPackageProvider {
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
      * @param usePut the boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
-     * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Library.class)
-    public IBaseBundle packageLibrary(
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = Library.class,
+            manualResponse = true)
+    public void packageLibrary(
             @OperationParam(name = "id") StringType id,
             @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
             @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
@@ -151,30 +174,32 @@ public class LibraryPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
-        List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
-                ? null
-                : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
-        return libraryProcessorFactory
-                .create(requestDetails)
-                .packageLibrary(
-                        Eithers.for3(
-                                getCanonicalType(fhirVersion, canonical, url, version),
-                                getIdType(fhirVersion, "Library", id),
-                                null),
-                        packageParameters(
-                                fhirVersion,
-                                offset,
-                                count,
-                                getStringValue(bundleType),
-                                include == null
-                                        ? null
-                                        : include.stream()
-                                                .distinct()
-                                                .map(PrimitiveType::getValueAsString)
-                                                .collect(Collectors.toList()),
-                                artifactEndpointConfigurationParam,
-                                terminologyEndpointParam,
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        asyncHelper.packageOrRespondAsync(requestDetails, rd -> {
+            var terminologyEndpointParam = getEndpoint(fhirVersion, terminologyEndpoint);
+            List<IBase> artifactEndpointConfigurationParam = artifactEndpointConfiguration == null
+                    ? null
+                    : artifactEndpointConfiguration.stream().map(p -> (IBase) p).collect(Collectors.<IBase>toList());
+            return libraryProcessorFactory
+                    .create(rd)
+                    .packageLibrary(
+                            Eithers.for3(
+                                    getCanonicalType(fhirVersion, canonical, url, version),
+                                    getIdType(fhirVersion, "Library", id),
+                                    null),
+                            packageParameters(
+                                    fhirVersion,
+                                    offset,
+                                    count,
+                                    getStringValue(bundleType),
+                                    include == null
+                                            ? null
+                                            : include.stream()
+                                                    .distinct()
+                                                    .map(PrimitiveType::getValueAsString)
+                                                    .collect(Collectors.toList()),
+                                    artifactEndpointConfigurationParam,
+                                    terminologyEndpointParam,
+                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        });
     }
 }

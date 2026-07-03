@@ -5,10 +5,13 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import java.util.Arrays;
 import java.util.Map;
+import org.opencds.cqf.fhir.cr.hapi.common.AsyncPackageOperationHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.ILibraryProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IQuestionnaireProcessorFactory;
 import org.opencds.cqf.fhir.cr.hapi.common.IValueSetProcessorFactory;
+import org.opencds.cqf.fhir.cr.hapi.common.PackageJobService;
+import org.opencds.cqf.fhir.cr.hapi.common.PackageJobStatusProvider;
 import org.opencds.cqf.fhir.cr.hapi.config.CrProcessorConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
@@ -26,24 +29,29 @@ import org.springframework.context.annotation.Import;
 public class PackageOperationConfig {
     @Bean
     PlanDefinitionPackageProvider dstu3PlanDefinitionPackageProvider(
-            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
-        return new PlanDefinitionPackageProvider(planDefinitionProcessorFactory);
+            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory,
+            AsyncPackageOperationHelper asyncPackageOperationHelper) {
+        return new PlanDefinitionPackageProvider(planDefinitionProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
     QuestionnairePackageProvider dstu3QuestionnairePackageProvider(
-            IQuestionnaireProcessorFactory questionnaireProcessorFactory) {
-        return new QuestionnairePackageProvider(questionnaireProcessorFactory);
+            IQuestionnaireProcessorFactory questionnaireProcessorFactory,
+            AsyncPackageOperationHelper asyncPackageOperationHelper) {
+        return new QuestionnairePackageProvider(questionnaireProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
-    LibraryPackageProvider dstu3LibraryPackageProvider(ILibraryProcessorFactory libraryProcessorFactory) {
-        return new LibraryPackageProvider(libraryProcessorFactory);
+    LibraryPackageProvider dstu3LibraryPackageProvider(
+            ILibraryProcessorFactory libraryProcessorFactory, AsyncPackageOperationHelper asyncPackageOperationHelper) {
+        return new LibraryPackageProvider(libraryProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean
-    ValueSetPackageProvider dstu3ValueSetPackageProvider(IValueSetProcessorFactory valueSetProcessorFactory) {
-        return new ValueSetPackageProvider(valueSetProcessorFactory);
+    ValueSetPackageProvider dstu3ValueSetPackageProvider(
+            IValueSetProcessorFactory valueSetProcessorFactory,
+            AsyncPackageOperationHelper asyncPackageOperationHelper) {
+        return new ValueSetPackageProvider(valueSetProcessorFactory, asyncPackageOperationHelper);
     }
 
     @Bean(name = "packageOperationLoader")
@@ -57,8 +65,24 @@ public class PackageOperationConfig {
                                 LibraryPackageProvider.class,
                                 QuestionnairePackageProvider.class,
                                 PlanDefinitionPackageProvider.class,
-                                ValueSetPackageProvider.class)));
+                                ValueSetPackageProvider.class,
+                                PackageJobStatusProvider.class)));
 
         return new ProviderLoader(restfulServer, applicationContext, selector);
+    }
+
+    @Bean
+    PackageJobService packageJobService() {
+        return new PackageJobService();
+    }
+
+    @Bean
+    AsyncPackageOperationHelper asyncPackageOperationHelper(PackageJobService packageJobService) {
+        return new AsyncPackageOperationHelper(packageJobService);
+    }
+
+    @Bean
+    PackageJobStatusProvider packageJobStatusProvider(PackageJobService packageJobService) {
+        return new PackageJobStatusProvider(packageJobService);
     }
 }

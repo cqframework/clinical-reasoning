@@ -63,7 +63,8 @@ public class AsyncPackageOperationHelper {
      */
     public void packageOrRespondAsync(RequestDetails requestDetails, Function<RequestDetails, IBaseBundle> work) {
         if (isAsyncRequested(requestDetails)) {
-            var jobId = jobService.submit(() -> work.apply(detach(requestDetails)));
+            var detached = detach(requestDetails);
+            var jobId = jobService.submit(() -> work.apply(detached));
             writeAccepted(requestDetails, jobId);
         } else {
             writeResource(requestDetails, work.apply(requestDetails), Constants.STATUS_HTTP_200_OK);
@@ -113,18 +114,21 @@ public class AsyncPackageOperationHelper {
 
     /**
      * Produce a {@link RequestDetails} that is safe to use on a worker thread after the originating
-     * request has completed.
+     * request has completed, while preserving the caller's identity so authorization/consent
+     * enforcement matches the synchronous path.
+     *
+     * <p>For an HTTP request this returns a {@link DetachedServletRequestDetails} — still a
+     * {@link ServletRequestDetails}, so interceptors do not treat it as a trusted internal call the
+     * way they would a {@link SystemRequestDetails}. Must be called on the request thread (the copy
+     * reads the live request). Non-servlet (already-internal) callers are copied as a system request.
      */
     private static RequestDetails detach(RequestDetails requestDetails) {
+        if (requestDetails instanceof ServletRequestDetails servletRequestDetails) {
+            return new DetachedServletRequestDetails(servletRequestDetails);
+        }
         var detached = new SystemRequestDetails(requestDetails);
         if (detached.getFhirContext() == null) {
             detached.setFhirContext(requestDetails.getFhirContext());
-        }
-        if (requestDetails instanceof ServletRequestDetails servletRequestDetails) {
-            var headers = servletRequestDetails.getHeaders();
-            if (headers != null) {
-                headers.forEach(detached::setHeaders);
-            }
         }
         return detached;
     }

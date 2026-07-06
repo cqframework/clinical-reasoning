@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.common;
 
+import jakarta.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
@@ -43,11 +44,13 @@ public class PackageJobService {
         this.retention = retention;
         this.executor = Executors.newFixedThreadPool(threadCount, runnable -> {
             var thread = new Thread(runnable, "package-async-worker");
-            // Daemon threads so a forgotten job never blocks JVM shutdown.
+            // Daemon threads so a forgotten job never blocks JVM shutdown. Lifecycle cleanup is
+            // driven by {@link #shutdown()} (invoked by Spring via @PreDestroy on context close),
+            // rather than a JVM shutdown hook — a hook would pin this instance for the life of the
+            // JVM and would not run on context close/redeploy, leaking the pool.
             thread.setDaemon(true);
             return thread;
         });
-        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown, "package-async-shutdown"));
     }
 
     /**
@@ -91,6 +94,10 @@ public class PackageJobService {
         });
     }
 
+    /**
+     * Shut down the worker pool. Invoked by Spring on context close via {@link PreDestroy}.
+     */
+    @PreDestroy
     public void shutdown() {
         executor.shutdown();
         try {

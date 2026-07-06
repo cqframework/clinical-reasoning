@@ -179,7 +179,7 @@ class AsyncPackageOperationHelperTest {
     }
 
     @Test
-    void asyncRequest_detachesToSystemRequestDetails_snapshottingHeaders() throws Exception {
+    void asyncRequest_detachesToServletRequestDetails_preservingCallerContext() throws Exception {
         var jobService = new PackageJobService(1, Duration.ofMinutes(1));
         var helper = new AsyncPackageOperationHelper(jobService);
 
@@ -209,8 +209,13 @@ class AsyncPackageOperationHelperTest {
         }
 
         var detached = captured.get();
-        assertInstanceOf(SystemRequestDetails.class, detached);
-        // The detached request carries its own snapshot of the headers, independent of the servlet request.
-        assertEquals(List.of("acme"), detached.getHeaders("X-Tenant"));
+        // Must stay a ServletRequestDetails so authorization/consent interceptors enforce as they do
+        // synchronously — NOT a SystemRequestDetails, which they trust and skip.
+        assertInstanceOf(ServletRequestDetails.class, detached);
+        assertFalse(detached instanceof SystemRequestDetails, "async work must not run as a trusted system request");
+        // Headers are snapshotted, so both accessors work off the recycled servlet request.
+        var servletDetached = (ServletRequestDetails) detached;
+        assertEquals(List.of("acme"), servletDetached.getHeaders("X-Tenant"));
+        assertTrue(servletDetached.getHeaders().containsKey("X-Tenant"));
     }
 }

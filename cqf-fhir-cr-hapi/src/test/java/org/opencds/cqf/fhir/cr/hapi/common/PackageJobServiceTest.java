@@ -21,6 +21,7 @@ class PackageJobServiceTest {
     private static final long POLL_MS = 20;
 
     /** Poll until the job finishes; fail if it does not complete within the timeout. */
+    @SuppressWarnings("BusyWait")
     private static void awaitDone(PackageJobService service, String jobId) {
         var deadline = System.currentTimeMillis() + TIMEOUT_MS;
         while (System.currentTimeMillis() < deadline) {
@@ -132,7 +133,7 @@ class PackageJobServiceTest {
     void submit_purgesExpiredFinishedJobs() throws Exception {
         var service = new PackageJobService(1, Duration.ofMillis(1));
         try {
-            var firstId = service.submit(() -> new Bundle());
+            var firstId = service.submit(Bundle::new);
             awaitDone(service, firstId);
             assertNotNull(service.get(firstId));
 
@@ -140,7 +141,7 @@ class PackageJobServiceTest {
             Thread.sleep(20);
 
             // submit() triggers purgeExpired(), which should evict the aged, finished first job.
-            var secondId = service.submit(() -> new Bundle());
+            var secondId = service.submit(Bundle::new);
 
             assertNull(service.get(firstId), "expired finished job should have been purged");
             assertNotNull(service.get(secondId), "freshly submitted job should be present");
@@ -152,6 +153,7 @@ class PackageJobServiceTest {
     }
 
     @Test
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     void purge_keepsRunningAndRecentlyFinishedJobs() throws Exception {
         // Long retention so a finished job stays "recent" (isBefore(cutoff) == false).
         var service = new PackageJobService(1, Duration.ofHours(1));
@@ -159,7 +161,7 @@ class PackageJobServiceTest {
         var started = new CountDownLatch(1);
         try {
             // A finished-but-recent job.
-            var finishedId = service.submit(() -> new Bundle());
+            var finishedId = service.submit(Bundle::new);
             awaitDone(service, finishedId);
 
             // A job that blocks the single worker, so it stays IN_PROGRESS (isDone() == false).
@@ -176,7 +178,7 @@ class PackageJobServiceTest {
 
             // submit() triggers purgeExpired() while one job is finished-but-recent and another is
             // still running; neither is eligible for eviction.
-            var thirdId = service.submit(() -> new Bundle());
+            var thirdId = service.submit(Bundle::new);
 
             assertNotNull(service.get(finishedId), "recently finished job should be kept");
             assertNotNull(service.get(runningId), "in-progress job should be kept");

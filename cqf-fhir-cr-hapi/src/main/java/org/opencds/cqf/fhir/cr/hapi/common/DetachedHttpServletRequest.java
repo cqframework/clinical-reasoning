@@ -42,7 +42,7 @@ class DetachedHttpServletRequest implements HttpServletRequest {
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
     private final String method;
     private final String requestUri;
-    private final StringBuffer requestUrl;
+    private final StringBuilder requestUrl;
     private final String contextPath;
     private final String servletPath;
     private final String pathInfo;
@@ -64,7 +64,7 @@ class DetachedHttpServletRequest implements HttpServletRequest {
         method = source.getMethod();
         requestUri = source.getRequestURI();
         var url = source.getRequestURL();
-        requestUrl = url == null ? null : new StringBuffer(url);
+        requestUrl = url == null ? null : new StringBuilder(url);
         contextPath = source.getContextPath();
         servletPath = source.getServletPath();
         pathInfo = source.getPathInfo();
@@ -112,7 +112,7 @@ class DetachedHttpServletRequest implements HttpServletRequest {
                 return entry.getValue();
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     // --- Request line / metadata -------------------------------------------------------------
@@ -129,7 +129,7 @@ class DetachedHttpServletRequest implements HttpServletRequest {
 
     @Override
     public StringBuffer getRequestURL() {
-        return requestUrl;
+        return new StringBuffer(requestUrl == null ? "" : requestUrl.toString());
     }
 
     @Override
@@ -270,7 +270,7 @@ class DetachedHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String[] getParameterValues(String name) {
-        return null;
+        return new String[0];
     }
 
     @Override

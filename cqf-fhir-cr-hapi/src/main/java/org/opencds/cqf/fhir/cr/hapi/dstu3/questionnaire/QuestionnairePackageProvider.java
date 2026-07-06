@@ -62,16 +62,16 @@ public class QuestionnairePackageProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
-        asyncHelper.packageOrRespondAsync(requestDetails, rd -> {
-            return (Bundle) questionnaireProcessorFactory
+        asyncHelper.packageOrRespondAsync(requestDetails, rd ->
+            questionnaireProcessorFactory
                     .create(rd)
                     .packageQuestionnaire(
                             Eithers.forMiddle3(id),
                             packageParameters(
                                     fhirVersion,
                                     getEndpoint(fhirVersion, terminologyEndpoint),
-                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()));
-        });
+                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()))
+        );
     }
 
     /**
@@ -103,8 +103,8 @@ public class QuestionnairePackageProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
-        asyncHelper.packageOrRespondAsync(requestDetails, rd -> {
-            return (Bundle) questionnaireProcessorFactory
+        asyncHelper.packageOrRespondAsync(requestDetails, rd ->
+            questionnaireProcessorFactory
                     .create(rd)
                     .packageQuestionnaire(
                             Eithers.for3(
@@ -114,7 +114,7 @@ public class QuestionnairePackageProvider {
                             packageParameters(
                                     fhirVersion,
                                     getEndpoint(fhirVersion, terminologyEndpoint),
-                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()));
-        });
+                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()))
+        );
     }
 }

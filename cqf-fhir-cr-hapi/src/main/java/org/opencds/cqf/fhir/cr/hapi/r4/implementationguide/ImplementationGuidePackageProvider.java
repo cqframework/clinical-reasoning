@@ -70,7 +70,7 @@ public class ImplementationGuidePackageProvider {
         asyncHelper.packageOrRespondAsync(
                 requestDetails,
                 rd -> implementationGuideProcessorFactory
-                        .create(requestDetails)
+                        .create(rd)
                         .packageImplementationGuide(
                                 Eithers.forMiddle3(id),
                                 packageParameters(
@@ -112,7 +112,7 @@ public class ImplementationGuidePackageProvider {
         asyncHelper.packageOrRespondAsync(
                 requestDetails,
                 rd -> implementationGuideProcessorFactory
-                        .create(requestDetails)
+                        .create(rd)
                         .packageImplementationGuide(
                                 Eithers.for3(
                                         getCanonicalType(fhirVersion, canonical, url, version),

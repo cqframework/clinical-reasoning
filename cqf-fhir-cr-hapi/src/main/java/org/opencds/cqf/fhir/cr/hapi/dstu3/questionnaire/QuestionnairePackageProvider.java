@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
@@ -62,16 +61,16 @@ public class QuestionnairePackageProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
-        asyncHelper.packageOrRespondAsync(requestDetails, rd ->
-            questionnaireProcessorFactory
-                    .create(rd)
-                    .packageQuestionnaire(
-                            Eithers.forMiddle3(id),
-                            packageParameters(
-                                    fhirVersion,
-                                    getEndpoint(fhirVersion, terminologyEndpoint),
-                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()))
-        );
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> questionnaireProcessorFactory
+                        .create(rd)
+                        .packageQuestionnaire(
+                                Eithers.forMiddle3(id),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
@@ -103,18 +102,18 @@ public class QuestionnairePackageProvider {
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails) {
-        asyncHelper.packageOrRespondAsync(requestDetails, rd ->
-            questionnaireProcessorFactory
-                    .create(rd)
-                    .packageQuestionnaire(
-                            Eithers.for3(
-                                    getCanonicalType(fhirVersion, canonical, url, version),
-                                    getIdType(fhirVersion, "Questionnaire", id),
-                                    null),
-                            packageParameters(
-                                    fhirVersion,
-                                    getEndpoint(fhirVersion, terminologyEndpoint),
-                                    usePut == null ? Boolean.FALSE : usePut.booleanValue()))
-        );
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> questionnaireProcessorFactory
+                        .create(rd)
+                        .packageQuestionnaire(
+                                Eithers.for3(
+                                        getCanonicalType(fhirVersion, canonical, url, version),
+                                        getIdType(fhirVersion, "Questionnaire", id),
+                                        null),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

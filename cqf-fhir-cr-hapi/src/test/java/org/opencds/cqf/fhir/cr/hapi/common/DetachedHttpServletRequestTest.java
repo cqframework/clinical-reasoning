@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.hapi.common;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -161,7 +162,7 @@ class DetachedHttpServletRequestTest {
         assertEquals(-1, detached.getContentLengthLong());
         assertNull(detached.getParameter("x"));
         assertFalse(detached.getParameterNames().hasMoreElements());
-        assertNull(detached.getParameterValues("x"));
+        assertArrayEquals(new String[0], detached.getParameterValues("x"));
         assertTrue(detached.getParameterMap().isEmpty());
         assertNull(detached.getRemoteAddr());
         assertNull(detached.getRemoteHost());

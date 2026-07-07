@@ -68,6 +68,7 @@ class PackageAsyncProviderIT extends BaseCrR4TestServer {
     }
 
     @Test
+    @SuppressWarnings("java:S2925")
     void asyncPackage_returns202ThenPollableBundle() throws Exception {
         loadBundle("small-naive-expansion-bundle.json");
 
@@ -126,6 +127,7 @@ class PackageAsyncProviderIT extends BaseCrR4TestServer {
     }
 
     @Test
+    @SuppressWarnings("java:S2925")
     void asyncPackage_deniedSynchronously_isAlsoDeniedAsync() throws Exception {
         loadBundle("small-naive-expansion-bundle.json");
         // Register only after loading the fixture so the policy applies to the $package reads.

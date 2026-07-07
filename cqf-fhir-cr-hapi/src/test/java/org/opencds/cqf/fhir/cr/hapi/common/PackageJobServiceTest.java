@@ -21,7 +21,7 @@ class PackageJobServiceTest {
     private static final long POLL_MS = 20;
 
     /** Poll until the job finishes; fail if it does not complete within the timeout. */
-    @SuppressWarnings("BusyWait")
+    @SuppressWarnings({"BusyWait", "java:S2925"})
     private static void awaitDone(PackageJobService service, String jobId) {
         var deadline = System.currentTimeMillis() + TIMEOUT_MS;
         while (System.currentTimeMillis() < deadline) {
@@ -130,6 +130,7 @@ class PackageJobServiceTest {
     }
 
     @Test
+    @SuppressWarnings("java:S2925")
     void submit_purgesExpiredFinishedJobs() throws Exception {
         var service = new PackageJobService(1, Duration.ofMillis(1));
         try {

@@ -83,6 +83,7 @@ public class LibraryPackageProvider {
             idempotent = true,
             type = Library.class,
             manualResponse = true)
+    @SuppressWarnings("java:S107")
     public void packageLibrary(
             @IdParam IdType id,
             @OperationParam(name = "offset", typeName = "integer") IPrimitiveType<Integer> offset,
@@ -159,6 +160,7 @@ public class LibraryPackageProvider {
             idempotent = true,
             type = Library.class,
             manualResponse = true)
+    @SuppressWarnings("java:S107")
     public void packageLibrary(
             @OperationParam(name = "id") StringType id,
             @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,

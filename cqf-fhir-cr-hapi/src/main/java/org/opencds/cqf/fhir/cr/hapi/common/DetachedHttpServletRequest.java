@@ -63,8 +63,7 @@ class DetachedHttpServletRequest implements HttpServletRequest {
         }
         method = source.getMethod();
         requestUri = source.getRequestURI();
-        var url = source.getRequestURL();
-        requestUrl = url == null ? null : new StringBuilder(url);
+        requestUrl = new StringBuilder(source.getRequestURL());
         contextPath = source.getContextPath();
         servletPath = source.getServletPath();
         pathInfo = source.getPathInfo();

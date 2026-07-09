@@ -112,27 +112,31 @@ public class R4ImportBundleProducer {
                 switch (resource.getResourceType()) {
                     case ValueSet:
                         var valueSet = (ValueSet) resource;
-                        List<UsageContext> conditionsList = new ArrayList<>();
+                        List<UsageContext> genericContextList = new ArrayList<>();
                         List<UsageContext> priorityList = new ArrayList<>();
                         valueSet.setIdentifier(fixIdentifiers(valueSet.getIdentifier()));
                         var valueSetCanonicalUrl = adapterFactory
                                 .createKnowledgeArtifactAdapter(valueSet)
                                 .getCanonical();
-                        extractPrioritiesAndConditions(
-                                valueSet.getUseContext(), priorityList, conditionsList, valueSetCanonicalUrl);
+                        extractUsageContexts(
+                                valueSet.getUseContext(), priorityList, genericContextList, valueSetCanonicalUrl);
                         if (hasGrouperCompose(valueSet)) {
                             prepareGrouperValueSet(valueSet, appAuthoritativeUrl);
-                            groupers.add(
-                                    relatedArtifactFromGrouperUrl(valueSetCanonicalUrl, conditionsList, priorityList));
+                            groupers.add(relatedArtifactFromGrouperUrl(
+                                    valueSetCanonicalUrl, genericContextList, priorityList));
                         } else {
                             prepareLeafValueSet(valueSet);
-                            leafs.add(relatedArtifactFromLeafUrl(valueSetCanonicalUrl, conditionsList, priorityList));
+                            leafs.add(
+                                    relatedArtifactFromLeafUrl(valueSetCanonicalUrl, genericContextList, priorityList));
                         }
                         // Remove conditions and priority from useContext of leaf valuesets and groupers
                         var cleanedContext = valueSet.getUseContext().stream()
                                 .filter(ctx -> ctx.hasCode()
-                                        && !(ctx.getCode().getCode().equals("focus")
-                                                || ctx.getCode().getCode().equals("priority")))
+                                                && !(ctx.getCode().getCode().equals("focus")
+                                                        || ctx.getCode()
+                                                                .getCode()
+                                                                .equals("priority"))
+                                        || ctx.getCode().getCode().equals("reporting"))
                                 .collect(Collectors.toList());
                         valueSet.setUseContext(cleanedContext);
                         // Check if ValueSet already exists
@@ -249,10 +253,10 @@ public class R4ImportBundleProducer {
                 .collect(Collectors.toList());
     }
 
-    static void extractPrioritiesAndConditions(
+    static void extractUsageContexts(
             List<UsageContext> contexts,
             List<UsageContext> priorityList,
-            List<UsageContext> conditionsList,
+            List<UsageContext> genericContextList,
             String valueSetCanonicalUrl) {
 
         if (contexts == null || contexts.isEmpty()) return;
@@ -262,7 +266,7 @@ public class R4ImportBundleProducer {
             if (!isValidUsageContext) continue;
 
             switch (context.getCode().getCode()) {
-                case "focus" -> conditionsList.add(context);
+                case "focus", "reporting" -> genericContextList.add(context);
                 case "priority" -> handlePriorityContext(context, priorityList, valueSetCanonicalUrl);
                 default -> {
                     /* ignore other usage contexts */
@@ -360,7 +364,7 @@ public class R4ImportBundleProducer {
     }
 
     private static RelatedArtifact relatedArtifactFromGrouperUrl(
-            String grouperUrl, List<UsageContext> conditions, List<UsageContext> priorities) {
+            String grouperUrl, List<UsageContext> genericContexts, List<UsageContext> priorities) {
         var relatedArtifact = new RelatedArtifact();
         relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
         relatedArtifact.setResource(grouperUrl);
@@ -368,8 +372,8 @@ public class R4ImportBundleProducer {
         isOwnedExtension.setUrl(TransformProperties.crmiIsOwned);
         isOwnedExtension.setValue(new BooleanType(true));
         var extensions = new ArrayList<Extension>();
-        extensions.addAll(
-                processUsageContextMapForLibrary(conditions, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
+        extensions.addAll(processUsageContextMapForLibrary(
+                genericContexts, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.addAll(
                 processUsageContextMapForLibrary(priorities, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.add(isOwnedExtension);
@@ -378,13 +382,13 @@ public class R4ImportBundleProducer {
     }
 
     private static RelatedArtifact relatedArtifactFromLeafUrl(
-            String leafUrl, List<UsageContext> conditions, List<UsageContext> priorities) {
+            String leafUrl, List<UsageContext> genericContexts, List<UsageContext> priorities) {
         var relatedArtifact = new RelatedArtifact();
         relatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DEPENDSON);
         relatedArtifact.setResource(leafUrl);
         var extensions = new ArrayList<Extension>();
-        extensions.addAll(
-                processUsageContextMapForLibrary(conditions, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
+        extensions.addAll(processUsageContextMapForLibrary(
+                genericContexts, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         extensions.addAll(
                 processUsageContextMapForLibrary(priorities, TransformProperties.CRMI_INTENDED_USAGE_CONTEXT_EXT_URL));
         relatedArtifact.setExtension(extensions);

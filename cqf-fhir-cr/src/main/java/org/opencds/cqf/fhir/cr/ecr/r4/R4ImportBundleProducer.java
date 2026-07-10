@@ -132,11 +132,9 @@ public class R4ImportBundleProducer {
                         // Remove conditions and priority from useContext of leaf valuesets and groupers
                         var cleanedContext = valueSet.getUseContext().stream()
                                 .filter(ctx -> ctx.hasCode()
-                                                && !(ctx.getCode().getCode().equals("focus")
-                                                        || ctx.getCode()
-                                                                .getCode()
-                                                                .equals("priority"))
-                                        || ctx.getCode().getCode().equals("reporting"))
+                                        && !(ctx.getCode().getCode().equals("focus")
+                                                || ctx.getCode().getCode().equals("priority")
+                                                || ctx.getCode().getCode().equals("reporting")))
                                 .collect(Collectors.toList());
                         valueSet.setUseContext(cleanedContext);
                         // Check if ValueSet already exists

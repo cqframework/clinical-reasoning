@@ -51,6 +51,15 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
         adapter.setExtension(removeReleaseLabelAndDescription);
         // remove approval date
         adapter.setApprovalDate(null);
+        // reset expansion parameters to the author-specified input, in preparation for future releases
+        switch (repository.fhirContext().getVersion().getVersion()) {
+            case DSTU3 -> org.opencds.cqf.fhir.cr.visitor.dstu3.DraftVisitor.restoreInputExpansionParams(adapter);
+            case R4 -> org.opencds.cqf.fhir.cr.visitor.r4.DraftVisitor.restoreInputExpansionParams(adapter);
+            case R5 -> org.opencds.cqf.fhir.cr.visitor.r5.DraftVisitor.restoreInputExpansionParams(adapter);
+            default ->
+                throw new UnprocessableEntityException("Unsupported FHIR version: "
+                        + repository.fhirContext().getVersion().getVersion());
+        }
         // new draft version
         String draftVersion = version + "-draft";
         String draftVersionUrl = Canonicals.getUrl(adapter.getUrl()) + "|" + draftVersion;

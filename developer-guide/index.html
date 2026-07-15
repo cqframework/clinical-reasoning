@@ -1,0 +1,1750 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for CQF Clinical Reasoning on FHIR for Java">
+      
+      
+        <meta name="author" content="Smile Digital Health">
+      
+      
+        <link rel="canonical" href="https://www.cqframework.org/clinical-reasoning/developer-guide/">
+      
+      
+        <link rel="prev" href="../operations/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/icon/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.2">
+    
+    
+      
+        <title>Developer Guide - CQF Clinical Reasoning for Java</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.d7758b05.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#developer-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="CQF Clinical Reasoning for Java" class="md-header__button md-logo" aria-label="CQF Clinical Reasoning for Java" data-md-component="logo">
+      
+  <img src="../assets/images/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CQF Clinical Reasoning for Java
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Developer Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/cqframework/clinical-reasoning/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="CQF Clinical Reasoning for Java" class="md-nav__button md-logo" aria-label="CQF Clinical Reasoning for Java" data-md-component="logo">
+      
+  <img src="../assets/images/logo.svg" alt="logo">
+
+    </a>
+    CQF Clinical Reasoning for Java
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/cqframework/clinical-reasoning/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cql/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CQL
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#repository-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repository Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#licensing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Licensing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extensions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#style-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Style Guide
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#branch-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branch Policy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systems-of-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Systems of Systems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      FHIR Platform
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hapi-fhir" class="md-nav__link">
+    <span class="md-ellipsis">
+      HAPI FHIR
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#design-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design Goals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hexagonal-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hexagonal Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      FHIR Repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir-operation-implementation-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      FHIR Operation Implementation Layers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FHIR Operation Implementation Layers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer Responsibilities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-measure-evaluate-measure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Measure $evaluate-measure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guiding-principles-for-refactoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Guiding Principles for Refactoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java Guidance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Java Guidance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discovery-and-maintainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovery and Maintainability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javadoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Javadoc
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming Conventions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Naming Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#package-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artifact-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Artifact names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class names
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#design-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design Conventions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Utilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#class-specific-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Specific Utilities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#behavior-specific-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Behavior Specific Utilities
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#repository-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repository Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#licensing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Licensing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extensions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#style-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      Style Guide
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#branch-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Branch Policy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    <span class="md-ellipsis">
+      Background
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systems-of-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      Systems of Systems
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      FHIR Platform
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hapi-fhir" class="md-nav__link">
+    <span class="md-ellipsis">
+      HAPI FHIR
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#design-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design Goals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hexagonal-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hexagonal Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      FHIR Repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fhir-operation-implementation-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      FHIR Operation Implementation Layers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="FHIR Operation Implementation Layers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer Responsibilities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-measure-evaluate-measure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example: Measure $evaluate-measure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Error Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guiding-principles-for-refactoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Guiding Principles for Refactoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Java Guidance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Java Guidance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#discovery-and-maintainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      Discovery and Maintainability
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#javadoc" class="md-nav__link">
+    <span class="md-ellipsis">
+      Javadoc
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming Conventions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Naming Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#package-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Package names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artifact-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Artifact names
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class names
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#design-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Design Conventions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Utilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types-of-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Types of Utilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Types of Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#class-specific-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Class Specific Utilities
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#behavior-specific-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Behavior Specific Utilities
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/cqframework/clinical-reasoning/edit/main/docs/src/doc/docs/developer-guide.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="developer-guide">Developer Guide<a class="headerlink" href="#developer-guide" title="Permanent link">&para;</a></h1>
+<h2 id="repository-structure">Repository Structure<a class="headerlink" href="#repository-structure" title="Permanent link">&para;</a></h2>
+<p>This is a table of current artifacts in this project, and short description of what each artifact contains. See the <a href="#architecture">Architecture</a> section for more detailed information on why this project is structured this way.</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cqf-fhir-bom</code></td>
+<td>Maven "Bill of Materials" for this repository, simplifying dependency management in downstream projects.</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-utility</code></td>
+<td>Utilities to assist in the creation of FHIR clinical reasoning operations. Implementations of the above APIs for REST and in-memory use cases also live here, and act as a reference for how to implement the above APIs.</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-test</code></td>
+<td>Utilities to assist writing unit tests for clinical reasoning operations.</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-cql</code></td>
+<td>Core project for FHIR / CQL interop</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-cr</code></td>
+<td>FHIR clinical reasoning operation implementations, such as <code>Measure/$evaluate-measure</code> and <code>PlanDefinition/$apply</code></td>
+</tr>
+<tr>
+<td><code>cqf-fhir-cr-hapi</code></td>
+<td>HAPI FHIR server integration. Transport adapter that connects clinical reasoning operations to HAPI's <code>@Operation</code> annotation-driven routing.</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-cr-spring</code></td>
+<td>Spring auto-configuration for wiring clinical reasoning components into Spring-based applications.</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-cr-cli</code></td>
+<td>CLI tool for running FHIR clinical reasoning operations</td>
+</tr>
+<tr>
+<td><code>cqf-fhir-benchmark</code></td>
+<td>JMH performance benchmarks for clinical reasoning operations. Not published to Maven Central.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
+<p>See the <a href="#java-guidance">Java Guidance</a> section for more detailed information.</p>
+<h3 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h3>
+<p>Java 17+ is required to build and run this project. You can build the project with <code>./gradlew build</code>.</p>
+<h3 id="licensing">Licensing<a class="headerlink" href="#licensing" title="Permanent link">&para;</a></h3>
+<p>All contributions to this project will be licensed under Apache 2.0</p>
+<h3 id="extensions">Extensions<a class="headerlink" href="#extensions" title="Permanent link">&para;</a></h3>
+<p>If you're using VS Code, the <code>clinical-reasoning</code> repo suggests a list of Java extensions for static and style analysis. Please enable these recommended extensions, as they help detect issues with contributions prior to committing them or opening a PR.</p>
+<h3 id="style-guide">Style Guide<a class="headerlink" href="#style-guide" title="Permanent link">&para;</a></h3>
+<p>This project uses <a href="https://github.com/palantir/palantir-java-format">Palantir Java Format</a>, applied automatically via <a href="https://github.com/diffplug/spotless">Spotless</a>. Run <code>./gradlew spotlessApply</code> to format code, or <code>./gradlew spotlessCheck</code> to verify formatting. Default formatter settings are already configured for VS Code. If you use another editor, please set it up accordingly.</p>
+<h3 id="branch-policy">Branch Policy<a class="headerlink" href="#branch-policy" title="Permanent link">&para;</a></h3>
+<p>All new development takes place on <code>&lt;feature&gt;</code> branches off <code>main</code>. Once feature development on the branch is complete, the feature branch is submitted to <code>main</code> as a PR. The PR is reviewed by maintainers and regression testing by the CI build occurs.</p>
+<p>Changes to the <code>main</code> branch must be done through an approved PR. Delete branches after merging to keep the repository clean.</p>
+<p>See Release Process for related information.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<p>In general, the clinical reasoning modules contained on this project can be enabled on a given platform by implementing the <a href="#fhir-repository">FHIR Repository API</a>. There are examples for that:</p>
+<ul>
+<li>In HAPI, connecting to a JPA layer</li>
+<li>On Android, connecting to SQLite</li>
+<li>In the test utilities, using a filesystem</li>
+<li>In the client utilities, connecting to a remote FHIR server</li>
+<li>In the standalone examples, using an in-memory data structure</li>
+</ul>
+<p>The specific usage of each module is documented in the module-specific section of the documentation. The <a href="#architecture">Architecture</a> gives an overview of why the FHIR Repository API was chosen and its design goals.</p>
+<h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h3>
+<p>"Clinical Reasoning" is the application business logic in clinical settings. For example, given a certain diagnosis a clinician may prescribe a certain medication, or given a positive lab result for a contagious disease laws may require reporting of that result to a Public Health Authority (PHA). The primary concern of this repository is developing Clinical Reasoning capabilities for FHIR applications.</p>
+<p><a href="https://hl7.org/fhir/">FHIR</a> is a platform for building interoperable clinical systems of systems (SoS). Use cases include:</p>
+<ul>
+<li>Storing electronic clinical data (EMRs)</li>
+<li>Data exchange across payers, public health authorities, heath information exchanges, and between independent EMRs</li>
+<li>Reporting clinical quality metrics or disease surveillance</li>
+<li>Research and analytics on patient data</li>
+<li>Creation and distribution of standardized clinical logic that can be run anywhere FHIR is supported</li>
+</ul>
+<p>FHIR defines a dedicated <a href="https://build.fhir.org/clinicalreasoning-module.html">Clinical Reasoning module</a> and there are numerous derivative "Implementation Guides" (IGs) that specify new uses based upon the core module, such as the <a href="https://build.fhir.org/ig/HL7/cqf-measures/">CQF Measures IG</a> that describes how to use Quality Measures within the FHIR ecosystem.</p>
+<h4 id="systems-of-systems">Systems of Systems<a class="headerlink" href="#systems-of-systems" title="Permanent link">&para;</a></h4>
+<p>Systems of Systems are collaborating systems that exhibit operational and managerial independence.</p>
+<ul>
+<li>Operational independence - each constituent system is operated to achieve a useful purpose independently</li>
+<li>Managerial independence - each constituent system evolves to achieve its own ends independently</li>
+</ul>
+<p>Within the healthcare space an example are the various Electronic Medical Record (EMR) systems, Healthcare Information Exchanges (HIE), and Public Health Authorities (PHA) that interoperate for various purposes such as public health reporting, exchanging patient data, and so on.</p>
+<pre class="mermaid"><code>flowchart LR
+    A["EMR A"]
+    B["EMR B"]
+    C["EMR C"]
+    A &lt;--&gt; HIE["HIE"]
+    B &lt;--&gt; HIE
+    C &lt;--&gt; HIE
+    HIE &lt;--&gt; N["National PHA"]
+    HIE &lt;--&gt; R["Regional PHA"]
+    HIE &lt;--&gt; L["Local PHA"]</code></pre>
+<p>A common approach to scaling an SoS is to build a "platform". An SoS platform:</p>
+<ul>
+<li>Promotes interoperability through<ul>
+<li>Common communication mechanisms</li>
+<li>Common information models (semantics)</li>
+<li>Patterns or sequences of interaction</li>
+</ul>
+</li>
+<li>Provides services and functions to all constituent systems</li>
+<li>Reduces time and effort to develop or modify systems by<ul>
+<li>Providing reference or concrete implementations of services</li>
+<li>Replacing point-to-point integration with system-to-platform integration</li>
+<li>Reducing barrier to entry for new systems to join SoS</li>
+</ul>
+</li>
+<li>Enables modular substitution systems in the SoS<ul>
+<li>Which supports an “ecosystem”</li>
+</ul>
+</li>
+</ul>
+<p>The Internet is an example of an SoS platform:</p>
+<ul>
+<li>Common communication mechanisms<ul>
+<li>TCP/HTTP</li>
+</ul>
+</li>
+<li>System-to-platform integration<ul>
+<li>DNS servers allow you to access anything, anywhere</li>
+</ul>
+</li>
+<li>Well-established patterns and sequences of interactions<ul>
+<li>REST</li>
+</ul>
+</li>
+<li>Connecting to one server looks like connecting to any other<ul>
+<li>Allows (nearly) transparent middleware<ul>
+<li>Routers, proxies, caching, authentication</li>
+</ul>
+</li>
+<li>Allows arbitrarily deep/complex networks</li>
+</ul>
+</li>
+</ul>
+<p>An SoS Platform is frequently described as a set of standards. For example, all the RFCs that are published by the IETF for the Internet that describe things like REST. These standards function as a formal description of a set of functionality within the overall platform. SDKs for developing Internet applications exist in almost every programming language, such as HTTP client libraries.</p>
+<h4 id="fhir-platform">FHIR Platform<a class="headerlink" href="#fhir-platform" title="Permanent link">&para;</a></h4>
+<p>FHIR is an SoS Platform built on top of web standards and focused on clinical concepts. <a href="https://www.hl7.org/">Health Level Seven International</a> (HL7) manages the development of FHIR. FHIR provides (among other things):</p>
+<ul>
+<li>A Common data (meta)model and semantics<ul>
+<li>FHIR "Resources" representing clinical concepts such as Patient, Encounter, Medication, etc.</li>
+</ul>
+</li>
+<li>Common patterns for interaction<ul>
+<li>FHIR REST API</li>
+<li>SMART-on-FHIR</li>
+<li>Bulk Data</li>
+</ul>
+</li>
+<li>Extensibility and discovery mechanisms for adding new functionality to a systems</li>
+</ul>
+<p>Additionally, HL7 funds the development of reference implementations and provides some platform services, such as a common package registry for FHIR publications.</p>
+<h3 id="hapi-fhir">HAPI FHIR<a class="headerlink" href="#hapi-fhir" title="Permanent link">&para;</a></h3>
+<p><a href="https://hapifhir.io/hapi-fhir">HAPI FHIR</a> is an open-source Java SDK for building FHIR applications. It defines a set of object models, a persistence layer, an implementation of the FHIR REST API, and forms the basis of this project. In turn, some of the operations defined here are used to provide Clinical Reasoning functionality on the HAPI FHIR Server.</p>
+<p><a href="https://www.smilecdr.com/">Smile Digital Health</a> is the maintainer and publisher of that HAPI FHIR project. The publisher of this project, <a href="https://www.alphora.com/">Alphora</a>, is a subsidiary of Smile Digital Health.</p>
+<h3 id="design-goals">Design Goals<a class="headerlink" href="#design-goals" title="Permanent link">&para;</a></h3>
+<p>This project is designed to provide reusable Clinical Reasoning modules for any Java and HAPI based application. This includes:</p>
+<ul>
+<li>Android, as part of the <a href="https://github.com/google/android-fhir">Android FHIR SDK</a></li>
+<li><a href="https://github.com/CDCgov/eCR-FHIR-app-HCS">eCR Now</a>, the CDC's reference implementation for contagious disease surveillance</li>
+<li>Spark, for analytics use cases<ul>
+<li><a href="https://www.alphora.com/">Alphora</a> provides a commercial solution</li>
+</ul>
+</li>
+<li>VS Code, through the <a href="https://github.com/cqframework/vscode-cql">LSP</a><ul>
+<li>Provides an IDE for authoring clinical logic in terms of FHIR/CQL</li>
+</ul>
+</li>
+<li><a href="https://github.com/hapifhir/hapi-fhir">HAPI FHIR Server</a>, an open-source Clinical Data Repository (CDR)</li>
+<li><a href="https://www.smilecdr.com/smilecdr">Smile CDR</a>, a commercial CDR</li>
+<li>Various other open-source and commercial implementations</li>
+</ul>
+<h3 id="hexagonal-architecture">Hexagonal Architecture<a class="headerlink" href="#hexagonal-architecture" title="Permanent link">&para;</a></h3>
+<p>This project follows <a href="https://alistair.cockburn.us/hexagonal-architecture/">Hexagonal Architecture</a> (also called Ports &amp; Adapters). The central abstraction is <code>IRepository</code>, a Java projection of the FHIR REST API. It serves as the port on both the gateway (inbound) and data store (outbound) sides. An operation is a capsule of logic that sits between two repositories: it receives data through one and persists results through the other.</p>
+<p>Operations exist at different levels of complexity. Each level builds on the previous:</p>
+<p><strong>Generic operation.</strong> Simple FHIR-to-FHIR logic. Repository in, operation, Repository out.</p>
+<pre class="mermaid"><code>graph LR
+    GRAPHQL["GraphQL"] --&gt; R1
+    REST["REST"] --&gt; R1
+    CLI["CLI"] --&gt; R1
+    R1["IRepository&lt;br/&gt;(Gateway)&lt;br/&gt;Auth, Routing"] --&gt; Op["Operation"] --&gt; R2["IRepository&lt;br/&gt;(Data Store)&lt;br/&gt;Search, CRUD,&lt;br/&gt;Transactions"]
+    R2 --&gt; JPA["JPA"]
+    R2 --&gt; FS["Filesystem"]
+    R2 --&gt; RC["REST Client"]</code></pre>
+<p><strong>Specialized domain.</strong> When the operation needs version-agnostic domain types. FHIR resources are normalized to domain representations, domain logic executes, and results are denormalized back to FHIR.</p>
+<pre class="mermaid"><code>graph LR
+    R1["IRepository&lt;br/&gt;(Gateway)"] --&gt; Norm["Domain&lt;br/&gt;Normalization"] --&gt; DL["Domain&lt;br/&gt;Logic"] --&gt; Denorm["Domain&lt;br/&gt;Denormalization"] --&gt; R2["IRepository&lt;br/&gt;(Data Store)"]</code></pre>
+<p>CRMI operations (<code>$release</code>, <code>$package</code>, <code>$draft</code>, <code>$approve</code>) follow this pattern. They accept an <code>IRepository</code> as their data store, normalize FHIR resources to adapter representations via <code>IKnowledgeArtifactAdapter</code>, execute domain logic through the visitor pattern (<code>ReleaseVisitor</code>, <code>PackageVisitor</code>, etc.), and denormalize results back to FHIR transaction bundles. They do not require environment configuration or CQL evaluation. The <code>IRepository</code> they receive is used directly, not composed from endpoint parameters.</p>
+<p><strong>Clinical reasoning runtime.</strong> The pattern used by <code>$evaluate-measure</code>, <code>$apply</code>, and similar operations. Adds environment configuration (resolving <code>dataEndpoint</code>, <code>terminologyEndpoint</code> into a composed <code>ProxyRepository</code>) and treats the domain logic as a runtime for standards-based content (CQL, FHIR resources define the logic; Java provides the execution environment).</p>
+<pre class="mermaid"><code>graph LR
+    R1["IRepository&lt;br/&gt;(Gateway)"] --&gt; RN["Runtime&lt;br/&gt;Normalization"] --&gt; Env["Environment&lt;br/&gt;Config"] --&gt; RT["Runtime"] --&gt; RD["Runtime&lt;br/&gt;Denormalization"] --&gt; R2["IRepository&lt;br/&gt;(Data Store)"]</code></pre>
+<p><strong>HAPI integration.</strong> HAPI's <code>@Operation</code> annotation-driven routing replaces the inbound <code>IRepository</code> with a HAPI Operation Provider. This is a degraded form of the canonical architecture: HAPI handles REST parsing and routing, so the gateway is no longer a clean <code>IRepository</code> boundary. HAPI's <code>@Operation</code> annotations are accepted in the transport adapter as a deployment necessity. The coding value "no annotations-as-logic" applies to domain and normalization code. Annotations must not drive clinical logic or data transformation behavior.</p>
+<pre class="mermaid"><code>graph LR
+    HAPI["HAPI Operation&lt;br/&gt;Provider"] --&gt; RN["Runtime&lt;br/&gt;Normalization"] --&gt; Env["Environment&lt;br/&gt;Config"] --&gt; RT["Runtime"] --&gt; RD["Runtime&lt;br/&gt;Denormalization"] --&gt; R2["IRepository&lt;br/&gt;(Data Store)"]</code></pre>
+<p>The first three levels represent the canonical architecture. The HAPI integration is the most common deployment but not the architectural ideal. Code should be structured for the canonical case; the HAPI adapter wraps it.</p>
+<p>Processor classes like <code>R4MeasureProcessor</code> and CRMI services like <code>R4ReleaseService</code> accept an <code>IRepository</code>, but this is the <strong>data store</strong> port. Gateway logic (request parsing, routing, auth) has already happened by the time they are invoked. The canonical gateway <code>IRepository</code> shown in the Generic operation diagram represents an architectural goal: a uniform inbound port that any transport (REST, CLI, GraphQL) can implement. Today, the CLI module comes closest to this ideal. In the HAPI deployment, the HAPI Operation Provider serves as the gateway and constructs the processor with a data store <code>IRepository</code>.</p>
+<p>Notice how the structure of the architecture mirrors the structure of the systems of systems that FHIR is designed to support. The transport layer corresponds to the various platforms and interfaces that interact with the system. The domain core corresponds to the business logic that operates on clinical concepts. The repository API abstracts away the data sources, which could be any of the constituent systems in an SoS.</p>
+<p>This design allows the clinical reasoning logic to be reusable across different platforms and data sources, as long as they can implement the Repository API. It's also an example of recursive architecture, where the same principles of modularity and separation of concerns apply at different levels of the system. This allows developers and agents to reuse the same mental model and design patterns at multiple levels in the system. </p>
+<h3 id="fhir-repository">FHIR Repository<a class="headerlink" href="#fhir-repository" title="Permanent link">&para;</a></h3>
+<p>The FHIR Repository API (<code>IRepository</code>) is a Java projection of the FHIR REST API. It is the always-present driven adapter for all data access in this project. Every operation implementation accesses clinical data, terminology, and content exclusively through this interface.</p>
+<p>This design allows clinical reasoning operations to run on any platform that implements <code>IRepository</code>:</p>
+<ul>
+<li><strong>HAPI JPA</strong>: Connecting to a database via the HAPI persistence layer</li>
+<li><strong>Android</strong>: Connecting to SQLite via the Google FHIR SDK</li>
+<li><strong>REST client</strong>: Connecting to a remote FHIR server</li>
+<li><strong>Filesystem</strong>: Reading FHIR resources from test fixtures or bundles</li>
+<li><strong>In-memory</strong>: Using bundled data for standalone evaluation</li>
+</ul>
+<p>Because <code>IRepository</code> mirrors the FHIR REST API, repositories compose naturally. A <code>ProxyRepository</code> routes content, terminology, and data requests to different backing repositories. A <code>FederatedRepository</code> overlays additional data on top of a base repository. This composition happens during environment resolution, not in the domain core.</p>
+<h3 id="fhir-operation-implementation-layers">FHIR Operation Implementation Layers<a class="headerlink" href="#fhir-operation-implementation-layers" title="Permanent link">&para;</a></h3>
+<p>When implementing a FHIR operation (e.g., <code>$evaluate-measure</code>, <code>$apply</code>), the code follows a consistent pipeline through the hexagonal layers. Each operation implementation is an isolated <strong>capsule</strong> of business logic that accepts FHIR at the top, operates on domain representations internally, and produces FHIR at the bottom. This self-contained unit can slot into (or between) any FHIR server. The Repository API provides FHIR translation on the data-access side.</p>
+<pre class="mermaid"><code>sequenceDiagram
+    actor Client
+    box FHIR Gateway&lt;br/&gt;Auth, Validation, Routing
+    participant Transport
+    end
+    box Operation Implementation
+    participant OpProvider as Operation Provider&lt;br/&gt;Converts to FHIR types
+    participant EnvConfig as Environment Resolution&lt;br/&gt;Configures Repository
+    participant FHIR as Domain Translation&lt;br/&gt;Converts to Domain types
+    end
+    box rgb(218,232,252) Domain Service&lt;br/&gt;FHIR-version independent
+    participant Domain as Measure Evaluation
+    end
+    box Data Store&lt;br/&gt;Search, CRUD, Transactions
+    participant Repo as Repository API
+    end
+
+    Client-&gt;&gt;Transport: HTTP $evaluate-measure
+    activate Transport
+    Transport-&gt;&gt;OpProvider: parameters
+    Note over OpProvider: Parse REST params&lt;br/&gt;to typed values
+
+    OpProvider-&gt;&gt;EnvConfig: EvaluateMeasureRequest
+    activate EnvConfig
+    Note over EnvConfig: Separate environment params&lt;br/&gt;(dataEndpoint, terminologyEndpoint, ...)&lt;br/&gt;from operation params
+    EnvConfig-&gt;&gt;Repo: Resolve endpoints to repositories
+    Note over EnvConfig: Compose ProxyRepository&lt;br/&gt;from resolved endpoints
+    EnvConfig-&gt;&gt;FHIR: operation params + configured Repository
+    deactivate EnvConfig
+
+    activate FHIR
+    FHIR-&gt;&gt;Repo: Read Measure resource
+    Note over FHIR: Normalize:&lt;br/&gt;Measure → MeasureDef
+    FHIR-&gt;&gt;Domain: MeasureDef + params + configured Repository
+    deactivate FHIR
+
+    activate Domain
+    Note over Domain: Version-agnostic logic only.&lt;br/&gt;Assumes configured environment.
+    Domain-&gt;&gt;Repo: CQL Engine evaluates&lt;br/&gt;(via configured Repository)
+    Note over Domain: Population membership&lt;br/&gt;Stratification&lt;br/&gt;Scoring
+    Domain--&gt;&gt;FHIR: Evaluated MeasureDef
+    deactivate Domain
+
+    activate FHIR
+    Note over FHIR: Denormalize:&lt;br/&gt;MeasureDef → MeasureReport
+    FHIR--&gt;&gt;OpProvider: MeasureReport
+    deactivate FHIR
+
+    Note over OpProvider: Translate domain&lt;br/&gt;exceptions → HTTP status
+    OpProvider--&gt;Transport: MeasureReport or OperationOutcome
+    Transport--&gt;&gt;Client: HTTP Response
+    deactivate Transport</code></pre>
+<p>Note the recursive nature of the architecture in the above sequence diagram.</p>
+<p>The transport layer accepts FHIR, normalizes it to domain types, and then the domain logic operates on those types. When the domain logic needs to access data, it goes through the Repository API, which provides FHIR-native data access. The results are then denormalized back to FHIR and returned to the client.</p>
+<p>This pattern applies to all operations implemented in this project, providing a consistent structure for development and maintenance.
+In the cases where a domain specific representation is not needed, the operation simply operates on FHIR resources.</p>
+<h4 id="layer-responsibilities">Layer Responsibilities<a class="headerlink" href="#layer-responsibilities" title="Permanent link">&para;</a></h4>
+<p>Each layer has one job at one level of abstraction. If you need "and" to describe a layer's responsibility, it should be two layers.</p>
+<p><strong>1. Transport Adapter</strong> (<code>cqf-fhir-cr-hapi</code> or <code>cqf-fhir-cr-cli</code>)</p>
+<ul>
+<li>Accepts platform-specific input (HTTP <code>@OperationParam</code>, CLI arguments)</li>
+<li>Converts to typed domain request objects</li>
+<li>Delegates to the FHIR translation / operation facade</li>
+<li>Translates domain exceptions to platform-appropriate responses (HTTP status codes, CLI exit codes)</li>
+<li>This is the <strong>only</strong> layer that imports <code>ca.uhn.fhir.rest.server.exceptions.*</code></li>
+</ul>
+<p><strong>2. Environment Resolution</strong></p>
+<ul>
+<li>Separates environment configuration parameters (<code>dataEndpoint</code>, <code>terminologyEndpoint</code>, <code>contentEndpoint</code>, etc.) from operation parameters</li>
+<li>Resolves endpoint parameters into concrete Repository instances</li>
+<li>Composes a single <code>ProxyRepository</code> (via <code>Repositories.proxy()</code>) that routes data, terminology, and content requests to the appropriate backing repositories</li>
+<li>The domain core receives a fully configured Repository and never sees raw endpoint configuration</li>
+</ul>
+<p><strong>3. FHIR Translation - Inbound (Normalization)</strong></p>
+<ul>
+<li>Resolves the target resource (e.g., find the Measure by ID/URL/identifier via Repository)</li>
+<li>Normalizes version-specific FHIR resources into version-agnostic domain representations (e.g., <code>R4MeasureDefBuilder</code> converts an R4 <code>Measure</code> to a <code>MeasureDef</code>)</li>
+<li>This layer contains version-specific code (one implementation per FHIR version)</li>
+</ul>
+<p><strong>4. Domain Core (Operation Facade + Evaluator)</strong></p>
+<ul>
+<li>Orchestrates the evaluation pipeline</li>
+<li><strong>FHIR-version independent</strong>: operates exclusively on version-agnostic domain representations (<code>MeasureDef</code>, <code>GroupDef</code>, <code>PopulationDef</code>, etc.), never on version-specific FHIR types</li>
+<li><strong>Assumes a configured environment</strong>: receives a fully composed <code>IRepository</code> and domain parameters — has no knowledge of endpoints, connection details, or how data sources were resolved</li>
+<li>May use extended domain representations for internal concerns (e.g., CQL evaluation results, stratification state)</li>
+<li>Contains no version-specific FHIR imports</li>
+<li>Throws domain exceptions, never HTTP exceptions</li>
+<li>Lives in <code>common/</code> packages</li>
+</ul>
+<p><strong>5. FHIR Translation - Outbound (Denormalization)</strong></p>
+<ul>
+<li>Converts evaluated domain representations back to version-specific FHIR resources (e.g., <code>R4MeasureReportBuilder</code> converts <code>MeasureDef</code> to an R4 <code>MeasureReport</code>)</li>
+<li>Applies response decorations (reporter, extensions, bundling) that are FHIR-version-specific</li>
+<li>This layer contains version-specific code (one implementation per FHIR version)</li>
+</ul>
+<p><strong>6. Repository API (Data Access)</strong></p>
+<ul>
+<li>All data access goes through <code>IRepository</code>, which is a FHIR-native interface</li>
+<li>The domain core accesses data via Repository without knowing whether the backend is JPA, REST, filesystem, or in-memory</li>
+<li>Repository composition (proxy, federation) is configured during environment resolution and injected into the domain core</li>
+</ul>
+<h4 id="example-measure-evaluate-measure">Example: Measure <code>$evaluate-measure</code><a class="headerlink" href="#example-measure-evaluate-measure" title="Permanent link">&para;</a></h4>
+<p>The <code>$evaluate-measure</code> operation demonstrates how these layers apply concretely:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Class(es)</th>
+<th>Input</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transport Adapter</td>
+<td><code>MeasureOperationsProvider</code></td>
+<td>HTTP <code>@OperationParam</code> strings</td>
+<td><code>MeasureReport</code> (FHIR)</td>
+</tr>
+<tr>
+<td>Environment Resolution</td>
+<td><code>Repositories.proxy()</code></td>
+<td>Endpoint params (<code>dataEndpoint</code>, <code>terminologyEndpoint</code>, ...)</td>
+<td>Configured <code>ProxyRepository</code></td>
+</tr>
+<tr>
+<td>Normalization</td>
+<td><code>R4MeasureDefBuilder</code></td>
+<td>R4 <code>Measure</code> resource</td>
+<td><code>MeasureDef</code> (domain)</td>
+</tr>
+<tr>
+<td>Domain Core</td>
+<td><code>MeasureEvaluator</code>, <code>MeasureMultiSubjectEvaluator</code>, <code>MeasureReportDefScorer</code></td>
+<td><code>MeasureDef</code> + configured <code>IRepository</code></td>
+<td><code>MeasureDef</code> (evaluated)</td>
+</tr>
+<tr>
+<td>Denormalization</td>
+<td><code>R4MeasureReportBuilder</code></td>
+<td><code>MeasureDef</code> (evaluated)</td>
+<td>R4 <code>MeasureReport</code></td>
+</tr>
+<tr>
+<td>Data Access</td>
+<td><code>IRepository</code> (via <code>ProxyRepository</code>, <code>FederatedRepository</code>)</td>
+<td>FHIR search/read calls</td>
+<td>FHIR resources</td>
+</tr>
+</tbody>
+</table>
+<h4 id="error-architecture">Error Architecture<a class="headerlink" href="#error-architecture" title="Permanent link">&para;</a></h4>
+<p>Each layer should have layer-appropriate error abstractions:</p>
+<ul>
+<li><strong>Domain core</strong> throws domain exceptions (e.g., <code>MeasureValidationException</code>, <code>EvaluationException</code>). These carry structured information about what failed, not how to report it.</li>
+<li><strong>Normalization and denormalization</strong> may throw domain exceptions for resolution failures (e.g., <code>MeasureResolutionException</code> if the Measure is not found).</li>
+<li><strong>Transport adapter</strong> catches domain exceptions and translates them to platform-appropriate errors (e.g., <code>MeasureResolutionException</code> becomes HTTP 404, <code>MeasureValidationException</code> becomes HTTP 400).</li>
+<li><strong>Never</strong> throw transport-layer exceptions (e.g., <code>InvalidRequestException</code>, <code>InternalErrorException</code>) from domain core, normalization, or denormalization code. This couples business logic to a specific transport.</li>
+</ul>
+<h4 id="guiding-principles-for-refactoring">Guiding Principles for Refactoring<a class="headerlink" href="#guiding-principles-for-refactoring" title="Permanent link">&para;</a></h4>
+<p>When modifying or creating operation implementations, work toward this layering rather than replicating existing patterns that may have diverged from it:</p>
+<ul>
+<li><strong>One class, one layer.</strong> A class that resolves endpoints AND evaluates measures AND formats responses is doing three jobs across three layers. Split it.</li>
+<li><strong>Version-agnostic code stays version-agnostic.</strong> If a class in <code>common/</code> imports from <code>r4/</code> or <code>dstu3/</code>, either the import belongs in <code>common/</code> (move it) or the class belongs in a version-specific package (move the class).</li>
+<li><strong>Build domain representations once.</strong> If the same FHIR resource is being parsed into a domain object multiple times in a single request, refactor to build it once and thread it through the pipeline.</li>
+<li><strong>Request objects over parameter lists.</strong> If a method takes more than 5-6 parameters, introduce a value object to carry them. This makes the pipeline stages composable and testable.</li>
+<li><strong>Symmetric version support.</strong> DSTU3 and R4 have full symmetric support: each has its own normalizer/denormalizer pair while sharing the domain core. R5 has partial support (adapters, visitors, repository composition) but does not yet have full operation-level normalization/denormalization. The pipeline stages should happen at the same layer in all versions.</li>
+</ul>
+<h2 id="java-guidance">Java Guidance<a class="headerlink" href="#java-guidance" title="Permanent link">&para;</a></h2>
+<p>This section contains some high-level guidance on style, best-practices, conventions, etc. See the <a href="#architecture">Architecture</a> section above for related information.</p>
+<h3 id="discovery-and-maintainability">Discovery and Maintainability<a class="headerlink" href="#discovery-and-maintainability" title="Permanent link">&para;</a></h3>
+<p>Following conventions such as those below make it easier for the next developer to find code that's already been implemented and to understand and improve code that's already been written more easily.</p>
+<h3 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h3>
+<p>Code should generally follow Java best-practices as outlined in <a href="https://www.pearson.com/us/higher-education/program/Bloch-Effective-Java-3rd-Edition/PGM1763855.html">Effective Java 3rd Edition</a>.</p>
+<p>If using VS Code, the Sonarlint plugin will be suggested to help detect issues early on.</p>
+<h3 id="javadoc">Javadoc<a class="headerlink" href="#javadoc" title="Permanent link">&para;</a></h3>
+<p>This project has strict checking for Javadoc enabled.  This will cause a build failure in the event of a Javadoc warning.  Visit <a href="https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html">https://www.oracle.com/technical-resources/articles/java/javadoc-tool.html</a> for more info.</p>
+<p>Results of Javadoc can be found in the output of the build.</p>
+<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
+<p>Most of the components and operations in this repository are built around an interface representing a conceptual FHIR API, the idea being that any given Java-based FHIR platform or toolkit can provide an implementation of this API to enabled the use of CQL or Clinical Reasoning on that platform. The <code>cqf-fhir-test</code> project provides a set of utilities (specifically an implementation of that API that can read test <code>resource</code> files) to facilitate easier unit testing.</p>
+<h3 id="naming-conventions">Naming Conventions<a class="headerlink" href="#naming-conventions" title="Permanent link">&para;</a></h3>
+<h4 id="package-names">Package names<a class="headerlink" href="#package-names" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Should be rooted with <code>org.opencds.cqf.fhir</code></li>
+<li>For the sake of brevity, <code>clinicalreasoning</code> is abbreviated <code>cr</code> in package names</li>
+<li>Package names should reflect high-level areas of functionality:<ul>
+<li><code>org.opencds.cqf.fhir.utility</code><ul>
+<li>Non-FHIR version specific utilities</li>
+</ul>
+</li>
+<li><code>org.opencds.cqf.fhir.cql</code><ul>
+<li>Non-FHIR version specific CQL components</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>If a FHIR version is specified, it should come after the high-level functionality described:<ul>
+<li><code>org.opencds.cqf.fhir.cql.r5</code><ul>
+<li>An example package name for CQL-related functionality tied to R5</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>If a Resource name is specified, it should generally come after the FHIR version<ul>
+<li><code>org.opencds.cqf.fhir.cr.dstu3.measure</code><ul>
+<li>An example package name for Measure-related functionality tied to DSTU3</li>
+<li>Exception: There may be a few cases where functionality for a Resource is not FHIR-version specific, in which case the FHIR version should be omitted<ul>
+<li><code>org.opencds.cqf.fhir.cr.plandefinition</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Generally, the package name prefix should one of:<ul>
+<li><code>org.opencds.cqf.fhir.api</code></li>
+<li><code>org.opencds.cqf.fhir.utility</code></li>
+<li><code>org.opencds.cqf.fhir.cql</code></li>
+<li><code>org.opencds.cqf.fhir.elm</code></li>
+<li><code>org.opencds.cqf.fhir.cr</code></li>
+<li><code>org.opencds.cqf.fhir.cdshooks</code></li>
+<li>If you find a use case that doesn't fall under one those prefixes, it may be out of scope for this repository.</li>
+</ul>
+</li>
+<li>Java 9+ modules require that each artifact have only one root package name that's exported. If you find the need for multiple root namespaces, consider that you may need to create a new artifact.</li>
+</ul>
+<h4 id="artifact-names">Artifact names<a class="headerlink" href="#artifact-names" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Should start with <code>cqf-fhir</code></li>
+<li>Should reflect the root package name for the artifact<ul>
+<li><code>org.opencds.cqf.fhir.cql</code> -&gt; <code>cqf-fhir-cql</code></li>
+<li><code>org.opencds.cqf.fhir.utility</code> -&gt; <code>cqf-fhir-utility</code></li>
+</ul>
+</li>
+<li>Exception: If there is a FHIR-version in the package name, it should come <em>last</em> in the artifact name. This is to match the conventions already established by the FHIR core and HAPI FHIR projects<ul>
+<li><code>org.opencds.cqf.fhir.cr.r5.measure</code> -&gt; <code>cqf-fhir-cr-measure-r5</code></li>
+</ul>
+</li>
+</ul>
+<h4 id="class-names">Class names<a class="headerlink" href="#class-names" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Should follow the conventions established by <a href="#best-practices">Effective Java</a>.</li>
+<li>Utility classes should follow the conventions established in the <a href="#utilities">Utilities</a> section.</li>
+<li>There are several cases where this project implements a "runtime" for standards-based content. In other words, the clinical logic isn't implemented by java, but rather by some FHIR Resource or CQL, and the Java provides an execution environment for that logic:<ul>
+<li><code>Measure</code> evaluation</li>
+<li><code>PlanDefinition</code> application</li>
+<li><code>ActivityDefinition</code> application
+  These cases require special approaches to design an extensible and debuggable runtime, discussed further in the <a href="#architecture">Architecture</a> section, and the class names should follow conventions for naming runtimes:<ul>
+<li><code>CqlEngine</code></li>
+<li><code>FhirPathEngine</code></li>
+<li><code>MeasureEvaluationRuntime</code></li>
+<li><code>ActivityDefinitionEngine</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="design-conventions">Design Conventions<a class="headerlink" href="#design-conventions" title="Permanent link">&para;</a></h3>
+<p>See the <a href="ARCHITECTURE.md#coding-values">Coding Values</a> section of the Architecture document for the full list. The values below are expanded with examples for day-to-day coding guidance.</p>
+<p><strong>Structure over validation ("parse, don't validate").</strong> When data crosses a boundary (HTTP request, FHIR resource read, CQL result), parse it into a domain type that enforces its constraints structurally. After that point, code that receives the domain type should not need to re-check those constraints.</p>
+<p>Prefer:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// MeasureDef requires groups at construction time</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">var</span><span class="w"> </span><span class="n">measureDef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">MeasureDefBuilder</span><span class="p">.</span><span class="na">build</span><span class="p">(</span><span class="n">measure</span><span class="p">);</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1">// All downstream code can assume groups exist</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">measureDef</span><span class="p">.</span><span class="na">groups</span><span class="p">().</span><span class="na">forEach</span><span class="p">(</span><span class="k">this</span><span class="p">::</span><span class="n">evaluateGroup</span><span class="p">);</span>
+</code></pre></div></p>
+<p>Over:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Passing raw FHIR resource through the pipeline</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">measure</span><span class="p">.</span><span class="na">getGroup</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">measure</span><span class="p">.</span><span class="na">getGroup</span><span class="p">().</span><span class="na">isEmpty</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">&quot;Measure must have groups&quot;</span><span class="p">);</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1">// ... same check repeated in three other methods</span>
+</code></pre></div></p>
+<p><strong>Small conceptual surface per layer.</strong> Each abstraction should encapsulate roughly 5 to 20 units of detail. That ratio applies recursively throughout the codebase: a module exposes a handful of packages, a package a handful of classes, a class a handful of methods, a method a handful of steps. Each step down should introduce a manageable new chunk of complexity, not an explosion. If you find yourself needing to understand 30 classes to work on one feature, the layer is too wide and should be split.</p>
+<p><strong>Domain-specific representations over generic ones.</strong> Give names to things. Use the domain language to make code searchable, self-documenting, and precise.</p>
+<p>Prefer:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">MeasureValidationException</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="n">measureDef</span><span class="p">.</span><span class="na">url</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;Measure has no population criteria for group &quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">groupId</span><span class="p">);</span>
+</code></pre></div></p>
+<p>Over:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">UnsupportedOperationException</span><span class="p">(</span><span class="s">&quot;not supported&quot;</span><span class="p">);</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1">// or</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">throw</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">IllegalArgumentException</span><span class="p">(</span><span class="s">&quot;invalid measure&quot;</span><span class="p">);</span>
+</code></pre></div></p>
+<p>This applies to return types too. A <code>ResolvedMeasure</code> record that pairs a <code>MeasureDef</code> with its <code>VersionedIdentifier</code> is better than a <code>Pair&lt;MeasureDef, VersionedIdentifier&gt;</code>, because it has a name that communicates what it represents and can evolve independently.</p>
+<h3 id="utilities">Utilities<a class="headerlink" href="#utilities" title="Permanent link">&para;</a></h3>
+<h4 id="types-of-utilities">Types of Utilities<a class="headerlink" href="#types-of-utilities" title="Permanent link">&para;</a></h4>
+<p>In general, reusable utilities are separated along two different dimensions, Classes and Behaviors.</p>
+<p>Class specific utilities are functions that are associated with specific class or interface, and add functionality to that class.</p>
+<p>Behavior specific utilities allow the reuse of behavior across many different classes.</p>
+<h5 id="class-specific-utilities">Class Specific Utilities<a class="headerlink" href="#class-specific-utilities" title="Permanent link">&para;</a></h5>
+<p>Utility or Helper methods that are associated with a single class should go into a class that has the pluralized name of the associated class. For example, utilities for <code>Client</code> should go into the <code>Clients</code> class. This ensures that the utility class is focused on one class and allows for more readable code:</p>
+<p><code>Clients.forUrl("test.com")</code></p>
+<p>as opposed to:</p>
+<p><code>ClientUtilities.createClient("test.com")</code></p>
+<p>or, if you put unrelated code into the class, you might end up with something like:</p>
+<p><code>Clients.parseRegex()</code></p>
+<p>If the code doesn't read clearly after you've added an utility, consider that it may not be in the right place.</p>
+<p>In general, all the functions for this type of utility should be <code>static</code>. No internal state should be maintained (<code>static final</code>, or immutable, state is ok). If you find that your utility class contains mutable state, consider an alternate design.</p>
+<p>Examples</p>
+<ul>
+<li>Factory functions</li>
+<li>Adding behavior to a class you can't extend</li>
+</ul>
+<h5 id="behavior-specific-utilities">Behavior Specific Utilities<a class="headerlink" href="#behavior-specific-utilities" title="Permanent link">&para;</a></h5>
+<p>If there is behavior you'd like to share across many classes, model that as an interface and use a name that follows the pattern <code>"ThingDoer"</code>. For example, all the classes that access a database might be <code>DatabaseReader</code>. Use <code>default</code> interface implementations to write logic that can be shared many places. The interfaces themselves shouldn't have mutable state (again <code>static final</code> is ok). If it's necessary for the for shared logic to have access to state, model that as an method without a default implementation. For example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kd">interface</span> <span class="nc">DatabaseReader</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">   </span><span class="n">Database</span><span class="w"> </span><span class="nf">getDb</span><span class="p">();</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">   </span><span class="k">default</span><span class="w"> </span><span class="n">Entity</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="n">Id</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="n">getDb</span><span class="p">().</span><span class="na">connect</span><span class="p">().</span><span class="na">find</span><span class="p">(</span><span class="n">id</span><span class="p">);</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">   </span><span class="p">}</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="p">}</span>
+</code></pre></div>
+<p>In the above example any class that has access to a <code>Database</code> can inherit the <code>read</code> behavior.</p>
+<p>Examples</p>
+<ul>
+<li>Cross-cutting concerns<ul>
+<li>Data Access</li>
+<li>Logging</li>
+<li>Parameter Validation</li>
+</ul>
+</li>
+</ul>
+<p>Functions associated with only one operation or a small set of related classes should not be modeled as a "Behavior". Default interfaces can be easily abused in this way. Ask yourself "would I use this in an operation for a totally unrelated FHIR Resource?". If not, it's not a cross-cutting behavior.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2019+ Smile Digital Health
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://chat.fhir.org/#narrow/stream/179220-cql" target="_blank" rel="noopener" title="chat.fhir.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M88.2 309.1c9.8-18.3 6.8-40.8-7.5-55.8C59.4 230.9 48 204 48 176c0-63.5 63.8-128 160-128s160 64.5 160 128-63.8 128-160 128c-13.1 0-25.8-1.3-37.8-3.6-10.4-2-21.2-.6-30.7 4.2q-6.15 3.15-12.6 6c-16 7.2-32.9 13.5-49.9 18 2.8-4.6 5.4-9.1 7.9-13.6 1.1-1.9 2.2-3.9 3.2-5.9zM208 352c114.9 0 208-78.8 208-176S322.9 0 208 0 0 78.8 0 176c0 41.8 17.2 80.1 45.9 110.3-.9 1.7-1.9 3.5-2.8 5.1-10.3 18.4-22.3 36.5-36.6 52.1-6.6 7-8.3 17.2-4.6 25.9C5.8 378.3 14.4 384 24 384c43 0 86.5-13.3 122.7-29.7 4.8-2.2 9.6-4.5 14.2-6.8 15.1 3 30.9 4.5 47.1 4.5m224 128c16.2 0 31.9-1.6 47.1-4.5 4.6 2.3 9.4 4.6 14.2 6.8C529.5 498.7 573 512 616 512c9.6 0 18.2-5.7 22-14.5s2-19-4.6-25.9c-14.2-15.6-26.2-33.7-36.6-52.1-.9-1.7-1.9-3.4-2.8-5.1 28.8-30.3 46-68.6 46-110.4 0-94.4-87.9-171.5-198.2-175.8 4.1 15.2 6.2 31.2 6.2 47.8v.6c87.2 6.7 144 67.5 144 127.4 0 28-11.4 54.9-32.7 77.2-14.3 15-17.3 37.6-7.5 55.8 1.1 2 2.2 4 3.2 5.9 2.5 4.5 5.2 9 7.9 13.6-17-4.5-33.9-10.7-49.9-18q-6.45-2.85-12.6-6c-9.5-4.8-20.3-6.2-30.7-4.2-12.1 2.4-24.8 3.6-37.8 3.6-61.7 0-110-26.5-136.8-62.3-16 5.4-32.8 9.4-50 11.8C279 439.8 350 480 432 480"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/cqframework/clinical-reasoning" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.action.edit"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f13b1293.min.js"></script>
+      
+    
+  </body>
+</html>

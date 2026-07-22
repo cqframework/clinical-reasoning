@@ -262,6 +262,47 @@ public interface ResourceMatcher {
                 throw new UnsupportedOperationException(
                         "Expected date, found " + pathResult.getClass().getSimpleName());
             }
+        } else if (pathResult instanceof ICompositeType type) {
+            // For Period/Timing paths, a single DateParam represents one side of an overlap check.
+            // This allows repositories that AND repeated date params to evaluate each bound safely.
+            dateRange = getDateRange(type);
+            DateParam lowerBound = dateRange.getLowerBound();
+            DateParam upperBound = dateRange.getUpperBound();
+
+            Date resourceStart = lowerBound == null ? null : lowerBound.getValue();
+            Date resourceEnd = upperBound == null ? null : upperBound.getValue();
+
+            if (param.getValue() == null) {
+                return false;
+            }
+
+            switch (param.getPrefix()) {
+                case GREATERTHAN:
+                case GREATERTHAN_OR_EQUALS:
+                    return resourceEnd != null && isDateMatch(param, resourceEnd);
+                case LESSTHAN:
+                case LESSTHAN_OR_EQUALS:
+                    return resourceStart != null && isDateMatch(param, resourceStart);
+                case EQUAL:
+                    if (resourceStart == null || resourceEnd == null) {
+                        return false;
+                    }
+
+                    Date compareDate = param.getValue();
+                    return !compareDate.before(resourceStart) && !compareDate.after(resourceEnd);
+                case NOT_EQUAL:
+                    if (resourceStart == null || resourceEnd == null) {
+                        return true;
+                    }
+
+                    Date notEqualCompare = param.getValue();
+                    return notEqualCompare.before(resourceStart) || notEqualCompare.after(resourceEnd);
+                default:
+                    String msg = String.format(
+                            "Unsupported DateTime comparison operation %s",
+                            param.getPrefix().getValue());
+                    throw new UnsupportedOperationException(msg);
+            }
         } else {
             throw new UnsupportedOperationException(
                     "Expected element of type date, dateTime, instant, Timing or Period, found "

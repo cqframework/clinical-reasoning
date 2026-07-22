@@ -59,6 +59,38 @@ class ResourceMatcherTest {
         resourceMatcher = new ResourceMatcherR4();
     }
 
+    @Test
+    void matches_locationPeriodWithSingleDateParam_doesNotThrowAndRespectsBounds() {
+        var encounter = new Encounter();
+        encounter
+                .addLocation()
+                .setPeriod(new Period()
+                        .setStart(createDate("2000-01-01 00:00:00"))
+                        .setEnd(createDate("2000-12-31 23:59:59")));
+
+        assertTrue(resourceMatcher.matches(
+                "location-period",
+                List.of(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, createDate("2000-01-01"))),
+                encounter));
+        assertTrue(resourceMatcher.matches(
+                "location-period",
+                List.of(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, createDate("2000-12-31"))),
+                encounter));
+
+        assertEquals(
+            false,
+            resourceMatcher.matches(
+                "location-period",
+                List.of(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, createDate("2001-01-01"))),
+                encounter));
+        assertEquals(
+            false,
+            resourceMatcher.matches(
+                "location-period",
+                List.of(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, createDate("1999-12-31"))),
+                encounter));
+    }
+
     // NB: the list of parameters are always OR'd
     // internal compositeparams are always AND'd
     static List<Arguments> coverageParameters() {

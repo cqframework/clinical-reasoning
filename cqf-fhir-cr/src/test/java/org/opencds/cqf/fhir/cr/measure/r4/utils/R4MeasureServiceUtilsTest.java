@@ -5,26 +5,35 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.repository.IRepository;
 import jakarta.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureLookupException;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureEvalType;
 import org.opencds.cqf.fhir.utility.monad.Either;
@@ -265,5 +274,43 @@ class R4MeasureServiceUtilsTest {
 
     private static Either<Optional<Reference>, Exception> buildEitherLeft(@Nullable String theId) {
         return Eithers.forLeft(Optional.ofNullable(theId).map(Reference::new));
+    }
+
+    @Test
+    void resolveByUrl_noMatchingMeasures_throws() {
+        var url = "http://example.org/Measure/does-not-exist";
+        when(repository.search(eq(Bundle.class), eq(Measure.class), any(Map.class)))
+                .thenReturn(new Bundle());
+
+        var actual = assertThrows(MeasureLookupException.class, () -> testSubject.resolveByUrl(url));
+
+        assertEquals("Measure URL: %s, found no matching measure resources".formatted(url), actual.getMessage());
+    }
+
+    @Test
+    void resolveByUrl_multipleMatches_throws() {
+        var url = "http://example.org/Measure/ambiguous";
+        var bundle = new Bundle();
+        bundle.addEntry().setResource(new Measure().setUrl(url));
+        bundle.addEntry().setResource(new Measure().setUrl(url));
+        when(repository.search(eq(Bundle.class), eq(Measure.class), any(Map.class)))
+                .thenReturn(bundle);
+
+        var actual = assertThrows(MeasureLookupException.class, () -> testSubject.resolveByUrl(url));
+
+        assertEquals(
+                "Measure URL: %s, found more than one matching measure resource".formatted(url), actual.getMessage());
+    }
+
+    @Test
+    void resolveByUrl_singleMatch_returns() {
+        var url = "http://example.org/Measure/found";
+        var measure = new Measure().setUrl(url);
+        var bundle = new Bundle();
+        bundle.addEntry().setResource(measure);
+        when(repository.search(eq(Bundle.class), eq(Measure.class), any(Map.class)))
+                .thenReturn(bundle);
+
+        assertSame(measure, testSubject.resolveByUrl(url));
     }
 }

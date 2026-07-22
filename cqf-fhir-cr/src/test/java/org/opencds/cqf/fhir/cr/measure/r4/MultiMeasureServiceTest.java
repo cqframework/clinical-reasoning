@@ -11,6 +11,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureLookupException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 
@@ -1137,5 +1138,18 @@ class MultiMeasureServiceTest {
         var e = assertThrows(InvalidRequestException.class, when::then);
         assertTrue(e.getMessage().contains("Duplicate population ID"));
         assertTrue(e.getMessage().contains("initial-population"));
+    }
+
+    @Test
+    void MultiMeasure_NoMeasureReferencesSupplied_throws() {
+        var when = GIVEN_REPO
+                .when()
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate();
+
+        var e = assertThrows(MeasureLookupException.class, when::then);
+        assertEquals("At least one of measureId, measureIdentifier, or measureUrl must be supplied", e.getMessage());
     }
 }

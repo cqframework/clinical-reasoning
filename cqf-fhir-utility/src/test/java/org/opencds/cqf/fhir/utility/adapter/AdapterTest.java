@@ -59,7 +59,7 @@ class AdapterTest {
         var parameters = new Parameters();
         parameters.addParameter().setName("param0").setValue(new StringType("value0"));
         var adapter = IAdapterFactory.createAdapterForResource(parameters);
-        
+
         assertNull(adapter.resolvePath(parameters, "parameter[10]"));
     }
 

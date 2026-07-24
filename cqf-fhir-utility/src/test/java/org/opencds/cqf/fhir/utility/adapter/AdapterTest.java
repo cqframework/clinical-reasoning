@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,6 +15,7 @@ import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +40,27 @@ class AdapterTest {
         library.setDate(new Date());
         var adapter = IAdapterFactory.createAdapterForResource(library);
         assertThrows(UnprocessableEntityException.class, () -> adapter.resolvePathString(library, "date"));
+    }
+
+    @Test
+    void testResolvePath_resolvesDoubleDigitIndex() {
+        var parameters = new Parameters();
+        for (int i = 0; i < 15; i++) {
+            parameters.addParameter().setName("param" + i).setValue(new StringType("value" + i));
+        }
+        var adapter = IAdapterFactory.createAdapterForResource(parameters);
+
+        assertEquals("param12", adapter.resolvePathString(parameters, "parameter[12].name"));
+        assertEquals("value12", adapter.resolvePathString(parameters, "parameter[12].value"));
+    }
+
+    @Test
+    void testResolvePath_returnsNullForOutOfRangeIndex() {
+        var parameters = new Parameters();
+        parameters.addParameter().setName("param0").setValue(new StringType("value0"));
+        var adapter = IAdapterFactory.createAdapterForResource(parameters);
+        
+        assertNull(adapter.resolvePath(parameters, "parameter[10]"));
     }
 
     @Test

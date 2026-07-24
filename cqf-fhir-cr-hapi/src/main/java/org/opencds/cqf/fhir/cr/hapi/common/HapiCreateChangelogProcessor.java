@@ -239,7 +239,7 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
             // Parameters object
             try {
                 if (originalValue.isEmpty() && !type.equals("insert") && sourceResource != null && path.isPresent()) {
-                    originalValue = Optional.of(IAdapterFactory.createAdapterForResource(sourceResource)
+                    originalValue = Optional.ofNullable(IAdapterFactory.createAdapterForResource(sourceResource)
                             .resolvePath(sourceResource, path.get()));
                 }
             } catch (Exception e) {

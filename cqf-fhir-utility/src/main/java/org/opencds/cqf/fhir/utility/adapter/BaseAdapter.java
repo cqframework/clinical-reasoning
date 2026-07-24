@@ -59,9 +59,12 @@ public abstract class BaseAdapter {
         for (String identifier : identifiers) {
             // handling indexes: i.e. item[0].code
             if (identifier.contains("[")) {
-                int index = Character.getNumericValue(identifier.charAt(identifier.indexOf("[") + 1));
-                target = resolveProperty(target, identifier.replaceAll("\\[\\d]", ""));
-                target = ((ArrayList<?>) target).get(index);
+                int index = parseInt(identifier.substring(identifier.indexOf("[") + 1, identifier.indexOf("]")));
+                target = resolveProperty(target, identifier.replaceAll("\\[\\d+]", ""));
+                if (!(target instanceof List<?> list) || index >= list.size()) {
+                    return null;
+                }
+                target = list.get(index);
             } else {
                 target = resolveProperty(target, identifier);
             }

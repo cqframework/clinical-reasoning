@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.opencds.cqf.fhir.utility.Parameters.newPart;
 import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
@@ -25,6 +26,8 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
@@ -585,5 +588,47 @@ class InputParametersTest {
         var parameter = actual.getParameter("%" + inputReq.getId());
         assertNotNull(parameter);
         assertEquals(obs, parameter.getResource());
+    }
+
+    @Test
+    void testResolveParametersSkipsRefetchWhenAlreadyInBaseParametersR4() {
+        // When baseParameters already contains %subject/%encounter/%practitioner
+        // (e.g. passed in from a parent PlanDefinition's resolver into an ActivityDefinition's
+        // resolver), the resolver must not re-fetch and produce duplicate entries.
+        var patient = new Patient();
+        patient.setIdElement(Ids.newId(fhirContextR4, "Patient", patientId));
+        var encounter = new Encounter();
+        encounter.setIdElement(Ids.newId(fhirContextR4, "Encounter", encounterId));
+        var practitioner = new Practitioner();
+        practitioner.setIdElement(Ids.newId(fhirContextR4, "Practitioner", practitionerId));
+
+        var baseParameters = new Parameters();
+        baseParameters.addParameter().setName("%subject").setResource(patient);
+        baseParameters.addParameter().setName("%encounter").setResource(encounter);
+        baseParameters.addParameter().setName("%practitioner").setResource(practitioner);
+
+        doReturn(fhirContextR4).when(repository).fhirContext();
+        lenient().doReturn(patient).when(repository).read(Patient.class, patient.getIdElement());
+        lenient().doReturn(encounter).when(repository).read(Encounter.class, encounter.getIdElement());
+        lenient().doReturn(practitioner).when(repository).read(Practitioner.class, practitioner.getIdElement());
+
+        var resolver = IInputParameterResolver.createResolver(
+            repository,
+            patient.getIdElement(),
+            encounter.getIdElement(),
+            practitioner.getIdElement(),
+            baseParameters,
+            null,
+            null,
+            null);
+        var actual = (Parameters) resolver.getParameters();
+        assertNotNull(actual);
+        assertEquals(3, actual.getParameter().size());
+        assertEquals("%subject", actual.getParameter().get(0).getName());
+        assertEquals(patient, actual.getParameter().get(0).getResource());
+        assertEquals("%encounter", actual.getParameter().get(1).getName());
+        assertEquals(encounter, actual.getParameter().get(1).getResource());
+        assertEquals("%practitioner", actual.getParameter().get(2).getName());
+        assertEquals(practitioner, actual.getParameter().get(2).getResource());
     }
 }

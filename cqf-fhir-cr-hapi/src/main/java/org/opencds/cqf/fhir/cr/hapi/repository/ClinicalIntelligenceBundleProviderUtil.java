@@ -53,7 +53,7 @@ public class ClinicalIntelligenceBundleProviderUtil {
         }
 
         private int limitOrZero() {
-            return defaultZeroIfNull(offset);
+            return defaultZeroIfNull(limit);
         }
 
         private int defaultZeroIfNull(Integer value) {
@@ -124,7 +124,7 @@ public class ClinicalIntelligenceBundleProviderUtil {
                         request.getParameters()));
             }
             if (isNotBlank(result.getPreviousPageId())) {
-                links.setNext(RestfulServerUtils.createOffsetPagingLink(
+                links.setPrev(RestfulServerUtils.createOffsetPagingLink(
                         links,
                         request.getRequestPath(),
                         request.getTenantId(),

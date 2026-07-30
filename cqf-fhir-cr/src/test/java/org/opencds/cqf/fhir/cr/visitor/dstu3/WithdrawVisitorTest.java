@@ -1,29 +1,32 @@
-package org.opencds.cqf.fhir.cr.visitor.r4;
+package org.opencds.cqf.fhir.cr.visitor.dstu3;
 
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.parameters;
+import static org.opencds.cqf.fhir.utility.dstu3.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.repository.IRepository;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.opencds.cqf.fhir.cr.visitor.IWithdrawVisitorTest;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.r4.AdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.dstu3.AdapterFactory;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 
-class WithdrawVisitorTests implements IWithdrawVisitorTest {
-    private final FhirContext fhirContext = FhirContext.forR4Cached();
-    private IRepository repo;
-    private final IParser jsonParser = fhirContext.newJsonParser();
+public class WithdrawVisitorTest implements IWithdrawVisitorTest {
+
+    private final FhirContext fhirContext = FhirContext.forDstu3Cached();
+
     private final AdapterFactory factory = new AdapterFactory();
+    private IRepository repo;
+
+    private final IParser jsonParser = fhirContext.newJsonParser();
 
     @BeforeEach
-    void setup() {
+    public void setup() {
         SearchParameter sp = (SearchParameter)
                 jsonParser.parseResource(getClass().getResourceAsStream("SearchParameter-artifactAssessment.json"));
         repo = new InMemoryFhirRepository(fhirContext);

@@ -1,169 +1,153 @@
-package org.opencds.cqf.fhir.cql.engine.utility;
+package org.opencds.cqf.fhir.cql.engine.utility
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.runtime.Code;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.RuntimeCompositeDatatypeDefinition
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseEnumeration
+import org.hl7.fhir.instance.model.api.IPrimitiveType
+import org.opencds.cqf.cql.engine.runtime.Code
 
-public class CodeExtractor {
-    private final RuntimeCompositeDatatypeDefinition conceptDefinition;
-    private final RuntimeCompositeDatatypeDefinition codingDefinition;
+class CodeExtractor(fhirContext: FhirContext) {
+    private val conceptDefinition =
+        fhirContext.getElementDefinition("CodeableConcept") as RuntimeCompositeDatatypeDefinition
+    private val codingDefinition =
+        fhirContext.getElementDefinition("Coding") as RuntimeCompositeDatatypeDefinition
 
-    private final BaseRuntimeChildDefinition conceptCodingChild;
+    private val conceptCodingChild: BaseRuntimeChildDefinition =
+        conceptDefinition.getChildByName("coding")
 
-    private final BaseRuntimeChildDefinition versionDefinition;
-    private final BaseRuntimeChildDefinition codeDefinition;
-    private final BaseRuntimeChildDefinition systemDefinition;
-    private final BaseRuntimeChildDefinition displayDefinition;
+    private val versionDefinition: BaseRuntimeChildDefinition =
+        codingDefinition.getChildByName("version")
+    private val codeDefinition: BaseRuntimeChildDefinition = codingDefinition.getChildByName("code")
+    private val systemDefinition: BaseRuntimeChildDefinition =
+        codingDefinition.getChildByName("system")
+    private val displayDefinition: BaseRuntimeChildDefinition =
+        codingDefinition.getChildByName("display")
 
-    public CodeExtractor(FhirContext fhirContext) {
-        this.conceptDefinition =
-                (RuntimeCompositeDatatypeDefinition) fhirContext.getElementDefinition("CodeableConcept");
-        this.conceptCodingChild = conceptDefinition.getChildByName("coding");
-
-        this.codingDefinition = (RuntimeCompositeDatatypeDefinition) fhirContext.getElementDefinition("Coding");
-        this.versionDefinition = codingDefinition.getChildByName("version");
-        this.codeDefinition = codingDefinition.getChildByName("code");
-        this.systemDefinition = codingDefinition.getChildByName("system");
-        this.displayDefinition = codingDefinition.getChildByName("display");
-    }
-
-    public List<Code> getElmCodesFromObject(Object object) {
-        var codes = new ArrayList<Code>();
-        if (object instanceof Iterable<?> iterable) {
-            for (Object innerObject : iterable) {
-                List<Code> elmCodes = getElmCodesFromObject(innerObject);
-                if (elmCodes != null) {
-                    codes.addAll(elmCodes);
-                }
+    fun getElmCodesFromObject(`object`: Any?): MutableList<Code> {
+        val codes = mutableListOf<Code>()
+        if (`object` is Iterable<*>) {
+            for (innerObject in `object`) {
+                val elmCodes = getElmCodesFromObject(innerObject)
+                codes.addAll(elmCodes)
             }
         } else {
-            var elmCodes = getElmCodesFromObjectInner(object);
-            if (elmCodes != null) {
-                codes.addAll(elmCodes);
-            }
+            val elmCodes = getElmCodesFromObjectInner(`object`)
+            codes.addAll(elmCodes)
         }
-        return codes;
+        return codes
     }
 
-    private List<Code> getElmCodesFromObjectInner(Object object) {
-        List<Code> codes = new ArrayList<>();
-        if (object == null) {
-            return codes;
-        } else if (object instanceof IBase base) {
-            List<Code> innerCodes = getCodesFromBase(base);
+    private fun getElmCodesFromObjectInner(`object`: Any?): MutableList<Code> {
+        val codes = mutableListOf<Code>()
+        if (`object` == null) {
+            return codes
+        } else if (`object` is IBase) {
+            val innerCodes = getCodesFromBase(`object`)
             if (innerCodes != null) {
-                codes.addAll(innerCodes);
+                codes.addAll(innerCodes)
             }
-        } else if (object instanceof Code code) {
-            codes.add(code);
+        } else if (`object` is Code) {
+            codes.add(`object`)
         } else {
-            throw new IllegalArgumentException("Unable to extract codes from object %s".formatted(object.toString()));
+            throw IllegalArgumentException("Unable to extract codes from object $`object`")
         }
 
-        return codes;
+        return codes
     }
 
-    private List<Code> getCodesFromBase(IBase object) {
-        if (object instanceof org.hl7.fhir.instance.model.api.IBaseEnumeration<?>) {
-            @SuppressWarnings("unchecked")
-            IBaseEnumeration<Enum<?>> enumeration = ((IBaseEnumeration<Enum<?>>) object);
-            return this.getCodeFromEnumeration(enumeration);
-        } else if (object.fhirType().equals("CodeableConcept")) {
-            return this.getCodesInConcept(object);
-        } else if (object.fhirType().equals("Coding")) {
-            return this.generateCodes(Collections.singletonList(object));
+    private fun getCodesFromBase(`object`: IBase): MutableList<Code>? {
+        if (`object` is IBaseEnumeration<*>) {
+            @Suppress("UNCHECKED_CAST") val enumeration = (`object` as IBaseEnumeration<Enum<*>?>)
+            return this.getCodeFromEnumeration(enumeration)
+        } else if (`object`.fhirType() == "CodeableConcept") {
+            return this.getCodesInConcept(`object`)
+        } else if (`object`.fhirType() == "Coding") {
+            return this.generateCodes(mutableListOf(`object`))
         }
 
-        throw new IllegalArgumentException("Unable to extract codes from fhirType %s".formatted(object.fhirType()));
+        throw IllegalArgumentException(
+            "Unable to extract codes from fhirType ${`object`.fhirType()}"
+        )
     }
 
-    private List<Code> getCodeFromEnumeration(IBaseEnumeration<Enum<?>> enumeration) {
-        var codes = new ArrayList<Code>();
+    private fun getCodeFromEnumeration(
+        enumeration: IBaseEnumeration<Enum<*>?>?
+    ): MutableList<Code> {
+        val codes = mutableListOf<Code>()
         if (enumeration == null) {
-            return codes;
+            return codes
         }
 
-        IBaseEnumFactory<Enum<?>> enumFactory = enumeration.getEnumFactory();
+        val enumFactory = enumeration.getEnumFactory()
 
-        String system = enumFactory.toSystem(enumeration.getValue());
-        String codeAsString = enumFactory.toCode(enumeration.getValue());
-        if (system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()) {
-            Code code = new Code();
-            code.setCode(codeAsString);
-            code.setSystem(system);
-            codes.add(code);
+        val system = enumFactory.toSystem(enumeration.getValue())
+        val codeAsString = enumFactory.toCode(enumeration.getValue())
+        if (
+            system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()
+        ) {
+            val code = Code()
+            code.code = codeAsString
+            code.system = system
+            codes.add(code)
         }
 
-        return codes;
+        return codes
     }
 
-    private List<Code> getCodesInConcept(IBase object) {
-        List<IBase> codingObjects = getCodingObjects(object);
-        if (codingObjects == null) {
-            return null;
-        }
-        return generateCodes(codingObjects);
+    private fun getCodesInConcept(`object`: IBase?): MutableList<Code>? {
+        val codingObjects = getCodingObjects(`object`) ?: return null
+        return generateCodes(codingObjects)
     }
 
-    private List<Code> generateCodes(List<IBase> codingObjects) {
-
-        List<Code> codes = new ArrayList<>();
-        for (IBase coding : codingObjects) {
-            String code = getStringValueFromPrimitiveDefinition(this.codeDefinition, coding);
-            String display = getStringValueFromPrimitiveDefinition(this.displayDefinition, coding);
-            String system = getStringValueFromPrimitiveDefinition(this.systemDefinition, coding);
-            String version = getStringValueFromPrimitiveDefinition(this.versionDefinition, coding);
-            codes.add(new Code()
-                    .withSystem(system)
-                    .withCode(code)
-                    .withDisplay(display)
-                    .withVersion(version));
+    private fun generateCodes(codingObjects: MutableList<IBase?>): MutableList<Code> {
+        val codes = mutableListOf<Code>()
+        for (coding in codingObjects) {
+            val code = getStringValueFromPrimitiveDefinition(this.codeDefinition, coding)
+            val display = getStringValueFromPrimitiveDefinition(this.displayDefinition, coding)
+            val system = getStringValueFromPrimitiveDefinition(this.systemDefinition, coding)
+            val version = getStringValueFromPrimitiveDefinition(this.versionDefinition, coding)
+            codes.add(
+                Code().withSystem(system).withCode(code).withDisplay(display).withVersion(version)
+            )
         }
-        return codes;
+        return codes
     }
 
-    private List<IBase> getCodingObjects(IBase object) {
-        List<IBase> codingObject = null;
+    private fun getCodingObjects(`object`: IBase?): MutableList<IBase?>? {
+        var codingObject: MutableList<IBase?>? = null
         try {
-            codingObject = this.conceptCodingChild.getAccessor().getValues(object);
-        } catch (Exception e) {
+            codingObject = this.conceptCodingChild.accessor.getValues(`object`)
+        } catch (e: Exception) {
             // TODO: handle exception
         }
-        return codingObject;
+        return codingObject
     }
 
-    private String getStringValueFromPrimitiveDefinition(BaseRuntimeChildDefinition definition, IBase value) {
-        IAccessor accessor = definition.getAccessor();
+    private fun getStringValueFromPrimitiveDefinition(
+        definition: BaseRuntimeChildDefinition,
+        value: IBase?,
+    ): String? {
+        val accessor = definition.accessor
         if (value == null || accessor == null) {
-            return null;
+            return null
         }
 
-        List<IBase> values = accessor.getValues(value);
+        val values = accessor.getValues(value)
         if (values == null || values.isEmpty()) {
-            return null;
+            return null
         }
 
-        if (values.size() > 1) {
-            throw new IllegalArgumentException(
-                    "More than one value returned while attempting to access primitive value.");
+        require(values.size <= 1) {
+            "More than one value returned while attempting to access primitive value."
         }
 
-        IBase baseValue = values.get(0);
+        val baseValue = values[0]
 
-        if (!(baseValue instanceof IPrimitiveType)) {
-            throw new IllegalArgumentException(
-                    "Non-primitive value encountered while trying to access primitive value.");
-        } else {
-            return ((IPrimitiveType<?>) baseValue).getValueAsString();
+        require(baseValue is IPrimitiveType<*>) {
+            "Non-primitive value encountered while trying to access primitive value."
         }
+        return baseValue.valueAsString
     }
 }

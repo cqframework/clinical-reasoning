@@ -1,25 +1,18 @@
-package org.opencds.cqf.fhir.cql.engine.retrieve;
+package org.opencds.cqf.fhir.cql.engine.retrieve
 
-import com.google.common.collect.Iterables;
-import java.util.ArrayList;
-import java.util.List;
-import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider;
-import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.engine.runtime.Value;
+import com.google.common.collect.Iterables
+import org.opencds.cqf.cql.engine.data.CompositeDataProvider
+import org.opencds.cqf.cql.engine.model.ModelResolver
+import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider
+import org.opencds.cqf.cql.engine.runtime.Code
+import org.opencds.cqf.cql.engine.runtime.Interval
+import org.opencds.cqf.cql.engine.runtime.Value
 
-public class FederatedDataProvider extends CompositeDataProvider {
-    protected final List<RetrieveProvider> retrieveProviders;
-
-    public FederatedDataProvider(ModelResolver modelResolver, List<RetrieveProvider> retrieveProviders) {
-        super(modelResolver, null);
-        this.retrieveProviders = retrieveProviders;
-    }
-
+class FederatedDataProvider(
+    modelResolver: ModelResolver?,
+    protected val retrieveProviders: MutableList<RetrieveProvider>,
+) : CompositeDataProvider(modelResolver, null) {
     /**
-     *
      * @param context - resource type
      * @param contextPath -
      * @param contextValue - id
@@ -34,23 +27,24 @@ public class FederatedDataProvider extends CompositeDataProvider {
      * @param dateRange - date range to search within
      * @return
      */
-    @Override
-    public Iterable<Value> retrieve(
-            String context,
-            String contextPath,
-            String contextValue,
-            String dataType,
-            String templateId,
-            String codePath,
-            Iterable<Code> codes,
-            String valueSet,
-            String datePath,
-            String dateLowPath,
-            String dateHighPath,
-            Interval dateRange) {
-        List<Iterable<Value>> results = new ArrayList<>();
-        for (var provider : this.retrieveProviders) {
-            results.add(provider.retrieve(
+    override fun retrieve(
+        context: String?,
+        contextPath: String?,
+        contextValue: String?,
+        dataType: String,
+        templateId: String?,
+        codePath: String?,
+        codes: Iterable<Code>?,
+        valueSet: String?,
+        datePath: String?,
+        dateLowPath: String?,
+        dateHighPath: String?,
+        dateRange: Interval?,
+    ): Iterable<Value?>? {
+        val results = mutableListOf<Iterable<Value?>?>()
+        for (provider in this.retrieveProviders) {
+            results.add(
+                provider.retrieve(
                     context,
                     contextPath,
                     contextValue,
@@ -62,9 +56,11 @@ public class FederatedDataProvider extends CompositeDataProvider {
                     datePath,
                     dateLowPath,
                     dateHighPath,
-                    dateRange));
+                    dateRange,
+                )
+            )
         }
 
-        return Iterables.concat(results);
+        return Iterables.concat(results)
     }
 }

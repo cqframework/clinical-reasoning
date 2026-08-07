@@ -1,191 +1,136 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.cql
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.cql2elm.model.Model;
-import org.cqframework.fhir.npm.NpmProcessor;
-import org.hl7.cql.model.ModelIdentifier;
-import org.hl7.elm.r1.VersionedIdentifier;
-import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
+import java.util.concurrent.ConcurrentHashMap
+import org.cqframework.cql.cql2elm.LibrarySourceProvider
+import org.cqframework.cql.cql2elm.model.CompiledLibrary
+import org.cqframework.cql.cql2elm.model.Model
+import org.cqframework.fhir.npm.NpmProcessor
+import org.hl7.cql.model.ModelIdentifier
+import org.hl7.elm.r1.VersionedIdentifier
+import org.opencds.cqf.cql.engine.runtime.Code
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings
 
-public class EvaluationSettings {
+class EvaluationSettings {
+    var modelCache: MutableMap<ModelIdentifier, Model>?
+    var libraryCache: MutableMap<VersionedIdentifier, CompiledLibrary>
+    var valueSetCache: MutableMap<String, MutableList<Code>>
+    var librarySourceProviders: MutableList<LibrarySourceProvider>
+    private var registeredNamespaces: MutableMap<String, String>
 
-    private Map<ModelIdentifier, Model> modelCache;
-    private Map<VersionedIdentifier, CompiledLibrary> libraryCache;
-    private Map<String, List<Code>> valueSetCache;
-    private List<LibrarySourceProvider> librarySourceProviders;
-    private Map<String, String> registeredNamespaces;
+    var cqlOptions: CqlOptions
 
-    private CqlOptions cqlOptions;
+    var retrieveSettings: RetrieveSettings
+    var terminologySettings: TerminologySettings
+    var npmProcessor: NpmProcessor?
 
-    private RetrieveSettings retrieveSettings;
-    private TerminologySettings terminologySettings;
-    private NpmProcessor npmProcessor;
-
-    public static EvaluationSettings getDefault() {
-        return new EvaluationSettings();
-    }
-
-    EvaluationSettings() {
-        this.modelCache = new ConcurrentHashMap<>();
-        this.libraryCache = new ConcurrentHashMap<>();
-        this.valueSetCache = new ConcurrentHashMap<>();
-        this.librarySourceProviders = new ArrayList<>();
-        this.cqlOptions = CqlOptions.defaultOptions();
-        this.retrieveSettings = new RetrieveSettings();
-        this.terminologySettings = new TerminologySettings();
-        this.npmProcessor = null;
-        this.registeredNamespaces = new ConcurrentHashMap<>();
+    internal constructor() {
+        this.modelCache = ConcurrentHashMap<ModelIdentifier, Model>()
+        this.libraryCache = ConcurrentHashMap<VersionedIdentifier, CompiledLibrary>()
+        this.valueSetCache = ConcurrentHashMap<String, MutableList<Code>>()
+        this.librarySourceProviders = ArrayList()
+        this.cqlOptions = CqlOptions.defaultOptions()
+        this.retrieveSettings = RetrieveSettings()
+        this.terminologySettings = TerminologySettings()
+        this.npmProcessor = null
+        this.registeredNamespaces = ConcurrentHashMap<String, String>()
     }
 
     /**
      * Copy constructor for EvaluationSettings
+     *
      * @param settings The EvaluationSettings being copied
      */
-    public EvaluationSettings(EvaluationSettings settings) {
-        this.modelCache = new ConcurrentHashMap<>(settings.modelCache);
-        this.libraryCache = new ConcurrentHashMap<>(settings.libraryCache);
-        this.valueSetCache = new ConcurrentHashMap<>(settings.valueSetCache);
-        this.cqlOptions = settings.cqlOptions;
-        this.retrieveSettings = new RetrieveSettings(settings.retrieveSettings);
-        this.terminologySettings = new TerminologySettings(settings.terminologySettings);
-        this.librarySourceProviders = new ArrayList<>(settings.librarySourceProviders);
+    constructor(settings: EvaluationSettings) {
+        this.modelCache = ConcurrentHashMap<ModelIdentifier, Model>(settings.modelCache)
+        this.libraryCache =
+            ConcurrentHashMap<VersionedIdentifier, CompiledLibrary>(settings.libraryCache)
+        this.valueSetCache = ConcurrentHashMap<String, MutableList<Code>>(settings.valueSetCache)
+        this.cqlOptions = settings.cqlOptions
+        this.retrieveSettings = RetrieveSettings(settings.retrieveSettings)
+        this.terminologySettings = TerminologySettings(settings.terminologySettings)
+        this.librarySourceProviders = ArrayList(settings.librarySourceProviders)
         this.npmProcessor =
-                settings.npmProcessor != null ? new NpmProcessor(settings.npmProcessor.getIgContext()) : null;
-        this.registeredNamespaces = new ConcurrentHashMap<>(settings.registeredNamespaces);
+            if (settings.npmProcessor != null) NpmProcessor(settings.npmProcessor!!.igContext)
+            else null
+        this.registeredNamespaces = ConcurrentHashMap<String, String>(settings.registeredNamespaces)
     }
 
-    public Map<ModelIdentifier, Model> getModelCache() {
-        return this.modelCache;
+    fun withModelCache(modelCache: MutableMap<ModelIdentifier, Model>?): EvaluationSettings {
+        this.modelCache = modelCache
+        return this
     }
 
-    public void setModelCache(Map<ModelIdentifier, Model> modelCache) {
-        this.modelCache = modelCache;
+    fun withLibraryCache(
+        libraryCache: MutableMap<VersionedIdentifier, CompiledLibrary>
+    ): EvaluationSettings {
+        this.libraryCache = libraryCache
+        return this
     }
 
-    public EvaluationSettings withModelCache(Map<ModelIdentifier, Model> modelCache) {
-        setModelCache(modelCache);
-        return this;
+    fun withValueSetCache(
+        valueSetCache: MutableMap<String, MutableList<Code>>
+    ): EvaluationSettings {
+        this.valueSetCache = valueSetCache
+        return this
     }
 
-    public Map<VersionedIdentifier, CompiledLibrary> getLibraryCache() {
-        return this.libraryCache;
+    fun withCqlOptions(cqlOptions: CqlOptions): EvaluationSettings {
+        this.cqlOptions = cqlOptions
+        return this
     }
 
-    public void setLibraryCache(Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
-        this.libraryCache = libraryCache;
+    fun withRetrieveSettings(retrieveSettings: RetrieveSettings): EvaluationSettings {
+        this.retrieveSettings = retrieveSettings
+        return this
     }
 
-    public EvaluationSettings withLibraryCache(Map<VersionedIdentifier, CompiledLibrary> libraryCache) {
-        setLibraryCache(libraryCache);
-        return this;
+    fun withTerminologySettings(terminologySettings: TerminologySettings): EvaluationSettings {
+        this.terminologySettings = terminologySettings
+        return this
     }
 
-    public Map<String, List<Code>> getValueSetCache() {
-        return this.valueSetCache;
+    fun withLibrarySourceProviders(
+        librarySourceProviders: MutableList<LibrarySourceProvider>
+    ): EvaluationSettings {
+        this.librarySourceProviders = librarySourceProviders
+        return this
     }
 
-    public void setValueSetCache(Map<String, List<Code>> valueSetCache) {
-        this.valueSetCache = valueSetCache;
+    fun withNpmProcessor(npmProcessor: NpmProcessor?): EvaluationSettings {
+        this.npmProcessor = npmProcessor
+        return this
     }
 
-    public EvaluationSettings withValueSetCache(Map<String, List<Code>> valueSetCache) {
-        setValueSetCache(valueSetCache);
-        return this;
-    }
-
-    public CqlOptions getCqlOptions() {
-        return this.cqlOptions;
-    }
-
-    public EvaluationSettings withCqlOptions(CqlOptions cqlOptions) {
-        setCqlOptions(cqlOptions);
-        return this;
-    }
-
-    public void setCqlOptions(CqlOptions cqlOptions) {
-        this.cqlOptions = cqlOptions;
-    }
-
-    public RetrieveSettings getRetrieveSettings() {
-        return this.retrieveSettings;
-    }
-
-    public EvaluationSettings withRetrieveSettings(RetrieveSettings retrieveSettings) {
-        setRetrieveSettings(retrieveSettings);
-        return this;
-    }
-
-    public void setRetrieveSettings(RetrieveSettings retrieveSettings) {
-        this.retrieveSettings = retrieveSettings;
-    }
-
-    public TerminologySettings getTerminologySettings() {
-        return this.terminologySettings;
-    }
-
-    public EvaluationSettings withTerminologySettings(TerminologySettings terminologySettings) {
-        setTerminologySettings(terminologySettings);
-        return this;
-    }
-
-    public void setTerminologySettings(TerminologySettings terminologySettings) {
-        this.terminologySettings = terminologySettings;
-    }
-
-    public List<LibrarySourceProvider> getLibrarySourceProviders() {
-        return librarySourceProviders;
-    }
-
-    public void setLibrarySourceProviders(List<LibrarySourceProvider> librarySourceProviders) {
-        this.librarySourceProviders = librarySourceProviders;
-    }
-
-    public EvaluationSettings withLibrarySourceProviders(List<LibrarySourceProvider> librarySourceProviders) {
-        setLibrarySourceProviders(librarySourceProviders);
-        return this;
-    }
-
-    public NpmProcessor getNpmProcessor() {
-        return npmProcessor;
-    }
-
-    public void setNpmProcessor(NpmProcessor npmProcessor) {
-        this.npmProcessor = npmProcessor;
-    }
-
-    public EvaluationSettings withNpmProcessor(NpmProcessor npmProcessor) {
-        setNpmProcessor(npmProcessor);
-        return this;
-    }
-
-    /***
-     * Returns a map of the registered namespaces with the key being the name and the value being the uri of the namespace
+    /**
+     * Returns a map of the registered namespaces with the key being the name and the value being
+     * the uri of the namespace
+     *
      * @return The map of registered namespaces
      */
-    public Map<String, String> getRegisteredNamespaces() {
-        return registeredNamespaces;
+    fun getRegisteredNamespaces(): MutableMap<String, String> {
+        return registeredNamespaces
     }
 
-    public void setRegisteredNamespaces(Map<String, String> namespaces) {
-        this.registeredNamespaces = new ConcurrentHashMap<>(namespaces);
+    fun setRegisteredNamespaces(namespaces: MutableMap<String, String>?) {
+        this.registeredNamespaces = ConcurrentHashMap<String, String>(namespaces)
     }
 
-    public EvaluationSettings withRegisteredNamespaces(Map<String, String> namespaces) {
-        setRegisteredNamespaces(namespaces);
-        return this;
+    fun withRegisteredNamespaces(namespaces: MutableMap<String, String>?): EvaluationSettings {
+        setRegisteredNamespaces(namespaces)
+        return this
     }
 
-    public EvaluationSettings addRegisteredNamespace(String name, String uri) {
+    fun addRegisteredNamespace(name: String, uri: String): EvaluationSettings {
         if (!registeredNamespaces.containsKey(name)) {
-            registeredNamespaces.put(name, uri);
+            registeredNamespaces[name] = uri
         }
-        return this;
+        return this
+    }
+
+    companion object {
+        @JvmStatic
+        val default: EvaluationSettings
+            get() = EvaluationSettings()
     }
 }

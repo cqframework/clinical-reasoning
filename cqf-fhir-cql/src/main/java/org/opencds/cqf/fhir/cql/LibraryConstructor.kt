@@ -1,127 +1,123 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.cql
 
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.fhirpath.IFhirPath
+import org.apache.commons.lang3.StringUtils
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition
+import org.opencds.cqf.fhir.utility.FhirPathCache
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+class LibraryConstructor(protected var fhirContext: FhirContext) {
+    protected var fhirPath: IFhirPath = FhirPathCache.cachedForContext(fhirContext)
 
-public class LibraryConstructor {
-
-    private static final Logger logger = LoggerFactory.getLogger(LibraryConstructor.class);
-
-    protected FhirContext fhirContext;
-    protected IFhirPath fhirPath;
-
-    public LibraryConstructor(FhirContext fhirContext) {
-
-        this.fhirContext = requireNonNull(fhirContext, "fhirContext can not be null");
-        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    }
-
-    public String constructCqlLibrary(
-            String name,
-            String version,
-            String expression,
-            Map<String, String> libraries,
-            List<CqlParameterDefinition> parameters) {
-        logger.debug("Constructing expression for local evaluation");
+    fun constructCqlLibrary(
+        name: String?,
+        version: String?,
+        expression: String?,
+        libraries: MutableMap<String?, String?>?,
+        parameters: MutableList<CqlParameterDefinition>?,
+    ): String {
+        logger.debug("Constructing expression for local evaluation")
         return constructCqlLibrary(
-                name, version, Set.of("define \"return\":%n  %s".formatted(expression)), libraries, parameters);
+            name,
+            version,
+            mutableSetOf("define \"return\":\n  $expression"),
+            libraries,
+            parameters,
+        )
     }
 
-    public String constructCqlLibrary(
-            String name,
-            String version,
-            Set<String> expressions,
-            Map<String, String> libraries,
-            List<CqlParameterDefinition> parameters) {
+    fun constructCqlLibrary(
+        name: String?,
+        version: String?,
+        expressions: MutableSet<String?>,
+        libraries: MutableMap<String?, String?>?,
+        parameters: MutableList<CqlParameterDefinition>?,
+    ): String {
+        val sb = StringBuilder()
 
-        StringBuilder sb = new StringBuilder();
-
-        constructHeader(sb, name, version);
-        constructUsings(sb);
-        constructIncludes(sb, libraries);
-        constructParameters(sb, parameters);
-        constructContext(sb, null);
-        for (var expression : expressions) {
-            sb.append("%s%n%n".formatted(expression));
+        constructHeader(sb, name, version)
+        constructUsings(sb)
+        constructIncludes(sb, libraries)
+        constructParameters(sb, parameters)
+        constructContext(sb, null)
+        for (expression in expressions) {
+            sb.append("$expression\n\n")
         }
 
-        String cql = sb.toString();
+        val cql = sb.toString()
 
-        logger.debug(cql);
-        return cql;
+        logger.debug(cql)
+        return cql
     }
 
-    private String getFhirVersionString(FhirVersionEnum fhirVersion) {
+    private fun getFhirVersionString(fhirVersion: FhirVersionEnum): String? {
         // The version of the DSTU3 enum is 3.0.2 which the CQL Engine does not support.
-        return fhirVersion == FhirVersionEnum.DSTU3 ? "3.0.1" : fhirVersion.getFhirVersionString();
+        return if (fhirVersion == FhirVersionEnum.DSTU3) "3.0.1" else fhirVersion.fhirVersionString
     }
 
-    private void constructIncludes(StringBuilder sb, Map<String, String> libraries) {
-        sb.append("include FHIRHelpers version '%s' called FHIRHelpers%n"
-                .formatted(getFhirVersionString(fhirContext.getVersion().getVersion())));
+    private fun constructIncludes(sb: StringBuilder, libraries: MutableMap<String?, String?>?) {
+        sb.append(
+            "include FHIRHelpers version '${getFhirVersionString(fhirContext.version.version)}' called FHIRHelpers\n"
+        )
 
         if (libraries != null) {
-            for (var library : libraries.entrySet()) {
-                var vi = VersionedIdentifiers.forUrl(library.getValue());
-                sb.append("include \"%s\"".formatted(vi.getId()));
-                if (vi.getVersion() != null) {
-                    sb.append(" version '%s'".formatted(vi.getVersion()));
+            for (library in libraries.entries) {
+                val vi = VersionedIdentifiers.forUrl(library.value!!)
+                sb.append("include \"${vi.id}\"")
+                if (vi.version != null) {
+                    sb.append(" version '${vi.version}'")
                 }
-                sb.append(" called \"%s\"".formatted(library.getKey()));
-                sb.append("\n");
+                sb.append(" called \"${library.key}\"")
+                sb.append("\n")
             }
         }
-        sb.append("\n");
+        sb.append("\n")
     }
 
-    private void constructParameters(StringBuilder sb, List<CqlParameterDefinition> parameters) {
-        if (parameters == null || parameters.isEmpty()) {
-            return;
+    private fun constructParameters(
+        sb: StringBuilder,
+        parameters: MutableList<CqlParameterDefinition>?,
+    ) {
+        if (parameters.isNullOrEmpty()) {
+            return
         }
 
-        for (CqlParameterDefinition cpd : parameters) {
+        for (cpd in parameters) {
             sb.append("parameter \"")
-                    .append(cpd.getName())
-                    .append("\" ")
-                    .append(this.getTypeDeclaration(cpd.getType(), cpd.getIsList()))
-                    .append("%n".formatted());
+                .append(cpd.name)
+                .append("\" ")
+                .append(this.getTypeDeclaration(cpd.type, cpd.isList))
+                .append("\n")
         }
-        sb.append("%n".formatted());
+        sb.append("\n")
     }
 
-    private String getTypeDeclaration(String type, Boolean isList) {
+    private fun getTypeDeclaration(type: String?, isList: Boolean?): String? {
         // TODO: Handle "FHIR" and "System" prefixes
         // Should probably mark system types in the CqlParameterDefinition?
-        if (Boolean.TRUE.equals(isList)) {
-            return "List<" + type + ">";
+        if (true == isList) {
+            return "List<$type>"
         } else {
-            return type;
+            return type
         }
     }
 
-    private void constructUsings(StringBuilder sb) {
-        sb.append("using FHIR version '%s'%n%n"
-                .formatted(getFhirVersionString(fhirContext.getVersion().getVersion())));
+    private fun constructUsings(sb: StringBuilder) {
+        sb.append("using FHIR version '${getFhirVersionString(fhirContext.version.version)}'\n\n")
     }
 
-    private void constructHeader(StringBuilder sb, String name, String version) {
-        sb.append("library %s version '%s'%n%n".formatted(name, version));
+    private fun constructHeader(sb: StringBuilder, name: String?, version: String?) {
+        sb.append("library $name version '$version'\n\n")
     }
 
-    private void constructContext(StringBuilder sb, String contextType) {
-        sb.append("context %s%n%n"
-                .formatted(StringUtils.isBlank(contextType) ? "Patient" : contextType)
-                .formatted());
+    private fun constructContext(sb: StringBuilder, contextType: String?) {
+        sb.append("context ${if (StringUtils.isBlank(contextType)) "Patient" else contextType}\n\n")
+    }
+
+    companion object {
+        private val logger: Logger = LoggerFactory.getLogger(LibraryConstructor::class.java)
     }
 }

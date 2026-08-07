@@ -1,163 +1,195 @@
-package org.opencds.cqf.fhir.cql.engine.retrieve;
+package org.opencds.cqf.fhir.cql.engine.retrieve
 
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.model.api.IQueryParameterType
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.util.bundle.BundleEntryParts
+import com.google.common.collect.HashMultimap
+import com.google.common.collect.Multimap
+import java.util.function.Predicate
+import java.util.stream.Collectors
+import org.hl7.fhir.instance.model.api.IBaseBundle
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.opencds.cqf.cql.engine.runtime.ClassInstance
+import org.opencds.cqf.cql.engine.runtime.Code
+import org.opencds.cqf.cql.engine.runtime.Interval
+import org.opencds.cqf.cql.engine.runtime.Value
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE
+import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE
+import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository
+import org.opencds.cqf.fhir.utility.repository.ig.IgRepository
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.engine.runtime.Interval;
-import org.opencds.cqf.cql.engine.runtime.Value;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.fhir.utility.iterable.BundleMappingIterable;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
-import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
-import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
+class RepositoryRetrieveProvider(
+    private val repository: IRepository,
+    terminologyProvider: TerminologyProvider,
+    settings: RetrieveSettings,
+) : BaseRetrieveProvider(repository.fhirContext(), terminologyProvider, settings) {
+    private class SearchConfig {
+        /** Each element of each list is OR'd Each */
+        var searchParams: Multimap<String?, MutableList<IQueryParameterType?>?> =
+            HashMultimap.create<String?, MutableList<IQueryParameterType?>?>()
 
-@SuppressWarnings("UnstableApiUsage")
-public class RepositoryRetrieveProvider extends BaseRetrieveProvider {
-
-    private static class SearchConfig {
-
-        /**
-         * Each element of each list is OR'd
-         * Each
-         */
-        public Multimap<String, List<IQueryParameterType>> searchParams = HashMultimap.create();
-
-        public Predicate<IBaseResource> filter = x -> true;
+        var filter: Predicate<IBaseResource?> = Predicate { true }
     }
 
-    private final IRepository repository;
-    private final FhirContext fhirContext;
+    private val fhirContext: FhirContext = repository.fhirContext()
 
-    public RepositoryRetrieveProvider(
-            final IRepository repository, final TerminologyProvider terminologyProvider, RetrieveSettings settings) {
-        super(repository.fhirContext(), terminologyProvider, settings);
-        this.repository = requireNonNull(repository, "repository can not be null.");
-        this.fhirContext = repository.fhirContext();
-    }
+    override fun retrieve(
+        context: String?,
+        contextPath: String?,
+        contextValue: String?,
+        dataType: String,
+        templateId: String?,
+        codePath: String?,
+        codes: Iterable<Code>?,
+        valueSet: String?,
+        datePath: String?,
+        dateLowPath: String?,
+        dateHighPath: String?,
+        dateRange: Interval?,
+    ): Iterable<Value?>? {
+        val resourceType = fhirContext.getResourceDefinition(dataType).implementingClass
 
-    @Override
-    public Iterable<Value> retrieve(
-            final String context,
-            final String contextPath,
-            final String contextValue,
-            final String dataType,
-            final String templateId,
-            final String codePath,
-            final Iterable<Code> codes,
-            final String valueSet,
-            final String datePath,
-            final String dateLowPath,
-            final String dateHighPath,
-            final Interval dateRange) {
-        var resourceType = fhirContext.getResourceDefinition(dataType).getImplementingClass();
+        @Suppress("UNCHECKED_CAST")
+        val bt =
+            this.fhirContext.getResourceDefinition("Bundle").implementingClass
+                as Class<out IBaseBundle?>?
 
-        @SuppressWarnings("unchecked")
-        var bt = (Class<? extends IBaseBundle>)
-                this.fhirContext.getResourceDefinition("Bundle").getImplementingClass();
+        val config = SearchConfig()
+        this.configureTerminology(config, dataType, codePath, codes, valueSet)
+        this.configureContext(config, dataType, context, contextPath, contextValue)
+        this.configureProfile(config, dataType, templateId)
+        this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange)
 
-        var config = new SearchConfig();
-        this.configureTerminology(config, dataType, codePath, codes, valueSet);
-        this.configureContext(config, dataType, context, contextPath, contextValue);
-        this.configureProfile(config, dataType, templateId);
-        this.configureDates(config, dataType, datePath, dateLowPath, dateHighPath, dateRange);
+        val headers = headersForContext(context, contextValue)
 
-        Map<String, String> headers = headersForContext(context, contextValue);
+        val resources: IBaseBundle? =
+            this.repository.search(bt, resourceType, config.searchParams, headers)
 
-        var resources = this.repository.search(bt, resourceType, config.searchParams, headers);
-
-        var modelResolver = FhirModelResolverCache.resolverForVersion(
-                fhirContext.getVersion().getVersion());
-        var iter = new BundleMappingIterable<>(repository, resources, BundleEntryParts::getResource);
-        return iter.toStream()
-                .filter(config.filter)
-                .map(r -> modelResolver.toCqlValue(r, false))
-                .collect(Collectors.toList());
+        val modelResolver = FhirModelResolverCache.resolverForVersion(fhirContext.version.version)
+        val iter =
+            BundleMappingIterable<IBaseBundle?, IBaseResource?>(
+                repository,
+                resources,
+                { obj: BundleEntryParts? -> obj!!.resource },
+            )
+        return iter
+            .toStream()
+            .filter(config.filter)
+            .map<ClassInstance?> { r: IBaseResource? -> modelResolver.toCqlValue(r, false) }
+            .collect(Collectors.toList())
     }
 
     // Create headers for the FHIR compartment search (e.g. X-FHIR-Compartment: Patient/123)
-    private Map<String, String> headersForContext(String context, Object contextValue) {
+    private fun headersForContext(
+        context: String?,
+        contextValue: Any?,
+    ): MutableMap<String?, String?> {
         if (context == null || contextValue == null) {
-            return Collections.emptyMap();
+            return mutableMapOf()
         }
 
-        return Map.of(IgRepository.FHIR_COMPARTMENT_HEADER, context + "/" + contextValue.toString());
+        return mutableMapOf(IgRepository.FHIR_COMPARTMENT_HEADER to "$context/$contextValue")
     }
 
-    private void configureProfile(SearchConfig config, String dataType, String templateId) {
-        var mode = this.getRetrieveSettings().getSearchParameterMode();
-        switch (mode) {
-            case FILTER_IN_MEMORY:
-            case AUTO: // TODO: Auto-detect based on CapabilityStatement
-                config.filter = config.filter.and(filterByTemplateId(dataType, templateId));
-                break;
-            case USE_SEARCH_PARAMETERS:
-                populateTemplateSearchParams(config.searchParams, dataType, templateId);
-        }
-    }
+    private fun configureProfile(config: SearchConfig, dataType: String?, templateId: String?) {
+        val mode = this.retrieveSettings.searchParameterMode
+        when (mode) {
+            SEARCH_FILTER_MODE.FILTER_IN_MEMORY,
+            SEARCH_FILTER_MODE.AUTO ->
+                config.filter = config.filter.and(filterByTemplateId(dataType, templateId))
 
-    private void configureContext(
-            SearchConfig config, String dataType, String context, String contextPath, Object contextValue) {
-        var mode = this.getRetrieveSettings().getSearchParameterMode();
-        switch (mode) {
-            case FILTER_IN_MEMORY:
-                config.filter = config.filter.and(filterByContext(dataType, context, contextPath, contextValue));
-                break;
-            case AUTO: // TODO: offload detection based on CapabilityStatement
-            case USE_SEARCH_PARAMETERS:
-                populateContextSearchParams(config.searchParams, dataType, context, contextPath, contextValue);
-                break;
+            SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS ->
+                populateTemplateSearchParams(config.searchParams, dataType, templateId)
         }
     }
 
-    private void configureTerminology(
-            SearchConfig config, String dataType, String codePath, Iterable<Code> codes, String valueSet) {
-        var mode = this.getRetrieveSettings().getTerminologyParameterMode();
-        switch (mode) {
-            case FILTER_IN_MEMORY:
-                config.filter = config.filter.and(filterByTerminology(dataType, codePath, codes, valueSet));
-                break;
-            case AUTO: // TODO: offload detection based on CapabilityStatement
-            case USE_INLINE_CODES:
-            case USE_VALUE_SET_URL:
-                populateTerminologySearchParams(config.searchParams, dataType, codePath, codes, valueSet);
-                break;
+    private fun configureContext(
+        config: SearchConfig,
+        dataType: String?,
+        context: String?,
+        contextPath: String?,
+        contextValue: Any?,
+    ) {
+        val mode = this.retrieveSettings.searchParameterMode
+        when (mode) {
+            SEARCH_FILTER_MODE.FILTER_IN_MEMORY ->
+                config.filter =
+                    config.filter.and(filterByContext(dataType, context, contextPath, contextValue))
+
+            SEARCH_FILTER_MODE.AUTO,
+            SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS ->
+                populateContextSearchParams(
+                    config.searchParams,
+                    dataType,
+                    context,
+                    contextPath,
+                    contextValue,
+                )
         }
     }
 
-    private void configureDates(
-            SearchConfig config,
-            String dataType,
-            String datePath,
-            String dateLowPath,
-            String dateHighPath,
-            Interval dateRange) {
-        var mode = this.getRetrieveSettings().getSearchParameterMode();
-        switch (mode) {
-            case FILTER_IN_MEMORY:
-            case AUTO: // TODO: offload detection based on CapabilityStatement
-            case USE_SEARCH_PARAMETERS:
-                populateDateSearchParams(config.searchParams, dataType, datePath, dateLowPath, dateHighPath, dateRange);
-                break;
+    private fun configureTerminology(
+        config: SearchConfig,
+        dataType: String?,
+        codePath: String?,
+        codes: Iterable<Code>?,
+        valueSet: String?,
+    ) {
+        val mode = this.retrieveSettings.terminologyParameterMode
+        when (mode) {
+            TERMINOLOGY_FILTER_MODE.FILTER_IN_MEMORY ->
+                config.filter =
+                    config.filter.and(filterByTerminology(dataType, codePath, codes, valueSet))
+
+            TERMINOLOGY_FILTER_MODE.AUTO,
+            TERMINOLOGY_FILTER_MODE.USE_INLINE_CODES,
+            TERMINOLOGY_FILTER_MODE.USE_VALUE_SET_URL ->
+                populateTerminologySearchParams(
+                    config.searchParams,
+                    dataType,
+                    codePath,
+                    codes,
+                    valueSet,
+                )
         }
     }
 
-    @Override
-    protected boolean inModifierSupported(String valueSet, String resourceName, String searchParamName) {
-        // The IN modifier is not currently supported by the ResourceMatcher used by the InMemoryRepository
-        return !(repository instanceof InMemoryFhirRepository)
-                && super.inModifierSupported(valueSet, resourceName, searchParamName);
+    private fun configureDates(
+        config: SearchConfig,
+        dataType: String?,
+        datePath: String?,
+        dateLowPath: String?,
+        dateHighPath: String?,
+        dateRange: Interval?,
+    ) {
+        val mode = this.retrieveSettings.searchParameterMode
+        when (mode) {
+            SEARCH_FILTER_MODE.FILTER_IN_MEMORY,
+            SEARCH_FILTER_MODE.AUTO,
+            SEARCH_FILTER_MODE.USE_SEARCH_PARAMETERS ->
+                populateDateSearchParams(
+                    config.searchParams,
+                    dataType,
+                    datePath,
+                    dateLowPath,
+                    dateHighPath,
+                    dateRange,
+                )
+        }
+    }
+
+    override fun inModifierSupported(
+        valueSet: String?,
+        resourceName: String?,
+        searchParamName: String?,
+    ): Boolean {
+        // The IN modifier is not currently supported by the ResourceMatcher used by the
+        // InMemoryRepository
+        return repository !is InMemoryFhirRepository &&
+            super.inModifierSupported(valueSet, resourceName, searchParamName)
     }
 }

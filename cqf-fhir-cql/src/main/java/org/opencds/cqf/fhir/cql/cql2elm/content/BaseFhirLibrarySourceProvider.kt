@@ -1,68 +1,52 @@
-package org.opencds.cqf.fhir.cql.cql2elm.content;
+package org.opencds.cqf.fhir.cql.cql2elm.content
 
-import static java.util.Objects.requireNonNull;
-import static kotlinx.io.CoreKt.buffered;
-import static kotlinx.io.JvmCoreKt.asSource;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import kotlinx.io.Source;
-import org.cqframework.cql.cql2elm.LibraryContentType;
-import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import kotlinx.io.Source
+import kotlinx.io.asSource
+import kotlinx.io.buffered
+import org.cqframework.cql.cql2elm.LibraryContentType
+import org.cqframework.cql.cql2elm.LibrarySourceProvider
+import org.hl7.elm.r1.VersionedIdentifier
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.instance.model.api.ICompositeType
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory
 
 /**
  * This class implements logic for extracting content from a FHIR Library resource and provides an
  * extension point for implementing the fetch of a FHIR library matching a specific identifier.
  */
-public abstract class BaseFhirLibrarySourceProvider implements LibrarySourceProvider {
+abstract class BaseFhirLibrarySourceProvider
+protected constructor(protected val adapterFactory: IAdapterFactory) : LibrarySourceProvider {
+    override fun getLibraryContent(
+        libraryIdentifier: VersionedIdentifier,
+        libraryContentType: LibraryContentType,
+    ): Source? {
+        val library = this.getLibrary(libraryIdentifier) ?: return null
 
-    protected IAdapterFactory adapterFactory;
-
-    protected BaseFhirLibrarySourceProvider(IAdapterFactory adapterFactory) {
-        this.adapterFactory = requireNonNull(adapterFactory, "adapterFactory can not be null");
+        val inputStream = this.getContentStream(library, libraryContentType.mimeType())
+        return inputStream?.asSource()?.buffered()
     }
 
-    @Override
-    public Source getLibraryContent(VersionedIdentifier libraryIdentifier, LibraryContentType libraryContentType) {
-        requireNonNull(libraryIdentifier, "versionedIdentifier can not be null.");
-        requireNonNull(libraryContentType, "libraryContentType can not be null.");
-
-        IBaseResource library = this.getLibrary(libraryIdentifier);
-        if (library == null) {
-            return null;
-        }
-
-        var inputStream = this.getContentStream(library, libraryContentType.mimeType());
-        return inputStream == null ? null : buffered(asSource(inputStream));
-    }
-
-    protected InputStream getContentStream(IBaseResource library, String contentType) {
-
-        ILibraryAdapter libraryAdapter = this.adapterFactory.createLibrary(library);
+    protected fun getContentStream(library: IBaseResource?, contentType: String?): InputStream? {
+        val libraryAdapter = this.adapterFactory.createLibrary(library)
 
         if (libraryAdapter.hasContent()) {
-            for (ICompositeType attachment : libraryAdapter.getContent()) {
-                IAttachmentAdapter attachmentAdapter = this.adapterFactory.createAttachment(attachment);
-                if (attachmentAdapter.getContentType().equals(contentType)) {
+            for (attachment in libraryAdapter.getContent<ICompositeType?>()) {
+                val attachmentAdapter = this.adapterFactory.createAttachment(attachment)
+                if (attachmentAdapter.getContentType() == contentType) {
                     // get externalized extension if present and add custom load data
-                    return new ByteArrayInputStream(attachmentAdapter.getData());
+                    return ByteArrayInputStream(attachmentAdapter.getData())
                 }
             }
         }
 
-        return null;
+        return null
     }
 
-    @Override
-    public Source getLibrarySource(VersionedIdentifier libraryIdentifier) {
-        return getLibraryContent(libraryIdentifier, LibraryContentType.CQL);
+    override fun getLibrarySource(libraryIdentifier: VersionedIdentifier): Source? {
+        return getLibraryContent(libraryIdentifier, LibraryContentType.CQL)
     }
 
-    protected abstract IBaseResource getLibrary(VersionedIdentifier libraryIdentifier);
+    protected abstract fun getLibrary(libraryIdentifier: VersionedIdentifier): IBaseResource?
 }

@@ -1,84 +1,82 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.cql
 
-import static org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver.fhirModelNamespaceUri;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver
+import org.opencds.cqf.cql.engine.runtime.ClassInstance
+import org.opencds.cqf.cql.engine.runtime.String
+import org.opencds.cqf.cql.engine.runtime.Value
+import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.Arrays;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.ResourceType;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.cql.engine.runtime.ClassInstance;
-import org.opencds.cqf.cql.engine.runtime.Value;
-import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter;
+/** This class provides utilities for handling ClassInstance objects from the CQL engine. */
+object ClassInstanceHelper {
+    var r4Converter: CqlFhirParametersConverter =
+        Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached())
+    val DSTU3_RESOURCE_TYPE_NAMES =
+        org.hl7.fhir.dstu3.model.ResourceType.entries.map { obj -> obj.name }
+    val R4_RESOURCE_TYPE_NAMES = org.hl7.fhir.r4.model.ResourceType.entries.map { obj -> obj.name }
 
-/**
- * This class provides utilities for handling ClassInstance objects from the CQL engine.
- */
-public class ClassInstanceHelper {
-    public static CqlFhirParametersConverter r4Converter =
-            Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
-    public static final List<String> DSTU3_RESOURCE_TYPE_NAMES =
-            Arrays.stream(ResourceType.values()).map(ResourceType::name).toList();
-    public static final List<String> R4_RESOURCE_TYPE_NAMES = Arrays.stream(org.hl7.fhir.r4.model.ResourceType.values())
-            .map(org.hl7.fhir.r4.model.ResourceType::name)
-            .toList();
-
-    private ClassInstanceHelper() {
-        // intentionally empty
-    }
-
-    public static String getId(ClassInstance classInstance) {
-        if (classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri) && classInstance.has("id")) {
-            var resourceIdInstance = (ClassInstance) classInstance.get("id");
-            var resourceIdValue = resourceIdInstance == null ? null : resourceIdInstance.get("value");
+    @JvmStatic
+    fun getId(classInstance: ClassInstance): kotlin.String? {
+        if (
+            classInstance.type.namespaceURI == FhirModelResolver.fhirModelNamespaceUri &&
+                classInstance.has("id")
+        ) {
+            val resourceIdInstance = classInstance["id"] as ClassInstance?
+            val resourceIdValue = resourceIdInstance?.get("value")
             if (resourceIdValue != null) {
-                var type = classInstance.getType().getLocalPart();
-                return "%s/%s".formatted(type, plainStringValue(resourceIdValue));
+                val type = classInstance.type.localPart
+                return "$type/${plainStringValue(resourceIdValue)}"
             }
         }
-        return null;
+        return null
     }
 
     /**
-     * Renders the plain string form of a CQL id value. The {@code id.value} element is a CQL
-     * {@link org.opencds.cqf.cql.engine.runtime.String}, whose {@code toString()} adds CQL quoting
-     * (e.g. {@code 'enc-1'}); using that quoted form yields broken references like
-     * {@code Encounter/'enc-1'}. Unwrap the underlying Java value instead.
+     * Renders the plain string form of a CQL id value. The `id.value` element is a CQL [String],
+     * whose `toString()` adds CQL quoting (e.g. `'enc-1'`); using that quoted form yields broken
+     * references like `Encounter/'enc-1'`. Unwrap the underlying Java value instead.
      */
-    private static String plainStringValue(Object value) {
-        if (value instanceof org.opencds.cqf.cql.engine.runtime.String cqlString) {
-            return cqlString.getValue();
+    private fun plainStringValue(value: Any?): kotlin.String {
+        if (value is String) {
+            return value.value
         }
-        return String.valueOf(value);
+        return value.toString()
     }
 
-    public static Object convertToFhirR4IfNeeded(Object value) {
-        return r4Converter.convertToFhirIfNeeded(value);
+    @JvmStatic
+    fun convertToFhirR4IfNeeded(value: Any?): Any? {
+        return r4Converter.convertToFhirIfNeeded(value)
     }
 
-    public static IBase convertToFhirR4(Value value) {
-        return r4Converter.toFhirValue(value);
+    @JvmStatic
+    fun convertToFhirR4(value: Value?): IBase? {
+        return r4Converter.toFhirValue(value)
     }
 
-    public static String getClassName(ClassInstance classInstance) {
+    @JvmStatic
+    fun getClassName(classInstance: ClassInstance): kotlin.String {
         // TODO: Need to fix version determination
-        var version = "r4";
-        var qName = classInstance.getType();
-        var system = qName.getNamespaceURI().equals(fhirModelNamespaceUri) ? "org.hl7.fhir" : qName.getNamespaceURI();
-        return "%s.%s.model.%s".formatted(system, version, qName.getLocalPart());
+        val version = "r4"
+        val qName = classInstance.type
+        val system =
+            if (qName.namespaceURI == FhirModelResolver.fhirModelNamespaceUri) "org.hl7.fhir"
+            else qName.namespaceURI
+        return "$system.$version.model.${qName.localPart}"
     }
 
-    public static boolean isFhirResource(FhirVersionEnum fhirVersion, ClassInstance classInstance) {
-        if (classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri)) {
-            var resourceTypes =
-                    switch (fhirVersion) {
-                        case DSTU3 -> DSTU3_RESOURCE_TYPE_NAMES;
-                        case R4 -> R4_RESOURCE_TYPE_NAMES;
-                        default -> List.of();
-                    };
-            return resourceTypes.contains(classInstance.getType().getLocalPart());
+    @JvmStatic
+    fun isFhirResource(fhirVersion: FhirVersionEnum?, classInstance: ClassInstance): Boolean {
+        if (classInstance.type.namespaceURI == FhirModelResolver.fhirModelNamespaceUri) {
+            val resourceTypes =
+                when (fhirVersion) {
+                    FhirVersionEnum.DSTU3 -> DSTU3_RESOURCE_TYPE_NAMES
+                    FhirVersionEnum.R4 -> R4_RESOURCE_TYPE_NAMES
+                    else -> mutableListOf()
+                }
+            return resourceTypes.contains(classInstance.type.localPart)
         }
-        return false;
+        return false
     }
 }

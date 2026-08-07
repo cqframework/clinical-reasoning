@@ -1,32 +1,21 @@
-package org.opencds.cqf.fhir.cql.engine.terminology;
+package org.opencds.cqf.fhir.cql.engine.terminology
 
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.util.BundleUtil;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
-import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
-import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
-import org.opencds.cqf.fhir.utility.ValueSets;
-import org.opencds.cqf.fhir.utility.search.Searches;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.fhirpath.IFhirPath
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.util.BundleUtil
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.cql.engine.runtime.Code
+import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo
+import org.opencds.cqf.cql.engine.terminology.TerminologyProvider
+import org.opencds.cqf.cql.engine.terminology.ValueSetInfo
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE
+import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_PRE_EXPANSION_MODE
+import org.opencds.cqf.fhir.utility.FhirPathCache
+import org.opencds.cqf.fhir.utility.ValueSets
+import org.opencds.cqf.fhir.utility.search.Searches
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /*
  * The implementation of this class uses a sorted list to perform terminology membership operations.
@@ -34,51 +23,29 @@ import org.slf4j.LoggerFactory;
  * search, but found that the performance was reduced by ~33%. Please run the benchmarks to verify
  * that changes to this class do not result in significant performance degradation.
  */
-@SuppressWarnings("UnstableApiUsage")
-public class RepositoryTerminologyProvider implements TerminologyProvider {
-
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryTerminologyProvider.class);
-
-    private static final Comparator<Code> CODE_COMPARATOR =
-            (x, y) -> x.getCode().compareTo(y.getCode());
-    private final IRepository repository;
-    private final FhirContext fhirContext;
-    private final IFhirPath fhirPath;
-    private final Map<String, List<Code>> valueSetIndex;
-    private final TerminologySettings terminologySettings;
+class RepositoryTerminologyProvider
+@JvmOverloads
+constructor(
+    private val repository: IRepository,
+    private val valueSetIndex: MutableMap<String, MutableList<Code>> =
+        HashMap<String, MutableList<Code>>(),
+    private val terminologySettings: TerminologySettings = TerminologySettings(),
+) : TerminologyProvider {
+    private val fhirContext: FhirContext = repository.fhirContext()
+    private val fhirPath: IFhirPath = FhirPathCache.cachedForContext(fhirContext)
 
     // The cached expansions are sorted by code order
     // This is used determine the range of codes to check
-    private static class Range {
-
-        public static final Range EMPTY = new Range(-1, -1);
-
-        public Range(int start, int end) {
-            this.start = start;
-            this.end = end;
+    private class Range(val start: Int, val end: Int) {
+        companion object {
+            val EMPTY: Range = Range(-1, -1)
         }
-
-        public final int start;
-        public final int end;
     }
 
-    public RepositoryTerminologyProvider(IRepository repository, TerminologySettings terminologySettings) {
-        this(repository, new HashMap<>(), terminologySettings);
-    }
-
-    public RepositoryTerminologyProvider(
-            IRepository repository, Map<String, List<Code>> valueSetIndex, TerminologySettings terminologySettings) {
-        this.repository = requireNonNull(repository, "repository can not be null.");
-        this.valueSetIndex = requireNonNull(valueSetIndex, "valueSetIndex can not be null.");
-        this.terminologySettings = requireNonNull(terminologySettings, "terminologySettings can not be null.");
-
-        this.fhirContext = repository.fhirContext();
-        this.fhirPath = FhirPathCache.cachedForContext(fhirContext);
-    }
-
-    public RepositoryTerminologyProvider(IRepository repository) {
-        this(repository, new HashMap<>(), new TerminologySettings());
-    }
+    constructor(
+        repository: IRepository,
+        terminologySettings: TerminologySettings,
+    ) : this(repository, HashMap<String, MutableList<Code>>(), terminologySettings)
 
     /**
      * This method checks for membership of a Code in a ValueSet
@@ -87,65 +54,58 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
      * @param valueSet The ValueSetInfo for the ValueSet to check membership of. Can not be null.
      * @return True if code is in the ValueSet.
      */
-    @Override
-    public boolean in(Code code, ValueSetInfo valueSet) {
+    override fun `in`(code: Code, valueSet: ValueSetInfo): Boolean {
         // Implementation note: This function should be considered inner loop
         // code. It's called thousands or millions of times by the CQL engine
         // during evaluation
-        requireNonNull(code, "code can not be null when using 'expand'");
-        requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
 
-        List<Code> codes = this.expand(valueSet);
+        val codes = this.expand(valueSet)
 
-        if (code.getSystem() == null) {
-            // If the system is not provided and the resolved value set contains codes from multiple code systems, a
+        if (code.system == null) {
+            // If the system is not provided and the resolved value set contains codes from multiple
+            // code systems, a
             // run-time error is thrown because the operation is ambiguous
-            var distinctSystems = codes.stream().map(Code::getSystem).distinct().count();
-            if (distinctSystems > 1) {
-                throw new IllegalArgumentException(
-                        "The 'in' operation is ambiguous because the code system is not provided and the resolved value set contains codes from multiple code systems");
+            val distinctSystems = codes.map { it.system }.distinct().count()
+            require(distinctSystems <= 1) {
+                "The 'in' operation is ambiguous because the code system is not provided and the resolved value set contains codes from multiple code systems"
             }
         }
 
         // This range includes all codes that have an equivalent code value,
         // So we only need to check the code system.
-        Range range = this.getSearchRange(code, codes);
-        for (int i = range.start; i < range.end; i++) {
-            var c = codes.get(i);
-            if (code.getSystem() == null || c.getSystem().equals(code.getSystem())) {
-                return true;
+        val range = this.getSearchRange(code, codes)
+        for (i in range.start..<range.end) {
+            val c = codes[i]
+            if (code.system == null || c.system == code.system) {
+                return true
             }
         }
 
-        return false;
+        return false
     }
 
     /**
-     * This method expands a ValueSet into a list of Codes. It will use the "expansion" element of the
-     * ValueSet if present. It will fall back the to "compose" element if not present. <b>NOTE:</b>
+     * This method expands a ValueSet into a list of Codes. It will use the "expansion" element of
+     * the ValueSet if present. It will fall back the to "compose" element if not present. **NOTE:**
      * This provider does not provide a full expansion of the "compose" element. If only lists the
      * codes present in the "compose".
      *
      * @param valueSet The ValueSetInfo of the ValueSet to expand
-     * @return The Codes in the ValueSet. <b>NOTE:</b> This method never returns null.
+     * @return The Codes in the ValueSet. **NOTE:** This method never returns null.
      */
-    @Override
-    public List<Code> expand(ValueSetInfo valueSet) {
-        requireNonNull(valueSet, "valueSet can not be null when using 'expand'");
+    override fun expand(valueSet: ValueSetInfo): MutableList<Code> {
 
         // create a url|version canonical url from the info
-        var url = valueSet.getId() + (valueSet.getVersion() != null ? ("|" + valueSet.getVersion()) : "");
+        val url = valueSet.id + (if (valueSet.version != null) ("|" + valueSet.version) else "")
 
-        var expansion = this.valueSetIndex.computeIfAbsent(url, k -> tryExpand(valueSet));
-        if (expansion == null) {
-            throw new IllegalArgumentException("Unable to get expansion for ValueSet %s".formatted(valueSet.getId()));
-        }
+        val expansion = this.valueSetIndex.computeIfAbsent(url) { tryExpand(valueSet) }
+        requireNotNull(expansion) { "Unable to get expansion for ValueSet ${valueSet.id}" }
 
-        return expansion;
+        return expansion
     }
 
-    private Class<? extends IBaseResource> classFor(String resourceType) {
-        return this.fhirContext.getResourceDefinition(resourceType).getImplementingClass();
+    private fun classFor(resourceType: String?): Class<out IBaseResource?>? {
+        return this.fhirContext.getResourceDefinition(resourceType).implementingClass
     }
 
     // Attempts to perform expansion of the referenced ValueSet. It will first use an
@@ -153,209 +113,231 @@ public class RepositoryTerminologyProvider implements TerminologyProvider {
     // an expansion if possible, and then fall back to doing a "naive" expansion where
     // possible. A "naive" expansion includes only codes directly referenced in the ValueSet
     // It's not possible to run expansion filters without the support of a terminology server.
-    private List<Code> tryExpand(ValueSetInfo valueSet) {
-        var codes = performExpansion(valueSet);
+    private fun tryExpand(valueSet: ValueSetInfo): MutableList<Code> {
+        var codes = performExpansion(valueSet)
         // Filter out invalid codes that are missing a code or system
-        codes = codes.stream()
-                .filter(x -> x.getCode() != null && x.getSystem() != null)
-                .collect(Collectors.toList());
-        Collections.sort(codes, CODE_COMPARATOR);
-        return codes;
+        codes =
+            codes
+                .filter { x -> x.code != null && x.system != null }
+                .sortedWith(CODE_COMPARATOR)
+                .toMutableList()
+        return codes
     }
 
-    private List<Code> tryExpandOperation(IBaseResource vs, ValueSetInfo valueSet) {
-        boolean useExpandOperation = (this.terminologySettings.getValuesetExpansionMode()
-                                == VALUESET_EXPANSION_MODE.AUTO
-                        && canRepositoryExpand(valueSet))
-                || this.terminologySettings.getValuesetExpansionMode() == VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION;
+    private fun tryExpandOperation(vs: IBaseResource, valueSet: ValueSetInfo): MutableList<Code>? {
+        var vs = vs
+        val useExpandOperation =
+            ((this.terminologySettings.valuesetExpansionMode == VALUESET_EXPANSION_MODE.AUTO) &&
+                canRepositoryExpand(valueSet)) ||
+                this.terminologySettings.valuesetExpansionMode ==
+                    VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION
 
-        List<Code> codes = null;
+        var codes: MutableList<Code>? = null
         if (useExpandOperation) {
-            vs = this.repository.invoke(vs.getIdElement(), "$expand", null).getResource();
-            codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
+            vs =
+                this.repository
+                    .invoke<IBaseParameters?, IIdType?>(vs.idElement, "\$expand", null)
+                    .resource
+            codes = ValueSets.getCodesInExpansion(this.fhirContext, vs)
         }
 
-        if (codes == null
-                && this.terminologySettings.getValuesetExpansionMode()
-                        == VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION) {
-            throw new IllegalArgumentException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
+        require(
+            !(codes == null &&
+                (this.terminologySettings.valuesetExpansionMode ==
+                    VALUESET_EXPANSION_MODE.USE_EXPAND_OPERATION))
+        ) {
+            "Failed to expand ValueSet ${valueSet.id}"
         }
 
-        return codes;
+        return codes
     }
 
-    private List<Code> tryNaiveExpansion(IBaseResource vs, ValueSetInfo valueSet) {
-
-        if (containsExpansionLogic(vs)) {
-            throw new IllegalArgumentException(
-                    "ValueSet %s requires $expand to support correctly, and $expand is not available"
-                            .formatted(valueSet.getId()));
+    private fun tryNaiveExpansion(vs: IBaseResource?, valueSet: ValueSetInfo): MutableList<Code> {
+        require(!containsExpansionLogic(vs)) {
+            "ValueSet ${valueSet.id} requires \$expand to support correctly, and \$expand is not available"
         }
 
         logger.warn(
-                "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
-                valueSet.getId());
+            "ValueSet {} is not expanded. Falling back to compose definition. This will potentially produce incorrect results. ",
+            valueSet.id,
+        )
 
-        var codes = ValueSets.getCodesInCompose(fhirContext, vs);
+        val codes = ValueSets.getCodesInCompose(fhirContext, vs)
 
-        if (codes == null) {
-            throw new IllegalArgumentException("Failed to expand ValueSet %s".formatted(valueSet.getId()));
-        }
+        requireNotNull(codes) { "Failed to expand ValueSet ${valueSet.id}" }
 
-        return codes;
+        return codes
     }
 
-    private List<Code> performExpansion(ValueSetInfo valueSet) {
-        var search = valueSet.getVersion() != null
-                ? Searches.byUrlAndVersion(valueSet.getId(), valueSet.getVersion())
-                : Searches.byUrl(valueSet.getId());
+    private fun performExpansion(valueSet: ValueSetInfo): MutableList<Code> {
+        val search =
+            if (valueSet.version != null) Searches.byUrlAndVersion(valueSet.id, valueSet.version)
+            else Searches.byUrl(valueSet.id)
 
-        @SuppressWarnings("unchecked")
-        var results = this.repository.search(
-                (Class<? extends IBaseBundle>) classFor("Bundle"), classFor("ValueSet"), search, null);
+        @Suppress("UNCHECKED_CAST")
+        val results: IBaseBundle? =
+            this.repository.search(
+                classFor("Bundle") as Class<out IBaseBundle?>?,
+                classFor("ValueSet"),
+                search,
+                null,
+            )
 
-        var resources = BundleUtil.toListOfResources(fhirContext, results);
+        val resources = BundleUtil.toListOfResources(fhirContext, results)
 
-        if (resources.isEmpty()) {
-            throw new IllegalArgumentException("Unable to locate ValueSet %s".formatted(valueSet.getId()));
-        }
+        require(!resources.isEmpty()) { "Unable to locate ValueSet ${valueSet.id}" }
 
-        if (resources.size() > 1) {
-            throw new IllegalArgumentException("Multiple ValueSets resolved for %s".formatted(valueSet.getId()));
-        }
+        require(resources.size <= 1) { "Multiple ValueSets resolved for ${valueSet.id}" }
 
-        var vs = resources.get(0);
-        var codes = tryPreExpansion(vs, valueSet);
+        val vs = resources[0]
+        var codes = tryPreExpansion(vs, valueSet)
         if (codes != null) {
-            return codes;
+            return codes
         }
 
-        codes = tryExpandOperation(vs, valueSet);
+        codes = tryExpandOperation(vs, valueSet)
         if (codes != null) {
-            return codes;
+            return codes
         }
 
-        return tryNaiveExpansion(vs, valueSet);
+        return tryNaiveExpansion(vs, valueSet)
     }
 
-    private List<Code> tryPreExpansion(IBaseResource vs, ValueSetInfo valueSet) {
-        if (this.terminologySettings.getValuesetPreExpansionMode() == VALUESET_PRE_EXPANSION_MODE.IGNORE) {
-            return null;
+    private fun tryPreExpansion(vs: IBaseResource?, valueSet: ValueSetInfo): MutableList<Code>? {
+        if (
+            this.terminologySettings.valuesetPreExpansionMode == VALUESET_PRE_EXPANSION_MODE.IGNORE
+        ) {
+            return null
         }
 
-        var codes = ValueSets.getCodesInExpansion(this.fhirContext, vs);
-        if (codes == null
-                && this.terminologySettings.getValuesetPreExpansionMode() == VALUESET_PRE_EXPANSION_MODE.REQUIRE) {
-            throw new IllegalArgumentException(
-                    "ValueSet PreExpansion mode was set to REQUIRE, and valueSet %s did not have an expansion"
-                            .formatted(valueSet.getId()));
+        val codes = ValueSets.getCodesInExpansion(this.fhirContext, vs)
+        require(
+            !(codes == null &&
+                this.terminologySettings.valuesetPreExpansionMode ==
+                    VALUESET_PRE_EXPANSION_MODE.REQUIRE)
+        ) {
+            "ValueSet PreExpansion mode was set to REQUIRE, and valueSet ${valueSet.id} did not have an expansion"
         }
 
-        if (codes != null && Boolean.TRUE.equals(isNaiveExpansion(vs))) {
+        if (codes != null && true == isNaiveExpansion(vs)) {
             logger.warn(
-                    "Codes for ValueSet {} expanded without a terminology server, some results may not be correct.",
-                    valueSet.getId());
+                "Codes for ValueSet {} expanded without a terminology server, some results may not be correct.",
+                valueSet.id,
+            )
         }
 
-        return codes;
+        return codes
     }
 
     // Given a set of Codes sorted by ".code", find the range that matching codes
     // occur in. This function first performs a binary search to find a matching element
     // and then iterates backwards and forwards from there to get the set of candidate codes
-    private Range getSearchRange(Code code, List<Code> expansion) {
+    private fun getSearchRange(code: Code, expansion: MutableList<Code>): Range {
         // Can't match on a null code
-        if (code.getCode() == null) {
-            return Range.EMPTY;
+        if (code.code == null) {
+            return Range.EMPTY
         }
 
-        int index = Collections.binarySearch(expansion, code, CODE_COMPARATOR);
+        val index = expansion.binarySearch(code, CODE_COMPARATOR)
 
         if (index < 0) {
-            return Range.EMPTY;
+            return Range.EMPTY
         }
 
-        int first = index;
-        int last = index + 1;
+        var first = index
+        var last = index + 1
 
-        var value = code.getCode();
+        val value: String = code.code!!
 
-        while (first > 0 && expansion.get(first - 1).getCode().equals(value)) {
-            first--;
+        while (first > 0 && expansion[first - 1].code == value) {
+            first--
         }
 
-        while (last < expansion.size() && expansion.get(last).getCode().equals(value)) {
-            last++;
+        while (last < expansion.size && expansion[last].code == value) {
+            last++
         }
 
-        return new Range(first, last);
+        return Range(first, last)
     }
 
     /**
-     * Lookup is only partially implemented for this TerminologyProvider. Full implementation requires
-     * the ability to access the full CodeSystem. This implementation only checks the code system of
-     * the code matches the CodeSystemInfo url, and verifies the version if present.
+     * Lookup is only partially implemented for this TerminologyProvider. Full implementation
+     * requires the ability to access the full CodeSystem. This implementation only checks the code
+     * system of the code matches the CodeSystemInfo url, and verifies the version if present.
      *
      * @param code The Code to lookup
      * @param codeSystem The CodeSystemInfo of the CodeSystem to check.
      * @return The Code if the system of the Code (and version if specified) matches the
-     *         CodeSystemInfo url (and version)
+     *   CodeSystemInfo url (and version)
      */
-    @Override
-    public Code lookup(Code code, CodeSystemInfo codeSystem) {
-
-        if (code.getSystem() == null) {
-            return null;
+    override fun lookup(code: Code, codeSystem: CodeSystemInfo): Code? {
+        if (code.system == null) {
+            return null
         }
 
-        if (code.getSystem().equals(codeSystem.getId())
-                && (code.getVersion() == null || code.getVersion().equals(codeSystem.getVersion()))) {
-            logger.warn("Unvalidated CodeSystem lookup: {} in {}", code, codeSystem.getId());
-            return code;
+        if (
+            code.system == codeSystem.id &&
+                (code.version == null || code.version == codeSystem.version)
+        ) {
+            logger.warn("Unvalidated CodeSystem lookup: {} in {}", code, codeSystem.id)
+            return code
         }
 
-        return null;
+        return null
     }
 
-    @SuppressWarnings("unchecked")
-    private Boolean isNaiveExpansion(IBaseResource resource) {
-        IBase expansion = ValueSets.getExpansion(this.fhirContext, resource);
+    private fun isNaiveExpansion(resource: IBaseResource?): Boolean? {
+        val expansion = ValueSets.getExpansion(this.fhirContext, resource)
         if (expansion != null) {
-            Object object = ValueSets.getExpansionParameters(expansion, fhirPath, ".where(name = 'naive').value");
-            if (object instanceof IBase base) {
-                return resolveNaiveBoolean(base);
-            } else if (object instanceof Iterable) {
-                List<IBase> naiveParameters = (List<IBase>) object;
-                for (IBase param : naiveParameters) {
-                    return resolveNaiveBoolean(param);
+            val `object`: Any? =
+                ValueSets.getExpansionParameters<IBase?>(
+                    expansion,
+                    fhirPath,
+                    ".where(name = 'naive').value",
+                )
+            if (`object` is IBase) {
+                return resolveNaiveBoolean(`object`)
+            } else if (`object` is Iterable<*>) {
+                @Suppress("UNCHECKED_CAST") val naiveParameters = `object` as MutableList<IBase>
+                for (param in naiveParameters) {
+                    return resolveNaiveBoolean(param)
                 }
             }
         }
-        return null;
+        return null
     }
 
-    private Boolean resolveNaiveBoolean(IBase param) {
-        if (param.fhirType().equals("boolean")) {
-            return (Boolean) ((IPrimitiveType<?>) param).getValue();
+    private fun resolveNaiveBoolean(param: IBase): Boolean? {
+        if (param.fhirType() == "boolean") {
+            return (param as IPrimitiveType<*>).getValue() as Boolean?
         } else {
-            return null;
+            return null
         }
     }
 
-    private boolean containsExpansionLogic(IBaseResource resource) {
-        List<IBase> includeFilters = ValueSets.getIncludeFilters(this.fhirContext, resource);
+    private fun containsExpansionLogic(resource: IBaseResource?): Boolean {
+        val includeFilters = ValueSets.getIncludeFilters(this.fhirContext, resource)
         if (includeFilters != null && !includeFilters.isEmpty()) {
-            return true;
+            return true
         }
-        List<IBase> excludeFilters = ValueSets.getExcludeFilters(this.fhirContext, resource);
+        val excludeFilters = ValueSets.getExcludeFilters(this.fhirContext, resource)
         if (excludeFilters != null && !excludeFilters.isEmpty()) {
-            return true;
+            return true
         }
-        return false;
+        return false
     }
 
-    private boolean canRepositoryExpand(ValueSetInfo valueSetInfo) {
+    private fun canRepositoryExpand(valueSetInfo: ValueSetInfo?): Boolean {
         // TODO: check capabilities statement to see if expansion is supported.
-        return true;
+        return true
+    }
+
+    companion object {
+        private val logger: Logger =
+            LoggerFactory.getLogger(RepositoryTerminologyProvider::class.java)
+
+        private val CODE_COMPARATOR = Comparator { x: Code?, y: Code? ->
+            x!!.code!!.compareTo(y!!.code!!)
+        }
     }
 }

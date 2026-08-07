@@ -1,37 +1,31 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.cql
 
-import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier
 
-public class VersionedIdentifiers {
-
-    private VersionedIdentifiers() {
-        // empty
-    }
-
-    public static VersionedIdentifier forUrl(String url) {
-        if (!url.contains("/Library/") && !url.startsWith("Library/")) {
-            throw new IllegalArgumentException(
-                    "Invalid resource type for determining library version identifier: Library");
+object VersionedIdentifiers {
+    @JvmStatic
+    fun forUrl(url: String): VersionedIdentifier {
+        require(!(!url.contains("/Library/") && !url.startsWith("Library/"))) {
+            "Invalid resource type for determining library version identifier: Library"
         }
 
-        String[] urlSplit = url.split("Library/");
-        if (urlSplit.length > 2) {
-            throw new IllegalArgumentException(
-                    "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>");
+        val urlSplit = url.split("Library/".toRegex()).dropLastWhile { it.isEmpty() }
+        require(urlSplit.size <= 2) {
+            "Invalid url, Library.url SHALL be <CQL namespace url>/Library/<CQL library name>"
         }
 
-        String cqlName = urlSplit.length == 1 ? urlSplit[0] : urlSplit[1];
-        VersionedIdentifier versionedIdentifier = new VersionedIdentifier();
+        val cqlName = if (urlSplit.size == 1) urlSplit[0] else urlSplit[1]
+        val versionedIdentifier = VersionedIdentifier()
         if (cqlName.contains("|")) {
-            String[] nameVersion = cqlName.split("\\|");
-            String name = nameVersion[0];
-            String version = nameVersion[1];
-            versionedIdentifier.setId(name);
-            versionedIdentifier.setVersion(version);
+            val nameVersion = cqlName.split("\\|".toRegex()).dropLastWhile { it.isEmpty() }
+            val name = nameVersion[0]
+            val version = nameVersion[1]
+            versionedIdentifier.id = name
+            versionedIdentifier.version = version
         } else {
-            versionedIdentifier.setId(cqlName);
+            versionedIdentifier.id = cqlName
         }
 
-        return versionedIdentifier;
+        return versionedIdentifier
     }
 }

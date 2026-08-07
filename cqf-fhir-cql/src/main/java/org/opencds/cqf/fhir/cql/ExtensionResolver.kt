@@ -1,53 +1,50 @@
-package org.opencds.cqf.fhir.cql;
+package org.opencds.cqf.fhir.cql
 
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.CqfExpression;
+import java.util.*
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.CqfExpression
 
-/**
- * This class is used to resolve any CQFExpression extensions that exist on an extension.
- */
-public class ExtensionResolver {
-    private final IIdType subjectId;
-    private final IBaseParameters parameters;
-    private final IBaseBundle bundle;
-    private final LibraryEngine libraryEngine;
-
-    public ExtensionResolver(
-            IIdType subjectId, IBaseParameters parameters, IBaseBundle bundle, LibraryEngine libraryEngine) {
-        this.subjectId = subjectId;
-        this.parameters = parameters;
-        this.bundle = bundle;
-        this.libraryEngine = libraryEngine;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <E extends IBaseExtension> void resolveExtensions(
-            IBase resource, List<E> extensions, Map<String, String> referencedLibraries) {
-        for (var extension : extensions) {
-            var nestedExtensions = extension.getExtension();
+/** This class is used to resolve any CQFExpression extensions that exist on an extension. */
+class ExtensionResolver(
+    private val subjectId: IIdType,
+    private val parameters: IBaseParameters?,
+    private val bundle: IBaseBundle?,
+    private val libraryEngine: LibraryEngine,
+) {
+    fun <E : IBaseExtension<*, *>?> resolveExtensions(
+        resource: IBase?,
+        extensions: MutableList<E?>,
+        referencedLibraries: MutableMap<String?, String?>?,
+    ) {
+        for (extension in extensions) {
+            val nestedExtensions = extension!!.getExtension()
             if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
-                resolveExtensions(resource, nestedExtensions, referencedLibraries);
+                @Suppress("UNCHECKED_CAST")
+                resolveExtensions(
+                    resource,
+                    nestedExtensions as MutableList<IBaseExtension<*, *>?>,
+                    referencedLibraries,
+                )
             }
-            var value = extension.getValue();
-            if (value instanceof IBaseHasExtensions hasExtensions) {
-                var valueExtensions = hasExtensions.getExtension();
+            val value = extension.value
+            if (value is IBaseHasExtensions) {
+                val valueExtensions = value.extension
                 if (valueExtensions != null) {
-                    var expressionExtensions = valueExtensions.stream()
-                            .filter(e -> e.getUrl() != null && e.getUrl().equals(Constants.CQF_EXPRESSION))
-                            .findFirst();
-                    if (expressionExtensions.isPresent()) {
-                        var result = getExpressionResult(expressionExtensions.get(), referencedLibraries, resource);
+                    val expressionExtensions: Optional<out IBaseExtension<*, *>?> =
+                        valueExtensions
+                            .stream()
+                            .filter { e -> e!!.url != null && e.url == Constants.CQF_EXPRESSION }
+                            .findFirst()
+                    if (expressionExtensions.isPresent) {
+                        val result =
+                            getExpressionResult(
+                                expressionExtensions.get(),
+                                referencedLibraries,
+                                resource,
+                            )
                         if (result != null) {
-                            extension.setValue(result);
+                            extension.value = result
                         }
                     }
                 }
@@ -55,17 +52,22 @@ public class ExtensionResolver {
         }
     }
 
-    protected <E extends IBaseExtension<?, ?>> IBaseDatatype getExpressionResult(
-            E expressionExtension, Map<String, String> referencedLibraries, IBase resource) {
-        var result = libraryEngine.resolveExpression(
-                subjectId.getIdPart(),
+    protected fun <E : IBaseExtension<*, *>?> getExpressionResult(
+        expressionExtension: E?,
+        referencedLibraries: MutableMap<String?, String?>?,
+        resource: IBase?,
+    ): IBaseDatatype? {
+        val result =
+            libraryEngine.resolveExpression(
+                subjectId.idPart,
                 CqfExpression.of(expressionExtension, referencedLibraries),
                 parameters,
                 null,
                 bundle,
                 resource,
-                null);
+                null,
+            )
 
-        return result != null && !result.isEmpty() ? (IBaseDatatype) result.get(0) : null;
+        return if (!result.isNullOrEmpty()) result[0] as IBaseDatatype? else null
     }
 }

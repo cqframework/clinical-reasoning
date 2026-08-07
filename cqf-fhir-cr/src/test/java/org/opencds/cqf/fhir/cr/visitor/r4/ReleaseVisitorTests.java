@@ -989,20 +989,20 @@ class ReleaseVisitorTests {
     @Test
     void release_should_not_duplicate_rctc_depends_on_entries() {
         Bundle bundle = (Bundle) jsonParser.parseResource(
-            ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-small-approved-draft.json"));
         repo.transaction(bundle);
         // rctc owns dxtc as a component, so a previous release will already have a depends-on
         // entry for it. Releasing again must refresh that entry rather than appending a
         // second one, otherwise the list grows on every release.
         var rctc = repo.read(Library.class, new IdType("Library/rctc")).copy();
         rctc.addRelatedArtifact()
-            .setType(RelatedArtifactType.DEPENDSON)
-            .setResource("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|1.2.2")
-            .setDisplay("ValueSet dxtc, 1.2.2");
+                .setType(RelatedArtifactType.DEPENDSON)
+                .setResource("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|1.2.2")
+                .setDisplay("ValueSet dxtc, 1.2.2");
         repo.update(rctc);
 
         Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
-            .copy();
+                .copy();
         ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
         Parameters params = new Parameters();
         params.addParameter("version", "1.2.5");
@@ -1012,19 +1012,19 @@ class ReleaseVisitorTests {
         assertNotNull(returnResource);
 
         var maybeRctc = returnResource.getEntry().stream()
-            .filter(entry -> entry.getResponse().getLocation().contains("Library"))
-            .map(entry ->
-                repo.read(Library.class, new IdType(entry.getResponse().getLocation())))
-            .filter(lib -> "http://ersd.aimsplatform.org/fhir/Library/rctc".equals(lib.getUrl()))
-            .findFirst();
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .map(entry ->
+                        repo.read(Library.class, new IdType(entry.getResponse().getLocation())))
+                .filter(lib -> "http://ersd.aimsplatform.org/fhir/Library/rctc".equals(lib.getUrl()))
+                .findFirst();
         assertTrue(maybeRctc.isPresent());
 
         var dxtcDependencies = maybeRctc.get().getRelatedArtifact().stream()
-            .filter(ra -> ra.getType() == RelatedArtifactType.DEPENDSON)
-            .map(RelatedArtifact::getResource)
-            .filter(Objects::nonNull)
-            .filter(resource -> resource.startsWith("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc"))
-            .toList();
+                .filter(ra -> ra.getType() == RelatedArtifactType.DEPENDSON)
+                .map(RelatedArtifact::getResource)
+                .filter(Objects::nonNull)
+                .filter(resource -> resource.startsWith("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc"))
+                .toList();
         // a single entry, with the newly released version
         assertEquals(1, dxtcDependencies.size());
         assertEquals("http://ersd.aimsplatform.org/fhir/ValueSet/dxtc|1.2.5", dxtcDependencies.get(0));

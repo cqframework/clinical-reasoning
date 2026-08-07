@@ -113,7 +113,7 @@ class CodeExtractor(fhirContext: FhirContext) {
         return codes
     }
 
-    private fun getCodingObjects(`object`: IBase?): MutableList<IBase?>? {
+    private fun getCodingObjects(`object`: IBase?): List<IBase?>? {
         var codingObject: MutableList<IBase?>? = null
         try {
             codingObject = this.conceptCodingChild.accessor.getValues(`object`)

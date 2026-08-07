@@ -16,7 +16,13 @@ class EvaluationSettings {
     var libraryCache: MutableMap<VersionedIdentifier, CompiledLibrary>
     var valueSetCache: MutableMap<String, MutableList<Code>>
     var librarySourceProviders: MutableList<LibrarySourceProvider>
-    private var registeredNamespaces: MutableMap<String, String>
+
+    /**
+     * A map of the registered namespaces with the key being the name and the value being the uri of
+     * the namespace
+     */
+    var registeredNamespaces: MutableMap<String, String>
+        private set
 
     var cqlOptions: CqlOptions
 
@@ -100,16 +106,6 @@ class EvaluationSettings {
     fun withNpmProcessor(npmProcessor: NpmProcessor?): EvaluationSettings {
         this.npmProcessor = npmProcessor
         return this
-    }
-
-    /**
-     * Returns a map of the registered namespaces with the key being the name and the value being
-     * the uri of the namespace
-     *
-     * @return The map of registered namespaces
-     */
-    fun getRegisteredNamespaces(): MutableMap<String, String> {
-        return registeredNamespaces
     }
 
     fun setRegisteredNamespaces(namespaces: MutableMap<String, String>?) {

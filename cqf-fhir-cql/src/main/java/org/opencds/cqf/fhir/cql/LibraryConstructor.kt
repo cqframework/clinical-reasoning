@@ -34,7 +34,7 @@ class LibraryConstructor(protected var fhirContext: FhirContext) {
         version: String?,
         expressions: Set<String?>,
         libraries: MutableMap<String?, String?>?,
-        parameters: MutableList<CqlParameterDefinition>?,
+        parameters: List<CqlParameterDefinition>?,
     ): String {
         val sb = StringBuilder()
 
@@ -95,10 +95,10 @@ class LibraryConstructor(protected var fhirContext: FhirContext) {
     private fun getTypeDeclaration(type: String?, isList: Boolean?): String? {
         // TODO: Handle "FHIR" and "System" prefixes
         // Should probably mark system types in the CqlParameterDefinition?
-        if (true == isList) {
-            return "List<$type>"
+        return if (true == isList) {
+            "List<$type>"
         } else {
-            return type
+            type
         }
     }
 

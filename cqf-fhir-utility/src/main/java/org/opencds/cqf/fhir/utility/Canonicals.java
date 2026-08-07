@@ -68,13 +68,13 @@ public class Canonicals {
     public static String getIdPart(String canonical) {
         checkNotNull(canonical);
 
-        if (!canonical.contains("/")) {
+        var urlPart = canonical.substring(0, calculateLastIndex(canonical));
+
+        if (!urlPart.contains("/")) {
             return null;
         }
 
-        int lastIndex = calculateLastIndex(canonical);
-
-        return canonical.substring(canonical.lastIndexOf("/") + 1, lastIndex);
+        return urlPart.substring(urlPart.lastIndexOf("/") + 1);
     }
 
     /**

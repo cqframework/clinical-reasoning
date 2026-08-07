@@ -262,8 +262,10 @@ protected constructor(
         return false
     }
 
-    // Special case filtering to handle "codes" that are actually ids. This is a
-    // workaround to handle filtering by Id.
+    /**
+     * Special case filtering to handle "codes" that are actually ids. This is a workaround to
+     * handle filtering by Id.
+     */
     private fun isPrimitiveMatch(
         dataType: String?,
         code: IPrimitiveType<*>?,
@@ -273,8 +275,7 @@ protected constructor(
             return false
         }
 
-        // This handles the case that the value is a reference such as
-        // "Medication/med-id"
+        // This handles the case that the value is a reference such as "Medication/med-id"
         val primitiveString = code.valueAsString.replace("$dataType/", "")
         for (c in codes) {
             if (c.code == primitiveString) {
@@ -381,8 +382,7 @@ protected constructor(
                     ),
                 )
             } else {
-                // Inline the codes into the retrieve e.g.
-                // Observation?code=system|code,system|code
+                // Inline the codes into the retrieve e.g. Observation?code=system|code,system|code
                 val codeList = mutableListOf<IQueryParameterType?>()
                 for (code in this.terminologyProvider.expand(ValueSetInfo().withId(valueSet))) {
                     codeList.add(

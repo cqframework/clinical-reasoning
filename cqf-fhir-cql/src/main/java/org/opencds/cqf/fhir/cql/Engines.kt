@@ -151,10 +151,8 @@ object Engines {
         )
 
         // TODO: This is a workaround for: a) multiple packages with the same package id will be in
-        // the dependency
-        // list, and b) there are packages with different package ids but the same base canonical
-        // (e.g.
-        // fhir.r4.examples has the same base canonical as fhir.r4)
+        // the dependency list, and b) there are packages with different package ids but the same
+        // base canonical (e.g. fhir.r4.examples has the same base canonical as fhir.r4)
         // NOTE: Using ensureNamespaceRegistered works around a but not b
         val keys = mutableSetOf<String?>()
         val uris = mutableSetOf<String?>()

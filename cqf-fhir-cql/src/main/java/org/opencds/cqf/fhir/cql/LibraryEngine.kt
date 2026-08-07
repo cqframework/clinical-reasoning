@@ -87,7 +87,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
 
     protected fun getModelName(base: Any): String? {
         if (base is MutableList<*>) {
-            // A Tuple requires each property to have a type.  If there is no value default ot a
+            // A Tuple requires each property to have a type.  If there is no value default to a
             // FHIR string.
             return if (base.isEmpty()) "FHIR.string" else getModelName(base[0]!!)
         }

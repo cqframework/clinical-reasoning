@@ -9,59 +9,73 @@ package org.opencds.cqf.fhir.cql.engine.terminology
   3. code lookup - given a code, find the code details in a code system
 */
 class TerminologySettings {
-    // How to treat pre-expanded value sets. If a value set is not pre-expanded, fall back to the
-    // expansion behavior
-    // defined by the expansion mode.
+
+    /**
+     * How to treat pre-expanded value sets. If a value set is not pre-expanded, fall back to the
+     * expansion behavior defined by the expansion mode.
+     */
     enum class VALUESET_PRE_EXPANSION_MODE {
-        // Require value sets to be pre-expanded, never perform expansion operations
+        /** Require value sets to be pre-expanded, never perform expansion operations */
         REQUIRE,
 
-        // Use a pre-expansion if it's present on the value set resource, other perform an expansion
+        /**
+         * Use a pre-expansion if it's present on the value set resource, other perform an expansion
+         */
         USE_IF_PRESENT,
 
-        // Ignore any pre-expansion and always perform an expansion
+        /** Ignore any pre-expansion and always perform an expansion */
         IGNORE,
     }
 
-    // How to do an expansions
+    /** How to do an expansions */
     enum class VALUESET_EXPANSION_MODE {
         // Decreasing order of performance
-        // Detect from capability statements
+
+        /** Detect from capability statements */
         AUTO,
 
-        // Repository performs expansion - Force the use of the $expand operation
+        /** Repository performs expansion - Force the use of the $expand operation */
         USE_EXPAND_OPERATION,
 
-        // CQL engine performs expansion - Make a best effort expansion in the CQL engine
+        /** CQL engine performs expansion - Make a best effort expansion in the CQL engine */
         PERFORM_NAIVE_EXPANSION,
     }
 
-    // How to do valueset code membership
+    /** How to do valueset code membership */
     enum class VALUESET_MEMBERSHIP_MODE {
         // Decreasing order of performance
-        // Detect from capability statements
+
+        /** Detect from capability statements */
         AUTO,
 
-        // Repository performs membership operation - Force the use of the $validate-code operation
+        /**
+         * Repository performs membership operation - Force the use of the $validate-code operation
+         */
         USE_VALIDATE_CODE_OPERATION,
 
-        // CQL engine checks code membership by expanding the value set and checking for the code in
-        // the expansion
+        /**
+         * CQL engine checks code membership by expanding the value set and checking for the code in
+         * the expansion
+         */
         USE_EXPANSION,
     }
 
-    // How to do code lookups
+    /** How to do code lookups */
     enum class CODE_LOOKUP_MODE {
         // Decreasing order of performance
-        // Detect from capability statements
+
+        /** Detect from capability statements */
         AUTO,
 
-        // Repository performs membership operation - Force the use of the $validate-code operation
+        /**
+         * Repository performs membership operation - Force the use of the $validate-code operation
+         */
         USE_VALIDATE_CODE_OPERATION,
 
-        // CQL engine checks code membership by doing a simple check of the code's declared system
-        // against the expected
-        // url
+        /**
+         * CQL engine checks code membership by doing a simple check of the code's declared system
+         * against the expected url
+         */
         USE_CODESYSTEM_URL,
     }
 

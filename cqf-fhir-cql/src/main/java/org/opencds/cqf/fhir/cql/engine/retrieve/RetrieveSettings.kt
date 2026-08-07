@@ -24,62 +24,78 @@ class RetrieveSettings {
         this.terminologyParameterMode = retrieveSettings.terminologyParameterMode
     }
 
-    // Decreasing order of performance
-    // Applies to all search parameters
-    // EXCEPT terminology search parameters, which are controlled by the terminology settings.
+    /**
+     * Applies to all search parameters EXCEPT terminology search parameters, which are controlled
+     * by the terminology settings.
+     */
     enum class SEARCH_FILTER_MODE {
-        // Detect from capability statements, and make best guess in the absence of capability
-        // statements.
+
+        // Decreasing order of performance
+
+        /**
+         * Detect from capability statements, and make best guess in the absence of capability
+         * statements.
+         */
         AUTO,
 
-        // Force use of repository search parameters
+        /** Force use of repository search parameters */
         USE_SEARCH_PARAMETERS,
 
-        // Force use of CQL filtering
+        /** Force use of CQL filtering */
         FILTER_IN_MEMORY,
     }
 
-    // How to do a filter, if and when we need a filter.
-    // e.g. Observation O where O.code ~ "ValueSet"
+    /**
+     * How to do a filter, if and when we need a filter. e.g. Observation O where O.code ~
+     * "ValueSet"
+     */
     enum class TERMINOLOGY_FILTER_MODE {
         // Decreasing order of performance
-        // Detect from capability statements
+
+        /** Detect from capability statements */
         AUTO,
 
-        // Use code:in=valueSetUrl - Force the use of the :in modifier of the search parameter to
-        // filter resources.
+        /**
+         * Use code:in=valueSetUrl - Force the use of the :in modifier of the search parameter to
+         * filter resources.
+         */
         USE_VALUE_SET_URL,
 
-        // Use code=system|value,system|value - Force the use of the the relevant search parameter
-        // WITHOUT the in
-        // modifier to filter resources.
+        /**
+         * Use code=system|value,system|value - Force the use of the the relevant search parameter
+         * WITHOUT the in modifier to filter resources.
+         */
         USE_INLINE_CODES,
 
-        // CQL engine does the filter - Retrieve all potentially applicable resources and apply
-        // terminology filtering in
-        // the CQL engine.
+        /**
+         * CQL engine does the filter - Retrieve all potentially applicable resources and apply
+         * terminology filtering in the CQL engine.
+         */
         FILTER_IN_MEMORY,
     }
 
     enum class PROFILE_MODE {
-        // Always check the resource profile by validating the returned resource against the profile
-        // This requires access to the structure defs that define the profile at runtime
-        // Meaning, they need to be loaded on the server or otherwise. If they are unavailable, it's
-        // an automatic
-        // failure. ENFORCED is not yet implemented.
+        /**
+         * Always check the resource profile by validating the returned resource against the
+         * profile. This requires access to the structure defs that define the profile at runtime.
+         * Meaning, they need to be loaded on the server or otherwise. If they are unavailable, it's
+         * an automatic failure. ENFORCED is not yet implemented.
+         */
         ENFORCED,
 
-        // Use the declared profile (generally considered a bad practice).
-        // If the resource doesn't declare a profile, it's filtered out.
+        /**
+         * Use the declared profile (generally considered a bad practice). If the resource doesn't
+         * declare a profile, it's filtered out.
+         */
         DECLARED,
 
-        // Same as above, but if the resource doesn't declare a profile, it's not filtered out.
+        /** Same as above, but if the resource doesn't declare a profile, it's not filtered out. */
         OPTIONAL,
 
-        // Let the underlying repository validate profiles (IOW, offload validation)
+        /** Let the underlying repository validate profiles (IOW, offload validation) */
         TRUST,
 
-        // Don't check resource profile, even if specified by the engine
+        /** Don't check resource profile, even if specified by the engine */
         OFF,
     }
 

@@ -63,8 +63,7 @@ constructor(
 
         if (code.system == null) {
             // If the system is not provided and the resolved value set contains codes from multiple
-            // code systems, a
-            // run-time error is thrown because the operation is ambiguous
+            // code systems, a run-time error is thrown because the operation is ambiguous
             val distinctSystems = codes.map { it.system }.distinct().count()
             require(distinctSystems <= 1) {
                 "The 'in' operation is ambiguous because the code system is not provided and the resolved value set contains codes from multiple code systems"
@@ -228,9 +227,11 @@ constructor(
         return codes
     }
 
-    // Given a set of Codes sorted by ".code", find the range that matching codes
-    // occur in. This function first performs a binary search to find a matching element
-    // and then iterates backwards and forwards from there to get the set of candidate codes
+    /**
+     * Given a set of Codes sorted by ".code", find the range that matching codes occur in. This
+     * function first performs a binary search to find a matching element and then iterates
+     * backwards and forwards from there to get the set of candidate codes
+     */
     private fun getSearchRange(code: Code, expansion: List<Code>): Range {
         // Can't match on a null code
         if (code.code == null) {

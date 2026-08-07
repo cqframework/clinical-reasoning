@@ -25,7 +25,7 @@ class CodeExtractor(fhirContext: FhirContext) {
     private val displayDefinition: BaseRuntimeChildDefinition =
         codingDefinition.getChildByName("display")
 
-    fun getElmCodesFromObject(`object`: Any?): MutableList<Code> {
+    fun getElmCodesFromObject(`object`: Any?): List<Code> {
         val codes = mutableListOf<Code>()
         if (`object` is Iterable<*>) {
             for (innerObject in `object`) {
@@ -39,7 +39,7 @@ class CodeExtractor(fhirContext: FhirContext) {
         return codes
     }
 
-    private fun getElmCodesFromObjectInner(`object`: Any?): MutableList<Code> {
+    private fun getElmCodesFromObjectInner(`object`: Any?): List<Code> {
         val codes = mutableListOf<Code>()
         if (`object` == null) {
             return codes
@@ -57,7 +57,7 @@ class CodeExtractor(fhirContext: FhirContext) {
         return codes
     }
 
-    private fun getCodesFromBase(`object`: IBase): MutableList<Code>? {
+    private fun getCodesFromBase(`object`: IBase): List<Code>? {
         if (`object` is IBaseEnumeration<*>) {
             @Suppress("UNCHECKED_CAST") val enumeration = (`object` as IBaseEnumeration<Enum<*>?>)
             return this.getCodeFromEnumeration(enumeration)
@@ -84,9 +84,7 @@ class CodeExtractor(fhirContext: FhirContext) {
 
         val system = enumFactory.toSystem(enumeration.getValue())
         val codeAsString = enumFactory.toCode(enumeration.getValue())
-        if (
-            system != null && !system.isEmpty() && codeAsString != null && !codeAsString.isEmpty()
-        ) {
+        if (!system.isNullOrEmpty() && !codeAsString.isNullOrEmpty()) {
             val code = Code()
             code.code = codeAsString
             code.system = system
@@ -101,7 +99,7 @@ class CodeExtractor(fhirContext: FhirContext) {
         return generateCodes(codingObjects)
     }
 
-    private fun generateCodes(codingObjects: MutableList<IBase?>): MutableList<Code> {
+    private fun generateCodes(codingObjects: List<IBase?>): MutableList<Code> {
         val codes = mutableListOf<Code>()
         for (coding in codingObjects) {
             val code = getStringValueFromPrimitiveDefinition(this.codeDefinition, coding)
@@ -135,7 +133,7 @@ class CodeExtractor(fhirContext: FhirContext) {
         }
 
         val values = accessor.getValues(value)
-        if (values == null || values.isEmpty()) {
+        if (values.isNullOrEmpty()) {
             return null
         }
 

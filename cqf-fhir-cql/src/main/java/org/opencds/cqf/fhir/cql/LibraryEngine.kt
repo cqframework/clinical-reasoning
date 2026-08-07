@@ -239,7 +239,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         }
     }
 
-    fun resolveParameterValues(values: MutableList<IBase?>?): MutableList<IBase?>? {
+    fun resolveParameterValues(values: List<IBase?>?): MutableList<IBase?>? {
         if (values.isNullOrEmpty()) {
             return null
         }
@@ -248,17 +248,14 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             .map { parametersParameterComponent ->
                 adapterFactory.createParametersParameter(parametersParameterComponent)
             }
-            .map { param ->
-                if (param!!.hasValue()) {
-                    return@map param.getValue()
-                } else if (param.hasResource()) {
-                    return@map param.getResource()
-                } else if (param.hasPart()) {
-                    return@map param.newTupleWithParts()
+            .mapNotNull { param ->
+                when {
+                    param!!.hasValue() -> param.getValue()
+                    param.hasResource() -> param.getResource()
+                    param.hasPart() -> param.newTupleWithParts()
+                    else -> null
                 }
-                null
             }
-            .filterNotNull()
             .toMutableList()
     }
 
@@ -270,7 +267,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         bundle: IBaseBundle?,
         contextParameter: IBase?,
         resourceParameter: IBase?,
-    ): MutableList<IBase?>? {
+    ): List<IBase?>? {
         var result =
             getExpressionResult(
                 patientId,
@@ -304,7 +301,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
     }
 
     fun getEvaluationResult(
-        ids: MutableList<VersionedIdentifier>,
+        ids: List<VersionedIdentifier>,
         patientId: String?,
         parameters: IBaseParameters?,
         rawParameters: MutableMap<String?, Any?>?,

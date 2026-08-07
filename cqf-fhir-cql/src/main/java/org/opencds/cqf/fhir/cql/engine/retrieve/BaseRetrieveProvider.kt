@@ -217,12 +217,12 @@ protected constructor(
     }
 
     private fun stripUrnScheme(uri: String): String {
-        if (uri.startsWith("urn:uuid:")) {
-            return uri.substring(9)
+        return if (uri.startsWith("urn:uuid:")) {
+            uri.substring(9)
         } else if (uri.startsWith("urn:oid:")) {
-            return uri.substring(8)
+            uri.substring(8)
         } else {
-            return uri
+            uri
         }
     }
 
@@ -335,7 +335,7 @@ protected constructor(
             else IdDt(contextValue as String)
         val sp =
             this.resolver.getSearchParameterDefinition(dataType, contextPath)
-                ?: throw InternalErrorException("resolved search parameter definition is null")
+                ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
 
         // Self-references are token params.
         if (sp.name == "_id") {
@@ -361,7 +361,7 @@ protected constructor(
                 dataType,
                 codePath,
                 RestSearchParameterTypeEnum.TOKEN,
-            ) ?: throw InternalErrorException("resolved search parameter definition is null")
+            ) ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
         if (codes != null) {
             val codeList: MutableList<IQueryParameterType?> = ArrayList<IQueryParameterType?>()
             for (code in codes) {
@@ -435,15 +435,11 @@ protected constructor(
         val end: java.util.Date?
         if (dateRange.start is DateTime) {
             start = (dateRange.start as DateTime).toJavaDate()
-            val dateRangeEnd =
-                dateRange.end
-                    ?: throw InternalErrorException("resolved search parameter definition is null")
+            val dateRangeEnd = dateRange.end ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
             end = (dateRangeEnd as DateTime).toJavaDate()
         } else if (dateRange.start is Date) {
             start = (dateRange.start as Date).toJavaDate()
-            val dateRangeEnd =
-                dateRange.end
-                    ?: throw InternalErrorException("resolved search parameter definition is null")
+            val dateRangeEnd = dateRange.end ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
             end = (dateRangeEnd as Date).toJavaDate()
         } else {
             throw UnsupportedOperationException(
@@ -454,7 +450,7 @@ protected constructor(
         if (StringUtils.isNotBlank(dateParamName)) {
             val sp =
                 this.resolver.getSearchParameterDefinition(dataType, dateParamName)
-                    ?: throw InternalErrorException("resolved search parameter definition is null")
+                    ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
 
             // a date range is a search && condition - so we'll use a composite
             val gte = DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
@@ -468,7 +464,7 @@ protected constructor(
             dateRangeParam.add(dateParam)
             val sp =
                 this.resolver.getSearchParameterDefinition(dataType, dateLowPath)
-                    ?: throw InternalErrorException("resolved search parameter definition is null")
+                    ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
 
             searchParams.put(sp.name, dateRangeParam)
         } else if (StringUtils.isNotBlank(dateHighPath)) {
@@ -478,17 +474,16 @@ protected constructor(
             dateRangeParam.add(dateParam)
             val sp =
                 this.resolver.getSearchParameterDefinition(dataType, dateHighPath)
-                    ?: throw InternalErrorException("resolved search parameter definition is null")
+                    ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
 
             searchParams.put(sp.name, dateRangeParam)
         } else {
-            throw IllegalStateException(
-                "A date path must be provided when filtering using date parameters"
-            )
+            error("A date path must be provided when filtering using date parameters")
         }
     }
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(BaseRetrieveProvider::class.java)
+        const val RESOLVED_SP_DEF_NULL = "resolved search parameter definition is null"
     }
 }

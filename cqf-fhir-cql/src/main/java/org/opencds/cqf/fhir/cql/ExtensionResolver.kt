@@ -14,12 +14,12 @@ class ExtensionResolver(
 ) {
     fun <E : IBaseExtension<*, *>?> resolveExtensions(
         resource: IBase?,
-        extensions: MutableList<E?>,
+        extensions: List<E?>,
         referencedLibraries: MutableMap<String?, String?>?,
     ) {
         for (extension in extensions) {
             val nestedExtensions = extension!!.getExtension()
-            if (nestedExtensions != null && !nestedExtensions.isEmpty()) {
+            if (!nestedExtensions.isNullOrEmpty()) {
                 @Suppress("UNCHECKED_CAST")
                 resolveExtensions(
                     resource,

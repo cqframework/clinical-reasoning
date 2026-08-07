@@ -202,7 +202,7 @@ object Engines {
         providers.add(retrieveProvider)
         if (
             additionalData != null &&
-                !BundleHelper.getEntry<IBaseBackboneElement?>(additionalData).isEmpty()
+                BundleHelper.getEntry<IBaseBackboneElement?>(additionalData).isNotEmpty()
         ) {
             val bundleRepo = InMemoryFhirRepository(repository.fhirContext(), additionalData)
             val provider =

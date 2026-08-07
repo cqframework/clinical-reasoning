@@ -9,7 +9,7 @@ import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter
 class LibraryVersionSelector(private val adapterFactory: IAdapterFactory) {
     fun select(
         libraryIdentifier: VersionedIdentifier,
-        libraries: MutableCollection<IBaseResource?>,
+        libraries: Collection<IBaseResource?>,
     ): IBaseResource? {
         val targetVersion = libraryIdentifier.version
 

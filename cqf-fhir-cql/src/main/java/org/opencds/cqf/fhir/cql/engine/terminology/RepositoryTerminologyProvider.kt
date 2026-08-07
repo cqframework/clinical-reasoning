@@ -99,7 +99,6 @@ constructor(
         val url = valueSet.id + (if (valueSet.version != null) ("|" + valueSet.version) else "")
 
         val expansion = this.valueSetIndex.computeIfAbsent(url) { tryExpand(valueSet) }
-        requireNotNull(expansion) { "Unable to get expansion for ValueSet ${valueSet.id}" }
 
         return expansion
     }
@@ -185,7 +184,7 @@ constructor(
 
         val resources = BundleUtil.toListOfResources(fhirContext, results)
 
-        require(!resources.isEmpty()) { "Unable to locate ValueSet ${valueSet.id}" }
+        require(resources.isNotEmpty()) { "Unable to locate ValueSet ${valueSet.id}" }
 
         require(resources.size <= 1) { "Multiple ValueSets resolved for ${valueSet.id}" }
 
@@ -232,7 +231,7 @@ constructor(
     // Given a set of Codes sorted by ".code", find the range that matching codes
     // occur in. This function first performs a binary search to find a matching element
     // and then iterates backwards and forwards from there to get the set of candidate codes
-    private fun getSearchRange(code: Code, expansion: MutableList<Code>): Range {
+    private fun getSearchRange(code: Code, expansion: List<Code>): Range {
         // Can't match on a null code
         if (code.code == null) {
             return Range.EMPTY
@@ -298,7 +297,7 @@ constructor(
             if (`object` is IBase) {
                 return resolveNaiveBoolean(`object`)
             } else if (`object` is Iterable<*>) {
-                @Suppress("UNCHECKED_CAST") val naiveParameters = `object` as MutableList<IBase>
+                @Suppress("UNCHECKED_CAST") val naiveParameters = `object` as List<IBase>
                 for (param in naiveParameters) {
                     return resolveNaiveBoolean(param)
                 }
@@ -308,20 +307,20 @@ constructor(
     }
 
     private fun resolveNaiveBoolean(param: IBase): Boolean? {
-        if (param.fhirType() == "boolean") {
-            return (param as IPrimitiveType<*>).getValue() as Boolean?
+        return if (param.fhirType() == "boolean") {
+            (param as IPrimitiveType<*>).getValue() as Boolean?
         } else {
-            return null
+            null
         }
     }
 
     private fun containsExpansionLogic(resource: IBaseResource?): Boolean {
         val includeFilters = ValueSets.getIncludeFilters(this.fhirContext, resource)
-        if (includeFilters != null && !includeFilters.isEmpty()) {
+        if (!includeFilters.isNullOrEmpty()) {
             return true
         }
         val excludeFilters = ValueSets.getExcludeFilters(this.fhirContext, resource)
-        if (excludeFilters != null && !excludeFilters.isEmpty()) {
+        if (!excludeFilters.isNullOrEmpty()) {
             return true
         }
         return false

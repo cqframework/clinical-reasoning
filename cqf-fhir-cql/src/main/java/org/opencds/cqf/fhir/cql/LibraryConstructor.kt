@@ -32,7 +32,7 @@ class LibraryConstructor(protected var fhirContext: FhirContext) {
     fun constructCqlLibrary(
         name: String?,
         version: String?,
-        expressions: MutableSet<String?>,
+        expressions: Set<String?>,
         libraries: MutableMap<String?, String?>?,
         parameters: MutableList<CqlParameterDefinition>?,
     ): String {
@@ -77,10 +77,7 @@ class LibraryConstructor(protected var fhirContext: FhirContext) {
         sb.append("\n")
     }
 
-    private fun constructParameters(
-        sb: StringBuilder,
-        parameters: MutableList<CqlParameterDefinition>?,
-    ) {
+    private fun constructParameters(sb: StringBuilder, parameters: List<CqlParameterDefinition>?) {
         if (parameters.isNullOrEmpty()) {
             return
         }

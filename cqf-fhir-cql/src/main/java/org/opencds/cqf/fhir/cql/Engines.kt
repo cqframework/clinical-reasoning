@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cql
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.repository.IRepository
-import com.google.common.base.Preconditions
 import org.cqframework.cql.cql2elm.LibraryManager
 import org.cqframework.cql.cql2elm.LibrarySourceProvider
 import org.cqframework.cql.cql2elm.ModelManager
@@ -45,17 +44,15 @@ object Engines {
     @JvmStatic
     @JvmOverloads
     fun forRepository(
-        repository: IRepository?,
-        settings: EvaluationSettings? = EvaluationSettings.default,
+        repository: IRepository,
+        settings: EvaluationSettings = EvaluationSettings.default,
         additionalData: IBaseBundle? = null,
     ): CqlEngine {
-        Preconditions.checkNotNull<EvaluationSettings?>(settings)
-        Preconditions.checkNotNull<IRepository?>(repository)
 
         val terminologyProvider =
             RepositoryTerminologyProvider(
-                repository!!,
-                settings!!.valueSetCache,
+                repository,
+                settings.valueSetCache,
                 settings.terminologySettings,
             )
         val dataProviders =
@@ -93,8 +90,8 @@ object Engines {
         // Ideally we don't need to do this at all and can determine what namespaces are required
         // from the library.
         // This will require more work in the CQL engine to accommodate.
-        settings.getRegisteredNamespaces().forEach { (name: String?, uri: String?) ->
-            libraryManager.namespaceManager.ensureNamespaceRegistered(NamespaceInfo(name!!, uri!!))
+        settings.registeredNamespaces.forEach { (name, uri) ->
+            libraryManager.namespaceManager.ensureNamespaceRegistered(NamespaceInfo(name, uri))
         }
 
         return Environment(libraryManager, dataProviders, terminologyProvider)

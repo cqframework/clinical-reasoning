@@ -37,7 +37,7 @@ protected constructor(
     val fhirVersion = fhirContext.version.version
     protected val codeUtil = CodeExtractor(fhirContext)
     protected val fhirPath: IFhirPath = FhirPathCache.cachedForContext(fhirContext)
-    private val resolver: SearchParameterResolver = SearchParameterResolver(fhirContext)
+    private val resolver = SearchParameterResolver(fhirContext)
 
     fun filterByTemplateId(dataType: String?, templateId: String?): Predicate<IBaseResource?> {
         val profileMode = this.retrieveSettings.profileMode
@@ -364,7 +364,7 @@ protected constructor(
                 RestSearchParameterTypeEnum.TOKEN,
             ) ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
         if (codes != null) {
-            val codeList: MutableList<IQueryParameterType?> = ArrayList<IQueryParameterType?>()
+            val codeList = mutableListOf<IQueryParameterType?>()
             for (code in codes) {
                 codeList.add(
                     TokenParam(InternalCodingDt().setSystem(code.system).setCode(code.code))
@@ -458,8 +458,7 @@ protected constructor(
 
             searchParams.put(sp.name, mutableListOf(CompositeParam(gte, lte)))
         } else if (StringUtils.isNotBlank(dateLowPath)) {
-            val dateRangeParam: MutableList<IQueryParameterType?> =
-                ArrayList<IQueryParameterType?>()
+            val dateRangeParam = mutableListOf<IQueryParameterType?>()
             val dateParam = DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
             dateRangeParam.add(dateParam)
             val sp =
@@ -468,8 +467,7 @@ protected constructor(
 
             searchParams.put(sp.name, dateRangeParam)
         } else if (StringUtils.isNotBlank(dateHighPath)) {
-            val dateRangeParam: MutableList<IQueryParameterType?> =
-                ArrayList<IQueryParameterType?>()
+            val dateRangeParam = mutableListOf<IQueryParameterType?>()
             val dateParam = DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)
             dateRangeParam.add(dateParam)
             val sp =

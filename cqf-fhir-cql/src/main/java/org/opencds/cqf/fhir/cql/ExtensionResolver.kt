@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cql
 
-import java.util.*
 import org.hl7.fhir.instance.model.api.*
 import org.opencds.cqf.fhir.utility.Constants
 import org.opencds.cqf.fhir.utility.CqfExpression
@@ -31,18 +30,13 @@ class ExtensionResolver(
             if (value is IBaseHasExtensions) {
                 val valueExtensions = value.extension
                 if (valueExtensions != null) {
-                    val expressionExtensions: Optional<out IBaseExtension<*, *>?> =
-                        valueExtensions
-                            .stream()
-                            .filter { e -> e!!.url != null && e.url == Constants.CQF_EXPRESSION }
-                            .findFirst()
-                    if (expressionExtensions.isPresent) {
+                    val expressionExtensions =
+                        valueExtensions.firstOrNull { e ->
+                            e!!.url != null && e.url == Constants.CQF_EXPRESSION
+                        }
+                    if (expressionExtensions != null) {
                         val result =
-                            getExpressionResult(
-                                expressionExtensions.get(),
-                                referencedLibraries,
-                                resource,
-                            )
+                            getExpressionResult(expressionExtensions, referencedLibraries, resource)
                         if (result != null) {
                             extension.value = result
                         }

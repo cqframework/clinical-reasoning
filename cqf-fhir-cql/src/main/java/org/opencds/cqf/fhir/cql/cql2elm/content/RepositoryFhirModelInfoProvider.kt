@@ -2,8 +2,6 @@ package org.opencds.cqf.fhir.cql.cql2elm.content
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.repository.IRepository
-import ca.uhn.fhir.util.bundle.BundleEntryParts
-import java.util.function.Consumer
 import kotlinx.io.asSource
 import kotlinx.io.buffered
 import org.hl7.cql.model.ModelIdentifier
@@ -68,8 +66,8 @@ class RepositoryFhirModelInfoProvider(
             return null
         }
 
-        val libraries = ArrayList<IBaseResource?>()
-        iter.forEachRemaining(Consumer { x: BundleEntryParts? -> libraries.add(x!!.resource) })
+        val libraries = mutableListOf<IBaseResource?>()
+        iter.forEachRemaining { x -> libraries.add(x!!.resource) }
 
         return this.libraryVersionSelector.select(libraryIdentifier, libraries)
     }

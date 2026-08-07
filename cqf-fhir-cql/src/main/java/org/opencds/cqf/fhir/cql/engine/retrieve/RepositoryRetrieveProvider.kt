@@ -3,14 +3,11 @@ package org.opencds.cqf.fhir.cql.engine.retrieve
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.model.api.IQueryParameterType
 import ca.uhn.fhir.repository.IRepository
-import ca.uhn.fhir.util.bundle.BundleEntryParts
 import com.google.common.collect.HashMultimap
 import com.google.common.collect.Multimap
 import java.util.function.Predicate
-import java.util.stream.Collectors
 import org.hl7.fhir.instance.model.api.IBaseBundle
 import org.hl7.fhir.instance.model.api.IBaseResource
-import org.opencds.cqf.cql.engine.runtime.ClassInstance
 import org.opencds.cqf.cql.engine.runtime.Code
 import org.opencds.cqf.cql.engine.runtime.Interval
 import org.opencds.cqf.cql.engine.runtime.Value
@@ -30,9 +27,9 @@ class RepositoryRetrieveProvider(
     private class SearchConfig {
         /** Each element of each list is OR'd Each */
         var searchParams: Multimap<String?, MutableList<IQueryParameterType?>?> =
-            HashMultimap.create<String?, MutableList<IQueryParameterType?>?>()
+            HashMultimap.create()
 
-        var filter: Predicate<IBaseResource?> = Predicate { true }
+        var filter = Predicate<IBaseResource?> { true }
     }
 
     private val fhirContext: FhirContext = repository.fhirContext()
@@ -66,21 +63,15 @@ class RepositoryRetrieveProvider(
 
         val headers = headersForContext(context, contextValue)
 
-        val resources: IBaseBundle? =
-            this.repository.search(bt, resourceType, config.searchParams, headers)
+        val resources = this.repository.search(bt, resourceType, config.searchParams, headers)
 
         val modelResolver = FhirModelResolverCache.resolverForVersion(fhirContext.version.version)
-        val iter =
-            BundleMappingIterable<IBaseBundle?, IBaseResource?>(
-                repository,
-                resources,
-                { obj: BundleEntryParts? -> obj!!.resource },
-            )
+        val iter = BundleMappingIterable(repository, resources) { obj -> obj!!.resource }
         return iter
             .toStream()
             .filter(config.filter)
-            .map<ClassInstance?> { r: IBaseResource? -> modelResolver.toCqlValue(r, false) }
-            .collect(Collectors.toList())
+            .map { r -> modelResolver.toCqlValue(r, false) }
+            .toList()
     }
 
     // Create headers for the FHIR compartment search (e.g. X-FHIR-Compartment: Patient/123)

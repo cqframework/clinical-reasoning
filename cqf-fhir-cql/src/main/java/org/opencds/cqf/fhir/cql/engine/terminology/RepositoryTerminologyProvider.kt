@@ -106,11 +106,13 @@ constructor(
         return this.fhirContext.getResourceDefinition(resourceType).implementingClass
     }
 
-    // Attempts to perform expansion of the referenced ValueSet. It will first use an
-    // expansion if one is available, and then ask the underlying repository to perform
-    // an expansion if possible, and then fall back to doing a "naive" expansion where
-    // possible. A "naive" expansion includes only codes directly referenced in the ValueSet
-    // It's not possible to run expansion filters without the support of a terminology server.
+    /**
+     * Attempts to perform expansion of the referenced ValueSet. It will first use an expansion if
+     * one is available, and then ask the underlying repository to perform an expansion if possible,
+     * and then fall back to doing a "naive" expansion where possible. A "naive" expansion includes
+     * only codes directly referenced in the ValueSet. It's not possible to run expansion filters
+     * without the support of a terminology server.
+     */
     private fun tryExpand(valueSet: ValueSetInfo): MutableList<Code> {
         var codes = performExpansion(valueSet)
         // Filter out invalid codes that are missing a code or system

@@ -248,11 +248,15 @@ public class ItemProcessor {
             var extension = item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
             // populate using expected initial expression extensions
             if (extension != null) {
-                // pass the context resource(s) as a parameter to the evaluation
-                var rawParams = request.getRawParameters();
-                rawParams.put("%" + contextName, context.get());
-                rawParams.put("%qitem", item.get());
-                populateAnswer(request, responseItem, getInitialValue(request, item, responseItem, rawParams));
+                List<IBase> initialValue = null;
+                if (context != null) {
+                    // pass the context resource(s) as a parameter to the evaluation
+                    var rawParams = request.getRawParameters();
+                    rawParams.put("%" + contextName, context.get());
+                    rawParams.put("%qitem", item.get());
+                    initialValue = getInitialValue(request, item, responseItem, rawParams);
+                }
+                populateAnswer(request, responseItem, initialValue);
             }
         }
         return responseItem;

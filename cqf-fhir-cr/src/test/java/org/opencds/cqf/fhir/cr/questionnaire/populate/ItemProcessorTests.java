@@ -22,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -253,20 +254,29 @@ class ItemProcessorTests {
         var questionnaire = new Questionnaire();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         var populateRequest = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var expression = new Expression()
+                .setLanguage("text/cql")
+                .setExpression("%subject.name.given[0]")
+                .setName("PatientName");
+        var cqfExpression = CqfExpression.of(expression, null);
         var questionnaireItem = new QuestionnaireItemComponent()
                 .setLinkId("1")
                 .setType(QuestionnaireItemType.GROUP)
                 .setDefinition("http://hl7.org/fhir/Patient#Patient.name.given");
-        var extensions = List.of(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT));
+        var extensions = List.of(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT, expression));
         questionnaireItem.setExtension(extensions);
-        var expression = new CqfExpression().setLanguage("text/cql").setExpression("%subject.name.given[0]");
+        var nestedItem = new QuestionnaireItemComponent().setLinkId("1.1");
+        nestedItem.addExtension(new Extension(
+                Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION,
+                new Expression().setLanguage("text/cql").setExpression("%PatientName.value")));
+        questionnaireItem.addItem(nestedItem);
         List<IBase> expressionResults = new ArrayList<>();
-        doReturn(expression)
+        doReturn(cqfExpression)
                 .when(expressionProcessor)
                 .getCqfExpression(populateRequest, extensions, Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
         doReturn(expressionResults)
                 .when(expressionProcessor)
-                .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
+                .getExpressionResultForItem(eq(populateRequest), eq(cqfExpression), eq("1"), any(), any());
         var adapter = (IQuestionnaireItemComponentAdapter)
                 IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
         var actual = itemProcessor.processContextItem(populateRequest, adapter);

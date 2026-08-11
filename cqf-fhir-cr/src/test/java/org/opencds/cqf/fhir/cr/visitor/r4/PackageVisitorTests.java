@@ -644,6 +644,68 @@ class PackageVisitorTests {
         assertTrue(containsVset);
     }
 
+    // Reproduces cqframework/clinical-reasoning#1072: a version-pinned ValueSet reference that is
+    // not found by the local version-pinned repository search but IS resolved via the
+    // terminology-server fallback and included in the package must NOT be reported as
+    // "not found in repository / will not be included".
+    @Test
+    void valueset_resolved_via_tx_server_is_not_reported_as_missing() {
+        final var leafOid = "2.16.840.1.113762.1.4.1146.6";
+        final var authoritativeSource = "http://cts.nlm.nih.gov/fhir/";
+        var bundle = (Bundle) jsonParser.parseResource(
+                ReleaseVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        Predicate<BundleEntryComponent> leafFinder = e -> e.getResource().getResourceType() == ResourceType.ValueSet
+                && ((ValueSet) e.getResource()).getUrl().contains(leafOid);
+        // Remove the leaf so the local, version-pinned search misses it and the tx fallback is used.
+        var leafEntry = bundle.getEntry().stream().filter(leafFinder).findFirst();
+        var missingVset = leafEntry.map(e -> (ValueSet) e.getResource()).get();
+        bundle.getEntry().remove(leafEntry.get());
+
+        repo.transaction(bundle);
+        var library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var endpoint = createEndpoint(authoritativeSource);
+
+        var clientMock = mock(ITerminologyProviderRouter.class, new ReturnsDeepStubs());
+        // The Tx Server provides the missing ValueSet, so it ends up in the package.
+        when(clientMock.getValueSetResource(any(IEndpointAdapter.class), any())).thenReturn(Optional.of(missingVset));
+        doAnswer(new Answer<ValueSet>() {
+                    @Override
+                    public ValueSet answer(InvocationOnMock invocation) throws Throwable {
+                        return new ValueSet();
+                    }
+                })
+                .when(clientMock)
+                .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any(IParametersAdapter.class));
+        var packageVisitor = new PackageVisitor(repo, clientMock);
+        var libraryAdapter = new AdapterFactory().createLibrary(library);
+        var params = parameters(part("terminologyEndpoint", (Endpoint) endpoint.get()));
+
+        var packagedBundle = (Bundle) libraryAdapter.accept(packageVisitor, params);
+
+        // The ValueSet is resolved via the tx fallback and included in the package...
+        assertTrue(
+                packagedBundle.getEntry().stream().anyMatch(leafFinder),
+                "ValueSet should be included in the package via the tx-server fallback");
+
+        // ...so it must NOT be reported as "not found in repository / will not be included".
+        var manifest = packagedBundle.getEntry().stream()
+                .filter(e -> e.getResource().getResourceType() == ResourceType.Library)
+                .map(e -> (Library) e.getResource())
+                .filter(l -> library.getUrl().equals(l.getUrl()))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(manifest, "Expected the manifest Library in the packaged bundle");
+        boolean reportedMissing = manifest.getContained().stream()
+                .filter(OperationOutcome.class::isInstance)
+                .map(OperationOutcome.class::cast)
+                .flatMap(oo -> oo.getIssue().stream())
+                .map(issue -> issue.getDiagnostics())
+                .anyMatch(d -> d != null && d.contains(leafOid) && d.contains("not found in repository"));
+        assertFalse(
+                reportedMissing, "ValueSet included in the package must not be reported as 'not found in repository'");
+    }
+
     @Test
     void packageOperation_manifest_is_first_with_include_terminology() {
         Bundle bundle = (Bundle) jsonParser.parseResource(

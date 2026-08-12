@@ -93,6 +93,12 @@ public class Constants {
     public static final String CPG_RELATED_SUMMARY_DEFINITION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition";
 
+    public static final String CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-definitionPopulationContext";
+
+    public static final String CPG_ADDITIONAL_LAUNCH_CONTEXT_SYSTEM =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-additionalLaunchContext";
+
     public static final String CQF_RESOURCETYPE = "http://hl7.org/fhir/StructureDefinition/cqf-resourceType";
 
     // DSTU3 CQF Extensions
@@ -101,6 +107,8 @@ public class Constants {
 
     public static final String CQF_APPLICABILITY_BEHAVIOR =
             "http://hl7.org/fhir/StructureDefinition/cqf-applicabilityBehavior";
+    public static final String R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR =
+            "http://hl7.org/fhir/6.0/StructureDefinition/extension-PlanDefinition.action.applicabilityBehavior";
 
     public enum CqfApplicabilityBehavior {
         ALL,
@@ -167,6 +175,8 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtractValue";
     public static final String SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext";
+    public static final String SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionPopulationContext";
     public static final String SDC_QUESTIONNAIRE_IS_SUBJECT =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject";
     public static final String SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT =
@@ -193,6 +203,9 @@ public class Constants {
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext";
     public static final String SDC_QUESTIONNAIRE_ADAPTIVE =
             "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-questionnaireAdaptive";
+    public static final String SDC_POPULATE_BEHAVIOR =
+            "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-populate-behavior";
+    public static final String SDC_LAUNCH_CONTEXT_SYSTEM = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext";
 
     public enum SDC_QUESTIONNAIRE_LAUNCH_CONTEXT_CODE {
         PATIENT,
@@ -201,6 +214,20 @@ public class Constants {
         USER,
         STUDY,
         CLINICAL
+    }
+
+    public enum SDC_POPULATE_BEHAVIOR_CODE {
+        ALWAYS("always"),
+        NEVER("never"),
+        IF_EMPTY("if-empty"),
+        IF_AVAILABLE("if-available"),
+        SUPPLEMENT("supplement");
+
+        public final String code;
+
+        SDC_POPULATE_BEHAVIOR_CODE(String code) {
+            this.code = code;
+        }
     }
 
     public static final String SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE =

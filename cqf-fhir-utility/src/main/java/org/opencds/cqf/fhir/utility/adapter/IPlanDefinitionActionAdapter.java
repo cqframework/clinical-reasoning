@@ -67,12 +67,16 @@ public interface IPlanDefinitionActionAdapter extends IAdapter<IBase> {
 
     // These will need to be overridden starting with R6 when this is introduced as an element on action
     default boolean hasApplicabilityBehavior() {
-        return hasExtension(Constants.CQF_APPLICABILITY_BEHAVIOR);
+        return hasExtension(Constants.CQF_APPLICABILITY_BEHAVIOR)
+                || hasExtension(Constants.R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR);
     }
 
     // These will need to be overridden starting with R6 when this is introduced as an element on action
     default CqfApplicabilityBehavior getApplicabilityBehavior() {
         var extension = getExtensionByUrl(Constants.CQF_APPLICABILITY_BEHAVIOR);
+        if (extension == null) {
+            extension = getExtensionByUrl(Constants.R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR);
+        }
         if (extension != null && extension.getValue() instanceof IPrimitiveType<?> primitiveType) {
             try {
                 return CqfApplicabilityBehavior.valueOf(

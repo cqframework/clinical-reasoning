@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,9 +33,8 @@ public class PopulateProcessor implements IPopulateProcessor {
                 "Performing $populate operation on Questionnaire/{}",
                 request.getQuestionnaire().getIdElement().getIdPart());
         // process root level variables
-        request.getQuestionnaireAdapter().getItem().forEach(item -> {
-            request.addQuestionnaireResponseItems(populateItem(request, item));
-        });
+        // getVariables(request, request.getQuestionnaire())
+        request.getQuestionnaireAdapter().getItem().forEach(item -> populateItem(request, item));
         request.resolveOperationOutcome(request.getQuestionnaireResponseAdapter());
         logger.info("$populate operation completed");
         return request.getQuestionnaireResponseAdapter().get();
@@ -66,17 +65,24 @@ public class PopulateProcessor implements IPopulateProcessor {
         return variables;
     }
 
-    protected List<IQuestionnaireResponseItemComponentAdapter> populateItem(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+    protected void populateItem(PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
         var linkId = item.getLinkId();
         logger.info("Processing item {}", linkId);
-
         try {
-            return itemProcessor.processItem(request, item);
+            // var isNew = true;
+            // if (request.getPreviousQuestionnaireResponseAdapter() != null) {
+            //    isNew = !request.getPreviousQuestionnaireResponseAdapter().hasItem(linkId);
+            // }
+            // var responseItem = isNew
+            //        ? new ArrayList<IQuestionnaireResponseItemComponentAdapter>()
+            //        : request.getPreviousQuestionnaireResponseAdapter().getItem(linkId);
+            var responseItem = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+            itemProcessor.processItem(request, item, responseItem);
+            request.addQuestionnaireResponseItems(responseItem);
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            request.logException(e.getMessage());
-            return List.of(item.newResponseItem());
+            var message = String.format("Error encountered populating item (%s): %s", linkId, e.getMessage());
+            logger.error(message);
+            request.logException(message);
         }
     }
 }

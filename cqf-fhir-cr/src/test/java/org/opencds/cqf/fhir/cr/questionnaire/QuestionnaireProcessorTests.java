@@ -331,9 +331,10 @@ class QuestionnaireProcessorTests {
         var patientId = "Patient1";
         var questionnaire = given().repository(repositoryR4)
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "StructureDefinition", "LaunchContexts"))
+                .profileUrl(canonicalTypeForVersion(
+                        FhirVersionEnum.R4, "http://fhir.org/test/StructureDefinition/LaunchContexts"))
                 .thenGenerate()
-                .hasItems(2)
+                .hasItems(1)
                 .hasExtensions(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT, 5)
                 .questionnaire
                 .get();
@@ -353,9 +354,9 @@ class QuestionnaireProcessorTests {
                                 newPart(fhirContextR4, "Reference", "content", "Encounter/Encounter1"))))
                 .thenPopulate(true)
                 .hasNoErrors()
-                .hasItems(2)
-                .itemHasAnswer("1.1")
-                .itemHasAuthorExt("1.1")
+                .hasItems(1)
+                .itemHasAnswer("1")
+                .itemHasAuthorExt("1")
                 .questionnaireResponse
                 .get();
         assertEquals("Patient/" + patientId, questionnaireResponse.getSubject().getReference());

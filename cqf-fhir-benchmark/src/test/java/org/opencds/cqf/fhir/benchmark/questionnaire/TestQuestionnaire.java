@@ -8,8 +8,6 @@ import java.nio.file.Path;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -69,10 +67,8 @@ public class TestQuestionnaire {
         private IBaseResource questionnaire;
         private String subjectId;
         private List<IBaseBackboneElement> context;
-        private IBaseExtension<?, ?> launchContext;
         private final boolean useServerData;
         private IBaseBundle data;
-        private IBaseParameters parameters;
 
         When(QuestionnaireProcessor processor) {
             this.processor = processor;
@@ -94,17 +90,11 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When parameters(IBaseParameters params) {
-            parameters = params;
-            return this;
-        }
-
         public IBaseResource runPopulate() {
             return processor.populate(
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
                     context,
-                    launchContext,
                     data,
                     useServerData,
                     (IBaseResource) null,

@@ -42,28 +42,20 @@ public class ItemGenerator {
     protected final IRepository repository;
     protected final ExpressionProcessor expressionProcessor;
     protected final ExtensionProcessor extensionProcessor;
-    protected final ElementHasCaseFeature elementHasCaseFeature;
     protected final ItemTypeIsChoice itemTypeIsChoice;
 
     public ItemGenerator(IRepository repository) {
-        this(
-                repository,
-                new ExpressionProcessor(),
-                new ExtensionProcessor(),
-                new ElementHasCaseFeature(),
-                new ItemTypeIsChoice(repository));
+        this(repository, new ExpressionProcessor(), new ExtensionProcessor(), new ItemTypeIsChoice(repository));
     }
 
     public ItemGenerator(
             IRepository repository,
             ExpressionProcessor expressionProcessor,
             ExtensionProcessor extensionProcessor,
-            ElementHasCaseFeature elementHasCaseFeature,
             ItemTypeIsChoice itemTypeIsChoice) {
         this.repository = repository;
         this.expressionProcessor = expressionProcessor;
         this.extensionProcessor = extensionProcessor;
-        this.elementHasCaseFeature = elementHasCaseFeature;
         this.itemTypeIsChoice = itemTypeIsChoice;
     }
 
@@ -82,20 +74,37 @@ public class ItemGenerator {
             if (childItems.isEmpty() && valueExtensions.isEmpty()) {
                 return null;
             }
-            var questionnaireItem = createQuestionnaireItem(request, linkId);
-            if (!childItems.isEmpty()) {
-                questionnaireItem.addItems(childItems);
+            IQuestionnaireItemComponentAdapter questionnaireItem;
+            if (childItems.size() == 1) {
+                questionnaireItem = childItems.get(0);
+                questionnaireItem.setLinkId(linkId);
+            } else {
+                questionnaireItem = createQuestionnaireItem(request, linkId);
+                if (!childItems.isEmpty()) {
+                    questionnaireItem.addItems(childItems);
+                }
             }
+            addDefinitionExtractExt(request, questionnaireItem);
             if (!valueExtensions.isEmpty()) {
                 valueExtensions.forEach(questionnaireItem::addExtension);
             }
 
-            // If we have a caseFeature we need to include launchContext extensions and Item Population Context
+            // If we have a caseFeature we need to include launchContext extensions and Definition Population Context
             List<T> launchContextExts = new ArrayList<>();
             if (caseFeature != null) {
-                var itemContextExt = questionnaireItem.addExtension();
-                itemContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
-                itemContextExt.setValue(caseFeature.toExpressionType(request.getFhirVersion()));
+                var definitionContextExt = questionnaireItem.addExtension();
+                // Switch to SDC extension once new version is published
+                // definitionContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+                definitionContextExt.setUrl(Constants.CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+                var definitionContextExtAdapter =
+                        questionnaireItem.getAdapterFactory().createBase(definitionContextExt);
+                var definitionExt = definitionContextExtAdapter.addExtension();
+                definitionExt.setUrl("definition");
+                definitionExt.setValue(canonicalTypeForVersion(
+                        request.getFhirVersion(), request.getProfileAdapter().getCanonical()));
+                var expressionExt = definitionContextExtAdapter.addExtension();
+                expressionExt.setUrl("expression");
+                expressionExt.setValue(caseFeature.toExpressionType(request.getFhirVersion()));
                 // Assume Patient for now - this should probably be the context of the Library if we can determine that
                 launchContextExts.add(buildSdcLaunchContextExt(request, "patient", "Patient"));
                 var featureLibrary = request.getAdapterFactory()
@@ -107,7 +116,7 @@ public class ItemGenerator {
                 featureLibrary.getParameter().stream()
                         .filter(p -> featureLibrary.resolvePathString(p, "use").equals("in"))
                         .filter(p -> request.getFHIRTypes().contains(featureLibrary.resolvePathString(p, "type")))
-                        .map(p -> new ImmutablePair<String, String>(
+                        .map(p -> new ImmutablePair<>(
                                 featureLibrary.resolvePathString(p, "name"),
                                 featureLibrary.resolvePathString(p, "type")))
                         .forEach(p -> launchContextExts.add(buildSdcLaunchContextExt(request, p.left, p.right)));
@@ -123,7 +132,7 @@ public class ItemGenerator {
     @SuppressWarnings("unchecked")
     protected <T extends IBaseExtension<?, ?>> T buildSdcLaunchContextExt(
             GenerateRequest request, String code, String type) {
-        var system = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext";
+        var system = Constants.SDC_LAUNCH_CONTEXT_SYSTEM;
         var display = "";
         switch (code.toLowerCase()) {
             case "patient":
@@ -148,7 +157,7 @@ public class ItemGenerator {
 
             default:
                 display = code;
-                system = "http://example.org/fhir/uv/sdc/CodeSystem/additionalLaunchContext";
+                system = Constants.CPG_ADDITIONAL_LAUNCH_CONTEXT_SYSTEM;
                 break;
         }
         var fhirVersion = request.getFhirVersion();
@@ -275,9 +284,6 @@ public class ItemGenerator {
             if (item.isChoiceItem()) {
                 itemTypeIsChoice.addProperties(element, item);
             }
-            if (caseFeature != null) {
-                elementHasCaseFeature.addProperties(request, caseFeature, request.getProfileAdapter(), element, item);
-            }
             return item;
         } catch (Exception ex) {
             final String message = ITEM_CREATION_ERROR.formatted(ex.getMessage());
@@ -295,7 +301,7 @@ public class ItemGenerator {
         // Add elements from the snapshot that were not in the differential
         if (request.getSnapshotElements() != null) {
             elements.addAll(request.getProfileAdapter().getSnapshotElements().stream()
-                    .filter(e -> filterElement(request, e, elements, parentPath, sliceName, request.getRequiredOnly()))
+                    .filter(e -> filterElement(request, e, elements, parentPath, sliceName, request.getMinimalOnly()))
                     .toList());
         }
         return elements;
@@ -307,7 +313,7 @@ public class ItemGenerator {
             List<IElementDefinitionAdapter> existingElements,
             String parentPath,
             String sliceName,
-            boolean requiredOnly) {
+            boolean minimalOnly) {
         var path = element.getPath();
         if (elementExists(existingElements, path)) {
             return false;
@@ -325,7 +331,7 @@ public class ItemGenerator {
         if (sliceName != null) {
             return element.getId().contains(sliceName);
         }
-        if (requiredOnly) {
+        if (minimalOnly) {
             return element.isRequired();
         }
         if (request.getSupportedOnly()) {
@@ -382,11 +388,15 @@ public class ItemGenerator {
                 : request.getProfileAdapter().getName();
         var item = initializeQuestionnaireItem(
                 request, "group", request.getProfileAdapter().getUrl(), linkId, text, false, isRepeats(request));
+        addDefinitionExtractExt(request, item);
+        return item;
+    }
+
+    protected void addDefinitionExtractExt(GenerateRequest request, IQuestionnaireItemComponentAdapter item) {
         var definitionExtract = item.addExtension();
         definitionExtract.setUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT);
         definitionExtract.setValue(canonicalTypeForVersion(
                 request.getFhirVersion(), request.getProfileAdapter().getUrl()));
-        return item;
     }
 
     protected Boolean isRepeats(GenerateRequest request) {

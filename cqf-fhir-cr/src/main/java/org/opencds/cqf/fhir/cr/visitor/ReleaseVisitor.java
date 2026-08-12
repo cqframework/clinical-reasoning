@@ -361,11 +361,17 @@ public class ReleaseVisitor extends BaseKnowledgeArtifactVisitor {
                 // add to dependencies
                 var updatedRelatedArtifacts = artifactAdapter.getRelatedArtifact();
                 var newReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(componentToDependency);
-                updatedRelatedArtifacts.removeIf(ra -> Constants.RELATEDARTIFACT_TYPE_DEPENDSON.equalsIgnoreCase(
-                                IKnowledgeArtifactAdapter.getRelatedArtifactType(ra))
-                        && Objects.equals(
-                                Canonicals.getUrl(IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra)),
-                                Canonicals.getUrl(newReference)));
+                var newReferenceUrl = StringUtils.isBlank(newReference) ? null : Canonicals.getUrl(newReference);
+                updatedRelatedArtifacts.removeIf(ra -> {
+                    if (newReferenceUrl == null
+                            || !Constants.RELATEDARTIFACT_TYPE_DEPENDSON.equalsIgnoreCase(
+                                    IKnowledgeArtifactAdapter.getRelatedArtifactType(ra))) {
+                        return false;
+                    }
+                    var existingReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(ra);
+                    return StringUtils.isNotBlank(existingReference)
+                            && newReferenceUrl.equals(Canonicals.getUrl(existingReference));
+                });
                 updatedRelatedArtifacts.add(componentToDependency);
                 artifactAdapter.setRelatedArtifact(updatedRelatedArtifacts);
             }

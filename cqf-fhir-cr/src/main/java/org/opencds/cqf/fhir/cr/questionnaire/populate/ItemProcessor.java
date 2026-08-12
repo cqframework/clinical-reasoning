@@ -3,18 +3,23 @@ package org.opencds.cqf.fhir.cr.questionnaire.populate;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.QUESTIONNAIRE_RESPONSE_AUTHOR_EXTENSION;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReferenceExt;
 import static org.opencds.cqf.fhir.cr.common.ItemValueTransformer.transformValueToItem;
+import static org.opencds.cqf.fhir.utility.Constants.CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT;
+import static org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT;
+import static org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 import static org.opencds.cqf.fhir.utility.VersionUtilities.stringTypeForVersion;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,26 +46,40 @@ public class ItemProcessor {
         this.expressionProcessor = expressionProcessor;
     }
 
-    public List<IQuestionnaireResponseItemComponentAdapter> processItem(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
-        var populationContextExt = item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
-        return populationContextExt != null
-                ? processContextItem(request, item)
-                : List.of(processSingleItem(request, item));
+    public void processItem(
+            PopulateRequest request,
+            IQuestionnaireItemComponentAdapter item,
+            List<IQuestionnaireResponseItemComponentAdapter> responseItem) {
+        if (item.isContextItem()) {
+            processContextItem(request, item, responseItem);
+        } else {
+            responseItem.add(item.newResponseItem());
+            processSingleItem(request, item, responseItem);
+        }
     }
 
-    protected IQuestionnaireResponseItemComponentAdapter processSingleItem(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
-        final var responseItem = item.newResponseItem();
+    protected void processGroupItem(
+            PopulateRequest request,
+            IQuestionnaireItemComponentAdapter item,
+            IQuestionnaireResponseItemComponentAdapter responseItem,
+            List<IQuestionnaireItemComponentAdapter> childItems) {
+        childItems.forEach(childItem -> {
+            var childResponseItem = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+            processItem(request, childItem, childResponseItem);
+            responseItem.addItems(childResponseItem);
+        });
+    }
+
+    protected List<IQuestionnaireResponseItemComponentAdapter> processSingleItem(
+            PopulateRequest request,
+            IQuestionnaireItemComponentAdapter item,
+            List<IQuestionnaireResponseItemComponentAdapter> responseItems) {
+        var responseItem = responseItems.get(0);
         var childItems = item.getItem().stream()
                 .map(IQuestionnaireItemComponentAdapter.class::cast)
-                .toList();
+                .collect(Collectors.toList());
         if (item.isGroupItem()) {
-            final List<IQuestionnaireResponseItemComponentAdapter> groupChildItems = new ArrayList<>();
-            childItems.forEach(childItem -> {
-                groupChildItems.addAll(processItem(request, childItem));
-            });
-            responseItem.setItem(groupChildItems);
+            processGroupItem(request, item, responseItem, childItems);
         } else {
             request.setContextVariable(responseItem.get());
             var rawParams = request.getRawParameters();
@@ -69,8 +88,9 @@ public class ItemProcessor {
             if (!childItems.isEmpty()) {
                 // children of non group items go under each answer
                 var childResponseItems = childItems.stream()
-                        .map(c -> processSingleItem(request, c))
-                        .toList();
+                        .map(c -> processSingleItem(request, c, List.of(c.newResponseItem())))
+                        .flatMap(Collection::stream)
+                        .collect(Collectors.toList());
                 var answers = responseItem.getAnswer();
                 if (answers.isEmpty()) {
                     answers.add(responseItem.newAnswer(null));
@@ -79,18 +99,23 @@ public class ItemProcessor {
                 answers.forEach(a -> a.setItem(childResponseItems));
             }
         }
-        return responseItem;
+        return responseItems;
     }
 
-    protected List<IQuestionnaireResponseItemComponentAdapter> processContextItem(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+    protected void processContextItem(
+            PopulateRequest request,
+            IQuestionnaireItemComponentAdapter item,
+            List<IQuestionnaireResponseItemComponentAdapter> responseItem) {
         var itemLinkId = item.getLinkId();
-        if (!item.isGroupItem()) {
+        if (!item.isGroupItem() && item.hasExtension(SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)) {
             throw new UnprocessableEntityException(
                     "Encountered Item Population Context extension on a non group item: {}", itemLinkId);
         }
         IBaseResource profile = null;
-        var definition = item.getDefinition();
+        var ctx = getContext(request, item);
+        var definition = ctx.component1();
+        var contextExpression = ctx.component2();
+
         if (StringUtils.isNotBlank(definition)) {
             var profileUrl = definition.split("#")[0];
             try {
@@ -106,31 +131,23 @@ public class ItemProcessor {
                 ? null
                 : (IStructureDefinitionAdapter)
                         request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
-        final CqfExpression contextExpression = expressionProcessor.getCqfExpression(
-                request, item.getExtension(), Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
         List<IAdapter<?>> populationContext;
-        try {
-            populationContext =
-                    expressionProcessor
-                            .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
-                            .stream()
-                            //                            .map(r -> {
-                            //                                if (r != null && r.fhirType().equals("Tuple")) {
-                            //                                    return new Tuple()
-                            //                                            .withElements(request.getAdapterFactory()
-                            //                                                    .createTuple(r)
-                            //                                                    .getProperties());
-                            //                                }
-                            //                                return r;
-                            //                            })
-                            // filtering nulls here to prevent unnecessary duplicate responseItems
-                            .filter(Objects::nonNull)
-                            .map(r -> request.getAdapterFactory().createBase(r))
-                            .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            request.logException(e.getMessage());
+        if (contextExpression != null) {
+            try {
+                populationContext =
+                        expressionProcessor
+                                .getExpressionResultForItem(request, contextExpression, itemLinkId, null, null)
+                                .stream()
+                                // filtering nulls here to prevent unnecessary duplicate responseItems
+                                .filter(Objects::nonNull)
+                                .map(r -> request.getAdapterFactory().createBase(r))
+                                .collect(Collectors.toList());
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                request.logException(e.getMessage());
+                populationContext = new ArrayList<>();
+            }
+        } else {
             populationContext = new ArrayList<>();
         }
         if (populationContext.isEmpty()) {
@@ -142,10 +159,44 @@ public class ItemProcessor {
                     "Population context expression resulted in multiple values for a non repeating group: {}",
                     contextExpression.getExpression());
         }
-        return populationContext.stream()
-                .map(context ->
-                        processPopulationContext(request, item, contextExpression.getName(), context, profileAdapter))
+        var contextName = contextExpression == null ? null : contextExpression.getName();
+        var newResponseItems = populationContext.stream()
+                .map(context -> processPopulationContext(request, item, contextName, context, profileAdapter))
                 .toList();
+        responseItem.addAll(newResponseItems);
+    }
+
+    protected kotlin.Pair<String, CqfExpression> getContext(
+            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+        String definition;
+        CqfExpression contextExpression;
+        if (item.hasExtension(SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT)
+                || item.hasExtension(CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT)) {
+            var defPopExt = item.getExtensionByUrl(SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+            if (defPopExt == null) {
+                defPopExt = item.getExtensionByUrl(CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+            }
+            definition = defPopExt.getExtension().stream()
+                    .map(IBaseExtension.class::cast)
+                    .filter(e -> "definition".equals(e.getUrl()))
+                    .map(IBaseExtension::getValue)
+                    .map(IPrimitiveType.class::cast)
+                    .map(IPrimitiveType::getValueAsString)
+                    .findFirst()
+                    .orElse(null);
+            contextExpression = defPopExt.getExtension().stream()
+                    .map(IBaseExtension.class::cast)
+                    .filter(e -> "expression".equals(e.getUrl()))
+                    .map(e -> CqfExpression.of(
+                            request.getAdapterFactory().createBase(e.getValue()), request.getReferencedLibraries()))
+                    .findFirst()
+                    .orElse(null);
+        } else {
+            definition = item.getDefinition();
+            contextExpression = expressionProcessor.getCqfExpression(
+                    request, item.getExtension(), SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT);
+        }
+        return new kotlin.Pair<>(definition, contextExpression);
     }
 
     protected void populateAnswer(
@@ -194,30 +245,41 @@ public class ItemProcessor {
 
     protected IQuestionnaireResponseItemComponentAdapter processPopulationContext(
             PopulateRequest request,
-            IQuestionnaireItemComponentAdapter groupItem,
+            IQuestionnaireItemComponentAdapter item,
             String contextName,
             IAdapter<?> context,
             IStructureDefinitionAdapter profile) {
-        final var contextItem = groupItem.newResponseItem();
-        groupItem.getItem().stream()
-                .map(IQuestionnaireItemComponentAdapter.class::cast)
-                .forEach(item -> {
-                    var childItems = item.getItem();
-                    if (!childItems.isEmpty()) {
-                        var childGroupItem = processPopulationContext(request, item, contextName, context, profile);
-                        contextItem.addItem(childGroupItem);
-                    } else {
-                        try {
-                            var processedSubItem =
-                                    createResponseContextItem(request, item, contextName, context, profile);
-                            contextItem.addItem(processedSubItem);
-                        } catch (Exception e) {
-                            logger.error(e.getMessage());
-                            request.logException(e.getMessage());
+        if (item.hasItem()) {
+            final var contextItem = item.newResponseItem();
+            item.getItem().stream()
+                    .map(IQuestionnaireItemComponentAdapter.class::cast)
+                    .forEach(childItem -> {
+                        var childItems = childItem.getItem();
+                        if (!childItems.isEmpty()) {
+                            var childItemWithChildren =
+                                    processPopulationContext(request, childItem, contextName, context, profile);
+                            contextItem.addItem(childItemWithChildren);
+                        } else {
+                            try {
+                                var processedSubItem =
+                                        createResponseContextItem(request, childItem, contextName, context, profile);
+                                contextItem.addItem(processedSubItem);
+                            } catch (Exception e) {
+                                logger.error(e.getMessage());
+                                request.logException(e.getMessage());
+                            }
                         }
-                    }
-                });
-        return contextItem;
+                    });
+            return contextItem;
+        } else {
+            try {
+                return createResponseContextItem(request, item, contextName, context, profile);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                request.logException(e.getMessage());
+                return item.newResponseItem();
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -227,27 +289,26 @@ public class ItemProcessor {
             String contextName,
             IAdapter<?> context,
             IStructureDefinitionAdapter profile) {
-        if (item.hasInitial()) {
-            return processSingleItem(request, item);
-        }
         final var responseItem = item.newResponseItem();
+        if (item.hasInitial()) {
+            return processSingleItem(request, item, List.of(responseItem)).get(0);
+        }
         request.setContextVariable(responseItem.get());
-        // if we have a definition use it to populate
+        // if we have a definition and no initial expression use the definition to populate
         var definition = item.getDefinition();
-        if (StringUtils.isNotBlank(definition) && profile != null && context != null) {
+        var initialExpressionExt = item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
+        if (StringUtils.isNotBlank(definition) && profile != null && context != null && initialExpressionExt == null) {
             final var pathValue = getPathValue(request, context, definition, profile);
             if (pathValue != null) {
-                final List<IBase> answerValue =
-                        pathValue instanceof List ? (List<IBase>) pathValue : List.of((IBase) pathValue);
+                var answerValue = pathValue instanceof List ? (List<IBase>) pathValue : List.of((IBase) pathValue);
                 if (!answerValue.isEmpty()) {
                     addAuthorExtension(request, responseItem);
                 }
                 populateAnswer(request, responseItem, answerValue);
             }
         } else {
-            var extension = item.getExtensionByUrl(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION);
             // populate using expected initial expression extensions
-            if (extension != null) {
+            if (initialExpressionExt != null) {
                 List<IBase> initialValue = null;
                 if (context != null) {
                     // pass the context resource(s) as a parameter to the evaluation

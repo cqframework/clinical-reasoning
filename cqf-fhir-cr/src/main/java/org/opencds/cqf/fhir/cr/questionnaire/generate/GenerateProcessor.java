@@ -5,10 +5,9 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanoni
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,27 +40,27 @@ public class GenerateProcessor implements IGenerateProcessor {
     @Override
     public IBaseResource generate(String id) {
         var questionnaire = createQuestionnaire();
-        if (id != null) {
-            var newId = Ids.newId(fhirVersion, Ids.ensureIdType(id, "Questionnaire"));
-            questionnaire.setId(newId);
-        }
+        setQuestionnaireId(questionnaire, id);
         return questionnaire.get();
     }
 
     @Override
     public IBaseResource generate(GenerateRequest request, String id) {
-        request.setQuestionnaire(
-                generate(id == null ? request.getProfile().getIdElement().getIdPart() : id));
-        var formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
-        request.getQuestionnaireAdapter()
-                .setVersion("%s-%s".formatted(request.getProfileAdapter().getVersion(), formatter.format(new Date())));
-        var item = generateItem(request);
-        if (item != null) {
-            item.getLeft();
-            request.addQuestionnaireItem(item.getLeft());
-            if (!item.getRight().isEmpty()) {
-                request.addCqlLibraryExtension();
-                request.addLaunchContextExtensions(item.getRight());
+        var questionnaireId = id;
+        if (StringUtils.isBlank(questionnaireId)) {
+            questionnaireId = request.getProfiles().get(0).getId();
+        }
+        request.setQuestionnaire(generate(questionnaireId));
+        while (request.setNextProfileAdapter()) {
+            var item = generateItem(request);
+            if (item != null) {
+                // TODO: Set derivedFrom on the Questionnaire (constrained to Questionnaire canonical)
+                //  or add a new CPG extension to link to the StructureDef?
+                request.addQuestionnaireItem(item.getLeft());
+                if (!item.getRight().isEmpty()) {
+                    request.addCqlLibraryExtension();
+                    request.addLaunchContextExtensions(item.getRight());
+                }
             }
         }
         return request.getQuestionnaire();
@@ -104,5 +103,12 @@ public class GenerateProcessor implements IGenerateProcessor {
                 adapterFactory.createQuestionnaire((IBaseResource) newBaseForVersion("Questionnaire", fhirVersion));
         questionnaire.setStatus("active");
         return questionnaire;
+    }
+
+    protected void setQuestionnaireId(IQuestionnaireAdapter questionnaire, String id) {
+        if (StringUtils.isNotBlank(id)) {
+            var newId = Ids.newId(fhirVersion, Ids.ensureIdType(id, "Questionnaire"));
+            questionnaire.setId(newId);
+        }
     }
 }

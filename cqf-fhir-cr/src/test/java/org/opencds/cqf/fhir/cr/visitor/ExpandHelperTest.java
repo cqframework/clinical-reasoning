@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
@@ -761,6 +762,100 @@ class ExpandHelperTest {
 
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
         verify(repo, never()).search(any(), any(), any(Multimap.class), any());
+    }
+
+    // Reproduces cqframework/clinical-reasoning#1073: a ValueSet whose authoritative source differs
+    // from the configured terminologyEndpoint and which cannot be expanded locally (it has a filter)
+    // must still be expanded via the configured endpoint, not fail with
+    // "Cannot expand ValueSet without terminology server".
+    @Test
+    void valueSetNotLocallyExpandable_withMismatchedAuthoritativeSource_usesConfiguredEndpoint() {
+        var endpoint = new Endpoint();
+        endpoint.setAddress("https://tx.fhir.org/r4");
+
+        var vs = new ValueSet();
+        vs.setUrl("http://hl7.org/fhir/ValueSet/allergyintolerance-clinical");
+        // authoritative source (hl7.org) differs from the tx.fhir.org endpoint
+        vs.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType("http://hl7.org/fhir"));
+        // a filter makes local expansion impossible
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://snomed.info/sct")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.ISA)
+                .setValue("609328004");
+
+        // repository cannot expand it; the terminology server can
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var expanded = createLeafWithUrl(vs.getUrl());
+        var client = mockTerminologyServerWithValueSetR4(expanded);
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        Exception thrown = null;
+        try {
+            expandHelper.expandValueSet(
+                    (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                    factory.createParameters(new Parameters()),
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
+        } catch (Exception e) {
+            thrown = e;
+        }
+
+        // The configured endpoint should be used rather than skipped.
+        assertNull(thrown, "ValueSet should be expanded via the configured terminology endpoint");
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+        assertEquals(3, vs.getExpansion().getContains().size());
+    }
+
+    // Companion to #1073: the CRMI artifactEndpointConfiguration path expands a non-locally-expandable
+    // ValueSet WITHOUT relying on the valueset-authoritativeSource extension and WITHOUT a legacy
+    // terminologyEndpoint. Routing is by the config's artifactRoute (here, a route-less catch-all).
+    @Test
+    void valueSetNotLocallyExpandable_withArtifactEndpointConfiguration_usesConfiguredEndpoint() {
+        var vs = new ValueSet();
+        vs.setUrl("http://hl7.org/fhir/ValueSet/allergyintolerance-clinical");
+        // deliberately NO authoritative-source extension; a filter makes local expansion impossible
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://snomed.info/sct")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.ISA)
+                .setValue("609328004");
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var expanded = createLeafWithUrl(vs.getUrl());
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expandWithConfigurations(any(IValueSetAdapter.class), any(), any(IParametersAdapter.class)))
+                .thenReturn(expanded);
+
+        var expandHelper = new ExpandHelper(rep, client);
+        // route-less catch-all config, and NO legacy terminologyEndpoint
+        var config = new ArtifactEndpointConfiguration(null, "https://tx.fhir.org/r4", null);
+
+        Exception thrown = null;
+        try {
+            expandHelper.expandValueSet(
+                    (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                    factory.createParameters(new Parameters()),
+                    java.util.List.of(config),
+                    Optional.empty(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
+        } catch (Exception e) {
+            thrown = e;
+        }
+
+        assertNull(thrown, "artifactEndpointConfiguration should expand the ValueSet without a terminologyEndpoint");
+        verify(client, times(1))
+                .expandWithConfigurations(any(IValueSetAdapter.class), any(), any(IParametersAdapter.class));
+        assertEquals(3, vs.getExpansion().getContains().size());
     }
 
     @Test

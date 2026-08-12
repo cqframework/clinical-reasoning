@@ -4,8 +4,10 @@ import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -19,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.cr.crmi.KnowledgeArtifactProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.VersionUtilities;
@@ -82,6 +85,10 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
         }
         // create draft resources
         List<IDomainResource> resourcesToCreate = createDraftsOfArtifactAndRelated(libRes, version, new ArrayList<>());
+        // Draft should float leaf versions, so unpin every reference to them,
+        // the grouper's compose and the manifest's depends-on have to stay in agreement
+        var leafUrlsToFloat = collectLeafUrlsToFloat(resourcesToCreate);
+        resourcesToCreate.forEach(res -> unpinLeafReferences(res, leafUrlsToFloat));
         var transactionBundle = BundleHelper.newBundle(fhirVersion(), null, "transaction");
         List<String> urnList = resourcesToCreate.stream()
                 .map(res -> "urn:uuid:" + UUID.randomUUID().toString())
@@ -102,6 +109,53 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
         // DependencyInfo --document here that there is a need for figuring out how to determine which package the
         // dependency is in.
         // what is dependency, where did it originate? potentially the package?
+    }
+
+    private boolean isGrouper(IDomainResource resource) {
+        return switch (repository.fhirContext().getVersion().getVersion()) {
+            case DSTU3 -> KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.dstu3.model.MetadataResource) resource);
+            case R4 -> KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.r4.model.MetadataResource) resource);
+            case R5 -> KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.r5.model.MetadataResource) resource);
+            default ->
+                throw new UnprocessableEntityException("Unsupported FHIR version: "
+                        + repository.fhirContext().getVersion().getVersion());
+        };
+    }
+
+    /**
+     * Finds grouper referenced leaf ValueSets that draft should float to latest.
+     */
+    private Set<String> collectLeafUrlsToFloat(List<IDomainResource> resources) {
+        return resources.stream()
+                .filter(this::isGrouper)
+                .map(res -> IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(res))
+                .flatMap(adapter -> adapter.getDependencies().stream())
+                .map(IDependencyInfo::getReference)
+                .filter(StringUtils::isNotBlank)
+                .map(Canonicals::getUrl)
+                .filter(StringUtils::isNotBlank)
+                .filter(url -> Constants.RESOURCETYPE_VALUESET.equals(Canonicals.getResourceType(url)))
+                .collect(Collectors.toCollection(HashSet::new));
+    }
+
+    /**
+     * Unpins every reference to a floating leaf, so a draft picks up the newest leaf versions while
+     * it is being edited.
+     */
+    private void unpinLeafReferences(IDomainResource resource, Set<String> leafUrlsToFloat) {
+        IAdapterFactory.forFhirVersion(fhirVersion())
+                .createKnowledgeArtifactAdapter(resource)
+                .getDependencies()
+                .forEach(dep -> {
+                    var reference = dep.getReference();
+                    if (StringUtils.isBlank(reference) || !reference.contains("|")) {
+                        return;
+                    }
+                    var url = Canonicals.getUrl(reference);
+                    if (url != null && leafUrlsToFloat.contains(url)) {
+                        dep.setReference(url);
+                    }
+                });
     }
 
     private List<IDomainResource> createDraftsOfArtifactAndRelated(
@@ -133,30 +187,6 @@ public class DraftVisitor extends BaseKnowledgeArtifactVisitor {
                     IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(newResource);
             newResourceAdapter.setStatus("draft");
             newResourceAdapter.setVersion(draftVersion);
-
-            // Leaf ValueSet versions should be removed from grouper dependencies
-            var isGrouper =
-                    switch (repository.fhirContext().getVersion().getVersion()) {
-                        case DSTU3 ->
-                            KnowledgeArtifactProcessor.isGrouper(
-                                    (org.hl7.fhir.dstu3.model.MetadataResource) newResource);
-                        case R4 ->
-                            KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.r4.model.MetadataResource) newResource);
-                        case R5 ->
-                            KnowledgeArtifactProcessor.isGrouper((org.hl7.fhir.r5.model.MetadataResource) newResource);
-                        default ->
-                            throw new UnprocessableEntityException("Unsupported FHIR version: "
-                                    + repository.fhirContext().getVersion().getVersion());
-                    };
-
-            if (isGrouper) {
-                newResourceAdapter.getDependencies().forEach(vs -> {
-                    if (vs.getReference().contains("|")) {
-                        vs.setReference(
-                                vs.getReference().substring(0, vs.getReference().indexOf("|")));
-                    }
-                });
-            }
 
             resourcesToCreate.add(newResource);
             var ownedRelatedArtifacts = sourceResourceAdapter.getOwnedRelatedArtifacts();

@@ -267,6 +267,24 @@ class EnginesTest {
     }
 
     @Test
+    void npmProcessorPackageManagerNull() {
+        var npmProcessor = mock(NpmProcessor.class);
+        when(npmProcessor.getPackageManager()).thenReturn(null);
+        when(npmProcessor.getIgContext()).thenReturn(mock(IGContext.class));
+        when(npmProcessor.getPackageManager()).thenReturn(null);
+
+        var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
+
+        var engine = getEngine(settings);
+        var lm = engine.getEnvironment().getLibraryManager();
+
+        var ni = lm.getNamespaceManager().getNamespaceInfoFromUri("http://fhir.org/guides/cqf/common");
+        assertNull(ni);
+
+        assertDataProviders(engine);
+    }
+
+    @Test
     void npmProcessorWithDupeNamespacesById() {
         var npmProcessor = mock(NpmProcessor.class);
         var namespaceInfo1 = new NamespaceInfo("1", "a");

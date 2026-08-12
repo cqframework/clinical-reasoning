@@ -113,6 +113,7 @@ public class ProcessAction {
                     if (!request.questionnaireItemExistsForProfile(profileUrl)) {
                         var profile = searchRepositoryByCanonical(repository, profileUrl);
                         var generateRequest = request.toGenerateRequest(profile);
+                        generateRequest.setNextProfileAdapter();
                         var item = generateProcessor.generateItem(generateRequest);
                         if (item != null) {
                             // If input has text extension use it to override

@@ -5,10 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.Constants.CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT;
+import static org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT;
+import static org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
+import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Expression;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
@@ -88,5 +94,29 @@ class QuestionnaireItemComponentAdapterTest {
         assertEquals(1, adapter.getItem().size());
         adapter.addItems(List.of(item2, item3, item4));
         assertEquals(4, adapter.getItem().size());
+    }
+
+    @Test
+    void testContextItemExtensions() {
+        var profile = new CanonicalType("test.com/fhir/StructureDefinition/Test");
+        var expression = new Expression().setExpression("TestExpression");
+        var item1 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("1", QuestionnaireItemType.GROUP));
+        item1.addExtension(new Extension(SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT, expression));
+        assertTrue(item1.isContextItem());
+        var item2 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("2", QuestionnaireItemType.BOOLEAN));
+        var sdcDefPopExt = new Extension(SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+        sdcDefPopExt.addExtension(new Extension("definition", profile));
+        sdcDefPopExt.addExtension(new Extension("expression", expression));
+        item2.addExtension(sdcDefPopExt);
+        assertTrue(item2.isContextItem());
+        var item3 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent("3", QuestionnaireItemType.BOOLEAN));
+        var cpgDefPopExt = new Extension(CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+        cpgDefPopExt.addExtension(new Extension("definition", profile));
+        cpgDefPopExt.addExtension(new Extension("expression", expression));
+        item3.addExtension(cpgDefPopExt);
+        assertTrue(item3.isContextItem());
     }
 }

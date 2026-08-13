@@ -105,4 +105,52 @@ class StratifierMultiSubjectDateBasisTest {
                 .up()
                 .report();
     }
+
+    /**
+     * Reproduces the HEDIS 2025 (NCQA ENP-Reporting) stratifier bug using the REAL
+     * {@code Product Line Stratifier} function body (a query ending in {@code return all
+     * mmInfo.payer.code} over stubbed member-months), paired with a scalar {@code Age Stratifier}.
+     *
+     * <p>The stratifier component whose function returns a <b>list</b> is not unwrapped: its stratum
+     * value is emitted as the raw CQL representation ({@code 'MMO'}, with quotes) instead of
+     * {@code MMO}. With empty/multi-element lists (real member-months data) this degrades further and
+     * the stratifier collapses. Expected: three strata for a single member with 12 enrollment dates,
+     * Age constant ("18-19"), Product Line MMO x2 / MCD x9 / MEP x1, each with clean component values.
+     */
+    @Test
+    void hedisEnrollmentComponentStratifierIsNotEmpty() {
+        GIVEN.when()
+                .measureId("StratifierMultiSubjectDateBasisMultiComponentMeasure")
+                .subject("Patient/patient-a")
+                .evaluate()
+                .then()
+                .hasGroupCount(1)
+                .firstGroup()
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(12)
+                .up()
+                .firstStratifier()
+                .hasStratumCount(3)
+                .stratumByComponentValueText("MMO")
+                .hasComponentStratifierCount(2)
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(2)
+                .up()
+                .up()
+                .stratumByComponentValueText("MCD")
+                .hasComponentStratifierCount(2)
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(9)
+                .up()
+                .up()
+                .stratumByComponentValueText("MEP")
+                .hasComponentStratifierCount(2)
+                .population(MeasurePopulationType.INITIALPOPULATION)
+                .hasCount(1)
+                .up()
+                .up()
+                .up()
+                .up()
+                .report();
+    }
 }

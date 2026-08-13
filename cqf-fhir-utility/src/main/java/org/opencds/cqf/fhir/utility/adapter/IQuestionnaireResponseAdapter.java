@@ -70,6 +70,10 @@ public interface IQuestionnaireResponseAdapter extends IResourceAdapter {
 
     IQuestionnaireResponseAdapter setStatus(String status);
 
+    default String getStatus() {
+        return resolvePathString("status");
+    }
+
     boolean hasItem();
 
     default boolean hasItem(String linkId) {

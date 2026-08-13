@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -7,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
+import static org.opencds.cqf.fhir.utility.Constants.R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -193,9 +195,19 @@ class PlanDefinitionActionAdapterTest {
         var adapter = new PlanDefinitionActionAdapter(action);
         assertFalse(adapter.hasApplicabilityBehavior());
         assertEquals(CqfApplicabilityBehavior.ALL, adapter.getApplicabilityBehavior());
-        adapter.addExtension(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("one")));
+        adapter.setExtension(singletonList(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("any"))));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ANY, adapter.getApplicabilityBehavior());
+        adapter.setExtension(singletonList(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("one"))));
         assertTrue(adapter.hasApplicabilityBehavior());
         assertThrows(IllegalArgumentException.class, adapter::getApplicabilityBehavior);
+        adapter.setExtension(singletonList(new Extension(CQF_APPLICABILITY_BEHAVIOR, null)));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ALL, adapter.getApplicabilityBehavior());
+        adapter.setExtension(
+                singletonList(new Extension(R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR, new StringType("any"))));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ANY, adapter.getApplicabilityBehavior());
     }
 
     @Test

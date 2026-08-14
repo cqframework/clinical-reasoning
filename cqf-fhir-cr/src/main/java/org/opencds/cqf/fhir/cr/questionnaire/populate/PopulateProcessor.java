@@ -22,7 +22,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         this(null, null);
     }
 
-    private PopulateProcessor(ItemProcessor itemProcessor, ExpressionProcessor expressionProcessor) {
+    public PopulateProcessor(ItemProcessor itemProcessor, ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor != null ? expressionProcessor : new ExpressionProcessor();
         this.itemProcessor = itemProcessor != null ? itemProcessor : new ItemProcessor(this.expressionProcessor);
     }
@@ -59,7 +59,10 @@ public class PopulateProcessor implements IPopulateProcessor {
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error encountered evaluating result for variable: {}", expression.getName());
+                var message =
+                        String.format("Error encountered evaluating result for variable: %s", expression.getName());
+                logger.error(message);
+                request.logException(message);
             }
         });
         return variables;
@@ -69,6 +72,9 @@ public class PopulateProcessor implements IPopulateProcessor {
         var linkId = item.getLinkId();
         logger.info("Processing item {}", linkId);
         try {
+            // This code is meant to handle a previous QuestionnaireResponse being passed into
+            // the $populate call. This functionality is still being discussed by the SDC WG
+            // and how this should be done has not yet been determined.
             // var isNew = true;
             // if (request.getPreviousQuestionnaireResponseAdapter() != null) {
             //    isNew = !request.getPreviousQuestionnaireResponseAdapter().hasItem(linkId);

@@ -1,10 +1,15 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import static org.opencds.cqf.fhir.utility.VersionUtilities.dateTimeTypeForVersion;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.instantTypeForVersion;
+
+import java.util.Date;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public interface IObservationAdapter extends IResourceAdapter {
     default IObservationAdapter setBasedOn(List<IBaseReference> basedOn) {
@@ -56,13 +61,34 @@ public interface IObservationAdapter extends IResourceAdapter {
         return this;
     }
 
-    IObservationAdapter setEffective(String effective);
+    default IObservationAdapter setEffective(String effective) {
+        return setEffective(dateTimeTypeForVersion(fhirVersion(), effective));
+    }
 
-    IObservationAdapter setEffective(IBaseDatatype effective);
+    default IObservationAdapter setEffective(IBaseDatatype effective) {
+        if (effective instanceof IPrimitiveType<?> primitive && primitive.getValue() instanceof Date) {
+            setValue("effectiveDateTime", primitive);
+        }
+        return this;
+    }
 
-    IObservationAdapter setIssued(String effective);
+    default IObservationAdapter setEffectivePeriod(ICompositeType period) {
+        setValue(get(), "effectivePeriod", period);
+        return this;
+    }
 
-    IObservationAdapter setIssued(IBaseDatatype effective);
+    default IObservationAdapter setIssued(String issued) {
+        return setIssued(instantTypeForVersion(fhirVersion(), issued));
+    }
+
+    default IObservationAdapter setIssued(IBaseDatatype issued) {
+        if (issued instanceof IPrimitiveType<?> primitive
+                && primitive.fhirType().equals("instant")
+                && primitive.getValue() instanceof Date) {
+            setValue("issued", primitive);
+        }
+        return this;
+    }
 
     default IObservationAdapter setPerformer(List<IBaseReference> performer) {
         setValue("performer", performer);

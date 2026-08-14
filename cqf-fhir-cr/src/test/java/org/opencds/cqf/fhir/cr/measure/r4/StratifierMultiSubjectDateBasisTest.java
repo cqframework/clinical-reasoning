@@ -1,5 +1,12 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.util.HashMap;
+import java.util.Map;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
@@ -104,5 +111,108 @@ class StratifierMultiSubjectDateBasisTest {
                 .up()
                 .up()
                 .report();
+    }
+
+    /**
+     * Reproduces the HEDIS 2025 (NCQA ENP-Reporting) stratifier bug using the REAL
+     * {@code Product Line Stratifier} function body (a query ending in {@code return all
+     * mmInfo.payer.code} over stubbed member-months), paired with a scalar {@code Age Stratifier}.
+     *
+     * <p>The stratifier component whose function returns a <b>list</b> is not unwrapped: its stratum
+     * value is emitted as the raw CQL representation ({@code 'MMO'}, with quotes) instead of
+     * {@code MMO}. With empty/multi-element lists (real member-months data) this degrades further and
+     * the stratifier collapses. Expected: three strata for a single member with 12 enrollment dates,
+     * Age constant ("18-19"), Product Line MMO x2 / MCD x9 / MEP x1, each with clean component values.
+     */
+    @Test
+    void hedisEnrollmentComponentStratifierRendersCleanCodes() {
+        MeasureReport report = GIVEN.when()
+                .measureId("StratifierMultiSubjectDateBasisMultiComponentMeasure")
+                .subject("Patient/patient-a")
+                .evaluate()
+                .then()
+                .measureReport();
+
+        var group = report.getGroup().stream()
+                .filter(g -> "Enrollment".equals(g.getId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no Enrollment group in report"));
+        assertEquals(12, group.getPopulationFirstRep().getCount(), "initial-population count");
+
+        assertFalse(group.getStratifier().isEmpty(), "Enrollment group produced no stratifier");
+        var strata = group.getStratifierFirstRep().getStratum();
+        assertEquals(3, strata.size(), "expected three strata (MMO, MCD, MEP)");
+
+        // Map each stratum's ProductLine component value -> its initial-population count.
+        Map<String, Integer> productLineCounts = new HashMap<>();
+        for (var stratum : strata) {
+            assertEquals(2, stratum.getComponent().size(), "each stratum should carry Age + ProductLine");
+            var productLine = stratum.getComponent().stream()
+                    .filter(c -> c.getCode().hasText()
+                            && "ProductLine".equals(c.getCode().getText()))
+                    .map(c -> c.getValue().getText())
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("stratum is missing a ProductLine component"));
+
+            // The defect: the list-valued "Product Line Stratifier" (`return all mmInfo.payer.code`)
+            // rendered its element as the raw CQL representation ('MMO') instead of the bare code MMO.
+            // The engine still emits three strata; the malformed values are what break the report
+            // downstream. This assertion fails clearly (not with an NPE) when the fix is absent.
+            assertNotNull(productLine, "ProductLine component value.text was null");
+            assertFalse(
+                    productLine.contains("'"),
+                    "ProductLine value should be a bare code, but got the raw CQL representation: " + productLine);
+            productLineCounts.put(productLine, stratum.getPopulationFirstRep().getCount());
+        }
+
+        assertEquals(
+                Map.of("MMO", 2, "MCD", 9, "MEP", 1),
+                productLineCounts,
+                "expected clean product-line strata with correct counts");
+    }
+
+    /**
+     * Reproduces the empty/collapsed stratifier reported for HEDIS 2025 (NCQA ENP-Reporting):
+     * {@code "stratifier": [ { "id": "enrollment-stratifier" } ]} with no {@code stratum} array.
+     *
+     * <p>Both stratifier components ({@code Null Age Subject}, {@code Null Product Line Subject})
+     * evaluate to null for the member. Before the fix, a null-valued scalar component was silently
+     * dropped in {@code MeasureEvaluator.handleNonBooleanBasisComponent}, so when every component was
+     * null no results were recorded and {@code buildSubjectResultsTable} produced zero strata — the
+     * stratifier collapsed entirely. After the fix a null component records an explicit null result,
+     * so the member lands in a single "null" stratum (matching how a null-returning function component
+     * already behaves) instead of vanishing.
+     */
+    @Test
+    void hedisEnrollmentNullComponentsProduceNullStratumNotEmpty() {
+        MeasureReport report = GIVEN.when()
+                .measureId("StratifierMultiSubjectDateBasisNullComponentMeasure")
+                .subject("Patient/patient-a")
+                .evaluate()
+                .then()
+                .measureReport();
+
+        var group = report.getGroup().stream()
+                .filter(g -> "Enrollment".equals(g.getId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no Enrollment group in report"));
+        assertEquals(12, group.getPopulationFirstRep().getCount(), "initial-population count");
+
+        assertFalse(group.getStratifier().isEmpty(), "Enrollment group produced no stratifier");
+        var strata = group.getStratifierFirstRep().getStratum();
+
+        // The defect collapsed this to zero strata. A subject whose components are all null must
+        // still be stratified — into a single "null" stratum carrying every declared component.
+        assertEquals(
+                1, strata.size(), "null-valued components should yield one 'null' stratum, not an empty stratifier");
+        var stratum = strata.get(0);
+        assertEquals(2, stratum.getComponent().size(), "stratum should carry Age + ProductLine components");
+        for (var component : stratum.getComponent()) {
+            assertNotNull(component.getValue(), "component value should be present");
+            assertEquals(
+                    "null", component.getValue().getText(), "null component should render the 'null' sentinel value");
+        }
+        assertEquals(
+                12, stratum.getPopulationFirstRep().getCount(), "all 12 enrollment dates fall in the null stratum");
     }
 }

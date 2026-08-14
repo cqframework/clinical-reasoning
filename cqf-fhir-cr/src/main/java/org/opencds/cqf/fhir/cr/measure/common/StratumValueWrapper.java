@@ -205,6 +205,11 @@ public class StratumValueWrapper {
     }
 
     private String getValueAsString(Object valueInner) {
+        // Normalize engine-native values (CQL String -> plain String, FHIR ClassInstance -> HAPI type).
+        // The top-level value is normalized at construction, but list elements are not, so normalize
+        // here too: a list element left as a CQL String would otherwise fall through to toString() and
+        // render with CQL quotes (e.g. 'MMO' instead of MMO).
+        valueInner = normalizeEngineNativeValue(valueInner);
         var wrapper = CqlExpressionValue.ofRaw(null, valueInner, null);
         if (wrapper.isNull()) {
             return NULL_STRATUM_VALUE;

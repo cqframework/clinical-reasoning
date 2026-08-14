@@ -57,3 +57,15 @@ define function "Product Line Stratifier"(enrollmentDate Date):
         mmInfo.monthlyEnrollmentDate = enrollmentDate
     return all
         mmInfo.payer.code
+
+// --- Null-valued stratifier components (reproduces the empty/collapsed stratifier) ---
+// Two scalar stratifier expressions that evaluate to null for the member. With the defect,
+// a null scalar component is silently dropped (never recorded), so when every component is
+// null the whole stratifier collapses to zero strata: "stratifier": [ { "id": "..." } ].
+// A null component must instead land the subject in a "null" stratum, matching how a
+// null-returning *function* component already behaves.
+define "Null Age Subject":
+    null
+
+define "Null Product Line Subject":
+    null

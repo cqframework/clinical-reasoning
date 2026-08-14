@@ -748,6 +748,13 @@ public class MeasureEvaluator {
                     "Stratifier component expression '{}' returned null result for subject '{}' (fallback)",
                     component.expression(),
                     subjectId);
+            // Record an explicit null-valued result rather than dropping the subject. Skipping here
+            // removed the subject from this component entirely; when every component was null for
+            // every subject, buildSubjectResultsTable produced no rows and the stratifier collapsed
+            // to zero strata (the reported empty "stratifier": [ { "id": "..." } ]). A null result
+            // instead groups the subject into a "null" stratum, matching how a null-returning
+            // function component already behaves.
+            component.putResult(subjectId, component.expression(), null, Set.of());
             return; // short-circuit
         }
 

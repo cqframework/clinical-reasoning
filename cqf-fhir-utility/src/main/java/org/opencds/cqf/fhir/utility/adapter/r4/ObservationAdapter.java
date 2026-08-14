@@ -1,9 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.opencds.cqf.fhir.utility.adapter.IObservationAdapter;
 
@@ -20,32 +17,5 @@ public class ObservationAdapter extends ResourceAdapter implements IObservationA
     @Override
     public Observation get() {
         return (Observation) resource;
-    }
-
-    @Override
-    public ObservationAdapter setEffective(String effective) {
-        get().setEffective(new DateTimeType(effective));
-        return this;
-    }
-
-    @Override
-    public ObservationAdapter setEffective(IBaseDatatype effective) {
-        if (effective instanceof DateTimeType dateTime) {
-            get().setEffective(dateTime);
-        }
-        return this;
-    }
-
-    @Override
-    public ObservationAdapter setIssued(String issued) {
-        return setIssued(new InstantType(new DateTimeType(issued)));
-    }
-
-    @Override
-    public ObservationAdapter setIssued(IBaseDatatype issued) {
-        if (issued instanceof InstantType instantType) {
-            get().setIssuedElement(instantType);
-        }
-        return this;
     }
 }

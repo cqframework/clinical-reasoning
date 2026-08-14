@@ -126,6 +126,7 @@ public class TestQuestionnaire {
         private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
+        private IBaseResource profile;
         private List<IPrimitiveType<String>> profileUrl;
 
         When(IRepository repository, QuestionnaireProcessor processor) {
@@ -198,6 +199,11 @@ public class TestQuestionnaire {
             return this;
         }
 
+        public When profile(IBaseResource profile) {
+            this.profile = profile;
+            return this;
+        }
+
         public When profileUrl(IPrimitiveType<String> url) {
             profileUrl.add(url);
             return this;
@@ -235,13 +241,15 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaire thenGenerate() {
+            var profiles = new ArrayList<IBaseResource>();
+            if (profile != null) {
+                profiles.add(profile);
+            }
+            profileUrl.stream()
+                    .map(url -> (IBaseResource) processor.resolveStructureDefinition(Eithers.forLeft3(url)))
+                    .forEach(profiles::add);
             var request = new GenerateRequest(
-                    profileUrl.stream()
-                            .map(url -> (IBaseResource) processor.resolveStructureDefinition(Eithers.forLeft3(url)))
-                            .toList(),
-                    false,
-                    true,
-                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
+                    profiles, false, true, new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
             return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }
 

@@ -6,12 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Date;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 
@@ -61,5 +65,24 @@ class ObservationAdapterTest {
         assertEquals(encounter, obs.getEncounter());
         assertEquals(performer, obs.getPerformerFirstRep());
         assertEquals(value, obs.getValue());
+    }
+
+    @Test
+    void adapter_effective_issued() {
+        var obs = new Observation();
+        var adapter = (ObservationAdapter) adapterFactory.createResource(obs);
+        var dateTimeString = "2026-01-01T12:12:12-01:00";
+        adapter.setEffective(dateTimeString);
+        assertEquals(dateTimeString, obs.getEffectiveDateTimeType().asStringValue());
+        var date = new Date();
+        adapter.setEffective(new DateTimeType(date));
+        assertEquals(date, obs.getEffectiveDateTimeType().getValue());
+        var period = new Period();
+        adapter.setEffectivePeriod(period);
+        assertEquals(period, obs.getEffectivePeriod());
+        adapter.setIssued(dateTimeString);
+        assertEquals(dateTimeString, obs.getIssuedElement().asStringValue());
+        adapter.setIssued(new InstantType(date));
+        assertEquals(date, obs.getIssued());
     }
 }

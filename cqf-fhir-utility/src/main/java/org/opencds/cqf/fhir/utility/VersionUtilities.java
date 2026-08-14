@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.math.BigDecimal;
+import java.util.Date;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -215,6 +216,26 @@ public class VersionUtilities {
             case DSTU3 -> new org.hl7.fhir.dstu3.model.DecimalType(value);
             case R4 -> new org.hl7.fhir.r4.model.DecimalType(value);
             case R5 -> new org.hl7.fhir.r5.model.DecimalType(value);
+            default -> throw new IllegalArgumentException(UNSUPPORTED);
+        };
+    }
+
+    public static IPrimitiveType<Date> dateTimeTypeForVersion(FhirVersionEnum fhirVersion, String value) {
+        return switch (fhirVersion) {
+            case DSTU2 -> new org.hl7.fhir.dstu2.model.DateTimeType(value);
+            case DSTU3 -> new org.hl7.fhir.dstu3.model.DateTimeType(value);
+            case R4 -> new org.hl7.fhir.r4.model.DateTimeType(value);
+            case R5 -> new org.hl7.fhir.r5.model.DateTimeType(value);
+            default -> throw new IllegalArgumentException(UNSUPPORTED);
+        };
+    }
+
+    public static IPrimitiveType<Date> instantTypeForVersion(FhirVersionEnum fhirVersion, String value) {
+        return switch (fhirVersion) {
+            case DSTU2 -> new org.hl7.fhir.dstu2.model.InstantType(value);
+            case DSTU3 -> new org.hl7.fhir.dstu3.model.InstantType(value);
+            case R4 -> new org.hl7.fhir.r4.model.InstantType(value);
+            case R5 -> new org.hl7.fhir.r5.model.InstantType(value);
             default -> throw new IllegalArgumentException(UNSUPPORTED);
         };
     }

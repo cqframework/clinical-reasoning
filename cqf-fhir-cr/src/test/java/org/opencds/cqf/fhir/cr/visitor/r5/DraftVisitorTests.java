@@ -27,6 +27,7 @@ import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Period;
 import org.hl7.fhir.r5.model.PlanDefinition;
+import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.StringType;
@@ -450,7 +451,7 @@ class DraftVisitorTests {
 
         var grouperLeafReferences = draftedGrouper.get().getCompose().getInclude().stream()
                 .flatMap(include -> include.getValueSet().stream())
-                .map(canonical -> canonical.getValueAsString())
+                .map(PrimitiveType::getValueAsString)
                 .filter(resource -> resource.startsWith(leafUrl))
                 .toList();
         var manifestLeafReferences = draftedManifest.get().getRelatedArtifact().stream()

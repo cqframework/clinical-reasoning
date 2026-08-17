@@ -119,7 +119,6 @@ public class TestQuestionnaire {
         private IPrimitiveType<String> questionnaireUrl;
         private IIdType questionnaireId;
         private IBaseResource questionnaire;
-        private IBaseResource questionnaireResponse;
         private String subjectId;
         private List<IBaseBackboneElement> context;
         private boolean useServerData;
@@ -161,11 +160,6 @@ public class TestQuestionnaire {
 
         public When questionnaire(IBaseResource resource) {
             questionnaire = resource;
-            return this;
-        }
-
-        public When questionnaireResponse(IBaseResource resource) {
-            questionnaireResponse = resource;
             return this;
         }
 

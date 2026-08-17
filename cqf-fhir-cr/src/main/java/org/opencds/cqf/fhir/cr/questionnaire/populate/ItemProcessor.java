@@ -60,7 +60,6 @@ public class ItemProcessor {
 
     protected void processGroupItem(
             PopulateRequest request,
-            IQuestionnaireItemComponentAdapter item,
             IQuestionnaireResponseItemComponentAdapter responseItem,
             List<IQuestionnaireItemComponentAdapter> childItems) {
         childItems.forEach(childItem -> {
@@ -79,7 +78,7 @@ public class ItemProcessor {
                 .map(IQuestionnaireItemComponentAdapter.class::cast)
                 .collect(Collectors.toList());
         if (item.isGroupItem()) {
-            processGroupItem(request, item, responseItem, childItems);
+            processGroupItem(request, responseItem, childItems);
         } else {
             request.setContextVariable(responseItem.get());
             var rawParams = request.getRawParameters();
@@ -90,7 +89,7 @@ public class ItemProcessor {
                 var childResponseItems = childItems.stream()
                         .map(c -> processSingleItem(request, c, List.of(c.newResponseItem())))
                         .flatMap(Collection::stream)
-                        .collect(Collectors.toList());
+                        .toList();
                 var answers = responseItem.getAnswer();
                 if (answers.isEmpty()) {
                     answers.add(responseItem.newAnswer(null));

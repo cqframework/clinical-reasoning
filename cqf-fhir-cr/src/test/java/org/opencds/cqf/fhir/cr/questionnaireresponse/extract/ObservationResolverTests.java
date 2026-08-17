@@ -35,7 +35,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
-public class ObservationResolverTests {
+class ObservationResolverTests {
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
 
     @Mock

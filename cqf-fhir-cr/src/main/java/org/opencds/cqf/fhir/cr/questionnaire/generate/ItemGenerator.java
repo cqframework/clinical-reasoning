@@ -94,7 +94,7 @@ public class ItemGenerator {
             if (caseFeature != null) {
                 var definitionContextExt = questionnaireItem.addExtension();
                 // Switch to SDC extension once new version is published
-                // definitionContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
+                // definitionContextExt.setUrl(Constants.SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT)
                 definitionContextExt.setUrl(Constants.CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
                 var definitionContextExtAdapter =
                         questionnaireItem.getAdapterFactory().createBase(definitionContextExt);

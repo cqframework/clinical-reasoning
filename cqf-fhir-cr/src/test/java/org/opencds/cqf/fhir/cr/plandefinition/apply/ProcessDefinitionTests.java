@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPDApplyRequestForVersion;
-import static org.opencds.cqf.fhir.utility.search.Searches.byUrl;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -69,7 +68,6 @@ class ProcessDefinitionTests {
     @Test
     void applyActivityDefinitionShouldReturnNullOnException() {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
-        var definition = new CanonicalType(ACTIVITYDEFINITION);
         var activityDef = new ActivityDefinition().setUrl(ACTIVITYDEFINITION);
         activityDef.setId("test");
         var result = fixture.applyActivityDefinition(request, activityDef);
@@ -81,7 +79,6 @@ class ProcessDefinitionTests {
     @Test
     void applyNestedPlanDefinitionShouldReturnNullOnException() {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
-        var definition = new CanonicalType(PLANDEFINITION);
         var nestedPlanDef = new PlanDefinition().setUrl(PLANDEFINITION);
         nestedPlanDef.setId("nested");
         doThrow(new RuntimeException("boom")).when(applyProcessor).applyPlanDefinition(any());
@@ -96,7 +93,6 @@ class ProcessDefinitionTests {
         var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType(QUESTIONNAIRE);
         var expectedQuestionnaire = new Questionnaire().setUrl(QUESTIONNAIRE);
-        var params = byUrl(QUESTIONNAIRE);
         expectedQuestionnaire.setId("q1");
         doReturn(toSearchBundle(List.of(expectedQuestionnaire)))
                 .when(fixture)

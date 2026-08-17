@@ -76,7 +76,6 @@ public class TestItemGenerator {
     public static class When {
         private final IRepository repository;
         private final QuestionnaireProcessor processor;
-        //        private IIdType profileId;
         private List<IPrimitiveType<String>> profileUrl;
         private IBaseResource profile;
         private String id;
@@ -86,11 +85,6 @@ public class TestItemGenerator {
             this.processor = itemGenerator;
             this.profileUrl = new ArrayList<>();
         }
-
-        //        public When profileId(IIdType id) {
-        //            profileId = id;
-        //            return this;
-        //        }
 
         public When profileUrl(IPrimitiveType<String> url) {
             profileUrl.add(url);

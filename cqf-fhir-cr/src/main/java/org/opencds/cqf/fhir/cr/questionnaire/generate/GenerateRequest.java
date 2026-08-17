@@ -48,7 +48,6 @@ public class GenerateRequest implements IQuestionnaireRequest {
                         getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) p))
                 .toList();
         addedProfiles = new ArrayList<>();
-        // setNextProfileAdapter();
         this.supportedOnly = supportedOnly;
         this.minimalOnly = minimalOnly;
         this.libraryEngine = libraryEngine;

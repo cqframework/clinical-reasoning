@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cql;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.fhir.utility.Constants.DATA_ABSENT_REASON;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
@@ -22,6 +23,7 @@ import org.cqframework.cql.cql2elm.StringLibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.execution.EvaluationParams;
@@ -264,7 +266,12 @@ public class LibraryEngine {
                 .map(adapterFactory::createParametersParameter)
                 .map(param -> {
                     if (param.hasValue()) {
-                        return param.getValue();
+                        if (((IBaseHasExtensions) param.getValue())
+                                .getExtension().stream().anyMatch(e -> DATA_ABSENT_REASON.equals(e.getUrl()))) {
+                            return null;
+                        } else {
+                            return param.getValue();
+                        }
                     } else if (param.hasResource()) {
                         return param.getResource();
                     } else if (param.hasPart()) {

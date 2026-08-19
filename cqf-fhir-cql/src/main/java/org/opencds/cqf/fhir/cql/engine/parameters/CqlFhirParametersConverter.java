@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cql.engine.parameters;
 
 import static java.util.Objects.requireNonNull;
+import static org.opencds.cqf.cql.engine.fhir.ConstantsKt.fhirModelNamespaceUri;
 
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -400,7 +401,7 @@ public class CqlFhirParametersConverter {
 
     public Object convertToFhirIfNeeded(Object value) {
         return value instanceof ClassInstance classInstance
-                        && classInstance.getType().getNamespaceURI().equals(FhirModelResolver.fhirModelNamespaceUri)
+                        && classInstance.getType().getNamespaceURI().equals(fhirModelNamespaceUri)
                 ? toFhirValue(classInstance)
                 : value;
     }
@@ -441,7 +442,7 @@ public class CqlFhirParametersConverter {
         IBase instance;
         try {
             if (clazz.isEnum()) {
-                instance = (IBase) modelResolver.createHapiInstance$engine_fhir(typeName);
+                instance = (IBase) modelResolver.createHapiInstance(typeName);
             } else {
                 instance = (IBase) clazz.getDeclaredConstructor().newInstance();
             }

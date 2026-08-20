@@ -811,6 +811,17 @@ class ExpandHelperTest {
         assertNull(thrown, "ValueSet should be expanded via the configured terminology endpoint");
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
         assertEquals(3, vs.getExpansion().getContains().size());
+
+        // Because the endpoint is not the ValueSet's authoritative source, the expansion must be
+        // flagged with a warning parameter indicating it may be non-authoritative.
+        var warningParameters = vs.getExpansion().getParameter().stream()
+                .filter(p -> "warning".equals(p.getName()))
+                .toList();
+        assertEquals(1, warningParameters.size(), "expected a single non-authoritative warning parameter");
+        var warningText = warningParameters.get(0).getValue().primitiveValue();
+        assertTrue(
+                warningText.contains("not its authoritative source"),
+                "warning should explain the expansion was completed non-authoritatively: " + warningText);
     }
 
     // Companion to #1073: the CRMI artifactEndpointConfiguration path expands a non-locally-expandable

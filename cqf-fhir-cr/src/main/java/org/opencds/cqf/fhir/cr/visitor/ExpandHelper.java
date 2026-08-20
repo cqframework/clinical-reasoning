@@ -193,6 +193,12 @@ public class ExpandHelper {
             if (terminologyEndpoint.isPresent() && !endpointIsAuthoritativeSource) {
                 try {
                     terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+                    // The endpoint used is not this ValueSet's authoritative source, so surface a
+                    // warning that the expansion was completed non-authoritatively.
+                    addExpansionWarningParameter(
+                            valueSet,
+                            "Expansion for ValueSet %s was completed by the configured terminology endpoint, which is not its authoritative source; the expansion may be non-authoritative."
+                                    .formatted(valueSet.getUrl()));
                     expandedList.add(valueSet.getUrl());
                     return;
                 } catch (TerminologyServerExpansionException e) {

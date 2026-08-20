@@ -14,6 +14,7 @@ import org.opencds.cqf.fhir.cr.crmi.R4ReleaseManifestService;
 import org.opencds.cqf.fhir.cr.crmi.R4ReleaseService;
 import org.opencds.cqf.fhir.cr.ecr.r4.R4ERSDTransformService;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
+import org.opencds.cqf.fhir.cr.hapi.config.CrEcrValidateConfig;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderLoader;
 import org.opencds.cqf.fhir.cr.hapi.config.ProviderSelector;
 import org.opencds.cqf.fhir.cr.hapi.config.RepositoryConfig;
@@ -69,7 +70,8 @@ import org.springframework.context.annotation.Import;
     WithdrawOperationConfig.class,
     ReviseOperationConfig.class,
     ArtifactDiffOperationConfig.class,
-    CreateChangelogOperationConfig.class
+    CreateChangelogOperationConfig.class,
+    CrEcrValidateConfig.class
 })
 public class CrR4Config {
 

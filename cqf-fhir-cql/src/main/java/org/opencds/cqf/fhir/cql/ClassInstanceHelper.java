@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.cql;
 
-import static org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver.fhirModelNamespaceUri;
+import static org.opencds.cqf.cql.engine.fhir.ConstantsKt.fhirModelNamespaceUri;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;

@@ -315,7 +315,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             return;
         }
         var errorMessage = String.format(
-                "Requested version '%s' for resource '%s' not found in repository. Resource will not be included in package.",
+                "Requested version '%s' for resource '%s' could not be resolved from the repository or terminology server. Resource will not be included in package.",
                 requestedVersion, canonical);
         // Create messages OperationOutcome if it doesn't exist yet
         if (messagesWrapper[0] == null) {

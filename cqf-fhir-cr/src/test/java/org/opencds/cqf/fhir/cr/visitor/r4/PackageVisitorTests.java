@@ -647,7 +647,7 @@ class PackageVisitorTests {
     // Reproduces cqframework/clinical-reasoning#1072: a version-pinned ValueSet reference that is
     // not found by the local version-pinned repository search but IS resolved via the
     // terminology-server fallback and included in the package must NOT be reported as
-    // "not found in repository / will not be included".
+    // "unresolvable and excluded from the package".
     @Test
     void valueset_resolved_via_tx_server_is_not_reported_as_missing() {
         final var leafOid = "2.16.840.1.113762.1.4.1146.6";
@@ -688,7 +688,7 @@ class PackageVisitorTests {
                 packagedBundle.getEntry().stream().anyMatch(leafFinder),
                 "ValueSet should be included in the package via the tx-server fallback");
 
-        // ...so it must NOT be reported as "not found in repository / will not be included".
+        // ...so it must NOT be reported as "unresolvable and excluded from the package".
         var manifest = packagedBundle.getEntry().stream()
                 .filter(e -> e.getResource().getResourceType() == ResourceType.Library)
                 .map(e -> (Library) e.getResource())
@@ -701,9 +701,8 @@ class PackageVisitorTests {
                 .map(OperationOutcome.class::cast)
                 .flatMap(oo -> oo.getIssue().stream())
                 .map(issue -> issue.getDiagnostics())
-                .anyMatch(d -> d != null && d.contains(leafOid) && d.contains("not found in repository"));
-        assertFalse(
-                reportedMissing, "ValueSet included in the package must not be reported as 'not found in repository'");
+                .anyMatch(d -> d != null && d.contains(leafOid) && d.contains("could not be resolved"));
+        assertFalse(reportedMissing, "ValueSet included in the package must not be reported as unable to be resolved");
     }
 
     @Test
@@ -1448,8 +1447,8 @@ class PackageVisitorTests {
                 diagnostics.contains("http://example.org/fhir/ValueSet/test-valueset"),
                 "Expected error message to mention the ValueSet URL");
         assertTrue(
-                diagnostics.contains("not found in repository"),
-                "Expected error message to indicate version not found");
+                diagnostics.contains("could not be resolved from the repository or terminology server"),
+                "Expected error message to indicate the version could not be resolved from repository or terminology server");
         assertTrue(
                 diagnostics.contains("will not be included in package"),
                 "Expected error message to indicate resource exclusion");

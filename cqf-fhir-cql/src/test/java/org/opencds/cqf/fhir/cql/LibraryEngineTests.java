@@ -4,7 +4,6 @@ import static kotlinx.io.CoreKt.buffered;
 import static kotlinx.io.JvmCoreKt.asSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
@@ -12,6 +11,7 @@ import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.util.ParametersUtil;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -21,7 +21,6 @@ import kotlinx.io.Source;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
@@ -39,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
+@SuppressWarnings("UnstableApiUsage")
 class LibraryEngineTests {
 
     IRepository repository;
@@ -196,7 +196,7 @@ class LibraryEngineTests {
         var result3 = libraryEngine.resolveExpression(patientId, expression1, params2, null, null, null, null);
         var result4 = libraryEngine.resolveExpression(patientId, expression2, params2, null, null, null, null);
         assertTrue(codeableConcept1.equalsDeep((CodeableConcept) result1.get(0)));
-        assertNull(((BooleanType) result2.get(0)).getValue());
+        assertEquals(0, result2.size());
         assertTrue(codeableConcept2.equalsDeep((CodeableConcept) result3.get(0)));
         assertEquals(codeableConcept2.getCodingFirstRep().getDisplay(), ((StringType) result4.get(0)).getValue());
     }
@@ -218,5 +218,30 @@ class LibraryEngineTests {
 
         var result = libraryEngine.resolveExpression(patientId, expression, params, null, null, null, null);
         assertEquals("Alice Marie", ((StringType) result.get(0)).getValue());
+    }
+
+    @Test
+    void resolveParameterValuesHandlesDataAbsent() {
+        var expression = "ExtensionForTask";
+        var parser = repository.fhirContext().newJsonParser();
+        var params = parser.parseResource("{\n"
+                + "  \"resourceType\": \"Parameters\",\n"
+                + "  \"parameter\": [\n"
+                + "    {\n"
+                + "      \"name\": \"" + expression + "\",\n"
+                + "      \"_valueBoolean\": {\n"
+                + "        \"extension\": [\n"
+                + "          {\n"
+                + "            \"url\": \"http://hl7.org/fhir/StructureDefinition/data-absent-reason\",\n"
+                + "            \"valueCode\": \"unknown\"\n"
+                + "          }\n"
+                + "        ]\n"
+                + "      }\n"
+                + "    }\n"
+                + "  ]\n"
+                + "}");
+        var values = ParametersUtil.getNamedParameters(repository.fhirContext(), params, expression);
+        var actual = libraryEngine.resolveParameterValues(values);
+        assertEquals(0, actual.size());
     }
 }

@@ -3,8 +3,10 @@ package org.opencds.cqf.fhir.cql.engine.retrieve;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -26,17 +28,15 @@ class BaseRetrieveProviderTests {
     final String FHIR_CONDITION = "http://hl7.org/fhir/StructureDefinition/Condition";
     final String US_CORE_CONDITION = "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition";
 
-    private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
-    private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
-
     /**
      * Creates a concrete BaseRetrieveProvider backed by a real FhirContext and SearchParameterResolver.
      * This is needed for tests that exercise methods using the resolver (e.g. populateContextSearchParams)
      * because SearchParameterResolver is a Kotlin final class and cannot be mocked.
      */
-    private BaseRetrieveProvider createRealProvider(FhirContext fhirContext, RetrieveSettings retrieveSettings) {
+    private static BaseRetrieveProvider createRealProvider() {
+        FhirContext fhirContext = FhirContext.forR4Cached();
         TerminologyProvider terminologyProvider = Mockito.mock(TerminologyProvider.class);
-        return new BaseRetrieveProvider(fhirContext, terminologyProvider, retrieveSettings) {
+        return new BaseRetrieveProvider(fhirContext, terminologyProvider, new RetrieveSettings()) {
             @Override
             public Iterable<Value> retrieve(
                     String context,
@@ -56,14 +56,12 @@ class BaseRetrieveProviderTests {
         };
     }
 
-    private BaseRetrieveProvider createRealProvider() {
-        return createRealProvider(fhirContextR4, new RetrieveSettings());
-    }
-
     @Test
     void testProfileParameterTypeIsCorrectForVersion() {
         var retrieveSettings = new RetrieveSettings().setProfileMode(PROFILE_MODE.DECLARED);
-        var fixture = createRealProvider(fhirContextR4, retrieveSettings);
+        var fixture = Mockito.mock(BaseRetrieveProvider.class, Mockito.CALLS_REAL_METHODS);
+        doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
+        doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Multimap<String, List<IQueryParameterType>> searchParamsR4 = HashMultimap.create();
         fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
@@ -74,7 +72,7 @@ class BaseRetrieveProviderTests {
                         .orElseThrow()
                         .get(0));
 
-        fixture = createRealProvider(fhirContextR5, retrieveSettings);
+        doReturn(FhirVersionEnum.R5).when(fixture).getFhirVersion();
         Multimap<String, List<IQueryParameterType>> searchParamsR5 = HashMultimap.create();
         fixture.populateTemplateSearchParams(searchParamsR5, CONDITION, US_CORE_CONDITION);
         assertInstanceOf(
@@ -88,7 +86,9 @@ class BaseRetrieveProviderTests {
     @Test
     void testProfileParameterIsNotAddedForDefaultProfile() {
         var retrieveSettings = new RetrieveSettings().setProfileMode(PROFILE_MODE.DECLARED);
-        var fixture = createRealProvider(fhirContextR4, retrieveSettings);
+        var fixture = Mockito.mock(BaseRetrieveProvider.class, Mockito.CALLS_REAL_METHODS);
+        doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
+        doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Multimap<String, List<IQueryParameterType>> searchParamsR4 = HashMultimap.create();
         fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, FHIR_CONDITION);
@@ -98,7 +98,9 @@ class BaseRetrieveProviderTests {
     @Test
     void testProfileParameterIsNotAddedWhenProfileModeOff() {
         var retrieveSettings = new RetrieveSettings().setProfileMode(PROFILE_MODE.OFF);
-        var fixture = createRealProvider(fhirContextR4, retrieveSettings);
+        var fixture = Mockito.mock(BaseRetrieveProvider.class, Mockito.CALLS_REAL_METHODS);
+        doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
+        doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Multimap<String, List<IQueryParameterType>> searchParamsR4 = HashMultimap.create();
         fixture.populateTemplateSearchParams(searchParamsR4, CONDITION, US_CORE_CONDITION);
@@ -108,7 +110,9 @@ class BaseRetrieveProviderTests {
     @Test
     void testPopulateTemplateSearchParams_producesMutableOrList() {
         var retrieveSettings = new RetrieveSettings().setProfileMode(PROFILE_MODE.DECLARED);
-        var fixture = createRealProvider(fhirContextR4, retrieveSettings);
+        var fixture = Mockito.mock(BaseRetrieveProvider.class, Mockito.CALLS_REAL_METHODS);
+        doReturn(retrieveSettings).when(fixture).getRetrieveSettings();
+        doReturn(FhirVersionEnum.R4).when(fixture).getFhirVersion();
 
         Multimap<String, List<IQueryParameterType>> searchParams = HashMultimap.create();
         fixture.populateTemplateSearchParams(searchParams, CONDITION, US_CORE_CONDITION);

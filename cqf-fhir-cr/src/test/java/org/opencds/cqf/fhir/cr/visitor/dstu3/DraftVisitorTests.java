@@ -27,6 +27,7 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -410,5 +411,72 @@ class DraftVisitorTests {
 
         assertTrue(library.getExtension().isEmpty());
         assertTrue(library.getContained().isEmpty());
+    }
+
+    @Test
+    void library_draft_floats_manifest_and_grouper_leaf_references() {
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        final var leafUrl = "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6";
+        // Code system versions are pinned deliberately, so the manifest's pinned reference must
+        // not be floated just because the grouper mentions the same system.
+        final var codeSystemUrl = "http://snomed.info/sct";
+        final var pinnedCodeSystem = codeSystemUrl + "|http://snomed.info/sct/731000124108/version/20250901";
+        var grouperToSeed =
+                repo.read(ValueSet.class, new IdType("ValueSet/dxtc")).copy();
+        grouperToSeed.getCompose().addInclude().setSystem(codeSystemUrl);
+        repo.update(grouperToSeed);
+
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        library.addRelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource(new Reference(pinnedCodeSystem));
+        // the manifest and the grouper both pin this leaf before drafting
+        assertTrue(library.getRelatedArtifact().stream()
+                .anyMatch(ra -> (leafUrl + "|20210526").equals(ra.getResource().getReference())));
+
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter().setName("version").setValue(new StringType("1.2.3"));
+        Bundle returnedBundle = (Bundle) libraryAdapter.accept(new DraftVisitor(repo), params);
+        assertNotNull(returnedBundle);
+
+        var draftedManifest = returnedBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .map(entry ->
+                        repo.read(Library.class, new IdType(entry.getResponse().getLocation())))
+                .filter(lib -> "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary".equals(lib.getUrl()))
+                .findFirst();
+        assertTrue(draftedManifest.isPresent());
+
+        var draftedGrouper = returnedBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("ValueSet"))
+                .map(entry ->
+                        repo.read(ValueSet.class, new IdType(entry.getResponse().getLocation())))
+                .filter(vs -> "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc".equals(vs.getUrl()))
+                .findFirst();
+        assertTrue(draftedGrouper.isPresent());
+
+        var grouperLeafReferences = draftedGrouper.get().getCompose().getInclude().stream()
+                .flatMap(include -> include.getValueSet().stream())
+                .map(PrimitiveType::getValueAsString)
+                .filter(resource -> resource.startsWith(leafUrl))
+                .toList();
+        var manifestLeafReferences = draftedManifest.get().getRelatedArtifact().stream()
+                .map(ra -> ra.getResource().getReference())
+                .filter(resource -> resource != null && resource.startsWith(leafUrl))
+                .toList();
+
+        // The grouper floats its leaves to latest, the manifest's depends-on has to float with it.
+        // Assert the pair, not just that each side is individually bare.
+        assertFalse(grouperLeafReferences.isEmpty());
+        assertEquals(grouperLeafReferences, manifestLeafReferences);
+        assertEquals(List.of(leafUrl), manifestLeafReferences);
+
+        // only leaf ValueSets float - the code system keeps its pin
+        assertTrue(draftedManifest.get().getRelatedArtifact().stream()
+                .anyMatch(ra -> pinnedCodeSystem.equals(ra.getResource().getReference())));
     }
 }

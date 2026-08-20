@@ -34,6 +34,8 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
+import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
@@ -761,6 +763,272 @@ class ExpandHelperTest {
 
         verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
         verify(repo, never()).search(any(), any(), any(Multimap.class), any());
+    }
+
+    // Reproduces cqframework/clinical-reasoning#1073: a ValueSet whose authoritative source differs
+    // from the configured terminologyEndpoint and which cannot be expanded locally (it has a filter)
+    // must still be expanded via the configured endpoint, not fail with
+    // "Cannot expand ValueSet without terminology server".
+    @Test
+    void valueSetNotLocallyExpandable_withMismatchedAuthoritativeSource_usesConfiguredEndpoint() {
+        var endpoint = new Endpoint();
+        endpoint.setAddress("https://tx.fhir.org/r4");
+
+        var vs = new ValueSet();
+        vs.setUrl("http://hl7.org/fhir/ValueSet/allergyintolerance-clinical");
+        // authoritative source (hl7.org) differs from the tx.fhir.org endpoint
+        vs.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType("http://hl7.org/fhir"));
+        // a filter makes local expansion impossible
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://snomed.info/sct")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.ISA)
+                .setValue("609328004");
+
+        // repository cannot expand it; the terminology server can
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var expanded = createLeafWithUrl(vs.getUrl());
+        var client = mockTerminologyServerWithValueSetR4(expanded);
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        Exception thrown = null;
+        try {
+            expandHelper.expandValueSet(
+                    (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                    factory.createParameters(new Parameters()),
+                    Optional.of(factory.createEndpoint(endpoint)),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
+        } catch (Exception e) {
+            thrown = e;
+        }
+
+        // The configured endpoint should be used rather than skipped.
+        assertNull(thrown, "ValueSet should be expanded via the configured terminology endpoint");
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+        assertEquals(3, vs.getExpansion().getContains().size());
+
+        // Because the endpoint is not the ValueSet's authoritative source, the expansion must be
+        // flagged with a warning parameter indicating it may be non-authoritative.
+        var warningParameters = vs.getExpansion().getParameter().stream()
+                .filter(p -> "warning".equals(p.getName()))
+                .toList();
+        assertEquals(1, warningParameters.size(), "expected a single non-authoritative warning parameter");
+        var warningText = warningParameters.get(0).getValue().primitiveValue();
+        assertTrue(
+                warningText.contains("not its authoritative source"),
+                "warning should explain the expansion was completed non-authoritatively: " + warningText);
+    }
+
+    // Companion to #1073: the CRMI artifactEndpointConfiguration path expands a non-locally-expandable
+    // ValueSet WITHOUT relying on the valueset-authoritativeSource extension and WITHOUT a legacy
+    // terminologyEndpoint. Routing is by the config's artifactRoute (here, a route-less catch-all).
+    @Test
+    void valueSetNotLocallyExpandable_withArtifactEndpointConfiguration_usesConfiguredEndpoint() {
+        var vs = new ValueSet();
+        vs.setUrl("http://hl7.org/fhir/ValueSet/allergyintolerance-clinical");
+        // deliberately NO authoritative-source extension; a filter makes local expansion impossible
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://snomed.info/sct")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.ISA)
+                .setValue("609328004");
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var expanded = createLeafWithUrl(vs.getUrl());
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expandWithConfigurations(any(IValueSetAdapter.class), any(), any(IParametersAdapter.class)))
+                .thenReturn(expanded);
+
+        var expandHelper = new ExpandHelper(rep, client);
+        // route-less catch-all config, and NO legacy terminologyEndpoint
+        var config = new ArtifactEndpointConfiguration(null, "https://tx.fhir.org/r4", null);
+
+        Exception thrown = null;
+        try {
+            expandHelper.expandValueSet(
+                    (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                    factory.createParameters(new Parameters()),
+                    java.util.List.of(config),
+                    Optional.empty(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new Date());
+        } catch (Exception e) {
+            thrown = e;
+        }
+
+        assertNull(thrown, "artifactEndpointConfiguration should expand the ValueSet without a terminologyEndpoint");
+        verify(client, times(1))
+                .expandWithConfigurations(any(IValueSetAdapter.class), any(), any(IParametersAdapter.class));
+        assertEquals(3, vs.getExpansion().getContains().size());
+    }
+
+    // #1073 fallback path: when the configured endpoint is attempted for a non-locally-expandable
+    // ValueSet with a mismatched authoritative source but the terminology server fails, the failure is
+    // logged and the operation ultimately reports it could not be expanded.
+    @Test
+    void valueSetNotLocallyExpandable_mismatchedAuthoritativeSource_endpointFails_reportsCannotExpand() {
+        var endpoint = new Endpoint();
+        endpoint.setAddress("https://tx.fhir.org/r4");
+
+        var vs = new ValueSet();
+        vs.setUrl("http://hl7.org/fhir/ValueSet/allergyintolerance-clinical");
+        vs.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType("http://hl7.org/fhir"));
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://snomed.info/sct")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.ISA)
+                .setValue("609328004");
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenThrow(new TerminologyServerExpansionException("tx failure"));
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        // Endpoint fallback is attempted (throws, is logged), then the repository fallback fails too.
+        assertThrows(
+                Exception.class,
+                () -> expandHelper.expandValueSet(
+                        (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                        factory.createParameters(new Parameters()),
+                        Optional.of(factory.createEndpoint(endpoint)),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new Date()));
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+    }
+
+    // Validates the normalization fix: an authoritative source on the same server but expressed as
+    // http + trailing slash still matches an https, no-trailing-slash endpoint, so the ValueSet is
+    // expanded directly against the endpoint (first gate) rather than composed locally.
+    @Test
+    void authoritativeSourceMatchingEndpointAfterNormalization_expandsDirectly() {
+        var endpoint = new Endpoint();
+        endpoint.setAddress("https://tx.fhir.org/r4");
+
+        var vs = createLeafWithUrl("https://tx.fhir.org/r4/ValueSet/leaf");
+        vs.addExtension().setUrl(Constants.AUTHORITATIVE_SOURCE_URL).setValue(new UriType("http://tx.fhir.org/r4/"));
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var expanded = createLeafWithUrl(vs.getUrl());
+        var client = mockTerminologyServerWithValueSetR4(expanded);
+
+        var expandHelper = new ExpandHelper(rep, client);
+        expandHelper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+        verify(rep, never()).search(any(), any(), any(Multimap.class), any());
+        assertEquals(3, vs.getExpansion().getContains().size());
+    }
+
+    // No endpoint at all: a non-locally-expandable ValueSet falls straight through to the repository
+    // fallback (the endpoint attempt is skipped) and reports it could not be expanded.
+    @Test
+    void valueSetNotLocallyExpandable_withoutEndpoint_reportsCannotExpand() {
+        var vs = new ValueSet();
+        vs.setUrl("http://hl7.org/fhir/ValueSet/with-filter");
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://loinc.org")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.EQUAL)
+                .setValue("1234-5");
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var client = mockTerminologyServerWithValueSetR4(new ValueSet());
+        var expandHelper = new ExpandHelper(rep, client);
+
+        assertThrows(
+                Exception.class,
+                () -> expandHelper.expandValueSet(
+                        (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                        factory.createParameters(new Parameters()),
+                        Optional.empty(),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new Date()));
+        verify(client, never()).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+    }
+
+    // Endpoint IS the authoritative source (no authoritative-source extension) but its expand fails, and
+    // the ValueSet is not locally expandable: the first-gate attempt is logged, and the fallback does NOT
+    // retry the same endpoint before reporting it could not be expanded.
+    @Test
+    void endpointIsAuthoritativeSource_expandFails_notLocallyExpandable_isNotRetried() {
+        var endpoint = new Endpoint();
+        endpoint.setAddress("https://tx.fhir.org/r4");
+
+        var vs = new ValueSet();
+        vs.setUrl("https://tx.fhir.org/r4/ValueSet/with-filter"); // no authoritative-source extension
+        vs.getCompose()
+                .addInclude()
+                .setSystem("http://loinc.org")
+                .addFilter()
+                .setProperty("concept")
+                .setOp(org.hl7.fhir.r4.model.ValueSet.FilterOperator.EQUAL)
+                .setValue("1234-5");
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenThrow(new TerminologyServerExpansionException("tx failure"));
+
+        var expandHelper = new ExpandHelper(rep, client);
+
+        assertThrows(
+                Exception.class,
+                () -> expandHelper.expandValueSet(
+                        (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                        factory.createParameters(new Parameters()),
+                        Optional.of(factory.createEndpoint(endpoint)),
+                        new ArrayList<>(),
+                        new ArrayList<>(),
+                        new Date()));
+        // attempted exactly once (first gate); the fallback does not retry the same authoritative endpoint
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+    }
+
+    // A blank endpoint address normalizes to no address, so it can't match an authoritative source; with
+    // no authoritative-source extension the endpoint is still used (first gate).
+    @Test
+    void blankEndpointAddress_stillUsedWhenNoAuthoritativeSource() {
+        var endpoint = new Endpoint();
+        endpoint.setAddress("   ");
+
+        var vs = createLeafWithUrl("http://test.org/ValueSet/leaf");
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var expanded = createLeafWithUrl(vs.getUrl());
+        var client = mockTerminologyServerWithValueSetR4(expanded);
+
+        var expandHelper = new ExpandHelper(rep, client);
+        expandHelper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vs),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new Date());
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any());
+        assertEquals(3, vs.getExpansion().getContains().size());
     }
 
     @Test

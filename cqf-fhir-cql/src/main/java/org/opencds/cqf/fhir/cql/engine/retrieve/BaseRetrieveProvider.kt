@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException
 import ca.uhn.fhir.util.ExtensionUtil
 import com.google.common.collect.Multimap
 import java.util.function.Predicate
-import org.apache.commons.lang3.StringUtils
 import org.hl7.fhir.instance.model.api.*
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver
 import org.opencds.cqf.cql.engine.retrieve.RetrieveProvider
@@ -309,8 +308,8 @@ protected constructor(
     ) {
         if (
             this.retrieveSettings.profileMode != PROFILE_MODE.OFF &&
-                StringUtils.isNotBlank(templateId) &&
-                !templateId!!.startsWith("http://hl7.org/fhir/StructureDefinition/$dataType")
+                !templateId.isNullOrBlank() &&
+                !templateId.startsWith("http://hl7.org/fhir/StructureDefinition/$dataType")
         ) {
             val profileParam =
                 if (this.fhirVersion!!.isOlderThan(FhirVersionEnum.R5)) UriParam(templateId)
@@ -331,8 +330,7 @@ protected constructor(
         }
 
         val ref =
-            if (StringUtils.isNotBlank(context))
-                IdDt(contextValue as String).withResourceType(context)
+            if (!context.isNullOrBlank()) IdDt(contextValue as String).withResourceType(context)
             else IdDt(contextValue as String)
         val sp =
             this.resolver.getSearchParameterDefinition(dataType, contextPath)
@@ -447,7 +445,7 @@ protected constructor(
             )
         }
 
-        if (StringUtils.isNotBlank(dateParamName)) {
+        if (!dateParamName.isNullOrBlank()) {
             val sp =
                 this.resolver.getSearchParameterDefinition(dataType, dateParamName)
                     ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
@@ -457,7 +455,7 @@ protected constructor(
             val lte = DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)
 
             searchParams.put(sp.name, mutableListOf(CompositeParam(gte, lte)))
-        } else if (StringUtils.isNotBlank(dateLowPath)) {
+        } else if (!dateLowPath.isNullOrBlank()) {
             val dateRangeParam = mutableListOf<IQueryParameterType?>()
             val dateParam = DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, start)
             dateRangeParam.add(dateParam)
@@ -466,7 +464,7 @@ protected constructor(
                     ?: throw InternalErrorException(RESOLVED_SP_DEF_NULL)
 
             searchParams.put(sp.name, dateRangeParam)
-        } else if (StringUtils.isNotBlank(dateHighPath)) {
+        } else if (!dateHighPath.isNullOrBlank()) {
             val dateRangeParam = mutableListOf<IQueryParameterType?>()
             val dateParam = DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, end)
             dateRangeParam.add(dateParam)

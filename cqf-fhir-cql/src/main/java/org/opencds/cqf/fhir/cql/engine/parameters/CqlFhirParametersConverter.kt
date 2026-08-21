@@ -126,21 +126,28 @@ class CqlFhirParametersConverter(
             value = this.fhirTypeConverter.toFhirType(value as Value)
         }
 
-        if (value is IBaseDatatype) {
-            val ppca = this.addPart(pa, name)
-            ppca.setValue(value)
-        } else if (value is IBaseBackboneElement) {
-            // Likely already a parameter part
-            val ppca = this.adapterFactory.createParametersParameter(value)
-            ppca.setName(name)
-            pa.addParameter(ppca.get())
-        } else if (value is IBaseResource) {
-            val ppca = this.addPart(pa, name)
-            ppca.setResource(value)
-        } else {
-            throw IllegalArgumentException(
-                "unknown type when trying to convert to parameters: ${value!!.javaClass.simpleName}"
-            )
+        when (value) {
+            is IBaseDatatype -> {
+                val ppca = this.addPart(pa, name)
+                ppca.setValue(value)
+            }
+
+            is IBaseBackboneElement -> {
+                // Likely already a parameter part
+                val ppca = this.adapterFactory.createParametersParameter(value)
+                ppca.setName(name)
+                pa.addParameter(ppca.get())
+            }
+
+            is IBaseResource -> {
+                val ppca = this.addPart(pa, name)
+                ppca.setResource(value)
+            }
+
+            else ->
+                throw IllegalArgumentException(
+                    "unknown type when trying to convert to parameters: ${value!!.javaClass.simpleName}"
+                )
         }
     }
 
@@ -290,14 +297,12 @@ class CqlFhirParametersConverter(
         return parameterMap
     }
 
-    fun toCqlParameters(
-        parameters: MutableMap<kotlin.String, Any?>
-    ): MutableMap<kotlin.String, Value?> {
+    fun toCqlParameters(parameters: Map<kotlin.String, Any?>): MutableMap<kotlin.String, Value?> {
         val parameterMap = mutableMapOf<kotlin.String, Value?>()
         parameters.forEach { (k, v) ->
             val className = v!!.javaClass.name
             val value: Value?
-            if (v is MutableList<*>) {
+            if (v is kotlin.collections.List<*>) {
                 value = List(v.map { value -> this.convertToCqlIfNeeded(value!!) })
             } else if (className.contains("org.hl7.fhir") && className.contains("Tuple")) {
                 val elements =
@@ -306,7 +311,7 @@ class CqlFhirParametersConverter(
                         .getProperties()
                         .mapValues { entry ->
                             val listValue =
-                                (entry.value as MutableList<*>).map { e ->
+                                (entry.value as kotlin.collections.List<*>).map { e ->
                                     modelResolver.toCqlValue(e, false)
                                 }
                             val cqlValue =
@@ -374,15 +379,21 @@ class CqlFhirParametersConverter(
     fun toFhirValue(valueToConvert: Value?, parentName: kotlin.String?): IBase {
         var clazz: Class<*>?
         val typeName: kotlin.String
-        if (valueToConvert is ClassInstance) {
-            typeName = valueToConvert.type.localPart
-            clazz = modelResolver.resolveType(typeName)
-        } else if (valueToConvert is NamedTypeValue) {
-            typeName = valueToConvert.type.localPart
-            clazz = modelResolver.resolveType(typeName)
-        } else {
-            typeName = valueToConvert!!.typeAsString
-            clazz = null
+        when (valueToConvert) {
+            is ClassInstance -> {
+                typeName = valueToConvert.type.localPart
+                clazz = modelResolver.resolveType(typeName)
+            }
+
+            is NamedTypeValue -> {
+                typeName = valueToConvert.type.localPart
+                clazz = modelResolver.resolveType(typeName)
+            }
+
+            else -> {
+                typeName = valueToConvert!!.typeAsString
+                clazz = null
+            }
         }
         requireNotNull(clazz) { "Could not resolve FHIR type: $typeName" }
         if (
@@ -423,20 +434,18 @@ class CqlFhirParametersConverter(
         if (instance is IPrimitiveType<*>) {
             val primitiveValue =
                 if (valueToConvert is ClassInstance) valueToConvert["value"] else valueToConvert
-            if (primitiveValue is DateTime) {
-                modelResolver.setPrimitiveValue(primitiveValue, instance)
-            } else if (primitiveValue is Date) {
-                modelResolver.setPrimitiveValue(primitiveValue, instance)
-            } else if (primitiveValue is Boolean) {
-                modelResolver.setPrimitiveValue(primitiveValue.value, instance)
-            } else if (primitiveValue is Integer) {
-                modelResolver.setPrimitiveValue(primitiveValue.value, instance)
-            } else if (primitiveValue is Decimal) {
-                modelResolver.setPrimitiveValue(primitiveValue.value, instance)
-            } else if (primitiveValue is String) {
-                modelResolver.setPrimitiveValue(primitiveValue.value, instance)
-            } else if (primitiveValue != null) {
-                modelResolver.setPrimitiveValue(primitiveValue.toString(), instance)
+
+            when (primitiveValue) {
+                is DateTime -> modelResolver.setPrimitiveValue(primitiveValue, instance)
+                is Date -> modelResolver.setPrimitiveValue(primitiveValue, instance)
+                is Boolean -> modelResolver.setPrimitiveValue(primitiveValue.value, instance)
+                is Integer -> modelResolver.setPrimitiveValue(primitiveValue.value, instance)
+                is Decimal -> modelResolver.setPrimitiveValue(primitiveValue.value, instance)
+                is String -> modelResolver.setPrimitiveValue(primitiveValue.value, instance)
+                else ->
+                    if (primitiveValue != null) {
+                        modelResolver.setPrimitiveValue(primitiveValue.toString(), instance)
+                    }
             }
             return instance
         }

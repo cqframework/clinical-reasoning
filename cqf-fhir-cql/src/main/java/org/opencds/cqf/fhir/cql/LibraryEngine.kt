@@ -44,7 +44,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         url: String,
         patientId: String?,
         parameters: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         additionalData: IBaseBundle?,
         zonedDateTime: ZonedDateTime?,
         expressions: MutableSet<String>?,
@@ -64,7 +64,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         id: VersionedIdentifier,
         patientId: String?,
         parameters: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         additionalData: IBaseBundle?,
         zonedDateTime: ZonedDateTime?,
         expressions: MutableSet<String>?,
@@ -112,7 +112,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
     fun evaluateExpression(
         expression: String?,
         parameters: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         patientId: String?,
         referencedLibraries: MutableMap<String?, String?>?,
         bundle: IBaseBundle?,
@@ -135,7 +135,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
                 modelResolver.toCqlValue(resourceParameter ?: contextParameter, false)
         }
         if (rawParameters != null) {
-            rawParameters.forEach { (k: String?, v: Any?) ->
+            rawParameters.forEach { (k, v) ->
                 cqlParameters.add(CqlParameterDefinition(k, getModelName(v!!), v is MutableList<*>))
             }
             evaluationParameters.putAll(cqlFhirParametersConverter.toCqlParameters(rawParameters))
@@ -176,7 +176,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         libraryToBeEvaluated: String?,
         referencedLibraries: MutableMap<String?, String?>?,
         parameters: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         bundle: IBaseBundle?,
         contextParameter: IBase?,
         resourceParameter: IBase?,
@@ -274,7 +274,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         patientId: String?,
         expression: CqfExpression,
         params: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         bundle: IBaseBundle?,
         contextParameter: IBase?,
         resourceParameter: IBase?,
@@ -315,7 +315,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         ids: List<VersionedIdentifier>,
         patientId: String?,
         parameters: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         additionalData: IBaseBundle?,
         expressions: MutableSet<String>?,
         cqlFhirParametersConverter: CqlFhirParametersConverter?,
@@ -354,7 +354,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         id: VersionedIdentifier,
         patientId: String?,
         parameters: IBaseParameters?,
-        rawParameters: MutableMap<String?, Any?>?,
+        rawParameters: MutableMap<String, Any?>?,
         additionalData: IBaseBundle?,
         expressions: MutableSet<String>?,
         cqlFhirParametersConverter: CqlFhirParametersConverter?,

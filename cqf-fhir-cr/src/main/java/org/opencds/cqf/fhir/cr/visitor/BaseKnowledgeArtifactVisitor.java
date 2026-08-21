@@ -197,10 +197,18 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                         if (hasUrl) {
                             // Try to resolve version using package source and IG dependencies
                             String canonical = resolveCanonicalWithIgVersion(ra.getReference(), igDependencyVersions);
-                            return Optional.ofNullable(
-                                            SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical))
-                                    .map(bundle -> findResourceMatchingVersion(bundle, canonical, messagesWrapper))
-                                    .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint));
+                            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical);
+                            var resolved = bundle == null ? null : findResourceMatchingVersion(bundle, canonical);
+                            if (resolved == null) {
+                                // Not resolvable from the repository at the requested version; fall back
+                                // to the terminology server before treating the reference as unresolved.
+                                resolved = tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint);
+                            }
+                            if (resolved == null) {
+                                // Unresolvable by any path — surface an accurate message.
+                                addUnresolvedReferenceMessage(canonical, messagesWrapper);
+                            }
+                            return resolved;
                         }
                         return null;
                     })
@@ -261,20 +269,13 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
     }
 
     /**
-     * Finds a resource in the bundle that matches the version specified in the canonical reference.
-     * If a version is specified in the canonical, this method will search through all bundle entries
-     * to find a resource with the matching URL and version. If no version is specified, it returns
-     * the first entry. If a version is specified but no matching version is found, and messagesWrapper is
-     * not null, an issue is added to the OperationOutcome and null is returned.
-     *
-     * @param bundle The bundle containing search results
-     * @param canonical The canonical reference (may include version)
-     * @param messagesWrapper Optional array wrapper containing OperationOutcome to add issues to when version mismatch occurs
-     * @return The matching resource, null if version specified but not found and messagesWrapper is provided,
-     *         or the first resource if no version match is found and messagesWrapper is null
+     * Resolves the resource in the bundle that matches the version in the canonical reference. If the
+     * canonical has no version, returns the latest (or first) entry. If a version is requested but no
+     * entry matches, returns {@code null} so the caller can attempt other resolution paths (e.g. a
+     * terminology server) before treating the reference as unresolved. This method only resolves; it
+     * does not record messages.
      */
-    private IDomainResource findResourceMatchingVersion(
-            IBaseBundle bundle, String canonical, IBaseOperationOutcome[] messagesWrapper) {
+    private IDomainResource findResourceMatchingVersion(IBaseBundle bundle, String canonical) {
         var requestedVersion = Canonicals.getVersion(canonical);
         var requestedUrl = Canonicals.getUrl(canonical);
 
@@ -284,7 +285,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                     .orElseGet(() -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle));
         }
 
-        // Search through all entries to find one matching the requested version
+        // The repository search is already filtered by url + version; re-check defensively.
         var entries = BundleHelper.getEntryResources(bundle);
         for (var resource : entries) {
             if (resource instanceof IDomainResource domainResource) {
@@ -299,33 +300,29 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             }
         }
 
-        // No matching version found
-        if (messagesWrapper != null) {
-            // For $package operation: add error message and return null (don't include resource)
-            var errorMessage = String.format(
-                    "Requested version '%s' for resource '%s' not found in repository. Resource will not be included in package.",
-                    requestedVersion, canonical);
-            // Create messages OperationOutcome if it doesn't exist yet
-            if (messagesWrapper[0] == null) {
-                messagesWrapper[0] = ca.uhn.fhir.util.OperationOutcomeUtil.newInstance(fhirContext());
-            }
-            ca.uhn.fhir.util.OperationOutcomeUtil.addIssue(
-                    fhirContext(), messagesWrapper[0], "error", errorMessage, null, "processing");
-            return null;
-        } else {
-            // For other operations: log warning and return first entry (backward compatibility)
-            var firstResource = (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle);
-            if (firstResource != null) {
-                var firstAdapter =
-                        IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(firstResource);
-                logger.warn(
-                        "Requested version '{}' for resource '{}' not found. Using version '{}' instead.",
-                        requestedVersion,
-                        requestedUrl,
-                        firstAdapter.getVersion());
-            }
-            return firstResource;
+        // No matching version in the repository search result.
+        return null;
+    }
+
+    /**
+     * Records a "version not found" message for a reference that could not be resolved from the
+     * repository or a terminology server. Only versioned references produce a message; unversioned
+     * references resolve to the latest available and are never reported here.
+     */
+    private void addUnresolvedReferenceMessage(String canonical, IBaseOperationOutcome[] messagesWrapper) {
+        var requestedVersion = Canonicals.getVersion(canonical);
+        if (requestedVersion == null || messagesWrapper == null) {
+            return;
         }
+        var errorMessage = String.format(
+                "Requested version '%s' for resource '%s' could not be resolved from the repository or terminology server. Resource will not be included in package.",
+                requestedVersion, canonical);
+        // Create messages OperationOutcome if it doesn't exist yet
+        if (messagesWrapper[0] == null) {
+            messagesWrapper[0] = ca.uhn.fhir.util.OperationOutcomeUtil.newInstance(fhirContext());
+        }
+        ca.uhn.fhir.util.OperationOutcomeUtil.addIssue(
+                fhirContext(), messagesWrapper[0], "error", errorMessage, null, "processing");
     }
 
     /**

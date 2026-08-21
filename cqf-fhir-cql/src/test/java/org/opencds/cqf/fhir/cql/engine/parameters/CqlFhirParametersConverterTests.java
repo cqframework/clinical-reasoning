@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver.fhirModelNamespaceUri;
+import static org.opencds.cqf.cql.engine.fhir.ConstantsKt.fhirModelNamespaceUri;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;

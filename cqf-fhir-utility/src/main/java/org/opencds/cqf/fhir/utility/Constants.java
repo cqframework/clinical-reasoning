@@ -29,6 +29,7 @@ public class Constants {
 
     public static final String FHIR_TYPE_EXTENSION =
             "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
+    public static final String DATA_ABSENT_REASON = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
     public static final String DISPLAY_EXTENSION = "http://hl7.org/fhir/StructureDefinition/display";
     public static final String PERTAINS_TO_GOAL = "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal";
     public static final String REQUEST_DO_NOT_PERFORM = "http://hl7.org/fhir/StructureDefinition/request-doNotPerform";

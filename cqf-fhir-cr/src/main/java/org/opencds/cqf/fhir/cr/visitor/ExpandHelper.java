@@ -106,12 +106,20 @@ public class ExpandHelper {
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .map(url -> ITerminologyServerClient.getAddressBase(url, fhirContext()))
                 .orElse(null);
-        // If terminologyEndpoint exists, and we have no authoritativeSourceUrl or the authoritativeSourceUrl
-        // matches the terminologyEndpoint address then we will use the terminologyEndpoint for expansion
-        if (terminologyEndpoint.isPresent()
-                && (authoritativeSourceUrl == null
-                        || authoritativeSourceUrl.equals(
-                                terminologyEndpoint.get().getAddress()))) {
+        // Normalize the endpoint address the same way as the authoritativeSourceUrl so the comparison
+        // is not defeated by http/https, trailing-slash, or resource-path differences.
+        var endpointAddressBase = terminologyEndpoint
+                .map(IEndpointAdapter::getAddress)
+                .filter(address -> !address.isBlank())
+                .map(address -> ITerminologyServerClient.getAddressBase(address, fhirContext()))
+                .orElse(null);
+        // The endpoint is the authoritative source for this ValueSet when the ValueSet declares no
+        // authoritative source or it matches the endpoint. In that case expand against it directly;
+        // otherwise prefer local composition (e.g. a grouper authored on a different server) and only
+        // fall back to the endpoint below if local expansion turns out not to be possible.
+        var endpointIsAuthoritativeSource = terminologyEndpoint.isPresent()
+                && (authoritativeSourceUrl == null || authoritativeSourceUrl.equals(endpointAddressBase));
+        if (endpointIsAuthoritativeSource) {
             try {
                 terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
                 return;
@@ -177,8 +185,29 @@ public class ExpandHelper {
             return;
         }
 
-        // Fallback: repository $expand (for remaining ValueSets with compose)
+        // Fallback for ValueSets that could not be expanded locally.
         if (valueSet.hasCompose()) {
+            // A terminologyEndpoint was supplied but not used above because the ValueSet's authoritative
+            // source differs from it. Since local expansion was not possible, use the configured endpoint
+            // rather than failing — a general terminology server can expand ValueSets authored elsewhere.
+            if (terminologyEndpoint.isPresent() && !endpointIsAuthoritativeSource) {
+                try {
+                    terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+                    // The endpoint used is not this ValueSet's authoritative source, so surface a
+                    // warning that the expansion was completed non-authoritatively.
+                    addExpansionWarningParameter(
+                            valueSet,
+                            "Expansion for ValueSet %s was completed by the configured terminology endpoint, which is not its authoritative source; the expansion may be non-authoritative."
+                                    .formatted(valueSet.getUrl()));
+                    expandedList.add(valueSet.getUrl());
+                    return;
+                } catch (TerminologyServerExpansionException e) {
+                    log.warn(
+                            "Failed to expand value set {} via the configured terminology endpoint. Reason: {}.",
+                            valueSet.getUrl(),
+                            e.getMessage());
+                }
+            }
             try {
                 var headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/json");

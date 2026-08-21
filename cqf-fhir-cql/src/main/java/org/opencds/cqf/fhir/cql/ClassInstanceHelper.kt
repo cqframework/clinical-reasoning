@@ -3,7 +3,7 @@ package org.opencds.cqf.fhir.cql
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.context.FhirVersionEnum
 import org.hl7.fhir.instance.model.api.IBase
-import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver
+import org.opencds.cqf.cql.engine.fhir.fhirModelNamespaceUri
 import org.opencds.cqf.cql.engine.runtime.ClassInstance
 import org.opencds.cqf.cql.engine.runtime.String
 import org.opencds.cqf.cql.engine.runtime.Value
@@ -19,10 +19,7 @@ object ClassInstanceHelper {
 
     @JvmStatic
     fun getId(classInstance: ClassInstance): kotlin.String? {
-        if (
-            classInstance.type.namespaceURI == FhirModelResolver.fhirModelNamespaceUri &&
-                classInstance.has("id")
-        ) {
+        if (classInstance.type.namespaceURI == fhirModelNamespaceUri && classInstance.has("id")) {
             val resourceIdInstance = classInstance["id"] as ClassInstance?
             val resourceIdValue = resourceIdInstance?.get("value")
             if (resourceIdValue != null) {
@@ -61,14 +58,13 @@ object ClassInstanceHelper {
         val version = "r4"
         val qName = classInstance.type
         val system =
-            if (qName.namespaceURI == FhirModelResolver.fhirModelNamespaceUri) "org.hl7.fhir"
-            else qName.namespaceURI
+            if (qName.namespaceURI == fhirModelNamespaceUri) "org.hl7.fhir" else qName.namespaceURI
         return "$system.$version.model.${qName.localPart}"
     }
 
     @JvmStatic
     fun isFhirResource(fhirVersion: FhirVersionEnum?, classInstance: ClassInstance): Boolean {
-        if (classInstance.type.namespaceURI == FhirModelResolver.fhirModelNamespaceUri) {
+        if (classInstance.type.namespaceURI == fhirModelNamespaceUri) {
             val resourceTypes =
                 when (fhirVersion) {
                     FhirVersionEnum.DSTU3 -> DSTU3_RESOURCE_TYPE_NAMES

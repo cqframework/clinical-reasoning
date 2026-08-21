@@ -10,6 +10,7 @@ import org.cqframework.cql.cql2elm.StringLibrarySourceProvider
 import org.hl7.elm.r1.VersionedIdentifier
 import org.hl7.fhir.instance.model.api.IBase
 import org.hl7.fhir.instance.model.api.IBaseBundle
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions
 import org.hl7.fhir.instance.model.api.IBaseParameters
 import org.opencds.cqf.cql.engine.execution.CqlEngine
 import org.opencds.cqf.cql.engine.execution.EvaluationResult
@@ -17,6 +18,7 @@ import org.opencds.cqf.cql.engine.execution.EvaluationResults
 import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlFhirParametersConverter
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition
+import org.opencds.cqf.fhir.utility.Constants.DATA_ABSENT_REASON
 import org.opencds.cqf.fhir.utility.CqfExpression
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache
@@ -250,7 +252,16 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             }
             .mapNotNull { param ->
                 when {
-                    param!!.hasValue() -> param.getValue()
+                    param!!.hasValue() ->
+                        if (
+                            (param.getValue() as IBaseHasExtensions).extension.any {
+                                DATA_ABSENT_REASON == it.url
+                            }
+                        ) {
+                            null
+                        } else {
+                            param.getValue()
+                        }
                     param.hasResource() -> param.getResource()
                     param.hasPart() -> param.newTupleWithParts()
                     else -> null

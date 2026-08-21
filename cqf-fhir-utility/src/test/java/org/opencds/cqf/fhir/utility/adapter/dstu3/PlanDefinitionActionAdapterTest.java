@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionConditionKind;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
@@ -16,10 +18,12 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedAction
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.dstu3.model.TriggerDefinition;
 import org.hl7.fhir.dstu3.model.TriggerDefinition.TriggerType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 class PlanDefinitionActionAdapterTest {
@@ -167,6 +171,17 @@ class PlanDefinitionActionAdapterTest {
         var adapter = new PlanDefinitionActionAdapter(action);
         assertTrue(adapter.hasSelectionBehavior());
         assertEquals(selectionBehavior, adapter.getSelectionBehavior());
+    }
+
+    @Test
+    void testApplicabilityBehavior() {
+        var action = new PlanDefinition.PlanDefinitionActionComponent();
+        var adapter = new PlanDefinitionActionAdapter(action);
+        assertFalse(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ALL, adapter.getApplicabilityBehavior());
+        adapter.addExtension(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("one")));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertThrows(IllegalArgumentException.class, adapter::getApplicabilityBehavior);
     }
 
     @Test

@@ -89,11 +89,12 @@ class ItemProcessorTests {
         doReturn(expressionResults)
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
+        var responseItem = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        responseItem.add(itemAdapter.newResponseItem());
         // execute
-        final var actual =
-                itemProcessor.processItem(populateRequest, itemAdapter).get(0);
+        itemProcessor.processItem(populateRequest, itemAdapter, responseItem);
         // validate
-        final var answers = actual.getAnswer();
+        final var answers = responseItem.get(0).getAnswer();
         assertEquals(3, answers.size());
         for (int i = 0; i < answers.size(); i++) {
             assertEquals(expressionResults.get(i), answers.get(i).getValue(), "value");
@@ -120,10 +121,12 @@ class ItemProcessorTests {
                 .when(expressionProcessor)
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         // execute
-        final var actual =
-                itemProcessor.processItem(populateRequest, itemAdapter).get(0);
+        var responseItem = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        responseItem.add(itemAdapter.newResponseItem());
+        // execute
+        itemProcessor.processItem(populateRequest, itemAdapter, responseItem);
         // validate
-        final var answers = actual.getAnswer();
+        final var answers = responseItem.get(0).getAnswer();
         assertEquals(3, answers.size());
         for (int i = 0; i < answers.size(); i++) {
             assertEquals(expressionResults.get(i), answers.get(i).getValue(), "value");
@@ -213,8 +216,12 @@ class ItemProcessorTests {
         final var itemAdapter =
                 (IQuestionnaireItemComponentAdapter) IAdapterFactory.createAdapterForBase(fhirVersion, parentItem);
         doReturn(null).when(expressionProcessor).getItemInitialExpression(eq(populateRequest), any());
-        var actual = (QuestionnaireResponseItemComponent)
-                itemProcessor.processItem(populateRequest, itemAdapter).get(0).get();
+        var responseItem = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        responseItem.add(itemAdapter.newResponseItem());
+        // execute
+        itemProcessor.processItem(populateRequest, itemAdapter, responseItem);
+        // validate
+        var actual = (QuestionnaireResponseItemComponent) responseItem.get(0).get();
         assertNotNull(actual);
         assertFalse(actual.hasItem());
         assertTrue(actual.hasAnswer());
@@ -243,7 +250,9 @@ class ItemProcessorTests {
                 .getExpressionResultForItem(eq(populateRequest), eq(expression), eq("1"), any(), any());
         var adapter = (IQuestionnaireItemComponentAdapter)
                 IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
-        itemProcessor.processContextItem(populateRequest, adapter);
+        var responseItems = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        responseItems.add(adapter.newResponseItem());
+        itemProcessor.processContextItem(populateRequest, adapter, responseItems);
         var operationOutcome = (OperationOutcome) populateRequest.getOperationOutcome();
         assertTrue(operationOutcome.hasIssue());
         assertEquals(1, operationOutcome.getIssue().size());
@@ -279,9 +288,10 @@ class ItemProcessorTests {
                 .getExpressionResultForItem(eq(populateRequest), eq(cqfExpression), eq("1"), any(), any());
         var adapter = (IQuestionnaireItemComponentAdapter)
                 IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
-        var actual = itemProcessor.processContextItem(populateRequest, adapter);
-        assertEquals(1, actual.size());
-        assertTrue(actual.get(0).getAnswer().isEmpty());
+        var responseItems = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        itemProcessor.processContextItem(populateRequest, adapter, responseItems);
+        assertEquals(1, responseItems.size());
+        assertTrue(responseItems.get(0).getAnswer().isEmpty());
     }
 
     @Test
@@ -336,12 +346,13 @@ class ItemProcessorTests {
                 (IQuestionnaireItemComponentAdapter) IAdapterFactory.createAdapterForBase(fhirVersion, groupItem);
 
         // execute
-        final var actual = itemProcessor.processContextItem(populateRequest, adapter);
+        var responseItems = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        itemProcessor.processContextItem(populateRequest, adapter, responseItems);
 
         // validate: the group's child item is populated from the tuple's "gender" member
-        assertEquals(1, actual.size());
+        assertEquals(1, responseItems.size());
         final var responseGroup =
-                (QuestionnaireResponseItemComponent) actual.get(0).get();
+                (QuestionnaireResponseItemComponent) responseItems.get(0).get();
         assertTrue(responseGroup.hasItem(), "group child items should be populated from the tuple");
         final var responseChild = responseGroup.getItemFirstRep();
         assertTrue(responseChild.hasAnswer(), "child item should have an answer populated from the tuple member");
@@ -366,10 +377,12 @@ class ItemProcessorTests {
         var adapter = (IQuestionnaireItemComponentAdapter)
                 IAdapterFactory.createAdapterForBase(populateRequest.getFhirVersion(), questionnaireItem);
         doReturn(null).when(expressionProcessor).getItemInitialExpression(eq(populateRequest), any());
-        var actual = itemProcessor.processItem(populateRequest, adapter);
-        assertNotNull(actual);
+        var responseItems = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+        responseItems.add(adapter.newResponseItem());
+        itemProcessor.processItem(populateRequest, adapter, responseItems);
+        assertNotNull(responseItems);
         var nestedActual = (IQuestionnaireResponseItemComponentAdapter)
-                actual.get(0).getItem().get(0);
+                responseItems.get(0).getItem().get(0);
         assertNotNull(nestedActual);
         assertTrue(nestedActual.hasAnswer());
         assertFalse(((BooleanType) nestedActual.getAnswer().get(0).getValue()).booleanValue());

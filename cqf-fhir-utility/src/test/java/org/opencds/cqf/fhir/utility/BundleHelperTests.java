@@ -172,6 +172,37 @@ class BundleHelperTests {
     }
 
     @Test
+    void isEntryRequestGetDstu3() {
+        org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent bundle =
+                new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()
+                        .setRequest(new org.hl7.fhir.dstu3.model.Bundle.BundleEntryRequestComponent()
+                                .setMethod(org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.GET));
+        var res = BundleHelper.isEntryRequestGet(FhirVersionEnum.DSTU3, bundle);
+
+        assertTrue(res);
+    }
+
+    @Test
+    void isEntryRequestGetR4() {
+        BundleEntryComponent bundle =
+                new Bundle.BundleEntryComponent().setRequest(new BundleEntryRequestComponent().setMethod(HTTPVerb.GET));
+        var res = BundleHelper.isEntryRequestGet(FhirVersionEnum.R4, bundle);
+
+        assertTrue(res);
+    }
+
+    @Test
+    void isEntryRequestGetR5() {
+        org.hl7.fhir.r5.model.Bundle.BundleEntryComponent bundle =
+                new org.hl7.fhir.r5.model.Bundle.BundleEntryComponent()
+                        .setRequest(new org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent()
+                                .setMethod(org.hl7.fhir.r5.model.Bundle.HTTPVerb.GET));
+        var res = BundleHelper.isEntryRequestGet(FhirVersionEnum.R5, bundle);
+
+        assertTrue(res);
+    }
+
+    @Test
     void isEntryRequestDeleteDstu3() {
         org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent bundle =
                 new org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent()

@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.benchmark;
 
 import static org.opencds.cqf.fhir.benchmark.questionnaire.TestQuestionnaire.given;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newPart;
+import static org.opencds.cqf.fhir.utility.Parameters.newStringPart;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.IdType;
 import org.opencds.cqf.fhir.benchmark.questionnaire.TestQuestionnaire.When;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -33,11 +35,27 @@ public class Questionnaires {
         this.result = given().repositoryFor(FHIR_CONTEXT, "r4/pa-aslp")
                 .when()
                 .questionnaireId(new IdType("Questionnaire", "ASLPA1"))
-                .subjectId("positive")
-                .parameters(parameters(
-                        stringPart("Service Request Id", "SleepStudy"),
-                        stringPart("Service Request Id", "SleepStudy2"),
-                        stringPart("Coverage Id", "Coverage-positive")));
+                .context(Arrays.asList(
+                        (IBaseBackboneElement) newPart(
+                                FHIR_CONTEXT,
+                                "context",
+                                newStringPart(FHIR_CONTEXT, "name", "patient"),
+                                newPart(FHIR_CONTEXT, "Reference", "content", "Patient/positive")),
+                        (IBaseBackboneElement) newPart(
+                                FHIR_CONTEXT,
+                                "context",
+                                newStringPart(FHIR_CONTEXT, "name", "ServiceRequest"),
+                                newPart(FHIR_CONTEXT, "Reference", "content", "ServiceRequest/SleepStudy")),
+                        (IBaseBackboneElement) newPart(
+                                FHIR_CONTEXT,
+                                "context",
+                                newStringPart(FHIR_CONTEXT, "name", "ServiceRequest"),
+                                newPart(FHIR_CONTEXT, "Reference", "content", "ServiceRequest/SleepStudy2")),
+                        (IBaseBackboneElement) newPart(
+                                FHIR_CONTEXT,
+                                "context",
+                                newStringPart(FHIR_CONTEXT, "name", "Coverage"),
+                                newPart(FHIR_CONTEXT, "Reference", "content", "Coverage/Coverage-positive"))));
     }
 
     @Benchmark

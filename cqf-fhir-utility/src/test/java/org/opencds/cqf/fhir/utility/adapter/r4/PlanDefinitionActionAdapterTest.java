@@ -1,10 +1,14 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
+import static org.opencds.cqf.fhir.utility.Constants.R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.r4.model.CanonicalType;
@@ -12,6 +16,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DataRequirement;
 import org.hl7.fhir.r4.model.Expression;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
@@ -22,10 +27,12 @@ import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionRelatedActionCom
 import org.hl7.fhir.r4.model.PlanDefinition.RequestPriority;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.TriggerDefinition;
 import org.hl7.fhir.r4.model.TriggerDefinition.TriggerType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 class PlanDefinitionActionAdapterTest {
@@ -180,6 +187,27 @@ class PlanDefinitionActionAdapterTest {
         var adapter = new PlanDefinitionActionAdapter(action);
         assertTrue(adapter.hasSelectionBehavior());
         assertEquals(selectionBehavior, adapter.getSelectionBehavior());
+    }
+
+    @Test
+    void testApplicabilityBehavior() {
+        var action = new PlanDefinitionActionComponent();
+        var adapter = new PlanDefinitionActionAdapter(action);
+        assertFalse(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ALL, adapter.getApplicabilityBehavior());
+        adapter.setExtension(singletonList(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("any"))));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ANY, adapter.getApplicabilityBehavior());
+        adapter.setExtension(singletonList(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("one"))));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertThrows(IllegalArgumentException.class, adapter::getApplicabilityBehavior);
+        adapter.setExtension(singletonList(new Extension(CQF_APPLICABILITY_BEHAVIOR, null)));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ALL, adapter.getApplicabilityBehavior());
+        adapter.setExtension(
+                singletonList(new Extension(R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR, new StringType("any"))));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ANY, adapter.getApplicabilityBehavior());
     }
 
     @Test

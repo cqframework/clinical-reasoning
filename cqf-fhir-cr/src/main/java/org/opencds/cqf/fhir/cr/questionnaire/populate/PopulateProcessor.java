@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -22,7 +22,7 @@ public class PopulateProcessor implements IPopulateProcessor {
         this(null, null);
     }
 
-    private PopulateProcessor(ItemProcessor itemProcessor, ExpressionProcessor expressionProcessor) {
+    public PopulateProcessor(ItemProcessor itemProcessor, ExpressionProcessor expressionProcessor) {
         this.expressionProcessor = expressionProcessor != null ? expressionProcessor : new ExpressionProcessor();
         this.itemProcessor = itemProcessor != null ? itemProcessor : new ItemProcessor(this.expressionProcessor);
     }
@@ -33,9 +33,8 @@ public class PopulateProcessor implements IPopulateProcessor {
                 "Performing $populate operation on Questionnaire/{}",
                 request.getQuestionnaire().getIdElement().getIdPart());
         // process root level variables
-        request.getQuestionnaireAdapter().getItem().forEach(item -> {
-            request.addQuestionnaireResponseItems(populateItem(request, item));
-        });
+        // getVariables(request, request.getQuestionnaire())
+        request.getQuestionnaireAdapter().getItem().forEach(item -> populateItem(request, item));
         request.resolveOperationOutcome(request.getQuestionnaireResponseAdapter());
         logger.info("$populate operation completed");
         return request.getQuestionnaireResponseAdapter().get();
@@ -60,23 +59,36 @@ public class PopulateProcessor implements IPopulateProcessor {
                     }
                 }
             } catch (Exception e) {
-                logger.error("Error encountered evaluating result for variable: {}", expression.getName());
+                var message =
+                        String.format("Error encountered evaluating result for variable: %s", expression.getName());
+                logger.error(message);
+                request.logException(message);
             }
         });
         return variables;
     }
 
-    protected List<IQuestionnaireResponseItemComponentAdapter> populateItem(
-            PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
+    protected void populateItem(PopulateRequest request, IQuestionnaireItemComponentAdapter item) {
         var linkId = item.getLinkId();
         logger.info("Processing item {}", linkId);
-
         try {
-            return itemProcessor.processItem(request, item);
+            // This code is meant to handle a previous QuestionnaireResponse being passed into
+            // the $populate call. This functionality is still being discussed by the SDC WG
+            // and how this should be done has not yet been determined.
+            // var isNew = true;
+            // if (request.getPreviousQuestionnaireResponseAdapter() != null) {
+            //    isNew = !request.getPreviousQuestionnaireResponseAdapter().hasItem(linkId);
+            // }
+            // var responseItem = isNew
+            //        ? new ArrayList<IQuestionnaireResponseItemComponentAdapter>()
+            //        : request.getPreviousQuestionnaireResponseAdapter().getItem(linkId);
+            var responseItem = new ArrayList<IQuestionnaireResponseItemComponentAdapter>();
+            itemProcessor.processItem(request, item, responseItem);
+            request.addQuestionnaireResponseItems(responseItem);
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            request.logException(e.getMessage());
-            return List.of(item.newResponseItem());
+            var message = String.format("Error encountered populating item (%s): %s", linkId, e.getMessage());
+            logger.error(message);
+            request.logException(message);
         }
     }
 }

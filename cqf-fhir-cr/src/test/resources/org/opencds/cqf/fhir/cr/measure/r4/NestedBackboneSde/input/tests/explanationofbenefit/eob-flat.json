@@ -1,0 +1,40 @@
+{
+  "resourceType": "ExplanationOfBenefit",
+  "id": "eob-flat",
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "professional"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "Patient/patient-flat"
+  },
+  "created": "2024-03-20",
+  "insurer": {
+    "reference": "Organization/insurer-1"
+  },
+  "provider": {
+    "reference": "Organization/provider-1"
+  },
+  "outcome": "complete",
+  "item": [
+    {
+      "sequence": 1,
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "99213",
+            "display": "Office or other outpatient visit"
+          }
+        ]
+      },
+      "servicedDate": "2024-03-15"
+    }
+  ]
+}

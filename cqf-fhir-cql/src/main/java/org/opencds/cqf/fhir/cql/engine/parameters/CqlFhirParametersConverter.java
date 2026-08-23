@@ -410,13 +410,16 @@ public class CqlFhirParametersConverter {
         return toFhirValue(value, null);
     }
 
+    /**
+     * Converts a CQL [Value] to a HAPI FHIR structure.
+     *
+     * @param valueToConvert The CQL value to convert.
+     * @param parentName The enclosing FHIR type for nested/inner HAPI FHIR classes representing backbone elements.
+     */
     public IBase toFhirValue(Value valueToConvert, String parentName) {
         Class<?> clazz;
         String typeName;
-        if (valueToConvert instanceof ClassInstance classInstance) {
-            typeName = classInstance.getType().getLocalPart();
-            clazz = modelResolver.resolveType(typeName);
-        } else if (valueToConvert instanceof NamedTypeValue namedTypeValue) {
+        if (valueToConvert instanceof NamedTypeValue namedTypeValue) {
             typeName = namedTypeValue.getType().getLocalPart();
             clazz = modelResolver.resolveType(typeName);
         } else {
@@ -490,6 +493,12 @@ public class CqlFhirParametersConverter {
             definition = fhirContext.getResourceDefinition(resourceClazz);
         }
 
+        // `toFhirValue()` is called recursively for all subelements of the CQL class instance. If
+        // the current class is a nested/inner class, the same parent resource name (type name)
+        // should be used because in HAPI FHIR, all classes representing nested backbone elements
+        // are declared directly inside the named parent class.
+        var parentNameForChildren = clazz.getEnclosingClass() == null ? typeName : parentName;
+
         for (var child : definition.getChildren()) {
             var elementValue = ((ClassInstance) valueToConvert).get(child.getElementName());
             if (elementValue == null) {
@@ -497,10 +506,10 @@ public class CqlFhirParametersConverter {
             }
             if (elementValue instanceof org.opencds.cqf.cql.engine.runtime.List list) {
                 for (var item : list) {
-                    child.getMutator().addValue(instance, toFhirValue(item, typeName));
+                    child.getMutator().addValue(instance, toFhirValue(item, parentNameForChildren));
                 }
             } else {
-                child.getMutator().addValue(instance, toFhirValue(elementValue, typeName));
+                child.getMutator().addValue(instance, toFhirValue(elementValue, parentNameForChildren));
             }
         }
         return instance;

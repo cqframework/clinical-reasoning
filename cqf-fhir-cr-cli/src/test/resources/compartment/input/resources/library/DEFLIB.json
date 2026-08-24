@@ -1,7 +1,7 @@
 {
     "resourceType": "Library",
     "id": "DEFLIB",
-    "url": "http://example.com/Library/DEF-LIB",
+    "url": "http://example.com/Library/DEFLIB",
     "name": "DEFLIB",
     "status": "active",
     "type": {

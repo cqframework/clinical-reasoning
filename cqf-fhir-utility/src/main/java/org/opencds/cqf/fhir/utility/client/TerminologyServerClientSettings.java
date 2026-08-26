@@ -18,7 +18,24 @@ public class TerminologyServerClientSettings {
         DISABLED
     }
 
+    /**
+     * Maximum number of attempts for terminology-server calls before a failure is surfaced. This governs
+     * BOTH ValueSet {@code $expand} calls and the resource-resolution reads ({@code getValueSetResource},
+     * {@code getCodeSystemResource}, {@code getLatestValueSetResource}) used during {@code $package} /
+     * {@code $data-requirements} dependency gathering. Only transient failures (connection/read timeouts and
+     * retryable HTTP statuses) are retried; each retry is delayed by {@link #retryIntervalMillis} times the
+     * attempt number (linear back-off).
+     *
+     * <p><strong>Performance note:</strong> a value greater than 1 improves resilience against a flaky
+     * terminology server (a single hiccup no longer aborts the whole operation), but it also makes every
+     * <em>transient</em> failure take up to {@code maxRetryCount}× longer — dominated by the per-attempt
+     * connect timeout — which can noticeably slow operations that make many terminology-server calls (e.g.
+     * {@code $data-requirements} against many un-cached ValueSets). In performance-sensitive production
+     * environments that prefer fail-fast over resilience, set this to {@code 1} to disable retries entirely
+     * (a single attempt per call).
+     */
     private int maxRetryCount = 3;
+
     private long retryIntervalMillis = 1000;
     private int timeoutSeconds = 30;
     private int socketTimeout = 60;

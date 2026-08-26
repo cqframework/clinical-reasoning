@@ -208,6 +208,13 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
      * resilience of the expansion path ({@code ExpandRunner}). A single transient tx-server hiccup during
      * dependency resolution should not abort an entire {@code $package} run. Non-transient errors and the
      * final failure after exhausting retries propagate unchanged.
+     *
+     * <p><strong>Performance note:</strong> against a flaky terminology server this trades speed for
+     * resilience — each transient failure takes up to {@code maxRetryCount}× longer (dominated by the
+     * per-attempt connect timeout). Operations that make many resolution calls (e.g. {@code $data-requirements}
+     * over many un-cached ValueSets) can be noticeably slower as a result. Performance-sensitive environments
+     * that prefer fail-fast can disable retries by setting
+     * {@link TerminologyServerClientSettings#setMaxRetryCount(int) maxRetryCount} to {@code 1}.
      */
     <T> T executeWithRetry(ITerminologyServerClient client, String url, Supplier<T> operation) {
         var settings = client.getTerminologyServerClientSettings();

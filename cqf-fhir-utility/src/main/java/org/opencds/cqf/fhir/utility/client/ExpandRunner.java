@@ -167,7 +167,18 @@ public class ExpandRunner implements Runnable {
                     parametersLog,
                     ex.getMessage());
 
-            if (expansionAttempt < terminologyServerClientSettings.getMaxRetryCount()) {
+            // Decide whether another attempt is worthwhile. Retrying only helps if either the fault was
+            // transient (a later identical call may succeed) or the NEXT attempt would send a materially
+            // different request. The latter happens only in AUTO mode after attempt 1, where attempt 2
+            // escalates by attaching tx-resource parameters (the escalation that a "definition could not be
+            // found" 422 is meant to resolve). Retrying a non-transient failure with an identical request
+            // (e.g. HTTP 422 for a CodeSystem the server will never know about) only adds latency and log
+            // noise, so stop early in that case.
+            var nextAttemptEscalates = terminologyServerClientSettings.getTxResourceMode()
+                            == TerminologyServerClientSettings.TxResourceMode.AUTO
+                    && expansionAttempt == 1;
+            if ((isTransient || nextAttemptEscalates)
+                    && expansionAttempt < terminologyServerClientSettings.getMaxRetryCount()) {
                 scheduler.schedule(
                         this,
                         terminologyServerClientSettings.getRetryIntervalMillis() * expansionAttempt,

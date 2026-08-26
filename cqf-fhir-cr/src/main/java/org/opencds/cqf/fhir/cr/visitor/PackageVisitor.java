@@ -71,6 +71,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     protected final ExpandHelper expandHelper;
     protected final TerminologyServerClientSettings terminologyServerClientSettings;
 
+    // Set per-visit when the packaged artifact's ImplementationGuide declares dependsOn packages; used to
+    // federate NPM package resolution into dependency gathering. Null when no IG/packages can be determined.
+    private IRepository npmFederatedRepository;
+
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
     private IBaseOperationOutcome messages;
     private final IAdapterFactory adapterFactory;
@@ -250,6 +254,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             });
         } else {
+            // Federate the NPM packages declared by the artifact's ImplementationGuide so version-pinned
+            // dependencies (e.g. us-core ValueSets at |6.1.0) the repository/tx server lack can be resolved
+            // directly from their NPM packages during gathering.
+            setUpNpmFederation(adapter, artifactEndpointConfigurations);
             // Use array wrapper to allow messages to be updated by recursiveGather
             var messagesWrapper = new IBaseOperationOutcome[] {messages};
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
@@ -441,6 +449,54 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
      * @param packagedBundle the bundle produced by the package operation
      * @return the package-authored CodeSystems eligible to be supplied as tx-resources
      */
+    @Override
+    protected IRepository gatherResolutionRepository() {
+        return npmFederatedRepository != null ? npmFederatedRepository : super.gatherResolutionRepository();
+    }
+
+    /**
+     * Builds an NPM-federated repository ({@code repository} + {@link NpmRepository}) from the NPM packages
+     * declared by the packaged artifact's ImplementationGuide, so version-pinned dependencies the repository
+     * and terminology server lack can be resolved from their packages during {@link #recursiveGather}.
+     *
+     * <p>The IG is the artifact itself if it is an ImplementationGuide, otherwise the one referenced by a
+     * {@code composed-of} related artifact. When no IG (or no dependsOn packages) can be determined, this logs
+     * and leaves federation disabled — the operation continues against the plain repository, unchanged.
+     */
+    private void setUpNpmFederation(
+            IKnowledgeArtifactAdapter adapter, List<ArtifactEndpointConfiguration> artifactEndpointConfigurations) {
+        npmFederatedRepository = null;
+        var ig = resolveImplementationGuide(adapter);
+        if (ig.isEmpty()) {
+            myLogger.info(
+                    "Could not determine an ImplementationGuide (via composed-of) for artifact {}; continuing "
+                            + "$package dependency resolution without NPM package federation.",
+                    adapter.getUrl());
+            return;
+        }
+        var dependsOnPackages = extractDependsOnPackages(ig.get());
+        if (dependsOnPackages.isEmpty()) {
+            myLogger.info(
+                    "ImplementationGuide {} declares no dependsOn packages; continuing without NPM federation.",
+                    ig.get().getUrl());
+            return;
+        }
+        try {
+            var resolver =
+                    new ConformanceResourceResolver(repository, dependsOnPackages, artifactEndpointConfigurations);
+            npmFederatedRepository = resolver.getFederatedRepository();
+            myLogger.info(
+                    "Federating {} NPM package(s) for $package dependency resolution from ImplementationGuide {}.",
+                    dependsOnPackages.size(),
+                    ig.get().getUrl());
+        } catch (Exception e) {
+            myLogger.warn(
+                    "Failed to set up NPM package federation for $package; continuing without it. Reason: {}",
+                    e.getMessage());
+            npmFederatedRepository = null;
+        }
+    }
+
     List<IBaseResource> gatherPackageCodeSystems(IBaseBundle packagedBundle) {
         var codeSystems = new ArrayList<IBaseResource>();
         var terser = new FhirTerser(fhirContext());

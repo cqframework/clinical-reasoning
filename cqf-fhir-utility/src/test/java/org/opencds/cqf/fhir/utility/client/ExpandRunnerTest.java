@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -588,5 +589,81 @@ class ExpandRunnerTest {
         runner.expandValueSet();
 
         assertTrue(hasTxResource(captor.getValue()), "ENABLED first attempt must be sent WITH tx-resource");
+    }
+
+    // ---- non-transient failures short-circuit the retry loop ----------------------------------------
+
+    @Test
+    void auto_nonTransientFailure_escalatesOnceThenStops() {
+        // A non-transient failure (HTTP 422) will never succeed on an identical retry. In AUTO mode the
+        // first failure still warrants ONE retry (attempt 2 escalates by attaching tx-resource), but once
+        // that escalated attempt also fails non-transiently there is nothing new to try, so we must stop
+        // rather than burn the third attempt.
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = paramsWithTxResource();
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        AtomicInteger executeCalls = new AtomicInteger(0);
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenAnswer(inv -> {
+                    executeCalls.incrementAndGet();
+                    throw new UnprocessableEntityException("CodeSystem could not be found");
+                });
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        assertThrows(TerminologyServerExpansionException.class, runner::expandValueSet);
+
+        assertEquals(
+                2,
+                executeCalls.get(),
+                "AUTO should make exactly two attempts (initial + one tx-resource escalation) on a non-transient failure");
+    }
+
+    @Test
+    void disabled_nonTransientFailure_doesNotRetry() {
+        // With no tx-resource escalation possible (DISABLED), a non-transient failure has no different
+        // request to try, so the loop must stop after the first attempt regardless of maxRetryCount.
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = new Parameters();
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        AtomicInteger executeCalls = new AtomicInteger(0);
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenAnswer(inv -> {
+                    executeCalls.incrementAndGet();
+                    throw new UnprocessableEntityException("CodeSystem could not be found");
+                });
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L)
+                .setTxResourceMode(TxResourceMode.DISABLED);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        assertThrows(TerminologyServerExpansionException.class, runner::expandValueSet);
+
+        assertEquals(1, executeCalls.get(), "DISABLED should make exactly one attempt on a non-transient failure");
     }
 }

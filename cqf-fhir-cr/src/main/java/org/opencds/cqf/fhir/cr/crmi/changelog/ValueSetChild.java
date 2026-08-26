@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.cr.crmi.changelog;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -138,32 +140,33 @@ public class ValueSetChild extends PageBase {
                     this.operation);
         }
 
-        public static String getCodeSystemOid(String systemUrl) {
-            if (systemUrl.contains("snomed")) {
-                return "2.16.840.1.113883.6.96";
-            } else if (systemUrl.contains("icd-10")) {
-                return "2.16.840.1.113883.6.90";
-            } else if (systemUrl.contains("icd-9")) {
-                return "2.16.840.1.113883.6.103, 2.16.840.1.113883.6.104";
-            } else if (systemUrl.contains("loinc")) {
-                return "2.16.840.1.113883.6.1";
-            } else {
-                return null;
+        //Name and OID for each code system used in eRSD, matched on a fragment of the system URL
+        private record CodeSystemIdentity(String urlFragment, String name, String oid) {}
+
+        private static final List<CodeSystemIdentity> CODE_SYSTEM_IDENTITIES = List.of(
+                new CodeSystemIdentity("snomed", "SNOMEDCT", "2.16.840.1.113883.6.96"),
+                new CodeSystemIdentity("loinc", "LOINC", "2.16.840.1.113883.6.1"),
+                new CodeSystemIdentity("icd-10", "ICD10CM", "2.16.840.1.113883.6.90"),
+                new CodeSystemIdentity("icd-9", "ICD9CM", "2.16.840.1.113883.6.103, 2.16.840.1.113883.6.104"),
+                new CodeSystemIdentity("rxnorm", "RXNORM", "2.16.840.1.113883.6.88"),
+                new CodeSystemIdentity("cvx", "CVX", "2.16.840.1.113883.12.292"));
+
+        private static Optional<CodeSystemIdentity> identify(String systemUrl) {
+            if (systemUrl == null) {
+                return Optional.empty();
             }
+            var lowered = systemUrl.toLowerCase(Locale.ROOT);
+            return CODE_SYSTEM_IDENTITIES.stream()
+                    .filter(identity -> lowered.contains(identity.urlFragment()))
+                    .findFirst();
+        }
+
+        public static String getCodeSystemOid(String systemUrl) {
+            return identify(systemUrl).map(CodeSystemIdentity::oid).orElse(null);
         }
 
         public static String getCodeSystemName(String systemUrl) {
-            if (systemUrl.contains("snomed")) {
-                return "SNOMEDCT";
-            } else if (systemUrl.contains("icd-10")) {
-                return "ICD10CM";
-            } else if (systemUrl.contains("icd-9")) {
-                return "ICD9CM";
-            } else if (systemUrl.contains("loinc")) {
-                return "LOINC";
-            } else {
-                return null;
-            }
+            return identify(systemUrl).map(CodeSystemIdentity::name).orElse(null);
         }
 
         public Operation getOperation() {

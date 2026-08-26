@@ -85,7 +85,7 @@ public record SubjectResourceKey(@Nullable String subjectId, String resourceValu
      */
     public static SubjectResourceKey fromRowKey(StratifierRowKey rowKey, boolean isPrimitiveBasis) {
         String resourceValue = rowKey.inputParam()
-                .map(StratifierRowValue::legacyString)
+                .map(StratifierRowValue::intersectionValue)
                 .orElseThrow(() -> new IllegalArgumentException("RowKey must have an inputParam"));
 
         if (isPrimitiveBasis) {

@@ -90,13 +90,21 @@ public class ExpandRunner implements Runnable {
                 String terminologyServerBase = fhirClient.getServerBase();
                 String fullExpandUrl = terminologyServerBase + "/" + id + "/$expand";
 
-                // Format parameters for logging
-                String parametersLog = formatParametersForLogging(parameters);
+                // Compute the request parameters for THIS attempt. Depending on the configured
+                // TxResourceMode, tx-resource parameters may be stripped for this attempt (see
+                // parametersForAttempt).
+                var requestParameters = parametersForAttempt(expansionAttempt);
 
+                // Format parameters for logging
+                String parametersLog = formatParametersForLogging(requestParameters);
+
+                var txResourceCount = countTxResourceParameters(requestParameters);
                 logger.info(
-                        "Expansion attempt {} for ValueSet: {} | Terminology Server: {} | Full URL: {} | Parameters: {}",
+                        "Expansion attempt {} for ValueSet: {} | tx-resource params sent: {} (mode={}) | Terminology Server: {} | Full URL: {} | Parameters: {}",
                         expansionAttempt,
                         valueSetUrl,
+                        txResourceCount,
+                        terminologyServerClientSettings.getTxResourceMode(),
                         terminologyServerBase,
                         fullExpandUrl,
                         parametersLog);
@@ -105,7 +113,7 @@ public class ExpandRunner implements Runnable {
                         .operation()
                         .onInstance(id)
                         .named("$expand")
-                        .withParameters(parameters)
+                        .withParameters(requestParameters)
                         .returnResourceType(getValueSetClass())
                         .execute();
 
@@ -114,7 +122,7 @@ public class ExpandRunner implements Runnable {
                 if (expandedValueSetAdapter.getExpansionTotal()
                         > expandedValueSetAdapter.getExpansionContains().size()) {
                     var paramsWithOffset = (IParametersAdapter) createAdapterForResource(
-                            createAdapterForResource(parameters).copy());
+                            createAdapterForResource(requestParameters).copy());
                     var offset = terminologyServerClientSettings.getExpansionsPerPage();
 
                     for (int expansionPage = 2;
@@ -195,6 +203,56 @@ public class ExpandRunner implements Runnable {
         }
     }
 
+    /**
+     * Computes the {@code $expand} request parameters to send for the given attempt, honoring the
+     * configured {@link TerminologyServerClientSettings.TxResourceMode}. The {@code tx-resource}
+     * entries always ride inside {@link #parameters}; this method decides, per attempt, whether to
+     * send them:
+     * <ul>
+     *   <li>{@code DISABLED} — nothing was attached upstream; send {@link #parameters} as-is.</li>
+     *   <li>{@code ENABLED} — always keep {@code tx-resource}; send {@link #parameters} as-is.</li>
+     *   <li>{@code AUTO} — attempt 1 is sent WITHOUT {@code tx-resource} (a filtered copy);
+     *       attempts 2..N keep {@code tx-resource}.</li>
+     * </ul>
+     *
+     * @param attempt the 1-based attempt number
+     * @return the parameters to send for this attempt (either {@link #parameters} or a filtered copy)
+     */
+    IBaseParameters parametersForAttempt(int attempt) {
+        if (parameters == null) {
+            return null;
+        }
+        var mode = terminologyServerClientSettings.getTxResourceMode();
+        if (mode == TerminologyServerClientSettings.TxResourceMode.AUTO && attempt <= 1) {
+            return withoutTxResourceParameters(parameters);
+        }
+        return parameters;
+    }
+
+    /**
+     * Returns a copy of the supplied parameters with all {@code tx-resource} parameters removed. Uses
+     * the same adapter copy pattern used for paging so the original parameters are left untouched.
+     */
+    private static IBaseParameters withoutTxResourceParameters(IBaseParameters parameters) {
+        var copy = (IParametersAdapter)
+                createAdapterForResource(createAdapterForResource(parameters).copy());
+        copy.setParameter(copy.getParameter().stream()
+                .filter(p -> !org.opencds.cqf.fhir.utility.Constants.TX_RESOURCE.equals(p.getName()))
+                .map(IParametersParameterComponentAdapter::get)
+                .toList());
+        return (IBaseParameters) copy.get();
+    }
+
+    private static long countTxResourceParameters(IBaseParameters parameters) {
+        if (parameters == null) {
+            return 0;
+        }
+        return ((IParametersAdapter) createAdapterForResource(parameters))
+                .getParameter().stream()
+                        .filter(p -> org.opencds.cqf.fhir.utility.Constants.TX_RESOURCE.equals(p.getName()))
+                        .count();
+    }
+
     private static boolean isTransient(Exception ex) {
         var isTransient = false;
         if (ex instanceof BaseServerResponseException bsre) {
@@ -260,6 +318,14 @@ public class ExpandRunner implements Runnable {
                     return String.valueOf(primitive.getValue());
                 }
                 return value.toString();
+            }
+            // Resource-valued parameters (e.g. tx-resource) — log a compact reference, not the full body.
+            if (param.hasResource()) {
+                var resource = param.getResource();
+                var ref = resource.getIdElement() != null
+                        ? resource.getIdElement().getValue()
+                        : null;
+                return resource.fhirType() + (ref != null ? "/" + ref : "");
             }
             // If no value, might be a part parameter
             if (param.hasPart()) {

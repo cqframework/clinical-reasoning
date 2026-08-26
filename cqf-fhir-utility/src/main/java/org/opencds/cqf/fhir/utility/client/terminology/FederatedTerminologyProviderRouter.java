@@ -3,11 +3,16 @@ package org.opencds.cqf.fhir.utility.client.terminology;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -24,6 +29,9 @@ import org.opencds.cqf.fhir.utility.search.Searches;
  * https://hl7.org/fhir/uv/crmi/StructureDefinition-crmi-artifact-endpoint-configurable-operation.html
  */
 public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider implements ITerminologyProviderRouter {
+
+    private static final org.slf4j.Logger logger =
+            org.slf4j.LoggerFactory.getLogger(FederatedTerminologyProviderRouter.class);
 
     private final List<ITerminologyServerClient> clients;
     private final ITerminologyServerClient defaultClient;
@@ -133,11 +141,14 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
     @Override
     public Optional<IDomainResource> getCodeSystemResource(IEndpointAdapter endpoint, String url) {
         var client = this.getClient(endpoint.getAddress());
-        return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
-                .search()
-                .forResource(client.getCodeSystemClass())
-                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
-                .execute());
+        return executeWithRetry(
+                client,
+                url,
+                () -> IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
+                        .search()
+                        .forResource(client.getCodeSystemClass())
+                        .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                        .execute()));
     }
 
     @Override
@@ -151,11 +162,14 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
     @Override
     public Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url) {
         var client = this.getClient(endpoint.getAddress());
-        return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
-                .search()
-                .forResource(client.getValueSetClass())
-                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
-                .execute());
+        return executeWithRetry(
+                client,
+                url,
+                () -> IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
+                        .search()
+                        .forResource(client.getValueSetClass())
+                        .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                        .execute()));
     }
 
     @Override
@@ -178,11 +192,74 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
     @Override
     public Optional<IDomainResource> getValueSetResource(IEndpointAdapter endpoint, String url) {
         var client = this.getClient(url);
-        return IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
-                .search()
-                .forResource(client.getValueSetClass())
-                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
-                .execute());
+        return executeWithRetry(
+                client,
+                url,
+                () -> IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
+                        .search()
+                        .forResource(client.getValueSetClass())
+                        .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                        .execute()));
+    }
+
+    /**
+     * Executes a terminology-server read, retrying transient failures (connection/read timeouts and
+     * retryable HTTP statuses) up to {@code maxRetryCount} times with a linear back-off, mirroring the
+     * resilience of the expansion path ({@code ExpandRunner}). A single transient tx-server hiccup during
+     * dependency resolution should not abort an entire {@code $package} run. Non-transient errors and the
+     * final failure after exhausting retries propagate unchanged.
+     */
+    <T> T executeWithRetry(ITerminologyServerClient client, String url, Supplier<T> operation) {
+        var settings = client.getTerminologyServerClientSettings();
+        int maxAttempts = settings != null ? Math.max(1, settings.getMaxRetryCount()) : 1;
+        long retryIntervalMillis = settings != null ? settings.getRetryIntervalMillis() : 0L;
+
+        RuntimeException lastError = null;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                return operation.get();
+            } catch (RuntimeException e) {
+                lastError = e;
+                if (attempt >= maxAttempts || !isTransient(e)) {
+                    throw e;
+                }
+                logger.warn(
+                        "Transient error resolving {} from terminology server (attempt {} of {}): {}. Retrying...",
+                        url,
+                        attempt,
+                        maxAttempts,
+                        e.getMessage());
+                try {
+                    Thread.sleep(retryIntervalMillis * attempt);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+        }
+        throw lastError; // unreachable: the loop either returns or throws
+    }
+
+    static boolean isTransient(Throwable error) {
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            // Connection-level failures (connect/read timeouts, connection refused) — the reported symptom.
+            if (t instanceof FhirClientConnectionException
+                    || t instanceof SocketTimeoutException
+                    || t instanceof ConnectException) {
+                return true;
+            }
+            if (t instanceof BaseServerResponseException bsre
+                    && switch (bsre.getStatusCode()) {
+                        case 408, 429, 500, 502, 503, 504 -> true;
+                        default -> false;
+                    }) {
+                return true;
+            }
+            if (t.getCause() == t) {
+                break;
+            }
+        }
+        return false;
     }
 
     @Override

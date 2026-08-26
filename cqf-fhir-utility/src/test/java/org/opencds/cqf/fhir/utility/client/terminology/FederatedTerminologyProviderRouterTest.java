@@ -1,20 +1,29 @@
 package org.opencds.cqf.fhir.utility.client.terminology;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -24,6 +33,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
 class FederatedTerminologyProviderRouterTest {
 
@@ -451,6 +461,69 @@ class FederatedTerminologyProviderRouterTest {
         var endpoint = new Endpoint();
         endpoint.setAddress(address);
         return (IEndpointAdapter) IAdapterFactory.createAdapterForResource(endpoint);
+    }
+
+    private ITerminologyServerClient fastRetryClient(int maxRetryCount) {
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setMaxRetryCount(maxRetryCount)
+                .setRetryIntervalMillis(1);
+        var client = mock(ITerminologyServerClient.class);
+        when(client.getTerminologyServerClientSettings()).thenReturn(settings);
+        return client;
+    }
+
+    @Test
+    void executeWithRetry_retriesTransientThenSucceeds() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var calls = new AtomicInteger();
+        Supplier<String> op = () -> {
+            if (calls.incrementAndGet() < 3) {
+                throw new FhirClientConnectionException("HAPI-1361: Connect timed out");
+            }
+            return "ok";
+        };
+        var result = router.executeWithRetry(fastRetryClient(3), "http://example.org/fhir/ValueSet/x", op);
+        assertEquals("ok", result);
+        assertEquals(3, calls.get(), "should retry the two transient failures then succeed on the third attempt");
+    }
+
+    @Test
+    void executeWithRetry_nonTransientError_propagatesWithoutRetry() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var calls = new AtomicInteger();
+        Supplier<String> op = () -> {
+            calls.incrementAndGet();
+            throw new InvalidRequestException("bad request");
+        };
+        assertThrows(
+                InvalidRequestException.class,
+                () -> router.executeWithRetry(fastRetryClient(3), "http://example.org/fhir/ValueSet/x", op));
+        assertEquals(1, calls.get(), "non-transient errors must not be retried");
+    }
+
+    @Test
+    void executeWithRetry_exhaustsRetriesThenPropagates() {
+        var router = new FederatedTerminologyProviderRouter(fhirContext);
+        var calls = new AtomicInteger();
+        Supplier<String> op = () -> {
+            calls.incrementAndGet();
+            throw new FhirClientConnectionException("HAPI-1361: Connect timed out");
+        };
+        assertThrows(
+                FhirClientConnectionException.class,
+                () -> router.executeWithRetry(fastRetryClient(3), "http://example.org/fhir/ValueSet/x", op));
+        assertEquals(3, calls.get(), "should attempt exactly maxRetryCount times before propagating");
+    }
+
+    @Test
+    void isTransient_classifiesConnectionAndServerErrorsAsRetryable() {
+        // Connection-level failures (the reported symptom) — directly and when wrapped.
+        assertTrue(FederatedTerminologyProviderRouter.isTransient(
+                new FhirClientConnectionException("HAPI-1361: Connect timed out")));
+        assertTrue(FederatedTerminologyProviderRouter.isTransient(
+                new RuntimeException("wrapped", new SocketTimeoutException("Connect timed out"))));
+        // Non-transient: a 4xx client error should not be retried.
+        assertFalse(FederatedTerminologyProviderRouter.isTransient(new InvalidRequestException("bad request")));
     }
 
     /**

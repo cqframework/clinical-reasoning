@@ -2,6 +2,22 @@ package org.opencds.cqf.fhir.utility.client;
 
 public class TerminologyServerClientSettings {
 
+    /**
+     * Controls when the package's own resources are supplied to a remote {@code $expand} call via the
+     * {@code tx-resource} parameter.
+     * <ul>
+     *   <li>{@code AUTO} — the first attempt is made WITHOUT {@code tx-resource}; retries (attempts 2..N)
+     *       are made WITH {@code tx-resource}.</li>
+     *   <li>{@code ENABLED} — every attempt (from the first) is made WITH {@code tx-resource}.</li>
+     *   <li>{@code DISABLED} — {@code tx-resource} is never attached (legacy behavior).</li>
+     * </ul>
+     */
+    public enum TxResourceMode {
+        AUTO,
+        ENABLED,
+        DISABLED
+    }
+
     private int maxRetryCount = 3;
     private long retryIntervalMillis = 1000;
     private int timeoutSeconds = 30;
@@ -9,6 +25,8 @@ public class TerminologyServerClientSettings {
     private String crmiVersion = "1.0.0";
     private int expansionsPerPage = 1000;
     private int maxExpansionPages = 1000;
+    private TxResourceMode txResourceMode = TxResourceMode.AUTO;
+    private int maxTxResourceCodeSystemConcepts = 1000;
 
     public static TerminologyServerClientSettings getDefault() {
         return new TerminologyServerClientSettings();
@@ -30,6 +48,8 @@ public class TerminologyServerClientSettings {
         this.crmiVersion = terminologyServerClientSettings.crmiVersion;
         this.expansionsPerPage = terminologyServerClientSettings.expansionsPerPage;
         this.maxExpansionPages = terminologyServerClientSettings.maxExpansionPages;
+        this.txResourceMode = terminologyServerClientSettings.txResourceMode;
+        this.maxTxResourceCodeSystemConcepts = terminologyServerClientSettings.maxTxResourceCodeSystemConcepts;
     }
 
     public int getMaxRetryCount() {
@@ -92,6 +112,32 @@ public class TerminologyServerClientSettings {
 
     public TerminologyServerClientSettings setMaxExpansionPages(int maxExpansionPages) {
         this.maxExpansionPages = maxExpansionPages;
+        return this;
+    }
+
+    public TxResourceMode getTxResourceMode() {
+        return txResourceMode;
+    }
+
+    public TerminologyServerClientSettings withTxResourceMode(TxResourceMode txResourceMode) {
+        return setTxResourceMode(txResourceMode);
+    }
+
+    public TerminologyServerClientSettings setTxResourceMode(TxResourceMode txResourceMode) {
+        this.txResourceMode = txResourceMode;
+        return this;
+    }
+
+    public int getMaxTxResourceCodeSystemConcepts() {
+        return maxTxResourceCodeSystemConcepts;
+    }
+
+    public TerminologyServerClientSettings withMaxTxResourceCodeSystemConcepts(int maxTxResourceCodeSystemConcepts) {
+        return setMaxTxResourceCodeSystemConcepts(maxTxResourceCodeSystemConcepts);
+    }
+
+    public TerminologyServerClientSettings setMaxTxResourceCodeSystemConcepts(int maxTxResourceCodeSystemConcepts) {
+        this.maxTxResourceCodeSystemConcepts = maxTxResourceCodeSystemConcepts;
         return this;
     }
 }

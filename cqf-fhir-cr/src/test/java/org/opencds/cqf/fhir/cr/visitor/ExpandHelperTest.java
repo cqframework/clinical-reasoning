@@ -20,10 +20,14 @@ import ca.uhn.fhir.repository.IRepository;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -35,6 +39,8 @@ import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings.TxResourceMode;
 import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.client.terminology.FederatedTerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
@@ -321,7 +327,11 @@ class ExpandHelperTest {
         verify(client, times(1))
                 .expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), parametersCaptor.capture());
         var filteredExpansionParams = parametersCaptor.getValue();
-        assertEquals(2, filteredExpansionParams.getParameter().size());
+        // Ignore any tx-resource params the feature adds; this test is about unsupported-param removal.
+        var nonTxParams = filteredExpansionParams.getParameter().stream()
+                .filter(p -> !Constants.TX_RESOURCE.equals(p.getName()))
+                .toList();
+        assertEquals(2, nonTxParams.size());
         ExpandHelper.unsupportedParametersToRemove.forEach(parameterUrl -> {
             assertNull(filteredExpansionParams.getParameter(parameterUrl));
         });
@@ -1141,5 +1151,217 @@ class ExpandHelperTest {
         when(mockClient.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
                 .thenReturn(valueSet);
         return mockClient;
+    }
+
+    // ---- tx-resource attachment -------------------------------------------------------------------
+
+    // Builds a target ValueSet that routes to the terminology server (same base as the endpoint, no
+    // authoritative-source extension) and whose compose references both a package-authored ValueSet
+    // (by canonical) and a package-authored CodeSystem (by system).
+    private ValueSet targetReferencing(String baseUrl, String depVsCanonical, String csSystem) {
+        var target = new ValueSet();
+        target.setUrl(baseUrl + "/ValueSet/target");
+        var include = target.getCompose().addInclude();
+        include.setSystem(csSystem);
+        include.addValueSet(depVsCanonical);
+        return target;
+    }
+
+    @Test
+    void terminologyServerExpand_attachesTxResourcePerPackageDependency() {
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var depVsUrl = baseUrl + "/ValueSet/dep";
+        var depVsVersion = "1.0.0";
+        var csSystem = "http://example.org/CodeSystem/local";
+
+        var target = targetReferencing(baseUrl, depVsUrl + "|" + depVsVersion, csSystem);
+
+        // package closure
+        var depVs = createLeafWithUrl(depVsUrl);
+        depVs.setVersion(depVsVersion);
+        var cs = new CodeSystem();
+        cs.setUrl(csSystem).setVersion("6.1.0");
+
+        var expanded = createLeafWithUrl(target.getUrl());
+
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        // AUTO by default
+        when(client.getTerminologyServerClientSettings(any(IEndpointAdapter.class)))
+                .thenReturn(TerminologyServerClientSettings.getDefault());
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenReturn(expanded);
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var helper = new ExpandHelper(rep, client);
+
+        var captor = ArgumentCaptor.forClass(IParametersAdapter.class);
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(target),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                List.of((IValueSetAdapter) factory.createValueSet(depVs)),
+                List.of((IBaseResource) cs),
+                new ArrayList<>(),
+                new Date());
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), captor.capture());
+        var sent = (Parameters) captor.getValue().get();
+        var txResources = sent.getParameter().stream()
+                .filter(p -> Constants.TX_RESOURCE.equals(p.getName()))
+                .map(Parameters.ParametersParameterComponent::getResource)
+                .toList();
+        assertEquals(3, txResources.size(), "expected the target ValueSet plus one tx-resource per package dependency");
+        var attachedUrls =
+                txResources.stream().map(r -> ((MetadataResource) r).getUrl()).toList();
+        assertTrue(attachedUrls.contains(target.getUrl()), "the target ValueSet itself should be attached");
+        assertTrue(attachedUrls.contains(depVsUrl), "the referenced package ValueSet should be attached");
+        assertTrue(attachedUrls.contains(csSystem), "the referenced package CodeSystem should be attached");
+    }
+
+    @Test
+    void terminologyServerExpand_attachesTargetValueSetEvenWithoutPackageDependencies() {
+        // Reproduces the core of aphl-vsm#709: the terminology server lacks the requested ValueSet
+        // version. Even with no package dependencies to supply, the target ValueSet itself must be
+        // attached as a tx-resource so the server can expand the version it does not hold.
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var target = new ValueSet();
+        target.setUrl(baseUrl + "/ValueSet/target").setVersion("6.1.0");
+        target.getCompose().getIncludeFirstRep().setSystem("http://example.org/external");
+
+        var expanded = createLeafWithUrl(target.getUrl());
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.getTerminologyServerClientSettings(any(IEndpointAdapter.class)))
+                .thenReturn(TerminologyServerClientSettings.getDefault());
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenReturn(expanded);
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var helper = new ExpandHelper(rep, client);
+
+        var captor = ArgumentCaptor.forClass(IParametersAdapter.class);
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(target),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                List.of(),
+                new ArrayList<String>(),
+                new Date());
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), captor.capture());
+        var sent = (Parameters) captor.getValue().get();
+        var txResources = sent.getParameter().stream()
+                .filter(p -> Constants.TX_RESOURCE.equals(p.getName()))
+                .map(Parameters.ParametersParameterComponent::getResource)
+                .toList();
+        assertEquals(1, txResources.size(), "the target ValueSet should be supplied even without package dependencies");
+        assertEquals(target.getUrl(), ((MetadataResource) txResources.get(0)).getUrl());
+    }
+
+    @Test
+    void terminologyServerExpand_doesNotAccumulateTxResourcesAcrossExpansions() {
+        // $package reuses one parameters object across every ValueSet it expands. tx-resource params must
+        // be scoped to a single $expand; they must not pile up on the shared object across expansions.
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var vsA = new ValueSet();
+        vsA.setUrl(baseUrl + "/ValueSet/a").setVersion("1.0.0");
+        vsA.getCompose().getIncludeFirstRep().setSystem("http://example.org/external");
+        var vsB = new ValueSet();
+        vsB.setUrl(baseUrl + "/ValueSet/b").setVersion("1.0.0");
+        vsB.getCompose().getIncludeFirstRep().setSystem("http://example.org/external");
+
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.getTerminologyServerClientSettings(any(IEndpointAdapter.class)))
+                .thenReturn(TerminologyServerClientSettings.getDefault());
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenAnswer(inv -> createLeafWithUrl(((IValueSetAdapter) inv.getArgument(0)).getUrl()));
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var helper = new ExpandHelper(rep, client);
+
+        // One shared parameters object, reused for both expansions (as PackageVisitor does).
+        var sharedParams = factory.createParameters(new Parameters());
+        var expandedList = new ArrayList<String>();
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vsA),
+                sharedParams,
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                List.of(),
+                expandedList,
+                new Date());
+
+        var captor = ArgumentCaptor.forClass(IParametersAdapter.class);
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(vsB),
+                sharedParams,
+                Optional.of(factory.createEndpoint(endpoint)),
+                new ArrayList<IValueSetAdapter>(),
+                List.of(),
+                expandedList,
+                new Date());
+
+        verify(client, times(2)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), captor.capture());
+        var sentForB = (Parameters) captor.getValue().get();
+        var txUrls = sentForB.getParameter().stream()
+                .filter(p -> Constants.TX_RESOURCE.equals(p.getName()))
+                .map(p -> ((MetadataResource) p.getResource()).getUrl())
+                .toList();
+        // The second expansion must carry only its own target — never the first ValueSet's tx-resources.
+        assertEquals(List.of(vsB.getUrl()), txUrls, "tx-resources must not accumulate across expansions");
+        // The shared parameters object must never be mutated with tx-resource params.
+        assertNull(sharedParams.getParameter(Constants.TX_RESOURCE));
+    }
+
+    @Test
+    void terminologyServerExpand_disabledMode_attachesNoTxResource() {
+        var baseUrl = "www.test.com/fhir";
+        var endpoint = new Endpoint();
+        endpoint.setAddress(baseUrl);
+
+        var depVsUrl = baseUrl + "/ValueSet/dep";
+        var depVsVersion = "1.0.0";
+        var csSystem = "http://example.org/CodeSystem/local";
+
+        var target = targetReferencing(baseUrl, depVsUrl + "|" + depVsVersion, csSystem);
+
+        var depVs = createLeafWithUrl(depVsUrl);
+        depVs.setVersion(depVsVersion);
+        var cs = new CodeSystem();
+        cs.setUrl(csSystem).setVersion("6.1.0");
+
+        var expanded = createLeafWithUrl(target.getUrl());
+
+        var client = mock(FederatedTerminologyProviderRouter.class);
+        when(client.getTerminologyServerClientSettings(any(IEndpointAdapter.class)))
+                .thenReturn(TerminologyServerClientSettings.getDefault().setTxResourceMode(TxResourceMode.DISABLED));
+        when(client.expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), any()))
+                .thenReturn(expanded);
+
+        var rep = mockRepositoryWithValueSetR4(new ValueSet());
+        var helper = new ExpandHelper(rep, client);
+
+        var captor = ArgumentCaptor.forClass(IParametersAdapter.class);
+        helper.expandValueSet(
+                (IValueSetAdapter) factory.createKnowledgeArtifactAdapter(target),
+                factory.createParameters(new Parameters()),
+                Optional.of(factory.createEndpoint(endpoint)),
+                List.of((IValueSetAdapter) factory.createValueSet(depVs)),
+                List.of((IBaseResource) cs),
+                new ArrayList<>(),
+                new Date());
+
+        verify(client, times(1)).expand(any(IValueSetAdapter.class), any(IEndpointAdapter.class), captor.capture());
+        var sent = (Parameters) captor.getValue().get();
+        assertFalse(
+                sent.getParameter().stream().anyMatch(p -> Constants.TX_RESOURCE.equals(p.getName())),
+                "DISABLED mode must not attach any tx-resource parameters");
     }
 }

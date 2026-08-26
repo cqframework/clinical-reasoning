@@ -197,7 +197,8 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                         if (hasUrl) {
                             // Try to resolve version using package source and IG dependencies
                             String canonical = resolveCanonicalWithIgVersion(ra.getReference(), igDependencyVersions);
-                            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical);
+                            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(
+                                    gatherResolutionRepository(), canonical);
                             var resolved = bundle == null ? null : findResourceMatchingVersion(bundle, canonical);
                             if (resolved == null) {
                                 // Not resolvable from the repository at the requested version; fall back
@@ -358,6 +359,79 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
     }
 
     /**
+     * The repository used to resolve dependency references during {@link #recursiveGather}. Defaults to the
+     * operation's repository. Subclasses may override to federate additional sources (e.g. NPM packages
+     * declared by the artifact's ImplementationGuide) so version-pinned artifacts the repository/tx server
+     * lack can still be resolved.
+     */
+    protected IRepository gatherResolutionRepository() {
+        return repository;
+    }
+
+    /**
+     * Determines the ImplementationGuide governing the artifact being processed: the artifact itself if it is
+     * an ImplementationGuide, otherwise the IG referenced by a {@code composed-of} related artifact and
+     * resolved from the repository. Returns empty when no IG can be determined — callers must not guess.
+     */
+    protected Optional<IKnowledgeArtifactAdapter> resolveImplementationGuide(IKnowledgeArtifactAdapter adapter) {
+        if (adapter == null) {
+            return Optional.empty();
+        }
+        if ("ImplementationGuide".equals(adapter.get().fhirType())) {
+            return Optional.of(adapter);
+        }
+        for (var component : adapter.getComponents()) {
+            var reference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+            if (reference == null
+                    || reference.isBlank()
+                    || !"ImplementationGuide".equals(Canonicals.getResourceType(reference))) {
+                continue;
+            }
+            var resolved = VisitorHelper.tryGetLatestVersion(reference, repository);
+            if (resolved.isPresent()) {
+                return resolved;
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Extracts the NPM package coordinates ({@code [packageId, version]}) declared by an ImplementationGuide's
+     * own package plus its {@code dependsOn} entries, used to seed an NPM-federated repository.
+     */
+    protected List<String[]> extractDependsOnPackages(IKnowledgeArtifactAdapter adapter) {
+        List<String[]> packages = new ArrayList<>();
+        try {
+            if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide ig) {
+                extractDependsOnPackages(
+                        ig.hasPackageId() && ig.hasVersion() ? ig.getPackageId() : null, ig.getVersion(), packages);
+                for (var dep : ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+                    }
+                }
+            } else if (adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide ig) {
+                extractDependsOnPackages(
+                        ig.hasPackageId() && ig.hasVersion() ? ig.getPackageId() : null, ig.getVersion(), packages);
+                for (var dep : ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Error extracting dependsOn packages", e);
+        }
+        return packages;
+    }
+
+    private static void extractDependsOnPackages(String packageId, String version, List<String[]> packages) {
+        if (packageId != null && version != null) {
+            packages.add(new String[] {packageId, version});
+        }
+    }
+
+    /**
      * Populates dependency versions from an ImplementationGuide adapter.
      * Extracts packageId and version from the IG's dependsOn array.
      *
@@ -422,7 +496,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
         try {
             // Search for the resource to determine its package source
-            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical);
+            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(gatherResolutionRepository(), canonical);
             if (bundle == null) {
                 return canonical;
             }

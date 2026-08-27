@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Optional;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -291,10 +292,11 @@ public class GenericTerminologyServerClientClientTest {
                         .withParameters(any())
                         .returnResourceType(any())
                         .execute())
-                .thenThrow(new UnprocessableEntityException())
-                .thenThrow(new UnprocessableEntityException())
+                .thenThrow(new InternalErrorException("transient server error"))
+                .thenThrow(new InternalErrorException("transient server error"))
                 .thenReturn(leaf);
-        // Important part - successful response on 3rd attempt to expand
+        // Important part - a transient fault (HTTP 500) is retried and succeeds on the 3rd attempt.
+        // (Non-transient faults such as HTTP 422 are intentionally not retried to success.)
 
         var client = spy(new GenericTerminologyServerClient(fhirContextR4));
         doReturn(fhirClient).when(client).initializeClientWithAuth(any(IEndpointAdapter.class));

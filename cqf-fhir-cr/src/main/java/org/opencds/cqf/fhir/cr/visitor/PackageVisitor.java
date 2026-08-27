@@ -69,6 +69,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     private static final Pattern FHIR_ID_PATTERN = Pattern.compile("^[A-Za-z0-9\\-.]+$");
     protected final ITerminologyProviderRouter terminologyServerRouter;
     protected final ExpandHelper expandHelper;
+    protected final TerminologyServerClientSettings terminologyServerClientSettings;
+
+    // Set per-visit when the packaged artifact's ImplementationGuide declares dependsOn packages; used to
+    // federate NPM package resolution into dependency gathering. Null when no IG/packages can be determined.
+    private IRepository npmFederatedRepository;
 
     protected Map<String, List<?>> resourceTypes = new HashMap<>();
     private IBaseOperationOutcome messages;
@@ -84,8 +89,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
 
     public PackageVisitor(IRepository repository, TerminologyServerClientSettings terminologyServerClientSettings) {
         super(repository);
+        this.terminologyServerClientSettings = terminologyServerClientSettings != null
+                ? terminologyServerClientSettings
+                : TerminologyServerClientSettings.getDefault();
         this.terminologyServerRouter =
-                new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
+                new FederatedTerminologyProviderRouter(fhirContext(), this.terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
@@ -96,8 +104,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
             TerminologyServerClientSettings terminologyServerClientSettings,
             IValueSetExpansionCache cache) {
         super(repository, cache);
+        this.terminologyServerClientSettings = terminologyServerClientSettings != null
+                ? terminologyServerClientSettings
+                : TerminologyServerClientSettings.getDefault();
         this.terminologyServerRouter =
-                new FederatedTerminologyProviderRouter(fhirContext(), terminologyServerClientSettings);
+                new FederatedTerminologyProviderRouter(fhirContext(), this.terminologyServerClientSettings);
         this.expandHelper = new ExpandHelper(this.repository, terminologyServerRouter);
         this.adapterFactory = IAdapterFactory.forFhirContext(repository.fhirContext());
         setupResourceTypes();
@@ -106,6 +117,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
     public PackageVisitor(
             IRepository repository, ITerminologyProviderRouter terminologyServerRouter, IValueSetExpansionCache cache) {
         super(repository, cache);
+        this.terminologyServerClientSettings = TerminologyServerClientSettings.getDefault();
         if (terminologyServerRouter == null) {
             this.terminologyServerRouter = new FederatedTerminologyProviderRouter(fhirContext());
         } else {
@@ -242,6 +254,10 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 }
             });
         } else {
+            // Federate the NPM packages declared by the artifact's ImplementationGuide so version-pinned
+            // dependencies (e.g. us-core ValueSets at |6.1.0) the repository/tx server lack can be resolved
+            // directly from their NPM packages during gathering.
+            setUpNpmFederation(adapter, artifactEndpointConfigurations);
             // Use array wrapper to allow messages to be updated by recursiveGather
             var messagesWrapper = new IBaseOperationOutcome[] {messages};
             var packagedResources = new HashMap<String, IKnowledgeArtifactAdapter>();
@@ -315,6 +331,11 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .filter(r -> r.fhirType().equals(VALUESET_FHIR_TYPE))
                 .map(v -> (IValueSetAdapter) createAdapterForResource(v))
                 .collect(Collectors.toList());
+        // Gather the package-authored CodeSystems from the bundle. Because these are package-authored by
+        // construction, external big systems (e.g. SNOMED/LOINC) are excluded automatically (they are
+        // referenced by URL, not contained in the package). These are supplied to remote $expand calls via
+        // the tx-resource parameter so version-pinned artifacts the server lacks can be resolved.
+        var packageCodeSystems = gatherPackageCodeSystems(packagedBundle);
         var expansionCache = getExpansionCache();
         var expansionParamsHash = expansionCache.map(
                 e -> e.getExpansionParametersHash(rootSpecificationLibrary).orElse(null));
@@ -352,6 +373,7 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         artifactEndpointConfigurations,
                         terminologyEndpoint,
                         valueSets,
+                        packageCodeSystems,
                         expandedList,
                         new Date());
                 addExpansionWarningsToOperationOutcome(valueSet);
@@ -385,7 +407,21 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                         return true;
                     }
                     var value = p.getPrimitiveValue();
-                    if (value == null || Canonicals.getUrl(value) == null) {
+                    if (value == null) {
+                        return true;
+                    }
+                    if (Canonicals.getUrl(value) == null) {
+                        // Canonicals.getUrl does not recognize bare URN systems (e.g. urn:ietf:bcp:47),
+                        // so they slip past the canonical check below. A version-pinning parameter whose
+                        // value is a URN system reference without a `|version` is still rejected by
+                        // terminology servers ("Unable to understand default system version ..."), so drop it.
+                        if (value.startsWith("urn:") && !value.contains("|")) {
+                            myLogger.warn(
+                                    "Excluding unversioned canonical from $package expansion parameters: {}={}",
+                                    p.getName(),
+                                    value);
+                            return false;
+                        }
                         return true;
                     }
                     if (Canonicals.getVersion(value) != null) {
@@ -400,6 +436,106 @@ public class PackageVisitor extends BaseKnowledgeArtifactVisitor {
                 .map(IParametersParameterComponentAdapter::get)
                 .toList();
         params.setParameter(kept);
+    }
+
+    /**
+     * Gathers the package-authored CodeSystems from the packaged bundle so they can be supplied to remote
+     * {@code $expand} calls via the {@code tx-resource} parameter. A safety filter is applied: CodeSystems
+     * whose {@code content} is {@code not-present}, {@code fragment}, or {@code supplement} are skipped (they
+     * carry no usable concepts), as are CodeSystems whose concept count exceeds
+     * {@link TerminologyServerClientSettings#getMaxTxResourceCodeSystemConcepts()}. A warning is logged for
+     * every skipped CodeSystem (no silent drop).
+     *
+     * @param packagedBundle the bundle produced by the package operation
+     * @return the package-authored CodeSystems eligible to be supplied as tx-resources
+     */
+    @Override
+    protected IRepository gatherResolutionRepository() {
+        return npmFederatedRepository != null ? npmFederatedRepository : super.gatherResolutionRepository();
+    }
+
+    /**
+     * Builds an NPM-federated repository ({@code repository} + {@link NpmRepository}) from the NPM packages
+     * declared by the packaged artifact's ImplementationGuide, so version-pinned dependencies the repository
+     * and terminology server lack can be resolved from their packages during {@link #recursiveGather}.
+     *
+     * <p>The IG is the artifact itself if it is an ImplementationGuide, otherwise the one referenced by a
+     * {@code composed-of} related artifact. When no IG (or no dependsOn packages) can be determined, this logs
+     * and leaves federation disabled — the operation continues against the plain repository, unchanged.
+     */
+    private void setUpNpmFederation(
+            IKnowledgeArtifactAdapter adapter, List<ArtifactEndpointConfiguration> artifactEndpointConfigurations) {
+        npmFederatedRepository = null;
+        var ig = resolveImplementationGuide(adapter);
+        if (ig.isEmpty()) {
+            myLogger.info(
+                    "Could not determine an ImplementationGuide (via composed-of) for artifact {}; continuing "
+                            + "$package dependency resolution without NPM package federation.",
+                    adapter.getUrl());
+            return;
+        }
+        var dependsOnPackages = extractDependsOnPackages(ig.get());
+        if (dependsOnPackages.isEmpty()) {
+            myLogger.info(
+                    "ImplementationGuide {} declares no dependsOn packages; continuing without NPM federation.",
+                    ig.get().getUrl());
+            return;
+        }
+        try {
+            var resolver =
+                    new ConformanceResourceResolver(repository, dependsOnPackages, artifactEndpointConfigurations);
+            npmFederatedRepository = resolver.getFederatedRepository();
+            myLogger.info(
+                    "Federating {} NPM package(s) for $package dependency resolution from ImplementationGuide {}.",
+                    dependsOnPackages.size(),
+                    ig.get().getUrl());
+        } catch (Exception e) {
+            myLogger.warn(
+                    "Failed to set up NPM package federation for $package; continuing without it. Reason: {}",
+                    e.getMessage());
+            npmFederatedRepository = null;
+        }
+    }
+
+    List<IBaseResource> gatherPackageCodeSystems(IBaseBundle packagedBundle) {
+        var codeSystems = new ArrayList<IBaseResource>();
+        var terser = new FhirTerser(fhirContext());
+        var maxConcepts = terminologyServerClientSettings.getMaxTxResourceCodeSystemConcepts();
+        for (var resource : BundleHelper.getEntryResources(packagedBundle)) {
+            if (!Constants.RESOURCETYPE_CODESYSTEM.equals(resource.fhirType())) {
+                continue;
+            }
+            var url = terser.getSinglePrimitiveValueOrNull(resource, "url");
+            var content = terser.getSinglePrimitiveValueOrNull(resource, "content");
+            if ("not-present".equals(content) || "fragment".equals(content) || "supplement".equals(content)) {
+                myLogger.warn(
+                        "Skipping package CodeSystem {} as a tx-resource because its content is '{}'.", url, content);
+                continue;
+            }
+            var conceptCount = countCodeSystemConcepts(resource, terser);
+            if (conceptCount > maxConcepts) {
+                myLogger.warn(
+                        "Skipping package CodeSystem {} as a tx-resource because its concept count ({}) exceeds the configured maximum ({}).",
+                        url,
+                        conceptCount,
+                        maxConcepts);
+                continue;
+            }
+            codeSystems.add(resource);
+        }
+        return codeSystems;
+    }
+
+    /**
+     * Counts the concepts of a CodeSystem, including nested concepts, in a FHIR-version-agnostic way.
+     */
+    private int countCodeSystemConcepts(IBase element, FhirTerser terser) {
+        var children = terser.getValues(element, "concept");
+        int count = children.size();
+        for (var child : children) {
+            count += countCodeSystemConcepts(child, terser);
+        }
+        return count;
     }
 
     // Helper to surface expansion parameter warnings as OperationOutcome issues

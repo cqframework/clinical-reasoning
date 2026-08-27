@@ -632,42 +632,6 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
         return transitiveKeyCanonicals;
     }
 
-    private List<String[]> extractDependsOnPackages(IKnowledgeArtifactAdapter adapter) {
-        List<String[]> packages = new ArrayList<>();
-        try {
-            if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide ig) {
-                extractR4DependsOnPackages(ig, packages);
-            } else if (adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide ig) {
-                extractR5DependsOnPackages(ig, packages);
-            }
-        } catch (Exception e) {
-            logger.debug("Error extracting dependsOn packages", e);
-        }
-        return packages;
-    }
-
-    private void extractR4DependsOnPackages(org.hl7.fhir.r4.model.ImplementationGuide ig, List<String[]> packages) {
-        if (ig.hasPackageId() && ig.hasVersion()) {
-            packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
-        }
-        for (var dep : ig.getDependsOn()) {
-            if (dep.hasPackageId() && dep.hasVersion()) {
-                packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
-            }
-        }
-    }
-
-    private void extractR5DependsOnPackages(org.hl7.fhir.r5.model.ImplementationGuide ig, List<String[]> packages) {
-        if (ig.hasPackageId() && ig.hasVersion()) {
-            packages.add(new String[] {ig.getPackageId(), ig.getVersion()});
-        }
-        for (var dep : ig.getDependsOn()) {
-            if (dep.hasPackageId() && dep.hasVersion()) {
-                packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
-            }
-        }
-    }
-
     protected LibraryManager createLibraryManager() {
         var librarySourceProvider = buildLibrarySource();
         var sourceProviders = new ArrayList<>(Arrays.asList(librarySourceProvider, librarySourceProvider));

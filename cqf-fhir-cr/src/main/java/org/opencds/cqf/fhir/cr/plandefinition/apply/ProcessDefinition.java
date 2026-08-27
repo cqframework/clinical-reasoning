@@ -7,9 +7,7 @@ import static org.opencds.cqf.fhir.utility.Canonicals.*;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.repository.IRepository;
-import org.hl7.fhir.exceptions.FHIRException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;

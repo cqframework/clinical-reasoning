@@ -27,6 +27,7 @@ import org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProces
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,8 @@ public class ApplyProcessor implements IApplyProcessor {
     public IBaseResource apply(ApplyRequest request) {
         request.setContainResources(true);
         var requestOrchestration = applyPlanDefinition(request);
-        request.resolveOperationOutcome(requestOrchestration);
+        var adapter = request.getAdapterFactory().createResource(requestOrchestration);
+        request.resolveOperationOutcome(adapter);
         var carePlan = processRequest.generateCarePlan(request, requestOrchestration);
 
         return liftContainedResourcesToParent(request, carePlan);
@@ -102,7 +104,8 @@ public class ApplyProcessor implements IApplyProcessor {
     public IBaseBundle applyR5(ApplyRequest request) {
         initApply(request);
         var requestOrchestration = applyPlanDefinition(request);
-        request.resolveOperationOutcome(requestOrchestration);
+        var adapter = request.getAdapterFactory().createResource(requestOrchestration);
+        request.resolveOperationOutcome(adapter);
         var resultBundle = newBundle(
                 request.getFhirVersion(), requestOrchestration.getIdElement().getIdPart(), null);
         addEntry(resultBundle, newEntryWithResource(requestOrchestration));
@@ -203,8 +206,8 @@ public class ApplyProcessor implements IApplyProcessor {
                     // entry))
                 }
             } catch (Exception e) {
-                request.logException("Error encountered extracting %s: %s"
-                        .formatted(questionnaireResponse.getId().getIdPart(), e.getMessage()));
+                request.logException(
+                        "Error encountered extracting %s: %s".formatted(questionnaireResponse.getId(), e.getMessage()));
             }
         });
     }
@@ -214,23 +217,22 @@ public class ApplyProcessor implements IApplyProcessor {
                 "Performing $apply operation on PlanDefinition/{}",
                 request.getPlanDefinition().getIdElement().getIdPart());
 
-        var requestOrchestration = processRequest.generateRequestOrchestration(request);
+        var requestOrchestration =
+                request.getAdapterFactory().createResource(processRequest.generateRequestOrchestration(request));
         extensionProcessor.processExtensions(
                 request, requestOrchestration, request.getPlanDefinition(), EXCLUDED_EXTENSION_LIST);
         processGoals(request, requestOrchestration);
         var metConditions = new ArrayList<String>();
         for (var action : request.getPlanDefinitionAdapter().getAction()) {
-            request.getModelResolver()
-                    .setValue(
-                            requestOrchestration,
-                            "action",
-                            Collections.singletonList(
-                                    processAction.processAction(request, requestOrchestration, metConditions, action)));
+            requestOrchestration.setValue(
+                    "action",
+                    Collections.singletonList(
+                            processAction.processAction(request, requestOrchestration, metConditions, action)));
         }
 
         return Boolean.TRUE.equals(request.getContainResources())
-                ? liftContainedResourcesToParent(request, requestOrchestration)
-                : requestOrchestration;
+                ? liftContainedResourcesToParent(request, requestOrchestration.get())
+                : requestOrchestration.get();
     }
 
     public IBaseResource applyActivityDefinition(
@@ -238,26 +240,21 @@ public class ApplyProcessor implements IApplyProcessor {
         return liftContainedResourcesToParent(request, activityProcessor.apply(request));
     }
 
-    protected void processGoals(ApplyRequest request, IBaseResource requestOrchestration) {
+    protected void processGoals(ApplyRequest request, IResourceAdapter adapter) {
         var goals = request.getPlanDefinitionAdapter().getGoal();
         for (int i = 0; i < goals.size(); i++) {
             var goal = processGoal.convertGoal(request, goals.get(i));
             if (Boolean.TRUE.equals(request.getContainResources())) {
                 var goalId = Ids.newId(request.getFhirVersion(), String.valueOf(i + 1));
                 goal.setId(goalId);
-                request.getModelResolver().setValue(requestOrchestration, "contained", Collections.singletonList(goal));
+                adapter.addContained(goal);
             } else {
                 var goalId = Ids.newId(request.getFhirVersion(), "Goal", String.valueOf(i + 1));
                 goal.setId(goalId);
-                request.getModelResolver()
-                        .setValue(
-                                requestOrchestration,
-                                "extension",
-                                Collections.singletonList(buildReferenceExt(
-                                        request.getFhirVersion(),
-                                        pertainToGoalExtension(
-                                                goal.getIdElement().getValue()),
-                                        request.getContainResources())));
+                adapter.addExtension(buildReferenceExt(
+                        request.getFhirVersion(),
+                        pertainToGoalExtension(goal.getIdElement().getValue()),
+                        request.getContainResources()));
             }
             // Always add goals to the resource list so they can be added to the CarePlan if needed
             request.getRequestResources().add(goal);

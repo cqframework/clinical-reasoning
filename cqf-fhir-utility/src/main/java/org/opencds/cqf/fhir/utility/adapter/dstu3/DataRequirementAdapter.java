@@ -1,18 +1,16 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementCodeFilterAdapter;
 
-public class DataRequirementAdapter extends BaseAdapter implements IDataRequirementAdapter {
+public class DataRequirementAdapter extends BaseElementAdapter implements IDataRequirementAdapter {
 
     private final DataRequirement dataRequirement;
 
@@ -28,16 +26,6 @@ public class DataRequirementAdapter extends BaseAdapter implements IDataRequirem
     @Override
     public DataRequirement get() {
         return dataRequirement;
-    }
-
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

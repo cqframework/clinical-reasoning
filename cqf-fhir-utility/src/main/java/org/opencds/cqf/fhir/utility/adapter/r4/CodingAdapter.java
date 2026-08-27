@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Coding;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
-public class CodingAdapter extends BaseAdapter implements ICodingAdapter {
+public class CodingAdapter extends BaseElementAdapter implements ICodingAdapter {
 
     private final Coding coding;
 

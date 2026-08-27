@@ -5,12 +5,11 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.CodeableConcept;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
-public class CodeableConceptAdapter extends BaseAdapter implements ICodeableConceptAdapter {
+public class CodeableConceptAdapter extends BaseElementAdapter implements ICodeableConceptAdapter {
 
     private final CodeableConcept codeableConcept;
 
@@ -31,11 +30,6 @@ public class CodeableConceptAdapter extends BaseAdapter implements ICodeableConc
     @Override
     public FhirContext fhirContext() {
         return fhirContext;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.PackageHelper;
 import org.opencds.cqf.fhir.utility.SearchHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -39,6 +41,7 @@ import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRoute
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifactVisitor {
     private static final Logger logger = LoggerFactory.getLogger(BaseKnowledgeArtifactVisitor.class);
     String isOwnedUrl = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
@@ -94,14 +97,14 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
     protected List<IDomainResource> getComponents(
             IKnowledgeArtifactAdapter adapter, IRepository repository, ArrayList<IDomainResource> resourcesToUpdate) {
-        adapter.getOwnedRelatedArtifacts().stream().forEach(c -> {
+        adapter.getOwnedRelatedArtifacts().forEach(c -> {
             final var preReleaseReference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(c);
             Optional<IKnowledgeArtifactAdapter> maybeArtifact =
                     VisitorHelper.tryGetLatestVersion(preReleaseReference, repository);
             if (maybeArtifact.isPresent()) {
                 if (resourcesToUpdate.stream()
-                        .noneMatch(rtu ->
-                                rtu.getId().equals(maybeArtifact.get().getId().toString()))) {
+                        .noneMatch(rtu -> Ids.simple(rtu.getIdElement())
+                                .equals(maybeArtifact.get().getId()))) {
                     resourcesToUpdate.add(maybeArtifact.get().get());
                     getComponents(maybeArtifact.get(), repository, resourcesToUpdate);
                 }
@@ -162,7 +165,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         if (adapter == null) {
             return;
         }
-        if (!gatheredResources.keySet().contains(adapter.getCanonical())) {
+        if (!gatheredResources.containsKey(adapter.getCanonical())) {
             gatheredResources.put(adapter.getCanonical(), adapter);
             findUnsupportedCapability(adapter, capability);
             processCanonicals(adapter, versionTuple);
@@ -194,14 +197,23 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                         if (hasUrl) {
                             // Try to resolve version using package source and IG dependencies
                             String canonical = resolveCanonicalWithIgVersion(ra.getReference(), igDependencyVersions);
-                            return Optional.ofNullable(
-                                            SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical))
-                                    .map(bundle -> findResourceMatchingVersion(bundle, canonical, messagesWrapper))
-                                    .orElseGet(() -> tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint));
+                            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(
+                                    gatherResolutionRepository(), canonical);
+                            var resolved = bundle == null ? null : findResourceMatchingVersion(bundle, canonical);
+                            if (resolved == null) {
+                                // Not resolvable from the repository at the requested version; fall back
+                                // to the terminology server before treating the reference as unresolved.
+                                resolved = tryGetValueSetsFromTxServer(ra, client, terminologyEndpoint);
+                            }
+                            if (resolved == null) {
+                                // Unresolvable by any path — surface an accurate message.
+                                addUnresolvedReferenceMessage(canonical, messagesWrapper);
+                            }
+                            return resolved;
                         }
                         return null;
                     })
-                    .filter(r -> r != null)
+                    .filter(Objects::nonNull)
                     .map(r -> IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(r))
                     .forEach(component -> recursiveGather(
                             component,
@@ -251,27 +263,20 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             IDependencyInfo ra, ITerminologyProviderRouter router, IEndpointAdapter endpoint) {
         if (router != null
                 && endpoint != null
-                && Canonicals.getResourceType(ra.getReference()).equals("ValueSet")) {
+                && Objects.equals(Canonicals.getResourceType(ra.getReference()), "ValueSet")) {
             return router.getValueSetResource(endpoint, ra.getReference()).orElse(null);
         }
         return null;
     }
 
     /**
-     * Finds a resource in the bundle that matches the version specified in the canonical reference.
-     * If a version is specified in the canonical, this method will search through all bundle entries
-     * to find a resource with the matching URL and version. If no version is specified, it returns
-     * the first entry. If a version is specified but no matching version is found, and messagesWrapper is
-     * not null, an issue is added to the OperationOutcome and null is returned.
-     *
-     * @param bundle The bundle containing search results
-     * @param canonical The canonical reference (may include version)
-     * @param messagesWrapper Optional array wrapper containing OperationOutcome to add issues to when version mismatch occurs
-     * @return The matching resource, null if version specified but not found and messagesWrapper is provided,
-     *         or the first resource if no version match is found and messagesWrapper is null
+     * Resolves the resource in the bundle that matches the version in the canonical reference. If the
+     * canonical has no version, returns the latest (or first) entry. If a version is requested but no
+     * entry matches, returns {@code null} so the caller can attempt other resolution paths (e.g. a
+     * terminology server) before treating the reference as unresolved. This method only resolves; it
+     * does not record messages.
      */
-    private IDomainResource findResourceMatchingVersion(
-            IBaseBundle bundle, String canonical, IBaseOperationOutcome[] messagesWrapper) {
+    private IDomainResource findResourceMatchingVersion(IBaseBundle bundle, String canonical) {
         var requestedVersion = Canonicals.getVersion(canonical);
         var requestedUrl = Canonicals.getUrl(canonical);
 
@@ -281,7 +286,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
                     .orElseGet(() -> (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle));
         }
 
-        // Search through all entries to find one matching the requested version
+        // The repository search is already filtered by url + version; re-check defensively.
         var entries = BundleHelper.getEntryResources(bundle);
         for (var resource : entries) {
             if (resource instanceof IDomainResource domainResource) {
@@ -296,33 +301,29 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
             }
         }
 
-        // No matching version found
-        if (messagesWrapper != null) {
-            // For $package operation: add error message and return null (don't include resource)
-            var errorMessage = String.format(
-                    "Requested version '%s' for resource '%s' not found in repository. Resource will not be included in package.",
-                    requestedVersion, canonical);
-            // Create messages OperationOutcome if it doesn't exist yet
-            if (messagesWrapper[0] == null) {
-                messagesWrapper[0] = ca.uhn.fhir.util.OperationOutcomeUtil.newInstance(fhirContext());
-            }
-            ca.uhn.fhir.util.OperationOutcomeUtil.addIssue(
-                    fhirContext(), messagesWrapper[0], "error", errorMessage, null, "processing");
-            return null;
-        } else {
-            // For other operations: log warning and return first entry (backward compatibility)
-            var firstResource = (IDomainResource) BundleHelper.getEntryResourceFirstRep(bundle);
-            if (firstResource != null) {
-                var firstAdapter =
-                        IAdapterFactory.forFhirVersion(fhirVersion()).createKnowledgeArtifactAdapter(firstResource);
-                logger.warn(
-                        "Requested version '{}' for resource '{}' not found. Using version '{}' instead.",
-                        requestedVersion,
-                        requestedUrl,
-                        firstAdapter.getVersion());
-            }
-            return firstResource;
+        // No matching version in the repository search result.
+        return null;
+    }
+
+    /**
+     * Records a "version not found" message for a reference that could not be resolved from the
+     * repository or a terminology server. Only versioned references produce a message; unversioned
+     * references resolve to the latest available and are never reported here.
+     */
+    private void addUnresolvedReferenceMessage(String canonical, IBaseOperationOutcome[] messagesWrapper) {
+        var requestedVersion = Canonicals.getVersion(canonical);
+        if (requestedVersion == null || messagesWrapper == null) {
+            return;
         }
+        var errorMessage = String.format(
+                "Requested version '%s' for resource '%s' could not be resolved from the repository or terminology server. Resource will not be included in package.",
+                requestedVersion, canonical);
+        // Create messages OperationOutcome if it doesn't exist yet
+        if (messagesWrapper[0] == null) {
+            messagesWrapper[0] = ca.uhn.fhir.util.OperationOutcomeUtil.newInstance(fhirContext());
+        }
+        ca.uhn.fhir.util.OperationOutcomeUtil.addIssue(
+                fhirContext(), messagesWrapper[0], "error", errorMessage, null, "processing");
     }
 
     /**
@@ -355,6 +356,79 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
         }
 
         return dependencyVersions;
+    }
+
+    /**
+     * The repository used to resolve dependency references during {@link #recursiveGather}. Defaults to the
+     * operation's repository. Subclasses may override to federate additional sources (e.g. NPM packages
+     * declared by the artifact's ImplementationGuide) so version-pinned artifacts the repository/tx server
+     * lack can still be resolved.
+     */
+    protected IRepository gatherResolutionRepository() {
+        return repository;
+    }
+
+    /**
+     * Determines the ImplementationGuide governing the artifact being processed: the artifact itself if it is
+     * an ImplementationGuide, otherwise the IG referenced by a {@code composed-of} related artifact and
+     * resolved from the repository. Returns empty when no IG can be determined — callers must not guess.
+     */
+    protected Optional<IKnowledgeArtifactAdapter> resolveImplementationGuide(IKnowledgeArtifactAdapter adapter) {
+        if (adapter == null) {
+            return Optional.empty();
+        }
+        if ("ImplementationGuide".equals(adapter.get().fhirType())) {
+            return Optional.of(adapter);
+        }
+        for (var component : adapter.getComponents()) {
+            var reference = IKnowledgeArtifactAdapter.getRelatedArtifactReference(component);
+            if (reference == null
+                    || reference.isBlank()
+                    || !"ImplementationGuide".equals(Canonicals.getResourceType(reference))) {
+                continue;
+            }
+            var resolved = VisitorHelper.tryGetLatestVersion(reference, repository);
+            if (resolved.isPresent()) {
+                return resolved;
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Extracts the NPM package coordinates ({@code [packageId, version]}) declared by an ImplementationGuide's
+     * own package plus its {@code dependsOn} entries, used to seed an NPM-federated repository.
+     */
+    protected List<String[]> extractDependsOnPackages(IKnowledgeArtifactAdapter adapter) {
+        List<String[]> packages = new ArrayList<>();
+        try {
+            if (adapter.get() instanceof org.hl7.fhir.r4.model.ImplementationGuide ig) {
+                extractDependsOnPackages(
+                        ig.hasPackageId() && ig.hasVersion() ? ig.getPackageId() : null, ig.getVersion(), packages);
+                for (var dep : ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+                    }
+                }
+            } else if (adapter.get() instanceof org.hl7.fhir.r5.model.ImplementationGuide ig) {
+                extractDependsOnPackages(
+                        ig.hasPackageId() && ig.hasVersion() ? ig.getPackageId() : null, ig.getVersion(), packages);
+                for (var dep : ig.getDependsOn()) {
+                    if (dep.hasPackageId() && dep.hasVersion()) {
+                        packages.add(new String[] {dep.getPackageId(), dep.getVersion()});
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Error extracting dependsOn packages", e);
+        }
+        return packages;
+    }
+
+    private static void extractDependsOnPackages(String packageId, String version, List<String[]> packages) {
+        if (packageId != null && version != null) {
+            packages.add(new String[] {packageId, version});
+        }
     }
 
     /**
@@ -422,7 +496,7 @@ public abstract class BaseKnowledgeArtifactVisitor implements IKnowledgeArtifact
 
         try {
             // Search for the resource to determine its package source
-            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(repository, canonical);
+            var bundle = SearchHelper.searchRepositoryByCanonicalWithPaging(gatherResolutionRepository(), canonical);
             if (bundle == null) {
                 return canonical;
             }

@@ -1,0 +1,17 @@
+{
+  "id": "ContinuousVariableObservationEncounterBasisNonFuncStrat",
+  "resourceType": "Library",
+  "url": "http://example.com/Library/ContinuousVariableObservationEncounterBasisNonFuncStrat",
+  "name": "ContinuousVariableObservationEncounterBasisNonFuncStrat",
+  "status": "active",
+  "type": {
+    "coding": [ {
+      "system": "http://terminology.hl7.org/CodeSystem/library-type",
+      "code": "logic-library"
+    } ]
+  },
+  "content": [ {
+    "contentType": "text/cql",
+    "url": "../../cql/ContinuousVariableObservationEncounterBasisNonFuncStrat.cql"
+  } ]
+}

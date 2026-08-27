@@ -14,6 +14,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 
@@ -145,9 +146,9 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
     public SelectedMeasureReportPopulationExt hasStringValue(String expected) {
         String actual = valueSlices().stream()
                 .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
+                .filter(PrimitiveType.class::isInstance)
+                .map(PrimitiveType.class::cast)
+                .map(PrimitiveType::getValueAsString)
                 .findFirst()
                 .orElse(null);
 
@@ -238,9 +239,9 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
     public SelectedMeasureReportPopulationExt hasListStringItem(String expectedItem) {
         boolean found = valueSlices().stream()
                 .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
+                .filter(PrimitiveType.class::isInstance)
+                .map(PrimitiveType.class::cast)
+                .map(PrimitiveType::getValueAsString)
                 .anyMatch(expectedItem::equals);
 
         assertTrue(found, "Expected string item not found: " + expectedItem);
@@ -425,9 +426,9 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
     public SelectedMeasureReportPopulationExt hasTupleListStringItem(String fieldName, String expectedItem) {
         boolean found = tupleFieldValueSlices(fieldName).stream()
                 .map(Extension::getValue)
-                .filter(StringType.class::isInstance)
-                .map(StringType.class::cast)
-                .map(StringType::getValue)
+                .filter(PrimitiveType.class::isInstance)
+                .map(PrimitiveType.class::cast)
+                .map(PrimitiveType::getValueAsString)
                 .anyMatch(expectedItem::equals);
 
         assertTrue(found, "Tuple list missing string item for field=" + fieldName + " item=" + expectedItem);

@@ -65,7 +65,7 @@ class ProcessDefinitionTests {
 
     @Test
     void applyActivityDefinitionShouldReturnNullOnException() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType(ACTIVITYDEFINITION);
         var activityDef = new ActivityDefinition().setUrl(ACTIVITYDEFINITION);
         activityDef.setId("test");
@@ -78,7 +78,7 @@ class ProcessDefinitionTests {
 
     @Test
     void applyNestedPlanDefinitionShouldReturnNullOnException() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType(PLANDEFINITION);
         var nestedPlanDef = new PlanDefinition().setUrl(PLANDEFINITION);
         nestedPlanDef.setId("nested");
@@ -92,7 +92,7 @@ class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionShouldReturnQuestionnaire() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType(QUESTIONNAIRE);
         var expectedQuestionnaire = new Questionnaire().setUrl(QUESTIONNAIRE);
         expectedQuestionnaire.setId("q1");
@@ -107,7 +107,7 @@ class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionReturnsTaskResourceForUnknownFhirType() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType(TASK);
         var task = new Task();
         task.setId("t1");
@@ -120,14 +120,13 @@ class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionReturnsNullWhenCanonicalNotFound() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType("http://test.fhir.org/fhir/Foo/test");
         doReturn(buildTransactionResponse(List.of(), List.of(), List.of()))
                 .when(repository)
                 .transaction(any(Bundle.class));
 
         var result = fixture.resolveDefinition(request, definition);
-
         assertNull(result);
     }
 
@@ -206,7 +205,7 @@ class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionOmitsVersionInSearchUrlsWhenAbsent() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType("http://test.fhir.org/fhir/Foo/test");
         var captor = ArgumentCaptor.forClass(Bundle.class);
         doReturn(buildTransactionResponse(List.of(), List.of(), List.of()))
@@ -239,7 +238,7 @@ class ProcessDefinitionTests {
 
     @Test
     void resolveDefinitionRoutesByFhirTypeNotByUrl() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var definition = new CanonicalType("http://test.fhir.org/fhir/Foo/test");
         var planDef = new PlanDefinition().setUrl("http://test.fhir.org/fhir/Foo/test");
         planDef.setId("nested-1");
@@ -277,7 +276,7 @@ class ProcessDefinitionTests {
 
     @Test
     void applyActivityDefinitionHandlesMultipleRequestResources() {
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null, null, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null, null);
         var definition = new CanonicalType(ACTIVITYDEFINITION);
         var activityDef = new ActivityDefinition().setUrl(ACTIVITYDEFINITION);
         activityDef.setId("test");

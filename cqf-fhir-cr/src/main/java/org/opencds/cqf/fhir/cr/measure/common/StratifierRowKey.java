@@ -20,37 +20,41 @@ import java.util.Optional;
  * StratifierRowKey subjectKey = StratifierRowKey.subjectOnly("Patient/123");
  *
  * // NON_SUBJECT_VALUE stratifier (e.g., encounter status function)
- * StratifierRowKey compositeKey = StratifierRowKey.withInput("Patient/123", "Encounter/456");
+ * StratifierRowKey compositeKey =
+ *         StratifierRowKey.withInput("Patient/123", StratifierRowValue.ofResourceId("Encounter/456"));
  * </pre>
  *
  * <h3>Key Components</h3>
  *
  * <ul>
  *   <li>{@code subjectQualified}: The qualified subject reference (e.g., "Patient/123")</li>
- *   <li>{@code inputParamId}: Optional input parameter ID for function-based stratifiers
- *       (e.g., "Encounter/456" when stratifying by a function that takes Encounter as input)</li>
+ *   <li>{@code inputParam}: Optional input-parameter for function-based stratifiers, or for the
+ *       synthetic per-element rows produced by iterable expansion. See {@link StratifierRowValue}.</li>
  * </ul>
  *
  * <h3>Intersection and Alignment</h3>
  *
- * <p>For NON_SUBJECT_VALUE stratifiers, the {@code inputParamId} serves two purposes:
+ * <p>For NON_SUBJECT_VALUE stratifiers, the {@code inputParam} serves two purposes:
  * <ol>
  *   <li><b>Cross-component alignment</b>: Multiple stratifier components (e.g., age + status)
  *       are aligned by matching on the same input parameter</li>
- *   <li><b>Population intersection</b>: The input parameter is intersected with population
- *       results to determine which items belong to each stratum</li>
+ *   <li><b>Population intersection</b>: Resource-style input params are intersected with
+ *       population results to determine which items belong to each stratum. Scalar-style
+ *       input params (from iterable expansion of non-resource values) are not intersectable
+ *       and instead fall back to subject-level resource attribution.</li>
  * </ol>
  *
  * @see MeasureMultiSubjectEvaluator
+ * @see StratifierRowValue
  */
-public record StratifierRowKey(String subjectQualified, Optional<String> inputParamId) {
+public record StratifierRowKey(String subjectQualified, Optional<StratifierRowValue> inputParam) {
 
     /**
      * Compact constructor with null validation.
      */
     public StratifierRowKey {
         Objects.requireNonNull(subjectQualified, "subjectQualified must not be null");
-        Objects.requireNonNull(inputParamId, "inputParamId must not be null");
+        Objects.requireNonNull(inputParam, "inputParam must not be null");
     }
 
     /**
@@ -67,19 +71,12 @@ public record StratifierRowKey(String subjectQualified, Optional<String> inputPa
      * Creates a row key for NON_SUBJECT_VALUE stratifiers with an input parameter.
      *
      * @param subjectQualified the qualified subject reference (e.g., "Patient/123")
-     * @param inputParamId the input parameter ID (e.g., "Encounter/456")
+     * @param inputParam the input parameter (see {@link StratifierRowValue})
      * @return a composite row key
      */
-    public static StratifierRowKey withInput(String subjectQualified, String inputParamId) {
-        Objects.requireNonNull(inputParamId, "inputParamId must not be null");
-        return new StratifierRowKey(subjectQualified, Optional.of(inputParamId));
-    }
-
-    /**
-     * Returns true if this row key has an input parameter (i.e., is for a NON_SUBJECT_VALUE stratifier).
-     */
-    public boolean hasInputParam() {
-        return inputParamId.isPresent();
+    public static StratifierRowKey withInput(String subjectQualified, StratifierRowValue inputParam) {
+        Objects.requireNonNull(inputParam, "inputParam must not be null");
+        return new StratifierRowKey(subjectQualified, Optional.of(inputParam));
     }
 
     /**
@@ -88,49 +85,5 @@ public record StratifierRowKey(String subjectQualified, Optional<String> inputPa
      */
     public String subjectOnlyKey() {
         return subjectQualified;
-    }
-
-    /**
-     * Returns the input parameter ID, or null if not present.
-     * Convenience method for code that needs nullable semantics.
-     */
-    public String inputParamIdOrNull() {
-        return inputParamId.orElse(null);
-    }
-
-    /**
-     * Parses a legacy string format row key into a StratifierRowKey.
-     *
-     * <p>Legacy format uses "|" as delimiter:
-     * <ul>
-     *   <li>"Patient/123" → subjectOnly("Patient/123")</li>
-     *   <li>"Patient/123|Encounter/456" → withInput("Patient/123", "Encounter/456")</li>
-     * </ul>
-     *
-     * @param legacyKey the legacy string format key
-     * @return the parsed StratifierRowKey
-     */
-    public static StratifierRowKey fromLegacyString(String legacyKey) {
-        Objects.requireNonNull(legacyKey, "legacyKey must not be null");
-        int idx = legacyKey.indexOf('|');
-        if (idx < 0) {
-            return subjectOnly(legacyKey);
-        }
-        String subject = legacyKey.substring(0, idx);
-        String input = legacyKey.substring(idx + 1);
-        return withInput(subject, input);
-    }
-
-    /**
-     * Converts this key to the legacy string format for compatibility.
-     *
-     * <p>Prefer using StratifierRowKey directly when possible.
-     * This method is provided for backward compatibility with code
-     * that still expects String-based row keys.
-     *
-     * @return the legacy string format ("Patient/123" or "Patient/123|Encounter/456")
-     */
-    public String toLegacyString() {
-        return inputParamId.map(id -> subjectQualified + "|" + id).orElse(subjectQualified);
     }
 }

@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter;
 
-public class ValueSetConceptReferenceAdapter extends BaseAdapter implements IValueSetConceptReferenceAdapter {
+public class ValueSetConceptReferenceAdapter extends BaseElementAdapter implements IValueSetConceptReferenceAdapter {
 
     private final ConceptReferenceComponent conceptReference;
 

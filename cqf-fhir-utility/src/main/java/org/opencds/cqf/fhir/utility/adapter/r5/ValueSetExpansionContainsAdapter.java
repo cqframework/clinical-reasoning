@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter.r5;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
 
-public class ValueSetExpansionContainsAdapter extends BaseAdapter implements IValueSetExpansionContainsAdapter {
+public class ValueSetExpansionContainsAdapter extends BaseElementAdapter implements IValueSetExpansionContainsAdapter {
 
     private final ValueSetExpansionContainsComponent contains;
 

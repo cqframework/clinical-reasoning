@@ -78,12 +78,8 @@ public class CdsParametersEncoderService {
             var listExtension = parameters.getParameter().get(0).get().addExtension();
             listExtension.setUrl(Constants.CPG_PARAMETER_DEFINITION);
             var paramDef = (IBaseDatatype) Resources.newBaseForVersion("ParameterDefinition", getFhirVersion());
-            parameters
-                    .getModelResolver()
-                    .setValue(paramDef, "max", VersionUtilities.stringTypeForVersion(getFhirVersion(), "*"));
-            parameters
-                    .getModelResolver()
-                    .setValue(paramDef, "name", VersionUtilities.codeTypeForVersion(getFhirVersion(), paramName));
+            parameters.setValue(paramDef, "max", VersionUtilities.stringTypeForVersion(getFhirVersion(), "*"));
+            parameters.setValue(paramDef, "name", VersionUtilities.codeTypeForVersion(getFhirVersion(), paramName));
             listExtension.setValue(paramDef);
         }
     }

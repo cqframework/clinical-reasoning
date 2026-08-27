@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.elm.executing.EqualEvaluator;
-import org.opencds.cqf.cql.engine.runtime.CqlType;
+import org.opencds.cqf.cql.engine.runtime.Date;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
  * Utility class providing equality comparison methods for FHIR resources and CQL types.
@@ -25,7 +26,7 @@ public class FhirResourceAndCqlTypeUtils {
     public static boolean areObjectsEqual(Object obj, Object item) {
         if (obj instanceof IBaseResource objResource && item instanceof IBaseResource itemResource) {
             return areEqualResources(objResource, itemResource);
-        } else if (obj instanceof CqlType objCqlType && item instanceof CqlType itemCqlType) {
+        } else if (obj instanceof Value objCqlType && item instanceof Value itemCqlType) {
             return areEqualCqlTypes(objCqlType, itemCqlType);
         } else {
             return Objects.equals(item, obj);
@@ -50,7 +51,7 @@ public class FhirResourceAndCqlTypeUtils {
         return Objects.equals(resource1.getIdElement(), resource2.getIdElement());
     }
 
-    public static boolean areEqualCqlTypes(CqlType cqlDate1, CqlType cqlDate2) {
+    public static boolean areEqualCqlTypes(Value cqlDate1, Value cqlDate2) {
         if (cqlDate1 == cqlDate2) {
             return true;
         }
@@ -61,7 +62,8 @@ public class FhirResourceAndCqlTypeUtils {
 
         // We're relying on all CqlTypes to implement equal() properly
         // Note this is equal(), not Object.equals()
-        return Boolean.TRUE.equals(EqualEvaluator.equal(cqlDate1, cqlDate2));
+        var result = EqualEvaluator.equal(cqlDate1, cqlDate2);
+        return result != null && result.getValue();
     }
 
     public static IBaseResource castToResourceIfApplicable(Object obj) {
@@ -71,8 +73,8 @@ public class FhirResourceAndCqlTypeUtils {
         return null;
     }
 
-    public static CqlType castToCqlTypeIfApplicable(Object obj) {
-        if (obj instanceof CqlType cqlDate) {
+    public static Value castToCqlTypeIfApplicable(Object obj) {
+        if (obj instanceof Date cqlDate) {
             return cqlDate;
         }
         return null;
@@ -91,7 +93,6 @@ public class FhirResourceAndCqlTypeUtils {
      * @return the matching key from the map if found, null otherwise
      */
     @Nullable
-    @SuppressWarnings("unchecked")
     public static <K> K findMatchingKey(Map<K, ?> map, Object key) {
         for (K existingKey : map.keySet()) {
             if (areObjectsEqual(existingKey, key)) {
@@ -114,7 +115,6 @@ public class FhirResourceAndCqlTypeUtils {
      * @return the matching value from the map if found, null otherwise
      */
     @Nullable
-    @SuppressWarnings("unchecked")
     public static <V> V findMatchingValue(Map<?, V> map, Object value) {
         for (V existingValue : map.values()) {
             if (areObjectsEqual(existingValue, value)) {

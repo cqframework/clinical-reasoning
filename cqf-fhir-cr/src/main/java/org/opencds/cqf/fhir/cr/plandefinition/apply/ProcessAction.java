@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
-import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -13,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
@@ -25,6 +23,7 @@ import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class ProcessAction {
 
     public IBaseBackboneElement processAction(
             ApplyRequest request,
-            IBaseResource requestOrchestration,
+            IResourceAdapter requestOrchestration,
             List<String> metConditions,
             IPlanDefinitionActionAdapter action) {
         // Create Questionnaire items for any input profiles that are present on the action
@@ -61,12 +60,12 @@ public class ProcessAction {
         if (Boolean.TRUE.equals(meetsConditions(request, action))) {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
             var requestAction = generateRequestAction(action);
-            extensionProcessor.processExtensions(
-                    request, requestAction.get(), (IElement) action.get(), new ArrayList<>());
+            extensionProcessor.processExtensions(request, requestAction, (IElement) action.get(), new ArrayList<>());
             processChildActions(request, requestOrchestration, metConditions, action, requestAction);
             var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
+            var adapter = resource == null ? null : request.getAdapterFactory().createResource(resource);
             dynamicValueProcessor.processDynamicValues(
-                    request, request.getPlanDefinition(), resource, (IElement) action.get(), (IElement)
+                    request, request.getPlanDefinitionAdapter(), adapter, (IElement) action.get(), (IElement)
                             requestAction.get());
             return (IBaseBackboneElement) requestAction.get();
         }
@@ -76,7 +75,7 @@ public class ProcessAction {
 
     protected void processChildActions(
             ApplyRequest request,
-            IBaseResource requestOrchestration,
+            IResourceAdapter requestOrchestration,
             List<String> metConditions,
             IPlanDefinitionActionAdapter action,
             IRequestActionAdapter requestAction) {
@@ -85,19 +84,11 @@ public class ProcessAction {
             return;
         }
         var applicabilityBehavior = CqfApplicabilityBehavior.ALL;
-        var applicabilityBehaviorExt = action.getExtensionByUrl(CQF_APPLICABILITY_BEHAVIOR);
-        if (applicabilityBehaviorExt != null
-                && applicabilityBehaviorExt.getValue() instanceof IPrimitiveType<?> primitiveType) {
-            try {
-                applicabilityBehavior = CqfApplicabilityBehavior.valueOf(
-                        primitiveType.getValueAsString().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                var message =
-                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`."
-                                .formatted(primitiveType.getValueAsString());
-                logger.error(message);
-                request.logException(message);
-            }
+        try {
+            applicabilityBehavior = action.getApplicabilityBehavior();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            request.logException(e.getMessage());
         }
         var metConditionsCount = metConditions.size();
         for (var childAction : childActions) {
@@ -149,12 +140,12 @@ public class ProcessAction {
     protected ICompositeType getDataRequirementElement(ApplyRequest request, IElement input) {
         return (ICompositeType)
                 (request.getFhirVersion().isEqualOrNewerThan(FhirVersionEnum.R5)
-                        ? request.resolvePath(input, "requirement")
+                        ? request.getPlanDefinitionAdapter().resolvePath(input, "requirement")
                         : input);
     }
 
     protected IBaseParameters resolveInputParameters(ApplyRequest request, IBaseBackboneElement action) {
-        var actionInput = request.resolvePathList(action, "input", IElement.class);
+        var actionInput = request.getPlanDefinitionAdapter().resolvePathList(action, "input", IElement.class);
         return request.resolveInputParameters(actionInput.stream()
                 .map(input -> getDataRequirementElement(request, input))
                 .collect(Collectors.toList()));
@@ -162,7 +153,9 @@ public class ProcessAction {
 
     protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         var conditions = action.getCondition().stream()
-                .filter(c -> "applicability".equals(request.resolvePathString(c, "kind")))
+                .filter(c -> "applicability"
+                        .equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
+                .map(c -> request.getAdapterFactory().createBase(c))
                 .toList();
         if (conditions.isEmpty()) {
             return true;

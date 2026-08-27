@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -46,13 +46,13 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
 
     private static final Logger logger = LoggerFactory.getLogger(SelectedMeasureDef.class);
 
-    private final Map<String, EvaluationResult> evaluationResults;
+    private final Map<String, CqlEvaluationResult> evaluationResults;
 
     public SelectedMeasureDef(MeasureDef value, P parent) {
         this(value, parent, Map.of());
     }
 
-    public SelectedMeasureDef(MeasureDef value, P parent, Map<String, EvaluationResult> evaluationResults) {
+    public SelectedMeasureDef(MeasureDef value, P parent, Map<String, CqlEvaluationResult> evaluationResults) {
         super(value, parent);
         this.evaluationResults = evaluationResults;
     }

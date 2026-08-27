@@ -10,7 +10,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.time.LocalDate;
 import java.util.Date;
@@ -20,6 +19,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r5.model.Expression;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Library;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.model.Patient;
@@ -157,7 +157,7 @@ class MeasureAdapterTest {
         var adapter = adapterFactory.createKnowledgeArtifactAdapter(measure);
         var copy = (Measure) adapter.copy();
         var adapterCopy = new MeasureAdapter(copy);
-        adapterCopy.setId(new IdDt("Measure", "plan-2"));
+        adapterCopy.setId(new IdType("Measure", "plan-2"));
         assertNotEquals(measure.getId(), copy.getId());
         measure.setStatus(PublicationStatus.ACTIVE);
         assertNotEquals(adapter.getStatus(), copy.getStatus().toCode());

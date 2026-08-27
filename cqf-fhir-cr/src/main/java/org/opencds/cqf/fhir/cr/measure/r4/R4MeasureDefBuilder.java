@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -456,7 +455,7 @@ public class R4MeasureDefBuilder implements MeasureDefBuilder<Measure> {
                     return SDE_USAGE_CODE.equals(code) || RISK_ADJUSTMENT_USAGE_CODE.equals(code);
                 })
                 .toList();
-        if (CollectionUtils.isEmpty(hasUsage)) {
+        if (hasUsage.isEmpty()) {
             throw new InvalidRequestException(
                     "SupplementalDataComponent usage is missing code: %s or %s for Measure: %s"
                             .formatted(SDE_USAGE_CODE, RISK_ADJUSTMENT_USAGE_CODE, measure.getUrl()));

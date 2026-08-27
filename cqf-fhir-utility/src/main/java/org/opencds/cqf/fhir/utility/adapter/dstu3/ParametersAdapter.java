@@ -98,8 +98,8 @@ class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
     }
 
     @Override
-    public ParametersParameterComponent addParameter() {
-        return this.getParameters().addParameter();
+    public IParametersParameterComponentAdapter addParameter() {
+        return adapterFactory.createParametersParameter(this.getParameters().addParameter());
     }
 
     @SuppressWarnings("unchecked")

@@ -68,7 +68,6 @@ class ApplyRequestBuilderTest {
         assertEquals(localRepository, libraryEngine.getRepository());
         assertEquals(evaluationSettings, libraryEngine.getSettings());
 
-        assertNotNull(request.getModelResolver());
         assertEquals(
                 fhirContext.getVersion().getVersion(),
                 request.getGraphDefinition().getStructureFhirVersionEnum());

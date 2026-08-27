@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.helper;
 
 public class SubjectContext {
-    public SubjectContext(String contextType, Object contextValue) {
+    public SubjectContext(String contextType, String contextValue) {
         this.contextType = contextType;
         this.contextValue = contextValue;
     }
@@ -12,9 +12,9 @@ public class SubjectContext {
         return contextType;
     }
 
-    private Object contextValue;
+    private String contextValue;
 
-    public Object getContextValue() {
+    public String getContextValue() {
         return contextValue;
     }
 }

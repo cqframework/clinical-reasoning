@@ -58,6 +58,24 @@ public class SelectedMeasureReportStratum
         return this;
     }
 
+    public SelectedMeasureReportStratum hasNoValue() {
+        assertFalse(
+                value().hasValue(),
+                "Expected stratum to have no top-level value, but got: %s"
+                        .formatted(value().hasValue() ? value().getValue().getText() : null));
+        return this;
+    }
+
+    public SelectedMeasureReportStratum hasComponentValueText(String expectedTextValue) {
+        assertTrue(
+                value().getComponent().stream()
+                        .anyMatch(c -> c.hasValue()
+                                && c.getValue().hasText()
+                                && expectedTextValue.equals(c.getValue().getText())),
+                "expected stratum to have a component with value text: %s".formatted(expectedTextValue));
+        return this;
+    }
+
     public SelectedMeasureReportStratumPopulation population(MeasurePopulationType populationType) {
         var population = population(s -> s.getPopulation().stream()
                 .filter(x -> x.hasCode()

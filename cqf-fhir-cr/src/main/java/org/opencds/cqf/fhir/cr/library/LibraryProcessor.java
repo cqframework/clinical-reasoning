@@ -15,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
@@ -42,12 +41,10 @@ import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateProcessor;
 import org.opencds.cqf.fhir.cr.library.evaluate.EvaluateRequest;
 import org.opencds.cqf.fhir.cr.library.evaluate.IEvaluateProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 @SuppressWarnings("UnstableApiUsage")
 public class LibraryProcessor {
-    protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected IPackageProcessor packageProcessor;
     protected IReleaseProcessor releaseProcessor;
@@ -76,7 +73,6 @@ public class LibraryProcessor {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
                 if (p instanceof IPackageProcessor pack) {
@@ -188,8 +184,7 @@ public class LibraryProcessor {
                 parameters,
                 data,
                 prefetchData,
-                libraryEngine,
-                modelResolver);
+                libraryEngine);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseParameters evaluate(

@@ -1,5 +1,8 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
+
+import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,13 +20,15 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
-import org.opencds.cqf.cql.engine.runtime.CqlType;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 /**
  * R4SupportingEvidenceExtension appends Supporting Evidence Criteria Results to MeasureReport.
@@ -194,15 +199,16 @@ public class R4SupportingEvidenceExtension {
      * - NORMAL: everything else
      */
     private static ValueKind classifyValue(Object value) {
-        if (value == null) {
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
+        if (wrapper.isNull()) {
             return ValueKind.NULL_RESULT;
         }
 
-        if (value instanceof Iterable<?> it) {
+        if (wrapper.isIterable()) {
             boolean sawAny = false;
             boolean sawNonNull = false;
 
-            for (Object o : it) {
+            for (Object o : wrapper.asIterable()) {
                 sawAny = true;
                 if (o != null) {
                     sawNonNull = true;
@@ -220,8 +226,8 @@ public class R4SupportingEvidenceExtension {
             return ValueKind.NORMAL;
         }
 
-        if (value instanceof Map<?, ?> m) {
-            return m.isEmpty() ? ValueKind.EMPTY_LIST : ValueKind.NORMAL;
+        if (wrapper.isMap()) {
+            return wrapper.isEmpty() ? ValueKind.EMPTY_LIST : ValueKind.NORMAL;
         }
 
         return ValueKind.NORMAL;
@@ -267,23 +273,20 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        // Preserve CQL runtime wrappers (encode later)
-        if (value instanceof CqlType) {
-            out.add(value);
-            return;
-        }
+        var wrapper = CqlExpressionValue.ofRaw(null, value, null);
 
         // Flatten lists & sets
-        if (value instanceof Iterable<?> it) {
-            for (Object item : it) {
+        if (wrapper.isIterable()) {
+            for (Object item : wrapper.asIterable()) {
                 collectLeavesInto(item, out, depth + 1);
             }
             return;
         }
 
         // Optional: flatten map values (if you still want)
-        if (value instanceof Map<?, ?> map) {
-            for (Object v : map.values()) {
+        var asMap = wrapper.asMap();
+        if (asMap.isPresent()) {
+            for (Object v : asMap.get().values()) {
                 collectLeavesInto(v, out, depth + 1);
             }
             return;
@@ -341,7 +344,7 @@ public class R4SupportingEvidenceExtension {
 
         // Tuple -> represented as nested extensions under this "value"
         if (leaf instanceof Tuple tuple) {
-            for (Map.Entry<String, Object> entry : tuple.getElements().entrySet()) {
+            for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
                 Extension fieldExt = new Extension(entry.getKey());
                 // field values become repeated nested "value" slices under the field extension
                 addValues(fieldExt, entry.getValue());
@@ -350,22 +353,37 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
+        // CQL-5 changed Code.toString() to a quoted, multi-line form; render the stable single-line
+        // representation the supporting-evidence string value has always carried. Handle this before
+        // convertToFhirR4, which would coerce the Code into a bare CodeType losing system/display.
+        if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Code cqlCode) {
+            valueExt.setValue(new StringType(formatCqlCode(cqlCode)));
+            return;
+        }
+
+        var value = leaf instanceof Value cqlValue ? convertToFhirR4(cqlValue) : leaf;
+
         // Scalars / resources / numeric
-        if (leaf instanceof Boolean b) {
+        if (value instanceof Boolean b) {
             valueExt.setValue(new BooleanType(b));
-        } else if (leaf instanceof Integer i) {
+        } else if (value instanceof Integer i) {
             valueExt.setValue(new IntegerType(i));
-        } else if (leaf instanceof BigDecimal bd) {
+        } else if (value instanceof BigDecimal bd) {
             valueExt.setValue(new DecimalType(bd));
-        } else if (leaf instanceof String s) {
+        } else if (value instanceof String s) {
             valueExt.setValue(new StringType(s));
-        } else if (leaf instanceof IBaseResource r) {
+        } else if (value instanceof IBaseResource r) {
             valueExt.setValue(new StringType(resourceIdString(r)));
-        } else if (leaf instanceof org.hl7.fhir.r4.model.Type t) {
+        } else if (value instanceof org.hl7.fhir.r4.model.Type t) {
             valueExt.setValue(t);
         } else {
             valueExt.setValue(new StringType(String.valueOf(leaf)));
         }
+    }
+
+    private static String formatCqlCode(org.opencds.cqf.cql.engine.runtime.Code code) {
+        return "Code { code: %s, system: %s, version: %s, display: %s }"
+                .formatted(code.getCode(), code.getSystem(), code.getVersion(), code.getDisplay());
     }
 
     private static Period tryBuildPeriod(Interval interval) {
@@ -381,11 +399,13 @@ public class R4SupportingEvidenceExtension {
     }
 
     private static String resourceIdString(IBaseResource r) {
-        var id = r.getIdElement();
+        var id = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
+                .createResource(r)
+                .getId();
         if (id == null || id.isEmpty()) {
             return "(no-id)";
         }
-        return id.toUnqualifiedVersionless().getValue();
+        return id;
     }
 
     @Nullable

@@ -409,7 +409,8 @@ class PlanDefinitionProcessorTests {
                 .hasQuestionnaireResponseItemValue("3.4.1", "12345")
                 .hasQuestionnaireResponseItemValue("4.1.1", "1245319599")
                 .hasQuestionnaireResponseItemValue("4.2.1", "456789")
-                .questionnaireResponse;
+                .questionnaireResponse
+                .get();
         var bundle = new Bundle().addEntry(new BundleEntryComponent().setResource(questionnaireResponse));
         bundle.setIdElement(new IdType().setValue("bundle").withResourceType("Bundle"));
         given().repositoryFor(fhirContextR4, "r4")
@@ -446,7 +447,8 @@ class PlanDefinitionProcessorTests {
                 .hasEntry(3)
                 .hasQuestionnaire(true)
                 .hasQuestionnaireResponse(true)
-                .questionnaireResponse;
+                .questionnaireResponse
+                .get();
         questionnaireResponse.getItem().forEach(responseItem -> {
             assertNotNull(responseItem);
             assertEquals("Input Text Test", responseItem.getText());

@@ -21,7 +21,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsola
 /**
  * Resolves filesystem locations for resources according to IG/KALM conventions.
  */
-class ResourcePathResolver {
+public class ResourcePathResolver {
 
     static final String EXTERNAL_DIRECTORY = "external";
 
@@ -71,7 +71,7 @@ class ResourcePathResolver {
     private final Path root;
     private final IgConventions conventions;
 
-    ResourcePathResolver(Path root, IgConventions conventions) {
+    public ResourcePathResolver(Path root, IgConventions conventions) {
         this.root = Objects.requireNonNull(root, "root cannot be null");
         this.conventions = Objects.requireNonNull(conventions, "conventions cannot be null");
     }
@@ -113,7 +113,7 @@ class ResourcePathResolver {
      * @param assignment the compartment assignment
      * @return a list of directories to search
      */
-    List<Path> directories(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
+    public List<Path> directories(Class<? extends IBaseResource> resourceType, CompartmentAssignment assignment) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(assignment, "assignment cannot be null");
         validateAssignment(resourceType, assignment);
@@ -133,10 +133,13 @@ class ResourcePathResolver {
             for (var path : expanded) {
                 var typedPath = typeSegment != null ? path.resolve(typeSegment) : path;
                 paths.add(typedPath);
-                // Terminology resources may also be found in an 'external' directory for some conventions
-                if (category == ResourceCategory.TERMINOLOGY
-                        && conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
-                    paths.add(typedPath.resolve(EXTERNAL_DIRECTORY));
+                if (category == ResourceCategory.TERMINOLOGY) {
+                    if (conventions.categoryLayout() == CategoryLayout.DEFINITIONAL_AND_DATA
+                            && base.equals(bases.get(0))) {
+                        paths.add(basePath.resolve(EXTERNAL_DIRECTORY));
+                    } else if (conventions.categoryLayout() != CategoryLayout.DEFINITIONAL_AND_DATA) {
+                        paths.add(typedPath.resolve(EXTERNAL_DIRECTORY));
+                    }
                 }
             }
         }
@@ -162,7 +165,7 @@ class ResourcePathResolver {
         }
     }
 
-    List<Path> candidates(
+    public List<Path> candidates(
             Class<? extends IBaseResource> resourceType, String idPart, CompartmentAssignment assignment) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(idPart, "idPart cannot be null");
@@ -187,7 +190,7 @@ class ResourcePathResolver {
         return FILE_EXTENSIONS.inverse().get(fileExtension(path));
     }
 
-    Predicate<Path> fileMatcher(Class<? extends IBaseResource> resourceType) {
+    public Predicate<Path> fileMatcher(Class<? extends IBaseResource> resourceType) {
         var typeName = resourceType.getSimpleName().toLowerCase();
         return switch (conventions.filenameMode()) {
             case ID_ONLY -> path -> hasKnownExtension(path);
@@ -199,9 +202,12 @@ class ResourcePathResolver {
         };
     }
 
-    boolean isExternalPath(Path path) {
-        return path.getParent() != null
-                && path.getParent().toString().toLowerCase().endsWith(EXTERNAL_DIRECTORY);
+    public boolean isExternalPath(Path path) {
+        return isExternalDirectory(path) || (path.getParent() != null && isExternalDirectory(path.getParent()));
+    }
+
+    private boolean isExternalDirectory(Path path) {
+        return path.getFileName() != null && path.getFileName().toString().equalsIgnoreCase(EXTERNAL_DIRECTORY);
     }
 
     // Helper to get the base directories for a given category and the current layout conventions.

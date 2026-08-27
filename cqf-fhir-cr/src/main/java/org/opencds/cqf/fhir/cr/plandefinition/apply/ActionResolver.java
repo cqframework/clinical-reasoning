@@ -3,17 +3,19 @@ package org.opencds.cqf.fhir.cr.plandefinition.apply;
 import static org.opencds.cqf.fhir.cr.common.ExtensionBuilders.buildReference;
 
 import java.util.Collections;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.Constants.CPG_ACTIVITY_TYPE_CODE;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
 public class ActionResolver {
 
     public void resolveAction(
             ApplyRequest request,
-            IBaseResource requestOrchestration,
+            IResourceAdapter requestOrchestration,
             IBaseResource result,
             IPlanDefinitionActionAdapter action) {
         if ("Task".equals(result.fhirType())) {
@@ -23,7 +25,7 @@ public class ActionResolver {
 
     protected void resolveTask(
             ApplyRequest request,
-            IBaseResource requestOrchestration,
+            IResourceAdapter requestOrchestration,
             IBaseResource task,
             IPlanDefinitionActionAdapter action) {
         var actionId = action.getId();
@@ -31,23 +33,22 @@ public class ActionResolver {
             var taskId = Ids.newId(request.getFhirVersion(), task.fhirType(), actionId);
             task.setId(taskId);
         }
-        request.getModelResolver()
-                .setValue(
-                        task,
-                        "basedOn",
-                        Collections.singletonList(buildReference(
-                                request.getFhirVersion(),
-                                requestOrchestration.getIdElement().getValue())));
+        action.setValue(
+                task,
+                "basedOn",
+                Collections.singletonList(buildReference(
+                        request.getFhirVersion(),
+                        requestOrchestration.getIdElement().getValue())));
         if (request.getQuestionnaireAdapter() != null
-                && request.resolvePath(task, "focus", IBaseReference.class) == null) {
-            var codePath = request.resolvePath(task, "code");
+                && action.resolvePath(task, "focus", IBaseReference.class) == null) {
+            var codePath = action.resolvePath(task, "code", IBase.class);
             if (codePath != null) {
                 var code = request.getAdapterFactory().createCodeableConcept(codePath);
                 if (code.hasCoding(CPG_ACTIVITY_TYPE_CODE.COLLECT_INFORMATION.code)) {
                     var questionnaireAdapter = request.getQuestionnaireAdapter();
                     var questionnaireReference =
                             buildReference(request.getFhirVersion(), questionnaireAdapter.getUrl());
-                    request.getModelResolver().setValue(task, "focus", questionnaireReference);
+                    action.setValue(task, "focus", questionnaireReference);
                 }
             }
         }

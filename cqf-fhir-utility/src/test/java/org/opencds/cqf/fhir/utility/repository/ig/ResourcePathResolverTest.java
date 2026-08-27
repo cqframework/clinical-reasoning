@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -79,6 +81,27 @@ class ResourcePathResolverTest {
         assertEquals(tempDir.resolve("src/fhir/valueset"), directories.get(0));
         assertTrue(directories.contains(tempDir.resolve("tests/data/fhir/shared/valueset")));
         assertFalse(directories.contains(tempDir.resolve("tests/data/fhir/valueset")));
+    }
+
+    @Test
+    void directoriesForTerminologyInKalmIncludeExternalSource(@TempDir Path tempDir) {
+        var resolver = new ResourcePathResolver(tempDir, IgConventions.KALM);
+        var external = tempDir.resolve("src/fhir/external");
+
+        assertEquals(
+                List.of(
+                        tempDir.resolve("src/fhir/valueset"),
+                        external,
+                        tempDir.resolve("tests/data/fhir/shared/valueset")),
+                resolver.directories(ValueSet.class, CompartmentAssignment.shared()));
+        assertEquals(
+                List.of(
+                        tempDir.resolve("src/fhir/codesystem"),
+                        tempDir.resolve("src/fhir/external"),
+                        tempDir.resolve("tests/data/fhir/shared/codesystem")),
+                resolver.directories(CodeSystem.class, CompartmentAssignment.shared()));
+        assertTrue(resolver.isExternalPath(external));
+        assertTrue(resolver.isExternalPath(external.resolve("example.json")));
     }
 
     @Test

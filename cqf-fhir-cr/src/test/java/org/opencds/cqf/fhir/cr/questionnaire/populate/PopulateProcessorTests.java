@@ -33,7 +33,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
 @SuppressWarnings("UnstableApiUsage")
 @ExtendWith(MockitoExtension.class)
@@ -105,7 +107,7 @@ class PopulateProcessorTests {
                 prePopulatedQuestionnaireId + "-" + PATIENT_ID,
                 actual.getIdElement().getIdPart());
         assertContainedOperationOutcome(request, actual, null);
-        assertEquals(questionnaireUrl, request.resolvePathString(actual, "questionnaire"));
+        assertEquals(questionnaireUrl, actual.getQuestionnaire());
         assertEquals(
                 org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
         assertEquals("Patient/" + PATIENT_ID, actual.getSubject().getReference());
@@ -135,13 +137,14 @@ class PopulateProcessorTests {
 
     private void assertContainedOperationOutcome(
             PopulateRequest request, IBaseResource actual, IBaseOperationOutcome expectedOperationOutcome) {
-        final var operationOutcome = getContainedByResourceType(request, actual, "OperationOutcome");
+        final var operationOutcome = getContainedByResourceType(
+                request, IAdapterFactory.createAdapterForResource(actual), "OperationOutcome");
         assertEquals(expectedOperationOutcome, operationOutcome);
     }
 
     private IBaseResource getContainedByResourceType(
-            PopulateRequest request, IBaseResource actual, String resourceType) {
-        return request.getContained(actual).stream()
+            PopulateRequest request, IResourceAdapter actual, String resourceType) {
+        return actual.getContained().stream()
                 .filter(c -> c.fhirType().equals(resourceType))
                 .findFirst()
                 .orElse(null);
@@ -152,11 +155,12 @@ class PopulateProcessorTests {
         // setup
         final var operationOutcome = withOperationOutcomeWithIssue();
         final var questionnaire = new Questionnaire();
+        var adapter = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4).createQuestionnaire(questionnaire);
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         request.setOperationOutcome(operationOutcome);
         // execute
-        request.resolveOperationOutcome(questionnaire);
+        request.resolveOperationOutcome(adapter);
         // validate
         assertContainedOperationOutcome(request, questionnaire, operationOutcome);
     }
@@ -166,11 +170,12 @@ class PopulateProcessorTests {
         // setup
         final var operationOutcome = new OperationOutcome();
         final var questionnaire = new Questionnaire();
+        var adapter = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4).createQuestionnaire(questionnaire);
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         request.setOperationOutcome(operationOutcome);
         // execute
-        request.resolveOperationOutcome(questionnaire);
+        request.resolveOperationOutcome(adapter);
         // validate
         assertContainedOperationOutcome(request, questionnaire, null);
     }

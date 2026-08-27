@@ -15,11 +15,9 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 public class EvaluateRequest implements ICqlOperationRequest {
     private final ILibraryAdapter libraryAdapter;
@@ -28,7 +26,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
     private final IBaseParameters parameters;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private IBaseOperationOutcome operationOutcome;
 
@@ -39,8 +36,7 @@ public class EvaluateRequest implements ICqlOperationRequest {
             IBaseParameters parameters,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            LibraryEngine libraryEngine) {
         checkNotNull(library, "expected non-null value for library");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         fhirVersion = library.getStructureFhirVersionEnum();
@@ -56,8 +52,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
         }
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver =
-                modelResolver != null ? modelResolver : FhirModelResolverCache.resolverForVersion(fhirVersion);
     }
 
     public IBaseResource getLibrary() {
@@ -105,11 +99,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
     @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

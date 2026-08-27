@@ -1,9 +1,13 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
 import static org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType.DATEOFCOMPLIANCE;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.CQFM_CARE_GAP_DATE_OF_COMPLIANCE_EXT_URL;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
@@ -38,9 +42,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
+import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
 import org.opencds.cqf.fhir.cr.measure.common.FhirResourceUtils;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
@@ -197,7 +204,9 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 if (docPopDef != null
                         && docPopDef.getAllSubjectResources() != null
                         && !docPopDef.getAllSubjectResources().isEmpty()) {
-                    var docValue = docPopDef.getAllSubjectResources().iterator().next();
+                    var firstWrapper =
+                            docPopDef.getAllSubjectResources().iterator().next();
+                    var docValue = firstWrapper == null ? null : firstWrapper.raw();
                     if (docValue != null) {
                         assert docValue instanceof Interval;
                         Interval docInterval = (Interval) docValue;
@@ -227,9 +236,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         }
     }
 
-    private String getPopulationResourceIds(Object resourceObject) {
-        if (resourceObject instanceof IBaseResource resource) {
-            return resource.getIdElement().toVersionless().getValueAsString();
+    // TODO: Consider pulling into a utility class
+    private String getPopulationResourceIds(CqlExpressionValue wrapper) {
+        if (wrapper != null) {
+            if (wrapper.raw() instanceof IBaseResource resource) {
+                return resource.getIdElement().toVersionless().getValueAsString();
+            }
+            if (wrapper.raw() instanceof ClassInstance classInstance
+                    && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+                return getId(classInstance);
+            }
         }
         return null;
     }
@@ -270,7 +286,10 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                     .collect(Collectors.toSet());
         } else {
             populationSet = populationDef.getAllSubjectResources().stream()
-                    .filter(Resource.class::isInstance)
+                    .filter(wrapper -> wrapper != null
+                            && (wrapper.raw() instanceof Resource
+                                    || (wrapper.raw() instanceof ClassInstance classInstance
+                                            && isFhirResource(FhirVersionEnum.R4, classInstance))))
                     .map(this::getPopulationResourceIds)
                     .collect(Collectors.toSet());
         }
@@ -304,14 +323,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addEvaluatedResourceReferences(
-            R4MeasureReportBuilderContext bc, String criteriaId, Set<Object> evaluatedResources) {
+            R4MeasureReportBuilderContext bc, String criteriaId, Set<Value> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }
 
-        for (Object object : evaluatedResources) {
-            Resource resource = (Resource) object;
-            bc.addCriteriaExtensionToEvaluatedResource(resource, criteriaId);
+        for (var resource : evaluatedResources) {
+            if (resource instanceof ClassInstance classInstance) {
+                bc.addCriteriaExtensionToEvaluatedResource(getId(classInstance), criteriaId);
+            }
         }
     }
 
@@ -345,8 +365,15 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 sde.getAccumulatedValues().entrySet()) {
 
             Resource obs;
-            if (!(accumulator.getKey().getValue() instanceof Resource resource)) {
-                String valueCode = accumulator.getKey().getValueAsString();
+            var key = accumulator.getKey();
+            if (key.getValue() instanceof Resource resource) {
+                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
+            } else if (key.getValue() instanceof ClassInstance classInstance
+                    && isFhirResource(FhirVersionEnum.R4, classInstance)) {
+                var resource = (Resource) convertToFhirR4(classInstance);
+                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
+            } else {
+                String valueCode = key.getValueAsString();
                 Long valueCount = accumulator.getValue();
 
                 Coding valueCoding = new Coding().setCode(valueCode);
@@ -359,8 +386,6 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                 }
 
                 bc.addCriteriaExtensionToSupplementalData(obs, sde.id(), sde.description());
-            } else {
-                bc.addCriteriaExtensionToSupplementalData(resource, sde.id(), sde.description());
             }
         }
     }

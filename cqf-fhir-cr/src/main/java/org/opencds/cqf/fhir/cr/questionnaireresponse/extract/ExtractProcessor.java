@@ -37,7 +37,7 @@ public class ExtractProcessor implements IExtractProcessor {
     @Override
     public List<IBaseResource> processItems(ExtractRequest request) {
         var resources = new ArrayList<IBaseResource>();
-        var subject = (IBaseReference) request.resolvePath(request.getQuestionnaireResponse(), "subject");
+        var subject = (IBaseReference) request.getQuestionnaireResponseAdapter().resolvePath("subject");
         var extractionExt = request.getDefinitionExtract();
         if (extractionExt != null) {
             processDefinitionItem(request, new ItemPair(null, null), resources);

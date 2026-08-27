@@ -253,7 +253,7 @@ public class PackageSourceResolver {
         }
 
         // Strategy 3: Use id as last resort
-        var idType = igAdapter.getId();
+        var idType = igAdapter.getIdElement();
         if (idType != null) {
             String id = idType.getValueAsString();
             if (id != null && !id.isEmpty()) {

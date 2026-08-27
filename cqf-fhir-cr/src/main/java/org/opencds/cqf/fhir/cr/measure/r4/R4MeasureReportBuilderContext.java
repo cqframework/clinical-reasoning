@@ -105,9 +105,8 @@ class R4MeasureReportBuilderContext {
         }
     }
 
-    public void addCriteriaExtensionToEvaluatedResource(Resource resource, String criteriaId) {
-        var id = getId(resource);
-        var ref = addEvaluatedResourceReference(id);
+    public void addCriteriaExtensionToEvaluatedResource(String resourceId, String criteriaId) {
+        var ref = addEvaluatedResourceReference(resourceId);
         addCriteriaExtensionToReference(ref, criteriaId);
     }
 
@@ -144,13 +143,18 @@ class R4MeasureReportBuilderContext {
 
     public void addOperationOutcomes() {
         var errorMsgs = this.measureDef.errors();
-        for (var error : errorMsgs) {
-            addContained(createOperationOutcome(error));
+        // Each error needs a unique id: addContained keys the contained map by resource type + id, so
+        // id-less OperationOutcomes would all collapse onto the same key and only the first error (which
+        // one is arbitrary, since it depends on subject evaluation order) would survive. Index-based ids
+        // keep the result deterministic while preserving every per-subject error.
+        for (int i = 0; i < errorMsgs.size(); i++) {
+            addContained(createOperationOutcome("error-" + i, errorMsgs.get(i)));
         }
     }
 
-    private OperationOutcome createOperationOutcome(String errorMsg) {
+    private OperationOutcome createOperationOutcome(String id, String errorMsg) {
         OperationOutcome op = new OperationOutcome();
+        op.setId(id);
         op.addIssue()
                 .setSeverity(OperationOutcome.IssueSeverity.ERROR)
                 .setCode(IssueType.EXCEPTION)

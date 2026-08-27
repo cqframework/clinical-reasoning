@@ -83,7 +83,7 @@ public class CqlCommand implements Callable<Integer> {
                 arguments.parameters.context.stream().map(c -> new SubjectContext(c.contextName, c.contextValue));
 
         var resultStream = contexts.map(sc -> {
-                    var contextParameter = new kotlin.Pair<String, Object>(sc.name(), sc.value());
+                    var contextParameter = new kotlin.Pair<>(sc.name(), sc.value());
                     var paramBuilder = new EvaluationParams.Builder();
                     paramBuilder.setContextParameter(contextParameter);
                     if (expressions != null && !expressions.isEmpty()) {

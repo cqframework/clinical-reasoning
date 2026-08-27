@@ -98,10 +98,10 @@ class R4MeasureProcessorTest {
         var expressionResults = evaluationResult.getExpressionResults();
         assertNotNull(expressionResults);
 
-        var expressionResult = expressionResults.get("Initial Population");
+        var expressionResult = evaluationResult.get("Initial Population");
         assertNotNull(expressionResult);
 
-        var evaluatedResources = expressionResult.getEvaluatedResources();
+        var evaluatedResources = expressionResult.evaluatedResources();
         assertNotNull(evaluatedResources);
         assertEquals(1, evaluatedResources.size());
     }
@@ -122,10 +122,10 @@ class R4MeasureProcessorTest {
         var evaluationResult = evaluationResults.get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
-        var expressionResult = evaluationResult.getExpressionResults().get("Initial Population");
+        var expressionResult = evaluationResult.get("Initial Population");
         assertNotNull(expressionResult);
-        assertNotNull(expressionResult.getEvaluatedResources());
-        assertEquals(1, expressionResult.getEvaluatedResources().size());
+        assertNotNull(expressionResult.evaluatedResources());
+        assertEquals(1, expressionResult.evaluatedResources().size());
     }
 
     @Test
@@ -146,10 +146,10 @@ class R4MeasureProcessorTest {
         var evaluationResult = evaluationResults.get(SUBJECT_ID);
         assertNotNull(evaluationResult);
 
-        var expressionResult = evaluationResult.getExpressionResults().get("Initial Population");
+        var expressionResult = evaluationResult.get("Initial Population");
         assertNotNull(expressionResult);
-        assertNotNull(expressionResult.getEvaluatedResources());
-        assertEquals(1, expressionResult.getEvaluatedResources().size());
+        assertNotNull(expressionResult.evaluatedResources());
+        assertEquals(1, expressionResult.evaluatedResources().size());
     }
 
     @ParameterizedTest(name = "{0}")

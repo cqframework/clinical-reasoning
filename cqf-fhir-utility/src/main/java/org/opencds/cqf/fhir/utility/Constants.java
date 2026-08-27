@@ -29,6 +29,7 @@ public class Constants {
 
     public static final String FHIR_TYPE_EXTENSION =
             "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type";
+    public static final String DATA_ABSENT_REASON = "http://hl7.org/fhir/StructureDefinition/data-absent-reason";
     public static final String DISPLAY_EXTENSION = "http://hl7.org/fhir/StructureDefinition/display";
     public static final String PERTAINS_TO_GOAL = "http://hl7.org/fhir/StructureDefinition/resource-pertainsToGoal";
     public static final String REQUEST_DO_NOT_PERFORM = "http://hl7.org/fhir/StructureDefinition/request-doNotPerform";
@@ -250,6 +251,13 @@ public class Constants {
     public static final String RELATEDARTIFACT_TYPE_DEPENDSON = "depends-on";
     public static final String RESOURCETYPE_VALUESET = "ValueSet";
     public static final String RESOURCETYPE_CODESYSTEM = "CodeSystem";
+
+    /**
+     * The {@code tx-resource} parameter of the {@code $expand} operation (R6 OperationDefinition).
+     * Additional value sets or code systems referred to from the value set being expanded, used
+     * preferentially to those known to the terminology server.
+     */
+    public static final String TX_RESOURCE = "tx-resource";
 
     public static final String EMPTY = "empty";
 

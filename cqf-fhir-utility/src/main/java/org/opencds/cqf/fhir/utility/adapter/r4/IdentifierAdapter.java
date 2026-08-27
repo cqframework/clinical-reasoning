@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Identifier;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
 
-public class IdentifierAdapter extends BaseAdapter implements IIdentifierAdapter {
+public class IdentifierAdapter extends BaseElementAdapter implements IIdentifierAdapter {
 
     private final Identifier identifier;
 

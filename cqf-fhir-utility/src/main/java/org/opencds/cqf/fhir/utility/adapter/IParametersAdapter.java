@@ -30,5 +30,5 @@ public interface IParametersAdapter extends IResourceAdapter {
 
     void addParameter(String name, IBaseResource resource);
 
-    IBaseBackboneElement addParameter();
+    IParametersParameterComponentAdapter addParameter();
 }

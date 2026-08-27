@@ -13,14 +13,10 @@ import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionConditionCompone
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionInputComponent;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ITriggerDefinitionAdapter;
+import org.opencds.cqf.fhir.utility.adapter.*;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 
-public class PlanDefinitionActionAdapter extends BaseAdapter implements IPlanDefinitionActionAdapter {
+public class PlanDefinitionActionAdapter extends BaseElementAdapter implements IPlanDefinitionActionAdapter {
 
     private final PlanDefinitionActionComponent action;
 

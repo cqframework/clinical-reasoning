@@ -31,7 +31,6 @@ class ElementDefinitionAdapterTest {
         assertNotNull(adapter);
         assertEquals(element, adapter.get());
         assertEquals(FhirVersionEnum.R5, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.getModelResolver());
 
         assertEquals(element.getId(), adapter.getId());
         assertEquals(element.getPath(), adapter.getPath());

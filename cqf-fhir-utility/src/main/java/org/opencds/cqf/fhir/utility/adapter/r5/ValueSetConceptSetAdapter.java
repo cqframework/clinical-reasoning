@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter;
 
-public class ValueSetConceptSetAdapter extends BaseAdapter implements IValueSetConceptSetAdapter {
+public class ValueSetConceptSetAdapter extends BaseElementAdapter implements IValueSetConceptSetAdapter {
 
     private final ConceptSetComponent conceptSet;
 

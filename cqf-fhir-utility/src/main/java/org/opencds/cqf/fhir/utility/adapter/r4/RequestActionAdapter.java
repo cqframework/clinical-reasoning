@@ -22,11 +22,11 @@ import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionConditionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionRelatedActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestPriority;
 import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 
-public class RequestActionAdapter extends BaseAdapter implements IRequestActionAdapter {
+public class RequestActionAdapter extends BaseElementAdapter implements IRequestActionAdapter {
 
     private final RequestGroupActionComponent requestAction;
 

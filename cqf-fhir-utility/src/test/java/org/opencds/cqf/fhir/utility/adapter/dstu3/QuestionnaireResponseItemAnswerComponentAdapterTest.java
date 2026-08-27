@@ -33,7 +33,6 @@ class QuestionnaireResponseItemAnswerComponentAdapterTest {
         assertNotNull(adapter);
         assertEquals(answer, adapter.get());
         assertEquals(FhirVersionEnum.DSTU3, adapter.fhirVersion());
-        assertNotNull(adapter.getModelResolver());
         assertNotNull(adapter.getAdapterFactory());
     }
 

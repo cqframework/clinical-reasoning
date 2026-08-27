@@ -9,11 +9,11 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 
-public class ElementDefinitionAdapter extends BaseAdapter implements IElementDefinitionAdapter {
+public class ElementDefinitionAdapter extends BaseElementAdapter implements IElementDefinitionAdapter {
 
     private final ElementDefinition elementDefinition;
 

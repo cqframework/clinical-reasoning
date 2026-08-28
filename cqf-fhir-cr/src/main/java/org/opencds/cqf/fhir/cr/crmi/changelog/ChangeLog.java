@@ -131,10 +131,10 @@ public class ChangeLog {
             ValueSet valueSet,
             ArtifactDiffProcessor.DiffCache cache,
             ValueSetChild.Leaf leafData) {
-        // compose.include carries no code system version in practice, so fallback to the versions the
-        // ValueSet's expansion recorded per code. Without this the changelog cannot show which code
-        // system version a code came from, which is the only thing that explains a repin's insert/delete pairs.
-        var codeSystemVersions = collectCodeSystemVersionsFromExpansion(valueSet);
+        // compose.include carries no code system version in practice and has no element at all for a
+        // code's active status, so fall back to what the ValueSet's expansion recorded per code. Without
+        // the version the changelog cannot show where a repin's insert/delete pairs came from
+        var expansionDetails = collectExpansionDetailsByCode(valueSet);
         valueSet.getCompose().getInclude().forEach(concept -> {
             if (concept.hasConcept()) {
                 updateLeafData(concept.getSystem(), leafData);
@@ -145,7 +145,7 @@ public class ChangeLog {
                         valueSet.getName(),
                         valueSet.getTitle(),
                         valueSet.getUrl(),
-                        codeSystemVersions);
+                        expansionDetails);
             }
             if (concept.hasValueSet()) {
                 concept.getValueSet().stream()
@@ -225,22 +225,42 @@ public class ChangeLog {
         var version = containsComponent.getVersion();
         var codeValue = containsComponent.getCode();
         var display = containsComponent.getDisplay();
-        var code = new ValueSetChild.Code(id, system, codeValue, version, display, source, name, title, url, null);
+        var inactive = containsComponent.hasInactive() ? containsComponent.getInactive() : null;
+        var code = new ValueSetChild.Code(
+                id, system, codeValue, version, display, inactive, source, name, title, url, null);
         codeMap.put(codeValue, code);
     }
 
-    // Collects the code system version the expansion recorded for each code.
-    private Map<String, String> collectCodeSystemVersionsFromExpansion(ValueSet valueSet) {
+    // What the expansion recorded about a code that compose.include cannot express.
+    private record ExpansionDetail(String version, Boolean inactive) {}
+
+    // Collects the code system version and active status the expansion recorded for each code.
+    private Map<String, ExpansionDetail> collectExpansionDetailsByCode(ValueSet valueSet) {
         if (!valueSet.getExpansion().hasContains()) {
             return Map.of();
         }
-        Map<String, String> versionsByCode = new HashMap<>();
+        Map<String, ExpansionDetail> detailsByCode = new HashMap<>();
         valueSet.getExpansion().getContains().forEach(contained -> {
-            if (contained.hasCode() && contained.hasVersion()) {
-                versionsByCode.putIfAbsent(contained.getCode(), contained.getVersion());
+            if (!contained.hasCode()) {
+                return;
             }
+            // First entry to state a thing wins, per field. Taking the first entry wholesale would let a
+            // contains entry with no version block a later one that has it.
+            detailsByCode.compute(
+                    contained.getCode(),
+                (k, existing) -> new ExpansionDetail(
+                    firstNonNull(
+                        existing == null ? null : existing.version(),
+                        contained.hasVersion() ? contained.getVersion() : null),
+                    firstNonNull(
+                        existing == null ? null : existing.inactive(),
+                        contained.hasInactive() ? contained.getInactive() : null)));
         });
-        return versionsByCode;
+        return detailsByCode;
+    }
+
+    private static <T> T firstNonNull(T preferred, T fallback) {
+        return preferred != null ? preferred : fallback;
     }
 
     private void mapConceptSetToCodeMap(
@@ -250,7 +270,7 @@ public class ChangeLog {
             String name,
             String title,
             String url,
-            Map<String, String> codeSystemVersions) {
+            Map<String, ExpansionDetail> expansionDetails) {
         var system = concept.getSystem();
         var id = concept.getId();
         var version = concept.getVersion();
@@ -258,14 +278,16 @@ public class ChangeLog {
                 .filter(ValueSet.ConceptReferenceComponent::hasCode)
                 .forEach(conceptReference -> {
                     if (!codeMap.containsKey(conceptReference.getCode())) {
+                        var detail = expansionDetails.get(conceptReference.getCode());
                         var code = new ValueSetChild.Code(
                                 id,
                                 system,
                                 conceptReference.getCode(),
                                 version == null || version.isBlank()
-                                        ? codeSystemVersions.get(conceptReference.getCode())
+                                        ? (detail == null ? null : detail.version())
                                         : version,
                                 conceptReference.getDisplay(),
+                                detail == null ? null : detail.inactive(),
                                 source,
                                 name,
                                 title,

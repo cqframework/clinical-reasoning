@@ -47,6 +47,9 @@ public class ValueSetChild extends PageBase {
         private final String codeValue;
         private final String version;
         private final String display;
+        // Null means the code's status was never established, not that it is active. Only
+        // expansion.contains carries inactive; compose.include has no equivalent element.
+        private final Boolean inactive;
         private final String memberOid;
         private String codeSystemOid;
         private String codeSystemName;
@@ -73,6 +76,10 @@ public class ValueSetChild extends PageBase {
 
         public String getDisplay() {
             return display;
+        }
+
+        public Boolean getInactive() {
+            return inactive;
         }
 
         public String getMemberOid() {
@@ -106,6 +113,7 @@ public class ValueSetChild extends PageBase {
                 String code,
                 String version,
                 String display,
+                Boolean inactive,
                 String memberOid,
                 String parentValueSetName,
                 String parentValueSetTitle,
@@ -120,6 +128,7 @@ public class ValueSetChild extends PageBase {
             this.codeValue = code;
             this.version = version;
             this.display = display;
+            this.inactive = inactive;
             this.memberOid = memberOid;
             this.operation = operation;
             this.parentValueSetName = parentValueSetName;
@@ -134,6 +143,7 @@ public class ValueSetChild extends PageBase {
                     this.codeValue,
                     this.version,
                     this.display,
+                    this.inactive,
                     this.memberOid,
                     this.parentValueSetName,
                     this.parentValueSetTitle,
@@ -307,6 +317,7 @@ public class ValueSetChild extends PageBase {
                         null,
                         null,
                         null,
+                        null,
                         null);
                 this.conditions.add(newCondition);
                 return newCondition;
@@ -461,17 +472,25 @@ public class ValueSetChild extends PageBase {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static String getCodeToCheck(Object newValue, Object originalValue) {
         String codeToCheck = null;
-        if (newValue instanceof IPrimitiveType || originalValue instanceof IPrimitiveType) {
-            codeToCheck = newValue instanceof IPrimitiveType
-                    ? ((IPrimitiveType<String>) newValue).getValue()
-                    : ((IPrimitiveType<String>) originalValue).getValue();
+        var primitive = asPrimitive(newValue) != null ? asPrimitive(newValue) : asPrimitive(originalValue);
+        if (primitive != null) {
+            // Only a string primitive can name a code. expansion.contains also holds a boolean
+            // (inactive), and blind-casting that to String threw, aborting the entire changelog the
+            // first time a code was retired. Anything non-string leaves the code unidentified, which
+            // the caller already handles.
+            if (primitive.getValue() instanceof String stringValue) {
+                codeToCheck = stringValue;
+            }
         } else if (originalValue instanceof ValueSet.ValueSetExpansionContainsComponent originalVSECC) {
             codeToCheck = originalVSECC.getCode();
         }
         return codeToCheck;
+    }
+
+    private static IPrimitiveType<?> asPrimitive(Object value) {
+        return value instanceof IPrimitiveType<?> primitive ? primitive : null;
     }
 
     private void addOperationHandleUseContext(Object newValue, Object originalValue, Operation operation) {

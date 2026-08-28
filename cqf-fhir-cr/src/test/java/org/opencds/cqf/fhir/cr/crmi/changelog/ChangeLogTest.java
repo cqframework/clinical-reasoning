@@ -179,6 +179,97 @@ class ChangeLogTest {
         var second = new Operation(ChangeLog.REPLACE, "ValueSet.expansion.contains[0].display", "second", null);
         assertThrows(UnprocessableEntityException.class, () -> code.setOperation(second));
     }
+
+    /** A leaf whose single expansion entry states an active status, or leaves it absent when null. */
+    private static ValueSet leafWithInactive(Boolean inactive) {
+        var valueSet = leafWithCode("2.81", "West Nile virus RNA");
+        if (inactive != null) {
+            valueSet.getExpansion().getContainsFirstRep().setInactive(inactive);
+        }
+        return valueSet;
+    }
+
+    /**
+     * Only expansion.contains carries inactive, and compose.include claims the code first, so the status
+     * has to reach the Code by the same fallback the code system version uses.
+     */
+    @Test
+    void codeTakesInactiveFromExpansionWhenComposeClaimedItFirst() {
+        assertEquals(Boolean.TRUE, getChangelogCode(leafWithInactive(true)).getInactive());
+        assertEquals(Boolean.FALSE, getChangelogCode(leafWithInactive(false)).getInactive());
+    }
+
+    /** An absent inactive means the status was never stated - not that the code is active. */
+    @Test
+    void codeInactiveIsNullWhenTheExpansionDoesNotStateIt() {
+        assertNull(getChangelogCode(leafWithInactive(null)).getInactive());
+    }
+
+    /** A code active on one side and inactive on the other must report each side's own status. */
+    @Test
+    void eachSideCarriesItsOwnInactiveFlag() {
+        var page = new ChangeLog(LEAF_URL)
+                .addPage(leafWithInactive(false), leafWithInactive(true), (ArtifactDiffProcessor.DiffCache) null);
+
+        assertEquals(Boolean.FALSE, page.getOldData().getCodes().get(0).getInactive());
+        assertEquals(Boolean.TRUE, page.getNewData().getCodes().get(0).getInactive());
+    }
+
+    /**
+     * A code can appear more than once in an expansion, under different systems. The fallback fills each
+     * field from the first entry that states it, so an entry with no version must not block a later one
+     * that has it - nor must collecting the status reintroduce that.
+     */
+    @Test
+    void expansionFallbackTakesEachFieldFromTheFirstEntryThatStatesIt() {
+        // Both orderings matter and they fail differently: a silent first entry must not block a later
+        // one that speaks, and a silent later entry must not overwrite what the first already stated.
+        for (var statedOnFirstEntry : new boolean[] {true, false}) {
+            var code = firstCodeOf(twoContainsEntriesOneSilent(statedOnFirstEntry));
+
+            assertEquals("2.81", code.getVersion(), "version, stated first: " + statedOnFirstEntry);
+            assertEquals(Boolean.TRUE, code.getInactive(), "inactive, stated first: " + statedOnFirstEntry);
+        }
+    }
+
+    /** One code, twice in the expansion - only one of the two entries states a version and a status. */
+    private static ValueSet twoContainsEntriesOneSilent(boolean statedOnFirstEntry) {
+        var valueSet = new ValueSet();
+        valueSet.setUrl(LEAF_URL);
+        valueSet.setVersion("20240619");
+        valueSet.setName("WestNileVirusRNA");
+        valueSet.setTitle("West Nile Virus RNA");
+        valueSet.getCompose().addInclude().setSystem(LOINC).addConcept().setCode(CODE);
+        var first = valueSet.getExpansion().addContains().setSystem(LOINC).setCode(CODE);
+        var second = valueSet.getExpansion().addContains().setSystem(LOINC).setCode(CODE);
+        (statedOnFirstEntry ? first : second).setVersion("2.81").setInactive(true);
+        return valueSet;
+    }
+
+    /** Both contains entries resolve to the one Code the map holds for that code value. */
+    private static ValueSetChild.Code firstCodeOf(ValueSet valueSet) {
+        return new ChangeLog(LEAF_URL)
+                .addPage(valueSet, valueSet.copy(), (ArtifactDiffProcessor.DiffCache) null)
+                .getNewData()
+                .getCodes()
+                .get(0);
+    }
+
+    /**
+     * A code going inactive is a boolean change at an expansion.contains path. Every other value the diff
+     * reports there is a string, so this is the first non-string primitive to reach that branch.
+     */
+    @Test
+    void aCodeGoingInactiveDoesNotAbortTheChangelog() {
+        var source = leafWithInactive(false);
+        var target = leafWithInactive(true);
+        var page = new ChangeLog(LEAF_URL).addPage(source, target, (ArtifactDiffProcessor.DiffCache) null);
+
+        assertDoesNotThrow(() -> page.addOperation(
+                ChangeLog.REPLACE,
+                "ValueSet.expansion.contains[0].inactive",
+                new org.hl7.fhir.r4.model.BooleanType(true),
+                new org.hl7.fhir.r4.model.BooleanType(false)));
     }
 
     /**

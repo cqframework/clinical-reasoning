@@ -52,12 +52,16 @@ public class ChangeLog {
                 && !sourceResource.getUrl().equals(targetResource.getUrl())) {
             throw new UnprocessableEntityException(URLS_DONT_MATCH);
         }
-        // Map< [Code], [Object with code, version, system, etc.] >
-        Map<String, ValueSetChild.Code> codeMap = new HashMap<>();
+        // Map< [Code], [Object with code, version, system, etc.] > - one per side.
+        //
+        // One code map per side. Allows each side to correctly record details of a given code.
+        // Prevents a single logical change from being reported twice, which could not be distinguished from a contradiction.
+        Map<String, ValueSetChild.Code> sourceCodeMap = new HashMap<>();
+        Map<String, ValueSetChild.Code> targetCodeMap = new HashMap<>();
         // Map< [URL], Map <[Version], [Object with name, version, and other metadata] >>
         Map<String, Map<String, ValueSetChild.Leaf>> leafMetadataMap = new HashMap<>();
-        updateCodeMapAndLeafMetadataMap(codeMap, leafMetadataMap, sourceResource, cache);
-        updateCodeMapAndLeafMetadataMap(codeMap, leafMetadataMap, targetResource, cache);
+        updateCodeMapAndLeafMetadataMap(sourceCodeMap, leafMetadataMap, sourceResource, cache);
+        updateCodeMapAndLeafMetadataMap(targetCodeMap, leafMetadataMap, targetResource, cache);
         var oldData = sourceResource == null
                 ? null
                 : new ValueSetChild(
@@ -68,7 +72,7 @@ public class ChangeLog {
                         sourceResource.getUrl(),
                         sourceResource.getCompose().getInclude(),
                         sourceResource.getExpansion().getContains(),
-                        codeMap,
+                        sourceCodeMap,
                         leafMetadataMap,
                         getPriority(sourceResource).orElse(null));
         var newData = targetResource == null
@@ -81,7 +85,7 @@ public class ChangeLog {
                         targetResource.getUrl(),
                         targetResource.getCompose().getInclude(),
                         targetResource.getExpansion().getContains(),
-                        codeMap,
+                        targetCodeMap,
                         leafMetadataMap,
                         getPriority(targetResource).orElse(null));
         var url = getPageUrl(sourceResource, targetResource);

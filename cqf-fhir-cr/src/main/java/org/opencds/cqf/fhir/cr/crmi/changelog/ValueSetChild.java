@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -140,7 +141,7 @@ public class ValueSetChild extends PageBase {
                     this.operation);
         }
 
-        //Name and OID for each code system used in eRSD, matched on a fragment of the system URL
+        // Name and OID for each code system used in eRSD, matched on a fragment of the system URL
         private record CodeSystemIdentity(String urlFragment, String name, String oid) {}
 
         private static final List<CodeSystemIdentity> CODE_SYSTEM_IDENTITIES = List.of(
@@ -174,15 +175,21 @@ public class ValueSetChild extends PageBase {
         }
 
         public void setOperation(Operation operation) {
-            if (operation != null) {
-                if (this.operation != null
-                        && this.operation.getType().equals(operation.getType())
-                        && this.operation.getPath().equals(operation.getPath())
-                        && this.operation.getNewValue() != operation.getNewValue()) {
-                    throw new UnprocessableEntityException("Multiple changes to the same element");
-                }
-                this.operation = operation;
+            if (operation == null) {
+                return;
             }
+            // Each side now has its own Code, the only way one instance sees two operations at the
+            // same type and path is the whole-expansion branch of addOperationHandleExpansion: it
+            // fans over each contains entry using the same path, and two entries sharing a code
+            // value then resolve to this Code twice, carrying the same value.
+            if (this.operation != null
+                    && this.operation.getType().equals(operation.getType())
+                    && this.operation.getPath().equals(operation.getPath())
+                    && !Objects.equals(this.operation.getNewValue(), operation.getNewValue())) {
+                throw new UnprocessableEntityException(
+                        "Multiple changes to the same code element: path=%s".formatted(operation.getPath()));
+            }
+            this.operation = operation;
         }
     }
 

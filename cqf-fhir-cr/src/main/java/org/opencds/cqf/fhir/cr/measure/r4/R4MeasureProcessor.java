@@ -33,6 +33,7 @@ import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
 import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
@@ -229,6 +230,14 @@ public class R4MeasureProcessor {
 
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
+
+        // here? synthesize supporting evidence extensions for all expressions in the library?
+        // if supporting evidence enabled.
+        for (GroupDef group : measureDef.groups()) {
+            group.populations().forEach(population -> {
+                // just need to attach the extension and it should map below
+            });
+        }
 
         final var resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);

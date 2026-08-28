@@ -48,7 +48,7 @@ object ClassInstanceHelper {
     }
 
     @JvmStatic
-    fun convertToFhirR4(value: Value?): IBase {
+    fun convertToFhirR4(value: Value): IBase {
         return r4Converter.toFhirValue(value)
     }
 

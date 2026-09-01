@@ -9,6 +9,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
@@ -21,6 +22,13 @@ import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 public class StratumValueWrapper {
 
     protected Object value;
+
+    /**
+     * {@link #getKey()} is called once per element by {@code hashCode()} and twice per comparison by
+     * {@code equals()}, so accumulating a frequency map walks the rendering chain below several times
+     * for every value. The wrapped value does not change after construction, so the key does not either.
+     */
+    private String cachedKey;
 
     public StratumValueWrapper(Object value) {
         this.value = normalizeEngineNativeValue(value);
@@ -36,7 +44,16 @@ public class StratumValueWrapper {
      * the FHIR-typed and primitive rendering branches apply.
      */
     private static Object normalizeEngineNativeValue(Object rawValue) {
-        // FHIR-namespaced ClassInstance -> HAPI FHIR R4 typed object (resource, CodeableConcept, ...)
+        // A FHIR *resource* is rendered here by its id alone, and the ClassInstance already carries it.
+        // Converting one first means reflectively rebuilding its whole element graph - for an
+        // ExplanationOfBenefit, dozens of nested backbone elements - to read a single field off it and
+        // discard the rest, once per occurrence per subject. Leave resources engine-native; the report
+        // builders convert the ones they actually render.
+        if (rawValue instanceof ClassInstance classInstance && ClassInstanceHelper.isFhirResource(classInstance)) {
+            return rawValue;
+        }
+        // Complex datatypes (Coding, CodeableConcept, Identifier) still convert: the rendering below
+        // reads their contents through IAdapterFactory, and they are a handful of primitives, not a graph.
         var converted = ClassInstanceHelper.convertToFhirR4IfNeeded(rawValue);
         if (converted != rawValue) {
             return converted;
@@ -110,6 +127,13 @@ public class StratumValueWrapper {
     private static final String EMPTY_STRATUM_VALUE = "empty";
 
     public String getKey() {
+        if (cachedKey == null) {
+            cachedKey = computeKey();
+        }
+        return cachedKey;
+    }
+
+    private String computeKey() {
         var wrapper = CqlExpressionValue.ofRaw(null, value, null);
         // Handle null values - group them into a special "null" stratum
         if (wrapper.isNull()) {
@@ -122,6 +146,7 @@ public class StratumValueWrapper {
         }
 
         String key = null;
+        var engineNativeResourceId = engineNativeResourceId(value);
         if (value instanceof IBaseCoding) {
             // ASSUMPTION: We won't have different systems with the same code
             // within a given stratifier / sde
@@ -140,6 +165,8 @@ public class StratumValueWrapper {
             key = adapterFactoryFor((IBase) value)
                     .createIdentifier((IBase) value)
                     .getValue();
+        } else if (engineNativeResourceId != null) {
+            key = engineNativeResourceId;
         } else if (value instanceof IBaseResource resource) {
             key = resource.getIdElement().toVersionless().getValue();
         } else {
@@ -165,6 +192,7 @@ public class StratumValueWrapper {
         if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
+        var engineNativeResourceId = engineNativeResourceId(value);
         if (value instanceof IBaseCoding) {
             ICodingAdapter coding = createCodingAdapter(value);
             return coding.hasDisplay() ? coding.getDisplay() : coding.getCode();
@@ -181,6 +209,8 @@ public class StratumValueWrapper {
             return adapterFactoryFor((IBase) value)
                     .createIdentifier((IBase) value)
                     .getValue();
+        } else if (engineNativeResourceId != null) {
+            return engineNativeResourceId;
         } else if (value instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValue();
         } else {
@@ -218,6 +248,7 @@ public class StratumValueWrapper {
         if (wrapper.isEmpty()) {
             return EMPTY_STRATUM_VALUE;
         }
+        var engineNativeResourceId = engineNativeResourceId(valueInner);
         if (valueInner instanceof IBaseCoding) {
             return createCodingAdapter(valueInner).getCode();
         } else if (isCodeableConcept(valueInner)) {
@@ -232,6 +263,8 @@ public class StratumValueWrapper {
             return adapterFactoryFor((IBase) valueInner)
                     .createIdentifier((IBase) valueInner)
                     .getValue();
+        } else if (engineNativeResourceId != null) {
+            return engineNativeResourceId;
         } else if (valueInner instanceof IBaseResource resource) {
             return resource.getIdElement().toVersionless().getValue();
         } else if (valueInner instanceof Iterable<?> iterable) {
@@ -242,6 +275,22 @@ public class StratumValueWrapper {
         } else {
             return valueInner.toString();
         }
+    }
+
+    /**
+     * The id of a FHIR resource still in the CQL engine's native form, or null for anything else.
+     * <p>
+     * This is the bare id part, which is what a resource converted from the same {@link ClassInstance}
+     * reports from {@code getIdElement()} - the conversion copies {@code id.value} and nothing else, so
+     * a value rendered here must agree with it or the same resource would land in two strata depending
+     * on whether it happened to be converted. A resource with no id yields null and falls through to
+     * the caller's default rendering.
+     */
+    private static String engineNativeResourceId(Object value) {
+        if (value instanceof ClassInstance classInstance && ClassInstanceHelper.isFhirResource(classInstance)) {
+            return ClassInstanceHelper.getIdPart(classInstance);
+        }
+        return null;
     }
 
     private static boolean isCodeableConcept(Object value) {

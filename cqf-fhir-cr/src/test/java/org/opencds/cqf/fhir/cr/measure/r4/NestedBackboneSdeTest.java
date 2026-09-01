@@ -2,16 +2,13 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants.EXT_SDE_REFERENCE_URL;
 
 import java.math.BigDecimal;
-import java.util.List;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.MeasureReport.MeasureReportStatus;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
-import org.opencds.cqf.fhir.cr.measure.common.SdeDef;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
 
 /**
@@ -128,21 +125,7 @@ class NestedBackboneSdeTest {
                 .report();
     }
 
-    /**
-     * Pulls the single converted supplemental-data value out of the MeasureDef. The MeasureReport only
-     * carries a reference to the resource (it is an evaluated resource, so it is not contained), so the
-     * converted object itself is only reachable through the def.
-     */
     private static ExplanationOfBenefit supplementalDataResource(MeasureDef measureDef) {
-        List<SdeDef> sdes = measureDef.sdes();
-        assertEquals(1, sdes.size());
-        var values = sdes.get(0).getAccumulatedValues().keySet().stream()
-                .map(wrapper -> wrapper.getValue())
-                .toList();
-        assertEquals(1, values.size());
-        var value = values.get(0);
-        assertNotNull(value);
-        assertEquals(ExplanationOfBenefit.class, value.getClass());
-        return (ExplanationOfBenefit) value;
+        return SdeValues.onlySupplementalDataResource(measureDef, ExplanationOfBenefit.class);
     }
 }

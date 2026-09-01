@@ -250,9 +250,7 @@ class StratumValueWrapperTest {
             var classInstance = encounterInstance();
             var converted = ClassInstanceHelper.convertToFhirR4(classInstance);
 
-            assertEquals(
-                    new StratumValueWrapper(converted).getKey(),
-                    new StratumValueWrapper(classInstance).getKey());
+            assertEquals(new StratumValueWrapper(converted).getKey(), new StratumValueWrapper(classInstance).getKey());
         }
 
         @Test

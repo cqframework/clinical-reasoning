@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.crmi.changelog;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
@@ -22,6 +23,10 @@ public class ChangeLog {
     public static final String REPLACE = "replace";
     public static final String INSERT = "insert";
     public static final String DELETE = "delete";
+    // Conditions and priorities are compared between sides rather than diffed, so their operations have no
+    // FhirPatch path - this stands in for one.
+    private static final String CONDITION_PATH = "condition";
+    private static final String PRIORITY_PATH = "priority";
 
     public ChangeLog(String url) {
         this.pages = new ArrayList<>();
@@ -248,13 +253,13 @@ public class ChangeLog {
             // contains entry with no version block a later one that has it.
             detailsByCode.compute(
                     contained.getCode(),
-                (k, existing) -> new ExpansionDetail(
-                    firstNonNull(
-                        existing == null ? null : existing.version(),
-                        contained.hasVersion() ? contained.getVersion() : null),
-                    firstNonNull(
-                        existing == null ? null : existing.inactive(),
-                        contained.hasInactive() ? contained.getInactive() : null)));
+                    (k, existing) -> new ExpansionDetail(
+                            firstNonNull(
+                                    existing == null ? null : existing.version(),
+                                    contained.hasVersion() ? contained.getVersion() : null),
+                            firstNonNull(
+                                    existing == null ? null : existing.inactive(),
+                                    contained.hasInactive() ? contained.getInactive() : null)));
         });
         return detailsByCode;
     }
@@ -388,43 +393,135 @@ public class ChangeLog {
             var manifestNewData = (LibraryChild) specLibrary.getNewData();
             if (manifestNewData != null) {
                 for (final var page : this.pages) {
-                    if (page.getOldData() instanceof ValueSetChild oldValueSet) {
-                        updateConditionsAndPriorities(manifestOldData, oldValueSet);
-                    }
-                    if (page.getNewData() instanceof ValueSetChild newValueSet) {
-                        updateConditionsAndPriorities(manifestNewData, newValueSet);
-                    }
+                    var oldValueSet = page.getOldData() instanceof ValueSetChild old ? old : null;
+                    var newValueSet = page.getNewData() instanceof ValueSetChild latest ? latest : null;
+
+                    // Whether a condition or priority changed is a property of the pair of sides, so
+                    // both sides have to be known before either is populated.
+                    var oldStated = statedForLeaves(manifestOldData, oldValueSet);
+                    var newStated = statedForLeaves(manifestNewData, newValueSet);
+
+                    // A value set present in only one release already says so through its own insert or
+                    // delete, so a null operation type leaves its conditions and priorities unmarked.
+                    var onBothSides = oldValueSet != null && newValueSet != null;
+                    addConditionsAndPriorities(manifestOldData, oldValueSet, newStated, onBothSides ? DELETE : null);
+                    addConditionsAndPriorities(manifestNewData, newValueSet, oldStated, onBothSides ? INSERT : null);
                 }
             }
         }
     }
 
-    private void updateConditionsAndPriorities(LibraryChild manifestData, ValueSetChild pageData) {
-        for (final var ra : manifestData.getRelatedArtifacts()) {
-            pageData.getLeafValueSets().stream()
-                    .filter(leafValueSet -> leafValueSet.getMemberOid() != null
-                            && leafValueSet.getMemberOid().equals(Canonicals.getIdPart(ra.getValue())))
-                    .forEach(leafValueSet -> {
-                        updateConditions(ra, leafValueSet);
-                        updatePriorities(ra, leafValueSet);
-                    });
-        }
-    }
+    /** What one side's manifest states for the leaves that side holds, to mark the other side against. */
+    private record StatedForLeaves(Set<String> conditionKeys, Map<String, String> priorityByLeafOid) {}
 
-    private void updateConditions(RelatedArtifactUrlWithOperation ra, ValueSetChild.Leaf leafValueSet) {
-        ra.getConditions().forEach(condition -> {
-            if (condition.getValue() != null) {
-                var c = leafValueSet.tryAddCondition(condition.getValue());
-                c.setOperation(condition.getOperation());
+    /** Reads only; nothing is modified. Called for both sides before either is populated. */
+    private static StatedForLeaves statedForLeaves(LibraryChild manifest, ValueSetChild side) {
+        Set<String> conditionKeys = new HashSet<>();
+        Map<String, String> priorityByLeafOid = new HashMap<>();
+        if (manifest == null || side == null) {
+            return new StatedForLeaves(conditionKeys, priorityByLeafOid);
+        }
+        for (final var relatedArtifact : manifest.getRelatedArtifacts()) {
+            for (final var leaf : leavesFor(side, relatedArtifact)) {
+                for (final var condition : conditionsOf(relatedArtifact)) {
+                    conditionKeys.add(conditionKey(leaf, condition));
+                }
+                var priority = priorityCodeOf(relatedArtifact);
+                if (priority != null) {
+                    priorityByLeafOid.put(leaf.getMemberOid(), priority);
+                }
             }
-        });
+        }
+        return new StatedForLeaves(conditionKeys, priorityByLeafOid);
     }
 
-    private void updatePriorities(RelatedArtifactUrlWithOperation ra, ValueSetChild.Leaf leafValueSet) {
-        if (ra.getPriority().getValue() != null) {
-            var coding = ra.getPriority().getValue().getCodingFirstRep();
-            leafValueSet.getPriority().setValue(coding.getCode());
-            leafValueSet.getPriority().setOperation(ra.getPriority().getOperation());
+    /**
+     * Adds the manifest's conditions and priorities to one side, each already marked.
+     *
+     * @param otherSide what the other side states, so a change can be recognised as it is added
+     * @param operationType what being absent from the other side means here, or null to mark nothing
+     */
+    private void addConditionsAndPriorities(
+            LibraryChild manifest, ValueSetChild side, StatedForLeaves otherSide, String operationType) {
+        if (manifest == null || side == null) {
+            return;
         }
+        for (final var relatedArtifact : manifest.getRelatedArtifacts()) {
+            for (final var leaf : leavesFor(side, relatedArtifact)) {
+                for (final var condition : conditionsOf(relatedArtifact)) {
+                    var statedOnOtherSide = otherSide.conditionKeys().contains(conditionKey(leaf, condition));
+                    leaf.tryAddCondition(
+                            condition, statedOnOtherSide ? null : conditionOperation(condition, operationType));
+                }
+                updatePriority(relatedArtifact, leaf, otherSide.priorityByLeafOid(), operationType);
+            }
+        }
+    }
+
+    /**
+     * This operation is derived from comparing the sides, and has no FhirPatch path of its own. This
+     * avoids reporting positional changes in the collection of conditions.
+     */
+    private static Operation conditionOperation(CodeableConcept condition, String operationType) {
+        if (operationType == null) {
+            return null;
+        }
+        return new Operation(
+                operationType, CONDITION_PATH, condition.getCodingFirstRep().getCode(), null);
+    }
+
+    private static List<CodeableConcept> conditionsOf(RelatedArtifactUrlWithOperation relatedArtifact) {
+        return relatedArtifact.getConditions().stream()
+                .map(RelatedArtifactUrlWithOperation.CodeableConceptWithOperation::getValue)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * The leaves on this side that the given manifest entry describes. The manifest lists every leaf in
+     * the program, a page holds only the ones its grouper composes. Both identify a leaf by the OID
+     * in its canonical, so that is what they are matched on.
+     */
+    private static List<ValueSetChild.Leaf> leavesFor(
+            ValueSetChild side, RelatedArtifactUrlWithOperation manifestEntry) {
+        var leafOid = Canonicals.getIdPart(manifestEntry.getValue());
+        return side.getLeafValueSets().stream()
+                .filter(leaf ->
+                        leaf.getMemberOid() != null && leaf.getMemberOid().equals(leafOid))
+                .toList();
+    }
+
+    /** A condition should be identified by leaf, system, and code. Never by its position. */
+    private static String conditionKey(ValueSetChild.Leaf leaf, CodeableConcept condition) {
+        return leaf.getMemberOid() + "|"
+                + condition.getCodingFirstRep().getSystem() + "|"
+                + condition.getCodingFirstRep().getCode();
+    }
+
+    /**
+     * A leaf's priority, marked when the other side states a different one.
+     *
+     * Priority sits in the same relatedArtifact extension collection as conditions and had the same
+     * defect: diff reports that collection positionally, it flagged nearly every leaf as a result.
+     */
+    private void updatePriority(
+            RelatedArtifactUrlWithOperation relatedArtifact,
+            ValueSetChild.Leaf leaf,
+            Map<String, String> otherSidePriorities,
+            String operationType) {
+        var priority = priorityCodeOf(relatedArtifact);
+        if (priority == null) {
+            return;
+        }
+        leaf.getPriority().setValue(priority);
+        var otherSidePriority = otherSidePriorities.get(leaf.getMemberOid());
+        if (operationType != null && !Objects.equals(priority, otherSidePriority)) {
+            leaf.getPriority().setOperation(new Operation(REPLACE, PRIORITY_PATH, priority, otherSidePriority));
+        }
+    }
+
+    private static String priorityCodeOf(RelatedArtifactUrlWithOperation relatedArtifact) {
+        var value = relatedArtifact.getPriority().getValue();
+        return value == null ? null : value.getCodingFirstRep().getCode();
     }
 }

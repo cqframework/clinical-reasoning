@@ -297,7 +297,10 @@ public class ValueSetChild extends PageBase {
             return copy;
         }
 
-        public Code tryAddCondition(CodeableConcept condition) {
+        /**
+         * operation describes how this condition differs from the other side, or null when it does not
+         */
+        public Code tryAddCondition(CodeableConcept condition, Operation operation) {
             var coding = condition.getCodingFirstRep();
             var conditionName =
                     (coding.getDisplay() == null || coding.getDisplay().isBlank())
@@ -318,7 +321,7 @@ public class ValueSetChild extends PageBase {
                         null,
                         null,
                         null,
-                        null);
+                        operation);
                 this.conditions.add(newCondition);
                 return newCondition;
             } else {

@@ -3,12 +3,16 @@ package org.opencds.cqf.fhir.cr.measure.common;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Code;
+import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 class StratumValueWrapperTest {
 
@@ -216,6 +220,69 @@ class StratumValueWrapperTest {
             var w1 = new StratumValueWrapper(new org.hl7.fhir.r4.model.Coding().setCode("ABC"));
             var w2 = new StratumValueWrapper(new org.hl7.fhir.r4.model.Coding().setCode("DEF"));
             assertNotEquals(w1, w2);
+        }
+    }
+
+    // ==================== Engine-native (ClassInstance) Tests ====================
+
+    /**
+     * Resource-valued SDE and stratifier results arrive from the CQL engine as {@link ClassInstance}
+     * and are deliberately left in that form: rebuilding the whole HAPI object graph to read one id
+     * off it is what made SDE accumulation dominate measure evaluation. These pin the invariant that
+     * makes that safe — an engine-native resource must render exactly as the same resource converted
+     * to HAPI FHIR, or SDE grouping silently splits into two strata for the same resource.
+     */
+    @Nested
+    class EngineNativeResource {
+
+        private static final FhirVersionEnum VERSION = FhirVersionEnum.R4;
+
+        private ClassInstance encounterInstance() {
+            var encounter = new org.hl7.fhir.r4.model.Encounter();
+            encounter.setId("encounter-1");
+            encounter.setStatus(org.hl7.fhir.r4.model.Encounter.EncounterStatus.FINISHED);
+            return (ClassInstance)
+                    FhirModelResolverCache.resolverForVersion(VERSION).toCqlValue(encounter, false);
+        }
+
+        @Test
+        void keyMatchesConvertedResource() {
+            var classInstance = encounterInstance();
+            var converted = ClassInstanceHelper.convertToFhirR4(classInstance);
+
+            assertEquals(
+                    new StratumValueWrapper(converted).getKey(),
+                    new StratumValueWrapper(classInstance).getKey());
+        }
+
+        @Test
+        void valueAsStringMatchesConvertedResource() {
+            var classInstance = encounterInstance();
+            var converted = ClassInstanceHelper.convertToFhirR4(classInstance);
+
+            assertEquals(
+                    new StratumValueWrapper(converted).getValueAsString(),
+                    new StratumValueWrapper(classInstance).getValueAsString());
+        }
+
+        @Test
+        void descriptionMatchesConvertedResource() {
+            var classInstance = encounterInstance();
+            var converted = ClassInstanceHelper.convertToFhirR4(classInstance);
+
+            assertEquals(
+                    new StratumValueWrapper(converted).getDescription(),
+                    new StratumValueWrapper(classInstance).getDescription());
+        }
+
+        @Test
+        void equalInstancesOfTheSameResourceShareAStratum() {
+            assertEquals(new StratumValueWrapper(encounterInstance()), new StratumValueWrapper(encounterInstance()));
+        }
+
+        @Test
+        void keyIsTheResourceId() {
+            assertEquals("encounter-1", new StratumValueWrapper(encounterInstance()).getKey());
         }
     }
 

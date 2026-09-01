@@ -1,0 +1,66 @@
+{
+  "id": "BoundCodeSde",
+  "resourceType": "Measure",
+  "name": "BoundCodeSde",
+  "url": "http://example.com/Measure/BoundCodeSde",
+  "status": "active",
+  "library": [
+    "http://example.com/Library/BoundCodeSde"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "boolean"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          }
+        }
+      ]
+    }
+  ],
+  "supplementalData": [
+    {
+      "id": "sde-medication-dispense",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "criteria": {
+        "language": "text/cql.identifier",
+        "expression": "SDE Medication Dispense"
+      }
+    }
+  ]
+}

@@ -252,6 +252,13 @@ public class Constants {
     public static final String RESOURCETYPE_VALUESET = "ValueSet";
     public static final String RESOURCETYPE_CODESYSTEM = "CodeSystem";
 
+    /**
+     * The {@code tx-resource} parameter of the {@code $expand} operation (R6 OperationDefinition).
+     * Additional value sets or code systems referred to from the value set being expanded, used
+     * preferentially to those known to the terminology server.
+     */
+    public static final String TX_RESOURCE = "tx-resource";
+
     public static final String EMPTY = "empty";
 
     public static final String PREVIOUS_VALUE = "previousValue";

@@ -1489,6 +1489,8 @@ class PackageVisitorTests {
         params.addParameter("canonicalVersion", "http://example.org/ValueSet/bar|1.0.0"); // versioned — keep
         params.addParameter("system-version", "urn:oid:1.2.3.4"); // unversioned urn canonical — drop
         params.addParameter("system-version", "urn:oid:1.2.3.4|2024"); // versioned urn canonical — keep
+        params.addParameter("system-version", "urn:ietf:bcp:47"); // unversioned bare-urn system — drop
+        params.addParameter("system-version", "urn:ietf:bcp:47|2.0"); // versioned bare-urn system — keep
         params.addParameter("displayLanguage", "en-US"); // non-canonical — keep
         params.addParameter("activeOnly", true); // boolean — keep
 
@@ -1504,16 +1506,18 @@ class PackageVisitorTests {
                 .map(p -> p.getName() + "=" + (p.hasValue() ? p.getPrimitiveValue() : "<no-value>"))
                 .toList();
 
-        assertEquals(5, remainingValues.size(), "should drop all three unversioned canonical entries");
+        assertEquals(6, remainingValues.size(), "should drop all four unversioned canonical entries");
         assertTrue(remainingValues.contains("system-version=http://loinc.org|2.81"));
         assertTrue(remainingValues.contains("canonicalVersion=http://example.org/ValueSet/bar|1.0.0"));
         assertTrue(remainingValues.contains("system-version=urn:oid:1.2.3.4|2024"));
+        assertTrue(remainingValues.contains("system-version=urn:ietf:bcp:47|2.0"));
         assertTrue(remainingValues.contains("displayLanguage=en-US"));
         assertTrue(remainingValues.contains("activeOnly=true"));
         assertFalse(remainingValues.stream().anyMatch(v -> v.equals("system-version=http://snomed.info/sct")));
         assertFalse(
                 remainingValues.stream().anyMatch(v -> v.equals("canonicalVersion=http://example.org/ValueSet/foo")));
         assertFalse(remainingValues.stream().anyMatch(v -> v.equals("system-version=urn:oid:1.2.3.4")));
+        assertFalse(remainingValues.stream().anyMatch(v -> v.equals("system-version=urn:ietf:bcp:47")));
     }
 
     @Test

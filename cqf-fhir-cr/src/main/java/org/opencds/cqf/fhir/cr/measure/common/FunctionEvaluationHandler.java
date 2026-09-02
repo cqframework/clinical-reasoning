@@ -4,12 +4,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import kotlin.Unit;
 import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.FunctionDef;
@@ -273,7 +272,7 @@ public class FunctionEvaluationHandler {
         // FhirResourceAndCqlTypeUtils.areObjectsEqual where needed; nothing in the downstream pipeline
         // does random-access lookup by input, so a List is sufficient and self-documenting.
         final List<ObservationEntry> functionResults = new ArrayList<>();
-        final Set<Value> evaluatedResources = new HashSet<>();
+        final Map<String, Value> evaluatedResources = new HashMap<>();
 
         final String exceptionMessageIfNotFunction = """
             Measure: '%s', MeasureObservation population expression '%s' must be a CQL function
@@ -293,7 +292,7 @@ public class FunctionEvaluationHandler {
 
             var quantity = convertCqlResultToQuantityDef(observationResult.getValue());
             functionResults.add(new ObservationEntry(result, quantity));
-            Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::addAll);
+            Optional.ofNullable(observationResult.getEvaluatedResources()).ifPresent(evaluatedResources::putAll);
         }
 
         return buildEvaluationResult(expressionName, new ObservationAccumulator(functionResults), evaluatedResources);
@@ -407,7 +406,7 @@ public class FunctionEvaluationHandler {
             // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
             var expressionName = popDef.id() + "-" + stratifierExpression;
             final List<FunctionResultEntry> functionResults = new ArrayList<>();
-            final Set<Value> evaluatedResources = new HashSet<>();
+            final Map<String, Value> evaluatedResources = new HashMap<>();
 
             for (var result : resultsIter) {
                 final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
@@ -425,8 +424,8 @@ public class FunctionEvaluationHandler {
                     throw new IllegalStateException("CQL function '" + stratifierExpression
                             + "' returned null evaluatedResources for measure: " + measureUrl);
                 }
-                evaluatedResources.addAll(evaluated);
-                evaluatedResources.addAll(functionResult.getEvaluatedResources());
+                evaluatedResources.putAll(evaluated);
+                evaluatedResources.putAll(functionResult.getEvaluatedResources());
             }
             // add to EvaluationResult
             addToEvaluationResult(
@@ -655,7 +654,7 @@ public class FunctionEvaluationHandler {
     }
 
     private static CqlEvaluationResult buildEvaluationResult(
-            String expressionName, Object functionResults, Set<Value> evaluatedResources) {
+            String expressionName, Object functionResults, Map<String, Value> evaluatedResources) {
 
         final var evaluationResultToReturn = new CqlEvaluationResult();
 
@@ -666,7 +665,10 @@ public class FunctionEvaluationHandler {
     }
 
     private static void addToEvaluationResult(
-            CqlEvaluationResult result, String expressionName, Object functionResults, Set<Value> evaluatedResources) {
+            CqlEvaluationResult result,
+            String expressionName,
+            Object functionResults,
+            Map<String, Value> evaluatedResources) {
 
         result.addExpressionResult(CqlExpressionValue.ofRaw(expressionName, functionResults, evaluatedResources));
     }

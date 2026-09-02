@@ -115,10 +115,10 @@ public class MeasureEvaluator {
             String subjectType,
             CqlExpressionValue expressionResult,
             CqlEvaluationResult evaluationResult,
-            Set<Value> outEvaluatedResources) {
+            Map<String, Value> outEvaluatedResources) {
 
         if (expressionResult != null && !expressionResult.evaluatedResources().isEmpty()) {
-            outEvaluatedResources.addAll(expressionResult.evaluatedResources());
+            outEvaluatedResources.putAll(expressionResult.evaluatedResources());
         }
 
         if (expressionResult == null || expressionResult.raw() == null) {
@@ -754,7 +754,7 @@ public class MeasureEvaluator {
             // to zero strata (the reported empty "stratifier": [ { "id": "..." } ]). A null result
             // instead groups the subject into a "null" stratum, matching how a null-returning
             // function component already behaves.
-            component.putResult(subjectId, component.expression(), null, Set.of());
+            component.putResult(subjectId, component.expression(), null, Map.of());
             return; // short-circuit
         }
 

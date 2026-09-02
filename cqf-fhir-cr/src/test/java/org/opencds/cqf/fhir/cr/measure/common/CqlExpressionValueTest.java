@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,14 +42,14 @@ class CqlExpressionValueTest {
         assertTrue(wrapper.isNull());
         assertTrue(wrapper.isEmpty());
         assertSame(CqlExpressionValue.empty(), wrapper);
-        assertEquals(Set.of(), wrapper.evaluatedResources());
+        assertEquals(Map.of(), wrapper.evaluatedResources());
     }
 
     @Test
     void of_expressionResult_propagatesValueAndResources() {
         var patient = modelResolver.toCqlValue(new Patient().setId("p1"), false);
         assertNotNull(patient);
-        Set<Value> resources = new HashSet<>(List.of(patient));
+        Map<java.lang.String, Value> resources = Map.of("r1", patient);
         ExpressionResult result = new ExpressionResult(patient, resources);
 
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(null, result, null);
@@ -61,11 +60,11 @@ class CqlExpressionValueTest {
 
     @Test
     void of_expressionResultWithNullResources_substitutesEmptySet() {
-        ExpressionResult result = new ExpressionResult(new String("v"), null);
+        ExpressionResult result = new ExpressionResult(new String("v"), Map.of());
 
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(null, result, null);
 
-        assertEquals(Set.of(), wrapper.evaluatedResources());
+        assertEquals(Map.of(), wrapper.evaluatedResources());
     }
 
     @Test
@@ -73,7 +72,7 @@ class CqlExpressionValueTest {
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(null, 42, null);
 
         assertEquals(42, wrapper.raw());
-        assertEquals(Set.of(), wrapper.evaluatedResources());
+        assertEquals(Map.of(), wrapper.evaluatedResources());
     }
 
     // -- predicates --------------------------------------------------------------
@@ -203,7 +202,7 @@ class CqlExpressionValueTest {
     void resolveForPopulation_falseReturnsEmpty() {
         EvaluationResult evaluationResult = new EvaluationResult();
         var patient = modelResolver.toCqlValue(new Patient(), false);
-        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Set.of()));
+        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Map.of()));
 
         Iterable<Object> result = CqlExpressionValue.ofRaw(null, new Boolean(false), null)
                 .resolveForPopulation("Patient", evaluationResult);
@@ -215,7 +214,7 @@ class CqlExpressionValueTest {
     void resolveForPopulation_trueLooksUpSubjectContextValue() {
         var patient = modelResolver.toCqlValue(new Patient().setId("p1"), false);
         var evaluationResult = new EvaluationResult();
-        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Set.of()));
+        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Map.of()));
 
         Iterable<Object> result = CqlExpressionValue.ofRaw(null, new Boolean(true), null)
                 .resolveForPopulation("Patient", evaluationResult);
@@ -471,7 +470,7 @@ class CqlExpressionValueTest {
 
     @Test
     void evaluatedResources_returnsTheBackingSet() {
-        Set<Value> resources = new HashSet<>(List.of(new String("r1"), new String("r2")));
+        Map<java.lang.String, Value> resources = Map.of("r1", new String("r1"), "r2", new String("r2"));
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(null, "v", resources);
 
         assertSame(resources, wrapper.evaluatedResources());

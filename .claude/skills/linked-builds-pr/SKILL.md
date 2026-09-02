@@ -36,7 +36,7 @@ Read `local.properties` in the project root. Each property key maps to a `Linked
 in the registry. For example:
 
 ```properties
-cql.engine.path=../clinical_quality_language/Src/java
+cql.engine.path=../clinical_quality_language
 ```
 
 Look up each active property key in `LinkedBuildRegistry` (in `LinkedBuild.kt`) to get the
@@ -53,7 +53,7 @@ For each linked build path discovered in Step 1, check if **that** repository al
 graph. This is important — if repo A depends on repo B which depends on repo C, PRs must be
 created starting from C (most upstream) and working down.
 
-For example, if `clinical_quality_language/Src/java` has its own `local.properties` pointing
+For example, if `clinical_quality_language` has its own `local.properties` pointing
 to another sibling repo, that repo needs a PR first.
 
 Each linked repo may have its own `LinkedBuildRegistry` (or equivalent) in its `build-logic/`
@@ -64,7 +64,7 @@ directory — read it to understand its structure.
 For each repository in topological order (most upstream first):
 
 1. **Navigate to the repo directory** (the path from `local.properties`, minus the `buildRoot`
-   suffix — e.g., `../clinical_quality_language` not `../clinical_quality_language/Src/java`)
+   suffix — e.g., `../clinical_quality_language` not `../clinical_quality_language`)
 
 2. **Check git status**: Identify the current branch, staged/unstaged changes, and unpushed commits.
 

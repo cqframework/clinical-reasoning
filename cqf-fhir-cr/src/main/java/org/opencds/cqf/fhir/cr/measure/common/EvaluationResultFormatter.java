@@ -65,7 +65,7 @@ public class EvaluationResultFormatter {
             if (expressionResult.evaluatedResources() != null
                     && !expressionResult.evaluatedResources().isEmpty()) {
                 sb.append(indent(baseIndent + 1)).append("Evaluated Resources:\n");
-                for (var resource : expressionResult.evaluatedResources()) {
+                for (var resource : expressionResult.evaluatedResources().values()) {
                     sb.append(indent(baseIndent + 2))
                             .append(formatResource(resource))
                             .append("\n");

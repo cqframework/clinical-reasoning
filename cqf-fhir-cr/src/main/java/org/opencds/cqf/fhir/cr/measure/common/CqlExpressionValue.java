@@ -24,13 +24,14 @@ import org.opencds.cqf.cql.engine.runtime.Value;
  */
 public final class CqlExpressionValue {
 
-    private static final CqlExpressionValue EMPTY = new CqlExpressionValue(null, null, Collections.emptySet());
+    private static final CqlExpressionValue EMPTY = new CqlExpressionValue(null, null, Collections.emptyMap());
 
     private final @Nullable String expressionName;
     private final @Nullable Object raw;
-    private final Set<Value> evaluatedResources;
+    private final Map<String, Value> evaluatedResources;
 
-    private CqlExpressionValue(@Nullable String expressionName, @Nullable Object raw, Set<Value> evaluatedResources) {
+    private CqlExpressionValue(
+            @Nullable String expressionName, @Nullable Object raw, Map<String, Value> evaluatedResources) {
         this.expressionName = expressionName;
         this.raw = raw;
         this.evaluatedResources = evaluatedResources;
@@ -45,7 +46,7 @@ public final class CqlExpressionValue {
         }
         var resources = result.getEvaluatedResources();
         return new CqlExpressionValue(
-                expressionName, result.getValue(), resources != null ? resources : Collections.emptySet());
+                expressionName, result.getValue(), resources != null ? resources : Collections.emptyMap());
     }
 
     /**
@@ -53,12 +54,12 @@ public final class CqlExpressionValue {
      * for callers that already hold the underlying value.
      */
     public static CqlExpressionValue ofRaw(
-            @Nullable String expressionName, @Nullable Object value, @Nullable Set<Value> evaluatedResources) {
+            @Nullable String expressionName, @Nullable Object value, @Nullable Map<String, Value> evaluatedResources) {
         if (value instanceof ExpressionResult expressionResult) {
             return of(expressionName, expressionResult);
         }
         return new CqlExpressionValue(
-                expressionName, value, evaluatedResources != null ? evaluatedResources : Collections.emptySet());
+                expressionName, value, evaluatedResources != null ? evaluatedResources : Collections.emptyMap());
     }
 
     /**
@@ -311,7 +312,7 @@ public final class CqlExpressionValue {
         return List.of(raw);
     }
 
-    public Set<Value> evaluatedResources() {
+    public Map<String, Value> evaluatedResources() {
         return evaluatedResources;
     }
 

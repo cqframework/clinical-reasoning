@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class StratifierComponentDef {
@@ -34,7 +33,7 @@ public class StratifierComponentDef {
         this.getResults().put(subject, expressionValue);
     }
 
-    public void putResult(String subject, String expression, Object value, Set<Value> evaluatedResources) {
+    public void putResult(String subject, String expression, Object value, Map<String, Value> evaluatedResources) {
         this.putResult(subject, CqlExpressionValue.ofRaw(expression, value, evaluatedResources));
     }
 

@@ -12,11 +12,9 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -75,7 +73,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, Set.of(buildInterval())),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, Map.of("", buildInterval())),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -111,7 +109,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, true, Set.of()),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, true, Map.of()),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -136,7 +134,7 @@ class R4MeasureReportBuilderTest {
 
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_1, null, 2, 3),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Set.of()),
+                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 3, false, Map.of()),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -159,7 +157,7 @@ class R4MeasureReportBuilderTest {
     void errorMismatchedGroupsSizes_tooMany() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
         final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 1, 2);
-        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of());
+        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Map.of());
         final List<String> subjectIds = List.of();
 
         try {
@@ -176,7 +174,7 @@ class R4MeasureReportBuilderTest {
     void errorMismatchedGroupsSizes_tooFew() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
         final Measure measure = buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 2);
-        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Set.of());
+        final MeasureDef measureDef = buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 1, 2, true, Map.of());
         final List<String> subjectIds = List.of();
 
         try {
@@ -193,11 +191,11 @@ class R4MeasureReportBuilderTest {
     void invalidPopulationResource() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
-        var patient = modelResolver.toCqlValue(new Patient(), false);
+        var patient = modelResolver.toCqlValue(new Patient().setId("pat1"), false);
         try {
             r4MeasureReportBuilder.build(
                     buildMeasure(null, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(patient)),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Map.of("pat1", patient)),
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -213,7 +211,7 @@ class R4MeasureReportBuilderTest {
             int numGroups,
             int numSdes,
             boolean isKeyResource,
-            Collection<Value> evaluatedResources) {
+            Map<String, Value> evaluatedResources) {
         var measureDef = new MeasureDef(
                 new IdType(ResourceType.Measure.name(), id),
                 url,
@@ -229,7 +227,7 @@ class R4MeasureReportBuilderTest {
         return measureDef;
     }
 
-    private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Value> evaluatedResources) {
+    private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Map<String, Value> evaluatedResources) {
         final SdeDef sdeDef = new SdeDef(
                 id,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
@@ -242,14 +240,14 @@ class R4MeasureReportBuilderTest {
                     isKeyResource
                             ? modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "patient1")), false)
                             : new org.opencds.cqf.cql.engine.runtime.String("nonResource"),
-                    evaluatedResources.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()));
+                    evaluatedResources);
         }
 
         return sdeDef;
     }
 
     @Nonnull
-    private static GroupDef buildGroupDef(String id, Collection<Value> resources) {
+    private static GroupDef buildGroupDef(String id, Map<String, Value> resources) {
         return new GroupDef(
                 id,
                 null,
@@ -261,7 +259,7 @@ class R4MeasureReportBuilderTest {
                 new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
     }
 
-    private static PopulationDef buildPopulationRef(Collection<Value> resources) {
+    private static PopulationDef buildPopulationRef(Map<String, Value> resources) {
         CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
         final PopulationDef populationDef = new PopulationDef(
                 null,
@@ -274,7 +272,7 @@ class R4MeasureReportBuilderTest {
                 null);
 
         if (resources != null) {
-            resources.forEach(res -> populationDef.addResource("subj", null, res));
+            resources.values().forEach(res -> populationDef.addResource("subj", null, res));
         }
 
         return populationDef;

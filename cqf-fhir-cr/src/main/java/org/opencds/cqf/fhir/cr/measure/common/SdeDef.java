@@ -1,9 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.opencds.cqf.cql.engine.runtime.Value;
@@ -18,7 +16,7 @@ public class SdeDef {
 
     // Pre-accumulated state (populated by MeasureMultiSubjectEvaluator)
     private final Map<StratumValueWrapper, Long> accumulatedValues = new HashMap<>();
-    private final Set<Value> allEvaluatedResources = new HashSet<>();
+    private final Map<String, Value> allEvaluatedResources = new HashMap<>();
 
     public SdeDef(String id, ConceptDef code, String expression) {
         this(id, code, expression, null);
@@ -47,7 +45,7 @@ public class SdeDef {
         return this.description;
     }
 
-    public void putResult(String subject, String expression, Object value, Set<Value> evaluatedResources) {
+    public void putResult(String subject, String expression, Object value, Map<String, Value> evaluatedResources) {
         this.results.put(subject, CqlExpressionValue.ofRaw(expression, value, evaluatedResources));
     }
 
@@ -55,7 +53,7 @@ public class SdeDef {
         return this.accumulatedValues;
     }
 
-    public Set<Value> getAllEvaluatedResources() {
+    public Map<String, Value> getAllEvaluatedResources() {
         return this.allEvaluatedResources;
     }
 
@@ -66,7 +64,7 @@ public class SdeDef {
     public void accumulate() {
         // Merge all evaluated resources across subjects
         for (CqlExpressionValue result : results.values()) {
-            allEvaluatedResources.addAll(result.evaluatedResources());
+            allEvaluatedResources.putAll(result.evaluatedResources());
         }
 
         // Count occurrences of each distinct value across all subjects

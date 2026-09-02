@@ -11,7 +11,6 @@ import jakarta.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 import org.hl7.fhir.Code;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -627,7 +626,7 @@ class R4PopulationBasisValidatorTest {
     private static CqlEvaluationResult buildEvaluationResult(Map<String, Value> expressionResultMap) {
         final EvaluationResult evaluationResult = new EvaluationResult();
         expressionResultMap.forEach((key, value) ->
-                evaluationResult.set(new EvaluationExpressionRef(key), new ExpressionResult(value, Set.of())));
+                evaluationResult.set(new EvaluationExpressionRef(key), new ExpressionResult(value, Map.of())));
         return new CqlEvaluationResult(evaluationResult);
     }
 }

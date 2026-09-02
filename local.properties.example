@@ -2,4 +2,4 @@
 # Uncomment and set paths to use local checkouts instead of Maven Central artifacts.
 
 # CQL Engine (clinical_quality_language) - Gradle project root
-#cql.engine.path=../clinical_quality_language/Src/java
+#cql.engine.path=../clinical_quality_language

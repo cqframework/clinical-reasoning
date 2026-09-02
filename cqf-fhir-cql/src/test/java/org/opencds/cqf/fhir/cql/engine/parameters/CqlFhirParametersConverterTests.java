@@ -77,8 +77,9 @@ class CqlFhirParametersConverterTests {
         var testData = new EvaluationResult();
         testData.set(
                 new EvaluationExpressionRef("Patient"),
-                new ExpressionResult(new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), null));
-        testData.set(new EvaluationExpressionRef("Numerator"), new ExpressionResult(new Boolean(true), null));
+                new ExpressionResult(
+                        new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), Map.of()));
+        testData.set(new EvaluationExpressionRef("Numerator"), new ExpressionResult(new Boolean(true), Map.of()));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -94,9 +95,11 @@ class CqlFhirParametersConverterTests {
         var testData = new EvaluationResult();
         testData.set(
                 new EvaluationExpressionRef("Patient"),
-                new ExpressionResult(new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), null));
+                new ExpressionResult(
+                        new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), Map.of()));
         testData.set(
-                new EvaluationExpressionRef("Encounters"), new ExpressionResult(List.Companion.getEMPTY_LIST(), null));
+                new EvaluationExpressionRef("Encounters"),
+                new ExpressionResult(List.Companion.getEMPTY_LIST(), Map.of()));
 
         Parameters actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -116,7 +119,7 @@ class CqlFhirParametersConverterTests {
         var cqlList = new List(testList);
 
         var testData = new EvaluationResult();
-        testData.set(new EvaluationExpressionRef("NullInList"), new ExpressionResult(cqlList, null));
+        testData.set(new EvaluationExpressionRef("NullInList"), new ExpressionResult(cqlList, Map.of()));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 
@@ -132,8 +135,9 @@ class CqlFhirParametersConverterTests {
         var testData = new EvaluationResult();
         testData.set(
                 new EvaluationExpressionRef("Patient"),
-                new ExpressionResult(new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), null));
-        testData.set(new EvaluationExpressionRef("Null"), new ExpressionResult(null, null));
+                new ExpressionResult(
+                        new ClassInstance(new QName(fhirModelNamespaceUri, "Patient"), Map.of()), Map.of()));
+        testData.set(new EvaluationExpressionRef("Null"), new ExpressionResult(null, Map.of()));
 
         var actual = (Parameters) cqlFhirParametersConverter.toFhirParameters(testData);
 

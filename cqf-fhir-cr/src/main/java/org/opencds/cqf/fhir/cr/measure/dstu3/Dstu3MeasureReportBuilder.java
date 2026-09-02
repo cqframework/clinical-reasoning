@@ -359,9 +359,10 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
         return referenceList;
     }
 
-    private void addResourceReferences(MeasurePopulationType measurePopulationType, Set<Value> evaluatedResources) {
+    private void addResourceReferences(
+            MeasurePopulationType measurePopulationType, Map<String, Value> evaluatedResources) {
         if (!evaluatedResources.isEmpty()) {
-            for (var object : evaluatedResources) {
+            for (var object : evaluatedResources.values()) {
                 var resource = (ClassInstance) object;
                 var resourceId = getId(resource);
                 var reference = this.getEvaluatedResourceReference(resourceId);
@@ -423,7 +424,7 @@ public class Dstu3MeasureReportBuilder implements MeasureReportBuilder<Measure, 
     }
 
     private void processSdeEvaluatedResourceExtension(SdeDef sdeDef) {
-        for (Object o : sdeDef.getAllEvaluatedResources()) {
+        for (Object o : sdeDef.getAllEvaluatedResources().values()) {
             if (o instanceof IBaseResource iBaseResource) {
                 // extension item
                 Extension extension = new Extension(MeasureConstants.EXT_SDE_URL);

@@ -323,12 +323,12 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
     }
 
     private void addEvaluatedResourceReferences(
-            R4MeasureReportBuilderContext bc, String criteriaId, Set<Value> evaluatedResources) {
+            R4MeasureReportBuilderContext bc, String criteriaId, Map<String, Value> evaluatedResources) {
         if (evaluatedResources == null || evaluatedResources.isEmpty()) {
             return;
         }
 
-        for (var resource : evaluatedResources) {
+        for (var resource : evaluatedResources.values()) {
             if (resource instanceof ClassInstance classInstance) {
                 bc.addCriteriaExtensionToEvaluatedResource(getId(classInstance), criteriaId);
             }

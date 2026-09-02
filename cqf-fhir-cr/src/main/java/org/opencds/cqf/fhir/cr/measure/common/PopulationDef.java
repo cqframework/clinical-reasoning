@@ -29,7 +29,7 @@ public class PopulationDef {
     @Nullable
     private Double aggregationResult;
 
-    protected Set<Value> evaluatedResources;
+    protected Map<String, Value> evaluatedResources;
 
     /**
      * Per-subject results from CQL evaluation, stored as wrappers so the FHIR-identity / CQL-type
@@ -105,9 +105,9 @@ public class PopulationDef {
         return populationType == this.measurePopulationType;
     }
 
-    public Set<Value> getEvaluatedResources() {
+    public Map<String, Value> getEvaluatedResources() {
         if (this.evaluatedResources == null) {
-            this.evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
+            this.evaluatedResources = new HashMap<>();
         }
 
         return this.evaluatedResources;

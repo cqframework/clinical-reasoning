@@ -58,6 +58,21 @@ define function "Product Line Stratifier"(enrollmentDate Date):
     return all
         mmInfo.payer.code
 
+// Same member-months, but @2026-01-12 is enrolled in TWO product lines in the same month, so the
+// stratifier function returns a MULTI-element list for that single enrollment date. That date must
+// fan out into BOTH the MEP and MMO strata (counted in each), not collapse into a single stratum
+// with a comma-joined "MEP,MMO" value.
+define "All reported member months info (multi payer)":
+    "All reported member months info"
+      union { Tuple { monthlyEnrollmentDate: @2026-01-12, payer: System.Code { code: 'MMO' } } }
+
+define function "Multi Payer Product Line Stratifier"(enrollmentDate Date):
+    ("All reported member months info (multi payer)") mmInfo
+    where
+        mmInfo.monthlyEnrollmentDate = enrollmentDate
+    return all
+        mmInfo.payer.code
+
 // --- Null-valued stratifier components (reproduces the empty/collapsed stratifier) ---
 // Two scalar stratifier expressions that evaluate to null for the member. With the defect,
 // a null scalar component is silently dropped (never recorded), so when every component is

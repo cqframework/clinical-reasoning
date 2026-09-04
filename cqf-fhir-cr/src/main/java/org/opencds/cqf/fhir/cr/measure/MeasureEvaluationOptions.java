@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.cr.measure;
 import java.util.HashMap;
 import java.util.Map;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceMode;
 import org.opencds.cqf.fhir.utility.ValidationProfile;
 
 public class MeasureEvaluationOptions {
@@ -19,6 +20,7 @@ public class MeasureEvaluationOptions {
 
     private boolean ensureSearchParameters = true;
     private EvaluationSettings evaluationSettings = null;
+    private SupportingEvidenceMode supportingEvidenceMode = SupportingEvidenceMode.DECLARED;
 
     public boolean isValidationEnabled() {
         return this.isValidationEnabled;
@@ -61,6 +63,15 @@ public class MeasureEvaluationOptions {
 
     public boolean getApplyScoringSetMembership() {
         return this.applyScoringSetMembership;
+    }
+
+    public MeasureEvaluationOptions setSupportingEvidenceMode(SupportingEvidenceMode supportingEvidenceMode) {
+        this.supportingEvidenceMode = supportingEvidenceMode;
+        return this;
+    }
+
+    public SupportingEvidenceMode getSupportingEvidenceMode() {
+        return this.supportingEvidenceMode;
     }
 
     public boolean isEnsureSearchParameters() {

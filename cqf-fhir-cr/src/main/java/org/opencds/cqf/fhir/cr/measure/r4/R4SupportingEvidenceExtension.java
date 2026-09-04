@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.convertToFhirR4;
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.getId;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -20,9 +22,13 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverter;
+import org.opencds.cqf.cql.engine.fhir.converter.FhirTypeConverterFactory;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.cql.engine.runtime.Tuple;
 import org.opencds.cqf.cql.engine.runtime.Value;
+import org.opencds.cqf.cql.engine.runtime.Vocabulary;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
 import org.opencds.cqf.fhir.cr.measure.common.CqlExpressionValue;
@@ -37,6 +43,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 public class R4SupportingEvidenceExtension {
 
     private static final R4DateHelper DATE_HELPER = new R4DateHelper();
+    private static final FhirTypeConverter TYPE_CONVERTER = new FhirTypeConverterFactory().create(FhirVersionEnum.R4);
     private static final int MAX_DEPTH = 25;
 
     // Primitive annotation URLs (match your examples)
@@ -60,16 +67,40 @@ public class R4SupportingEvidenceExtension {
             MeasureReport.MeasureReportGroupPopulationComponent reportPopulation,
             List<SupportingEvidenceDef> supportingEvidenceDefs) {
 
-        if (reportPopulation == null || supportingEvidenceDefs == null || supportingEvidenceDefs.isEmpty()) {
+        if (reportPopulation == null) {
             return;
         }
+        buildSupportingEvidenceExtensions(supportingEvidenceDefs).forEach(reportPopulation::addExtension);
+    }
 
+    /**
+     * Report-level variant, used for the entries synthesized for expressions the measure does not
+     * declare.
+     */
+    public static void addSupportingEvidenceExtensions(
+            MeasureReport report, List<SupportingEvidenceDef> supportingEvidenceDefs) {
+
+        if (report == null) {
+            return;
+        }
+        buildSupportingEvidenceExtensions(supportingEvidenceDefs).forEach(report::addExtension);
+    }
+
+    private static List<Extension> buildSupportingEvidenceExtensions(
+            List<SupportingEvidenceDef> supportingEvidenceDefs) {
+
+        if (supportingEvidenceDefs == null || supportingEvidenceDefs.isEmpty()) {
+            return List.of();
+        }
+
+        List<Extension> extensions = new ArrayList<>();
         for (SupportingEvidenceDef def : supportingEvidenceDefs) {
             Extension seExt = buildSupportingEvidenceExtension(def);
             if (seExt != null) {
-                reportPopulation.addExtension(seExt);
+                extensions.add(seExt);
             }
         }
+        return extensions;
     }
 
     private static Extension buildSupportingEvidenceExtension(SupportingEvidenceDef def) {
@@ -331,59 +362,114 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
-        // Interval<DateTime>/Interval<Date> -> Period
-        Interval interval = asInterval(leaf);
-        if (interval != null) {
-            Period p = tryBuildPeriod(interval);
-            if (p != null) {
-                valueExt.setValue(p); // valuePeriod
-                return;
-            }
-            // non-date interval -> fall through
-        }
-
         // Tuple -> represented as nested extensions under this "value"
         if (leaf instanceof Tuple tuple) {
-            for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
-                Extension fieldExt = new Extension(entry.getKey());
-                // field values become repeated nested "value" slices under the field extension
-                addValues(fieldExt, entry.getValue());
-                valueExt.addExtension(fieldExt);
-            }
+            encodeTupleIntoValue(valueExt, tuple);
             return;
+        }
+
+        org.hl7.fhir.r4.model.Type specialized = specializedLeafValue(leaf);
+        valueExt.setValue(specialized != null ? specialized : genericLeafValue(leaf));
+    }
+
+    /** Tuple fields become repeated nested "value" slices under a per-field extension. */
+    private static void encodeTupleIntoValue(Extension valueExt, Tuple tuple) {
+        for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
+            Extension fieldExt = new Extension(entry.getKey());
+            addValues(fieldExt, entry.getValue());
+            valueExt.addExtension(fieldExt);
+        }
+    }
+
+    /**
+     * Leaf types carrying a representation of their own, ahead of the generic tail. Returns null
+     * when the leaf has no specialized form, which hands it to {@link #genericLeafValue(Object)}.
+     */
+    private static org.hl7.fhir.r4.model.Type specializedLeafValue(Object leaf) {
+
+        // Interval<DateTime>/Interval<Date> -> Period. Kept ahead of the delegating tail, which
+        // renders DateTime endpoints under a different offset; other intervals fall through.
+        Interval interval = asInterval(leaf);
+        if (interval != null) {
+            Period period = tryBuildPeriod(interval);
+            if (period != null) {
+                return period;
+            }
         }
 
         // CQL-5 changed Code.toString() to a quoted, multi-line form; render the stable single-line
         // representation the supporting-evidence string value has always carried. Handle this before
         // convertToFhirR4, which would coerce the Code into a bare CodeType losing system/display.
         if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Code cqlCode) {
-            valueExt.setValue(new StringType(formatCqlCode(cqlCode)));
-            return;
+            return new StringType(formatCqlCode(cqlCode));
         }
 
+        // R4 has no integer64; render the numeral as a string rather than a range-guarded integer
+        if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Long cqlLong) {
+            return new StringType(String.valueOf(cqlLong.getValue()));
+        }
+
+        // ValueSet/CodeSystem -> canonical reference, versioned when the library pins one
+        if (leaf instanceof Vocabulary vocabulary) {
+            return new CanonicalType(canonicalReference(vocabulary));
+        }
+
+        if (leaf instanceof ClassInstance classInstance) {
+            String reference = getId(classInstance);
+            if (reference != null) {
+                return new StringType(reference);
+            }
+        }
+
+        return engineConvertedValue(leaf);
+    }
+
+    /**
+     * Remaining System types (Quantity, Ratio, Concept, Time, non-temporal Interval) delegate to
+     * the engine's converter; ClassInstance stays on the reference-string path.
+     */
+    private static org.hl7.fhir.r4.model.Type engineConvertedValue(Object leaf) {
+        if (leaf instanceof Value cqlLeaf && !(leaf instanceof ClassInstance) && TYPE_CONVERTER.isCqlType(cqlLeaf)) {
+            var converted = TYPE_CONVERTER.toFhirType(cqlLeaf);
+            if (converted instanceof org.hl7.fhir.r4.model.Type fhirType) {
+                return fhirType;
+            }
+        }
+        return null;
+    }
+
+    /** Scalars / resources / numeric, after handing anything CQL-native to the converter. */
+    private static org.hl7.fhir.r4.model.Type genericLeafValue(Object leaf) {
         var value = leaf instanceof Value cqlValue ? convertToFhirR4(cqlValue) : leaf;
 
-        // Scalars / resources / numeric
         if (value instanceof Boolean b) {
-            valueExt.setValue(new BooleanType(b));
+            return new BooleanType(b);
         } else if (value instanceof Integer i) {
-            valueExt.setValue(new IntegerType(i));
+            return new IntegerType(i);
         } else if (value instanceof BigDecimal bd) {
-            valueExt.setValue(new DecimalType(bd));
+            return new DecimalType(bd);
         } else if (value instanceof String s) {
-            valueExt.setValue(new StringType(s));
+            return new StringType(s);
         } else if (value instanceof IBaseResource r) {
-            valueExt.setValue(new StringType(resourceIdString(r)));
+            return new StringType(resourceIdString(r));
         } else if (value instanceof org.hl7.fhir.r4.model.Type t) {
-            valueExt.setValue(t);
+            return t;
         } else {
-            valueExt.setValue(new StringType(String.valueOf(leaf)));
+            return new StringType(String.valueOf(leaf));
         }
     }
 
     private static String formatCqlCode(org.opencds.cqf.cql.engine.runtime.Code code) {
         return "Code { code: %s, system: %s, version: %s, display: %s }"
                 .formatted(code.getCode(), code.getSystem(), code.getVersion(), code.getDisplay());
+    }
+
+    private static String canonicalReference(Vocabulary vocabulary) {
+        String version = vocabulary.getVersion();
+        if (version == null || version.isBlank()) {
+            return vocabulary.getId();
+        }
+        return vocabulary.getId() + "|" + version;
     }
 
     private static Period tryBuildPeriod(Interval interval) {

@@ -20,12 +20,35 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
 
-public class ResourceValidator {
+public class ResourceValidator implements IResourceValidator {
     protected IRepository repo;
     protected FhirContext context;
     protected FhirValidator validator;
     protected Map<String, ValidationProfile> profiles;
 
+    /**
+     * Creates a ResourceValidator with an externally-configured FhirValidator.
+     * Use this constructor when you want to provide your own pre-configured validator
+     * (e.g., with custom validation support chain, terminology services, etc.).
+     *
+     * @param validator the pre-configured FhirValidator to use
+     * @param profiles optional validation profiles for filtering error messages
+     */
+    public ResourceValidator(FhirValidator validator, Map<String, ValidationProfile> profiles) {
+        this.validator = validator;
+        this.profiles = profiles == null ? new HashMap<>() : profiles;
+        this.repo = null;
+        this.context = null;
+    }
+
+    /**
+     * Creates a ResourceValidator that bootstraps its own FhirValidator based on the
+     * provided FhirContext and profiles.
+     *
+     * @param context the FhirContext to use
+     * @param profiles validation profiles to load from the repository
+     * @param repo the repository to load ImplementationGuide resources from
+     */
     public ResourceValidator(FhirContext context, Map<String, ValidationProfile> profiles, IRepository repo) {
         this.repo = repo;
         this.context = context;
@@ -33,6 +56,14 @@ public class ResourceValidator {
         setValidator();
     }
 
+    /**
+     * Creates a ResourceValidator that bootstraps its own FhirValidator based on the
+     * provided FHIR version and profiles.
+     *
+     * @param version the FHIR version to use
+     * @param profiles validation profiles to load from the repository
+     * @param repo the repository to load ImplementationGuide resources from
+     */
     public ResourceValidator(FhirVersionEnum version, Map<String, ValidationProfile> profiles, IRepository repo) {
         this.repo = repo;
         this.context = FhirContext.forCached(version);
@@ -95,7 +126,7 @@ public class ResourceValidator {
                         && this.profiles.entrySet().stream()
                                 .flatMap(p -> p.getValue().getIgnoreKeys().stream())
                                 .noneMatch(m.getMessage()::contains))
-                .collect(Collectors.toList());
+                .toList();
 
         if (errors.isEmpty()) {
             return resource;

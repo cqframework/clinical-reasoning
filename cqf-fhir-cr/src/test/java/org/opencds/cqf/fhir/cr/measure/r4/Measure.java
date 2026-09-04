@@ -28,6 +28,7 @@ import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceMode;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDef;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReport;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportContained;
@@ -139,6 +140,11 @@ public class Measure {
 
         public Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
             this.evaluationOptions = evaluationOptions;
+            return this;
+        }
+
+        public Given supportingEvidenceMode(SupportingEvidenceMode supportingEvidenceMode) {
+            this.evaluationOptions.setSupportingEvidenceMode(supportingEvidenceMode);
             return this;
         }
 

@@ -19,6 +19,8 @@ public class MeasureDef {
     private final List<SdeDef> sdes;
     private final List<String> errors;
 
+    private final List<SupportingEvidenceDef> evaluatedExpressions;
+
     public static MeasureDef fromIdAndUrl(IIdType idType, @Nullable String url) {
         return new MeasureDef(idType, url, null, List.of(), List.of());
     }
@@ -31,6 +33,7 @@ public class MeasureDef {
         this.sdes = sdes;
 
         this.errors = new ArrayList<>();
+        this.evaluatedExpressions = new ArrayList<>();
     }
 
     // This is the raw unqualified ID (ex: for "Measure/measure123", we return "measure123"
@@ -67,6 +70,14 @@ public class MeasureDef {
 
     public void addError(String error) {
         this.errors.add(error);
+    }
+
+    public List<SupportingEvidenceDef> evaluatedExpressions() {
+        return this.evaluatedExpressions;
+    }
+
+    public void addEvaluatedExpression(SupportingEvidenceDef evaluatedExpression) {
+        this.evaluatedExpressions.add(evaluatedExpression);
     }
 
     // We need to limit the contract of equality to id, url, and version only

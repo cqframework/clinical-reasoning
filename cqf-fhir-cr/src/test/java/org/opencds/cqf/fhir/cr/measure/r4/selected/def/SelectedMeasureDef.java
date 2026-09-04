@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.EvaluationResultFormatter;
 import org.opencds.cqf.fhir.cr.measure.common.GroupDef;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -166,6 +168,47 @@ public class SelectedMeasureDef<P> extends org.opencds.cqf.fhir.cr.measure.r4.Me
         assertNotNull(value(), "MeasureDef is null");
         assertTrue(value().errors().isEmpty(), "Expected no errors, but found: " + value().errors());
         return this;
+    }
+
+    /**
+     * Assert an expression was collected as evidence without the measure declaring it.
+     *
+     * @param expression the CQL expression name
+     */
+    public SelectedMeasureDef<P> hasEvaluatedExpression(String expression) {
+        assertNotNull(value(), "MeasureDef is null");
+        assertTrue(
+                evaluatedExpressionNames().contains(expression),
+                "Expected evaluated expression '" + expression + "', but found: " + evaluatedExpressionNames());
+        return this;
+    }
+
+    /**
+     * Assert an expression was not collected, whether because it is declared, out of scope, or
+     * the mode did not enable collection.
+     *
+     * @param expression the CQL expression name
+     */
+    public SelectedMeasureDef<P> hasNoEvaluatedExpression(String expression) {
+        assertNotNull(value(), "MeasureDef is null");
+        assertFalse(
+                evaluatedExpressionNames().contains(expression),
+                "Expected no evaluated expression '" + expression + "', but found it");
+        return this;
+    }
+
+    public SelectedMeasureDef<P> hasNoEvaluatedExpressions() {
+        assertNotNull(value(), "MeasureDef is null");
+        assertTrue(
+                value().evaluatedExpressions().isEmpty(),
+                "Expected no evaluated expressions, but found: " + evaluatedExpressionNames());
+        return this;
+    }
+
+    private List<String> evaluatedExpressionNames() {
+        return value().evaluatedExpressions().stream()
+                .map(SupportingEvidenceDef::getExpression)
+                .toList();
     }
 
     /**

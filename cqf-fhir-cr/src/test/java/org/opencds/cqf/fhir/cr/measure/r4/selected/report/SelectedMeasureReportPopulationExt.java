@@ -15,7 +15,11 @@ import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Range;
+import org.hl7.fhir.r4.model.Ratio;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TimeType;
 import org.opencds.cqf.fhir.cr.measure.r4.Measure.Selected;
 
 public class SelectedMeasureReportPopulationExt extends Selected<Extension, SelectedMeasureReportPopulation> {
@@ -204,6 +208,86 @@ public class SelectedMeasureReportPopulationExt extends Selected<Extension, Sele
 
         assertEquals(expectedEnd.toInstant(), actual.getEnd().toInstant(), "Period.end mismatch");
 
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasTimeValue(String expected) {
+        String actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(TimeType.class::isInstance)
+                .map(TimeType.class::cast)
+                .map(TimeType::getValue)
+                .findFirst()
+                .orElse(null);
+
+        assertEquals(expected, actual, "Time value mismatch");
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasQuantityValue(double expectedValue, String expectedUnit) {
+        Quantity actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(Quantity.class::isInstance)
+                .map(Quantity.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected quantity value but none was found");
+        assertEquals(0, BigDecimal.valueOf(expectedValue).compareTo(actual.getValue()), "Quantity value mismatch");
+        assertEquals(expectedUnit, actual.getUnit(), "Quantity unit mismatch");
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasRatioValue(double expectedNumerator, double expectedDenominator) {
+        Ratio actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(Ratio.class::isInstance)
+                .map(Ratio.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected ratio value but none was found");
+        assertEquals(
+                0,
+                BigDecimal.valueOf(expectedNumerator)
+                        .compareTo(actual.getNumerator().getValue()),
+                "Ratio numerator mismatch");
+        assertEquals(
+                0,
+                BigDecimal.valueOf(expectedDenominator)
+                        .compareTo(actual.getDenominator().getValue()),
+                "Ratio denominator mismatch");
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasRangeValue(double expectedLow, double expectedHigh) {
+        Range actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(Range.class::isInstance)
+                .map(Range.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected range value but none was found");
+        assertEquals(
+                0, BigDecimal.valueOf(expectedLow).compareTo(actual.getLow().getValue()), "Range low mismatch");
+        assertEquals(
+                0, BigDecimal.valueOf(expectedHigh).compareTo(actual.getHigh().getValue()), "Range high mismatch");
+        return this;
+    }
+
+    public SelectedMeasureReportPopulationExt hasCodeableConceptValue(String expectedSystem, String expectedCode) {
+        CodeableConcept actual = valueSlices().stream()
+                .map(Extension::getValue)
+                .filter(CodeableConcept.class::isInstance)
+                .map(CodeableConcept.class::cast)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(actual, "Expected codeableConcept value but none was found");
+        boolean found = actual.getCoding().stream()
+                .anyMatch(c -> expectedSystem.equals(c.getSystem()) && expectedCode.equals(c.getCode()));
+        assertTrue(found, "CodeableConcept missing coding: system=" + expectedSystem + " code=" + expectedCode);
         return this;
     }
 

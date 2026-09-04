@@ -1,149 +1,42 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * A {@link HashSet} of {@link CqlExpressionValue} that compares elements by the FHIR-resource and
- * CQL-type identity rules of their underlying value (via {@link FhirResourceAndCqlTypeUtils}).
+ * A Set of {@link CqlExpressionValue} that identifies elements by what they wrap.
  * <p/>
  * Sister type to {@link HashSetForFhirResourcesAndCqlTypes} for use when the population pipeline
- * stores wrappers rather than raw {@link Object}s. Two wrappers around FHIR resources with the
- * same resource type and logical ID are considered equal, even if the wrappers (or the underlying
- * resource instances) are different object instances. Same applies to CQL types via
- * {@link org.opencds.cqf.cql.engine.runtime.CqlType#equal}.
+ * stores wrappers rather than raw {@link Object}s: two wrappers around the same FHIR resource are
+ * one element, and {@code contains} / {@code remove} accept either a wrapper or a raw value, so a
+ * caller can ask "does this set hold resource X?" directly.
  * <p/>
- * Bucket placement still uses the wrapper's default {@code Object.hashCode()} (the wrapper
- * doesn't implement {@code equals} / {@code hashCode}), so {@code add} / {@code remove} /
- * {@code contains} / {@code retainAll} fall through to linear-time identity checks via
- * {@link FhirResourceAndCqlTypeUtils#areObjectsEqual}. This is acceptable — per-subject
- * population sets are small.
+ * Keying on the wrapped value is the whole of the difference from the parent, which is why this is
+ * a few lines rather than a parallel implementation. It used to be a parallel implementation, and
+ * the two drifted: the wrapper carries no {@code equals}, so {@code add} deduplicated by wrapper
+ * identity - that is, not at all - while {@code contains} compared what was wrapped.
  */
-@SuppressWarnings("squid:S3776")
-public class HashSetForCqlExpressionValues extends HashSet<CqlExpressionValue> {
+public class HashSetForCqlExpressionValues extends HashSetForFhirResourcesAndCqlTypes<CqlExpressionValue> {
 
     public HashSetForCqlExpressionValues() {
         super();
     }
 
     public HashSetForCqlExpressionValues(Collection<CqlExpressionValue> collection) {
-        super();
-        for (CqlExpressionValue value : collection) {
-            this.add(value);
-        }
+        super(collection);
     }
 
     public HashSetForCqlExpressionValues(Iterable<CqlExpressionValue> iterable) {
-        super();
-        for (CqlExpressionValue value : iterable) {
-            this.add(value);
-        }
+        super(iterable);
     }
 
     /**
-     * Linear-search check that any wrapper in this set has an underlying value equal — by FHIR
-     * resource / CQL type identity — to {@code other}. Accepts either a {@link CqlExpressionValue}
-     * (the typical case) or a raw object (so callers can ask "does this set contain a wrapper
-     * around resource X?" directly).
+     * Keys on the wrapped value, so a wrapper and the raw value it wraps resolve to the same key.
      */
     @Override
-    public boolean contains(Object other) {
-        return containsByIdentity(this, unwrap(other));
-    }
-
-    /**
-     * Adds {@code newElement} only if no existing wrapper in this set has an underlying value
-     * equal to {@code newElement.raw()} by FHIR identity.
-     */
-    @Override
-    public boolean add(CqlExpressionValue newElement) {
-        if (newElement == null) {
-            return super.add(null);
-        }
-        Object newRaw = newElement.raw();
-        if (newRaw == null
-                || (FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(newRaw) == null
-                        && FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newRaw) == null)) {
-            return super.add(newElement);
-        }
-        for (CqlExpressionValue existing : this) {
-            if (existing != null && FhirResourceAndCqlTypeUtils.areObjectsEqual(existing.raw(), newRaw)) {
-                return false;
-            }
-        }
-        return super.add(newElement);
-    }
-
-    /**
-     * Removes the wrapper whose underlying value matches {@code removalCandidate} by FHIR
-     * identity. {@code removalCandidate} may be a {@link CqlExpressionValue} or a raw resource.
-     */
-    @Override
-    public boolean remove(Object removalCandidate) {
-        Object targetRaw = unwrap(removalCandidate);
-        if (targetRaw == null) {
-            return super.remove(removalCandidate);
-        }
-        if (FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(targetRaw) == null
-                && FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(targetRaw) == null) {
-            return super.remove(removalCandidate);
-        }
-        for (CqlExpressionValue existing : this) {
-            if (existing != null && FhirResourceAndCqlTypeUtils.areObjectsEqual(existing.raw(), targetRaw)) {
-                return super.remove(existing);
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean retainAll(@Nonnull Collection<?> otherCollection) {
-        Objects.requireNonNull(otherCollection);
-
-        if (otherCollection instanceof HashSetForCqlExpressionValues) {
-            return super.retainAll(otherCollection);
-        }
-
-        boolean modified = false;
-        Iterator<CqlExpressionValue> it = iterator();
-        while (it.hasNext()) {
-            CqlExpressionValue next = it.next();
-            if (!otherContains(otherCollection, next)) {
-                it.remove();
-                modified = true;
-            }
-        }
-        return modified;
-    }
-
-    private static boolean otherContains(Collection<?> collection, CqlExpressionValue value) {
-        Object raw = value == null ? null : value.raw();
-        for (Object other : collection) {
-            Object otherRaw = unwrap(other);
-            if (FhirResourceAndCqlTypeUtils.areObjectsEqual(raw, otherRaw)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean containsByIdentity(Iterable<CqlExpressionValue> elements, Object targetRaw) {
-        for (CqlExpressionValue existing : elements) {
-            Object existingRaw = existing == null ? null : existing.raw();
-            if (FhirResourceAndCqlTypeUtils.areObjectsEqual(existingRaw, targetRaw)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static Object unwrap(Object o) {
-        return o instanceof CqlExpressionValue v ? v.raw() : o;
+    IdentityKey keyFor(Object element) {
+        return super.keyFor(element instanceof CqlExpressionValue value ? value.raw() : element);
     }
 
     @Override
@@ -151,13 +44,13 @@ public class HashSetForCqlExpressionValues extends HashSet<CqlExpressionValue> {
         if (isEmpty()) {
             return "[]";
         }
-        Object firstRaw = iterator().next() == null ? null : iterator().next().raw();
-        if (firstRaw instanceof IBaseResource) {
+        var firstElement = iterator().next();
+        if (firstElement != null && firstElement.raw() instanceof IBaseResource) {
             return stream()
                     .map(CqlExpressionValue::raw)
                     .filter(IBaseResource.class::isInstance)
                     .map(IBaseResource.class::cast)
-                    .map(r -> r.getIdElement().getValueAsString())
+                    .map(resource -> resource.getIdElement().getValueAsString())
                     .collect(Collectors.joining(",", "[", "]"));
         }
         return super.toString();

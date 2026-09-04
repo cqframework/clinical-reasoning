@@ -219,6 +219,36 @@ public class BundleHelper {
     }
 
     /**
+     * Checks if an entry has a request type of GET
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return boolean
+     */
+    public static boolean isEntryRequestGet(FhirVersionEnum fhirVersion, IBaseBackboneElement entry) {
+        return switch (fhirVersion) {
+            case DSTU3 ->
+                Optional.ofNullable(((Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(Bundle.BundleEntryRequestComponent::getMethod)
+                        .filter(r -> r == Bundle.HTTPVerb.GET)
+                        .isPresent();
+            case R4 ->
+                Optional.ofNullable(((BundleEntryComponent) entry).getRequest())
+                        .map(BundleEntryRequestComponent::getMethod)
+                        .filter(r -> r == org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET)
+                        .isPresent();
+            case R5 ->
+                Optional.ofNullable(((org.hl7.fhir.r5.model.Bundle.BundleEntryComponent) entry).getRequest())
+                        .map(org.hl7.fhir.r5.model.Bundle.BundleEntryRequestComponent::getMethod)
+                        .filter(r -> r == org.hl7.fhir.r5.model.Bundle.HTTPVerb.GET)
+                        .isPresent();
+            default ->
+                throw new IllegalArgumentException(
+                        UNSUPPORTED_VERSION_OF_FHIR.formatted(fhirVersion.getFhirVersionString()));
+        };
+    }
+
+    /**
      * Returns the list of entries from the Bundle
      *
      * @param bundle IBaseBundle type

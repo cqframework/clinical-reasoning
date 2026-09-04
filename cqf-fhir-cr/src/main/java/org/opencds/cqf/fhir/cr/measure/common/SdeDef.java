@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -18,7 +17,9 @@ public class SdeDef {
 
     // Pre-accumulated state (populated by MeasureMultiSubjectEvaluator)
     private final Map<StratumValueWrapper, Long> accumulatedValues = new HashMap<>();
-    private final Set<Value> allEvaluatedResources = new HashSet<>();
+    // Keyed on resource identity: this accumulates the engine's evaluated resources across every
+    // subject, and a plain HashSet would hash each one by walking its element graph.
+    private final Set<Value> allEvaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
 
     public SdeDef(String id, ConceptDef code, String expression) {
         this(id, code, expression, null);

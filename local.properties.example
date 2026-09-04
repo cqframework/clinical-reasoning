@@ -1,5 +1,10 @@
 # Local development overrides (copy to local.properties, which is gitignored).
 # Uncomment and set paths to use local checkouts instead of Maven Central artifacts.
+#
+# The file's presence also adds mavenLocal() to the build's repositories, so an empty
+# local.properties (no paths set) is what you want to resolve a SNAPSHOT you published with
+# publishToMavenLocal. Without the file, mavenLocal() is not on the list and the artifact is
+# invisible however the version catalog is pinned.
 
-# CQL Engine (clinical_quality_language) - Gradle project root
-#cql.engine.path=../clinical_quality_language/Src/java
+# CQL Engine (clinical_quality_language) - Gradle project root, which is the repo root
+#cql.engine.path=../clinical_quality_language

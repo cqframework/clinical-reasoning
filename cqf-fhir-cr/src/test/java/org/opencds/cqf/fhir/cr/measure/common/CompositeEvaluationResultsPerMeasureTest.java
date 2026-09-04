@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +40,7 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         // Create a non-empty EvaluationResult without depending on ExpressionResult constructors
         EvaluationResult er = new EvaluationResult();
-        er.set(new EvaluationExpressionRef("subject-123"), new ExpressionResult(null, null));
+        er.set(new EvaluationExpressionRef("subject-123"), new ExpressionResult(null, Map.of()));
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef1, "subject-123", er, List.of());
@@ -119,7 +118,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         // Create an EvaluationResult with expression results
         EvaluationResult er = new EvaluationResult();
         ExpressionResult expressionResult = new ExpressionResult(
-                new org.opencds.cqf.cql.engine.runtime.Boolean(true), new HashSet<>(List.of(patient)));
+                new org.opencds.cqf.cql.engine.runtime.Boolean(true), TestEvaluatedResources.of(patient));
         er.set(new EvaluationExpressionRef("Initial Population"), expressionResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -180,11 +179,11 @@ class CompositeEvaluationResultsPerMeasureTest {
         // Create EvaluationResult with multiple expression results
         EvaluationResult er = new EvaluationResult();
         ExpressionResult popResult = new ExpressionResult(
-                new org.opencds.cqf.cql.engine.runtime.Integer(5), new HashSet<>(List.of(patient, encounter)));
+                new org.opencds.cqf.cql.engine.runtime.Integer(5), TestEvaluatedResources.of(patient, encounter));
         er.set(new EvaluationExpressionRef("Initial Population"), popResult);
 
         ExpressionResult numResult =
-                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.String("test-string"), Set.of());
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.String("test-string"), Map.of());
         er.set(new EvaluationExpressionRef("Numerator"), numResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -229,12 +228,12 @@ class CompositeEvaluationResultsPerMeasureTest {
 
         var localDate =
                 modelResolver.toCqlValue(new DateType(LocalDate.of(2024, 1, 15).toString()), false);
-        ExpressionResult dateResult = new ExpressionResult(localDate, Set.of());
+        ExpressionResult dateResult = new ExpressionResult(localDate, Map.of());
         er.set(new EvaluationExpressionRef("Date Expression"), dateResult);
 
         var localDateTime = modelResolver.toCqlValue(
                 new DateTimeType(LocalDateTime.of(2024, 1, 15, 14, 30, 45).toString()), false);
-        ExpressionResult dateTimeResult = new ExpressionResult(localDateTime, Set.of());
+        ExpressionResult dateTimeResult = new ExpressionResult(localDateTime, Map.of());
         er.set(new EvaluationExpressionRef("DateTime Expression"), dateTimeResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -267,7 +266,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         // Create EvaluationResult with collection value
         EvaluationResult er = new EvaluationResult();
         var patientList = new org.opencds.cqf.cql.engine.runtime.List(List.of(patient1, patient2));
-        ExpressionResult listResult = new ExpressionResult(patientList, Set.of());
+        ExpressionResult listResult = new ExpressionResult(patientList, Map.of());
         er.set(new EvaluationExpressionRef("Patient List"), listResult);
 
         CompositeEvaluationResultsPerMeasure.Builder builder = CompositeEvaluationResultsPerMeasure.builder();
@@ -294,7 +293,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         EvaluationResult er = new EvaluationResult();
         er.set(
                 new EvaluationExpressionRef("expr1"),
-                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Map.of()));
 
         var debugResult = new DebugResult();
         er.setDebugResult(debugResult);
@@ -324,7 +323,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         EvaluationResult er = new EvaluationResult();
         er.set(
                 new EvaluationExpressionRef("expr1"),
-                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Map.of()));
 
         var trace = new Trace(List.of());
         er.setTrace(trace);
@@ -348,7 +347,7 @@ class CompositeEvaluationResultsPerMeasureTest {
         EvaluationResult er = new EvaluationResult();
         er.set(
                 new EvaluationExpressionRef("expr1"),
-                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Set.of()));
+                new ExpressionResult(new org.opencds.cqf.cql.engine.runtime.Boolean(true), Map.of()));
 
         var builder = CompositeEvaluationResultsPerMeasure.builder();
         builder.addResult(measureDef, "patient-1", er, List.of());

@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cr.measure.r4.utils;
 
+import static org.opencds.cqf.fhir.cql.ClassInstanceHelper.isFhirResource;
+
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import jakarta.annotation.Nullable;
 import java.util.Objects;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -70,7 +73,11 @@ public class R4MeasureReportUtils {
 
             var cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(FhirContext.forR4Cached());
             Object value;
-            if (stratumValue.getValueClass().equals(ClassInstance.class)) {
+            // A resource-valued stratum is rendered by its id below, via getValueAsString(); converting
+            // it here would rebuild the whole object graph only to fall through every branch that reads
+            // a converted value. Only the complex datatypes those branches match are worth converting.
+            if (stratumValue.getValueClass().equals(ClassInstance.class)
+                    && !isFhirResource(FhirVersionEnum.R4, (ClassInstance) stratumValue.getValue())) {
                 value = cqlFhirParametersConverter.toFhirValue((ClassInstance) stratumValue.getValue());
             } else {
                 value = stratumValue.getValue();

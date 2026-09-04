@@ -1,0 +1,22 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "dispense-completed",
+  "status": "completed",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "1049502",
+        "display": "Acetaminophen 300 MG / Oxycodone Hydrochloride 5 MG Oral Tablet"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/patient-dispense"
+  },
+  "quantity": {
+    "value": 30,
+    "unit": "tablet"
+  },
+  "whenHandedOver": "2024-06-11T00:00:00-06:00"
+}

@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cql.engine.parameters
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition.ChildTypeEnum
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.fhirpath.IFhirPath
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException
@@ -380,45 +383,37 @@ class CqlFhirParametersConverter(
      * Converts a CQL [Value] to a HAPI FHIR structure.
      *
      * @param valueToConvert The CQL value to convert.
-     * @param parentName The enclosing FHIR type for nested/inner HAPI FHIR classes representing
-     *   backbone elements.
+     * @param childDefinition The HAPI child definition this value is being converted into, or null
+     *   at the top level, where there is no enclosing element. HAPI is authoritative about what
+     *   type an element holds - the inner class it declares for a backbone element, or the
+     *   `Enumeration` and its `EnumFactory` behind a bound code - where the CQL value's own type
+     *   name is only a guess at it.
      */
-    fun toFhirValue(valueToConvert: Value, parentName: kotlin.String?): IBase {
-        var clazz: Class<*>?
-        val typeName: kotlin.String
-        when (valueToConvert) {
-            is NamedTypeValue -> {
-                typeName = valueToConvert.type.localPart
-                clazz = modelResolver.resolveType(typeName)
-            }
+    fun toFhirValue(valueToConvert: Value, childDefinition: BaseRuntimeChildDefinition?): IBase {
+        val typeName: kotlin.String =
+            if (valueToConvert is NamedTypeValue) valueToConvert.type.localPart
+            else valueToConvert.typeAsString
 
-            else -> {
-                typeName = valueToConvert.typeAsString
-                clazz = null
-            }
-        }
+        val elementDefinition =
+            childDefinition?.let { elementDefinitionFor(it, valueToConvert, typeName) }
+        val clazz: Class<*>? =
+            elementDefinition?.implementingClass
+                ?: if (valueToConvert is NamedTypeValue) modelResolver.resolveType(typeName)
+                else null
         requireNotNull(clazz) { "Could not resolve FHIR type: $typeName" }
-        if (
-            !parentName.isNullOrBlank() &&
-                !clazz.isEnum &&
-                clazz.name.contains("$") &&
-                (clazz.enclosingClass.simpleName != parentName)
-        ) {
-            val correctClassName = clazz.name.replace(clazz.enclosingClass.simpleName, parentName)
-            try {
-                clazz = Class.forName(correctClassName)
-            } catch (e: ClassNotFoundException) {
-                throw IllegalArgumentException("Could not resolve inner FHIR type: $typeName")
-            }
-        }
 
         val instance: IBase
         try {
-            if (clazz.isEnum) {
-                instance = modelResolver.createHapiInstance(typeName) as IBase
-            } else {
-                instance = clazz.getDeclaredConstructor().newInstance() as IBase
-            }
+            instance =
+                when {
+                    // Instantiating through HAPI passes a bound code its EnumFactory, which
+                    // reflecting on the class does not, and without which no code parses.
+                    elementDefinition != null ->
+                        elementDefinition.newInstance(childDefinition.instanceConstructorArguments)
+                            as IBase
+                    clazz.isEnum -> modelResolver.createHapiInstance(typeName) as IBase
+                    else -> clazz.getDeclaredConstructor().newInstance() as IBase
+                }
         } catch (e: Exception) {
             throw IllegalArgumentException("Could not create instance of $typeName", e)
         }
@@ -452,35 +447,60 @@ class CqlFhirParametersConverter(
             return instance
         }
 
-        val ibaseClazz = clazz as Class<out IBase?>
-        var definition =
-            fhirContext.getElementDefinition(ibaseClazz)
-                as BaseRuntimeElementCompositeDefinition<*>?
-        if (definition == null) {
-            val resourceClazz = clazz as Class<out IBaseResource?>
-            definition = fhirContext.getResourceDefinition(resourceClazz)
-        }
-
-        // `toFhirValue()` is called recursively for all subelements of the CQL class instance. If
-        // the current class is a nested/inner class, the same parent resource name (type name)
-        // should be used because in HAPI FHIR, all classes representing nested backbone elements
-        // are declared directly inside the named parent class.
-        val parentNameForChildren = if (clazz.enclosingClass == null) typeName else parentName
+        val definition =
+            elementDefinition as? BaseRuntimeElementCompositeDefinition<*>
+                ?: compositeDefinitionFor(clazz)
 
         for (child in definition.getChildren()) {
-            val elementValue = (valueToConvert as ClassInstance)[child.elementName]
-            if (elementValue == null) {
-                continue
-            }
+            val elementValue = (valueToConvert as ClassInstance)[child.elementName] ?: continue
             if (elementValue is List) {
                 for (item in elementValue) {
-                    child.mutator.addValue(instance, toFhirValue(item!!, parentNameForChildren))
+                    child.mutator.addValue(instance, toFhirValue(item!!, child))
                 }
             } else {
-                child.mutator.addValue(instance, toFhirValue(elementValue, parentNameForChildren))
+                child.mutator.addValue(instance, toFhirValue(elementValue, child))
             }
         }
         return instance
+    }
+
+    /**
+     * The HAPI element definition for a value being converted into [childDefinition], or null when
+     * HAPI cannot settle it on its own and the CQL type name has to answer instead.
+     */
+    private fun elementDefinitionFor(
+        childDefinition: BaseRuntimeChildDefinition,
+        valueToConvert: Value,
+        typeName: kotlin.String,
+    ): BaseRuntimeElementDefinition<*>? {
+        val validChildNames = childDefinition.validChildNames
+        val definition =
+            if (validChildNames.size == 1) {
+                childDefinition.getChildByName(validChildNames.first())
+            } else {
+                // A choice element ([x]) holds one of several types, so the CQL value's own
+                // type picks between them; HAPI still supplies the class it will accept.
+                val candidate =
+                    if (valueToConvert is NamedTypeValue)
+                        runCatching { modelResolver.resolveType(typeName) }.getOrNull()
+                    else null
+                if (candidate != null && IBase::class.java.isAssignableFrom(candidate)) {
+                    @Suppress("UNCHECKED_CAST")
+                    childDefinition.getChildElementDefinitionByDatatype(
+                        candidate as Class<out IBase>
+                    )
+                } else null
+            }
+        return definition?.takeIf { SUPPORTED_CHILD_TYPES.contains(it.childType) }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun compositeDefinitionFor(clazz: Class<*>): BaseRuntimeElementCompositeDefinition<*> {
+        val elementDefinition =
+            fhirContext.getElementDefinition(clazz as Class<out IBase?>)
+                as BaseRuntimeElementCompositeDefinition<*>?
+        return elementDefinition
+            ?: fhirContext.getResourceDefinition(clazz as Class<out IBaseResource?>)
     }
 
     private fun convertToCql(ppca: IParametersParameterComponentAdapter): Value? {
@@ -496,6 +516,21 @@ class CqlFhirParametersConverter(
     }
 
     companion object {
+        /**
+         * The element kinds this converter can instantiate from a HAPI child definition.
+         * `contained` (a CONTAINED_RESOURCE_LIST, whose implementing class is the IBaseResource
+         * interface) and `Narrative.div` (an XhtmlNode, which is not an IBase at all) are left to
+         * the CQL type name, which handles them no worse than it did before.
+         */
+        private val SUPPORTED_CHILD_TYPES =
+            setOf(
+                ChildTypeEnum.PRIMITIVE_DATATYPE,
+                ChildTypeEnum.ID_DATATYPE,
+                ChildTypeEnum.COMPOSITE_DATATYPE,
+                ChildTypeEnum.RESOURCE_BLOCK,
+                ChildTypeEnum.RESOURCE,
+            )
+
         // This is basically a copy and paste from R4FhirTypeConverter, but it's not exposed.
         const val EMPTY_LIST_EXT_URL: kotlin.String =
             "http://hl7.org/fhir/StructureDefinition/cqf-isEmptyList"

@@ -16,15 +16,40 @@ object ClassInstanceHelper {
     val DSTU3_RESOURCE_TYPE_NAMES =
         org.hl7.fhir.dstu3.model.ResourceType.entries.map { obj -> obj.name }
     val R4_RESOURCE_TYPE_NAMES = org.hl7.fhir.r4.model.ResourceType.entries.map { obj -> obj.name }
+    val R4B_RESOURCE_TYPE_NAMES =
+        org.hl7.fhir.r4b.model.ResourceType.entries.map { obj -> obj.name }
+    val R5_RESOURCE_TYPE_NAMES = org.hl7.fhir.r5.model.ResourceType.entries.map { obj -> obj.name }
+
+    /** Every name that is a resource type in some modelled FHIR version. See [isFhirResource]. */
+    private val ALL_RESOURCE_TYPE_NAMES: Set<kotlin.String> =
+        (DSTU3_RESOURCE_TYPE_NAMES +
+                R4_RESOURCE_TYPE_NAMES +
+                R4B_RESOURCE_TYPE_NAMES +
+                R5_RESOURCE_TYPE_NAMES)
+            .toSet()
 
     @JvmStatic
     fun getId(classInstance: ClassInstance): kotlin.String? {
+        val idPart = getIdPart(classInstance) ?: return null
+        return "${classInstance.type.localPart}/$idPart"
+    }
+
+    /**
+     * The bare `id.value` of a FHIR [ClassInstance], unqualified by resource type, or null when the
+     * instance carries no id.
+     *
+     * This is the id that a HAPI resource converted from the same instance reports from
+     * `getIdElement()`: the conversion copies `id.value` and nothing else, so the resource type
+     * that [getId] prepends is not part of it. Callers that need to agree with a converted resource
+     * want this; callers building a reference want [getId].
+     */
+    @JvmStatic
+    fun getIdPart(classInstance: ClassInstance): kotlin.String? {
         if (classInstance.type.namespaceURI == fhirModelNamespaceUri && classInstance.has("id")) {
             val resourceIdInstance = classInstance["id"] as ClassInstance?
             val resourceIdValue = resourceIdInstance?.get("value")
             if (resourceIdValue != null) {
-                val type = classInstance.type.localPart
-                return "$type/${plainStringValue(resourceIdValue)}"
+                return plainStringValue(resourceIdValue)
             }
         }
         return null
@@ -74,5 +99,22 @@ object ClassInstanceHelper {
             return resourceTypes.contains(classInstance.type.localPart)
         }
         return false
+    }
+
+    /**
+     * Whether the instance is a FHIR resource in any FHIR version modelled here, for callers that
+     * hold no FHIR version of their own. A [ClassInstance] names its type but not the version that
+     * type came from, and the versions disagree about which names are resources ("Sequence" is a
+     * DSTU3 resource; R4 renamed it "MolecularSequence"), so this asks every version rather than
+     * assuming one.
+     *
+     * Sound only for questions whose answer does not depend on the version — telling a resource
+     * from a complex datatype so it can be keyed by [getIdPart], for instance. Converting to HAPI
+     * FHIR is not such a question: use the version-qualified overload there.
+     */
+    @JvmStatic
+    fun isFhirResource(classInstance: ClassInstance): Boolean {
+        return classInstance.type.namespaceURI == fhirModelNamespaceUri &&
+            ALL_RESOURCE_TYPE_NAMES.contains(classInstance.type.localPart)
     }
 }

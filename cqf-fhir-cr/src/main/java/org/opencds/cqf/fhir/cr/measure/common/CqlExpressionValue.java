@@ -38,14 +38,21 @@ public final class CqlExpressionValue {
 
     /**
      * Wraps an {@link ExpressionResult}. Accepts a null result and yields an empty wrapper.
+     * <p>
+     * The engine hands back its evaluated resources as a Map keyed by resource id. This pipeline
+     * carries them as a Set, so the keys are dropped here - but into a set that keys on the same
+     * identity, not a plain {@code HashSet}, which would hash each resource by walking its element
+     * graph and give back the cost the engine's own keying exists to avoid.
      */
     public static CqlExpressionValue of(@Nullable String expressionName, @Nullable ExpressionResult result) {
         if (result == null) {
             return EMPTY;
         }
-        var resources = result.getEvaluatedResources();
         return new CqlExpressionValue(
-                expressionName, result.getValue(), resources != null ? resources : Collections.emptySet());
+                expressionName,
+                result.getValue(),
+                new HashSetForFhirResourcesAndCqlTypes<>(
+                        result.getEvaluatedResources().values()));
     }
 
     /**

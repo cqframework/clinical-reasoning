@@ -1,38 +1,53 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import jakarta.annotation.Nonnull;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.runtime.Value;
 
 /**
- * A HashSet implementation that uses FHIR resource identity rules when comparing resources or
- * Cql.equal.
- * This means that two resources with the same resource type and logical ID are considered
- * equal, even if they are different object instances.
+ * A Set that identifies FHIR resources by resource type and logical ID, so two objects describing
+ * the same resource are one element even when they are different instances - or different
+ * representations, since a resource reaches this pipeline either as a HAPI object or as the CQL
+ * engine's native {@link org.opencds.cqf.cql.engine.runtime.ClassInstance}. Values that are not
+ * resources keep CQL {@code =} semantics, and everything else its own {@code equals}.
  * <p/>
- * This class exists strictly to compensate for the fact that FHIR resource classes and CQL types
- * do not implement equals() and hashCode().
+ * Elements are stored under an {@link IdentityKey}, which is what makes that one relation apply to
+ * every operation. The class this replaces compared elements pairwise, which had two consequences
+ * worth stating, since both are the reason for the rewrite rather than incidental to it:
+ * <ul>
+ *   <li>{@code add} and {@code remove} routed CQL values into {@code HashSet}'s own equality while
+ *       {@code contains} and {@code retainAll} routed them into CQL {@code =}. Under CQL 5 every
+ *       expression result is a {@code ClassInstance}, which those two relations need not agree
+ *       about, so a set could fail to contain a value it had just added.</li>
+ *   <li>Every operation was a linear scan, and under CQL 5 each comparison in that scan walked a
+ *       resource graph. Building an n-element set was O(n²) in deep structural comparisons.</li>
+ * </ul>
  *
  * <p/>For a wrapper-aware sister type used by {@code PopulationDef.subjectResources}, see
  * {@link HashSetForCqlExpressionValues}.
+ *
  * @param <T> the type of elements in this set, which may or may not be a {@link IBaseResource}
  *           or a {@link Value}
  */
-@SuppressWarnings("squid:S3776")
-public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
+public class HashSetForFhirResourcesAndCqlTypes<T> extends AbstractSet<T> {
+
+    /** Insertion-ordered so iteration is stable, as it was when this extended {@code HashSet}. */
+    private final Map<IdentityKey, T> elementsByKey = new LinkedHashMap<>();
 
     public HashSetForFhirResourcesAndCqlTypes() {
         super();
     }
 
     public HashSetForFhirResourcesAndCqlTypes(Collection<T> collection) {
-        super(collection);
+        this((Iterable<T>) collection);
     }
 
     public HashSetForFhirResourcesAndCqlTypes(Iterable<T> iterable) {
@@ -48,144 +63,90 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
     }
 
     /**
-     * This logic is triggered by retainAll() and removeAll(), whose behaviour we're trying
-     * to modify to use FHIR resource identity rules.
-     *
-     * @param other object to be checked for containment in this set
-     * @return true if this set contains the specified element
+     * The key {@code element} is stored under. Subclasses that hold wrappers rather than the values
+     * themselves override this to key on what they wrap.
+     * <p/>
+     * Package-private rather than protected: {@link IdentityKey} is an implementation detail of this
+     * package, so a subclass outside it could neither name the return type nor override this.
      */
-    @Override
-    public boolean contains(Object other) {
-        return contains(this, other);
+    IdentityKey keyFor(Object element) {
+        return IdentityKey.of(element);
     }
 
-    /**
-     * If we don't override this logic, we'll get duplicate resources since the comparison to
-     * existing resources in the set will be based on object identity, not FHIR resource identity
-     * The default implementation calls to HashMap, which means it's not based on contains()
-     * <p/>
-     * This is also called from super.allAll()
-     *
-     * @param newElement element to be added to this set
-     * @return true if this set did not already contain the specified element
-     */
     @Override
     public boolean add(T newElement) {
-        final IBaseResource newElementResource = FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(newElement);
-
-        if (newElementResource != null) {
-            if (this.contains(newElementResource)) {
-                return false;
-            } else {
-                return super.add(newElement);
-            }
+        var key = keyFor(newElement);
+        if (elementsByKey.containsKey(key)) {
+            return false;
         }
-
-        final Value newElementCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(newElement);
-
-        if (newElementCqlType != null) {
-            if (this.contains(newElementCqlType)) {
-                return false;
-            } else {
-                return super.add(newElement);
-            }
-        }
-
-        return super.add(newElement);
+        elementsByKey.put(key, newElement);
+        return true;
     }
 
-    /**
-     * If we don't override this logic, we'll get duplicate resources since the comparison to
-     * existing resources in the set will be based on object identity, not FHIR resource identity
-     * The default implementation calls to HashMap, which means it's not based on contains()
-     * <p/>
-     * This is also called from super.removeAll()
-     *
-     * @param removalCandidate object to be removed from this set, if present
-     * @return true if this set contained the specified element
-     */
+    @Override
+    public boolean contains(Object other) {
+        return elementsByKey.containsKey(keyFor(other));
+    }
+
     @Override
     public boolean remove(Object removalCandidate) {
-        final IBaseResource removalCandidateResource =
-                FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(removalCandidate);
-
-        if (removalCandidateResource != null) {
-            for (T next : this) {
-                if (next instanceof IBaseResource nextResource
-                        && FhirResourceAndCqlTypeUtils.areEqualResources(nextResource, removalCandidateResource)) {
-                    return super.remove(nextResource);
-                }
-            }
+        var key = keyFor(removalCandidate);
+        if (!elementsByKey.containsKey(key)) {
             return false;
         }
-
-        final Value removalCandidateCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(removalCandidate);
-
-        if (removalCandidateCqlType != null) {
-            for (T next : this) {
-                if (next instanceof Value nextCqlType
-                        && FhirResourceAndCqlTypeUtils.areEqualCqlTypes(nextCqlType, removalCandidateCqlType)) {
-                    return super.remove(nextCqlType);
-                }
-            }
-            return false;
-        }
-
-        return super.remove(removalCandidate);
+        elementsByKey.remove(key);
+        return true;
     }
 
     /**
-     * If we don't override this logic, we'll get duplicate resources since the comparison to
-     * existing resources in the set will be based on object identity, not FHIR resource identity
-     * The default implementation calls to HashMap, which means it's not based on contains()
+     * Retains the elements whose identity appears in {@code otherCollection}.
      * <p/>
-     *
-     * @param otherCollection collection containing elements to be retained in this set
-     * @return true if this set changed as a result of the call
+     * The inherited implementation would ask {@code otherCollection} what it contains, and a plain
+     * {@code List} or {@code HashSet} answers that by Java object identity - which is how a
+     * population intersection silently drops resources. Keying the other collection first means the
+     * comparison runs in this set's relation regardless of what the other collection is.
      */
     @Override
     public boolean retainAll(@Nonnull Collection<?> otherCollection) {
         Objects.requireNonNull(otherCollection);
 
-        // Both Collections are HashSetForFhirResources, so we can use the default implementation,
-        // which calls HashSetForFhirResources.contains().
-        if (otherCollection instanceof HashSetForFhirResourcesAndCqlTypes) {
-            return super.retainAll(otherCollection);
+        var retainedKeys = new HashSet<IdentityKey>();
+        for (Object other : otherCollection) {
+            retainedKeys.add(keyFor(other));
         }
+        return elementsByKey.keySet().retainAll(retainedKeys);
+    }
 
-        // Now we're dealing with another Collection, which calls its own contains() method when
-        // we invoke super.retainAll()
+    /**
+     * Removes the elements whose identity appears in {@code otherCollection}. Overridden for the
+     * same reason as {@link #retainAll(Collection)}: the inherited implementation delegates to the
+     * other collection's {@code contains} once this set is the smaller of the two.
+     */
+    @Override
+    public boolean removeAll(@Nonnull Collection<?> otherCollection) {
+        Objects.requireNonNull(otherCollection);
+
         boolean modified = false;
-        Iterator<?> it = iterator();
-        while (it.hasNext()) {
-            if (!contains(otherCollection, it.next())) {
-                it.remove();
-                modified = true;
-            }
+        for (Object other : otherCollection) {
+            modified |= remove(other);
         }
         return modified;
     }
 
-    private static boolean contains(Collection<?> collection, Object obj) {
-        final IBaseResource otherResource = FhirResourceAndCqlTypeUtils.castToResourceIfApplicable(obj);
-        final Value otherCqlType = FhirResourceAndCqlTypeUtils.castToCqlTypeIfApplicable(obj);
-
-        // prevent infinite recursion
-        if (otherResource != null || otherCqlType != null || collection instanceof HashSetForFhirResourcesAndCqlTypes) {
-            return containsInner(collection, obj);
-        }
-
-        return collection.contains(obj);
+    @Override
+    @Nonnull
+    public Iterator<T> iterator() {
+        return elementsByKey.values().iterator();
     }
 
-    private static boolean containsInner(Collection<?> collection, Object obj) {
-        for (Object item : collection) {
-            if (FhirResourceAndCqlTypeUtils.areObjectsEqual(obj, item)) {
-                return true;
-            }
-        }
+    @Override
+    public int size() {
+        return elementsByKey.size();
+    }
 
-        return false;
+    @Override
+    public void clear() {
+        elementsByKey.clear();
     }
 
     @Override
@@ -199,8 +160,7 @@ public class HashSetForFhirResourcesAndCqlTypes<T> extends HashSet<T> {
         if (firstElement instanceof IBaseResource) {
             return stream()
                     .map(IBaseResource.class::cast)
-                    .map(IBaseResource::getIdElement)
-                    .map(IPrimitiveType::getValueAsString)
+                    .map(resource -> resource.getIdElement().getValueAsString())
                     .collect(Collectors.joining(",", "[", "]"));
         }
 

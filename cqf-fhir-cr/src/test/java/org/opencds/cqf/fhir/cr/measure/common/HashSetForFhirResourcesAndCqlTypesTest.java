@@ -4,20 +4,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.cql.engine.runtime.Date;
+import org.opencds.cqf.cql.engine.runtime.Decimal;
 import org.opencds.cqf.cql.engine.runtime.Precision;
+import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 class HashSetForFhirResourcesAndCqlTypesTest {
 
     public static final String PATIENT_ID_1 = "patient-1";
     public static final String PATIENT_ID_2 = "patient-2";
+    public static final String ENCOUNTER_ID = "encounter-1";
 
     @Test
     void addFhirResourceWithSameIdIsNotAddedTwice() {
@@ -309,6 +316,152 @@ class HashSetForFhirResourcesAndCqlTypesTest {
 
         // Just verify no exception was thrown - if we got here, the test passed
         assertTrue(true, "Remove operation should complete without NPE");
+    }
+
+    // ==================== One relation across every operation ====================
+
+    /**
+     * The set holds elements under a single identity, so nothing it accepted can be absent from it.
+     * <p/>
+     * These are the value shapes the measure pipeline puts in these sets. Before the set was keyed,
+     * {@code add} and {@code contains} reached for different notions of equality and could disagree
+     * about the same element; the CQL {@code Decimal} case below is one that actually did.
+     */
+    @Test
+    void addThenContainsAgreeForEveryValueShape() {
+        var values = List.of(
+                createPatientWithId(PATIENT_ID_1),
+                encounterInstance(ENCOUNTER_ID),
+                new Date(LocalDate.of(2024, Month.JANUARY, 1)),
+                new Decimal(new BigDecimal("1.0")),
+                "a plain string");
+
+        for (Object value : values) {
+            var set = new HashSetForFhirResourcesAndCqlTypes<>();
+            assertTrue(set.add(value), () -> "add returned false for " + value);
+            assertTrue(set.contains(value), () -> "contains disagreed with add for " + value);
+            assertFalse(set.add(value), () -> "add accepted a duplicate of " + value);
+            assertEquals(1, set.size());
+        }
+    }
+
+    /**
+     * CQL {@code =} says {@code 1.0 = 1.00}; {@code Decimal.equals} is scale-sensitive and says the
+     * opposite. Whichever the set uses, it has to use it for both operations.
+     */
+    @Test
+    void addAndContainsAgreeOnCqlDecimalScale() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<Decimal>();
+        var oneDecimalPlace = new Decimal(new BigDecimal("1.0"));
+        var twoDecimalPlaces = new Decimal(new BigDecimal("1.00"));
+
+        assertTrue(set.add(oneDecimalPlace));
+        assertTrue(set.contains(twoDecimalPlaces));
+        assertFalse(set.add(twoDecimalPlaces));
+        assertEquals(1, set.size());
+    }
+
+    // ==================== Engine-native (ClassInstance) resources ====================
+
+    /**
+     * The same resource retrieved twice is one element even when the two copies differ in content -
+     * a differing {@code meta.versionId} here. Structural comparison calls those two resources
+     * distinct, and CQL {@code =} calls the comparison uncertain, so before id-keying a set of
+     * evaluated resources could hold the same resource more than once.
+     */
+    @Test
+    void engineNativeResourcesWithSameIdAreOneElement() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<ClassInstance>();
+
+        assertTrue(set.add(encounterInstance(ENCOUNTER_ID)));
+        assertFalse(set.add(encounterInstanceWithVersion(ENCOUNTER_ID, "7")));
+        assertEquals(1, set.size());
+    }
+
+    @Test
+    void engineNativeResourcesWithDifferentIdsAreDistinct() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<ClassInstance>();
+
+        assertTrue(set.add(encounterInstance(ENCOUNTER_ID)));
+        assertTrue(set.add(encounterInstance("encounter-2")));
+        assertEquals(2, set.size());
+    }
+
+    /**
+     * A resource reaches the pipeline either as a HAPI object or as an engine-native value, and it
+     * is the same resource in both forms.
+     */
+    @Test
+    void engineNativeAndHapiFormsOfOneResourceAreOneElement() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<>();
+        var hapiEncounter = new Encounter();
+        hapiEncounter.setId(ENCOUNTER_ID);
+
+        assertTrue(set.add(hapiEncounter));
+        assertTrue(set.contains(encounterInstance(ENCOUNTER_ID)));
+        assertFalse(set.add(encounterInstance(ENCOUNTER_ID)));
+        assertEquals(1, set.size());
+    }
+
+    /**
+     * The population/stratifier intersection at {@code MeasureMultiSubjectEvaluator} retains against
+     * a plain {@code List}, whose own {@code contains} compares by Java object identity. The
+     * comparison has to run in this set's relation regardless of what it is handed.
+     */
+    @Test
+    void retainAllAgainstPlainListOfEngineNativeResources() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<ClassInstance>();
+        set.add(encounterInstance(ENCOUNTER_ID));
+        set.add(encounterInstance("encounter-2"));
+
+        set.retainAll(List.of(encounterInstance(ENCOUNTER_ID)));
+
+        assertEquals(1, set.size());
+        assertTrue(set.contains(encounterInstance(ENCOUNTER_ID)));
+        assertFalse(set.contains(encounterInstance("encounter-2")));
+    }
+
+    @Test
+    void removeAllAgainstPlainListOfEngineNativeResources() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<ClassInstance>();
+        set.add(encounterInstance(ENCOUNTER_ID));
+        set.add(encounterInstance("encounter-2"));
+
+        set.removeAll(List.of(encounterInstance("encounter-2")));
+
+        assertEquals(1, set.size());
+        assertTrue(set.contains(encounterInstance(ENCOUNTER_ID)));
+    }
+
+    @Test
+    void iterationOrderFollowsInsertion() {
+        var set = new HashSetForFhirResourcesAndCqlTypes<Patient>();
+        var patient1 = createPatientWithId(PATIENT_ID_1);
+        var patient2 = createPatientWithId(PATIENT_ID_2);
+        set.add(patient1);
+        set.add(patient2);
+
+        assertEquals(List.of(patient1, patient2), List.copyOf(set));
+    }
+
+    static ClassInstance encounterInstance(String id) {
+        var encounter = new Encounter();
+        encounter.setId(id);
+        encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+        return toEngineNative(encounter);
+    }
+
+    private static ClassInstance encounterInstanceWithVersion(String id, String versionId) {
+        var encounter = new Encounter();
+        encounter.setId(id);
+        encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+        encounter.getMeta().setVersionId(versionId);
+        return toEngineNative(encounter);
+    }
+
+    private static ClassInstance toEngineNative(IBaseResource resource) {
+        return (ClassInstance)
+                FhirModelResolverCache.resolverForVersion(FhirVersionEnum.R4).toCqlValue(resource, false);
     }
 
     private static Patient createPatientWithId(String id) {

@@ -50,18 +50,23 @@ class CqlExpressionValueTest {
     void of_expressionResult_propagatesValueAndResources() {
         var patient = modelResolver.toCqlValue(new Patient().setId("p1"), false);
         assertNotNull(patient);
-        Set<Value> resources = new HashSet<>(List.of(patient));
+        var resources = TestEvaluatedResources.of(patient);
         ExpressionResult result = new ExpressionResult(patient, resources);
 
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(null, result, null);
 
         assertSame(patient, wrapper.raw());
-        assertEquals(resources, wrapper.evaluatedResources());
+        assertEquals(Set.copyOf(resources.values()), wrapper.evaluatedResources());
     }
 
+    /**
+     * An ExpressionResult can no longer carry null evaluated resources - the engine's map is
+     * non-null and empty when an expression touched none - so the empty case is what there is to
+     * cover here. {@code ofRaw} still accepts null from this pipeline's own callers.
+     */
     @Test
-    void of_expressionResultWithNullResources_substitutesEmptySet() {
-        ExpressionResult result = new ExpressionResult(new String("v"), null);
+    void of_expressionResultWithNoResources_yieldsEmptySet() {
+        ExpressionResult result = new ExpressionResult(new String("v"), Map.of());
 
         CqlExpressionValue wrapper = CqlExpressionValue.ofRaw(null, result, null);
 
@@ -203,7 +208,7 @@ class CqlExpressionValueTest {
     void resolveForPopulation_falseReturnsEmpty() {
         EvaluationResult evaluationResult = new EvaluationResult();
         var patient = modelResolver.toCqlValue(new Patient(), false);
-        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Set.of()));
+        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Map.of()));
 
         Iterable<Object> result = CqlExpressionValue.ofRaw(null, new Boolean(false), null)
                 .resolveForPopulation("Patient", evaluationResult);
@@ -215,7 +220,7 @@ class CqlExpressionValueTest {
     void resolveForPopulation_trueLooksUpSubjectContextValue() {
         var patient = modelResolver.toCqlValue(new Patient().setId("p1"), false);
         var evaluationResult = new EvaluationResult();
-        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Set.of()));
+        evaluationResult.set(new EvaluationExpressionRef("Patient"), new ExpressionResult(patient, Map.of()));
 
         Iterable<Object> result = CqlExpressionValue.ofRaw(null, new Boolean(true), null)
                 .resolveForPopulation("Patient", evaluationResult);

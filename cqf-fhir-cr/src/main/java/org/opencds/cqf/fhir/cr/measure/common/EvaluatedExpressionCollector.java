@@ -55,12 +55,13 @@ public class EvaluatedExpressionCollector {
 
         for (CqlExpressionValue expressionValue : evalResult.getExpressionResults()) {
             String name = expressionValue.expressionName();
-            if (name == null || name.isBlank() || declared.contains(name) || !collected.add(name)) {
-                continue;
-            }
-            // dedupe precedes the filter so the recursive value walk runs once per expression,
-            // not once per subject
-            if (!SupportingEvidenceValueFilter.isSupported(expressionValue.raw(), fhirVersion)) {
+            // The dedupe (collected.add) short-circuits ahead of the filter on purpose, so the
+            // recursive value walk runs once per expression rather than once per subject.
+            if (name == null
+                    || name.isBlank()
+                    || declared.contains(name)
+                    || !collected.add(name)
+                    || !SupportingEvidenceValueFilter.isSupported(expressionValue.raw(), fhirVersion)) {
                 continue;
             }
             // description, language and code are author-supplied metadata with nothing to author from

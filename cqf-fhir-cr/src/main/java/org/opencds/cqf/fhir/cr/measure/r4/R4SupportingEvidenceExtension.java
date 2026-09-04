@@ -362,83 +362,100 @@ public class R4SupportingEvidenceExtension {
             return;
         }
 
+        // Tuple -> represented as nested extensions under this "value"
+        if (leaf instanceof Tuple tuple) {
+            encodeTupleIntoValue(valueExt, tuple);
+            return;
+        }
+
+        org.hl7.fhir.r4.model.Type specialized = specializedLeafValue(leaf);
+        valueExt.setValue(specialized != null ? specialized : genericLeafValue(leaf));
+    }
+
+    /** Tuple fields become repeated nested "value" slices under a per-field extension. */
+    private static void encodeTupleIntoValue(Extension valueExt, Tuple tuple) {
+        for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
+            Extension fieldExt = new Extension(entry.getKey());
+            addValues(fieldExt, entry.getValue());
+            valueExt.addExtension(fieldExt);
+        }
+    }
+
+    /**
+     * Leaf types carrying a representation of their own, ahead of the generic tail. Returns null
+     * when the leaf has no specialized form, which hands it to {@link #genericLeafValue(Object)}.
+     */
+    private static org.hl7.fhir.r4.model.Type specializedLeafValue(Object leaf) {
+
         // Interval<DateTime>/Interval<Date> -> Period. Kept ahead of the delegating tail, which
         // renders DateTime endpoints under a different offset; other intervals fall through.
         Interval interval = asInterval(leaf);
         if (interval != null) {
-            Period p = tryBuildPeriod(interval);
-            if (p != null) {
-                valueExt.setValue(p); // valuePeriod
-                return;
+            Period period = tryBuildPeriod(interval);
+            if (period != null) {
+                return period;
             }
-        }
-
-        // Tuple -> represented as nested extensions under this "value"
-        if (leaf instanceof Tuple tuple) {
-            for (Map.Entry<String, Value> entry : tuple.getElements().entrySet()) {
-                Extension fieldExt = new Extension(entry.getKey());
-                // field values become repeated nested "value" slices under the field extension
-                addValues(fieldExt, entry.getValue());
-                valueExt.addExtension(fieldExt);
-            }
-            return;
         }
 
         // CQL-5 changed Code.toString() to a quoted, multi-line form; render the stable single-line
         // representation the supporting-evidence string value has always carried. Handle this before
         // convertToFhirR4, which would coerce the Code into a bare CodeType losing system/display.
         if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Code cqlCode) {
-            valueExt.setValue(new StringType(formatCqlCode(cqlCode)));
-            return;
+            return new StringType(formatCqlCode(cqlCode));
         }
 
         // R4 has no integer64; render the numeral as a string rather than a range-guarded integer
         if (leaf instanceof org.opencds.cqf.cql.engine.runtime.Long cqlLong) {
-            valueExt.setValue(new StringType(String.valueOf(cqlLong.getValue())));
-            return;
+            return new StringType(String.valueOf(cqlLong.getValue()));
         }
 
         // ValueSet/CodeSystem -> canonical reference, versioned when the library pins one
         if (leaf instanceof Vocabulary vocabulary) {
-            valueExt.setValue(new CanonicalType(canonicalReference(vocabulary)));
-            return;
+            return new CanonicalType(canonicalReference(vocabulary));
         }
 
         if (leaf instanceof ClassInstance classInstance) {
             String reference = getId(classInstance);
             if (reference != null) {
-                valueExt.setValue(new StringType(reference));
-                return;
+                return new StringType(reference);
             }
         }
 
-        // Remaining System types (Quantity, Ratio, Concept, Time, non-temporal Interval) delegate
-        // to the engine's converter; ClassInstance stays on the reference-string path below.
+        return engineConvertedValue(leaf);
+    }
+
+    /**
+     * Remaining System types (Quantity, Ratio, Concept, Time, non-temporal Interval) delegate to
+     * the engine's converter; ClassInstance stays on the reference-string path.
+     */
+    private static org.hl7.fhir.r4.model.Type engineConvertedValue(Object leaf) {
         if (leaf instanceof Value cqlLeaf && !(leaf instanceof ClassInstance) && TYPE_CONVERTER.isCqlType(cqlLeaf)) {
             var converted = TYPE_CONVERTER.toFhirType(cqlLeaf);
             if (converted instanceof org.hl7.fhir.r4.model.Type fhirType) {
-                valueExt.setValue(fhirType);
-                return;
+                return fhirType;
             }
         }
+        return null;
+    }
 
+    /** Scalars / resources / numeric, after handing anything CQL-native to the converter. */
+    private static org.hl7.fhir.r4.model.Type genericLeafValue(Object leaf) {
         var value = leaf instanceof Value cqlValue ? convertToFhirR4(cqlValue) : leaf;
 
-        // Scalars / resources / numeric
         if (value instanceof Boolean b) {
-            valueExt.setValue(new BooleanType(b));
+            return new BooleanType(b);
         } else if (value instanceof Integer i) {
-            valueExt.setValue(new IntegerType(i));
+            return new IntegerType(i);
         } else if (value instanceof BigDecimal bd) {
-            valueExt.setValue(new DecimalType(bd));
+            return new DecimalType(bd);
         } else if (value instanceof String s) {
-            valueExt.setValue(new StringType(s));
+            return new StringType(s);
         } else if (value instanceof IBaseResource r) {
-            valueExt.setValue(new StringType(resourceIdString(r)));
+            return new StringType(resourceIdString(r));
         } else if (value instanceof org.hl7.fhir.r4.model.Type t) {
-            valueExt.setValue(t);
+            return t;
         } else {
-            valueExt.setValue(new StringType(String.valueOf(leaf)));
+            return new StringType(String.valueOf(leaf));
         }
     }
 

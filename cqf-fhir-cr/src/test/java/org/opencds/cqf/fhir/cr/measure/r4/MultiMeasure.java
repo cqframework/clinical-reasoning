@@ -50,6 +50,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePopulationType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceMode;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.selected.def.SelectedMeasureDefCollection;
 import org.opencds.cqf.fhir.utility.BundleHelper;
@@ -142,6 +143,11 @@ class MultiMeasure {
 
         public MultiMeasure.Given evaluationOptions(MeasureEvaluationOptions evaluationOptions) {
             this.evaluationOptions = evaluationOptions;
+            return this;
+        }
+
+        public MultiMeasure.Given supportingEvidenceMode(SupportingEvidenceMode supportingEvidenceMode) {
+            this.evaluationOptions.setSupportingEvidenceMode(supportingEvidenceMode);
             return this;
         }
 

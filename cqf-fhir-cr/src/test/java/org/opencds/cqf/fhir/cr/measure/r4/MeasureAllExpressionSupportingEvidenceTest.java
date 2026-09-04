@@ -2,6 +2,8 @@ package org.opencds.cqf.fhir.cr.measure.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.measure.constant.MeasureReportConstants.EXT_SUPPORTING_EVIDENCE_URL;
 
@@ -17,6 +19,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.Measure.Given;
  * Verifies that under {@link SupportingEvidenceMode#ALL_EXPRESSIONS} every evaluated expression
  * surfaces as supporting evidence from unmodified measures.
  */
+@SuppressWarnings({"java:S2699"})
 class MeasureAllExpressionSupportingEvidenceTest {
 
     private static final Given given =
@@ -107,8 +110,8 @@ class MeasureAllExpressionSupportingEvidenceTest {
         // The authored entry is untouched: still at population level, still carrying its metadata.
         assertEquals(1, populationEvidence.size());
         assertEquals(List.of("DenominatorResource"), evidenceNames(populationEvidence));
-        assertTrue(
-                populationEvidence.get(0).getExtensionByUrl("description") != null,
+        assertNotNull(
+                populationEvidence.get(0).getExtensionByUrl("description"),
                 "declared entry should keep its authored description");
 
         var reportNames = evidenceNames(reportLevelEvidence(report));
@@ -140,28 +143,29 @@ class MeasureAllExpressionSupportingEvidenceTest {
         var quantity = evidenceByName(report, "Quantity Value")
                 .getExtensionByUrl("value")
                 .getValue();
-        assertTrue(quantity instanceof org.hl7.fhir.r4.model.Quantity, () -> "was " + quantity.fhirType());
-        assertEquals(
-                "31.5", ((org.hl7.fhir.r4.model.Quantity) quantity).getValue().toPlainString());
+        var quantityValue =
+                assertInstanceOf(org.hl7.fhir.r4.model.Quantity.class, quantity, () -> "was " + quantity.fhirType());
+        assertEquals("31.5", quantityValue.getValue().toPlainString());
 
         var ratio =
                 evidenceByName(report, "Ratio Value").getExtensionByUrl("value").getValue();
-        assertTrue(ratio instanceof org.hl7.fhir.r4.model.Ratio, () -> "was " + ratio.fhirType());
+        assertInstanceOf(org.hl7.fhir.r4.model.Ratio.class, ratio, () -> "was " + ratio.fhirType());
 
         var concept = evidenceByName(report, "Concept Value")
                 .getExtensionByUrl("value")
                 .getValue();
-        assertTrue(concept instanceof org.hl7.fhir.r4.model.CodeableConcept, () -> "was " + concept.fhirType());
+        assertInstanceOf(org.hl7.fhir.r4.model.CodeableConcept.class, concept, () -> "was " + concept.fhirType());
 
         var range = evidenceByName(report, "Interval Quantity Value")
                 .getExtensionByUrl("value")
                 .getValue();
-        assertTrue(range instanceof org.hl7.fhir.r4.model.Range, () -> "was " + range.fhirType());
+        assertInstanceOf(org.hl7.fhir.r4.model.Range.class, range, () -> "was " + range.fhirType());
 
         // R4 has no integer64, so a Long renders as a string carrying the numeral.
         var longValue = evidenceByName(report, "Long Value").getExtensionByUrl("value");
-        assertTrue(
-                longValue.getValue() instanceof org.hl7.fhir.r4.model.StringType,
+        assertInstanceOf(
+                org.hl7.fhir.r4.model.StringType.class,
+                longValue.getValue(),
                 () -> "was " + longValue.getValue().fhirType());
         assertEquals("31", longValue.getValue().primitiveValue());
 

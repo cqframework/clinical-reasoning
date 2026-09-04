@@ -45,12 +45,7 @@ public final class SupportingEvidenceValueFilter {
         }
 
         if (cqlValue instanceof org.opencds.cqf.cql.engine.runtime.List list) {
-            for (Value element : list) {
-                if (!isSupported(element, fhirVersion, depth + 1)) {
-                    return false;
-                }
-            }
-            return true;
+            return allSupported(list, fhirVersion, depth);
         }
 
         if (cqlValue instanceof Interval interval) {
@@ -59,14 +54,19 @@ public final class SupportingEvidenceValueFilter {
         }
 
         if (cqlValue instanceof Tuple tuple) {
-            for (Value element : tuple.getElements().values()) {
-                if (!isSupported(element, fhirVersion, depth + 1)) {
-                    return false;
-                }
-            }
-            return true;
+            return allSupported(tuple.getElements().values(), fhirVersion, depth);
         }
 
+        return true;
+    }
+
+    /** One element out of scope takes the whole container with it. */
+    private static boolean allSupported(Iterable<Value> elements, FhirVersionEnum fhirVersion, int depth) {
+        for (Value element : elements) {
+            if (!isSupported(element, fhirVersion, depth + 1)) {
+                return false;
+            }
+        }
         return true;
     }
 }

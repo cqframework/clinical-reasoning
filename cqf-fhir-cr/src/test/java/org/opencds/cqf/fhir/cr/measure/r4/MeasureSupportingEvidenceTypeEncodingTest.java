@@ -12,6 +12,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.selected.report.SelectedMeasureReportP
  * Concept, non-temporal Interval). Each previously-failing type is declared on its own measure so
  * a single regression cannot mask the others.
  */
+@SuppressWarnings({"java:S2699"})
 class MeasureSupportingEvidenceTypeEncodingTest {
 
     private static final Given given = Measure.given().repositoryFor("MeasureTest");

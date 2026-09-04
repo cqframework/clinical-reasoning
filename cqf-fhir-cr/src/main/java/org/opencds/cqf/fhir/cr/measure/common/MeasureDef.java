@@ -106,6 +106,7 @@ public class MeasureDef {
                 .add("version='" + version + "'")
                 .add("groups=" + groups.size())
                 .add("sdes=" + sdes.size())
+                .add("evaluatedExpressions=" + evaluatedExpressions.size())
                 .add("errors=" + errors)
                 .toString();
     }

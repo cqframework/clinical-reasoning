@@ -27,8 +27,10 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.common.DataRequirementsProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
@@ -53,6 +55,7 @@ class QuestionnaireProcessorTests {
                 .generateProcessor(new GenerateProcessor(repositoryR4))
                 .packageProcessor(new PackageProcessor(repositoryR4))
                 .populateProcessor(new PopulateProcessor())
+                .dataRequirementsProcessor(new DataRequirementsProcessor(repositoryR4))
                 .when()
                 .questionnaireId(Ids.newId(fhirContextR4, "Questionnaire", "OutpatientPriorAuthorizationRequest"))
                 .isPut(Boolean.FALSE)
@@ -327,13 +330,28 @@ class QuestionnaireProcessorTests {
     }
 
     @Test
+    void testGenerateR4() {
+        var profile =
+                repositoryR4.read(StructureDefinition.class, new IdType("StructureDefinition", "RouteOnePatient"));
+        given().repository(repositoryR4).when().profile(profile).thenGenerate().hasItems(8);
+    }
+
+    @Test
+    void testGenerateR5() {
+        var profile = repositoryR5.read(
+                org.hl7.fhir.r5.model.StructureDefinition.class, new IdType("StructureDefinition", "RouteOnePatient"));
+        given().repository(repositoryR5).when().profile(profile).thenGenerate().hasItems(8);
+    }
+
+    @Test
     void testIntegration() {
         var patientId = "Patient1";
         var questionnaire = given().repository(repositoryR4)
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "StructureDefinition", "LaunchContexts"))
+                .profileUrl(canonicalTypeForVersion(
+                        FhirVersionEnum.R4, "http://fhir.org/test/StructureDefinition/LaunchContexts"))
                 .thenGenerate()
-                .hasItems(2)
+                .hasItems(1)
                 .hasExtensions(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT, 5)
                 .questionnaire
                 .get();
@@ -353,9 +371,9 @@ class QuestionnaireProcessorTests {
                                 newPart(fhirContextR4, "Reference", "content", "Encounter/Encounter1"))))
                 .thenPopulate(true)
                 .hasNoErrors()
-                .hasItems(2)
-                .itemHasAnswer("1.1")
-                .itemHasAuthorExt("1.1")
+                .hasItems(1)
+                .itemHasAnswer("1")
+                .itemHasAuthorExt("1")
                 .questionnaireResponse
                 .get();
         assertEquals("Patient/" + patientId, questionnaireResponse.getSubject().getReference());

@@ -1,11 +1,13 @@
 package org.opencds.cqf.fhir.utility.adapter.r4;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,7 @@ class CodingAdapterTest {
         var adapter = adapterFactory.createCoding(coding);
         assertTrue(adapter.hasCode());
         assertEquals(code, adapter.getCode());
+        assertInstanceOf(CodeType.class, adapter.getCodeType());
         var newCode = "test2";
         adapter.setCode(newCode);
         assertEquals(newCode, adapter.getCode());

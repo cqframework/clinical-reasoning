@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
 
 class ChangeLogTest {
@@ -585,5 +586,51 @@ class ChangeLogTest {
                                 ? "unchanged"
                                 : condition.getOperation().getType()))
                 .toList();
+    }
+
+    /**
+     * expansion.contains.system is optional, so an entry can carry a version with no system.
+     * Matching on system prevents the expansion version from being incorrectly assigned.
+     */
+    @Test
+    void codeDoesNotTakeVersionFromAnExpansionEntryWithNoSystem() {
+        var valueSet = new ValueSet();
+        valueSet.setUrl(LEAF_URL);
+        valueSet.setVersion("20240619");
+        valueSet.setName("WestNileVirusRNA");
+        valueSet.setTitle("West Nile Virus RNA");
+        valueSet.getCompose().addInclude().setSystem(LOINC).addConcept().setCode(CODE);
+        valueSet.getExpansion().addContains().setCode(CODE).setVersion("2.81");
+
+        assertNull(onlyCodeOf(valueSet).getVersion());
+    }
+
+    /**
+     * A code string is only unique within its code system. Here the expansion lists the same code under
+     * ICD-10-CM before LOINC, while compose.include only draws it from LOINC - so a lookup keyed on the
+     * code alone would hand the LOINC concept ICD-10-CM's version.
+     */
+    @Test
+    void codeTakesTheVersionOfItsOwnCodeSystem() {
+        var valueSet = new ValueSet();
+        valueSet.setUrl(LEAF_URL);
+        valueSet.setVersion("20240619");
+        valueSet.setName("WestNileVirusRNA");
+        valueSet.setTitle("West Nile Virus RNA");
+        valueSet.getCompose().addInclude().setSystem(LOINC).addConcept().setCode(CODE);
+        valueSet.getExpansion()
+                .addContains()
+                .setSystem("http://hl7.org/fhir/sid/icd-10-cm")
+                .setCode(CODE)
+                .setVersion("2026");
+        valueSet.getExpansion().addContains().setSystem(LOINC).setCode(CODE).setVersion("2.81");
+        
+        var page = new ChangeLog(LEAF_URL).addPage(valueSet, valueSet.copy(), (ArtifactDiffProcessor.DiffCache) null);
+        var distinctVersions = page.getNewData().getCodes().stream()
+                .map(ValueSetChild.Code::getVersion)
+                .distinct()
+                .toList();
+
+        assertEquals(List.of("2.81"), distinctVersions);
     }
 }

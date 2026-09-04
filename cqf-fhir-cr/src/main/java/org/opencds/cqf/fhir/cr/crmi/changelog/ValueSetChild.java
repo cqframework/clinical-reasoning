@@ -188,10 +188,8 @@ public class ValueSetChild extends PageBase {
             if (operation == null) {
                 return;
             }
-            // Each side now has its own Code, the only way one instance sees two operations at the
-            // same type and path is the whole-expansion branch of addOperationHandleExpansion: it
-            // fans over each contains entry using the same path, and two entries sharing a code
-            // value then resolve to this Code twice, carrying the same value.
+            // Each side has its own Code, keyed by leaf, system and code, and ChangeLog.setCodeOperations
+            // visits each key once - so reaching here twice means two genuinely conflicting claims.
             if (this.operation != null
                     && this.operation.getType().equals(operation.getType())
                     && this.operation.getPath().equals(operation.getPath())
@@ -338,18 +336,12 @@ public class ValueSetChild extends PageBase {
             String name,
             String url,
             List<ValueSet.ConceptSetComponent> compose,
-            List<ValueSet.ValueSetExpansionContainsComponent> contains,
             Map<String, Code> codeMap,
             Map<String, Map<String, Leaf>> leafMetadataMap,
             String priority) {
         super(title, id, version, name, url, "ValueSet");
-        if (contains != null) {
-            contains.forEach(contained -> {
-                if (contained.getCode() != null && codeMap.containsKey(contained.getCode())) {
-                    this.codes.add(codeMap.get(contained.getCode()));
-                }
-            });
-        }
+        // Every code this side contributes, one entry per referenced value set that carries it.
+        this.codes.addAll(codeMap.values());
         if (compose != null) {
             compose.stream()
                     .filter(ValueSet.ConceptSetComponent::hasValueSet)
@@ -392,11 +384,11 @@ public class ValueSetChild extends PageBase {
             var operation = new Operation(type, path, newValue, originalValue);
             if (path.contains("compose")) {
                 addOperationHandleCompose(type, path, newValue, originalValue, operation);
-            } else if (path.contains("expansion")) {
-                addOperationHandleExpansion(type, path, newValue, originalValue, operation);
             } else if (path.contains("useContext")) {
                 addOperationHandleUseContext(newValue, originalValue, operation);
-            } else {
+            } else if (!path.contains("expansion")) {
+                // Code changes are derived by comparing the two sides in ChangeLog.setCodeOperations, so
+                // the diff's account of the grouper's expansion is dropped rather than recorded.
                 this.operations.add(operation);
             }
         }
@@ -452,50 +444,6 @@ public class ValueSetChild extends PageBase {
         }
     }
 
-    private void addOperationHandleExpansion(
-            String type, String path, Object newValue, Object originalValue, Operation operation) {
-        if (path.contains("expansion.contains[")) {
-            // if the codes themselves changed
-            String codeToCheck = getCodeToCheck(newValue, originalValue);
-            updateCodeOperation(codeToCheck, operation);
-        } else if (newValue instanceof ValueSet.ValueSetExpansionComponent
-                || originalValue instanceof ValueSet.ValueSetExpansionComponent) {
-            var contains = newValue instanceof ValueSet.ValueSetExpansionComponent newVSEC
-                    ? newVSEC
-                    : (ValueSet.ValueSetExpansionComponent) originalValue;
-            contains.getContains().forEach(c -> {
-                Operation updatedOperation;
-                if (newValue instanceof ValueSet.ValueSetExpansionComponent) {
-                    updatedOperation = new Operation(type, path, c.getCode(), null);
-                } else {
-                    updatedOperation = new Operation(type, path, null, c.getCode());
-                }
-                updateCodeOperation(c.getCode(), updatedOperation);
-            });
-        }
-    }
-
-    private static String getCodeToCheck(Object newValue, Object originalValue) {
-        String codeToCheck = null;
-        var primitive = asPrimitive(newValue) != null ? asPrimitive(newValue) : asPrimitive(originalValue);
-        if (primitive != null) {
-            // Only a string primitive can name a code. expansion.contains also holds a boolean
-            // (inactive), and blind-casting that to String threw, aborting the entire changelog the
-            // first time a code was retired. Anything non-string leaves the code unidentified, which
-            // the caller already handles.
-            if (primitive.getValue() instanceof String stringValue) {
-                codeToCheck = stringValue;
-            }
-        } else if (originalValue instanceof ValueSet.ValueSetExpansionContainsComponent originalVSECC) {
-            codeToCheck = originalVSECC.getCode();
-        }
-        return codeToCheck;
-    }
-
-    private static IPrimitiveType<?> asPrimitive(Object value) {
-        return value instanceof IPrimitiveType<?> primitive ? primitive : null;
-    }
-
     private void addOperationHandleUseContext(Object newValue, Object originalValue, Operation operation) {
         String priorityToCheck = null;
         if (newValue instanceof UsageContext newUseContext
@@ -513,21 +461,6 @@ public class ValueSetChild extends PageBase {
         }
         if (priorityToCheck != null) {
             this.priority.setOperation(operation);
-        }
-    }
-
-    private void updateCodeOperation(String codeToCheck, Operation operation) {
-        if (codeToCheck != null) {
-            final String codeNotNull = codeToCheck;
-            this.codes.stream()
-                    .filter(code -> code.codeValue != null)
-                    .filter(code -> code.codeValue.equals(codeNotNull))
-                    .findAny()
-                    .ifPresentOrElse(
-                            code -> code.setOperation(operation),
-                            () ->
-                                    // drop unmatched operations in the base operations list
-                                    this.operations.add(operation));
         }
     }
 }

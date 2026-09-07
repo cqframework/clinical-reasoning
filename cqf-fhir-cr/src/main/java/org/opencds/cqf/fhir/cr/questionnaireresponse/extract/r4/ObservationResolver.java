@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.questionnaireresponse.extract.ExtractRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 
@@ -40,7 +41,7 @@ public class ObservationResolver {
         var answer = (QuestionnaireResponseItemAnswerComponent) answerAdapter.get();
         var item = (QuestionnaireItemComponent) (itemAdapter == null ? null : itemAdapter.get());
         var obs = new Observation();
-        obs.setId(request.getExtractId() + "." + linkId);
+        obs.setId(GeneratedIds.fromComposite(request.getExtractId() + "." + linkId));
         obs.setBasedOn(questionnaireResponse.getBasedOn());
         obs.setPartOf(questionnaireResponse.getPartOf());
         obs.setStatus(Observation.ObservationStatus.FINAL);

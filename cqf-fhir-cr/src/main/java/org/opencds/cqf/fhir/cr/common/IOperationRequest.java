@@ -19,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 /**
@@ -59,9 +60,9 @@ public interface IOperationRequest {
         var issues = resolvePathList(getOperationOutcome(), "issue");
         if (issues != null && !issues.isEmpty()) {
             getOperationOutcome()
-                    .setId("%s-outcome-%s"
+                    .setId(GeneratedIds.fromComposite("%s-outcome-%s"
                             .formatted(
-                                    getOperationName(), resource.getIdElement().getIdPart()));
+                                    getOperationName(), resource.getIdElement().getIdPart())));
             getModelResolver().setValue(resource, "contained", Collections.singletonList(getOperationOutcome()));
             getModelResolver()
                     .setValue(

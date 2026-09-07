@@ -545,6 +545,20 @@ public class ProcessDefinitionItem {
             IBase answerValue,
             IStructureDefinitionAdapter profile) {
         try {
+            // A parent-relative path can use this resource profile only at its resource root.
+            // Nested/sliced profile resolution remains unchanged; do not borrow a root value constraint.
+            if (profile != null
+                    && profile.getType().equals(parent.fhirType())
+                    && "Coding".equals(answerValue.fhirType())) {
+                var element = profile.getElementByPath(answerPath.split(":")[0]);
+                if (element != null
+                        && element.getType().size() == 1
+                        && StringUtils.isBlank(element.getSliceName())
+                        && !StringUtils.contains(element.getId(), ":")
+                        && "CodeableConcept".equals(element.getTypeCode())) {
+                    answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+                }
+            }
             request.getModelResolver()
                     .setValue(
                             parent,

@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -181,7 +182,7 @@ public class ProcessDefinitionItem {
                 id = id.concat("-%s".formatted(linkId));
             }
             // casting here to identify the signature
-            resource.setId((IIdType) Ids.newId(request.getFhirVersion(), id));
+            resource.setId((IIdType) Ids.newId(request.getFhirVersion(), GeneratedIds.fromComposite(id)));
             resolveMeta(resource, profile);
         }
         getValueExtensions(request, item)

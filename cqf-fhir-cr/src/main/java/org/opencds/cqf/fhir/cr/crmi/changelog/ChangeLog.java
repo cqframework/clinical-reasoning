@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
+import org.opencds.cqf.fhir.cr.crmi.KnowledgeArtifactProcessor;
 import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
@@ -144,7 +145,9 @@ public class ChangeLog {
             if (valueSet.getCompose().hasInclude()) {
                 handleValueSetInclude(codeMap, leafMap, valueSet, cache, leafData);
             }
-            if (valueSet.getExpansion().hasContains()) {
+            // A grouper's own expansion already holds every code its referenced value sets contribute.
+            // Only the leaf attribution is wanted.
+            if (valueSet.getExpansion().hasContains() && !KnowledgeArtifactProcessor.isGrouper(valueSet)) {
                 handleValueSetContains(codeMap, valueSet, leafData);
             }
         }

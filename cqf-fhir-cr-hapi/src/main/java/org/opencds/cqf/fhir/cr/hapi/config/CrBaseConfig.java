@@ -16,7 +16,8 @@ public class CrBaseConfig {
             EvaluationSettings evaluationSettings, TerminologyServerClientSettings terminologyServerClientSettings) {
         return new CrSettings()
                 .withEvaluationSettings(evaluationSettings)
-                .withTerminologyServerClientSettings(terminologyServerClientSettings);
+                .withTerminologyServerClientSettings(terminologyServerClientSettings)
+                .withValidatorPackage(new String[] {"hl7.fhir.us.ecr", "2.1.2"});
     }
 
     @Bean

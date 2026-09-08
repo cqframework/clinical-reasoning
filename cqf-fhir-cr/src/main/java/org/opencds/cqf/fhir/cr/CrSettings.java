@@ -6,6 +6,28 @@ import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 public class CrSettings {
     private EvaluationSettings evaluationSettings;
     private TerminologyServerClientSettings terminologyServerClientSettings;
+    private boolean pauseOnUnknownApplicability = true;
+
+    /**
+     * Whether ordered ANY action groups stop at an unresolved applicability condition.
+     * Defaults to true. When enabled, the unresolved action's
+     * inputs remain available, but its descendants and later alternatives are not applied.
+     * Disabling this setting treats unknown as non-applicable and permits ordered fallthrough.
+     * Independent ALL actions remain independently evaluated. This does not remove items
+     * from a Questionnaire supplied by the caller.
+     */
+    public boolean isPauseOnUnknownApplicability() {
+        return pauseOnUnknownApplicability;
+    }
+
+    public void setPauseOnUnknownApplicability(boolean pauseOnUnknownApplicability) {
+        this.pauseOnUnknownApplicability = pauseOnUnknownApplicability;
+    }
+
+    public CrSettings withPauseOnUnknownApplicability(boolean pauseOnUnknownApplicability) {
+        setPauseOnUnknownApplicability(pauseOnUnknownApplicability);
+        return this;
+    }
 
     public static CrSettings getDefault() {
         return new CrSettings();

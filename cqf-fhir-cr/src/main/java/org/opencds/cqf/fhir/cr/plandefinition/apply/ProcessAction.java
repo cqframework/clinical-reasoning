@@ -53,12 +53,22 @@ public class ProcessAction {
             IBaseResource requestOrchestration,
             List<String> metConditions,
             IPlanDefinitionActionAdapter action) {
+        return processAction(request, requestOrchestration, metConditions, action, meetsConditions(request, action));
+    }
+
+    private IBaseBackboneElement processAction(
+            ApplyRequest request,
+            IBaseResource requestOrchestration,
+            List<String> metConditions,
+            IPlanDefinitionActionAdapter action,
+            Boolean applicable) {
+        // Keep the reached action's question available, including when its answer is unknown.
         // Create Questionnaire items for any input profiles that are present on the action
         if (!request.getFhirVersion().equals(FhirVersionEnum.DSTU3) && request.getQuestionnaire() != null) {
             addQuestionnaireItemForInput(request, action);
         }
 
-        if (Boolean.TRUE.equals(meetsConditions(request, action))) {
+        if (Boolean.TRUE.equals(applicable)) {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
             var requestAction = generateRequestAction(action);
             extensionProcessor.processExtensions(
@@ -101,12 +111,15 @@ public class ProcessAction {
         }
         var metConditionsCount = metConditions.size();
         for (var childAction : childActions) {
-            var childRequestAction = processAction(request, requestOrchestration, metConditions, childAction);
+            var applicable = meetsConditions(request, childAction);
+            var childRequestAction =
+                    processAction(request, requestOrchestration, metConditions, childAction, applicable);
             if (childRequestAction != null) {
                 requestAction.addAction(childRequestAction);
             }
             if (applicabilityBehavior.equals(CqfApplicabilityBehavior.ANY)
-                    && metConditionsCount < metConditions.size()) {
+                    && (metConditionsCount < metConditions.size()
+                            || (request.isPauseOnUnknownApplicability() && applicable == null))) {
                 break;
             }
         }
@@ -161,6 +174,9 @@ public class ProcessAction {
     }
 
     protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
+        if (request.isPauseOnUnknownApplicability()) {
+            return evaluateNullableConditions(request, action);
+        }
         var conditions = action.getCondition().stream()
                 .filter(c -> "applicability".equals(request.resolvePathString(c, "kind")))
                 .toList();
@@ -193,6 +209,77 @@ public class ProcessAction {
             }
         }
         return true;
+    }
+
+    /** Three-state conjunction, with evaluation failures taking precedence over false. */
+    private Boolean evaluateNullableConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
+        var conditions = action.getCondition().stream()
+                .filter(c -> "applicability".equals(request.resolvePathString(c, "kind")))
+                .toList();
+        if (conditions.isEmpty()) {
+            return true;
+        }
+        boolean unknown = false;
+        boolean knownFalse = false;
+        boolean failed = false;
+        try {
+            var inputParams = request.resolveInputParameters(action.getInputDataRequirement().stream()
+                    .map(IDataRequirementAdapter::get)
+                    .map(ICompositeType.class::cast)
+                    .toList());
+            for (var condition : conditions) {
+                try {
+                    var expression = expressionProcessor.getCqfExpressionForElement(request, condition);
+                    if (expression == null
+                            || expression.getExpression() == null
+                            || expression.getExpression().isBlank()
+                            || expression.getLanguage() == null
+                            || expression.getLanguage().isBlank()) {
+                        throw new IllegalArgumentException("Applicability condition has no executable expression");
+                    }
+                    var results = request.getLibraryEngine()
+                            .resolveExpression(
+                                    request.getSubjectId().getIdPart(),
+                                    expression,
+                                    inputParams == null ? request.getParameters() : inputParams,
+                                    request.getRawParameters(),
+                                    request.getData(),
+                                    request.getContextVariable(),
+                                    request.getResourceVariable());
+                    if (results != null && results.size() > 1) {
+                        throw new IllegalArgumentException(
+                                "Applicability condition must return a single Boolean value");
+                    }
+                    var result = results == null || results.isEmpty() ? null : results.get(0);
+                    if (result == null) {
+                        unknown = true;
+                    } else if (result instanceof IBaseBooleanDatatype value) {
+                        if (value.getValue() == null) {
+                            unknown = true;
+                        } else if (Boolean.FALSE.equals(value.getValue())) {
+                            knownFalse = true;
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Applicability condition returned a non-Boolean value");
+                    }
+                } catch (Exception e) {
+                    failed = true;
+                    request.logException("Error evaluating applicability for action %s: %s"
+                            .formatted(action.getId(), e.getMessage()));
+                }
+            }
+        } catch (Exception e) {
+            failed = true;
+            request.logException(
+                    "Error resolving applicability inputs for action %s: %s".formatted(action.getId(), e.getMessage()));
+        }
+        if (failed) {
+            return null;
+        }
+        if (knownFalse) {
+            return false;
+        }
+        return unknown ? null : Boolean.TRUE;
     }
 
     protected boolean validateResult(IBase result, String expression) {

@@ -10,8 +10,8 @@ Analyzes an IG and produces a module-definition Library listing all dependencies
 
 **Parameters:**
 
-- `artifactEndpointConfiguration` — endpoint configuration for resolving canonical artifacts
-- `terminologyEndpoint` — endpoint for resolving terminology resources not available locally
+- `artifactEndpointConfiguration` â€” endpoint configuration for resolving canonical artifacts
+- `terminologyEndpoint` â€” endpoint for resolving terminology resources not available locally
 
 ### 2. `Library/$infer-manifest-parameters`
 
@@ -23,15 +23,15 @@ Converts the module-definition Library from step 1 into an asset-collection mani
 
 ### 3. `Library/$release-manifest`
 
-Releases the manifest by resolving unversioned dependency references and updating metadata. Unlike `$release`, this operation does not re-discover dependencies through component traversal — it trusts the pre-computed `depends-on` entries from step 2.
+Releases the manifest by resolving unversioned dependency references and updating metadata. Unlike `$release`, this operation does not re-discover dependencies through component traversal â€” it trusts the pre-computed `depends-on` entries from step 2.
 
 **Parameters:**
 
-- `version` (required) — the version to assign to the released manifest
-- `versionBehavior` (required) — how to apply the version (`default`, `check`, `force`)
-- `latestFromTxServer` — whether to resolve unversioned references from the terminology server (default: `false`)
-- `terminologyEndpoint` — FHIR Endpoint resource with authentication headers for terminology resolution (required when `latestFromTxServer=true`)
-- `releaseLabel` — optional label to apply to the released manifest
+- `version` (required) â€” the version to assign to the released manifest
+- `versionBehavior` (required) â€” how to apply the version (`default`, `check`, `force`)
+- `latestFromTxServer` â€” whether to resolve unversioned references from the terminology server (default: `false`)
+- `terminologyEndpoint` â€” FHIR Endpoint resource with authentication headers for terminology resolution (required when `latestFromTxServer=true`)
+- `releaseLabel` â€” optional label to apply to the released manifest
 
 **Example terminology endpoint:**
 
@@ -55,3 +55,21 @@ Releases the manifest by resolving unversioned dependency references and updatin
     ]
 }
 ```
+
+
+## PlanDefinition applicability and missing data
+
+Applicability processing pauses on unknown by default. An action with an unresolved condition keeps its input questions available but does not apply its descendants or definition. In an ordered `any` group, an unresolved child also stops evaluation of later alternatives. A false child excludes its descendants and permits the next alternative; a true child is selected and stops later alternatives. Independent `all` children remain independently evaluated.
+
+This is a runtime policy for missing data in addition to the first-true selection described by [FHIR-50150](https://jira.hl7.org/browse/FHIR-50150). Hosts can explicitly select the previous non-applicable-on-null behavior through the existing settings API:
+
+```java
+var settings = CrSettings.getDefault().withPauseOnUnknownApplicability(false);
+var processor = new PlanDefinitionProcessor(repository, settings);
+```
+
+The setting applies to shared applicability evaluation for ordinary actions and ordered groups, including nested PlanDefinitions. Disabling it does not make null true: descendants of that action are still excluded, but later ordered alternatives may apply.
+
+With pausing enabled, multiple applicability conditions form a three-state conjunction: known false dominates unknown. Invalid or missing executable expressions, non-Boolean/multiple results, and evaluation failures report OperationOutcome errors and block that ordered branch even if another condition is false. Such errors are not successful requests for a missing answer. Each reached condition is evaluated once per action traversal.
+
+Input questions for a reached action remain available even when its condition is false, so an answer can be corrected. Questions beneath an excluded parent and later alternatives after an ordered pause are not newly generated. Existing items in a caller-supplied Questionnaire are retained; this setting does not retract a previously expanded form. A generated Questionnaire/QuestionnaireResponse and no activity alone are not a guarantee that every missing datum is answerable.

@@ -155,22 +155,27 @@ public class PlanDefinitionProcessor {
             throw new IllegalArgumentException("Missing required parameter: 'subject'");
         }
         return new ApplyRequest(
-                resolvePlanDefinition(planDefinition),
-                Ids.newId(fhirVersion, Ids.ensureIdType(subject, "Patient")),
-                encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter")),
-                practitioner == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner")),
-                organization == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization")),
-                userType,
-                userLanguage,
-                userTaskContext,
-                setting,
-                settingContext,
-                parameters,
-                data,
-                prefetchData,
-                libraryEngine,
-                modelResolver,
-                null);
+                        resolvePlanDefinition(planDefinition),
+                        Ids.newId(fhirVersion, Ids.ensureIdType(subject, "Patient")),
+                        encounter == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(encounter, "Encounter")),
+                        practitioner == null
+                                ? null
+                                : Ids.newId(fhirVersion, Ids.ensureIdType(practitioner, "Practitioner")),
+                        organization == null
+                                ? null
+                                : Ids.newId(fhirVersion, Ids.ensureIdType(organization, "Organization")),
+                        userType,
+                        userLanguage,
+                        userTaskContext,
+                        setting,
+                        settingContext,
+                        parameters,
+                        data,
+                        prefetchData,
+                        libraryEngine,
+                        modelResolver,
+                        null)
+                .setPauseOnUnknownApplicability(crSettings.isPauseOnUnknownApplicability());
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource apply(

@@ -4,7 +4,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -273,7 +272,9 @@ public class FunctionEvaluationHandler {
         // FhirResourceAndCqlTypeUtils.areObjectsEqual where needed; nothing in the downstream pipeline
         // does random-access lookup by input, so a List is sufficient and self-documenting.
         final List<ObservationEntry> functionResults = new ArrayList<>();
-        final Set<Value> evaluatedResources = new HashSet<>();
+        // Identity-keyed: these accumulate engine values whose hashCode walks the whole
+        // element tree. See HashSetForFhirResourcesAndCqlTypes.
+        final Set<Value> evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
 
         final String exceptionMessageIfNotFunction = """
             Measure: '%s', MeasureObservation population expression '%s' must be a CQL function
@@ -407,7 +408,9 @@ public class FunctionEvaluationHandler {
             // this will be used in MeasureEvaluator (Criteria population Id and Stratifier Expression)
             var expressionName = popDef.id() + "-" + stratifierExpression;
             final List<FunctionResultEntry> functionResults = new ArrayList<>();
-            final Set<Value> evaluatedResources = new HashSet<>();
+            // Identity-keyed: these accumulate engine values whose hashCode walks the whole
+            // element tree. See HashSetForFhirResourcesAndCqlTypes.
+            final Set<Value> evaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
 
             for (var result : resultsIter) {
                 final ExpressionResult functionResult = evaluateNonSubValueStratifiersFunction(
@@ -426,7 +429,6 @@ public class FunctionEvaluationHandler {
                             + "' returned null evaluatedResources for measure: " + measureUrl);
                 }
                 evaluatedResources.addAll(evaluated);
-                evaluatedResources.addAll(functionResult.getEvaluatedResources());
             }
             // add to EvaluationResult
             addToEvaluationResult(

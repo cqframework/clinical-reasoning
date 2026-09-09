@@ -53,6 +53,57 @@ class ProfileAnswerConversionTest {
         assign(version, "CodeableConcept", "Coding", CODING, true, "category");
     }
 
+    @ParameterizedTest
+    @EnumSource(
+            value = FhirVersionEnum.class,
+            names = {"DSTU3", "R4", "R5"})
+    void repeatingCategoryExtractionPreservesBothCodingAnswers(FhirVersionEnum version) {
+        var context = FhirContext.forCached(version);
+        var parser = context.newJsonParser();
+        var repository = new InMemoryFhirRepository(context);
+        var canonical = "http://example.org/StructureDefinition/repeated-answer-profile";
+        repository.create(parser.parseResource("""
+            {"resourceType":"StructureDefinition","id":"repeated-answer-profile",
+             "url":"%s","status":"active","kind":"resource","abstract":false,"type":"Observation",
+             "differential":{"element":[{"id":"Observation.category","path":"Observation.category",
+             "min":0,"max":"*","type":[{"code":"CodeableConcept"}]}]}}
+            """.formatted(canonical)));
+        var questionnaire = parser.parseResource(
+                """
+            {"resourceType":"Questionnaire","id":"q","status":"active",
+             "extension":[{"url":"http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtract",
+               "valueUri":"%s"}],
+             "item":[{"linkId":"answer","type":"%s","repeats":true,"definition":"%s#Observation.category"}]}
+            """.formatted(canonical, version == FhirVersionEnum.R5 ? "coding" : "choice", canonical));
+        var second = CODING.replace("\"no\"", "\"yes\"").replace("Explicit negative", "Explicit positive");
+        var response = parser.parseResource("""
+            {"resourceType":"QuestionnaireResponse","id":"qr","status":"completed",
+             "subject":{"reference":"Patient/patientId"},
+             "item":[{"linkId":"answer","answer":[{"valueCoding":%s},{"valueCoding":%s}]}]}
+            """.formatted(CODING, second));
+        var request = newExtractRequestForVersion(
+                version, new LibraryEngine(repository, EvaluationSettings.getDefault()), response, questionnaire);
+        var bundle = new ExtractProcessor().extract(request);
+        var observations = context.newFhirPath().evaluate(bundle, "entry.resource", IBaseResource.class);
+        assertEquals(1, observations.size());
+        var profiles = context.newFhirPath().evaluate(observations.get(0), "meta.profile", IBase.class);
+        assertEquals(1, profiles.size());
+        assertEquals(
+                canonical, ((org.hl7.fhir.instance.model.api.IPrimitiveType<?>) profiles.get(0)).getValueAsString());
+        assertTrue(context.newFhirPath()
+                .evaluate(observations.get(0), "value", IBase.class)
+                .isEmpty());
+        var actual = context.newFhirPath().evaluate(observations.get(0), "category", IBase.class);
+        assertEquals(2, actual.size());
+        actual.forEach(value -> assertEquals("CodeableConcept", value.fhirType()));
+        var expected = parser.parseResource("""
+            {"resourceType":"Observation","category":[{"coding":[%s]},{"coding":[%s]}]}
+            """.formatted(CODING, second));
+        var carrier = context.getResourceDefinition("Observation").newInstance();
+        IAdapterFactory.forFhirVersion(version).createResource(carrier).setValue("category", actual);
+        assertEquals(parser.encodeResourceToString(expected), parser.encodeResourceToString(carrier));
+    }
+
     // Characterizes an existing unsupported mismatch; this patch repairs Coding only.
     @ParameterizedTest
     @EnumSource(
@@ -215,7 +266,7 @@ class ProfileAnswerConversionTest {
                 if (profileForm.equals("sliced") || profileForm.startsWith("multi-")) {
                     assertTrue(
                             actualValue.isEmpty(),
-                            "Unsupported sliced or multi-type profile must not choose the first CodeableConcept constraint");
+                            "This patch leaves sliced and multi-type target resolution unsupported; this is a scope limit");
                     continue;
                 }
                 assertEquals(1, actualValue.size(), profileForm + ":" + answerPath);

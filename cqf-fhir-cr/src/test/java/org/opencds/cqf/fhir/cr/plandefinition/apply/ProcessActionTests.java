@@ -259,6 +259,8 @@ class ProcessActionTests {
                         case "true" -> List.of(new BooleanType(true));
                         case "false" -> List.of(new BooleanType(false));
                         case "null" -> List.of();
+                        case "nullList" -> null;
+                        case "nullElement" -> java.util.Collections.singletonList(null);
                         case "emptyBoolean" -> List.of(new BooleanType());
                         case "multiple" -> List.of(new BooleanType(true), new BooleanType(false));
                         case "multipleWithNull" -> java.util.Arrays.asList(new BooleanType(true), new BooleanType());
@@ -304,7 +306,60 @@ class ProcessActionTests {
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY);
         var request = interactiveRequest(true);
         assertNull(fixture.meetsConditions(request, adapt(action)));
-        Assertions.assertNotNull(request.getOperationOutcome());
+        var outcome = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
+        assertEquals(
+                "Error evaluating applicability for action a: Applicability condition has no executable expression",
+                outcome.getIssueFirstRep().getDiagnostics());
+    }
+
+    @Test
+    void interactiveNullResultsRemainUnknownWithoutErrors() {
+        literalResults();
+        for (var expression : List.of("nullList", "nullElement")) {
+            var request = interactiveRequest(true);
+            assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", expression))));
+            assertNull(request.getOperationOutcome());
+        }
+    }
+
+    @Test
+    void disabledPauseRetainsLegacyNullFiltering() {
+        literalResults();
+        var request = interactiveRequest(false);
+        assertTrue(fixture.meetsConditions(request, adapt(conditionAction("a", "multipleWithNull"))));
+        assertNull(request.getOperationOutcome());
+    }
+
+    @Test
+    void interactiveInputResolutionFailureBlocksAction() {
+        doThrow(new IllegalArgumentException("test input failure"))
+                .when(inputParameterResolver)
+                .resolveInputParameters(any());
+        var request = interactiveRequest(true);
+        assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", "true"))));
+        var outcome = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
+        assertEquals(1, outcome.getIssue().size());
+        assertEquals(
+                "Error resolving applicability inputs for action a: test input failure",
+                outcome.getIssueFirstRep().getDiagnostics());
+        org.mockito.Mockito.verifyNoInteractions(libraryEngine);
+    }
+
+    @Test
+    void interactiveCollectsEveryConditionFailure() {
+        literalResults();
+        var request = interactiveRequest(true);
+        assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", "throws", "false", "nonBoolean"))));
+        var outcome = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
+        assertEquals(2, outcome.getIssue().size());
+        assertEquals(
+                "Error evaluating applicability for action a: test evaluation failure",
+                outcome.getIssue().get(0).getDiagnostics());
+        assertEquals(
+                "Error evaluating applicability for action a: Applicability condition returned a non-Boolean value",
+                outcome.getIssue().get(1).getDiagnostics());
+        org.mockito.Mockito.verify(libraryEngine, org.mockito.Mockito.times(3))
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
     }
 
     private List<String> visitGroup(String behavior, boolean enabled, String expression) {

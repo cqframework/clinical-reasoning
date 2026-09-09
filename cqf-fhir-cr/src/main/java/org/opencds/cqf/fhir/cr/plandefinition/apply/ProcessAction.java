@@ -20,6 +20,8 @@ import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
+import org.opencds.cqf.fhir.utility.CqfExpression;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
@@ -166,7 +168,7 @@ public class ProcessAction {
 
     protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         if (request.isPauseOnUnknownApplicability()) {
-            return evaluateNullableConditions(request, action);
+            return evaluateNullableConditions(request, action).value;
         }
         var conditions = action.getCondition().stream()
                 .filter(c -> "applicability"
@@ -205,76 +207,110 @@ public class ProcessAction {
     }
 
     /** Three-state conjunction, with evaluation failures taking precedence over false. */
-    private Boolean evaluateNullableConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
+    private ConditionResult evaluateNullableConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         var conditions = action.getCondition().stream()
                 .filter(c -> "applicability"
                         .equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
                 .map(c -> request.getAdapterFactory().createBase(c))
                 .toList();
         if (conditions.isEmpty()) {
-            return true;
+            return ConditionResult.TRUE;
         }
-        boolean unknown = false;
-        boolean knownFalse = false;
-        boolean failed = false;
+        var combined = ConditionResult.TRUE;
         try {
             var inputParams = request.resolveInputParameters(action.getInputDataRequirement().stream()
                     .map(IDataRequirementAdapter::get)
                     .map(ICompositeType.class::cast)
                     .toList());
             for (var condition : conditions) {
-                try {
-                    var expression = expressionProcessor.getCqfExpressionForElement(request, condition);
-                    if (expression == null
-                            || expression.getExpression() == null
-                            || expression.getExpression().isBlank()
-                            || expression.getLanguage() == null
-                            || expression.getLanguage().isBlank()) {
-                        throw new IllegalArgumentException("Applicability condition has no executable expression");
-                    }
-                    var results = request.getLibraryEngine()
-                            .resolveExpression(
-                                    request.getSubjectId().getIdPart(),
-                                    expression,
-                                    inputParams == null ? request.getParameters() : inputParams,
-                                    request.getRawParameters(),
-                                    request.getData(),
-                                    request.getContextVariable(),
-                                    request.getResourceVariable());
-                    if (results != null && results.size() > 1) {
-                        throw new IllegalArgumentException(
-                                "Applicability condition must return a single Boolean value");
-                    }
-                    var result = results == null || results.isEmpty() ? null : results.get(0);
-                    if (result == null) {
-                        unknown = true;
-                    } else if (result instanceof IBaseBooleanDatatype value) {
-                        if (value.getValue() == null) {
-                            unknown = true;
-                        } else if (Boolean.FALSE.equals(value.getValue())) {
-                            knownFalse = true;
-                        }
-                    } else {
-                        throw new IllegalArgumentException("Applicability condition returned a non-Boolean value");
-                    }
-                } catch (Exception e) {
-                    failed = true;
-                    request.logException("Error evaluating applicability for action %s: %s"
-                            .formatted(action.getId(), e.getMessage()));
-                }
+                combined = combined.and(evaluateCondition(request, action, condition, inputParams));
             }
         } catch (Exception e) {
-            failed = true;
             request.logException(
                     "Error resolving applicability inputs for action %s: %s".formatted(action.getId(), e.getMessage()));
+            return ConditionResult.FAILED;
         }
-        if (failed) {
-            return null;
+        return combined;
+    }
+
+    private ConditionResult evaluateCondition(
+            ApplyRequest request,
+            IPlanDefinitionActionAdapter action,
+            IAdapter<?> condition,
+            IBaseParameters inputParams) {
+        try {
+            var expression = expressionProcessor.getCqfExpressionForElement(request, condition);
+            validateConditionExpression(expression);
+            var results = request.getLibraryEngine()
+                    .resolveExpression(
+                            request.getSubjectId().getIdPart(),
+                            expression,
+                            inputParams == null ? request.getParameters() : inputParams,
+                            request.getRawParameters(),
+                            request.getData(),
+                            request.getContextVariable(),
+                            request.getResourceVariable());
+            return conditionResult(results);
+        } catch (Exception e) {
+            request.logException(
+                    "Error evaluating applicability for action %s: %s".formatted(action.getId(), e.getMessage()));
+            return ConditionResult.FAILED;
         }
-        if (knownFalse) {
-            return false;
+    }
+
+    private static void validateConditionExpression(CqfExpression expression) {
+        if (expression == null
+                || expression.getExpression() == null
+                || expression.getExpression().isBlank()
+                || expression.getLanguage() == null
+                || expression.getLanguage().isBlank()) {
+            throw new IllegalArgumentException("Applicability condition has no executable expression");
         }
-        return unknown ? null : Boolean.TRUE;
+    }
+
+    private static ConditionResult conditionResult(List<IBase> results) {
+        if (results != null && results.size() > 1) {
+            throw new IllegalArgumentException("Applicability condition must return a single Boolean value");
+        }
+        var result = results == null || results.isEmpty() ? null : results.get(0);
+        if (result == null) {
+            return ConditionResult.UNKNOWN;
+        }
+        if (!(result instanceof IBaseBooleanDatatype value)) {
+            throw new IllegalArgumentException("Applicability condition returned a non-Boolean value");
+        }
+        if (value.getValue() == null) {
+            return ConditionResult.UNKNOWN;
+        }
+        return Boolean.FALSE.equals(value.getValue()) ? ConditionResult.FALSE : ConditionResult.TRUE;
+    }
+
+    // Preserve the protected nullable Boolean contract: UNKNOWN and FAILED both return null,
+    // but FAILED records an issue and must take precedence over FALSE in the conjunction.
+    private enum ConditionResult {
+        TRUE(Boolean.TRUE),
+        FALSE(Boolean.FALSE),
+        UNKNOWN(null),
+        FAILED(null);
+
+        private final Boolean value;
+
+        ConditionResult(Boolean value) {
+            this.value = value;
+        }
+
+        private ConditionResult and(ConditionResult other) {
+            if (this == FAILED || other == FAILED) {
+                return FAILED;
+            }
+            if (this == FALSE || other == FALSE) {
+                return FALSE;
+            }
+            if (this == UNKNOWN || other == UNKNOWN) {
+                return UNKNOWN;
+            }
+            return TRUE;
+        }
     }
 
     protected boolean validateResult(IBase result, String expression) {

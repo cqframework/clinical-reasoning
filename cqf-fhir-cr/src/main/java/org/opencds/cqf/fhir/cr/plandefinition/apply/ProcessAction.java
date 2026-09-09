@@ -20,7 +20,6 @@ import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
-import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
@@ -240,7 +239,13 @@ public class ProcessAction {
             IBaseParameters inputParams) {
         try {
             var expression = expressionProcessor.getCqfExpressionForElement(request, condition);
-            validateConditionExpression(expression);
+            if (expression == null
+                    || expression.getExpression() == null
+                    || expression.getExpression().isBlank()
+                    || expression.getLanguage() == null
+                    || expression.getLanguage().isBlank()) {
+                throw new IllegalArgumentException("Applicability condition has no executable expression");
+            }
             var results = request.getLibraryEngine()
                     .resolveExpression(
                             request.getSubjectId().getIdPart(),
@@ -255,16 +260,6 @@ public class ProcessAction {
             request.logException(
                     "Error evaluating applicability for action %s: %s".formatted(action.getId(), e.getMessage()));
             return ConditionResult.FAILED;
-        }
-    }
-
-    private static void validateConditionExpression(CqfExpression expression) {
-        if (expression == null
-                || expression.getExpression() == null
-                || expression.getExpression().isBlank()
-                || expression.getLanguage() == null
-                || expression.getLanguage().isBlank()) {
-            throw new IllegalArgumentException("Applicability condition has no executable expression");
         }
     }
 

@@ -20,10 +20,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -110,6 +114,10 @@ public class ProcessDefinitionItem {
     }
 
     protected <E extends IBaseExtension<?, ?>> E getExtractExtension(ExtractRequest request, ItemPair item) {
+        if (item.getItem() == null && item.getResponseItem() == null) {
+            // Use the same root declaration that selected definition-based extraction, including QR-only requests.
+            return request.getDefinitionExtract();
+        }
         var url = Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT;
         var extElement = getExtensionElement(request, item, url);
         E ext = extElement == null ? null : extElement.getExtensionByUrl(url);
@@ -319,11 +327,36 @@ public class ProcessDefinitionItem {
             ImmutablePair<List<? extends IItemComponentAdapter>, List<? extends IItemComponentAdapter>> items,
             boolean isNestedRepeating,
             String parentPath) {
+        var context = new ExtractionContext(adapter);
+        processItems(request, resourceDefinition, profile, adapter, items, isNestedRepeating, parentPath, context);
+        validateExtensionUrls(context);
+    }
+
+    private void processItems(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            Optional<IStructureDefinitionAdapter> profile,
+            IAdapter<?> adapter,
+            ImmutablePair<List<? extends IItemComponentAdapter>, List<? extends IItemComponentAdapter>> items,
+            boolean isNestedRepeating,
+            String parentPath,
+            ExtractionContext context) {
         var responseItems = items.left;
         var questionnaireItems = items.right;
+        var occurrences = new HashMap<String, Integer>();
+        responseItems.forEach(item -> occurrences.merge(item.getLinkId(), 1, Integer::sum));
         responseItems.forEach(childItem -> {
             var itemPair = new ItemPair(request.getQuestionnaireItem(childItem, questionnaireItems), childItem);
-            processChildItem(request, resourceDefinition, profile, adapter, itemPair, isNestedRepeating, parentPath);
+            processChildItem(
+                    request,
+                    resourceDefinition,
+                    profile,
+                    adapter,
+                    itemPair,
+                    isNestedRepeating,
+                    parentPath,
+                    context,
+                    occurrences.get(childItem.getLinkId()) > 1);
         });
     }
 
@@ -338,8 +371,10 @@ public class ProcessDefinitionItem {
 
     protected String getPath(IStructureDefinitionAdapter profile, String id) {
         var path = id;
-        // Extension slice identity is required when constructing the nested Extension.
-        if (profile != null && !id.contains(".extension:")) {
+        // Container slice identity must survive traversal, including named component groups.
+        var hasContainerSlice =
+                Arrays.stream(id.split("\\.")).anyMatch(segment -> segment.contains(":") && !segment.contains("[x]"));
+        if (profile != null && !hasContainerSlice) {
             var element = profile.getElement(id);
             if (element != null) {
                 path = element.getPath();
@@ -357,18 +392,40 @@ public class ProcessDefinitionItem {
             ItemPair itemPair,
             boolean isNestedRepeating,
             String parentPath) {
+        var context = new ExtractionContext(parent);
+        processChildItem(
+                request, resourceDefinition, profile, parent, itemPair, isNestedRepeating, parentPath, context, false);
+        validateExtensionUrls(context);
+    }
+
+    private void processChildItem(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            Optional<IStructureDefinitionAdapter> profile,
+            IAdapter<?> parent,
+            ItemPair itemPair,
+            boolean isNestedRepeating,
+            String parentPath,
+            ExtractionContext context,
+            boolean repeatedOccurrence) {
         var definition = getDefinition(itemPair);
         var children = itemPair.getResponseItem().getItem();
-        var repeats = itemPair.getItem() != null && itemPair.getItem().getRepeats();
+        var repeats = repeatedOccurrence
+                || (itemPair.getItem() != null && itemPair.getItem().getRepeats());
         if (StringUtils.isBlank(definition)) {
             processItems(
                     request,
                     resourceDefinition,
                     profile,
                     parent,
-                    new ImmutablePair<>(children, itemPair.getItem().getItem()),
+                    new ImmutablePair<>(
+                            children,
+                            itemPair.getItem() == null
+                                    ? null
+                                    : itemPair.getItem().getItem()),
                     repeats,
-                    parentPath);
+                    parentPath,
+                    repeats ? context.fork(parent) : context);
             return;
         }
         if (!definition.contains("#")) {
@@ -378,17 +435,25 @@ public class ProcessDefinitionItem {
         var pathAdapter = getPathAdapter(request, profile, definition);
         var path = pathAdapter.left;
         var adapter = pathAdapter.right;
+        if (StringUtils.isNotBlank(parentPath) && !path.equals(parentPath) && !path.startsWith(parentPath + ".")) {
+            parent = context.root;
+            parentPath = "";
+        }
         var identifiers = path.split("\\.");
-        if (hasMultipleSlices(identifiers)) {
-            if (hasExtractionAnswer(itemPair.getResponseItem())) {
-                throw new UnprocessableEntityException("Extraction of multiple nested slices is not supported");
-            }
+        if (Arrays.stream(identifiers).anyMatch(id -> id.contains(":") && !id.contains("[x]"))) {
+            processNamedExtensionPath(
+                    request, resourceDefinition, adapter, parent, itemPair, parentPath, path, context, repeats);
             return;
         }
         var propertyDefs = getPropertyDefinitions(request, resourceDefinition, adapter, identifiers);
+        // Duplicate response groups may divide the fields of a single-valued target.
+        // Only repeat that target when its physical field can hold multiple values.
+        repeats = itemPair.getItem() != null && itemPair.getItem().getRepeats();
         if (!children.isEmpty()) {
             var prop = identifiers[identifiers.length - 1];
-            var element = repeats ? null : getElement(parent, path);
+            repeats = repeats || (repeatedOccurrence && propertyDefs.get(prop).isMultipleCardinality());
+            var existing = propertyDefs.get(prop).getAccessor().getValues(parent.get());
+            var element = repeats || existing.isEmpty() ? null : existing.get(0);
             if (element == null) {
                 var propDef = propertyDefs.get(prop);
                 if (propDef instanceof BaseRuntimeChildDatatypeDefinition datatypeDef) {
@@ -423,7 +488,7 @@ public class ProcessDefinitionItem {
                             elementAdapter,
                             propertyDefs.get(childPath),
                             childPath,
-                            slice.getDefaultOrFixedOrPattern(),
+                            copyDefault(slice.getDefaultOrFixedOrPattern()),
                             adapter,
                             stripTypeFromPath(slice.getId()));
                 }
@@ -439,7 +504,8 @@ public class ProcessDefinitionItem {
                                     ? null
                                     : itemPair.getItem().getItem()),
                     repeats,
-                    path);
+                    path,
+                    context);
             parent.setValue(prop.split(":")[0], List.of(element));
         } else {
             processItem(
@@ -595,6 +661,13 @@ public class ProcessDefinitionItem {
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
             String parentPath) {
+        if (Arrays.stream(identifiers).anyMatch(id -> id.startsWith("extension:"))) {
+            var context = new ExtractionContext(parent);
+            processNamedAnswers(
+                    request, profile, parent, parentPath, String.join(".", identifiers), answers, false, context);
+            validateExtensionUrls(context);
+            return;
+        }
         if (profile == null) {
             throw new IllegalArgumentException("Unable to parse slice element without a profile for definition: %s"
                     .formatted(String.join(".", identifiers)));
@@ -619,9 +692,6 @@ public class ProcessDefinitionItem {
         if (answers.stream().noneMatch(answer -> answer.getValue() != null)) {
             return;
         }
-        if (hasMultipleSlices(identifiers)) {
-            throw new UnprocessableEntityException("Extraction of multiple nested slices is not supported");
-        }
         var answerPath =
                 sliceIndex + 1 == identifiers.length ? "value[x]" : getChildProperty(identifiers, sliceIndex + 1);
         var extensionUrl = getExtensionUrl(profile, stripTypeFromPath(sliceId));
@@ -638,7 +708,7 @@ public class ProcessDefinitionItem {
                 var sliceValue = request.getAdapterFactory().createBase(newBase(sliceClass));
                 for (var slice : sliceElements) {
                     var sliceElementPath = slice.getId().substring(sliceId.length() + 1);
-                    var sliceElementValue = slice.getDefaultOrFixedOrPattern();
+                    var sliceElementValue = copyDefault(slice.getDefaultOrFixedOrPattern());
                     setAnswerValue(
                             request,
                             sliceValue,
@@ -739,8 +809,289 @@ public class ProcessDefinitionItem {
         }
     }
 
-    private boolean hasMultipleSlices(String[] identifiers) {
-        return Arrays.stream(identifiers).filter(id -> id.contains(":")).count() > 1;
+    private static final class ExtractionContext {
+        // Parent identity separates repeated FHIR containers. A new context also separates definitionless QR repeats.
+        private final Map<IBase, Map<String, IBase>> containers = new IdentityHashMap<>();
+        private final IAdapter<?> root;
+        private final Map<IBase, String> extensionPaths;
+
+        private ExtractionContext(IAdapter<?> root) {
+            this(root, new IdentityHashMap<>());
+        }
+
+        private ExtractionContext(IAdapter<?> root, Map<IBase, String> extensionPaths) {
+            this.root = root;
+            this.extensionPaths = extensionPaths;
+        }
+
+        private ExtractionContext fork(IAdapter<?> parent) {
+            var result = new ExtractionContext(root, extensionPaths);
+            retainAncestors(root.get(), parent.get(), result);
+            return result;
+        }
+
+        private boolean retainAncestors(IBase current, IBase target, ExtractionContext destination) {
+            if (current == target) {
+                return true;
+            }
+            var children = containers.get(current);
+            if (children != null) {
+                for (var child : children.entrySet()) {
+                    if (retainAncestors(child.getValue(), target, destination)) {
+                        destination
+                                .containers
+                                .computeIfAbsent(current, ignored -> new HashMap<>())
+                                .put(child.getKey(), child.getValue());
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
+    private void validateExtensionUrls(ExtractionContext context) {
+        context.extensionPaths.forEach((element, path) -> {
+            if (element instanceof IBaseExtension<?, ?> extension && StringUtils.isBlank(extension.getUrl())) {
+                throw new UnprocessableEntityException("Unable to resolve Extension URL for extraction path " + path);
+            }
+        });
+    }
+
+    private void processNamedExtensionPath(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IStructureDefinitionAdapter profile,
+            IAdapter<?> parent,
+            ItemPair itemPair,
+            String parentPath,
+            String path,
+            ExtractionContext context,
+            boolean repeats) {
+        if (!hasExtractionAnswer(itemPair.getResponseItem())) {
+            return;
+        }
+        var children = itemPair.getResponseItem().getItem();
+        if (!children.isEmpty()) {
+            var local = hasAnswerWithinPath(request, itemPair, path);
+            if (repeats) {
+                if (local && !path.equals(parentPath)) {
+                    var dot = path.lastIndexOf('.');
+                    var ancestorPath = dot < 0 ? "" : path.substring(0, dot);
+                    parent = materializePath(request, profile, parent, parentPath, ancestorPath, false, context);
+                    parentPath = ancestorPath;
+                }
+                context = context.fork(parent);
+            }
+            var container =
+                    local ? materializePath(request, profile, parent, parentPath, path, repeats, context) : parent;
+            processItems(
+                    request,
+                    resourceDefinition,
+                    Optional.ofNullable(profile),
+                    container,
+                    new ImmutablePair<>(
+                            children,
+                            itemPair.getItem() == null
+                                    ? null
+                                    : itemPair.getItem().getItem()),
+                    repeats,
+                    local ? path : parentPath,
+                    context);
+        } else {
+            processNamedAnswers(
+                    request,
+                    profile,
+                    parent,
+                    parentPath,
+                    path,
+                    itemPair.getResponseItem().getAnswer(),
+                    repeats,
+                    context);
+        }
+    }
+
+    private boolean hasAnswerWithinPath(ExtractRequest request, ItemPair pair, String path) {
+        var definition = getDefinition(pair);
+        if (definition != null
+                && definition.contains("#")
+                && pair.getResponseItem().getAnswer().stream().anyMatch(answer -> answer.getValue() != null)) {
+            var target = stripTypeFromPath(definition.substring(definition.indexOf('#') + 1));
+            if (target.equals(path) || target.startsWith(path + ".")) {
+                return true;
+            }
+        }
+        var qItems = pair.getItem() == null ? null : pair.getItem().getItem();
+        return pair.getResponseItem().getItem().stream()
+                .anyMatch(child -> hasAnswerWithinPath(
+                        request, new ItemPair(request.getQuestionnaireItem(child, qItems), child), path));
+    }
+
+    private void processNamedAnswers(
+            ExtractRequest request,
+            IStructureDefinitionAdapter profile,
+            IAdapter<?> parent,
+            String parentPath,
+            String path,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
+            boolean repeats,
+            ExtractionContext context) {
+        var terminal = path.substring(path.lastIndexOf('.') + 1);
+        var terminalExtension = terminal.startsWith("extension:");
+        var containerPath = terminalExtension ? path : path.substring(0, path.lastIndexOf('.'));
+        var answerPath = terminalExtension ? "value[x]" : terminal.split(":")[0];
+        var targetPath = terminalExtension ? path + ".value[x]" : path;
+        var answerElement = resolveAnswerElement(request, profile, targetPath);
+        var supplied =
+                answers.stream().filter(answer -> answer.getValue() != null).toList();
+        if (supplied.isEmpty()) {
+            return;
+        }
+        var targetDefinition = request.getFhirContext()
+                .getElementDefinition(getClassForTypeAndVersion(
+                        profile == null ? parent.get().fhirType() : profile.getType(), request.getFhirVersion()));
+        var targetIdentifiers = targetPath.split("\\.");
+        var answerDefinition = getPropertyDefinitions(request, targetDefinition, profile, targetIdentifiers)
+                .get(targetIdentifiers[targetIdentifiers.length - 1]);
+        var repeatContainer = (repeats || supplied.size() > 1)
+                && (answerDefinition == null || !answerDefinition.isMultipleCardinality());
+        for (var answer : supplied) {
+            var container =
+                    materializePath(request, profile, parent, parentPath, containerPath, repeatContainer, context);
+            var runtime = request.getFhirContext()
+                    .getElementDefinition(container.get().getClass());
+            setResolvedAnswerValue(
+                    request,
+                    container,
+                    runtime.getChildByName(answerPath),
+                    answerPath,
+                    answer.getValue(),
+                    answerElement);
+        }
+    }
+
+    private IAdapter<?> materializePath(
+            ExtractRequest request,
+            IStructureDefinitionAdapter profile,
+            IAdapter<?> parent,
+            String parentPath,
+            String path,
+            boolean forceLast,
+            ExtractionContext context) {
+        if (path.equals(parentPath)) {
+            return parent;
+        }
+        if (StringUtils.isNotBlank(parentPath) && !path.startsWith(parentPath + ".")) {
+            return materializePath(request, profile, context.root, "", path, forceLast, context);
+        }
+        var segments = path.split("\\.");
+        var start = StringUtils.isBlank(parentPath) ? 0 : parentPath.split("\\.").length;
+        var current = parent;
+        for (int i = start; i < segments.length; i++) {
+            var prefix = String.join(".", Arrays.copyOf(segments, i + 1));
+            var key = (profile == null ? "" : profile.getCanonical()) + "#" + prefix;
+            var siblings = context.containers.computeIfAbsent(current.get(), ignored -> new HashMap<>());
+            var element = forceLast && i == segments.length - 1 ? null : siblings.get(key);
+            var property = segments[i].split(":")[0];
+            var runtime =
+                    request.getFhirContext().getElementDefinition(current.get().getClass());
+            var child = runtime.getChildByName(property);
+            if (element == null && !segments[i].contains(":") && child != null && !child.isMultipleCardinality()) {
+                var existing = child.getAccessor().getValues(current.get());
+                if (existing.size() == 1) {
+                    element = existing.get(0);
+                    siblings.put(key, element);
+                }
+            }
+            if (element == null) {
+                if (child instanceof RuntimeChildExtension) {
+                    element = newBaseForVersion("Extension", request.getFhirVersion());
+                } else if (child instanceof RuntimeChildChoiceDefinition) {
+                    var constraint = resolveAnswerElement(request, profile, prefix);
+                    if (constraint == null || constraint.getType().size() != 1) {
+                        throw new UnprocessableEntityException(
+                                "Unable to resolve extraction container type for " + prefix);
+                    }
+                    element = newBaseForVersion(constraint.getTypeCode(), request.getFhirVersion());
+                } else if (child instanceof BaseRuntimeChildDatatypeDefinition
+                        || child instanceof RuntimeChildResourceBlockDefinition) {
+                    element = newChildValue(child);
+                } else {
+                    throw new UnprocessableEntityException("Unable to resolve extraction container " + prefix);
+                }
+                var adapter = request.getAdapterFactory().createBase(element);
+                var defaults = collectContainerDefaults(request, profile, prefix, new HashSet<>());
+                for (var entry : defaults.entrySet()) {
+                    setAnswerValue(
+                            request,
+                            adapter,
+                            null,
+                            entry.getKey(),
+                            copyDefault(entry.getValue()),
+                            profile,
+                            prefix + "." + entry.getKey());
+                }
+                if (element instanceof IBaseExtension<?, ?>) {
+                    context.extensionPaths.put(element, prefix);
+                }
+                current.setValue(property, child.isMultipleCardinality() ? List.of(element) : element);
+                siblings.put(key, element);
+            }
+            current = request.getAdapterFactory().createBase(element);
+        }
+        return current;
+    }
+
+    private Map<String, IBase> collectContainerDefaults(
+            ExtractRequest request, IStructureDefinitionAdapter profile, String path, Set<String> visiting) {
+        var defaults = new LinkedHashMap<String, IBase>();
+        if (profile == null) {
+            return defaults;
+        }
+        var visit = profile.getCanonical() + "#" + path;
+        if (!visiting.add(visit)) {
+            throw new UnprocessableEntityException("Cyclic Extension profile at " + visit);
+        }
+        // First inherit the enclosing referenced profile, then this container's profile, then inline constraints.
+        for (int dot = path.lastIndexOf('.'); dot > 0; dot = path.lastIndexOf('.', dot - 1)) {
+            var references = getExtensionProfiles(profile, profile.getType() + "." + path.substring(0, dot));
+            if (references.size() == 1 && references.get(0) instanceof IPrimitiveType<?> canonical) {
+                var referenced =
+                        getProfile(request, canonical.getValueAsString(), true).orElse(null);
+                defaults.putAll(collectContainerDefaults(request, referenced, path.substring(dot + 1), visiting));
+                break;
+            }
+        }
+        var id = profile.getType() + (path.isEmpty() ? "" : "." + path);
+        var references = getExtensionProfiles(profile, id);
+        if (references.size() == 1 && references.get(0) instanceof IPrimitiveType<?> canonical) {
+            defaults.put("url", canonical);
+            var referenced =
+                    getProfile(request, canonical.getValueAsString(), true).orElse(null);
+            defaults.putAll(collectContainerDefaults(request, referenced, "", visiting));
+        }
+        for (var element : getSliceDefaults(profile, id)) {
+            var relative = element.getId().substring(id.length() + 1);
+            if (!relative.contains(":")) {
+                defaults.put(relative, element.getDefaultOrFixedOrPattern());
+            }
+        }
+        visiting.remove(visit);
+        return defaults;
+    }
+
+    private IBase copyDefault(IBase value) {
+        // Descending into a default-created datatype must not mutate the shared StructureDefinition.
+        if (value instanceof org.hl7.fhir.dstu3.model.Type base) {
+            return base.copy();
+        }
+        if (value instanceof org.hl7.fhir.r4.model.Base base) {
+            return base.copy();
+        }
+        if (value instanceof org.hl7.fhir.r5.model.Base base) {
+            return base.copy();
+        }
+        throw new IllegalArgumentException("Unsupported default type " + value.fhirType());
     }
 
     private boolean hasExtractionAnswer(IItemComponentAdapter item) {
@@ -768,12 +1119,14 @@ public class ProcessDefinitionItem {
                     targetDef = request.getFhirContext()
                             .getElementDefinition(getClassForTypeAndVersion("Extension", request.getFhirVersion()));
                 } else if (def instanceof RuntimeChildChoiceDefinition choiceDef) {
-                    var elementDef = adapter == null ? null : adapter.getElementByPath(identifiers[i]);
+                    var elementDef =
+                            resolveAnswerElement(request, adapter, String.join(".", Arrays.copyOf(identifiers, i + 1)));
                     if (elementDef == null) {
                         targetDef = choiceDef.getChildElementDefinitionByDatatype(
                                 choiceDef.getChoices().get(0));
                     } else {
-                        targetDef = choiceDef.getChildByName(identifiers[i].replace("[x]", elementDef.getTypeCode()));
+                        targetDef = choiceDef.getChildByName(identifiers[i].split(":")[0].replace(
+                                "[x]", StringUtils.capitalize(elementDef.getTypeCode())));
                     }
                 } else if (def instanceof BaseRuntimeChildDatatypeDefinition datatypeDef) {
                     targetDef = request.getFhirContext().getElementDefinition(datatypeDef.getDatatype());

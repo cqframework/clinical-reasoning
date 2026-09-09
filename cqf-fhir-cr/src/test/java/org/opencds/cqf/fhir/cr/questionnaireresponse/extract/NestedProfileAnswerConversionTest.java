@@ -424,49 +424,6 @@ class NestedProfileAnswerConversionTest {
         assertTrue(context.newFhirPath().evaluate(invalid, "value", IBase.class).isEmpty());
     }
 
-    @ParameterizedTest
-    @EnumSource(
-            value = FhirVersionEnum.class,
-            names = {"DSTU3", "R4", "R5"})
-    void complexExtensionPathIsRejectedInsteadOfAttachedAtRoot(FhirVersionEnum version) {
-        var context = FhirContext.forCached(version);
-        var repository = new InMemoryFhirRepository(context);
-        repository.create(context.newJsonParser().parseResource("""
-            {"resourceType":"StructureDefinition","id":"answers","url":"%s","status":"active",
-             "kind":"resource","abstract":false,"type":"Observation",
-             "differential":{"element":[
-             {"id":"Observation.extension:outer","path":"Observation.extension","sliceName":"outer","type":[{"code":"Extension"}]},
-             {"id":"Observation.extension:outer.extension:inner","path":"Observation.extension.extension","sliceName":"inner","type":[{"code":"Extension"}]},
-             {"id":"Observation.extension:outer.extension:inner.value[x]","path":"Observation.extension.extension.value[x]","type":[{"code":"Coding"}]}]}}
-            """.formatted(PROFILE)));
-        for (var grouped : new boolean[] {false, true}) {
-            var leaf = """
-                {"linkId":"answer","type":"%s","definition":"%s#Observation.extension:outer.extension:inner.value[x]"}
-                """.formatted(version == FhirVersionEnum.R5 ? "coding" : "choice", PROFILE);
-            var items = grouped ? """
-                [{"linkId":"group","type":"group","definition":"%s#Observation.extension:outer.extension:inner","item":[%s]}]
-                """.formatted(PROFILE, leaf) : "[" + leaf + "]";
-            var suppliedAnswer = """
-                {"linkId":"answer","answer":[{"valueCoding":%s}]}
-                """.formatted(CODING);
-            var answers =
-                    grouped ? "[{\"linkId\":\"group\",\"item\":[" + suppliedAnswer + "]}]" : "[" + suppliedAnswer + "]";
-            var error = assertThrows(
-                    ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException.class,
-                    () -> extractItems(version, repository, items, answers));
-            assertTrue(error.getMessage().contains("multiple nested slices"), error.getMessage());
-            for (var emptyAnswer :
-                    new String[] {"{\"linkId\":\"answer\"}", "{\"linkId\":\"answer\",\"answer\":[{}]}"}) {
-                var empty =
-                        grouped ? "[{\"linkId\":\"group\",\"item\":[" + emptyAnswer + "]}]" : "[" + emptyAnswer + "]";
-                var observation = extractItems(version, repository, items, empty);
-                assertTrue(context.newFhirPath()
-                        .evaluate(observation, "extension", IBase.class)
-                        .isEmpty());
-            }
-        }
-    }
-
     private IBaseResource extractItems(
             FhirVersionEnum version, InMemoryFhirRepository repository, String items, String answers) {
         var context = FhirContext.forCached(version);

@@ -23,6 +23,7 @@ import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
@@ -178,7 +179,8 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 .createQuestionnaireResponse(getFhirContext()
                         .getResourceDefinition("QuestionnaireResponse")
                         .newInstance())
-                .setId("%s-%s".formatted(questionnaireAdapter.getId(), subjectId.getIdPart()))
+                .setId(GeneratedIds.fromComposite(
+                        "%s-%s".formatted(questionnaireAdapter.getIdPart(), subjectId.getIdPart())))
                 .setQuestionnaire(questionnaireAdapter.getCanonical())
                 .setSubject(subjectId)
                 .setAuthored(new Date())

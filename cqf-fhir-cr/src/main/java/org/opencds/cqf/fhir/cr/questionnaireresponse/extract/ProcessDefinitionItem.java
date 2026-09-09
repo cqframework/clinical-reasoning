@@ -17,10 +17,14 @@ import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceBlockDefinition;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -39,6 +43,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
@@ -272,22 +277,35 @@ public class ProcessDefinitionItem {
         var split = definition.split("#");
         var canonical = split[0];
         var id = split[1];
-        // TODO: check if profile url matches canonical
-        var adapter = profile.orElseGet(() -> getProfile(request, canonical).orElse(null));
+        var adapter = profile.filter(p -> canonical.equals(p.getCanonical()))
+                .orElseGet(() -> getProfile(request, canonical, true).orElseGet(() -> profile.orElse(null)));
         var path = getPath(adapter, id);
         return new ImmutablePair<>(path, adapter);
     }
 
     protected Optional<IStructureDefinitionAdapter> getProfile(ExtractRequest request, String definition) {
+        return getProfile(request, definition, false);
+    }
+
+    protected Optional<IStructureDefinitionAdapter> getProfile(
+            ExtractRequest request, String definition, boolean optional) {
         if (StringUtils.isNotBlank(definition)) {
             var canonical =
                     canonicalTypeForVersion(request.getFhirVersion(), definition.split("#")[0]);
             try {
-                return Optional.of((IStructureDefinitionAdapter)
-                        request.getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource)
-                                searchRepositoryByCanonical(request.getRepository(), canonical)));
+                return Optional.of((IStructureDefinitionAdapter) request.getAdapterFactory()
+                        .createKnowledgeArtifactAdapter((IDomainResource) searchRepositoryByCanonical(
+                                request.getRepository(),
+                                canonical,
+                                request.getFhirContext()
+                                        .getResourceDefinition("StructureDefinition")
+                                        .getImplementingClass())));
             } catch (Exception e) {
-                logger.error("Encountered error retrieving profile %s: %s".formatted(canonical, e.getMessage()), e);
+                if (optional) {
+                    logger.debug("Unable to resolve optional profile {}: {}", canonical, e.getMessage());
+                } else {
+                    logger.error("Encountered error retrieving profile %s: %s".formatted(canonical, e.getMessage()), e);
+                }
             }
         }
         return Optional.empty();
@@ -320,7 +338,8 @@ public class ProcessDefinitionItem {
 
     protected String getPath(IStructureDefinitionAdapter profile, String id) {
         var path = id;
-        if (profile != null) {
+        // Extension slice identity is required when constructing the nested Extension.
+        if (profile != null && !id.contains(".extension:")) {
             var element = profile.getElement(id);
             if (element != null) {
                 path = element.getPath();
@@ -360,6 +379,12 @@ public class ProcessDefinitionItem {
         var path = pathAdapter.left;
         var adapter = pathAdapter.right;
         var identifiers = path.split("\\.");
+        if (hasMultipleSlices(identifiers)) {
+            if (hasExtractionAnswer(itemPair.getResponseItem())) {
+                throw new UnprocessableEntityException("Extraction of multiple nested slices is not supported");
+            }
+            return;
+        }
         var propertyDefs = getPropertyDefinitions(request, resourceDefinition, adapter, identifiers);
         if (!children.isEmpty()) {
             var prop = identifiers[identifiers.length - 1];
@@ -371,6 +396,8 @@ public class ProcessDefinitionItem {
                 } else if (propDef instanceof RuntimeChildResourceBlockDefinition blockDef) {
                     element = newBase(
                             blockDef.getChildByName(blockDef.getElementName()).getImplementingClass());
+                } else if (propDef instanceof RuntimeChildExtension) {
+                    element = newBaseForVersion("Extension", request.getFhirVersion());
                 } else if (adapter != null) {
                     var elementDef = adapter.getElementByPath(path);
                     element = newBaseForVersion(elementDef.getTypeCode(), request.getFhirVersion());
@@ -383,6 +410,24 @@ public class ProcessDefinitionItem {
                 }
             }
             var elementAdapter = request.getAdapterFactory().createBase(element);
+            if (element instanceof IBaseExtension<?, ?> extension && adapter != null) {
+                var url = getExtensionUrl(adapter, path);
+                if (url instanceof IPrimitiveType<?> primitive) {
+                    extension.setUrl(primitive.getValueAsString());
+                }
+                var sliceId = adapter.getType() + "." + path;
+                for (var slice : getSliceDefaults(adapter, sliceId)) {
+                    var childPath = slice.getId().substring(sliceId.length() + 1);
+                    setAnswerValue(
+                            request,
+                            elementAdapter,
+                            propertyDefs.get(childPath),
+                            childPath,
+                            slice.getDefaultOrFixedOrPattern(),
+                            adapter,
+                            stripTypeFromPath(slice.getId()));
+                }
+            }
             processItems(
                     request,
                     resourceDefinition,
@@ -395,7 +440,7 @@ public class ProcessDefinitionItem {
                                     : itemPair.getItem().getItem()),
                     repeats,
                     path);
-            parent.setValue(prop, List.of(element));
+            parent.setValue(prop.split(":")[0], List.of(element));
         } else {
             processItem(
                     request,
@@ -407,7 +452,8 @@ public class ProcessDefinitionItem {
                     adapter,
                     path,
                     identifiers,
-                    propertyDefs);
+                    propertyDefs,
+                    stripTypeFromPath(definition.split("#")[1]));
         }
     }
 
@@ -423,16 +469,52 @@ public class ProcessDefinitionItem {
             String path,
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs) {
-        if (path.contains(":")) {
-            processSliceItem(request, profile, parent, answers, identifiers, propertyDefs);
+        processItem(
+                request,
+                parent,
+                isNestedRepeating,
+                parentPath,
+                answers,
+                repeats,
+                profile,
+                path,
+                identifiers,
+                propertyDefs,
+                path);
+    }
+
+    @SuppressWarnings("squid:S107")
+    protected void processItem(
+            ExtractRequest request,
+            IAdapter<?> parent,
+            boolean isNestedRepeating,
+            String parentPath,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
+            boolean repeats,
+            IStructureDefinitionAdapter profile,
+            String path,
+            String[] identifiers,
+            HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
+            String targetPath) {
+        var localPath = StringUtils.isBlank(parentPath) ? path : StringUtils.removeStart(path, parentPath + ".");
+        if (localPath.contains(":")) {
+            processSliceItem(request, profile, parent, answers, identifiers, propertyDefs, parentPath);
         } else if (identifiers.length > 1 && (isNestedRepeating || repeats)) {
-            processRepeatingWithNested(request, parent, isNestedRepeating, answers, identifiers, propertyDefs, profile);
+            processRepeatingWithNested(
+                    request, parent, isNestedRepeating, answers, identifiers, propertyDefs, profile, targetPath);
         } else {
             var answerPath = StringUtils.isBlank(parentPath) ? path : path.replace(parentPath + ".", "");
             answers.forEach(answer -> {
                 var answerValue = answer.getValue();
                 if (answerValue != null) {
-                    setAnswerValue(request, parent, propertyDefs.get(answerPath), answerPath, answerValue, profile);
+                    setAnswerValue(
+                            request,
+                            parent,
+                            propertyDefs.get(identifiers[identifiers.length - 1]),
+                            answerPath,
+                            answerValue,
+                            profile,
+                            targetPath);
                 }
             });
         }
@@ -446,6 +528,26 @@ public class ProcessDefinitionItem {
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
             IStructureDefinitionAdapter profile) {
+        processRepeatingWithNested(
+                request,
+                parent,
+                isNestedRepeating,
+                answers,
+                identifiers,
+                propertyDefs,
+                profile,
+                String.join(".", identifiers));
+    }
+
+    protected void processRepeatingWithNested(
+            ExtractRequest request,
+            IAdapter<?> parent,
+            boolean isNestedRepeating,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
+            String[] identifiers,
+            HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
+            IStructureDefinitionAdapter profile,
+            String targetPath) {
         var parentProperty = identifiers[0];
         var childProperty = getChildProperty(identifiers, 1);
         var isChildList = propertyDefs.get(identifiers[identifiers.length - 1]).isMultipleCardinality();
@@ -458,20 +560,18 @@ public class ProcessDefinitionItem {
             if (answerValue != null) {
                 var parentValue = useParent
                         ? parent
-                        : request.getAdapterFactory()
-                                .createBase(
-                                        newBase(((BaseRuntimeChildDatatypeDefinition) propertyDefs.get(parentProperty))
-                                                .getDatatype()));
+                        : request.getAdapterFactory().createBase(newChildValue(propertyDefs.get(parentProperty)));
                 setAnswerValue(
-                        request, parentValue, propertyDefs.get(childProperty), childProperty, answerValue, profile);
+                        request,
+                        parentValue,
+                        propertyDefs.get(identifiers[identifiers.length - 1]),
+                        childProperty,
+                        answerValue,
+                        profile,
+                        targetPath);
                 if (!useParent) {
                     setAnswerValue(
-                            request,
-                            parent,
-                            propertyDefs.get(parentProperty),
-                            parentProperty,
-                            parentValue.get(),
-                            profile);
+                            request, parent, propertyDefs.get(parentProperty), parentProperty, parentValue.get(), null);
                 }
             }
         });
@@ -484,6 +584,17 @@ public class ProcessDefinitionItem {
             List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
             String[] identifiers,
             HashMap<String, BaseRuntimeChildDefinition> propertyDefs) {
+        processSliceItem(request, profile, parent, answers, identifiers, propertyDefs, "");
+    }
+
+    protected void processSliceItem(
+            ExtractRequest request,
+            IStructureDefinitionAdapter profile,
+            IAdapter<?> parent,
+            List<IQuestionnaireResponseItemAnswerComponentAdapter> answers,
+            String[] identifiers,
+            HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
+            String parentPath) {
         if (profile == null) {
             throw new IllegalArgumentException("Unable to parse slice element without a profile for definition: %s"
                     .formatted(String.join(".", identifiers)));
@@ -503,16 +614,30 @@ public class ProcessDefinitionItem {
         var sliceClass = slicePropertyDef instanceof BaseRuntimeChildDatatypeDefinition def
                 ? def.getDatatype()
                 : getClassForTypeAndVersion("Extension", request.getFhirVersion());
-        var sliceElements = profile.getSliceElements(sliceName);
-        var answerPath = getChildProperty(identifiers, sliceIndex + 1);
-        var extensionUrl = getExtensionUrl(profile, sliceName);
+        var sliceId = profile.getType() + "." + String.join(".", Arrays.copyOf(identifiers, sliceIndex + 1));
+        var sliceElements = getSliceDefaults(profile, sliceId);
+        if (answers.stream().noneMatch(answer -> answer.getValue() != null)) {
+            return;
+        }
+        if (hasMultipleSlices(identifiers)) {
+            throw new UnprocessableEntityException("Extraction of multiple nested slices is not supported");
+        }
+        var answerPath =
+                sliceIndex + 1 == identifiers.length ? "value[x]" : getChildProperty(identifiers, sliceIndex + 1);
+        var extensionUrl = getExtensionUrl(profile, stripTypeFromPath(sliceId));
+        var answerElement = resolveAnswerElement(
+                request,
+                profile,
+                sliceIndex + 1 == identifiers.length
+                        ? String.join(".", identifiers) + ".value[x]"
+                        : String.join(".", identifiers));
+        var sliceParentIndex = sliceIndex;
         answers.forEach(answer -> {
             var answerValue = answer.getValue();
             if (answerValue != null) {
                 var sliceValue = request.getAdapterFactory().createBase(newBase(sliceClass));
-                setAnswerValue(request, sliceValue, propertyDefs.get(answerPath), answerPath, answerValue, profile);
                 for (var slice : sliceElements) {
-                    var sliceElementPath = slice.getId().replace("%s.%s.".formatted(profile.getType(), sliceName), "");
+                    var sliceElementPath = slice.getId().substring(sliceId.length() + 1);
                     var sliceElementValue = slice.getDefaultOrFixedOrPattern();
                     setAnswerValue(
                             request,
@@ -520,28 +645,37 @@ public class ProcessDefinitionItem {
                             propertyDefs.get(sliceElementPath),
                             sliceElementPath,
                             sliceElementValue,
-                            profile);
+                            profile,
+                            stripTypeFromPath(slice.getId()));
                 }
+                var answerDefinition = sliceParentIndex + 1 == identifiers.length
+                        ? request.getFhirContext()
+                                .getElementDefinition(sliceValue.get().getClass())
+                                .getChildByName("value[x]")
+                        : propertyDefs.get(identifiers[identifiers.length - 1]);
+                setResolvedAnswerValue(request, sliceValue, answerDefinition, answerPath, answerValue, answerElement);
                 if (slicePath.equals("extension")) {
-                    setAnswerValue(request, sliceValue, propertyDefs.get("url"), "url", extensionUrl, profile);
+                    setAnswerValue(request, sliceValue, propertyDefs.get("url"), "url", extensionUrl, null);
                 }
-                setAnswerValue(request, parent, propertyDefs.get(sliceName), slicePath, sliceValue.get(), profile);
+                var sliceParent = parent;
+                var start = StringUtils.isBlank(parentPath) ? 0 : parentPath.split("\\.").length;
+                for (int i = start; i < sliceParentIndex; i++) {
+                    var property = identifiers[i];
+                    var container = getElement(sliceParent, property);
+                    if (container == null) {
+                        container = newChildValue(propertyDefs.get(property));
+                        setAnswerValue(request, sliceParent, propertyDefs.get(property), property, container, null);
+                    }
+                    sliceParent = request.getAdapterFactory().createBase(container);
+                }
+                setAnswerValue(request, sliceParent, propertyDefs.get(sliceName), slicePath, sliceValue.get(), null);
             }
         });
     }
 
     protected IBase getExtensionUrl(IStructureDefinitionAdapter profile, String sliceName) {
-        IBase retValue = null;
-        var sliceElement = profile.getElement(profile.getType() + "." + sliceName);
-        if (sliceElement != null) {
-            var type = sliceElement.getType().stream().findFirst();
-            if (type.isPresent()) {
-                retValue = sliceElement.resolvePathList(type.get(), "profile").stream()
-                        .findFirst()
-                        .orElse(null);
-            }
-        }
-        return retValue;
+        var profiles = getExtensionProfiles(profile, profile.getType() + "." + sliceName);
+        return profiles.size() == 1 ? profiles.get(0) : null;
     }
 
     protected String getChildProperty(String[] identifiers, int startIndex) {
@@ -559,16 +693,64 @@ public class ProcessDefinitionItem {
             String answerPath,
             IBase answerValue,
             IStructureDefinitionAdapter profile) {
+        setAnswerValue(request, parent, pathDefinition, answerPath, answerValue, profile, answerPath);
+    }
+
+    protected void setAnswerValue(
+            ExtractRequest request,
+            IAdapter<?> parent,
+            BaseRuntimeChildDefinition pathDefinition,
+            String answerPath,
+            IBase answerValue,
+            IStructureDefinitionAdapter profile,
+            String targetPath) {
+        setResolvedAnswerValue(
+                request,
+                parent,
+                pathDefinition,
+                answerPath,
+                answerValue,
+                resolveAnswerElement(request, profile, targetPath));
+    }
+
+    private void setResolvedAnswerValue(
+            ExtractRequest request,
+            IAdapter<?> parent,
+            BaseRuntimeChildDefinition pathDefinition,
+            String answerPath,
+            IBase answerValue,
+            IElementDefinitionAdapter answerElement) {
+        if (answerValue == null) {
+            return;
+        }
         try {
-            parent.setValue(answerPath, transformAnswer(request, pathDefinition, answerValue, answerPath, profile));
+            parent.setValue(
+                    answerPath, transformAnswer(request, pathDefinition, answerValue, answerElement, answerPath));
         } catch (Exception e) {
             if (pathDefinition instanceof RuntimeChildPrimitiveDatatypeDefinition definition
                     && answerValue instanceof IPrimitiveType<?> type) {
                 var newValue = (IPrimitiveType<?>) newBase(definition.getDatatype());
                 newValue.setValueAsString(type.getValueAsString());
                 parent.setValue(answerPath, newValue);
+            } else {
+                logger.warn(
+                        "Unable to assign answer type {} to extraction path {}", answerValue.fhirType(), answerPath);
             }
         }
+    }
+
+    private boolean hasMultipleSlices(String[] identifiers) {
+        return Arrays.stream(identifiers).filter(id -> id.contains(":")).count() > 1;
+    }
+
+    private boolean hasExtractionAnswer(IItemComponentAdapter item) {
+        if (item instanceof IQuestionnaireResponseItemComponentAdapter response
+                && response.getAnswer().stream()
+                        .anyMatch(answer -> answer.getValue() != null
+                                || answer.getItem().stream().anyMatch(this::hasExtractionAnswer))) {
+            return true;
+        }
+        return item.getItem().stream().anyMatch(this::hasExtractionAnswer);
     }
 
     protected HashMap<String, BaseRuntimeChildDefinition> getPropertyDefinitions(
@@ -595,6 +777,8 @@ public class ProcessDefinitionItem {
                     }
                 } else if (def instanceof BaseRuntimeChildDatatypeDefinition datatypeDef) {
                     targetDef = request.getFhirContext().getElementDefinition(datatypeDef.getDatatype());
+                } else if (def instanceof RuntimeChildResourceBlockDefinition blockDef) {
+                    targetDef = blockDef.getChildByName(blockDef.getElementName());
                 }
             }
         }
@@ -617,14 +801,53 @@ public class ProcessDefinitionItem {
             IBase answerValue,
             String answerPath,
             IStructureDefinitionAdapter profile) {
-        var pathElement =
-                profile == null ? null : profile.getElementByPath(answerPath.split(":")[0]);
-        var answerType = pathElement == null ? null : pathElement.getTypeCode();
-        if (answerType != null && !answerValue.fhirType().equals(answerType)) {
-            var newAnswerValue =
-                    request.getAdapterFactory().createBase(newBaseForVersion(answerType, request.getFhirVersion()));
-            newAnswerValue.setValue(VALUE_PATH, answerValue);
-            answerValue = newAnswerValue.get();
+        return transformAnswer(
+                request, pathDefinition, answerValue, resolveAnswerElement(request, profile, answerPath), answerPath);
+    }
+
+    protected Object transformAnswer(
+            ExtractRequest request,
+            BaseRuntimeChildDefinition pathDefinition,
+            IBase answerValue,
+            IElementDefinitionAdapter pathElement) {
+        return transformAnswer(request, pathDefinition, answerValue, pathElement, null);
+    }
+
+    private Object transformAnswer(
+            ExtractRequest request,
+            BaseRuntimeChildDefinition pathDefinition,
+            IBase answerValue,
+            IElementDefinitionAdapter pathElement,
+            String answerPath) {
+        var answerTypes = pathElement == null
+                ? List.<String>of()
+                : pathElement.getType().stream()
+                        .map(type -> pathElement.resolvePathString(type, "code"))
+                        .filter(Objects::nonNull)
+                        .toList();
+        if (pathElement != null
+                && answerPath != null
+                && !answerPath.contains("[x]")
+                && pathElement.getPath().endsWith("[x]")) {
+            var field = pathElement.getPath().substring(pathElement.getPath().lastIndexOf('.') + 1);
+            var alias = answerPath.substring(answerPath.lastIndexOf('.') + 1);
+            answerTypes = answerTypes.stream()
+                    .filter(type ->
+                            field.replace("[x]", StringUtils.capitalize(type)).equals(alias))
+                    .toList();
+        }
+        if (!answerTypes.isEmpty() && !answerTypes.contains(answerValue.fhirType())) {
+            var converted = transformValueToResource(request.getFhirVersion(), answerValue);
+            if (converted != null && answerTypes.contains(converted.fhirType())) {
+                answerValue = converted;
+            } else if (answerTypes.size() == 1) {
+                var newAnswerValue = request.getAdapterFactory()
+                        .createBase(newBaseForVersion(answerTypes.get(0), request.getFhirVersion()));
+                newAnswerValue.setValue(VALUE_PATH, answerValue);
+                answerValue = newAnswerValue.get();
+            } else {
+                throw new IllegalArgumentException("Answer does not match any allowed target type: " + answerTypes);
+            }
         } else {
             // Check if answer type matches path types available and transform if necessary
             if (!(pathDefinition instanceof RuntimeChildPrimitiveEnumerationDatatypeDefinition)
@@ -638,6 +861,86 @@ public class ProcessDefinitionItem {
         return pathDefinition != null && pathDefinition.isMultipleCardinality()
                 ? Collections.singletonList(answerValue)
                 : answerValue;
+    }
+
+    private IBase newChildValue(BaseRuntimeChildDefinition definition) {
+        if (definition instanceof RuntimeChildResourceBlockDefinition block) {
+            return newBase(block.getChildByName(block.getElementName()).getImplementingClass());
+        }
+        return newBase(((BaseRuntimeChildDatatypeDefinition) definition).getDatatype());
+    }
+
+    private IElementDefinitionAdapter getTypedElement(IStructureDefinitionAdapter profile, String id) {
+        // A differential can change cardinality/binding without repeating the snapshot's type.
+        return Stream.concat(profile.getDifferentialElements().stream(), profile.getSnapshotElements().stream())
+                .filter(e -> !e.getType().isEmpty())
+                .filter(e -> e.getId().equals(id)
+                        || (e.getType().stream()
+                                .filter(type -> e.resolvePathString(type, "code") != null)
+                                .anyMatch(type -> e.getId()
+                                        .replace("[x]", StringUtils.capitalize(e.resolvePathString(type, "code")))
+                                        .equals(id))))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private IElementDefinitionAdapter resolveAnswerElement(
+            ExtractRequest request, IStructureDefinitionAdapter profile, String targetPath) {
+        if (profile == null) {
+            return null;
+        }
+        var id = profile.getType() + "." + targetPath;
+        var element = getTypedElement(profile, id);
+        if (element != null) {
+            return element;
+        }
+        // Resolve each enclosing Extension's own profile; never look up its value at the resource root.
+        for (int dot = targetPath.lastIndexOf('.'); dot > 0; dot = targetPath.lastIndexOf('.', dot - 1)) {
+            var parent = getTypedElement(profile, profile.getType() + "." + targetPath.substring(0, dot));
+            if (parent == null || !"Extension".equals(parent.getTypeCode())) {
+                continue;
+            }
+            var references = getExtensionProfiles(profile, profile.getType() + "." + targetPath.substring(0, dot));
+            if (references.size() == 1 && references.get(0) instanceof IPrimitiveType<?> canonical) {
+                var extensionProfile =
+                        getProfile(request, canonical.getValueAsString(), true).orElse(null);
+                if (extensionProfile != null && "Extension".equals(extensionProfile.getType())) {
+                    return resolveAnswerElement(request, extensionProfile, targetPath.substring(dot + 1));
+                }
+            }
+        }
+        return null;
+    }
+
+    private List<IBase> getExtensionProfiles(IStructureDefinitionAdapter profile, String id) {
+        return Stream.concat(profile.getDifferentialElements().stream(), profile.getSnapshotElements().stream())
+                .filter(e -> id.equals(e.getId()))
+                .flatMap(e -> e.getType().stream()
+                        .filter(type -> "Extension".equals(e.resolvePathString(type, "code")))
+                        .map(type -> {
+                            var value = e.resolvePath(type, "profile");
+                            if (value instanceof IBase base) {
+                                return List.of(base);
+                            }
+                            return value instanceof List<?> values
+                                    ? values.stream()
+                                            .filter(IBase.class::isInstance)
+                                            .map(IBase.class::cast)
+                                            .toList()
+                                    : List.<IBase>of();
+                        }))
+                .filter(profiles -> !profiles.isEmpty())
+                .findFirst()
+                .orElse(List.of());
+    }
+
+    private List<IElementDefinitionAdapter> getSliceDefaults(IStructureDefinitionAdapter profile, String sliceId) {
+        // Load snapshot defaults first so explicit differential values replace them by exact identity.
+        var elements = new LinkedHashMap<String, IElementDefinitionAdapter>();
+        Stream.concat(profile.getSnapshotElements().stream(), profile.getDifferentialElements().stream())
+                .filter(e -> e.getId().startsWith(sliceId + ".") && e.hasDefaultOrFixedOrPattern())
+                .forEach(e -> elements.put(e.getId(), e));
+        return new ArrayList<>(elements.values());
     }
 
     protected String getDefinition(ItemPair itemPair) {

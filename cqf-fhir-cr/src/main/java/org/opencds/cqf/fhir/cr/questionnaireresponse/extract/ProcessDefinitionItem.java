@@ -569,7 +569,7 @@ public class ProcessDefinitionItem {
                 if (element != null
                         && element.getType().size() == 1
                         && StringUtils.isBlank(element.getSliceName())
-                        && !StringUtils.contains(element.getId(), ":")
+                        && !StringUtils.contains(element.getId(), ':')
                         && "CodeableConcept".equals(element.getTypeCode())) {
                     answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
                 }

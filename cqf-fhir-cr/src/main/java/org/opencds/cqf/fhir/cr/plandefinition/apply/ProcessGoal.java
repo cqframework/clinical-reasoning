@@ -1,25 +1,37 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
+import ca.uhn.fhir.context.FhirContext;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
+import org.opencds.cqf.fhir.cr.common.ExtensionPropagationPolicy;
 
 public class ProcessGoal {
-    public ProcessGoal() {}
+    private final ExtensionProcessor extensionProcessor;
+
+    public ProcessGoal() {
+        this(ExtensionPropagationPolicy.legacy());
+    }
+
+    public ProcessGoal(ExtensionPropagationPolicy propagationPolicy) {
+        extensionProcessor = new ExtensionProcessor(propagationPolicy);
+    }
 
     public IBaseResource convertGoal(ApplyRequest request, IBaseBackboneElement goal) {
         var fhirVersion = request.getFhirVersion();
         return switch (fhirVersion) {
-            case DSTU3 -> convertDstu3Goal(request.getSubjectId(), goal);
-            case R4 -> convertR4Goal(request.getSubjectId(), goal);
-            case R5 -> convertR5Goal(request.getSubjectId(), goal);
+            case DSTU3 -> convertDstu3Goal(request.getSubjectId(), goal, request.getFhirContext());
+            case R4 -> convertR4Goal(request.getSubjectId(), goal, request.getFhirContext());
+            case R5 -> convertR5Goal(request.getSubjectId(), goal, request.getFhirContext());
             default -> null;
         };
     }
 
-    private IBaseResource convertDstu3Goal(IIdType subjectId, IBaseBackboneElement element) {
+    private IBaseResource convertDstu3Goal(IIdType subjectId, IBaseBackboneElement element, FhirContext fhirContext) {
         var goal = (org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionGoalComponent) element;
         var myGoal = new org.hl7.fhir.dstu3.model.Goal();
         myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -36,7 +48,12 @@ public class ProcessGoal {
                             myTarget.setDetail(target.getDetail());
                             myTarget.setMeasure(target.getMeasure());
                             myTarget.setDue(target.getDue());
-                            myTarget.setExtension(target.getExtension());
+                            myTarget.setExtension(extensionProcessor.copyExtensions(
+                                    fhirContext,
+                                    target.getExtension(),
+                                    List.of(),
+                                    "PlanDefinition.goal.target",
+                                    "Goal.target"));
                             return myTarget;
                         })
                         .toList()
@@ -46,7 +63,7 @@ public class ProcessGoal {
         return myGoal;
     }
 
-    private IBaseResource convertR4Goal(IIdType subjectId, IBaseBackboneElement element) {
+    private IBaseResource convertR4Goal(IIdType subjectId, IBaseBackboneElement element, FhirContext fhirContext) {
         var goal = (org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionGoalComponent) element;
         var myGoal = new org.hl7.fhir.r4.model.Goal();
         myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -63,14 +80,19 @@ public class ProcessGoal {
                     myTarget.setDetail(target.getDetail());
                     myTarget.setMeasure(target.getMeasure());
                     myTarget.setDue(target.getDue());
-                    myTarget.setExtension(target.getExtension());
+                    myTarget.setExtension(extensionProcessor.copyExtensions(
+                            fhirContext,
+                            target.getExtension(),
+                            List.of(),
+                            "PlanDefinition.goal.target",
+                            "Goal.target"));
                     return myTarget;
                 })
                 .collect(Collectors.toList()));
         return myGoal;
     }
 
-    private IBaseResource convertR5Goal(IIdType subjectId, IBaseBackboneElement element) {
+    private IBaseResource convertR5Goal(IIdType subjectId, IBaseBackboneElement element, FhirContext fhirContext) {
         var goal = (org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionGoalComponent) element;
         var myGoal = new org.hl7.fhir.r5.model.Goal();
         myGoal.setCategory(Collections.singletonList(goal.getCategory()));
@@ -87,7 +109,12 @@ public class ProcessGoal {
                     myTarget.setDetail(target.getDetail());
                     myTarget.setMeasure(target.getMeasure());
                     myTarget.setDue(target.getDue());
-                    myTarget.setExtension(target.getExtension());
+                    myTarget.setExtension(extensionProcessor.copyExtensions(
+                            fhirContext,
+                            target.getExtension(),
+                            List.of(),
+                            "PlanDefinition.goal.target",
+                            "Goal.target"));
                     return myTarget;
                 })
                 .collect(Collectors.toList()));

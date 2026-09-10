@@ -25,6 +25,7 @@ public class ChangeLog {
     public static final String INSERT = "insert";
     public static final String DELETE = "delete";
     public static final String INACTIVE = "inactive";
+    public static final String UPDATED_DESCRIPTION = "updated code description";
     // Conditions and priorities are compared between sides rather than diffed, so their operations have no
     // FhirPatch path - this stands in for one.
     private static final String CONDITION_PATH = "condition";
@@ -120,6 +121,8 @@ public class ChangeLog {
                 code.setOperation(new Operation(INSERT, CODE_PATH, code.getCodeValue(), null));
             } else if (Boolean.TRUE.equals(code.getInactive()) && !Boolean.TRUE.equals(previous.getInactive())) {
                 code.setOperation(new Operation(INACTIVE, CODE_PATH, code.getInactive(), previous.getInactive()));
+            } else if (!Objects.equals(code.getDisplay(), previous.getDisplay())) {
+                code.setOperation(new Operation(UPDATED_DESCRIPTION, CODE_PATH, code.getDisplay(), previous.getDisplay()));
             }
         });
     }

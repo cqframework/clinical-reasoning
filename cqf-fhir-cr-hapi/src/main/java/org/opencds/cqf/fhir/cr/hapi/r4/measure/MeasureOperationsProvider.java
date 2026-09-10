@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import java.util.List;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -20,6 +21,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.cr.hapi.common.StringTimePeriodHandler;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorMultipleFactory;
 import org.opencds.cqf.fhir.cr.hapi.r4.R4MeasureEvaluatorSingleFactory;
+import org.opencds.cqf.fhir.cr.measure.common.InvalidMeasureRequestException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 
@@ -90,18 +92,22 @@ public class MeasureOperationsProvider {
         var dataEndpointParam = (Endpoint) getEndpoint(fhirVersion, dataEndpoint);
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
-        return r4MeasureServiceFactory
-                .create(requestDetails, environment)
-                .evaluate(
-                        new MeasureReference.ById(id),
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        lastReceivedOn,
-                        parameters,
-                        productLine,
-                        practitioner);
+        try {
+            return r4MeasureServiceFactory
+                    .create(requestDetails, environment)
+                    .evaluate(
+                            new MeasureReference.ById(id),
+                            stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                            stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                            reportType,
+                            subject,
+                            lastReceivedOn,
+                            parameters,
+                            productLine,
+                            practitioner);
+        } catch (InvalidMeasureRequestException exception) {
+            throw new InvalidRequestException(exception.getMessage(), exception);
+        }
     }
 
     /**
@@ -158,16 +164,20 @@ public class MeasureOperationsProvider {
         var measureRefs = MeasureReference.fromOperationParams(measureId, measureIdentifier, measureUrl);
         var environment = new MeasureEnvironment(
                 contentEndpointParam, terminologyEndpointParam, dataEndpointParam, additionalData);
-        return r4MultiMeasureServiceFactory
-                .create(requestDetails, environment)
-                .evaluate(
-                        measureRefs,
-                        stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
-                        stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
-                        reportType,
-                        subject,
-                        parameters,
-                        productLine,
-                        reporter);
+        try {
+            return r4MultiMeasureServiceFactory
+                    .create(requestDetails, environment)
+                    .evaluate(
+                            measureRefs,
+                            stringTimePeriodHandler.getStartZonedDateTime(periodStart, requestDetails),
+                            stringTimePeriodHandler.getEndZonedDateTime(periodEnd, requestDetails),
+                            reportType,
+                            subject,
+                            parameters,
+                            productLine,
+                            reporter);
+        } catch (InvalidMeasureRequestException exception) {
+            throw new InvalidRequestException(exception.getMessage(), exception);
+        }
     }
 }

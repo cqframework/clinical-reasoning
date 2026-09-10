@@ -51,6 +51,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureLookupException;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureScoring;
@@ -203,6 +204,14 @@ public class R4MeasureServiceUtils {
         }
 
         Bundle result = this.repository.search(Bundle.class, Measure.class, searchParameters);
+
+        if (result == null || result.getEntry().isEmpty()) {
+            throw new MeasureLookupException("Measure URL: %s, found no matching measure resources".formatted(url));
+        }
+        if (result.getEntry().size() > 1) {
+            throw new MeasureLookupException(
+                    "Measure URL: %s, found more than one matching measure resource".formatted(url));
+        }
         return (Measure) result.getEntryFirstRep().getResource();
     }
 

@@ -11,6 +11,12 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 
 public class ProcessItem {
+    private final ObservationResolver observationResolver;
+
+    public ProcessItem() {
+        observationResolver = new ObservationResolver();
+    }
+
     public void processItem(
             ExtractRequest request,
             ItemPair itemPair,
@@ -59,18 +65,7 @@ public class ProcessItem {
             IBaseReference subject,
             Map<String, List<IBaseCoding>> questionnaireCodeMap,
             IBaseExtension<?, ?> categoryExt) {
-        // Observation-based extraction -
-        // http://build.fhir.org/ig/HL7/sdc/extraction.html#observation-based-extraction
-        return switch (request.getFhirVersion()) {
-            case R4 ->
-                new org.opencds.cqf.fhir.cr.questionnaireresponse.extract.r4.ObservationResolver()
-                        .resolve(
-                                request, answer, questionnaireItem, linkId, subject, questionnaireCodeMap, categoryExt);
-            case R5 ->
-                new org.opencds.cqf.fhir.cr.questionnaireresponse.extract.r5.ObservationResolver()
-                        .resolve(
-                                request, answer, questionnaireItem, linkId, subject, questionnaireCodeMap, categoryExt);
-            default -> null;
-        };
+        return observationResolver.resolve(
+                request, answer, questionnaireItem, linkId, subject, questionnaireCodeMap, categoryExt);
     }
 }

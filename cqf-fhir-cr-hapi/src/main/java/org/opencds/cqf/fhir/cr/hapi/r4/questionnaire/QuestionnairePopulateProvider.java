@@ -21,9 +21,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Endpoint;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -51,8 +49,6 @@ public class QuestionnairePopulateProvider {
      * @param id                  The id of the Questionnaire to populate.
      * @param subject             The subject(s) that is/are the target of the Questionnaire.
      * @param context			 Resources containing information to be used to help populate the QuestionnaireResponse.
-     * @param launchContext       The Questionnaire Launch Context extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse.
-     * @param parameters		  This parameter has been deprecated and is no longer used
      * @param useServerData       Whether to use data from the server performing the evaluation.
      * @param data                Data to be made available during CQL evaluation.
      * @param bundle              Legacy support for data parameter.
@@ -70,8 +66,6 @@ public class QuestionnairePopulateProvider {
             @IdParam IdType id,
             @OperationParam(name = "subject") ParametersParameterComponent subject,
             @OperationParam(name = "context") List<ParametersParameterComponent> context,
-            @OperationParam(name = "launchContext") Extension launchContext,
-            @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "local") BooleanType local,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
@@ -87,7 +81,6 @@ public class QuestionnairePopulateProvider {
                         Eithers.forMiddle3(id),
                         getStringOrReferenceValue(fhirVersion, subject),
                         context,
-                        launchContext,
                         data == null ? bundle : data,
                         isUseServerData(local, useServerData),
                         getEndpoint(fhirVersion, dataEndpoint),
@@ -107,8 +100,6 @@ public class QuestionnairePopulateProvider {
      * @param version             Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
      * @param subject             The subject(s) that is/are the target of the Questionnaire.
      * @param context			 Resources containing information to be used to help populate the QuestionnaireResponse.
-     * @param launchContext       The Questionnaire Launch Context extension containing Resources that provide context for form processing logic (pre-population) when creating/displaying/editing a QuestionnaireResponse.
-     * @param parameters		  This parameter has been deprecated and is no longer used
      * @param useServerData       Whether to use data from the server performing the evaluation.
      * @param data                Data to be made available during CQL evaluation.
      * @param bundle              Legacy support for data parameter.
@@ -129,8 +120,6 @@ public class QuestionnairePopulateProvider {
             @OperationParam(name = "version") StringType version,
             @OperationParam(name = "subject") ParametersParameterComponent subject,
             @OperationParam(name = "context") List<ParametersParameterComponent> context,
-            @OperationParam(name = "launchContext") Extension launchContext,
-            @OperationParam(name = "parameters") Parameters parameters,
             @OperationParam(name = "local") BooleanType local,
             @OperationParam(name = "useServerData") BooleanType useServerData,
             @OperationParam(name = "data") Bundle data,
@@ -146,7 +135,6 @@ public class QuestionnairePopulateProvider {
                         getQuestionnaireMonad(questionnaire, canonical, url, version),
                         getStringOrReferenceValue(fhirVersion, subject),
                         context,
-                        launchContext,
                         data == null ? bundle : data,
                         isUseServerData(local, useServerData),
                         getEndpoint(fhirVersion, dataEndpoint),

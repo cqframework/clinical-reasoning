@@ -1,5 +1,9 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
+import static org.opencds.cqf.fhir.utility.Constants.CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT;
+import static org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT;
+import static org.opencds.cqf.fhir.utility.Constants.SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT;
+
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -47,5 +51,11 @@ public interface IQuestionnaireItemComponentAdapter extends IItemComponentAdapte
 
     default ICompositeType newExpression(String expression) {
         return newExpression("text/cql-expression", expression);
+    }
+
+    default boolean isContextItem() {
+        return hasExtension(SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT)
+                || hasExtension(SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT)
+                || hasExtension(CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT);
     }
 }

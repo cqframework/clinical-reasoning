@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.helpers;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -107,7 +108,7 @@ public class RequestHelpers {
 
     public static GenerateRequest newGenerateRequestForVersion(
             FhirVersionEnum fhirVersion, IBaseResource profile, LibraryEngine libraryEngine) {
-        return new GenerateRequest(profile, false, true, libraryEngine);
+        return new GenerateRequest(List.of(profile), false, true, libraryEngine);
     }
 
     public static PopulateRequest newPopulateRequestForVersion(
@@ -115,7 +116,6 @@ public class RequestHelpers {
         return new PopulateRequest(
                 questionnaire,
                 Ids.newId(fhirVersion, Ids.ensureIdType(PATIENT_ID, "Patient")),
-                null,
                 null,
                 null,
                 libraryEngine);

@@ -20,7 +20,6 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -122,17 +121,18 @@ public class TestQuestionnaire {
         private IBaseResource questionnaire;
         private String subjectId;
         private List<IBaseBackboneElement> context;
-        private IBaseExtension<?, ?> launchContext;
         private boolean useServerData;
         private IBaseBundle data;
         private IBaseParameters parameters;
         private Boolean isPut;
-        private IIdType profileId;
+        private IBaseResource profile;
+        private List<IPrimitiveType<String>> profileUrl;
 
         When(IRepository repository, QuestionnaireProcessor processor) {
             this.repository = repository;
             this.processor = processor;
             useServerData = true;
+            profileUrl = new ArrayList<>();
         }
 
         private FhirContext fhirContext() {
@@ -144,8 +144,6 @@ public class TestQuestionnaire {
                     processor.resolveQuestionnaire(Eithers.for3(questionnaireUrl, questionnaireId, questionnaire)),
                     subjectId == null ? null : Ids.newId(fhirContext(), "Patient", subjectId),
                     context,
-                    launchContext,
-                    // parameters,
                     data,
                     new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
         }
@@ -175,11 +173,6 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When launchContext(IBaseExtension<?, ?> extension) {
-            launchContext = extension;
-            return this;
-        }
-
         public When useServerData(boolean value) {
             useServerData = value;
             return this;
@@ -200,8 +193,13 @@ public class TestQuestionnaire {
             return this;
         }
 
-        public When profileId(IIdType id) {
-            profileId = id;
+        public When profile(IBaseResource profile) {
+            this.profile = profile;
+            return this;
+        }
+
+        public When profileUrl(IPrimitiveType<String> url) {
+            profileUrl.add(url);
             return this;
         }
 
@@ -210,8 +208,6 @@ public class TestQuestionnaire {
                     Eithers.for3(questionnaireUrl, questionnaireId, questionnaire),
                     subjectId,
                     context,
-                    launchContext,
-                    // parameters,
                     data,
                     useServerData,
                     (IBaseResource) null,
@@ -239,11 +235,15 @@ public class TestQuestionnaire {
         }
 
         public GeneratedQuestionnaire thenGenerate() {
+            var profiles = new ArrayList<IBaseResource>();
+            if (profile != null) {
+                profiles.add(profile);
+            }
+            profileUrl.stream()
+                    .map(url -> (IBaseResource) processor.resolveStructureDefinition(Eithers.forLeft3(url)))
+                    .forEach(profiles::add);
             var request = new GenerateRequest(
-                    processor.resolveStructureDefinition(Eithers.for3(null, profileId, null)),
-                    false,
-                    true,
-                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
+                    profiles, false, true, new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
             return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }
 

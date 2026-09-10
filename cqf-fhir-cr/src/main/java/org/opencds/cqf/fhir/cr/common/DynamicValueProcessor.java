@@ -100,7 +100,8 @@ public class DynamicValueProcessor {
                     request,
                     cqfExpression,
                     context == null ? null : context.get(),
-                    resourceAdapter == null ? null : resourceAdapter.get());
+                    resourceAdapter == null ? null : resourceAdapter.get(),
+                    requestAction);
             if (result == null || result.isEmpty()) {
                 var warning = "Null value received when evaluating dynamic value expression: %s"
                         .formatted(cqfExpression.getExpression());
@@ -135,13 +136,21 @@ public class DynamicValueProcessor {
     }
 
     protected List<IBase> getDynamicValueExpressionResult(
-            ICpgRequest request, CqfExpression cqfExpression, IBaseResource context, IBaseResource resource) {
+            ICpgRequest request,
+            CqfExpression cqfExpression,
+            IBaseResource context,
+            IBaseResource resource,
+            IElement requestAction) {
+        var rawParameters = request.getRawParameters();
+        if (requestAction != null) {
+            rawParameters.put("%action", requestAction);
+        }
         return request.getLibraryEngine()
                 .resolveExpression(
                         request.getSubjectId().getIdPart(),
                         cqfExpression,
                         request.getParameters(),
-                        request.getRawParameters(),
+                        rawParameters,
                         request.getData(),
                         context,
                         resource);

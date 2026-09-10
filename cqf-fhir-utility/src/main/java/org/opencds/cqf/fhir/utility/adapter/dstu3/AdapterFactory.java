@@ -10,6 +10,7 @@ import org.hl7.fhir.dstu3.model.ImplementationGuide;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MetadataResource;
+import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
@@ -41,6 +42,7 @@ import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IObservationAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
@@ -69,6 +71,8 @@ public class AdapterFactory implements IAdapterFactory {
             return createParameters(parameters);
         } else if (resource instanceof Group group) {
             return createGroup(group);
+        } else if (resource instanceof Observation observation) {
+            return createObservation(observation);
         } else {
             return new ResourceAdapter(resource);
         }
@@ -262,5 +266,10 @@ public class AdapterFactory implements IAdapterFactory {
     @Override
     public ITupleAdapter createTuple(IBase tuple) {
         throw new UnprocessableEntityException("No FHIR type Tuple exists in version DSTU3");
+    }
+
+    @Override
+    public IObservationAdapter createObservation(IBaseResource observation) {
+        return new ObservationAdapter(observation);
     }
 }

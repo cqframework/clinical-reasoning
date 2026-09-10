@@ -169,7 +169,7 @@ public class ApplyRequest implements ICpgRequest {
     }
 
     public GenerateRequest toGenerateRequest(IBaseResource profile) {
-        return new GenerateRequest(profile, false, true, libraryEngine)
+        return new GenerateRequest(List.of(profile), false, true, libraryEngine)
                 .setReferencedLibraries(referencedLibraries)
                 .setQuestionnaire(getQuestionnaire());
     }
@@ -234,7 +234,6 @@ public class ApplyRequest implements ICpgRequest {
                 // getQuestionnaireResponse(),
                 subjectId,
                 context,
-                null,
                 data,
                 libraryEngine);
     }

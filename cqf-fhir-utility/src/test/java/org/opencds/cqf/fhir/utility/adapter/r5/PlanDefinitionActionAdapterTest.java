@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.r5;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.opencds.cqf.fhir.utility.Constants.CQF_APPLICABILITY_BEHAVIOR;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -12,16 +13,19 @@ import org.hl7.fhir.r5.model.Enumerations.ActionRelationshipType;
 import org.hl7.fhir.r5.model.Enumerations.ActionSelectionBehavior;
 import org.hl7.fhir.r5.model.Enumerations.RequestPriority;
 import org.hl7.fhir.r5.model.Expression;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionConditionComponent;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionInputComponent;
 import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
+import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.Timing;
 import org.hl7.fhir.r5.model.TriggerDefinition;
 import org.hl7.fhir.r5.model.TriggerDefinition.TriggerType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 
 class PlanDefinitionActionAdapterTest {
@@ -174,6 +178,17 @@ class PlanDefinitionActionAdapterTest {
         var adapter = new PlanDefinitionActionAdapter(action);
         assertTrue(adapter.hasSelectionBehavior());
         assertEquals(selectionBehavior, adapter.getSelectionBehavior());
+    }
+
+    @Test
+    void testApplicabilityBehavior() {
+        var action = new PlanDefinitionActionComponent();
+        var adapter = new PlanDefinitionActionAdapter(action);
+        assertFalse(adapter.hasApplicabilityBehavior());
+        assertEquals(CqfApplicabilityBehavior.ALL, adapter.getApplicabilityBehavior());
+        adapter.addExtension(new Extension(CQF_APPLICABILITY_BEHAVIOR, new StringType("one")));
+        assertTrue(adapter.hasApplicabilityBehavior());
+        assertThrows(IllegalArgumentException.class, adapter::getApplicabilityBehavior);
     }
 
     @Test

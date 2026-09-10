@@ -7,10 +7,10 @@ import static org.opencds.cqf.fhir.utility.repository.Repositories.proxy;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import java.util.ArrayList;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -31,6 +31,7 @@ import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateRequest;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Either3;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 @SuppressWarnings("UnstableApiUsage")
 public class QuestionnaireProcessor {
@@ -98,17 +99,13 @@ public class QuestionnaireProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile) {
-        return generateQuestionnaire(profile, false, true);
+            R profile, List<C> urls, boolean supportedOnly, boolean requiredOnly) {
+        return generateQuestionnaire(profile, urls, supportedOnly, requiredOnly, (IBaseResource) null, null, null);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly) {
-        return generateQuestionnaire(profile, supportedOnly, requiredOnly, (IBaseResource) null, null, null);
-    }
-
-    public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile,
+            R profile,
+            List<C> urls,
             boolean supportedOnly,
             boolean requiredOnly,
             IBaseResource contentEndpoint,
@@ -116,6 +113,7 @@ public class QuestionnaireProcessor {
             String id) {
         return generateQuestionnaire(
                 profile,
+                urls,
                 supportedOnly,
                 requiredOnly,
                 createRestRepository(repository.fhirContext(), contentEndpoint),
@@ -124,34 +122,45 @@ public class QuestionnaireProcessor {
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile,
+            R profile,
+            List<C> urls,
             boolean supportedOnly,
             boolean requiredOnly,
             IRepository contentRepository,
             IRepository terminologyRepository,
             String id) {
         repository = proxy(repository, true, null, contentRepository, terminologyRepository);
-        return generateQuestionnaire(profile, supportedOnly, requiredOnly, id);
+        return generateQuestionnaire(profile, urls, supportedOnly, requiredOnly, id);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile, boolean supportedOnly, boolean requiredOnly, String id) {
-        return generateQuestionnaire(profile, supportedOnly, requiredOnly, id, null);
+            R profile, List<C> urls, boolean supportedOnly, boolean requiredOnly, String id) {
+        return generateQuestionnaire(profile, urls, supportedOnly, requiredOnly, id, null);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> IBaseResource generateQuestionnaire(
-            Either3<C, IIdType, R> profile,
+            R profile,
+            List<C> urls,
             boolean supportedOnly,
             boolean requiredOnly,
             String id,
             LibraryEngine libraryEngine) {
-        var request = new GenerateRequest(
-                resolveStructureDefinition(profile),
-                supportedOnly,
-                requiredOnly,
-                libraryEngine != null
-                        ? libraryEngine
-                        : new LibraryEngine(repository, crSettings.getEvaluationSettings()));
+        var libraryEngineToUse = libraryEngine != null
+                ? libraryEngine
+                : new LibraryEngine(repository, crSettings.getEvaluationSettings());
+        var profiles = new ArrayList<IBaseResource>();
+        if (profile != null) {
+            profiles.add(profile);
+        }
+        if (urls != null && !urls.isEmpty()) {
+            urls.forEach(url -> {
+                var p = resolveStructureDefinition(Eithers.forLeft3(url));
+                if (p != null) {
+                    profiles.add(p);
+                }
+            });
+        }
+        var request = new GenerateRequest(profiles, supportedOnly, requiredOnly, libraryEngineToUse);
         return generateQuestionnaire(request, id);
     }
 
@@ -196,14 +205,12 @@ public class QuestionnaireProcessor {
             IBaseResource questionnaire,
             String subjectId,
             List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         return new PopulateRequest(
                 questionnaire,
                 subjectId == null ? null : Ids.newId(fhirVersion, Ids.ensureIdType(subjectId, SUBJECT_TYPE)),
                 context,
-                launchContext,
                 data,
                 libraryEngine != null
                         ? libraryEngine
@@ -214,7 +221,6 @@ public class QuestionnaireProcessor {
             Either3<C, IIdType, R> questionnaire,
             String subjectId,
             List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             boolean useServerData,
             IBaseResource dataEndpoint,
@@ -224,7 +230,6 @@ public class QuestionnaireProcessor {
                 questionnaire,
                 subjectId,
                 context,
-                launchContext,
                 data,
                 useServerData,
                 createRestRepository(repository.fhirContext(), dataEndpoint),
@@ -236,7 +241,6 @@ public class QuestionnaireProcessor {
             Either3<C, IIdType, R> questionnaire,
             String subjectId,
             List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             boolean useServerData,
             IRepository dataRepository,
@@ -247,7 +251,6 @@ public class QuestionnaireProcessor {
                 questionnaire,
                 subjectId,
                 context,
-                launchContext,
                 data,
                 new LibraryEngine(repository, crSettings.getEvaluationSettings()));
     }
@@ -256,20 +259,18 @@ public class QuestionnaireProcessor {
             Either3<C, IIdType, R> questionnaire,
             String subjectId,
             List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
-        return populate(resolveQuestionnaire(questionnaire), subjectId, context, launchContext, data, libraryEngine);
+        return populate(resolveQuestionnaire(questionnaire), subjectId, context, data, libraryEngine);
     }
 
     public IBaseResource populate(
             IBaseResource questionnaire,
             String subjectId,
             List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
-        return populate(buildPopulateRequest(questionnaire, subjectId, context, launchContext, data, libraryEngine));
+        return populate(buildPopulateRequest(questionnaire, subjectId, context, data, libraryEngine));
     }
 
     public IBaseResource populate(PopulateRequest request) {

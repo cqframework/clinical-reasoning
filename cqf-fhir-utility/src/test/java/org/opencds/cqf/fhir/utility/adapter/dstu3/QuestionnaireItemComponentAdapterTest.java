@@ -11,6 +11,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.junit.jupiter.api.Test;
@@ -88,5 +89,12 @@ class QuestionnaireItemComponentAdapterTest {
         assertEquals(1, adapter.getItem().size());
         adapter.addItems(List.of(item2, item3, item4));
         assertEquals(4, adapter.getItem().size());
+    }
+
+    @Test
+    void testContextItemExtensions() {
+        var item1 = adapterFactory.createQuestionnaireItem(
+                new QuestionnaireItemComponent().setLinkId("1").setType(Questionnaire.QuestionnaireItemType.GROUP));
+        assertFalse(item1.isContextItem());
     }
 }

@@ -284,4 +284,12 @@ public interface IAdapterFactory {
      * @return an adapter exposing common api calls
      */
     ITupleAdapter createTuple(IBase tuple);
+
+    /**
+     * Creates an adapter that exposes common Observation operations across multiple versions of FHIR
+     *
+     * @param observation a HAPI FHIR Observation object
+     * @return an adapter exposing common api calls
+     */
+    IObservationAdapter createObservation(IBaseResource observation);
 }

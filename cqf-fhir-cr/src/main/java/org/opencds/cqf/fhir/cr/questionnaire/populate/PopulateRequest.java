@@ -11,12 +11,10 @@ import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -31,6 +29,7 @@ import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentA
 
 public class PopulateRequest implements IQuestionnaireRequest {
     private final IQuestionnaireAdapter questionnaireAdapter;
+    // private final IQuestionnaireResponseAdapter previousQuestionnaireResponseAdapter;
     private final IQuestionnaireResponseAdapter questionnaireResponseAdapter;
     private final IIdType subjectId;
     private final List<IParametersParameterComponentAdapter> context;
@@ -44,31 +43,30 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     public PopulateRequest(
             IBaseResource questionnaire,
+            // IBaseResource questionnaireResponse,
             IIdType subjectId,
             List<? extends IBaseBackboneElement> context,
-            IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
             LibraryEngine libraryEngine) {
         checkNotNull(questionnaire, "expected non-null value for questionnaire");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         fhirVersion = questionnaire.getStructureFhirVersionEnum();
-        questionnaireAdapter = (IQuestionnaireAdapter)
-                getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
+        questionnaireAdapter = getAdapterFactory().createQuestionnaire(questionnaire);
+        this.libraryEngine = libraryEngine;
+        // this.previousQuestionnaireResponseAdapter = questionnaireResponse == null
+        //        ? null
+        //        : getAdapterFactory().createQuestionnaireResponse(questionnaireResponse);
         this.context = context == null
                 ? new ArrayList<>()
                 : context.stream()
                         .map(c -> getAdapterFactory().createParametersParameter(c))
                         .collect(Collectors.toList());
-        this.subjectId = getSubjectId(subjectId);
+        this.subjectId = getSubjectId(subjectId); // , previousQuestionnaireResponseAdapter);
+        questionnaireResponseAdapter = createQuestionnaireResponse();
         this.data = data;
-        this.libraryEngine = libraryEngine;
         var launchContexts = questionnaireAdapter.getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
-        if (launchContext != null) {
-            launchContexts.add(launchContext);
-        }
         var parameters = (IBaseParameters) Resources.newBaseForVersion("Parameters", fhirVersion);
         getAdapterFactory().createParameters(parameters).addParameter("%questionnaire", questionnaireAdapter.get());
-        questionnaireResponseAdapter = createQuestionnaireResponse();
         contextVariable = questionnaireResponseAdapter.get();
         referencedLibraries = questionnaireAdapter.getReferencedLibraries();
         inputParameterResolver = IInputParameterResolver.createResolver(
@@ -77,6 +75,10 @@ public class PopulateRequest implements IQuestionnaireRequest {
 
     @SuppressWarnings("unchecked")
     protected IIdType getSubjectId(IIdType subject) {
+        // , IQuestionnaireResponseAdapter questionnaireResponse) {
+        // if (questionnaireResponse != null && questionnaireResponse.hasSubject()) {
+        //    return questionnaireResponse.getSubject();
+        // }
         var subjectContext = context.stream()
                 .filter(c -> c.getPartValues("name").stream()
                         .anyMatch(p ->
@@ -188,6 +190,10 @@ public class PopulateRequest implements IQuestionnaireRequest {
     public IQuestionnaireResponseAdapter getQuestionnaireResponseAdapter() {
         return questionnaireResponseAdapter;
     }
+
+    // public IQuestionnaireResponseAdapter getPreviousQuestionnaireResponseAdapter() {
+    //    return previousQuestionnaireResponseAdapter;
+    // }
 
     public void addQuestionnaireResponseItems(List<IQuestionnaireResponseItemComponentAdapter> items) {
         questionnaireResponseAdapter.addItems(items);

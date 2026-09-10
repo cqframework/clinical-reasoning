@@ -354,7 +354,8 @@ class ChangeLogTest {
         cache.addTarget(LEAF_CANONICAL, leaf(null, "2.81"));
 
         var changelog = new ChangeLog(MANIFEST_URL);
-        changelog.addPage(manifest("3.1.2", null, Collections.emptyList()), manifest("3.2.0", "emergent", List.of("840539006")));
+        changelog.addPage(
+                manifest("3.1.2", null, Collections.emptyList()), manifest("3.2.0", "emergent", List.of("840539006")));
         var page = changelog.addPage(null, grouper("3.2.0"), cache);
         changelog.handleRelatedArtifacts();
 

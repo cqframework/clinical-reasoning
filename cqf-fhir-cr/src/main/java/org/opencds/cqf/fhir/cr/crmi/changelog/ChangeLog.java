@@ -67,8 +67,8 @@ public class ChangeLog {
         Map<String, ValueSetChild.Code> targetCodeMap = new LinkedHashMap<>();
         // Map< [URL], Map <[Version], [Object with name, version, and other metadata] >>
         Map<String, Map<String, ValueSetChild.Leaf>> leafMetadataMap = new HashMap<>();
-        updateCodeMapAndLeafMetadataMap(sourceCodeMap, leafMetadataMap, sourceResource, cache);
-        updateCodeMapAndLeafMetadataMap(targetCodeMap, leafMetadataMap, targetResource, cache);
+        updateCodeMapAndLeafMetadataMap(sourceCodeMap, leafMetadataMap, sourceResource, cache, true);
+        updateCodeMapAndLeafMetadataMap(targetCodeMap, leafMetadataMap, targetResource, cache, false);
         var oldData = sourceResource == null
                 ? null
                 : new ValueSetChild(
@@ -143,11 +143,12 @@ public class ChangeLog {
             Map<String, ValueSetChild.Code> codeMap,
             Map<String, Map<String, ValueSetChild.Leaf>> leafMap,
             ValueSet valueSet,
-            ArtifactDiffProcessor.DiffCache cache) {
+            ArtifactDiffProcessor.DiffCache cache,
+            boolean isSource) {
         if (valueSet != null) {
             var leafData = getOrCreateLeaf(leafMap, valueSet);
             if (valueSet.getCompose().hasInclude()) {
-                handleValueSetInclude(codeMap, leafMap, valueSet, cache, leafData);
+                handleValueSetInclude(codeMap, leafMap, valueSet, cache, leafData, isSource);
             }
             // A grouper's own expansion already holds every code its referenced value sets contribute.
             // Only the leaf attribution is wanted.
@@ -162,9 +163,10 @@ public class ChangeLog {
             Map<String, Map<String, ValueSetChild.Leaf>> leafMap,
             ValueSet valueSet,
             ArtifactDiffProcessor.DiffCache cache,
-            ValueSetChild.Leaf leafData) {
-        // compose.include carries no code system version or active status, so fall back to what
-        // the ValueSet's expansion recorded per code.
+            ValueSetChild.Leaf leafData,
+            boolean isSource) {
+            // compose.include carries no code system version or active status, so fall back to what
+            // the ValueSet's expansion recorded per code.
         var expansionDetails = collectExpansionDetailsByCode(valueSet);
         valueSet.getCompose().getInclude().forEach(concept -> {
             if (concept.hasConcept()) {
@@ -180,10 +182,13 @@ public class ChangeLog {
             }
             if (concept.hasValueSet()) {
                 concept.getValueSet().stream()
-                        .map(vs -> cache.getResource(vs.getValue()).map(v -> (ValueSet) v))
+                        // this side's copy of the leaf: asking the cache without saying which side
+                        // returned whichever release was cached last, so both sides read the target's
+                        // expansion and no change to a code's version or status was ever visible
+                        .map(vs -> cache.getResource(vs.getValue(), isSource).map(v -> (ValueSet) v))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .forEach(vs -> updateCodeMapAndLeafMetadataMap(codeMap, leafMap, vs, cache));
+                        .forEach(vs -> updateCodeMapAndLeafMetadataMap(codeMap, leafMap, vs, cache, isSource));
             }
         });
     }

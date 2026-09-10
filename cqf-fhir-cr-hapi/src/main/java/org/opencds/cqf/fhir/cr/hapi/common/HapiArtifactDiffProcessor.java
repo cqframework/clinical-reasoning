@@ -347,7 +347,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             Endpoint terminologyEndpoint,
             boolean needsExpandedValueSets)
             throws UnprocessableEntityException {
-        var resource = cache.getResource(url).orElse(null);
+        var resource = cache.getResource(url, isSource).orElse(null);
         if (resource == null) {
             try {
                 resource = retrieveResourcesByCanonical(url, repository);

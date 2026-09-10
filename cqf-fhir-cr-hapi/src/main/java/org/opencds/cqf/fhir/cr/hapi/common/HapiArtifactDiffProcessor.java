@@ -354,6 +354,7 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             } catch (ResourceNotFoundException e) {
                 // ignore
             }
+            // TODO:: explore short-circuiting re-expansion by comparing on VS.expansion.identifier
             if (resource instanceof ValueSet valueSet && needsExpandedValueSets) {
                 try {
                     tryExpandValueSet(valueSet, context, terminologyEndpoint, repository);

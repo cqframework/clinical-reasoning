@@ -103,30 +103,14 @@ class IncludeAndEvaluateSameLibraryWithDifferentVersionsTest {
         return InMemoryFhirRepository(FhirContext.forR4Cached())
     }
 
-    fun LibraryEngine.evaluateIntExpression(
-        libraryName: String,
-        libraryVersion: String?,
-        expression: String,
-    ): Int? {
-        val result =
-            this.evaluate(
-                VersionedIdentifier().apply {
-                    id = libraryName
-                    version = libraryVersion
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                mutableSetOf(expression),
-            )
-        return ParametersUtil.getNamedParameterValueAsInteger(
-                this.repository.fhirContext(),
-                result,
-                expression,
-            )
-            .getOrNull()
+    fun LibraryEngine.evaluate(libraryId: VersionedIdentifier): Map<String, Int?> {
+        val results = this.evaluate(libraryId, null, null, null, null, null, null)
+        val fhirContext = this.repository.fhirContext()
+        return ParametersUtil.getNamedParameters(fhirContext, results).asMap().mapValues {
+            (expression, result) ->
+            ParametersUtil.getNamedParameterValueAsInteger(fhirContext, results, expression)
+                .getOrNull()
+        }
     }
 
     @Test
@@ -142,8 +126,10 @@ class IncludeAndEvaluateSameLibraryWithDifferentVersionsTest {
 
         val engine = LibraryEngine(repository, EvaluationSettings.default)
 
-        assertEquals(1, engine.evaluateIntExpression("LibA", null, "xFromLibB"))
-        assertEquals(2, engine.evaluateIntExpression("LibA", null, "xFromLibC"))
+        val results = engine.evaluate(VersionedIdentifier().apply { id = "LibA" })
+
+        assertEquals(1, results["xFromLibB"])
+        assertEquals(2, results["xFromLibC"])
     }
 
     @Test
@@ -157,8 +143,10 @@ class IncludeAndEvaluateSameLibraryWithDifferentVersionsTest {
 
         val engine = LibraryEngine(repository, EvaluationSettings.default)
 
-        assertEquals(1, engine.evaluateIntExpression("LibE", null, "xFromLibDVersion1"))
-        assertEquals(2, engine.evaluateIntExpression("LibE", null, "xFromLibDVersion2"))
+        val results = engine.evaluate(VersionedIdentifier().apply { id = "LibE" })
+
+        assertEquals(1, results["xFromLibDVersion1"])
+        assertEquals(2, results["xFromLibDVersion2"])
     }
 
     @Test
@@ -171,8 +159,26 @@ class IncludeAndEvaluateSameLibraryWithDifferentVersionsTest {
 
         val engine = LibraryEngine(repository, EvaluationSettings.default)
 
-        assertEquals(1, engine.evaluateIntExpression("LibD", "1.0.0", "x"))
-        assertEquals(2, engine.evaluateIntExpression("LibD", "2.0.0", "x"))
+        assertEquals(
+            1,
+            engine
+                .evaluate(
+                    VersionedIdentifier().apply {
+                        id = "LibD"
+                        version = "1.0.0"
+                    }
+                )["x"],
+        )
+        assertEquals(
+            2,
+            engine
+                .evaluate(
+                    VersionedIdentifier().apply {
+                        id = "LibD"
+                        version = "2.0.0"
+                    }
+                )["x"],
+        )
     }
 
     @Test
@@ -188,9 +194,11 @@ class IncludeAndEvaluateSameLibraryWithDifferentVersionsTest {
         val engine = LibraryEngine(repository, EvaluationSettings.default)
 
         val exception =
-            assertFailsWith<CqlException> { engine.evaluateIntExpression("LibB", null, "x") }
+            assertFailsWith<CqlException> {
+                engine.evaluate(VersionedIdentifier().apply { id = "LibB" })
+            }
         assertContains(exception.message!!, "Could not load source for library LibD, version 1.0.0")
 
-        assertEquals(2, engine.evaluateIntExpression("LibC", null, "x"))
+        assertEquals(2, engine.evaluate(VersionedIdentifier().apply { id = "LibC" })["x"])
     }
 }

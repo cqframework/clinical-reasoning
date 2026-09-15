@@ -455,14 +455,21 @@ public class ChangeLog {
     }
 
     /** What one side's manifest states for the leaves that side holds, to mark the other side against. */
-    private record StatedForLeaves(Set<String> conditionKeys, Map<String, String> priorityByLeafOid) {}
+    private record StatedForLeaves(
+            Set<String> leafOids, Set<String> conditionKeys, Map<String, String> priorityByLeafOid) {}
 
     /** Reads only; nothing is modified. Called for both sides before either is populated. */
     private static StatedForLeaves statedForLeaves(LibraryChild manifest, ValueSetChild side) {
+        Set<String> leafOids = new HashSet<>();
         Set<String> conditionKeys = new HashSet<>();
         Map<String, String> priorityByLeafOid = new HashMap<>();
-        if (manifest == null || side == null) {
-            return new StatedForLeaves(conditionKeys, priorityByLeafOid);
+        if (side == null) {
+            return new StatedForLeaves(leafOids, conditionKeys, priorityByLeafOid);
+        }
+        // read from the side itself
+        side.getLeafValueSets().forEach(leaf -> leafOids.add(leaf.getMemberOid()));
+        if (manifest == null) {
+            return new StatedForLeaves(leafOids, conditionKeys, priorityByLeafOid);
         }
         for (final var relatedArtifact : manifest.getRelatedArtifacts()) {
             for (final var leaf : leavesFor(side, relatedArtifact)) {
@@ -475,7 +482,7 @@ public class ChangeLog {
                 }
             }
         }
-        return new StatedForLeaves(conditionKeys, priorityByLeafOid);
+        return new StatedForLeaves(leafOids, conditionKeys, priorityByLeafOid);
     }
 
     /**
@@ -491,12 +498,17 @@ public class ChangeLog {
         }
         for (final var relatedArtifact : manifest.getRelatedArtifacts()) {
             for (final var leaf : leavesFor(side, relatedArtifact)) {
+                // A leaf the other side does not hold is already reported by its own insert or delete,
+                // and every condition and priority it carries arrived or left along with it. Marking
+                // those states nothing.
+                var leafOperationType =
+                        otherSide.leafOids().contains(leaf.getMemberOid()) ? operationType : null;
                 for (final var condition : conditionsOf(relatedArtifact)) {
                     var statedOnOtherSide = otherSide.conditionKeys().contains(conditionKey(leaf, condition));
                     leaf.tryAddCondition(
-                            condition, statedOnOtherSide ? null : conditionOperation(condition, operationType));
+                            condition, statedOnOtherSide ? null : conditionOperation(condition, leafOperationType));
                 }
-                updatePriority(relatedArtifact, leaf, otherSide.priorityByLeafOid(), operationType);
+                updatePriority(relatedArtifact, leaf, otherSide.priorityByLeafOid(), leafOperationType);
             }
         }
     }

@@ -13,6 +13,7 @@ import static org.opencds.cqf.fhir.cr.crmi.TransformProperties.usPHUsageContextT
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -23,7 +24,6 @@ import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.UsageContext;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
 
 class ChangeLogTest {
@@ -34,6 +34,7 @@ class ChangeLogTest {
     private static final String LEAF_CANONICAL = LEAF_URL + "|20240619";
     private static final String LOINC = "http://loinc.org";
     private static final String SNOMED = "http://snomed.info/sct";
+    private static final String ICD10 = "http://hl7.org/fhir/sid/icd-10-cm";
     private static final String CODE = "103721-7";
 
     // code system version and status
@@ -126,47 +127,15 @@ class ChangeLogTest {
     /** An operation on one side must not appear on the other now that the instances are separate. */
     @Test
     void anOperationOnOneSideDoesNotLeakToTheOther() {
-        var source = leafWithCode("2.76", "Old display");
-        var page = pageFor(source, leafWithCode("2.81", "New display"));
-
-        page.addOperation(
-                ChangeLog.DELETE,
-                "ValueSet.expansion.contains[0]",
-                null,
-                source.getExpansion().getContains().get(0));
+        var page = pageFor(leafWithCode("2.76", "Old display"), leafWithCode("2.81", "New display"));
 
         assertEquals(
-                ChangeLog.DELETE,
-                page.getOldData().getCodes().get(0).getOperation().getType());
-        assertNull(page.getNewData().getCodes().get(0).getOperation());
+                ChangeLog.UPDATED_DESCRIPTION,
+                page.getNewData().getCodes().get(0).getOperation().getType());
+        assertNull(page.getOldData().getCodes().get(0).getOperation());
     }
 
     // operations that must not abort changelog
-
-    /**
-     * The one route by which a single Code can still receive two operations at the same type and path:
-     * the whole-expansion branch fans over every contains entry using path "ValueSet.expansion", and two
-     * entries sharing a code value resolve to the same Code. Both carry the same value, so this is one
-     * change reported twice, not a contradiction - it must not abort the changelog.
-     */
-    @Test
-    void twoExpansionEntriesSharingACodeDoNotAbortTheChangelog() {
-        var valueSet = emptyLeaf();
-        valueSet.getCompose().addInclude().setSystem(LOINC).addConcept().setCode(CODE);
-        // The same code under two systems, which the code map collapses to one Code.
-        var equalButDistinctCode = new StringBuilder(CODE).toString();
-        valueSet.getExpansion().addContains().setSystem(LOINC).setCode(CODE).setVersion("2.81");
-        valueSet.getExpansion()
-                .addContains()
-                .setSystem("http://hl7.org/fhir/sid/icd-10-cm")
-                .setCode(equalButDistinctCode)
-                .setVersion("2026");
-
-        var page = pageFor(valueSet, valueSet.copy());
-
-        assertDoesNotThrow(() -> page.addOperation(
-                ChangeLog.REPLACE, "ValueSet.expansion", valueSet.getExpansion(), valueSet.getExpansion()));
-    }
 
     /** A genuinely conflicting value at one path is still a contradiction and must raise. */
     @Test
@@ -527,6 +496,18 @@ class ChangeLogTest {
         return pageFor(valueSet, valueSet.copy()).getNewData().getCodes().get(0);
     }
 
+    /**
+     * The one code a fixture produces for a given system, where the same code value appears under
+     * several. Codes are keyed by leaf, system and code, so each system is a concept in its own right.
+     */
+    private static ValueSetChild.Code codeOfSystem(ValueSet valueSet, String system) {
+        var codes = pageFor(valueSet, valueSet.copy()).getNewData().getCodes().stream()
+                .filter(code -> Objects.equals(system, code.getSystem()))
+                .toList();
+        assertEquals(1, codes.size(), "codes for system " + system);
+        return codes.get(0);
+    }
+
     private static LibraryChild manifestChildFor(RelatedArtifact entry) {
         var target = library("3.2.0");
         target.addRelatedArtifact(entry);
@@ -603,7 +584,7 @@ class ChangeLogTest {
         valueSet.getCompose().addInclude().setSystem(LOINC).addConcept().setCode(CODE);
         valueSet.getExpansion().addContains().setCode(CODE).setVersion("2.81");
 
-        assertNull(onlyCodeOf(valueSet).getVersion());
+        assertNull(codeOfSystem(valueSet, LOINC).getVersion());
     }
 
     /**
@@ -619,19 +600,12 @@ class ChangeLogTest {
         valueSet.setName("WestNileVirusRNA");
         valueSet.setTitle("West Nile Virus RNA");
         valueSet.getCompose().addInclude().setSystem(LOINC).addConcept().setCode(CODE);
-        valueSet.getExpansion()
-                .addContains()
-                .setSystem("http://hl7.org/fhir/sid/icd-10-cm")
-                .setCode(CODE)
-                .setVersion("2026");
+        valueSet.getExpansion().addContains().setSystem(ICD10).setCode(CODE).setVersion("2026");
         valueSet.getExpansion().addContains().setSystem(LOINC).setCode(CODE).setVersion("2.81");
-        
-        var page = new ChangeLog(LEAF_URL).addPage(valueSet, valueSet.copy(), (ArtifactDiffProcessor.DiffCache) null);
-        var distinctVersions = page.getNewData().getCodes().stream()
-                .map(ValueSetChild.Code::getVersion)
-                .distinct()
-                .toList();
 
-        assertEquals(List.of("2.81"), distinctVersions);
+        // Each system is a concept in its own right, so both are reported - the claim is that neither
+        // takes the other's version.
+        assertEquals("2.81", codeOfSystem(valueSet, LOINC).getVersion());
+        assertEquals("2026", codeOfSystem(valueSet, ICD10).getVersion());
     }
 }

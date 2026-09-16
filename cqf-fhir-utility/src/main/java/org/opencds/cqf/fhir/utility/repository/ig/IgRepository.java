@@ -38,6 +38,7 @@ import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
 import org.opencds.cqf.fhir.utility.repository.Repositories;
 import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
 import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
+import org.opencds.cqf.fhir.utility.search.Searches;
 
 /**
  * Provides access to FHIR resources stored in a directory structure following
@@ -745,8 +746,13 @@ public class IgRepository implements IRepository {
                         returnBundle,
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, requestUrl)));
+            } else if (BundleHelper.isEntryRequestGet(version, e)
+                    && BundleHelper.getEntryRequestUrl(version, e).contains("?")) {
+                var searchResult = executeSearchUrl(BundleHelper.getEntryRequestUrl(version, e), headers);
+                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(searchResult));
             } else {
-                throw new NotImplementedOperationException("Transaction only supports PUT, POST, or DELETE");
+                throw new NotImplementedOperationException(
+                        "Transaction only supports PUT, POST, DELETE, or search-style GET");
             }
         });
         return returnBundle;
@@ -758,5 +764,35 @@ public class IgRepository implements IRepository {
             throw new IllegalArgumentException("No operation provider found. Unable to invoke operations.");
         }
         return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
+    }
+
+    @SuppressWarnings("unchecked")
+    private IBaseBundle executeSearchUrl(String requestUrl, Map<String, String> headers) {
+        var queryIdx = requestUrl.indexOf('?');
+        var resourceType = queryIdx < 0 ? requestUrl : requestUrl.substring(0, queryIdx);
+        var queryString = queryIdx < 0 ? "" : requestUrl.substring(queryIdx + 1);
+        var resourceClass = (Class<IBaseResource>)
+                fhirContext.getResourceDefinition(resourceType).getImplementingClass();
+        var bundleClass =
+                (Class<IBaseBundle>) fhirContext.getResourceDefinition("Bundle").getImplementingClass();
+        return this.search(bundleClass, resourceClass, parseSearchQuery(queryString), headers);
+    }
+
+    private static Multimap<String, List<IQueryParameterType>> parseSearchQuery(String queryString) {
+        var builder = Searches.builder();
+        if (queryString.isEmpty()) {
+            return builder.build();
+        }
+        for (var pair : queryString.split("&")) {
+            var eq = pair.indexOf('=');
+            var key = eq < 0 ? pair : pair.substring(0, eq);
+            var value = eq < 0 ? "" : java.net.URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8);
+            switch (key) {
+                case "url" -> builder.withUriParam("url", value);
+                case "version" -> builder.withTokenParam("version", value);
+                default -> builder.withStringParam(key, value);
+            }
+        }
+        return builder.build();
     }
 }

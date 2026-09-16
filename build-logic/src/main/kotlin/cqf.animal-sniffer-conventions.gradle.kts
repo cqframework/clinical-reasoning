@@ -1,5 +1,7 @@
-plugins { id("ru.vyarus.animalsniffer") }
+plugins { alias(libs.plugins.animalsniffer) }
 
 dependencies {
-    "signature"("com.toasttab.android:gummy-bears-api-34:${BuildConfig.GUMMY_BEARS}@signature")
+    "signature"(
+        "com.toasttab.android:gummy-bears-api-34:${libs.versions.gummy.bears.get()}@signature"
+    )
 }

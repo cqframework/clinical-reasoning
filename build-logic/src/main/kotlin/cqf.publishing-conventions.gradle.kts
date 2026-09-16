@@ -1,6 +1,6 @@
 plugins {
     `java-library`
-    id("com.vanniktech.maven.publish")
+    alias(libs.plugins.vanniktech.publish)
 }
 
 tasks.withType<Javadoc>().configureEach {

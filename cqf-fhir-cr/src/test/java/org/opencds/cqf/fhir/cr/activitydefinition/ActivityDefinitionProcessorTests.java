@@ -19,8 +19,10 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ActivityDefinition;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CommunicationRequest;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Reference;
@@ -269,5 +271,51 @@ class ActivityDefinitionProcessorTests {
         var inputRef = (Reference) input.getValue();
         assertNotNull(inputRef);
         assertEquals("#" + contained.getId(), inputRef.getReference());
+    }
+
+    @Test
+    void testAdministerMedication() {
+        var patientId = "Patient/Patient1";
+        var encounterId = "Encounter/Encounter1";
+        var practitionerId = "Practitioner/Practitioner1";
+        var data = repositoryR4.read(Bundle.class, new IdType("Bundle", "PatientTestBundle1"));
+        var result = (Task) activityDefinitionProcessorR4.apply(
+                Eithers.forMiddle3(Ids.newId(FhirVersionEnum.R4, "ActivityDefinition", "AdministerMedicationActivity")),
+                patientId,
+                encounterId,
+                practitionerId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                data,
+                (IBaseResource) null,
+                null,
+                null);
+        assertNotNull(result);
+        assertEquals("ready", result.getStatus().toCode());
+        assertEquals("proposal", result.getIntent().toCode());
+        assertEquals(
+                "http://example.org/ActivityDefinition/AdministerMedicationActivity|0.2.0",
+                result.getInstantiatesCanonical());
+        assertEquals(patientId, result.getFor().getReference());
+        assertEquals(encounterId, result.getEncounter().getReference());
+        assertEquals(practitionerId, result.getRequester().getReference());
+        var code = result.getCode();
+        assertEquals(
+                "http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-activity-type-cs",
+                code.getCodingFirstRep().getSystem());
+        assertEquals("administer-medication", code.getCodingFirstRep().getCode());
+        assertEquals("Administer a medication", code.getCodingFirstRep().getDisplay());
+        var input = result.getInputFirstRep();
+        var inputType = input.getType().getCodingFirstRep();
+        assertEquals("http://hl7.org/fhir/uv/cpg/CodeSystem/cpg-activity-type-cs", inputType.getSystem());
+        assertEquals("order-medication", inputType.getCode());
+        assertEquals("Order a medication", inputType.getDisplay());
+        assertEquals("MedicationRequest/PastMedicationRequest", ((Reference) input.getValue()).getReference());
     }
 }

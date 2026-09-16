@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.cr.library;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.cr.helpers.TestEvaluationSettings.defaultTestEvaluationSettings;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
@@ -31,7 +30,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
@@ -39,7 +37,8 @@ import org.opencds.cqf.fhir.cr.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.cr.helpers.GeneratedPackage;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -278,21 +277,17 @@ public class TestLibrary {
     @SuppressWarnings("UnstableApiUsage")
     public static class Evaluation {
         final IRepository repository;
-        final IBaseParameters result;
+        final IParametersAdapter result;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
-        final List<IBase> parameter;
+        final List<IParametersParameterComponentAdapter> parameter;
         final IAdapterFactory adapterFactory;
 
-        @SuppressWarnings("unchecked")
         public Evaluation(IRepository repository, IBaseParameters result) {
             this.repository = repository;
-            this.result = result;
-            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    this.repository.fhirContext().getVersion().getVersion());
             adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
-            parameter = ((List<IBase>) modelResolver.resolvePath(result, "parameter"));
+            this.result = adapterFactory.createParameters(result);
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
+            parameter = this.result.getParameter();
         }
 
         public Evaluation hasResults(Integer count) {
@@ -301,15 +296,13 @@ public class TestLibrary {
         }
 
         public Evaluation hasOperationOutcome() {
-            assertTrue(modelResolver.resolvePath(parameter.get(0), "resource") instanceof IBaseOperationOutcome);
+            assertInstanceOf(IBaseOperationOutcome.class, parameter.get(0).getResource());
             return this;
         }
 
         @SuppressWarnings("unchecked")
         public Evaluation resultHasValue(Integer index, IBase value) {
-            var actual = adapterFactory
-                    .createParametersParameter(parameter.get(index))
-                    .getValue();
+            var actual = parameter.get(index).getValue();
             if (value instanceof IPrimitiveType<?> primitiveValue) {
                 assertEquals(primitiveValue.getValueAsString(), ((IPrimitiveType<String>) actual).getValueAsString());
             } else {

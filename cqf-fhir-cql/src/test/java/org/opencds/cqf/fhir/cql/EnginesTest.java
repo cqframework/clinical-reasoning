@@ -58,6 +58,7 @@ import org.opencds.cqf.cql.engine.debug.DebugMap;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.DateTime;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cql.engine.retrieve.FederatedDataProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
@@ -266,24 +267,6 @@ class EnginesTest {
     }
 
     @Test
-    void npmProcessorPackageManagerNull() {
-        var npmProcessor = mock(NpmProcessor.class);
-        when(npmProcessor.getPackageManager()).thenReturn(null);
-        when(npmProcessor.getIgContext()).thenReturn(mock(IGContext.class));
-        when(npmProcessor.getPackageManager()).thenReturn(null);
-
-        var settings = EvaluationSettings.getDefault().withNpmProcessor(npmProcessor);
-
-        var engine = getEngine(settings);
-        var lm = engine.getEnvironment().getLibraryManager();
-
-        var ni = lm.getNamespaceManager().getNamespaceInfoFromUri("http://fhir.org/guides/cqf/common");
-        assertNull(ni);
-
-        assertDataProviders(engine);
-    }
-
-    @Test
     void npmProcessorWithDupeNamespacesById() {
         var npmProcessor = mock(NpmProcessor.class);
         var namespaceInfo1 = new NamespaceInfo("1", "a");
@@ -400,11 +383,17 @@ class EnginesTest {
 
         var federatedDataProvider = (FederatedDataProvider) dataProvider1;
 
-        var retrievedPatients = retrieve(Patient.class, federatedDataProvider);
+        var retrievedPatients = new ArrayList<>();
+        federatedDataProvider
+                .retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null)
+                .forEach(retrievedPatients::add);
         assertThat(retrievedPatients, hasSize(1));
 
-        var retrieveEncounters = retrieve(Encounter.class, federatedDataProvider);
-        assertThat(retrieveEncounters, hasSize(1));
+        var retrievedEncounters = new ArrayList<>();
+        federatedDataProvider
+                .retrieve(null, null, null, "Encounter", null, null, null, null, null, null, null, null)
+                .forEach(retrievedEncounters::add);
+        assertThat(retrievedEncounters, hasSize(1));
     }
 
     @Test
@@ -613,7 +602,7 @@ class EnginesTest {
                                 .collect(Collectors.toSet())));
     }
 
-    private Iterable<Object> retrieveResourcesWithin2000BySPName(IBaseResource resource, String spName) {
+    private Iterable<Value> retrieveResourcesWithin2000BySPName(IBaseResource resource, String spName) {
         // setup
         String resourceType = resource.fhirType();
 
@@ -712,9 +701,11 @@ class EnginesTest {
 
         var federatedDataProvider = (FederatedDataProvider) dataProvider1;
 
-        var retrievedPatients = retrieve(Patient.class, federatedDataProvider);
-
-        assertThat(retrievedPatients, hasSize(1));
+        var retrieved = new ArrayList<>();
+        federatedDataProvider
+                .retrieve(null, null, null, "Patient", null, null, null, null, null, null, null, null)
+                .forEach(retrieved::add);
+        assertThat(retrieved, hasSize(1));
     }
 
     private static class NpmProcessorWithDupeNamespaces extends NpmProcessor {
@@ -737,7 +728,7 @@ class EnginesTest {
                         null, null, null, clazz.getSimpleName(), null, null, null, null, null, null, null, null));
     }
 
-    private static <T extends Resource> List<T> convert(Class<T> clazz, Iterable<Object> iterable) {
+    private static <T extends Resource> List<T> convert(Class<T> clazz, Iterable<Value> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false)
                 .filter(clazz::isInstance)
                 .map(clazz::cast)

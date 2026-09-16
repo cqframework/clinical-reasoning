@@ -1,0 +1,21 @@
+{
+  "resourceType": "ValueSet",
+  "id": "example-conditions-versioned",
+  "url": "http://example.org/ValueSet/example-conditions-versioned",
+  "version": "1.0",
+  "name": "ExampleConditionsVersioned",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://example.org/CodeSystem/example",
+        "concept": [
+          {
+            "code": "cond-1",
+            "display": "Example condition"
+          }
+        ]
+      }
+    ]
+  }
+}

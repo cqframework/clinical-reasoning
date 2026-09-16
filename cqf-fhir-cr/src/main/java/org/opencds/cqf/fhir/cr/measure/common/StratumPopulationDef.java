@@ -5,13 +5,11 @@ import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.cql.engine.runtime.ClassInstance;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 
 /**
  * Equivalent to the FHIR stratum population.
- *
  * This is meant to be the source of truth for all data points regarding stratum populations.
  * <p/>
  * Converted from record to class to support mutable aggregationResult field
@@ -182,13 +180,16 @@ public class StratumPopulationDef {
             return "null";
         }
 
+        // Limiting to 5 here to ensure we don't get flooded with values in the logs
         var limited = populationDefEvaluationResultIntersection.stream()
                 .limit(5)
                 .map(obj -> {
-                    if (obj instanceof IBaseResource resource) {
-                        return resource.getIdElement().getValueAsString();
-                    } else if (obj instanceof IBase base) {
-                        return base.fhirType();
+                    if (obj instanceof ClassInstance classInstance) {
+                        if (classInstance.has("id")) {
+                            return classInstance.get("id").toString();
+                        } else {
+                            return classInstance.getTypeAsString();
+                        }
                     } else {
                         return obj.toString();
                     }

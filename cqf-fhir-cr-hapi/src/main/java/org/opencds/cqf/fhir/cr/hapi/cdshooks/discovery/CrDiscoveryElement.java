@@ -31,7 +31,7 @@ public class CrDiscoveryElement {
         }
 
         var service = new CdsServiceJson()
-                .setId(planDefinition.getId().getIdPart())
+                .setId(planDefinition.getIdPart())
                 .setTitle(planDefinition.getTitle())
                 .setDescription(planDefinition.getDescription())
                 .setHook(triggerDefs.get(0).getName());

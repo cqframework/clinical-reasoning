@@ -8,11 +8,11 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 
-public class ElementDefinitionAdapter extends BaseAdapter implements IElementDefinitionAdapter {
+public class ElementDefinitionAdapter extends BaseElementAdapter implements IElementDefinitionAdapter {
 
     private final ElementDefinition elementDefinition;
 

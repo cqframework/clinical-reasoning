@@ -2,9 +2,7 @@ package org.opencds.cqf.fhir.cr.measure.common;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
@@ -285,6 +283,7 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), dateBasis);
 
+        var expression = "expression";
         // Create MEASUREOBSERVATION population with QuantityDef observations
         // Default aggregation method is SUM when not specified
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -292,24 +291,21 @@ class MeasureReportDefScorerTest {
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 dateBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Add QuantityDef observations for each subject
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
+        measureObsPop.addResource("p1", expression, obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
+        measureObsPop.addResource("p2", expression, obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
+        measureObsPop.addResource("p3", expression, obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -348,28 +344,26 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), booleanBasis);
 
+        var expression = "expression";
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 booleanBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
+        measureObsPop.addResource("p1", expression, obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
+        measureObsPop.addResource("p2", expression, obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
+        measureObsPop.addResource("p3", expression, obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -408,28 +402,26 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), encounterBasis);
 
+        var expression = "expression";
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 encounterBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.MIN,
                 null);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
+        measureObsPop.addResource("p1", expression, obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
+        measureObsPop.addResource("p2", expression, obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
+        measureObsPop.addResource("p3", expression, obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -468,28 +460,26 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3"), stringBasis);
 
+        var expression = "expression";
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 stringBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.MAX,
                 null);
 
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
+        measureObsPop.addResource("p1", expression, obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
+        measureObsPop.addResource("p2", expression, obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
+        measureObsPop.addResource("p3", expression, obs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -693,41 +683,43 @@ class MeasureReportDefScorerTest {
      */
     @Test
     void testScoreGroup_BooleanBasis_CountsUniqueSubjects() {
+        var expression = "Numerator";
         // Create numerator with 2 subjects, each having multiple resources
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
         CodeDef booleanBasis = createBooleanBasisCode();
         PopulationDef numeratorPop = new PopulationDef(
-                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", booleanBasis, null);
+                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, expression, booleanBasis, null);
 
         // Patient1: 3 encounters in numerator
-        numeratorPop.addResource("patient1", "Encounter/enc1");
-        numeratorPop.addResource("patient1", "Encounter/enc2");
-        numeratorPop.addResource("patient1", "Encounter/enc3");
+        numeratorPop.addResource("patient1", expression, "Encounter/enc1");
+        numeratorPop.addResource("patient1", expression, "Encounter/enc2");
+        numeratorPop.addResource("patient1", expression, "Encounter/enc3");
 
         // Patient2: 2 encounters in numerator
-        numeratorPop.addResource("patient2", "Encounter/enc4");
-        numeratorPop.addResource("patient2", "Encounter/enc5");
+        numeratorPop.addResource("patient2", expression, "Encounter/enc4");
+        numeratorPop.addResource("patient2", expression, "Encounter/enc5");
 
         // Create denominator with 3 subjects, each having multiple resources
+        expression = "Denominator";
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
         CodeDef booleanBasis2 = createBooleanBasisCode();
         PopulationDef denominatorPop = new PopulationDef(
-                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", booleanBasis2, null);
+                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, expression, booleanBasis2, null);
 
         // Patient1: 3 encounters in denominator
-        denominatorPop.addResource("patient1", "Encounter/enc1");
-        denominatorPop.addResource("patient1", "Encounter/enc2");
-        denominatorPop.addResource("patient1", "Encounter/enc3");
+        denominatorPop.addResource("patient1", expression, "Encounter/enc1");
+        denominatorPop.addResource("patient1", expression, "Encounter/enc2");
+        denominatorPop.addResource("patient1", expression, "Encounter/enc3");
 
         // Patient2: 2 encounters in denominator
-        denominatorPop.addResource("patient2", "Encounter/enc4");
-        denominatorPop.addResource("patient2", "Encounter/enc5");
+        denominatorPop.addResource("patient2", expression, "Encounter/enc4");
+        denominatorPop.addResource("patient2", expression, "Encounter/enc5");
 
         // Patient3: 4 encounters in denominator (NOT in numerator)
-        denominatorPop.addResource("patient3", "Encounter/enc6");
-        denominatorPop.addResource("patient3", "Encounter/enc7");
-        denominatorPop.addResource("patient3", "Encounter/enc8");
-        denominatorPop.addResource("patient3", "Encounter/enc9");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc6");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc7");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc8");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc9");
 
         // CRITICAL: Use boolean basis
         GroupDef groupDef = new GroupDef(
@@ -774,39 +766,41 @@ class MeasureReportDefScorerTest {
     @Test
     void testScoreGroup_EncounterBasis_CountsAllResources() {
         // Create numerator with 2 subjects, each having multiple resources
+        var expression = "Numerator";
         ConceptDef numeratorCode = createMeasurePopulationConcept(MeasurePopulationType.NUMERATOR);
         CodeDef encounterBasis = createPopulationBasisCode("Encounter");
         PopulationDef numeratorPop = new PopulationDef(
-                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, "Numerator", encounterBasis, null);
+                "num-1", numeratorCode, MeasurePopulationType.NUMERATOR, expression, encounterBasis, null);
 
         // Patient1: 3 encounters in numerator
-        numeratorPop.addResource("patient1", "Encounter/enc1");
-        numeratorPop.addResource("patient1", "Encounter/enc2");
-        numeratorPop.addResource("patient1", "Encounter/enc3");
+        numeratorPop.addResource("patient1", expression, "Encounter/enc1");
+        numeratorPop.addResource("patient1", expression, "Encounter/enc2");
+        numeratorPop.addResource("patient1", expression, "Encounter/enc3");
 
         // Patient2: 2 encounters in numerator
-        numeratorPop.addResource("patient2", "Encounter/enc4");
-        numeratorPop.addResource("patient2", "Encounter/enc5");
+        numeratorPop.addResource("patient2", expression, "Encounter/enc4");
+        numeratorPop.addResource("patient2", expression, "Encounter/enc5");
 
         // Create denominator with 3 subjects, each having multiple resources
+        expression = "Denominator";
         ConceptDef denominatorCode = createMeasurePopulationConcept(MeasurePopulationType.DENOMINATOR);
         PopulationDef denominatorPop = new PopulationDef(
-                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, "Denominator", encounterBasis, null);
+                "den-1", denominatorCode, MeasurePopulationType.DENOMINATOR, expression, encounterBasis, null);
 
         // Patient1: 3 encounters in denominator
-        denominatorPop.addResource("patient1", "Encounter/enc1");
-        denominatorPop.addResource("patient1", "Encounter/enc2");
-        denominatorPop.addResource("patient1", "Encounter/enc3");
+        denominatorPop.addResource("patient1", expression, "Encounter/enc1");
+        denominatorPop.addResource("patient1", expression, "Encounter/enc2");
+        denominatorPop.addResource("patient1", expression, "Encounter/enc3");
 
         // Patient2: 2 encounters in denominator
-        denominatorPop.addResource("patient2", "Encounter/enc4");
-        denominatorPop.addResource("patient2", "Encounter/enc5");
+        denominatorPop.addResource("patient2", expression, "Encounter/enc4");
+        denominatorPop.addResource("patient2", expression, "Encounter/enc5");
 
         // Patient3: 4 encounters in denominator (NOT in numerator)
-        denominatorPop.addResource("patient3", "Encounter/enc6");
-        denominatorPop.addResource("patient3", "Encounter/enc7");
-        denominatorPop.addResource("patient3", "Encounter/enc8");
-        denominatorPop.addResource("patient3", "Encounter/enc9");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc6");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc7");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc8");
+        denominatorPop.addResource("patient3", expression, "Encounter/enc9");
 
         // CRITICAL: Use Encounter basis (non-boolean)
         GroupDef groupDef = new GroupDef(
@@ -920,54 +914,50 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION with criteriaReference to numerator
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1", // criteriaReference to NUMERATOR population
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Add numerator observations
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-1", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p1", expression, numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-2", new QuantityDef(20.0))));
+        numeratorMeasureObs.addResource("p2", expression, numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-3", new QuantityDef(30.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
 
         // Create denominator MEASUREOBSERVATION with criteriaReference to denominator
+        expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1", // criteriaReference to DENOMINATOR population
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Add denominator observations
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(5.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-2", new QuantityDef(10.0))));
+        denominatorMeasureObs.addResource("p2", expression, denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-3", new QuantityDef(15.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
 
         // Create GroupDef with RATIO scoring
         GroupDef groupDef = new GroupDef(
@@ -1080,29 +1070,27 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create only denominator MEASUREOBSERVATION (no numerator reference)
+        var expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1", // criteriaReference to DENOMINATOR population
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Add denominator observations
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(5.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-2", new QuantityDef(10.0))));
+        denominatorMeasureObs.addResource("p2", expression, denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-3", new QuantityDef(15.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1139,29 +1127,27 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("num-1", MeasurePopulationType.NUMERATOR, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create only numerator MEASUREOBSERVATION (no denominator reference)
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1", // criteriaReference to NUMERATOR population
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Add numerator observations
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-1", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p1", expression, numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-2", new QuantityDef(20.0))));
+        numeratorMeasureObs.addResource("p2", expression, numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-3", new QuantityDef(30.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1193,12 +1179,13 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("ip-1", MeasurePopulationType.INITIALPOPULATION, Set.of("p1", "p2"), booleanBasis);
 
         // Create MEASUREOBSERVATION without any matching NUMERATOR or DENOMINATOR populations
+        var expression = "Expression";
         ConceptDef obsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObs = new PopulationDef(
                 "obs-1",
                 obsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "Expression",
+                expression,
                 booleanBasis,
                 "nonexistent-1", // No matching population
                 ContinuousVariableObservationAggregateMethod.SUM,
@@ -1253,20 +1240,20 @@ class MeasureReportDefScorerTest {
         // No observations added - will result in null aggregate
 
         // Denominator MEASUREOBSERVATION with observations
+        var expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(10.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1309,52 +1296,48 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION with AVG aggregation
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null); // AVG instead of SUM
 
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("obs-num-1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-1", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p1", expression, numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("obs-num-2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-2", new QuantityDef(20.0))));
+        numeratorMeasureObs.addResource("p2", expression, numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("obs-num-3", new QuantityDef(30.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-num-3", new QuantityDef(30.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
 
         // Create denominator MEASUREOBSERVATION with AVG aggregation
+        expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.AVG,
                 null); // AVG instead of SUM
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("obs-den-1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-1", new QuantityDef(5.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("obs-den-2", new QuantityDef(10.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-2", new QuantityDef(10.0))));
+        denominatorMeasureObs.addResource("p2", expression, denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("obs-den-3", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-den-3", new QuantityDef(15.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -1412,38 +1395,34 @@ class MeasureReportDefScorerTest {
                 "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
         // Create numerator MEASUREOBSERVATION
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Male numerator observations: 10 + 15 + 15 = 40
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p1", expression, numObs1);
 
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(15.0))));
+        numeratorMeasureObs.addResource("p2", expression, numObs2);
 
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(15.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
 
         // Female numerator observations: 10 + 20 = 30
-        Map<String, QuantityDef> numObs4 = new HashMap<>();
-        numObs4.put("p4", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p4", numObs4);
+        var numObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p4", expression, numObs4);
 
-        Map<String, QuantityDef> numObs5 = new HashMap<>();
-        numObs5.put("p5", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p5", numObs5);
+        var numObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(20.0))));
+        numeratorMeasureObs.addResource("p5", expression, numObs5);
 
         // Create denominator MEASUREOBSERVATION
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
@@ -1458,26 +1437,21 @@ class MeasureReportDefScorerTest {
                 null);
 
         // Male denominator observations: 5 + 7 + 8 = 20
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(5.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
 
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(7.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(7.0))));
+        denominatorMeasureObs.addResource("p2", expression, denObs2);
 
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(8.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(8.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
 
         // Female denominator observations: 4 + 6 = 10
-        Map<String, QuantityDef> denObs4 = new HashMap<>();
-        denObs4.put("p4", new QuantityDef(4.0));
-        denominatorMeasureObs.addResource("p4", denObs4);
+        var denObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(4.0))));
+        denominatorMeasureObs.addResource("p4", expression, denObs4);
 
-        Map<String, QuantityDef> denObs5 = new HashMap<>();
-        denObs5.put("p5", new QuantityDef(6.0));
-        denominatorMeasureObs.addResource("p5", denObs5);
+        var denObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(6.0))));
+        denominatorMeasureObs.addResource("p5", expression, denObs5);
 
         // Create stratum populations for Male stratum
         // Male stratum - MEASUREOBSERVATION populations
@@ -1599,60 +1573,52 @@ class MeasureReportDefScorerTest {
                 "den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
         // Numerator MEASUREOBSERVATION with SUM
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(15.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
-        Map<String, QuantityDef> numObs4 = new HashMap<>();
-        numObs4.put("p4", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p4", numObs4);
-        Map<String, QuantityDef> numObs5 = new HashMap<>();
-        numObs5.put("p5", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p5", numObs5);
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p1", expression, numObs1);
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(15.0))));
+        numeratorMeasureObs.addResource("p2", expression, numObs2);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(15.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
+        var numObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p4", expression, numObs4);
+        var numObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(20.0))));
+        numeratorMeasureObs.addResource("p5", expression, numObs5);
 
         // Denominator MEASUREOBSERVATION with SUM
+        expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(5.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(7.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(8.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
-        Map<String, QuantityDef> denObs4 = new HashMap<>();
-        denObs4.put("p4", new QuantityDef(4.0));
-        denominatorMeasureObs.addResource("p4", denObs4);
-        Map<String, QuantityDef> denObs5 = new HashMap<>();
-        denObs5.put("p5", new QuantityDef(6.0));
-        denominatorMeasureObs.addResource("p5", denObs5);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(5.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(7.0))));
+        denominatorMeasureObs.addResource("p2", expression, denObs2);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(8.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
+        var denObs4 = new ObservationAccumulator(List.of(new ObservationEntry("p4", new QuantityDef(4.0))));
+        denominatorMeasureObs.addResource("p4", expression, denObs4);
+        var denObs5 = new ObservationAccumulator(List.of(new ObservationEntry("p5", new QuantityDef(6.0))));
+        denominatorMeasureObs.addResource("p5", expression, denObs5);
 
         // Male stratum populations
         StratumPopulationDef maleNumObs = new StratumPopulationDef(
@@ -1756,35 +1722,31 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
+        var expression = "expression";
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 booleanBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Male observations: 10, 20, 30
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        measureObsPop.addResource("p1", obs1);
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(20.0));
-        measureObsPop.addResource("p2", obs2);
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(30.0));
-        measureObsPop.addResource("p3", obs3);
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(10.0))));
+        measureObsPop.addResource("p1", expression, obs1);
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(20.0))));
+        measureObsPop.addResource("p2", expression, obs2);
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(30.0))));
+        measureObsPop.addResource("p3", expression, obs3);
 
         // Female observations: 5, 15
-        Map<String, QuantityDef> obs4 = new HashMap<>();
-        obs4.put("obs-4", new QuantityDef(5.0));
-        measureObsPop.addResource("p4", obs4);
-        Map<String, QuantityDef> obs5 = new HashMap<>();
-        obs5.put("obs-5", new QuantityDef(15.0));
-        measureObsPop.addResource("p5", obs5);
+        var obs4 = new ObservationAccumulator(List.of(new ObservationEntry("obs-4", new QuantityDef(5.0))));
+        measureObsPop.addResource("p4", expression, obs4);
+        var obs5 = new ObservationAccumulator(List.of(new ObservationEntry("obs-5", new QuantityDef(15.0))));
+        measureObsPop.addResource("p5", expression, obs5);
 
         // Male stratum
         StratumPopulationDef maleIpPop = new StratumPopulationDef(
@@ -1928,7 +1890,7 @@ class MeasureReportDefScorerTest {
 
         // Add subjects to population
         for (String subject : subjects) {
-            pop.addResource(subject, true); // For boolean basis, resource is just boolean true
+            pop.addResource(subject, "expression", true); // For boolean basis, resource is just boolean true
         }
 
         return pop;
@@ -2177,37 +2139,33 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2", "p3", "p4", "p5"), booleanBasis);
 
+        var expression = "expression";
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 booleanBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.MEDIAN,
                 null);
 
         // Add observations in non-sorted order
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(20.0));
-        measureObsPop.addResource("p1", obs1);
+        var obs1 = new ObservationAccumulator(List.of(new ObservationEntry("obs-1", new QuantityDef(20.0))));
+        measureObsPop.addResource("p1", expression, obs1);
 
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-2", new QuantityDef(5.0));
-        measureObsPop.addResource("p2", obs2);
+        var obs2 = new ObservationAccumulator(List.of(new ObservationEntry("obs-2", new QuantityDef(5.0))));
+        measureObsPop.addResource("p2", expression, obs2);
 
-        Map<String, QuantityDef> obs3 = new HashMap<>();
-        obs3.put("obs-3", new QuantityDef(25.0));
-        measureObsPop.addResource("p3", obs3);
+        var obs3 = new ObservationAccumulator(List.of(new ObservationEntry("obs-3", new QuantityDef(25.0))));
+        measureObsPop.addResource("p3", expression, obs3);
 
-        Map<String, QuantityDef> obs4 = new HashMap<>();
-        obs4.put("obs-4", new QuantityDef(10.0));
-        measureObsPop.addResource("p4", obs4);
+        var obs4 = new ObservationAccumulator(List.of(new ObservationEntry("obs-4", new QuantityDef(10.0))));
+        measureObsPop.addResource("p4", expression, obs4);
 
-        Map<String, QuantityDef> obs5 = new HashMap<>();
-        obs5.put("obs-5", new QuantityDef(15.0));
-        measureObsPop.addResource("p5", obs5);
+        var obs5 = new ObservationAccumulator(List.of(new ObservationEntry("obs-5", new QuantityDef(15.0))));
+        measureObsPop.addResource("p5", expression, obs5);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -2247,31 +2205,32 @@ class MeasureReportDefScorerTest {
         PopulationDef measurePopulation = createPopulationDef(
                 "mp-1", MeasurePopulationType.MEASUREPOPULATION, Set.of("p1", "p2"), encounterBasis);
 
+        var expression = "expression";
         ConceptDef measureObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef measureObsPop = new PopulationDef(
                 "msrobs-1",
                 measureObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "expression",
+                expression,
                 encounterBasis,
                 null,
                 ContinuousVariableObservationAggregateMethod.COUNT,
                 null);
 
         // Patient 1 has 4 observations
-        Map<String, QuantityDef> obs1 = new HashMap<>();
-        obs1.put("obs-1", new QuantityDef(10.0));
-        obs1.put("obs-2", new QuantityDef(20.0));
-        obs1.put("obs-3", new QuantityDef(30.0));
-        obs1.put("obs-4", new QuantityDef(40.0));
-        measureObsPop.addResource("p1", obs1);
+        var obs1 = new ObservationAccumulator(List.of(
+                new ObservationEntry("obs-1", new QuantityDef(10.0)),
+                new ObservationEntry("obs-2", new QuantityDef(20.0)),
+                new ObservationEntry("obs-3", new QuantityDef(30.0)),
+                new ObservationEntry("obs-4", new QuantityDef(40.0))));
+        measureObsPop.addResource("p1", expression, obs1);
 
         // Patient 2 has 3 observations
-        Map<String, QuantityDef> obs2 = new HashMap<>();
-        obs2.put("obs-5", new QuantityDef(50.0));
-        obs2.put("obs-6", new QuantityDef(60.0));
-        obs2.put("obs-7", new QuantityDef(70.0));
-        measureObsPop.addResource("p2", obs2);
+        var obs2 = new ObservationAccumulator(List.of(
+                new ObservationEntry("obs-5", new QuantityDef(50.0)),
+                new ObservationEntry("obs-6", new QuantityDef(60.0)),
+                new ObservationEntry("obs-7", new QuantityDef(70.0))));
+        measureObsPop.addResource("p2", expression, obs2);
 
         GroupDef groupDef = new GroupDef(
                 "group-1",
@@ -2322,41 +2281,40 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
 
         // Numerator MEASUREOBSERVATION with observations for p1 and p2
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> numObs1 = new HashMap<>();
-        numObs1.put("p1", new QuantityDef(10.0));
-        numeratorMeasureObs.addResource("p1", numObs1);
-        Map<String, QuantityDef> numObs2 = new HashMap<>();
-        numObs2.put("p2", new QuantityDef(20.0));
-        numeratorMeasureObs.addResource("p2", numObs2);
+        var numObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(10.0))));
+        numeratorMeasureObs.addResource("p1", expression, numObs1);
+        var numObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(20.0))));
+        numeratorMeasureObs.addResource("p2", expression, numObs2);
 
         // Denominator MEASUREOBSERVATION with NO observations for p1 or p2
         // (observations exist for other subjects, e.g. p3, but not in this stratum)
+        expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Only add denominator obs for p3 (NOT in this stratum)
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(50.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(50.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
 
         // Stratum populations: subjects p1, p2
         StratumPopulationDef stratumNumObs = new StratumPopulationDef(
@@ -2437,40 +2395,39 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
 
         // Numerator MEASUREOBSERVATION with NO observations for p1 or p2
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Only add numerator obs for p3 (NOT in this stratum)
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(99.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(99.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
 
         // Denominator MEASUREOBSERVATION with observations for p1 and p2
+        expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
-        Map<String, QuantityDef> denObs1 = new HashMap<>();
-        denObs1.put("p1", new QuantityDef(15.0));
-        denominatorMeasureObs.addResource("p1", denObs1);
-        Map<String, QuantityDef> denObs2 = new HashMap<>();
-        denObs2.put("p2", new QuantityDef(25.0));
-        denominatorMeasureObs.addResource("p2", denObs2);
+        var denObs1 = new ObservationAccumulator(List.of(new ObservationEntry("p1", new QuantityDef(15.0))));
+        denominatorMeasureObs.addResource("p1", expression, denObs1);
+        var denObs2 = new ObservationAccumulator(List.of(new ObservationEntry("p2", new QuantityDef(25.0))));
+        denominatorMeasureObs.addResource("p2", expression, denObs2);
 
         // Stratum populations: subjects p1, p2
         StratumPopulationDef stratumNumObs = new StratumPopulationDef(
@@ -2549,38 +2506,38 @@ class MeasureReportDefScorerTest {
                 createPopulationDef("den-1", MeasurePopulationType.DENOMINATOR, Set.of("p1", "p2"), booleanBasis);
 
         // Numerator MEASUREOBSERVATION with NO observations for stratum subjects
+        var expression = "NumeratorExpression";
         ConceptDef numObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef numeratorMeasureObs = new PopulationDef(
                 "num-obs-1",
                 numObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "NumeratorExpression",
+                expression,
                 booleanBasis,
                 "num-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Only add numerator obs for p3 (NOT in stratum)
-        Map<String, QuantityDef> numObs3 = new HashMap<>();
-        numObs3.put("p3", new QuantityDef(99.0));
-        numeratorMeasureObs.addResource("p3", numObs3);
+        var numObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(99.0))));
+        numeratorMeasureObs.addResource("p3", expression, numObs3);
 
         // Denominator MEASUREOBSERVATION with NO observations for stratum subjects
+        expression = "DenominatorExpression";
         ConceptDef denObsCode = createMeasurePopulationConcept(MeasurePopulationType.MEASUREOBSERVATION);
         PopulationDef denominatorMeasureObs = new PopulationDef(
                 "den-obs-1",
                 denObsCode,
                 MeasurePopulationType.MEASUREOBSERVATION,
-                "DenominatorExpression",
+                expression,
                 booleanBasis,
                 "den-1",
                 ContinuousVariableObservationAggregateMethod.SUM,
                 null);
 
         // Only add denominator obs for p3 (NOT in stratum)
-        Map<String, QuantityDef> denObs3 = new HashMap<>();
-        denObs3.put("p3", new QuantityDef(50.0));
-        denominatorMeasureObs.addResource("p3", denObs3);
+        var denObs3 = new ObservationAccumulator(List.of(new ObservationEntry("p3", new QuantityDef(50.0))));
+        denominatorMeasureObs.addResource("p3", expression, denObs3);
 
         // Stratum populations: subjects p1, p2
         StratumPopulationDef stratumNumObs = new StratumPopulationDef(

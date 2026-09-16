@@ -267,7 +267,7 @@ public class Dstu3MeasureProcessor {
                 if (value instanceof IPrimitiveType<?> type) {
                     // TODO: handle Code, CodeableConcept, Quantity, etc
                     // resolves Date/Time values
-                    value = modelResolver.toJavaPrimitive(type.getValue(), value);
+                    value = modelResolver.toSimpleCqlType(type);
                 }
             }
             if (parameterMap.containsKey(param.getName())) {

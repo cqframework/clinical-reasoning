@@ -44,7 +44,7 @@ class ProcessGoalTests {
     void convertDstu3Goal() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forDstu3Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine);
         var goalElement = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionGoalComponent()
                 .addTarget(new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionGoalTargetComponent()
                         .setDetail(new org.hl7.fhir.dstu3.model.CodeableConcept(new Coding("test", "test", "test"))));
@@ -58,7 +58,7 @@ class ProcessGoalTests {
     void convertR4Goal() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var goalElement = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionGoalComponent()
                 .addTarget(new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionGoalTargetComponent());
         var result = fixture.convertGoal(request, goalElement);
@@ -71,7 +71,7 @@ class ProcessGoalTests {
     void convertR5Goal() {
         doReturn(repository).when(libraryEngine).getRepository();
         doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine, null);
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R5, libraryEngine);
         var goalElement = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionGoalComponent()
                 .addTarget(new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionGoalTargetComponent());
         var result = fixture.convertGoal(request, goalElement);

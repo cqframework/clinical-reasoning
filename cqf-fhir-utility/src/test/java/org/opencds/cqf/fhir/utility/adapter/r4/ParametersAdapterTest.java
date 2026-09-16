@@ -69,9 +69,7 @@ class ParametersAdapterTest {
                         "param4", new org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent()));
         adapter.addParameter(
                 new ParametersParameterComponent().setName("param4").setValue(new BooleanType(true)));
-        ((ParametersParameterComponent) adapter.addParameter())
-                .setName("param5")
-                .setValue(new StringType("value5"));
+        adapter.addParameter().setName("param5").setValue(new StringType("value5"));
         assertTrue(adapter.hasParameter("param5"));
         assertEquals("value5", adapter.getParameter("param5").getPrimitiveValue());
         adapter.setParameter("param6", 100);

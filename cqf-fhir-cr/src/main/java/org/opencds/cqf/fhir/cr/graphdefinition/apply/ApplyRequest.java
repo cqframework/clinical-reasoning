@@ -42,7 +42,6 @@ public class ApplyRequest implements ICpgRequest {
     private final ZonedDateTime endDateTime;
     private IBaseBundle data;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
@@ -93,7 +92,6 @@ public class ApplyRequest implements ICpgRequest {
         }
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
         this.inputParameterResolver = inputParameterResolver != null
                 ? inputParameterResolver
                 : createResolver(
@@ -184,11 +182,6 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

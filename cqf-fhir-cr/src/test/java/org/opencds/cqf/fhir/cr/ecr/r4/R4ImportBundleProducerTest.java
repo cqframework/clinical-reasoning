@@ -147,7 +147,7 @@ class R4ImportBundleProducerTest {
                 conditionUsageContext.getValueCodeableConcept().getText());
 
         UsageContext priorityUsageContext =
-                (UsageContext) ra.get(0).getExtension().get(1).getValue();
+                (UsageContext) ra.get(0).getExtension().get(2).getValue();
         assertEquals("priority", priorityUsageContext.getCode().getCode());
         assertEquals(
                 "routine",
@@ -248,8 +248,8 @@ class R4ImportBundleProducerTest {
     }
 
     @Test
-    void testExtractPrioritiesAndConditionsPopulatesLists() {
-        // focus usage context goes to conditions
+    void testExtractUsageContextsPopulatesLists() {
+        // focus usage context goes to genericUseContexts
         UsageContext context1 = new UsageContext();
         context1.setCode(new Coding().setCode("focus"));
         context1.setValue(new CodeableConcept().setText("Condition1").addCoding(new Coding().setCode("condition1")));
@@ -259,24 +259,38 @@ class R4ImportBundleProducerTest {
         context2.setCode(new Coding().setCode("priority"));
         context2.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
 
+        // reporting usage context goes to genericUseContexts
+        UsageContext context3 = new UsageContext();
+        context3.setCode(new Coding().setCode("reporting"));
+        context3.setValue(new CodeableConcept().addCoding(new Coding().setCode("triggering")));
+
         List<UsageContext> priorities = new ArrayList<>();
-        List<UsageContext> conditions = new ArrayList<>();
+        List<UsageContext> genericUseContexts = new ArrayList<>();
 
         // Execute
-        R4ImportBundleProducer.extractPrioritiesAndConditions(
-                Arrays.asList(context1, context2), priorities, conditions, "fakeUrl");
+        R4ImportBundleProducer.extractUsageContexts(
+                Arrays.asList(context1, context2, context3), priorities, genericUseContexts, "fakeUrl");
 
         // Verify
         assertEquals(1, priorities.size());
         assertEquals(
                 "routine",
                 priorities.get(0).getValueCodeableConcept().getCodingFirstRep().getCode());
-        assertEquals(1, conditions.size());
-        assertEquals("Condition1", conditions.get(0).getValueCodeableConcept().getText());
+        assertEquals(2, genericUseContexts.size());
+        assertEquals(
+                "Condition1",
+                genericUseContexts.get(0).getValueCodeableConcept().getText());
+        assertEquals(
+                "triggering",
+                genericUseContexts
+                        .get(1)
+                        .getValueCodeableConcept()
+                        .getCodingFirstRep()
+                        .getCode());
     }
 
     @Test
-    void testExtractPrioritiesAndConditionsConflictingPrioritiesThrows() {
+    void testExtractUsageContextsConflictingPrioritiesThrows() {
         UsageContext context1 = new UsageContext();
         context1.setCode(new Coding().setCode("priority"));
         context1.setValue(new CodeableConcept().addCoding(new Coding().setCode("urgent")));
@@ -285,13 +299,17 @@ class R4ImportBundleProducerTest {
         context2.setCode(new Coding().setCode("priority"));
         context2.setValue(new CodeableConcept().addCoding(new Coding().setCode("routine")));
 
+        UsageContext context3 = new UsageContext();
+        context3.setCode(new Coding().setCode("reporting"));
+        context3.setValue(new CodeableConcept().addCoding(new Coding().setCode("triggering")));
+
         List<UsageContext> priorities = new ArrayList<>();
-        List<UsageContext> conditions = new ArrayList<>();
+        List<UsageContext> genericUseContexts = new ArrayList<>();
 
         assertThrows(
                 UnprocessableEntityException.class,
-                () -> R4ImportBundleProducer.extractPrioritiesAndConditions(
-                        Arrays.asList(context1, context2), priorities, conditions, "http://example.com/fhir"));
+                () -> R4ImportBundleProducer.extractUsageContexts(
+                        Arrays.asList(context1, context2), priorities, genericUseContexts, "http://example.com/fhir"));
     }
 
     @Test

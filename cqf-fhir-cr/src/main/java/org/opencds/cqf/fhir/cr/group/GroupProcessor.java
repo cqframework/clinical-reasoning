@@ -45,6 +45,7 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
+@SuppressWarnings("UnstableApiUsage")
 public class GroupProcessor {
     protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
@@ -184,8 +185,7 @@ public class GroupProcessor {
                 parameters,
                 data,
                 prefetchData,
-                libraryEngine,
-                modelResolver);
+                libraryEngine);
     }
 
     public <C extends IPrimitiveType<String>, R extends IBaseResource> R evaluate(

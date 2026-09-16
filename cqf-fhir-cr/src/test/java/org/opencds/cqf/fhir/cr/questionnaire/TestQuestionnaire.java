@@ -147,8 +147,7 @@ public class TestQuestionnaire {
                     launchContext,
                     // parameters,
                     data,
-                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()),
-                    processor.modelResolver);
+                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
         }
 
         public When questionnaireUrl(IPrimitiveType<String> url) {
@@ -244,8 +243,7 @@ public class TestQuestionnaire {
                     processor.resolveStructureDefinition(Eithers.for3(null, profileId, null)),
                     false,
                     true,
-                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()),
-                    processor.modelResolver);
+                    new LibraryEngine(repository, processor.crSettings.getEvaluationSettings()));
             return new GeneratedQuestionnaire(repository, request, processor.generateQuestionnaire(request, null));
         }
 

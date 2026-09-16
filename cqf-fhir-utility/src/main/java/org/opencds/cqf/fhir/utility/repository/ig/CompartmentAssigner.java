@@ -24,7 +24,7 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsola
  * Determines the compartment assignment for a resource based on repository conventions
  * and resource references.
  */
-class CompartmentAssigner {
+public class CompartmentAssigner {
 
     // Search parameters that likely reference compartments,
     // in order of priority to use to determine compartment membership
@@ -35,7 +35,7 @@ class CompartmentAssigner {
     private final CompartmentMode compartmentMode;
     private final CompartmentIsolation compartmentIsolation;
 
-    CompartmentAssigner(
+    public CompartmentAssigner(
             FhirContext fhirContext, CompartmentMode compartmentMode, CompartmentIsolation compartmentIsolation) {
         this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
         this.compartmentMode = Objects.requireNonNull(compartmentMode, "compartmentMode cannot be null");
@@ -103,7 +103,7 @@ class CompartmentAssigner {
      * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
      * @return The compartment assignment for the resource
      */
-    CompartmentAssignment fromId(String resourceType, IIdType id) {
+    public CompartmentAssignment fromId(String resourceType, IIdType id) {
         requireNonNull(resourceType, "resourceType cannot be null");
         requireNonNull(id, "id cannot be null");
 

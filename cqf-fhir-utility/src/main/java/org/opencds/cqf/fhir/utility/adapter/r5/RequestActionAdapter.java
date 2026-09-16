@@ -20,11 +20,11 @@ import org.hl7.fhir.r5.model.RelatedArtifact;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionConditionComponent;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionRelatedActionComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 
-public class RequestActionAdapter extends BaseAdapter implements IRequestActionAdapter {
+public class RequestActionAdapter extends BaseElementAdapter implements IRequestActionAdapter {
 
     private final RequestOrchestrationActionComponent requestAction;
 

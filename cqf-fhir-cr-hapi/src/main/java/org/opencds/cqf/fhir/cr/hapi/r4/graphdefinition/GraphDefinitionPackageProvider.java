@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -21,20 +20,32 @@ import org.hl7.fhir.r4.model.GraphDefinition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.StringType;
+import org.opencds.cqf.fhir.cr.hapi.common.AsyncPackageOperationHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.IGraphDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class GraphDefinitionPackageProvider {
     private final IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory;
     private final FhirVersionEnum fhirVersion;
+    private final AsyncPackageOperationHelper asyncHelper;
 
     public GraphDefinitionPackageProvider(IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory) {
+        this(graphDefinitionProcessorFactory, AsyncPackageOperationHelper.disabled());
+    }
+
+    public GraphDefinitionPackageProvider(
+            IGraphDefinitionProcessorFactory graphDefinitionProcessorFactory, AsyncPackageOperationHelper asyncHelper) {
         this.graphDefinitionProcessorFactory = graphDefinitionProcessorFactory;
+        this.asyncHelper = asyncHelper;
         fhirVersion = FhirVersionEnum.R4;
     }
 
     /**
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
      *
      * @param id the id of the Resource.
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
@@ -42,25 +53,35 @@ public class GraphDefinitionPackageProvider {
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
      * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = GraphDefinition.class)
-    public IBaseBundle packageGraphDefinition(
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = GraphDefinition.class,
+            manualResponse = true)
+    public void packageGraphDefinition(
             @IdParam IdType id,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return graphDefinitionProcessorFactory
-                .create(requestDetails)
-                .packageGraphDefinition(
-                        Eithers.forMiddle3(id),
-                        packageParameters(
-                                fhirVersion,
-                                getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> graphDefinitionProcessorFactory
+                        .create(rd)
+                        .packageGraphDefinition(
+                                Eithers.forMiddle3(id),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
      *
      * @param id the id of the Resource.
      * @param canonical the canonical identifier for the Resource (optionally version-specific).
@@ -71,8 +92,12 @@ public class GraphDefinitionPackageProvider {
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
      * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = GraphDefinition.class)
-    public IBaseBundle packageGraphDefinition(
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = GraphDefinition.class,
+            manualResponse = true)
+    public void packageGraphDefinition(
             @OperationParam(name = "id") StringType id,
             @OperationParam(name = "canonical", typeName = "canonical") IPrimitiveType<String> canonical,
             @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
@@ -81,16 +106,18 @@ public class GraphDefinitionPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return graphDefinitionProcessorFactory
-                .create(requestDetails)
-                .packageGraphDefinition(
-                        Eithers.for3(
-                                getCanonicalType(fhirVersion, canonical, url, version),
-                                getIdType(fhirVersion, "GraphDefinition", id),
-                                null),
-                        packageParameters(
-                                fhirVersion,
-                                getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> graphDefinitionProcessorFactory
+                        .create(rd)
+                        .packageGraphDefinition(
+                                Eithers.for3(
+                                        getCanonicalType(fhirVersion, canonical, url, version),
+                                        getIdType(fhirVersion, "GraphDefinition", id),
+                                        null),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

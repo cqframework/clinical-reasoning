@@ -39,7 +39,7 @@ public class OperationParametersParser {
         IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
-            part = this.adapterFactory.createParametersParameter(parametersAdapter.addParameter());
+            part = parametersAdapter.addParameter();
         }
 
         part.setName(name);
@@ -56,7 +56,7 @@ public class OperationParametersParser {
         IParametersParameterComponentAdapter part =
                 parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
         if (part == null) {
-            part = this.adapterFactory.createParametersParameter(parametersAdapter.addParameter());
+            part = parametersAdapter.addParameter();
         }
 
         part.setName(name);

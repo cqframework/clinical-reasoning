@@ -163,6 +163,17 @@ class StratumValueWrapperTest {
         }
 
         @Test
+        void iterableWithCqlNativeStrings() {
+            // Regression (HEDIS ENP-Reporting): a stratifier function that returns a list of CQL
+            // engine-native Strings (e.g. `return all mmInfo.payer.code`) must have its elements
+            // normalized/unwrapped, not rendered via toString() which adds CQL quotes ('MMO').
+            var list = new ArrayList<>();
+            list.add(new org.opencds.cqf.cql.engine.runtime.String("MMO"));
+            var wrapper = new StratumValueWrapper(list);
+            assertEquals("MMO", wrapper.getValueAsString());
+        }
+
+        @Test
         void stringTypeGetKey() {
             var wrapper = new StratumValueWrapper(new org.hl7.fhir.r4.model.StringType("hello"));
             assertEquals("primitive-hello", wrapper.getKey());

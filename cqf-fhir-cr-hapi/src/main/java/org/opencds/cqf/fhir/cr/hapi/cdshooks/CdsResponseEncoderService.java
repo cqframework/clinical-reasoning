@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -166,7 +167,7 @@ public class CdsResponseEncoderService {
                 .setLabel(action.resolvePathString(documentation, "display"))
                 .setUrl(action.resolvePathString(documentation, "url"));
 
-        var document = action.resolvePath(documentation, "document");
+        var document = action.resolvePath(documentation, "document", IBase.class);
         String documentUrl = document == null ? null : action.resolvePathString(document, "url");
         if (StringUtils.isNotBlank(documentUrl)) {
             source.setIcon(documentUrl);

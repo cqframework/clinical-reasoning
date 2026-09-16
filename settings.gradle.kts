@@ -29,6 +29,8 @@ include("cqf-fhir-cr-spring")
 
 include("cqf-fhir-cr-cli")
 
+include("cqf-fhir-cr-dev-server")
+
 include("cqf-fhir-benchmark")
 
 include("docs")

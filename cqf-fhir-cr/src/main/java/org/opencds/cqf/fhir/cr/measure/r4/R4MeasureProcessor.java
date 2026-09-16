@@ -26,25 +26,27 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Interval;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cql.VersionedIdentifiers;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.common.CompositeEvaluationResultsPerMeasure;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvalType;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureEvaluationResultHandler;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceMode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.search.Searches;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("UnstableApiUsage")
 public class R4MeasureProcessor {
     private static final Logger log = LoggerFactory.getLogger(R4MeasureProcessor.class);
 
@@ -66,6 +68,10 @@ public class R4MeasureProcessor {
     // processor: this may be some sort of federated proxy repository initialized at runtime
     public IRepository getRepository() {
         return repository;
+    }
+
+    private SupportingEvidenceMode supportingEvidenceMode() {
+        return measureEvaluationOptions.getSupportingEvidenceMode();
     }
 
     public MeasureReport evaluateMeasure(
@@ -104,7 +110,7 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             @Nonnull List<String> subjectIds,
-            @Nonnull Map<String, EvaluationResult> results) {
+            @Nonnull Map<String, CqlEvaluationResult> results) {
 
         return evaluateMeasureCaptureDef(measure, periodStart, periodEnd, reportType, subjectIds, results)
                 .measureReport();
@@ -168,7 +174,7 @@ public class R4MeasureProcessor {
             @Nullable ZonedDateTime periodEnd,
             String reportType,
             @Nonnull List<String> subjectIds,
-            @Nonnull Map<String, EvaluationResult> results) {
+            @Nonnull Map<String, CqlEvaluationResult> results) {
 
         checkMeasureLibrary(measure);
 
@@ -183,7 +189,7 @@ public class R4MeasureProcessor {
         measureEvaluationResultHandler.processResults(fhirContext, results, measureDef, evaluationType);
 
         // Build Measure Report with Results
-        MeasureReport measureReport = new R4MeasureReportBuilder()
+        MeasureReport measureReport = new R4MeasureReportBuilder(supportingEvidenceMode())
                 .build(
                         measure,
                         measureDef,
@@ -229,7 +235,7 @@ public class R4MeasureProcessor {
         // setup MeasureDef
         var measureDef = new R4MeasureDefBuilder().build(measure);
 
-        final Map<String, EvaluationResult> resultForThisMeasure =
+        final var resultForThisMeasure =
                 compositeEvaluationResultsPerMeasure.processMeasureForSuccessOrFailure(measureDef);
 
         measureEvaluationResultHandler.processResults(fhirContext, resultForThisMeasure, measureDef, evaluationType);
@@ -237,7 +243,7 @@ public class R4MeasureProcessor {
         var measurementPeriod = MeasureProcessorTimeUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
         // Build Measure Report with Results
-        MeasureReport measureReport = new R4MeasureReportBuilder()
+        MeasureReport measureReport = new R4MeasureReportBuilder(supportingEvidenceMode())
                 .build(
                         measure,
                         measureDef,
@@ -564,7 +570,7 @@ public class R4MeasureProcessor {
                 if (value instanceof IPrimitiveType<?> type) {
                     // TODO: handle Code, CodeableConcept, Quantity, etc
                     // resolves Date/Time values
-                    value = modelResolver.toJavaPrimitive(type.getValue(), value);
+                    value = modelResolver.toSimpleCqlType(type);
                 }
             }
             if (parameterMap.containsKey(param.getName())) {

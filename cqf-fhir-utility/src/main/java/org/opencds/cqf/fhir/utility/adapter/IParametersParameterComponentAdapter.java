@@ -12,15 +12,17 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
 
     String getName();
 
-    void setName(String name);
+    IParametersParameterComponentAdapter setName(String name);
+
+    boolean hasName();
 
     List<IParametersParameterComponentAdapter> getPart();
 
     List<IBase> getPartValues(String name);
 
-    void setPart(List<IBaseBackboneElement> parametersParameterComponents);
+    IParametersParameterComponentAdapter setPart(List<IBaseBackboneElement> parametersParameterComponents);
 
-    IBaseBackboneElement addPart();
+    IParametersParameterComponentAdapter addPart();
 
     boolean hasPart();
 
@@ -30,7 +32,7 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
 
     IBaseResource getResource();
 
-    void setResource(IBaseResource resource);
+    IParametersParameterComponentAdapter setResource(IBaseResource resource);
 
     boolean hasValue();
 
@@ -38,7 +40,7 @@ public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
 
     String getPrimitiveValue();
 
-    void setValue(IBaseDatatype value);
+    IParametersParameterComponentAdapter setValue(IBaseDatatype value);
 
     IBaseDatatype getValue();
 

@@ -11,7 +11,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
@@ -32,7 +31,6 @@ public class ApplyRequest implements ICpgRequest {
     private final IBaseParameters parameters;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
@@ -51,11 +49,9 @@ public class ApplyRequest implements ICpgRequest {
             IBaseDatatype settingContext,
             IBaseParameters parameters,
             IBaseBundle data,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            LibraryEngine libraryEngine) {
         checkNotNull(activityDefinition, "expected non-null value for activityDefinition");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         fhirVersion = activityDefinition.getStructureFhirVersionEnum();
         this.activityDefinitionAdapter = getAdapterFactory().createActivityDefinition(activityDefinition);
         this.subjectId = subjectId;
@@ -70,7 +66,6 @@ public class ApplyRequest implements ICpgRequest {
         this.parameters = parameters;
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
         referencedLibraries = activityDefinitionAdapter.getReferencedLibraries();
         inputParameterResolver = IInputParameterResolver.createResolver(
                 libraryEngine.getRepository(),
@@ -153,11 +148,6 @@ public class ApplyRequest implements ICpgRequest {
     @Override
     public LibraryEngine getLibraryEngine() {
         return libraryEngine;
-    }
-
-    @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
     }
 
     @Override

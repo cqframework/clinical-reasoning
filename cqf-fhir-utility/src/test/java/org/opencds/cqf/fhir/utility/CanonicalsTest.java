@@ -70,6 +70,28 @@ class CanonicalsTest {
     }
 
     @Test
+    void versionContainingSlashesResolvesIdPart() {
+        // SNOMED CT versions are URIs. Previously, searching the full canonical for the last "/"
+        // found one inside the version and produced a start index past the end of the url part,
+        // throwing StringIndexOutOfBoundsException.
+        String snomed = "http://snomed.info/sct|http://snomed.info/sct/731000124108/version/20250901";
+
+        assertEquals("sct", Canonicals.getIdPart(snomed));
+        assertEquals("http://snomed.info/sct", Canonicals.getUrl(snomed));
+        assertEquals("http://snomed.info/sct/731000124108/version/20250901", Canonicals.getVersion(snomed));
+    }
+
+    @Test
+    void versionContainingSlashesDoesNotResolveIdPartForUrn() {
+        // The url part has no "/" at all, so there is no id to resolve. The slashes belong purely
+        // to the version and must not be mistaken for a path separator.
+        String urn = "urn:oid:2.16.840.1.113762.1.4.1146.6|http://example.org/v/1";
+
+        assertNull(Canonicals.getIdPart(urn));
+        assertEquals("urn:oid:2.16.840.1.113762.1.4.1146.6", Canonicals.getUrl(urn));
+    }
+
+    @Test
     void canonicalParts() {
         CanonicalType testUrl = new CanonicalType("http://fhir.acme.com/Questionnaire/example|1.0#vs1");
 

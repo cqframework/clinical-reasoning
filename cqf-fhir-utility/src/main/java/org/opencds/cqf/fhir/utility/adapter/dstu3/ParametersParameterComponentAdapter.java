@@ -13,10 +13,10 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 
-class ParametersParameterComponentAdapter extends BaseAdapter implements IParametersParameterComponentAdapter {
+class ParametersParameterComponentAdapter extends BaseElementAdapter implements IParametersParameterComponentAdapter {
 
     private final Parameters.ParametersParameterComponent parametersParameterComponent;
 
@@ -45,8 +45,14 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
-    public void setName(String name) {
+    public IParametersParameterComponentAdapter setName(String name) {
         this.parametersParameterComponent.setName(name);
+        return this;
+    }
+
+    @Override
+    public boolean hasName() {
+        return this.getParametersParameterComponent().hasName();
     }
 
     @Override
@@ -67,18 +73,19 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
-    public void setPart(List<IBaseBackboneElement> parametersParameterComponents) {
+    public IParametersParameterComponentAdapter setPart(List<IBaseBackboneElement> parametersParameterComponents) {
         this.parametersParameterComponent.setPart(
                 parametersParameterComponents == null
                         ? null
                         : parametersParameterComponents.stream()
                                 .map(x -> (ParametersParameterComponent) x)
                                 .collect(Collectors.toList()));
+        return this;
     }
 
     @Override
-    public IBaseBackboneElement addPart() {
-        return this.parametersParameterComponent.addPart();
+    public IParametersParameterComponentAdapter addPart() {
+        return adapterFactory.createParametersParameter(this.parametersParameterComponent.addPart());
     }
 
     @Override
@@ -107,8 +114,9 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
-    public void setResource(IBaseResource resource) {
+    public IParametersParameterComponentAdapter setResource(IBaseResource resource) {
         this.parametersParameterComponent.setResource((Resource) resource);
+        return this;
     }
 
     @Override
@@ -122,8 +130,9 @@ class ParametersParameterComponentAdapter extends BaseAdapter implements IParame
     }
 
     @Override
-    public void setValue(IBaseDatatype value) {
+    public IParametersParameterComponentAdapter setValue(IBaseDatatype value) {
         this.parametersParameterComponent.setValue((Type) value);
+        return this;
     }
 
     @Override

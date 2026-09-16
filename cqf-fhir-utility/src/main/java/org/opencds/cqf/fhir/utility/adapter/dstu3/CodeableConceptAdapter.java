@@ -4,11 +4,11 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
 
-public class CodeableConceptAdapter extends BaseAdapter implements ICodeableConceptAdapter {
+public class CodeableConceptAdapter extends BaseElementAdapter implements ICodeableConceptAdapter {
 
     private final CodeableConcept codeableConcept;
 

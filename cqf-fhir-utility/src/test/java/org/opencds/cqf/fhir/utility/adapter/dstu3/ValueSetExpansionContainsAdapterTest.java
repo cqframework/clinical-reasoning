@@ -24,7 +24,6 @@ class ValueSetExpansionContainsAdapterTest {
         assertNotNull(adapter);
         assertEquals(contains, adapter.get());
         assertEquals(FhirVersionEnum.DSTU3, adapter.fhirContext().getVersion().getVersion());
-        assertNotNull(adapter.getModelResolver());
     }
 
     @Test

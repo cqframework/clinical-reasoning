@@ -12,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
@@ -20,12 +19,10 @@ import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationProcessor;
 import org.opencds.cqf.fhir.cr.cql.evaluate.CqlEvaluationRequest;
 import org.opencds.cqf.fhir.cr.cql.evaluate.ICqlEvaluationProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CqlProcessor {
 
-    protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected ICqlEvaluationProcessor cqlEvaluationProcessor;
     protected IRepository repository;
@@ -44,7 +41,6 @@ public class CqlProcessor {
         this.repository = requireNonNull(repository, "repository can not be null");
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
                 if (p instanceof ICqlEvaluationProcessor pack) {
@@ -142,7 +138,6 @@ public class CqlProcessor {
                 data,
                 prefetchData,
                 content,
-                libraryEngine,
-                modelResolver);
+                libraryEngine);
     }
 }

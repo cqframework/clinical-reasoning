@@ -13,9 +13,7 @@ public interface IEndpointAdapter extends IResourceAdapter {
     }
 
     default void setAddress(String address) {
-        getModelResolver()
-                .setValue(
-                        get(), "address", newUrlType(fhirContext().getVersion().getVersion(), address));
+        setValue(get(), "address", newUrlType(fhirContext().getVersion().getVersion(), address));
     }
 
     default boolean hasHeaders() {
@@ -40,6 +38,6 @@ public interface IEndpointAdapter extends IResourceAdapter {
                 : headers.stream()
                         .map(header -> newStringType(fhirContext().getVersion().getVersion(), header))
                         .toList();
-        getModelResolver().setValue(get(), "header", mappedHeaders);
+        setValue(get(), "header", mappedHeaders);
     }
 }

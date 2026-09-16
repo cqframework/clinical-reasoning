@@ -1,11 +1,11 @@
 package org.opencds.cqf.fhir.cr.measure.common;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.opencds.cqf.cql.engine.runtime.Value;
 
 public class SdeDef {
 
@@ -13,11 +13,18 @@ public class SdeDef {
     private final ConceptDef code;
     private final String expression;
     private final String description;
-    private final Map<String, CriteriaResult> results = new HashMap<>();
+    private final Map<String, CqlExpressionValue> results = new HashMap<>();
 
     // Pre-accumulated state (populated by MeasureMultiSubjectEvaluator)
     private final Map<StratumValueWrapper, Long> accumulatedValues = new HashMap<>();
-    private final Set<Object> allEvaluatedResources = new HashSet<>();
+
+    /**
+     * Keyed by resource identity rather than by {@link Value#hashCode}. These are engine values —
+     * a FHIR resource arrives as a {@code ClassInstance} whose hash is a recursive walk of the whole
+     * element tree — and {@link #accumulate} merges every subject's set into this one, so a plain
+     * {@link HashSet} pays that walk per resource per subject.
+     */
+    private final Set<Value> allEvaluatedResources = new HashSetForFhirResourcesAndCqlTypes<>();
 
     public SdeDef(String id, ConceptDef code, String expression) {
         this(id, code, expression, null);
@@ -46,15 +53,15 @@ public class SdeDef {
         return this.description;
     }
 
-    public void putResult(String subject, Object value, Set<Object> evaluatedResources) {
-        this.results.put(subject, new CriteriaResult(value, evaluatedResources));
+    public void putResult(String subject, String expression, Object value, Set<Value> evaluatedResources) {
+        this.results.put(subject, CqlExpressionValue.ofRaw(expression, value, evaluatedResources));
     }
 
     public Map<StratumValueWrapper, Long> getAccumulatedValues() {
         return this.accumulatedValues;
     }
 
-    public Set<Object> getAllEvaluatedResources() {
+    public Set<Value> getAllEvaluatedResources() {
         return this.allEvaluatedResources;
     }
 
@@ -64,7 +71,7 @@ public class SdeDef {
      */
     public void accumulate() {
         // Merge all evaluated resources across subjects
-        for (CriteriaResult result : results.values()) {
+        for (CqlExpressionValue result : results.values()) {
             allEvaluatedResources.addAll(result.evaluatedResources());
         }
 

@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
 
-class AttachmentAdapter extends BaseAdapter implements IAttachmentAdapter {
+class AttachmentAdapter extends BaseElementAdapter implements IAttachmentAdapter {
 
     private final Attachment attachment;
 

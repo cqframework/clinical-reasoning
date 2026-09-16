@@ -302,15 +302,14 @@ class MeasureScoreCalculatorTest {
 
     @Test
     void testCollectQuantities_ValidMaps() {
-        // Create resources with nested maps containing QuantityDef values
-        Map<String, Object> map1 = new HashMap<>();
-        map1.put("key1", new QuantityDef(10.0));
-        map1.put("key2", new QuantityDef(20.0));
+        // Create observation accumulators with QuantityDef values
+        var acc1 = new ObservationAccumulator(List.of(
+                new ObservationEntry("key1", new QuantityDef(10.0)),
+                new ObservationEntry("key2", new QuantityDef(20.0))));
 
-        Map<String, Object> map2 = new HashMap<>();
-        map2.put("key3", new QuantityDef(30.0));
+        var acc2 = new ObservationAccumulator(List.of(new ObservationEntry("key3", new QuantityDef(30.0))));
 
-        Collection<Object> resources = List.of(map1, map2);
+        Collection<CqlExpressionValue> resources = wrap(acc1, acc2);
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -323,7 +322,7 @@ class MeasureScoreCalculatorTest {
 
     @Test
     void testCollectQuantities_EmptyCollection() {
-        Collection<Object> resources = new ArrayList<>();
+        Collection<CqlExpressionValue> resources = new ArrayList<>();
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -334,7 +333,7 @@ class MeasureScoreCalculatorTest {
     @Test
     void testCollectQuantities_NoMaps() {
         // Collection with non-Map objects
-        Collection<Object> resources = List.of("string", 42, new Object());
+        Collection<CqlExpressionValue> resources = wrap("string", 42, new Object());
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -343,12 +342,12 @@ class MeasureScoreCalculatorTest {
     }
 
     @Test
-    void testCollectQuantities_MapsWithoutQuantityDef() {
+    void testCollectQuantities_NonAccumulatorInputsIgnored() {
         Map<String, Object> map1 = new HashMap<>();
         map1.put("key1", "not a quantity");
         map1.put("key2", 123);
 
-        Collection<Object> resources = List.of(map1);
+        Collection<CqlExpressionValue> resources = wrap(map1);
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
@@ -358,21 +357,25 @@ class MeasureScoreCalculatorTest {
 
     @Test
     void testCollectQuantities_MixedContent() {
-        // Mix of maps with and without QuantityDef, and non-map objects
-        Map<String, Object> map1 = new HashMap<>();
-        map1.put("key1", new QuantityDef(10.0));
-        map1.put("key2", "not a quantity");
+        // Mix of accumulators with non-null/null observation values, and non-accumulator objects
+        var acc1 = new ObservationAccumulator(
+                List.of(new ObservationEntry("key1", new QuantityDef(10.0)), new ObservationEntry("key2", null)));
 
-        Map<String, Object> map2 = new HashMap<>();
-        map2.put("key3", 123);
+        var acc2 = new ObservationAccumulator(List.of(new ObservationEntry("key3", null)));
 
-        Collection<Object> resources = List.of(map1, "string", map2, new QuantityDef(20.0));
+        Collection<CqlExpressionValue> resources = wrap(acc1, "string", acc2, new QuantityDef(20.0));
 
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);
 
         assertNotNull(quantities);
         assertEquals(1, quantities.size());
         assertEquals(10.0, quantities.get(0).value(), 0.0001);
+    }
+
+    private static List<CqlExpressionValue> wrap(Object... items) {
+        return java.util.Arrays.stream(items)
+                .map(item -> CqlExpressionValue.ofRaw(null, item, null))
+                .toList();
     }
 
     // ========== Edge Cases and Integration Tests ==========
@@ -418,14 +421,13 @@ class MeasureScoreCalculatorTest {
     @Test
     void testFullWorkflow_CollectAggregateContinuousVariable() {
         // Full workflow: collect quantities -> aggregate -> score
-        Map<String, Object> resource1 = new HashMap<>();
-        resource1.put("obs1", new QuantityDef(10.0));
-        resource1.put("obs2", new QuantityDef(20.0));
+        var resource1 = new ObservationAccumulator(List.of(
+                new ObservationEntry("obs1", new QuantityDef(10.0)),
+                new ObservationEntry("obs2", new QuantityDef(20.0))));
 
-        Map<String, Object> resource2 = new HashMap<>();
-        resource2.put("obs3", new QuantityDef(30.0));
+        var resource2 = new ObservationAccumulator(List.of(new ObservationEntry("obs3", new QuantityDef(30.0))));
 
-        Collection<Object> resources = List.of(resource1, resource2);
+        Collection<CqlExpressionValue> resources = wrap(resource1, resource2);
 
         // Collect quantities
         List<QuantityDef> quantities = MeasureScoreCalculator.collectQuantities(resources);

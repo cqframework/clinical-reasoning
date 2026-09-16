@@ -3,10 +3,10 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.TriggerDefinition;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ITriggerDefinitionAdapter;
 
-public class TriggerDefinitionAdapter extends BaseAdapter implements ITriggerDefinitionAdapter {
+public class TriggerDefinitionAdapter extends BaseElementAdapter implements ITriggerDefinitionAdapter {
 
     private final TriggerDefinition triggerDefinition;
 

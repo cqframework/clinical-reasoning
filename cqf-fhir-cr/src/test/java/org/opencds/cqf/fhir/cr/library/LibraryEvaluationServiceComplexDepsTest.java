@@ -31,7 +31,8 @@ class LibraryEvaluationServiceComplexDepsTest {
                 .parameters(params)
                 .thenEvaluate()
                 .hasResults(21)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;
@@ -131,7 +132,8 @@ class LibraryEvaluationServiceComplexDepsTest {
                 .parameters(params)
                 .thenEvaluate()
                 .hasResults(14)
-                .result;
+                .result
+                .get();
         assertInstanceOf(Parameters.class, result);
 
         var report = (Parameters) result;

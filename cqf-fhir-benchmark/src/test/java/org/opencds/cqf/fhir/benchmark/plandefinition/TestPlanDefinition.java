@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.benchmark.plandefinition;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.json.JSONException;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.benchmark.TestOperationProvider;
 import org.opencds.cqf.fhir.benchmark.helpers.DataRequirementsLibrary;
 import org.opencds.cqf.fhir.benchmark.helpers.GeneratedPackage;
@@ -50,7 +49,10 @@ import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
@@ -349,46 +351,48 @@ public class TestPlanDefinition {
     @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedBundle {
         final IRepository repository;
-        final IBaseBundle generatedBundleInner;
+        final IBaseBundle generatedBundle;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
-        IBaseResource questionnaire;
-        IBaseResource questionnaireResponse;
-        Map<String, IBaseBackboneElement> items;
+        final IAdapterFactory adapterFactory;
+        public IQuestionnaireAdapter questionnaire;
+        public IQuestionnaireResponseAdapter questionnaireResponse;
+        Map<String, IQuestionnaireResponseItemComponentAdapter> items;
 
-        public GeneratedBundle(IRepository repository, IBaseBundle generatedBundleInner) {
+        public GeneratedBundle(IRepository repository, IBaseBundle generatedBundle) {
             this.repository = repository;
-            this.generatedBundleInner = generatedBundleInner;
+            this.generatedBundle = generatedBundle;
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    this.repository.fhirContext().getVersion().getVersion());
-            questionnaireResponse = getEntryResources(this.generatedBundleInner).stream()
+            adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
+            questionnaireResponse = getEntryResources(this.generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("QuestionnaireResponse"))
+                    .map(adapterFactory::createQuestionnaireResponse)
                     .findFirst()
                     .orElse(null);
-            questionnaire = getEntryResources(this.generatedBundleInner).stream()
-                    .filter(r -> r.fhirType().equals(QUESTIONNAIRE))
+            questionnaire = getEntryResources(this.generatedBundle).stream()
+                    .filter(r -> r.fhirType().equals("Questionnaire"))
+                    .map(adapterFactory::createQuestionnaire)
                     .findFirst()
                     .orElse(null);
             if (questionnaireResponse != null) {
                 items = new HashMap<>();
-                populateItems(getItems(questionnaireResponse));
+                populateItems(getItems(questionnaireResponse.get()));
             }
         }
 
-        @SuppressWarnings("unchecked")
-        private List<IBaseBackboneElement> getItems(IBase base) {
-            var pathResult = modelResolver.resolvePath(base, "item");
-            return pathResult instanceof List ? (List<IBaseBackboneElement>) pathResult : new ArrayList<>();
+        private List<IQuestionnaireResponseItemComponentAdapter> getItems(IBase base) {
+            var pathResult = questionnaireResponse.resolvePathList(base, "item");
+            return pathResult.stream()
+                    .map(adapterFactory::createQuestionnaireResponseItem)
+                    .toList();
         }
 
-        private void populateItems(List<IBaseBackboneElement> itemList) {
+        private void populateItems(List<IQuestionnaireResponseItemComponentAdapter> itemList) {
             for (var item : itemList) {
                 @SuppressWarnings("unchecked")
-                var linkIdPath = (IPrimitiveType<String>) modelResolver.resolvePath(item, "linkId");
+                var linkIdPath = (IPrimitiveType<String>) item.resolvePath("linkId");
                 var linkId = linkIdPath == null ? null : linkIdPath.getValue();
                 items.put(linkId, item);
-                var childItems = getItems(item);
+                var childItems = getItems(item.get());
                 if (!childItems.isEmpty()) {
                     populateItems(childItems);
                 }
@@ -398,10 +402,10 @@ public class TestPlanDefinition {
         public GeneratedBundle isEqualsTo(String expectedBundleAssetName) {
             try {
                 JSONAssert.assertEquals(
-                        load(expectedBundleAssetName), jsonParser.encodeResourceToString(generatedBundleInner), true);
+                        load(expectedBundleAssetName), jsonParser.encodeResourceToString(generatedBundle), true);
             } catch (JSONException | IOException e) {
-                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
-                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
+                e.printStackTrace();
+                fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
         }
@@ -410,70 +414,77 @@ public class TestPlanDefinition {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedBundleId)),
-                        jsonParser.encodeResourceToString(generatedBundleInner),
+                        jsonParser.encodeResourceToString(generatedBundle),
                         true);
             } catch (JSONException e) {
-                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
-                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
+                e.printStackTrace();
+                fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
         }
 
         public GeneratedBundle hasEntry(int count) {
-            assertEquals(count, getEntry(generatedBundleInner).size());
+            assertEquals(count, getEntry(generatedBundle).size());
             return this;
         }
 
         public GeneratedBundle hasCommunicationRequestPayload() {
-            var communications = getEntryResources(generatedBundleInner).stream()
+            var communications = getEntryResources(generatedBundle).stream()
                     .filter(r -> r.fhirType().equals("CommunicationRequest"))
                     .toList();
             assertFalse(communications.isEmpty());
-            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+            assertTrue(communications.stream()
+                    .map(adapterFactory::createResource)
+                    .allMatch(c -> c.resolvePath("payload") != null));
             return this;
         }
 
-        public GeneratedBundle hasQuestionnaire() {
-            assertNotNull(questionnaire);
+        public GeneratedBundle hasQuestionnaire(boolean value) {
+            if (value) {
+                assertNotNull(questionnaire);
+            } else {
+                assertNull(questionnaire);
+            }
             return this;
         }
 
-        public GeneratedBundle hasQuestionnaireResponse() {
-            assertNotNull(questionnaireResponse);
+        public GeneratedBundle hasQuestionnaireResponse(boolean value) {
+            if (value) {
+                assertNotNull(questionnaireResponse);
+            } else {
+                assertNull(questionnaireResponse);
+            }
             return this;
         }
 
-        @SuppressWarnings({"unchecked", "squid:S2259"})
         public GeneratedBundle hasQuestionnaireResponseItemValue(String linkId, String value) {
-            var answerPath = modelResolver.resolvePath(items.get(linkId), "answer");
-            var answers = answerPath instanceof List<?> l
-                    ? l.stream()
-                            .map(a -> (IPrimitiveType<String>) modelResolver.resolvePath(a, "value"))
-                            .toList()
-                    : null;
-            assertNotNull(answers);
+            var item = items.get(linkId);
+            assertTrue(item.hasAnswer());
             assertTrue(
-                    answers.stream().anyMatch(a -> a.getValue().equals(value)),
+                    item.getAnswer().stream()
+                            .filter(a -> a.getValue() instanceof IPrimitiveType<?>)
+                            .map(a -> (IPrimitiveType<?>) a.getValue())
+                            .anyMatch(a -> a.getValueAsString().equals(value)),
                     "expected answer to contain value: " + value);
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedBundle hasQuestionnaireOperationOutcome() {
-            assertTrue(getEntryResources(generatedBundleInner).stream()
-                    .anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)
-                            && ((List<IBaseResource>) modelResolver.resolvePath(r, CONTAINED))
-                                    .stream().anyMatch(c -> c.fhirType().equals(OPERATION_OUTCOME))));
+            assertTrue(getEntryResources(generatedBundle).stream()
+                    .anyMatch(r -> r.fhirType().equals("Questionnaire")
+                            && (adapterFactory.createResource(r).getContained())
+                                    .stream().anyMatch(c -> c.fhirType().equals("OperationOutcome"))));
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedBundle entryHasOperationOutcome(int entry) {
             var resource = getEntryResource(
-                    generatedBundleInner.getStructureFhirVersionEnum(),
-                    getEntry(generatedBundleInner).get(entry));
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(resource, CONTAINED))
-                    .stream().anyMatch(c -> c.fhirType().equals(OPERATION_OUTCOME)));
+                    generatedBundle.getStructureFhirVersionEnum(),
+                    getEntry(generatedBundle).get(entry));
+            assertNotNull(resource);
+            var adapter = adapterFactory.createResource(resource);
+            assertTrue(
+                    adapter.getContained().stream().anyMatch(c -> c.fhirType().equals("OperationOutcome")));
             return this;
         }
     }
@@ -481,27 +492,26 @@ public class TestPlanDefinition {
     @SuppressWarnings("UnstableApiUsage")
     public static class GeneratedCarePlan {
         final IRepository repository;
-        final IBaseResource generatedCarePlanInner;
+        final IResourceAdapter generatedCarePlan;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
+        final IAdapterFactory adapterFactory;
 
-        public GeneratedCarePlan(IRepository repository, IBaseResource generatedCarePlanInner) {
+        public GeneratedCarePlan(IRepository repository, IBaseResource generatedCarePlan) {
             this.repository = repository;
-            this.generatedCarePlanInner = generatedCarePlanInner;
+            adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
+            this.generatedCarePlan = adapterFactory.createResource(generatedCarePlan);
             jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    this.repository.fhirContext().getVersion().getVersion());
         }
 
         public GeneratedCarePlan isEqualsTo(String expectedCarePlanAssetName) {
             try {
                 JSONAssert.assertEquals(
                         load(expectedCarePlanAssetName),
-                        jsonParser.encodeResourceToString(generatedCarePlanInner),
+                        jsonParser.encodeResourceToString(generatedCarePlan.get()),
                         true);
             } catch (JSONException | IOException e) {
-                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
-                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
+                e.printStackTrace();
+                fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
         }
@@ -510,44 +520,38 @@ public class TestPlanDefinition {
             try {
                 JSONAssert.assertEquals(
                         jsonParser.encodeResourceToString(readRepository(repository, expectedCarePlanId)),
-                        jsonParser.encodeResourceToString(generatedCarePlanInner),
+                        jsonParser.encodeResourceToString(generatedCarePlan.get()),
                         true);
             } catch (JSONException e) {
-                logger.error(UNABLE_TO_COMPARE_JSONS + e.getMessage(), e);
-                fail(UNABLE_TO_COMPARE_JSONS + e.getMessage());
+                e.printStackTrace();
+                fail("Unable to compare Jsons: " + e.getMessage());
             }
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasContained(int count) {
-            assertEquals(
-                    count, ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED)).size());
+            assertEquals(count, generatedCarePlan.getContained().size());
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasOperationOutcome() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
-                    .stream().anyMatch(r -> r.fhirType().equals(OPERATION_OUTCOME)));
+            assertTrue(generatedCarePlan.getContained().stream()
+                    .anyMatch(r -> r.fhirType().equals("OperationOutcome")));
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasQuestionnaire() {
-            assertTrue(((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
-                    .stream().anyMatch(r -> r.fhirType().equals(QUESTIONNAIRE)));
+            assertTrue(generatedCarePlan.getContained().stream()
+                    .anyMatch(r -> r.fhirType().equals("Questionnaire")));
             return this;
         }
 
-        @SuppressWarnings("unchecked")
         public GeneratedCarePlan hasCommunicationRequestPayload() {
-            var communications = ((List<IBaseResource>) modelResolver.resolvePath(generatedCarePlanInner, CONTAINED))
-                    .stream()
-                            .filter(r -> r.fhirType().equals("CommunicationRequest"))
-                            .toList();
+            var communications = generatedCarePlan.getContained().stream()
+                    .filter(r -> r.fhirType().equals("CommunicationRequest"))
+                    .toList();
             assertFalse(communications.isEmpty());
-            assertTrue(communications.stream().allMatch(c -> modelResolver.resolvePath(c, "payload") != null));
+            assertTrue(communications.stream().allMatch(c -> generatedCarePlan.resolvePath(c, "payload") != null));
             return this;
         }
     }

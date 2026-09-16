@@ -72,7 +72,7 @@ public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQu
 
     @Override
     public IIdType getSubject() {
-        return Ids.newId(fhirVersion(), get().getSubject().getReference());
+        return get().hasSubject() ? Ids.newId(fhirVersion(), get().getSubject().getReference()) : null;
     }
 
     @Override

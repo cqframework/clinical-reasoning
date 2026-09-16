@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
@@ -11,11 +12,14 @@ import static org.mockito.Mockito.when;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -23,7 +27,9 @@ import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings.TxResourceMode;
 
 class ExpandRunnerTest {
 
@@ -453,5 +459,211 @@ class ExpandRunnerTest {
         var result = (ValueSet) runner.expandValueSet();
 
         assertEquals(1, result.getExpansion().getContains().size());
+    }
+
+    // ---- tx-resource per-attempt behavior ----------------------------------------------------------
+
+    private static Parameters paramsWithTxResource() {
+        var params = new Parameters();
+        params.addParameter().setName("count").setValue(new IntegerType(1000));
+        var cs = new CodeSystem();
+        cs.setUrl("http://example.org/CodeSystem/local").setVersion("6.1.0");
+        params.addParameter().setName(Constants.TX_RESOURCE).setResource(cs);
+        return params;
+    }
+
+    private static boolean hasTxResource(IBaseParameters parameters) {
+        return ((Parameters) parameters)
+                .getParameter().stream().anyMatch(p -> Constants.TX_RESOURCE.equals(p.getName()));
+    }
+
+    @Test
+    void parametersForAttempt_auto_stripsFirstAttemptOnly() {
+        var params = paramsWithTxResource();
+        var client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        // AUTO is the default mode
+        var settings = TerminologyServerClientSettings.getDefault();
+        var runner = new ExpandRunner(client, settings, "http://example.org/fhir/ValueSet/x", params);
+
+        assertFalse(hasTxResource(runner.parametersForAttempt(1)), "AUTO attempt 1 must NOT include tx-resource");
+        assertTrue(hasTxResource(runner.parametersForAttempt(2)), "AUTO attempt 2 must include tx-resource");
+        assertTrue(hasTxResource(params), "the original parameters must be left untouched");
+    }
+
+    @Test
+    void parametersForAttempt_enabled_keepsFromFirstAttempt() {
+        var params = paramsWithTxResource();
+        var client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        var settings = TerminologyServerClientSettings.getDefault().setTxResourceMode(TxResourceMode.ENABLED);
+        var runner = new ExpandRunner(client, settings, "http://example.org/fhir/ValueSet/x", params);
+
+        assertTrue(hasTxResource(runner.parametersForAttempt(1)), "ENABLED attempt 1 must include tx-resource");
+        assertTrue(hasTxResource(runner.parametersForAttempt(2)), "ENABLED attempt 2 must include tx-resource");
+    }
+
+    @Test
+    void parametersForAttempt_disabled_keepsParametersAsIs() {
+        var params = paramsWithTxResource();
+        var client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        var settings = TerminologyServerClientSettings.getDefault().setTxResourceMode(TxResourceMode.DISABLED);
+        var runner = new ExpandRunner(client, settings, "http://example.org/fhir/ValueSet/x", params);
+
+        // DISABLED does not strip; it sends whatever was provided (nothing is attached upstream in practice)
+        assertSameInstance(params, runner.parametersForAttempt(1));
+        assertSameInstance(params, runner.parametersForAttempt(2));
+    }
+
+    private static void assertSameInstance(IBaseParameters expected, IBaseParameters actual) {
+        assertTrue(expected == actual, "expected the very same parameters instance to be returned as-is");
+    }
+
+    @Test
+    void auto_endToEnd_stripsTxResourceOnFirstAttempt_thenAttachesOnRetry() {
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = paramsWithTxResource();
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        var captor = ArgumentCaptor.forClass(IBaseParameters.class);
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(captor.capture())
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenThrow(new InternalErrorException("Server error"))
+                .thenReturn(expandedVs);
+
+        // AUTO (default): attempt 1 without tx-resource, attempt 2 with it
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        var result = (ValueSet) runner.expandValueSet();
+
+        assertEquals(1, result.getExpansion().getContains().size());
+
+        var sent = captor.getAllValues();
+        assertEquals(2, sent.size(), "expected exactly two $expand attempts");
+        assertFalse(hasTxResource(sent.get(0)), "first attempt must be sent WITHOUT tx-resource");
+        assertTrue(hasTxResource(sent.get(1)), "retry must be sent WITH tx-resource");
+    }
+
+    @Test
+    void enabled_endToEnd_attachesTxResourceOnFirstAttempt() {
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = paramsWithTxResource();
+
+        var expandedVs = new ValueSet();
+        expandedVs.setUrl(url);
+        expandedVs.getExpansion().addContains(new ValueSetExpansionContainsComponent().setCode("test"));
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        var captor = ArgumentCaptor.forClass(IBaseParameters.class);
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(captor.capture())
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenReturn(expandedVs);
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L)
+                .setTxResourceMode(TxResourceMode.ENABLED);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        runner.expandValueSet();
+
+        assertTrue(hasTxResource(captor.getValue()), "ENABLED first attempt must be sent WITH tx-resource");
+    }
+
+    // ---- non-transient failures short-circuit the retry loop ----------------------------------------
+
+    @Test
+    void auto_nonTransientFailure_escalatesOnceThenStops() {
+        // A non-transient failure (HTTP 422) will never succeed on an identical retry. In AUTO mode the
+        // first failure still warrants ONE retry (attempt 2 escalates by attaching tx-resource), but once
+        // that escalated attempt also fails non-transiently there is nothing new to try, so we must stop
+        // rather than burn the third attempt.
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = paramsWithTxResource();
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        AtomicInteger executeCalls = new AtomicInteger(0);
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenAnswer(inv -> {
+                    executeCalls.incrementAndGet();
+                    throw new UnprocessableEntityException("CodeSystem could not be found");
+                });
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        assertThrows(TerminologyServerExpansionException.class, runner::expandValueSet);
+
+        assertEquals(
+                2,
+                executeCalls.get(),
+                "AUTO should make exactly two attempts (initial + one tx-resource escalation) on a non-transient failure");
+    }
+
+    @Test
+    void disabled_nonTransientFailure_doesNotRetry() {
+        // With no tx-resource escalation possible (DISABLED), a non-transient failure has no different
+        // request to try, so the loop must stop after the first attempt regardless of maxRetryCount.
+        var url = "http://example.org/fhir/ValueSet/test";
+        var params = new Parameters();
+
+        IGenericClient client = mock(IGenericClient.class, new ReturnsDeepStubs());
+        when(client.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+        when(client.getServerBase()).thenReturn("http://example.org/fhir");
+
+        AtomicInteger executeCalls = new AtomicInteger(0);
+        when(client.operation()
+                        .onInstance(anyString())
+                        .named("$expand")
+                        .withParameters(any(IBaseParameters.class))
+                        .returnResourceType(any(Class.class))
+                        .execute())
+                .thenAnswer(inv -> {
+                    executeCalls.incrementAndGet();
+                    throw new UnprocessableEntityException("CodeSystem could not be found");
+                });
+
+        var settings = TerminologyServerClientSettings.getDefault()
+                .setTimeoutSeconds(10)
+                .setMaxRetryCount(3)
+                .setRetryIntervalMillis(1L)
+                .setTxResourceMode(TxResourceMode.DISABLED);
+
+        var runner = new ExpandRunner(client, settings, url, params);
+        assertThrows(TerminologyServerExpansionException.class, runner::expandValueSet);
+
+        assertEquals(1, executeCalls.get(), "DISABLED should make exactly one attempt on a non-transient failure");
     }
 }

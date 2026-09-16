@@ -1,7 +1,7 @@
 package org.opencds.cqf.fhir.cr.cql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.opencds.cqf.fhir.test.Resources.getResourcePath;
 import static org.opencds.cqf.fhir.utility.BundleHelper.addEntry;
 import static org.opencds.cqf.fhir.utility.BundleHelper.newBundle;
@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -29,7 +27,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
@@ -37,8 +34,8 @@ import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.TestOperationProvider;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
@@ -250,26 +247,16 @@ public class TestCql {
     @SuppressWarnings("UnstableApiUsage")
     public static class Evaluation {
         final IRepository repository;
-        final IBaseParameters result;
+        final IParametersAdapter result;
         final IParser jsonParser;
-        final ModelResolver modelResolver;
         final List<IParametersParameterComponentAdapter> parameter;
 
-        @SuppressWarnings("unchecked")
         public Evaluation(IRepository repository, IBaseParameters result) {
             this.repository = repository;
-            this.result = result;
-            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
-            modelResolver = FhirModelResolverCache.resolverForVersion(
-                    this.repository.fhirContext().getVersion().getVersion());
             var adapterFactory = IAdapterFactory.forFhirContext(this.repository.fhirContext());
-            var rawParameter = modelResolver.resolvePath(result, "parameter");
-            if (rawParameter instanceof List<?>) {
-                parameter = ((List<IBase>) rawParameter)
-                        .stream().map(adapterFactory::createParametersParameter).toList();
-            } else {
-                parameter = Collections.emptyList();
-            }
+            this.result = adapterFactory.createParameters(result);
+            jsonParser = this.repository.fhirContext().newJsonParser().setPrettyPrint(true);
+            parameter = this.result.getParameter();
         }
 
         public Evaluation hasResults(Integer count) {
@@ -278,7 +265,7 @@ public class TestCql {
         }
 
         public Evaluation hasOperationOutcome() {
-            assertTrue(modelResolver.resolvePath(parameter.get(0), "resource") instanceof IBaseOperationOutcome);
+            assertInstanceOf(IBaseOperationOutcome.class, parameter.get(0).getResource());
             return this;
         }
 

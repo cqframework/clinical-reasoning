@@ -1,0 +1,73 @@
+{
+  "id": "StratifierMultiSubjectDateBasisNullComponentMeasure",
+  "resourceType": "Measure",
+  "name": "StratifierMultiSubjectDateBasisNullComponentMeasure",
+  "url": "http://example.com/Measure/StratifierMultiSubjectDateBasisNullComponentMeasure",
+  "library": [
+    "http://example.com/Library/StratifierMultiSubjectDateBasis"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "date"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "Enrollment",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Enrollment Initial Population"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "id": "enrollment-stratifier",
+          "component": [
+            {
+              "id": "age-component",
+              "code": {
+                "text": "Age"
+              },
+              "criteria": {
+                "language": "text/cql-identifier",
+                "expression": "Null Age Subject"
+              }
+            },
+            {
+              "id": "product-line-component",
+              "code": {
+                "text": "ProductLine"
+              },
+              "criteria": {
+                "language": "text/cql-identifier",
+                "expression": "Null Product Line Subject"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

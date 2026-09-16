@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import java.util.List;
 import java.util.Map;
 import org.hl7.fhir.r4.model.Parameters;
-import org.opencds.cqf.cql.engine.execution.EvaluationResult;
+import org.opencds.cqf.fhir.cr.measure.common.CqlEvaluationResult;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 
 /**
@@ -40,7 +40,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureDef;
 public record MeasureDefAndR4ParametersWithMeasureReports(
         List<MeasureDef> measureDefs,
         Parameters parameters,
-        Map<MeasureDef, Map<String, EvaluationResult>> evaluationResultsPerMeasure) {
+        Map<MeasureDef, Map<String, CqlEvaluationResult>> evaluationResultsPerMeasure) {
 
     /**
      * Backwards-compatible constructor for callers that do not need evaluation results.

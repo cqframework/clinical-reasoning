@@ -1,0 +1,28 @@
+spring:
+  main:
+    banner-mode: "off"
+  # JPA/JDBC/Quartz are excluded in @SpringBootApplication. Other surprise auto-configurations
+  # triggered by HAPI's transitive deps (Hibernate Search → Elasticsearch, Thymeleaf, etc.) are
+  # excluded here so the list can grow without recompiling.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ReactiveElasticsearchClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ReactiveElasticsearchRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.thymeleaf.ThymeleafAutoConfiguration
+
+server:
+  port: 8080
+
+cqf:
+  server:
+    base-path: /fhir
+    fhir-version: R4
+
+logging:
+  level:
+    ca.uhn.fhir: INFO
+    org.opencds.cqf: INFO

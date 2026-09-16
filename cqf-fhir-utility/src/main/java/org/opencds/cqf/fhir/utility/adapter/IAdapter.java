@@ -10,11 +10,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,23 +43,27 @@ public interface IAdapter<T extends IBase> {
 
     IAdapterFactory getAdapterFactory();
 
-    ModelResolver getModelResolver();
-
     default void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
         try {
-            getModelResolver().setValue(get(), "extension", null);
-            getModelResolver().setValue(get(), "extension", extensions);
+            setValue(get(), "extension", null);
+            setValue(get(), "extension", extensions);
         } catch (Exception e) {
             // Do nothing
             logger.debug(MISSING_EXTENSION, get().fhirType());
         }
     }
 
-    <E extends IBaseExtension<?, ?>> E addExtension();
+    @SuppressWarnings("unchecked")
+    default <E extends IBaseExtension<?, ?>> E addExtension() {
+        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
+            return (E) baseHasExtensions.addExtension();
+        }
+        return null;
+    }
 
     default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
         try {
-            getModelResolver().setValue(get(), "extension", Collections.singletonList(extension));
+            setValue(get(), "extension", Collections.singletonList(extension));
         } catch (Exception e) {
             // Do nothing
             logger.debug(MISSING_EXTENSION, get().fhirType());
@@ -118,15 +123,25 @@ public interface IAdapter<T extends IBase> {
         return getExtension(base).stream().anyMatch(e -> e.getUrl().equals(url));
     }
 
+    Object resolvePath(Object target, String path);
+
+    default List<IBase> resolvePathList(String path) {
+        return resolvePathList(get(), path);
+    }
+
     @SuppressWarnings("unchecked")
     default List<IBase> resolvePathList(IBase base, String path) {
-        var pathResult = getModelResolver().resolvePath(base, path);
+        var pathResult = resolvePath(base, path);
         return pathResult instanceof List ? (List<IBase>) pathResult : new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
     default <B extends IBase> List<B> resolvePathList(IBase base, String path, Class<B> clazz) {
         return resolvePathList(base, path).stream().map(i -> (B) i).collect(Collectors.toList());
+    }
+
+    default String resolvePathString(String path) {
+        return resolvePathString(get(), path);
     }
 
     default String resolvePathString(IBase base, String path) {
@@ -137,21 +152,32 @@ public interface IAdapter<T extends IBase> {
             return string;
         } else if (result instanceof IBaseReference reference) {
             return reference.getReferenceElement().getValue();
+        } else if (result instanceof IBaseEnumeration<?> enumeration) {
+            return enumeration.getValueAsString();
         } else {
-            throw new UnprocessableEntityException(
-                    "Path : {} on element of type {} could not be resolved",
-                    path,
-                    base.getClass().getSimpleName());
+            throw new UnprocessableEntityException(String.format(
+                    "Path (%s) on element of type (%s) could not be resolved",
+                    path, base.getClass().getSimpleName()));
         }
     }
 
-    default IBase resolvePath(IBase base, String path) {
-        return (IBase) getModelResolver().resolvePath(base, path);
+    default Object resolvePath(String path) {
+        return resolvePath(get(), path);
+    }
+
+    default <B extends IBase> B resolvePath(String path, Class<B> clazz) {
+        return resolvePath(get(), path, clazz);
     }
 
     @SuppressWarnings("unchecked")
     default <B extends IBase> B resolvePath(IBase base, String path, Class<B> clazz) {
         return (B) resolvePath(base, path);
+    }
+
+    void setValue(IBase base, String path, Object value);
+
+    default void setValue(String path, Object value) {
+        setValue(get(), path, value);
     }
 
     @SuppressWarnings("unchecked")

@@ -17,7 +17,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
 import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
@@ -33,12 +32,10 @@ import org.opencds.cqf.fhir.cr.plandefinition.apply.IApplyProcessor;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.Resources;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 
 @SuppressWarnings({"squid:S107", "squid:S1172", "UnstableApiUsage"})
 public class PlanDefinitionProcessor {
-    protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected IApplyProcessor applyProcessor;
     protected IPackageProcessor packageProcessor;
@@ -65,7 +62,6 @@ public class PlanDefinitionProcessor {
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         this.requestResolverFactory = requestResolverFactory;
         fhirVersion = this.repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
                 if (p instanceof IPackageProcessor pack) {
@@ -169,7 +165,6 @@ public class PlanDefinitionProcessor {
                 data,
                 prefetchData,
                 libraryEngine,
-                modelResolver,
                 null);
     }
 

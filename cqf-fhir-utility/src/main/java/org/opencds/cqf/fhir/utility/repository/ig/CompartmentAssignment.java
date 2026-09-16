@@ -7,7 +7,7 @@ import java.util.function.Supplier;
  * Represents the compartment directory segments that should be applied when
  * resolving a filesystem location for a resource.
  */
-record CompartmentAssignment(String compartmentType, String compartmentId) {
+public record CompartmentAssignment(String compartmentType, String compartmentId) {
 
     static final String SHARED_COMPARTMENT = "shared";
 

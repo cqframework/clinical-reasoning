@@ -19,22 +19,33 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.opencds.cqf.fhir.cr.hapi.common.AsyncPackageOperationHelper;
 import org.opencds.cqf.fhir.cr.hapi.common.IPlanDefinitionProcessorFactory;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 
 public class PlanDefinitionPackageProvider {
     private final IPlanDefinitionProcessorFactory planDefinitionProcessorFactory;
+    private final AsyncPackageOperationHelper asyncHelper;
     private final FhirVersionEnum fhirVersion;
 
     public PlanDefinitionPackageProvider(IPlanDefinitionProcessorFactory planDefinitionProcessorFactory) {
+        this(planDefinitionProcessorFactory, AsyncPackageOperationHelper.disabled());
+    }
+
+    public PlanDefinitionPackageProvider(
+            IPlanDefinitionProcessorFactory planDefinitionProcessorFactory, AsyncPackageOperationHelper asyncHelper) {
         this.planDefinitionProcessorFactory = planDefinitionProcessorFactory;
+        this.asyncHelper = asyncHelper;
         fhirVersion = FhirVersionEnum.DSTU3;
     }
 
     /**
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
      *
      * @param id the id of the Resource.
      * @param terminologyEndpoint the FHIR {@link Endpoint} Endpoint resource or url to use to access terminology (i.e. valuesets, codesystems, naming systems, concept maps, and membership testing) referenced by the Resource. If no terminology endpoint is supplied, the evaluation will attempt to use the server on which the operation is being performed as the terminology server.
@@ -42,25 +53,35 @@ public class PlanDefinitionPackageProvider {
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
      * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
-    public IBaseBundle packagePlanDefinition(
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = PlanDefinition.class,
+            manualResponse = true)
+    public void packagePlanDefinition(
             @IdParam IdType id,
             @OperationParam(name = "terminologyEndpoint") ParametersParameterComponent terminologyEndpoint,
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
-                .create(requestDetails)
-                .packagePlanDefinition(
-                        Eithers.forMiddle3(id),
-                        packageParameters(
-                                fhirVersion,
-                                getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> planDefinitionProcessorFactory
+                        .create(rd)
+                        .packagePlanDefinition(
+                                Eithers.forMiddle3(id),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 
     /**
      * Implements a $package operation following the <a href="https://build.fhir.org/ig/HL7/crmi-ig/branches/master/packaging.html">CRMI IG</a>.
+     *
+     * <p>Honors the FHIR Asynchronous Request Pattern: when the request carries
+     * {@code Prefer: respond-async} the operation returns {@code 202 Accepted} with a
+     * {@code Content-Location} header and runs in the background; otherwise it responds synchronously.
      *
      * @param id the id of the Resource.
      * @param canonical the canonical identifier for the Resource (optionally version-specific).
@@ -71,8 +92,12 @@ public class PlanDefinitionPackageProvider {
      * @param requestDetails the details (such as tenant) of this request. Usually autopopulated by HAPI.
      * @return a Bundle containing the ValueSet and all related CodeSystem and ValueSet resources
      */
-    @Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
-    public IBaseBundle packagePlanDefinition(
+    @Operation(
+            name = ProviderConstants.CR_OPERATION_PACKAGE,
+            idempotent = true,
+            type = PlanDefinition.class,
+            manualResponse = true)
+    public void packagePlanDefinition(
             @OperationParam(name = "id") StringType id,
             @OperationParam(name = "canonical", typeName = "uri") IPrimitiveType<String> canonical,
             @OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> url,
@@ -81,16 +106,18 @@ public class PlanDefinitionPackageProvider {
             @OperationParam(name = "usePut") BooleanType usePut,
             RequestDetails requestDetails)
             throws InternalErrorException, FHIRException {
-        return planDefinitionProcessorFactory
-                .create(requestDetails)
-                .packagePlanDefinition(
-                        Eithers.for3(
-                                getCanonicalType(fhirVersion, canonical, url, version),
-                                getIdType(fhirVersion, "PlanDefinition", id),
-                                null),
-                        packageParameters(
-                                fhirVersion,
-                                getEndpoint(fhirVersion, terminologyEndpoint),
-                                usePut == null ? Boolean.FALSE : usePut.booleanValue()));
+        asyncHelper.packageOrRespondAsync(
+                requestDetails,
+                rd -> planDefinitionProcessorFactory
+                        .create(rd)
+                        .packagePlanDefinition(
+                                Eithers.for3(
+                                        getCanonicalType(fhirVersion, canonical, url, version),
+                                        getIdType(fhirVersion, "PlanDefinition", id),
+                                        null),
+                                packageParameters(
+                                        fhirVersion,
+                                        getEndpoint(fhirVersion, terminologyEndpoint),
+                                        usePut == null ? Boolean.FALSE : usePut.booleanValue())));
     }
 }

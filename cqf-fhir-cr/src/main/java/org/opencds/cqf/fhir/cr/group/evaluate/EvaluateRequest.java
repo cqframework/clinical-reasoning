@@ -35,8 +35,7 @@ public class EvaluateRequest implements ICqlOperationRequest {
             IBaseParameters parameters,
             IBaseBundle data,
             List<? extends IBaseBackboneElement> prefetchData,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            LibraryEngine libraryEngine) {
         checkNotNull(group, "expected non-null value for group");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
         fhirVersion = group.getStructureFhirVersionEnum();
@@ -51,8 +50,7 @@ public class EvaluateRequest implements ICqlOperationRequest {
         }
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver =
-                modelResolver != null ? modelResolver : FhirModelResolverCache.resolverForVersion(fhirVersion);
+        this.modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
     }
 
     public IBaseResource getGroup() {
@@ -98,7 +96,6 @@ public class EvaluateRequest implements ICqlOperationRequest {
         return libraryEngine;
     }
 
-    @Override
     public ModelResolver getModelResolver() {
         return modelResolver;
     }

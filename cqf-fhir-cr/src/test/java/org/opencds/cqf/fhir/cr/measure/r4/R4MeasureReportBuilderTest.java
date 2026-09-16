@@ -12,7 +12,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,8 +34,11 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.cql.engine.fhir.model.FhirModelResolver;
+import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.runtime.Date;
 import org.opencds.cqf.cql.engine.runtime.Interval;
+import org.opencds.cqf.cql.engine.runtime.Value;
 import org.opencds.cqf.fhir.cr.measure.MeasureStratifierType;
 import org.opencds.cqf.fhir.cr.measure.common.CodeDef;
 import org.opencds.cqf.fhir.cr.measure.common.ConceptDef;
@@ -65,6 +67,8 @@ class R4MeasureReportBuilderTest {
     public static final String MEASURE_URL_1 = "http://something.com/measure1";
     public static final String MEASURE_URL_2 = "http://something.com/measure2|something";
 
+    static final FhirModelResolver modelResolver = new R4FhirModelResolver();
+
     @Test
     void happyPathEmptySdes() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
@@ -90,27 +94,6 @@ class R4MeasureReportBuilderTest {
         var measureReport = r4MeasureReportBuilder.build(
                 buildMeasure(MEASURE_ID_2, MEASURE_URL_2, 2, 0),
                 buildMeasureDef(MEASURE_ID_2, MEASURE_URL_2, 2, 0, true, null),
-                MeasureReportType.INDIVIDUAL,
-                null,
-                List.of());
-
-        assertNotNull(measureReport);
-
-        final List<Resource> contained = measureReport.getContained();
-
-        assertTrue(contained.isEmpty());
-    }
-
-    @Test
-    void happyPathEmptySdesAllNullResources() {
-        var r4MeasureReportBuilder = new R4MeasureReportBuilder();
-
-        var nulls = new ArrayList<>();
-        nulls.add(null);
-
-        var measureReport = r4MeasureReportBuilder.build(
-                buildMeasure(MEASURE_ID_1, MEASURE_URL_1, 2, 0),
-                buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 0, true, nulls),
                 MeasureReportType.INDIVIDUAL,
                 null,
                 List.of());
@@ -210,10 +193,11 @@ class R4MeasureReportBuilderTest {
     void invalidPopulationResource() {
         var r4MeasureReportBuilder = new R4MeasureReportBuilder();
 
+        var patient = modelResolver.toCqlValue(new Patient(), false);
         try {
             r4MeasureReportBuilder.build(
                     buildMeasure(null, MEASURE_URL_1, 2, 2),
-                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(new Patient())),
+                    buildMeasureDef(MEASURE_ID_1, MEASURE_URL_1, 2, 2, true, Set.of(patient)),
                     MeasureReportType.INDIVIDUAL,
                     null,
                     List.of());
@@ -229,7 +213,7 @@ class R4MeasureReportBuilderTest {
             int numGroups,
             int numSdes,
             boolean isKeyResource,
-            Collection<Object> evaluatedResources) {
+            Collection<Value> evaluatedResources) {
         var measureDef = new MeasureDef(
                 new IdType(ResourceType.Measure.name(), id),
                 url,
@@ -245,7 +229,7 @@ class R4MeasureReportBuilderTest {
         return measureDef;
     }
 
-    private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Object> evaluatedResources) {
+    private static SdeDef buildSdes(String id, boolean isKeyResource, @Nullable Collection<Value> evaluatedResources) {
         final SdeDef sdeDef = new SdeDef(
                 id,
                 new ConceptDef(List.of(new CodeDef("system", MeasurePopulationType.DATEOFCOMPLIANCE.toCode())), null),
@@ -254,7 +238,10 @@ class R4MeasureReportBuilderTest {
         if (evaluatedResources != null) {
             sdeDef.putResult(
                     "subject",
-                    isKeyResource ? new Patient().setId(new IdType("Patient", "patient1")) : "nonResource",
+                    null,
+                    isKeyResource
+                            ? modelResolver.toCqlValue(new Patient().setId(new IdType("Patient", "patient1")), false)
+                            : new org.opencds.cqf.cql.engine.runtime.String("nonResource"),
                     evaluatedResources.stream().filter(Objects::nonNull).collect(Collectors.toUnmodifiableSet()));
         }
 
@@ -262,7 +249,7 @@ class R4MeasureReportBuilderTest {
     }
 
     @Nonnull
-    private static GroupDef buildGroupDef(String id, Collection<Object> resources) {
+    private static GroupDef buildGroupDef(String id, Collection<Value> resources) {
         return new GroupDef(
                 id,
                 null,
@@ -274,7 +261,7 @@ class R4MeasureReportBuilderTest {
                 new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean"));
     }
 
-    private static PopulationDef buildPopulationRef(Collection<Object> resources) {
+    private static PopulationDef buildPopulationRef(Collection<Value> resources) {
         CodeDef booleanBasis = new CodeDef(MeasureConstants.POPULATION_BASIS_URL, "boolean");
         final PopulationDef populationDef = new PopulationDef(
                 null,
@@ -287,7 +274,7 @@ class R4MeasureReportBuilderTest {
                 null);
 
         if (resources != null) {
-            resources.forEach(res -> populationDef.addResource("subj", res));
+            resources.forEach(res -> populationDef.addResource("subj", null, res));
         }
 
         return populationDef;

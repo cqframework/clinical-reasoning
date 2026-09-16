@@ -1,5 +1,6 @@
 package org.opencds.cqf.fhir.cr.measure.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,6 +17,7 @@ import org.opencds.cqf.fhir.cr.measure.r4.MultiMeasure.Given;
 @SuppressWarnings({"java:S2699"})
 class MultiMeasureServiceTest {
     private static final Given GIVEN_REPO = MultiMeasure.given().repositoryFor("MinimalMeasureEvaluation");
+    private static final Given GIVEN_STRATIFIER_REPO = MultiMeasure.given().repositoryFor("MeasureStratifierTest");
 
     @Test
     void MultiMeasure_AllSubjects_MeasureIdentifier() {
@@ -34,7 +36,7 @@ class MultiMeasureServiceTest {
                 // all MeasureReports
                 .hasBundleCount(1)
                 .hasMeasureReportCount(2)
-                .report();
+                .reportBundles();
     }
 
     @Test
@@ -228,12 +230,15 @@ class MultiMeasureServiceTest {
                 .up()
                 .up()
                 .up()
+                .reportBundles()
+                .logReportBundlesJson()
                 // MeasureReport assertions (post-scoring) - verify FHIR resource output
                 // This is a population/summary report so we should have a single bundle containing
                 // all MeasureReports
                 .hasBundleCount(1)
                 .hasMeasureReportCount(7)
                 .measureReport("http://example.com/Measure/MinimalProportionNoBasisSingleGroup")
+                .logReportJson()
                 .hasReportType("Summary")
                 .firstGroup()
                 .population(MeasurePopulationType.INITIALPOPULATION)
@@ -1085,6 +1090,36 @@ class MultiMeasureServiceTest {
                 .hasMeasureReportStatus(MeasureReportStatus.ERROR)
                 .hasContainedOperationOutcome()
                 .hasContainedOperationOutcomeMsg("Patient/female-1988-2");
+    }
+
+    /**
+     * CDO-789: multi-component stratifier where two components resolve to the same scalar value
+     * must not collapse those components in the MeasureReport stratum, even when reached via the
+     * multi-measure orchestration path.
+     */
+    @Test
+    void MultiMeasure_MultiComponentStratifier_SameValueAcrossComponents_KeepsAllComponents() {
+        var stratifier = GIVEN_STRATIFIER_REPO
+                .when()
+                .measureId("CohortBooleanStratSameValueComponents")
+                .periodStart("2024-01-01")
+                .periodEnd("2024-12-31")
+                .reportType("population")
+                .evaluate()
+                .then()
+                .measureReport("http://example.com/Measure/CohortBooleanStratSameValueComponents")
+                .firstGroup()
+                .firstStratifier()
+                .value();
+
+        assertEquals(2, stratifier.getStratum().size());
+        for (var stratum : stratifier.getStratum()) {
+            assertEquals(
+                    3,
+                    stratum.getComponent().size(),
+                    "expected 3 components in stratum but got "
+                            + stratum.getComponent().size());
+        }
     }
 
     @Test

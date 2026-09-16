@@ -19,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.common.IInputParameterResolver;
 import org.opencds.cqf.fhir.cr.common.IQuestionnaireRequest;
@@ -37,7 +36,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     private final List<IParametersParameterComponentAdapter> context;
     private final IBaseBundle data;
     private final LibraryEngine libraryEngine;
-    private final ModelResolver modelResolver;
     private final FhirVersionEnum fhirVersion;
     private final Map<String, String> referencedLibraries;
     private final IInputParameterResolver inputParameterResolver;
@@ -50,11 +48,9 @@ public class PopulateRequest implements IQuestionnaireRequest {
             List<? extends IBaseBackboneElement> context,
             IBaseExtension<?, ?> launchContext,
             IBaseBundle data,
-            LibraryEngine libraryEngine,
-            ModelResolver modelResolver) {
+            LibraryEngine libraryEngine) {
         checkNotNull(questionnaire, "expected non-null value for questionnaire");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        checkNotNull(modelResolver, "expected non-null value for modelResolver");
         fhirVersion = questionnaire.getStructureFhirVersionEnum();
         questionnaireAdapter = (IQuestionnaireAdapter)
                 getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) questionnaire);
@@ -66,8 +62,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
         this.subjectId = getSubjectId(subjectId);
         this.data = data;
         this.libraryEngine = libraryEngine;
-        this.modelResolver = modelResolver;
-        var launchContexts = getExtensionsByUrl(questionnaireAdapter.get(), Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
+        var launchContexts = questionnaireAdapter.getExtensionsByUrl(Constants.SDC_QUESTIONNAIRE_LAUNCH_CONTEXT);
         if (launchContext != null) {
             launchContexts.add(launchContext);
         }
@@ -159,11 +154,6 @@ public class PopulateRequest implements IQuestionnaireRequest {
     }
 
     @Override
-    public ModelResolver getModelResolver() {
-        return modelResolver;
-    }
-
-    @Override
     public FhirVersionEnum getFhirVersion() {
         return fhirVersion;
     }
@@ -188,7 +178,7 @@ public class PopulateRequest implements IQuestionnaireRequest {
                 .createQuestionnaireResponse(getFhirContext()
                         .getResourceDefinition("QuestionnaireResponse")
                         .newInstance())
-                .setId("%s-%s".formatted(questionnaireAdapter.getId().getIdPart(), subjectId.getIdPart()))
+                .setId("%s-%s".formatted(questionnaireAdapter.getId(), subjectId.getIdPart()))
                 .setQuestionnaire(questionnaireAdapter.getCanonical())
                 .setSubject(subjectId)
                 .setAuthored(new Date())

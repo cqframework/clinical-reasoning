@@ -13,14 +13,11 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.BaseAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.*;
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 
-public class QuestionnaireItemComponentAdapter extends BaseAdapter implements IQuestionnaireItemComponentAdapter {
+public class QuestionnaireItemComponentAdapter extends BaseElementAdapter
+        implements IQuestionnaireItemComponentAdapter {
 
     private final QuestionnaireItemComponent item;
 

@@ -15,7 +15,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.ExtensionResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.CrSettings;
@@ -26,13 +25,11 @@ import org.opencds.cqf.fhir.cr.activitydefinition.apply.IRequestResolverFactory;
 import org.opencds.cqf.fhir.cr.common.IOperationProcessor;
 import org.opencds.cqf.fhir.cr.common.ResourceResolver;
 import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.model.FhirModelResolverCache;
 import org.opencds.cqf.fhir.utility.monad.Either3;
 import org.opencds.cqf.fhir.utility.repository.operations.IActivityDefinitionProcessor;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor {
-    protected final ModelResolver modelResolver;
     protected final FhirVersionEnum fhirVersion;
     protected final ResourceResolver resourceResolver;
     protected IApplyProcessor applyProcessor;
@@ -58,7 +55,6 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
         this.crSettings = requireNonNull(crSettings, "crSettings can not be null");
         this.resourceResolver = new ResourceResolver("ActivityDefinition", this.repository);
         fhirVersion = repository.fhirContext().getVersion().getVersion();
-        modelResolver = FhirModelResolverCache.resolverForVersion(fhirVersion);
         this.requestResolverFactory = requestResolverFactory;
         if (operationProcessors != null && !operationProcessors.isEmpty()) {
             operationProcessors.forEach(p -> {
@@ -236,8 +232,7 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                 settingContext,
                 parameters,
                 data,
-                libraryEngine,
-                modelResolver);
+                libraryEngine);
     }
 
     protected void initApplyProcessor() {

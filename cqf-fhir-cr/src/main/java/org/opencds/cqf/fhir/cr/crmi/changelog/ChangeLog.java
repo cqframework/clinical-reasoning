@@ -127,6 +127,10 @@ public class ChangeLog {
             ValueSet valueSet,
             ArtifactDiffProcessor.DiffCache cache,
             ValueSetChild.Leaf leafData) {
+        // compose.include carries no code system version in practice, so fallback to the versions the
+        // ValueSet's expansion recorded per code. Without this the changelog cannot show which code
+        // system version a code came from, which is the only thing that explains a repin's insert/delete pairs.
+        var codeSystemVersions = collectCodeSystemVersionsFromExpansion(valueSet);
         valueSet.getCompose().getInclude().forEach(concept -> {
             if (concept.hasConcept()) {
                 updateLeafData(concept.getSystem(), leafData);
@@ -136,7 +140,8 @@ public class ChangeLog {
                         Canonicals.getIdPart(valueSet.getUrl()),
                         valueSet.getName(),
                         valueSet.getTitle(),
-                        valueSet.getUrl());
+                        valueSet.getUrl(),
+                        codeSystemVersions);
             }
             if (concept.hasValueSet()) {
                 concept.getValueSet().stream()
@@ -220,14 +225,28 @@ public class ChangeLog {
         codeMap.put(codeValue, code);
     }
 
-    // can this be done with a fhir operation? tx server work?
+    // Collects the code system version the expansion recorded for each code.
+    private Map<String, String> collectCodeSystemVersionsFromExpansion(ValueSet valueSet) {
+        if (!valueSet.getExpansion().hasContains()) {
+            return Map.of();
+        }
+        Map<String, String> versionsByCode = new HashMap<>();
+        valueSet.getExpansion().getContains().forEach(contained -> {
+            if (contained.hasCode() && contained.hasVersion()) {
+                versionsByCode.putIfAbsent(contained.getCode(), contained.getVersion());
+            }
+        });
+        return versionsByCode;
+    }
+
     private void mapConceptSetToCodeMap(
             Map<String, ValueSetChild.Code> codeMap,
             ValueSet.ConceptSetComponent concept,
             String source,
             String name,
             String title,
-            String url) {
+            String url,
+            Map<String, String> codeSystemVersions) {
         var system = concept.getSystem();
         var id = concept.getId();
         var version = concept.getVersion();
@@ -239,7 +258,9 @@ public class ChangeLog {
                                 id,
                                 system,
                                 conceptReference.getCode(),
-                                version,
+                                version == null || version.isBlank()
+                                        ? codeSystemVersions.get(conceptReference.getCode())
+                                        : version,
                                 conceptReference.getDisplay(),
                                 source,
                                 name,

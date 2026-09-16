@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ParametersUtil;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Canonicals;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -25,10 +28,13 @@ import org.opencds.cqf.fhir.utility.Parameters;
 import org.opencds.cqf.fhir.utility.ValueSets;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings.TxResourceMode;
 import org.opencds.cqf.fhir.utility.client.terminology.ArtifactEndpointConfiguration;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyProviderRouter;
 import org.opencds.cqf.fhir.utility.client.terminology.ITerminologyServerClient;
@@ -92,6 +98,32 @@ public class ExpandHelper {
             List<IValueSetAdapter> valueSets,
             List<String> expandedList,
             Date expansionTimestamp) {
+        expandValueSet(
+                valueSet,
+                expansionParameters,
+                terminologyEndpoint,
+                valueSets,
+                List.of(),
+                expandedList,
+                expansionTimestamp);
+    }
+
+    /**
+     * Same as {@link #expandValueSet(IValueSetAdapter, IParametersAdapter, Optional, List, List, Date)}, but
+     * additionally accepts the package-authored CodeSystems ({@code packageCodeSystems}) that make up the
+     * package closure. When a remote terminology server is used to expand, the package-authored ValueSets and
+     * CodeSystems referenced by the target ValueSet are supplied to the {@code $expand} call via the
+     * {@code tx-resource} parameter so version-pinned artifacts the server lacks can be resolved from the
+     * supplied resources.
+     */
+    public void expandValueSet(
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            Optional<IEndpointAdapter> terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
+            List<IBaseResource> packageCodeSystems,
+            List<String> expandedList,
+            Date expansionTimestamp) {
         // Have we already expanded this ValueSet?
         if (expandedList.contains(valueSet.getUrl())) {
             // Nothing to do here
@@ -106,14 +138,23 @@ public class ExpandHelper {
                 .map(url -> ((IPrimitiveType<String>) url.getValue()).getValueAsString())
                 .map(url -> ITerminologyServerClient.getAddressBase(url, fhirContext()))
                 .orElse(null);
-        // If terminologyEndpoint exists, and we have no authoritativeSourceUrl or the authoritativeSourceUrl
-        // matches the terminologyEndpoint address then we will use the terminologyEndpoint for expansion
-        if (terminologyEndpoint.isPresent()
-                && (authoritativeSourceUrl == null
-                        || authoritativeSourceUrl.equals(
-                                terminologyEndpoint.get().getAddress()))) {
+        // Normalize the endpoint address the same way as the authoritativeSourceUrl so the comparison
+        // is not defeated by http/https, trailing-slash, or resource-path differences.
+        var endpointAddressBase = terminologyEndpoint
+                .map(IEndpointAdapter::getAddress)
+                .filter(address -> !address.isBlank())
+                .map(address -> ITerminologyServerClient.getAddressBase(address, fhirContext()))
+                .orElse(null);
+        // The endpoint is the authoritative source for this ValueSet when the ValueSet declares no
+        // authoritative source or it matches the endpoint. In that case expand against it directly;
+        // otherwise prefer local composition (e.g. a grouper authored on a different server) and only
+        // fall back to the endpoint below if local expansion turns out not to be possible.
+        var endpointIsAuthoritativeSource = terminologyEndpoint.isPresent()
+                && (authoritativeSourceUrl == null || authoritativeSourceUrl.equals(endpointAddressBase));
+        if (endpointIsAuthoritativeSource) {
             try {
-                terminologyServerExpand(valueSet, expansionParameters, terminologyEndpoint.get());
+                terminologyServerExpand(
+                        valueSet, expansionParameters, terminologyEndpoint.get(), valueSets, packageCodeSystems);
                 return;
             } catch (TerminologyServerExpansionException e) {
                 log.warn(
@@ -136,6 +177,7 @@ public class ExpandHelper {
                         expansionParameters,
                         terminologyEndpoint,
                         valueSets,
+                        packageCodeSystems,
                         expandedList,
                         repository,
                         expansionTimestamp);
@@ -177,8 +219,30 @@ public class ExpandHelper {
             return;
         }
 
-        // Fallback: repository $expand (for remaining ValueSets with compose)
+        // Fallback for ValueSets that could not be expanded locally.
         if (valueSet.hasCompose()) {
+            // A terminologyEndpoint was supplied but not used above because the ValueSet's authoritative
+            // source differs from it. Since local expansion was not possible, use the configured endpoint
+            // rather than failing — a general terminology server can expand ValueSets authored elsewhere.
+            if (terminologyEndpoint.isPresent() && !endpointIsAuthoritativeSource) {
+                try {
+                    terminologyServerExpand(
+                            valueSet, expansionParameters, terminologyEndpoint.get(), valueSets, packageCodeSystems);
+                    // The endpoint used is not this ValueSet's authoritative source, so surface a
+                    // warning that the expansion was completed non-authoritatively.
+                    addExpansionWarningParameter(
+                            valueSet,
+                            "Expansion for ValueSet %s was completed by the configured terminology endpoint, which is not its authoritative source; the expansion may be non-authoritative."
+                                    .formatted(valueSet.getUrl()));
+                    expandedList.add(valueSet.getUrl());
+                    return;
+                } catch (TerminologyServerExpansionException e) {
+                    log.warn(
+                            "Failed to expand value set {} via the configured terminology endpoint. Reason: {}.",
+                            valueSet.getUrl(),
+                            e.getMessage());
+                }
+            }
             try {
                 var headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/json");
@@ -228,6 +292,32 @@ public class ExpandHelper {
             List<IValueSetAdapter> valueSets,
             List<String> expandedList,
             Date expansionTimestamp) {
+        expandValueSet(
+                valueSet,
+                expansionParameters,
+                artifactEndpointConfigurations,
+                terminologyEndpoint,
+                valueSets,
+                List.of(),
+                expandedList,
+                expansionTimestamp);
+    }
+
+    /**
+     * Same as
+     * {@link #expandValueSet(IValueSetAdapter, IParametersAdapter, List, Optional, List, List, Date)}, but
+     * additionally accepts the package-authored CodeSystems ({@code packageCodeSystems}) that make up the
+     * package closure so they can be supplied to a remote {@code $expand} via {@code tx-resource}.
+     */
+    public void expandValueSet(
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            List<ArtifactEndpointConfiguration> artifactEndpointConfigurations,
+            Optional<IEndpointAdapter> terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
+            List<IBaseResource> packageCodeSystems,
+            List<String> expandedList,
+            Date expansionTimestamp) {
         // Have we already expanded this ValueSet?
         if (expandedList.contains(valueSet.getUrl())) {
             return;
@@ -259,13 +349,31 @@ public class ExpandHelper {
         }
 
         // Fall back to legacy single endpoint or local expansion
-        expandValueSet(valueSet, expansionParameters, terminologyEndpoint, valueSets, expandedList, expansionTimestamp);
+        expandValueSet(
+                valueSet,
+                expansionParameters,
+                terminologyEndpoint,
+                valueSets,
+                packageCodeSystems,
+                expandedList,
+                expansionTimestamp);
     }
 
     private void terminologyServerExpand(
-            IValueSetAdapter valueSet, IParametersAdapter expansionParameters, IEndpointAdapter terminologyEndpoint) {
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            IEndpointAdapter terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
+            List<IBaseResource> packageCodeSystems) {
+        // Supply the target ValueSet and the package's own resources it references to the $expand call
+        // via the tx-resource parameter so version-pinned artifacts the server lacks can be resolved
+        // from them. Attach to a per-expansion COPY of the parameters: the caller's parameters object is
+        // reused across every ValueSet in a $package run, so mutating it here would cause tx-resource
+        // params to accumulate across expansions.
+        var expandParameters = (IParametersAdapter) adapterFactory.createResource(expansionParameters.copy());
+        attachTxResourceParameters(valueSet, expandParameters, terminologyEndpoint, valueSets, packageCodeSystems);
         var expandedValueSet = (IValueSetAdapter) adapterFactory.createResource(
-                terminologyServerRouter.expand(valueSet, terminologyEndpoint, expansionParameters));
+                terminologyServerRouter.expand(valueSet, terminologyEndpoint, expandParameters));
         // expansions are only valid for a particular version
         if (!valueSet.hasVersion()) {
             valueSet.setVersion(expandedValueSet.getVersion());
@@ -275,11 +383,94 @@ public class ExpandHelper {
         validateExpansionParameters(valueSet, expansionParameters);
     }
 
+    /**
+     * Attaches {@code tx-resource} parameters to {@code expansionParameters} so they are supplied to the
+     * remote {@code $expand} call. Attaches the target ValueSet itself (the server may not hold the
+     * requested version) plus the package-authored ValueSets and CodeSystems it references: referenced
+     * ValueSet canonicals ({@code include[].valueSet}) matched against {@code valueSets}, and referenced
+     * CodeSystem systems ({@code include[].system}) matched against {@code packageCodeSystems}. Matches are
+     * de-duplicated by {@code url|version}. When the configured {@link TxResourceMode} is {@code DISABLED}
+     * nothing is attached.
+     */
+    private void attachTxResourceParameters(
+            IValueSetAdapter valueSet,
+            IParametersAdapter expansionParameters,
+            IEndpointAdapter terminologyEndpoint,
+            List<IValueSetAdapter> valueSets,
+            List<IBaseResource> packageCodeSystems) {
+        var settings = terminologyServerRouter.getTerminologyServerClientSettings(terminologyEndpoint);
+        var mode = settings != null ? settings.getTxResourceMode() : TxResourceMode.AUTO;
+        if (mode == TxResourceMode.DISABLED) {
+            return;
+        }
+
+        // De-duplicate attached resources by url|version, preserving insertion order.
+        var toAttach = new LinkedHashMap<String, IBaseResource>();
+
+        // Supply the target ValueSet itself. The reported failure mode is that the terminology server
+        // does not hold the requested ValueSet version; because $expand is invoked by url reference, the
+        // server cannot resolve a version it lacks. Supplied as a tx-resource, it is "used preferentially
+        // to those known to the system" (per the $expand OperationDefinition).
+        toAttach.put(urlVersionKey(valueSet.getUrl(), valueSet.getVersion()), valueSet.get());
+
+        boolean noValueSets = valueSets == null || valueSets.isEmpty();
+        boolean noCodeSystems = packageCodeSystems == null || packageCodeSystems.isEmpty();
+
+        if (!noValueSets || !noCodeSystems) {
+            // Referenced ValueSet canonicals from the target's compose (url|version strings)
+            var referencedValueSets = valueSet.getValueSetIncludes();
+            // Referenced CodeSystem systems from the target's compose includes
+            var referencedSystems = valueSet.getComposeInclude().stream()
+                    .filter(IValueSetConceptSetAdapter::hasSystem)
+                    .map(IValueSetConceptSetAdapter::getSystem)
+                    .collect(Collectors.toSet());
+
+            if (!noValueSets) {
+                for (var packageVs : valueSets) {
+                    for (var reference : referencedValueSets) {
+                        var refUrl = Canonicals.getUrl(reference);
+                        var refVersion = Canonicals.getVersion(reference);
+                        if (packageVs.getUrl() != null
+                                && packageVs.getUrl().equals(refUrl)
+                                && (refVersion == null || refVersion.equals(packageVs.getVersion()))) {
+                            toAttach.putIfAbsent(
+                                    urlVersionKey(packageVs.getUrl(), packageVs.getVersion()), packageVs.get());
+                        }
+                    }
+                }
+            }
+
+            if (!noCodeSystems) {
+                for (var codeSystem : packageCodeSystems) {
+                    IKnowledgeArtifactAdapter csAdapter =
+                            adapterFactory.createKnowledgeArtifactAdapter((IDomainResource) codeSystem);
+                    if (csAdapter.getUrl() != null && referencedSystems.contains(csAdapter.getUrl())) {
+                        toAttach.putIfAbsent(urlVersionKey(csAdapter.getUrl(), csAdapter.getVersion()), codeSystem);
+                    }
+                }
+            }
+        }
+
+        toAttach.values().forEach(resource -> expansionParameters.addParameter(Constants.TX_RESOURCE, resource));
+
+        log.info(
+                "Attached {} tx-resource(s) (mode={}) for $expand of ValueSet {}: [{}]",
+                toAttach.size(),
+                mode,
+                valueSet.getUrl(),
+                String.join(", ", toAttach.keySet()));
+    }
+
+    private static String urlVersionKey(String url, String version) {
+        return (url == null ? "" : url) + "|" + (version == null ? "" : version);
+    }
+
     private IBaseBackboneElement expandIncludes(
             IValueSetAdapter valueSet,
             IParametersAdapter expansionParameters,
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
+            List<IBaseResource> packageCodeSystems,
             List<String> expandedList,
             IRepository repository,
             Date expansionTimestamp) {
@@ -296,6 +487,7 @@ public class ExpandHelper {
                             expansionParameters,
                             terminologyEndpoint,
                             valueSets,
+                            packageCodeSystems,
                             expandedList,
                             expansionTimestamp,
                             includedVS);
@@ -369,6 +561,7 @@ public class ExpandHelper {
             IParametersAdapter expansionParameters,
             Optional<IEndpointAdapter> terminologyEndpoint,
             List<IValueSetAdapter> valueSets,
+            List<IBaseResource> packageCodeSystems,
             List<String> expandedList,
             Date expansionTimestamp,
             IValueSetAdapter includedVS) {
@@ -402,7 +595,14 @@ public class ExpandHelper {
                     .map(IParametersParameterComponentAdapter::get)
                     .toList());
         }
-        expandValueSet(includedVS, childExpParams, terminologyEndpoint, valueSets, expandedList, expansionTimestamp);
+        expandValueSet(
+                includedVS,
+                childExpParams,
+                terminologyEndpoint,
+                valueSets,
+                packageCodeSystems,
+                expandedList,
+                expansionTimestamp);
     }
 
     /**

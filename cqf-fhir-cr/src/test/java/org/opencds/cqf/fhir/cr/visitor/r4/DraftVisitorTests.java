@@ -19,19 +19,26 @@ import java.util.List;
 import java.util.Optional;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.RelatedArtifact;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.visitor.DraftVisitor;
+import org.opencds.cqf.fhir.cr.visitor.ReleaseVisitor;
 import org.opencds.cqf.fhir.utility.Canonicals;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactVisitor;
 import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
@@ -234,5 +241,232 @@ class DraftVisitorTests {
             }
             assertNull(versionException, "Non-semver version '" + version + "' should not throw for format");
         }
+    }
+
+    @Test
+    void draft_should_restore_authored_expansion_params_after_release() {
+        var bundle = (Bundle) jsonParser.parseResource(
+                DraftVisitorTests.class.getResourceAsStream("Bundle-versioned-and-unversioned-dependency.json"));
+        repo.transaction(bundle);
+        var releaseVisitor = new ReleaseVisitor(repo);
+        var originalLibrary = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        var releaseLibraryAdapter = new AdapterFactory().createLibrary(originalLibrary.copy());
+        var releaseParams =
+                parameters(part("version", new StringType("1.2.3")), part("versionBehavior", new CodeType("force")));
+        var releaseReturnBundle = (Bundle) releaseLibraryAdapter.accept(releaseVisitor, releaseParams);
+        var maybeReleasedLib = releaseReturnBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library/SpecificationLibrary"))
+                .findFirst();
+        assertTrue(maybeReleasedLib.isPresent());
+        var releasedLibrary = repo.read(
+                Library.class, new IdType(maybeReleasedLib.get().getResponse().getLocation()));
+
+        // Sanity check the release step actually captured the author's input separately from the
+        // processing timen exp-params
+        var releasedInputExt = releasedLibrary.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS);
+        assertNotNull(releasedInputExt);
+        var releasedInputParams =
+                (Parameters) releasedLibrary.getContained(((Reference) releasedInputExt.getValue()).getReference());
+        assertEquals(1, releasedInputParams.getParameter().size());
+        var releasedExpExt = releasedLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        assertNotNull(releasedExpExt);
+        var releasedExpParams =
+                (Parameters) releasedLibrary.getContained(((Reference) releasedExpExt.getValue()).getReference());
+        assertEquals(3, releasedExpParams.getParameter().size());
+
+        // Now draft the released library and confirm exp-params is reset to the 1 authored
+        // parameter, and input-exp-params (and its extension) are gone
+        var draftLibraryAdapter = new AdapterFactory().createLibrary(releasedLibrary.copy());
+        IKnowledgeArtifactVisitor draftVisitor = new DraftVisitor(repo);
+        var draftParams = parameters(part("version", new StringType("1.2.4")));
+        var draftReturnBundle = (Bundle) draftLibraryAdapter.accept(draftVisitor, draftParams);
+        var maybeDraftLib = draftReturnBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .map(entry ->
+                        repo.read(Library.class, new IdType(entry.getResponse().getLocation())))
+                .filter(lib -> originalLibrary.getUrl().equals(lib.getUrl()))
+                .findFirst();
+        assertTrue(maybeDraftLib.isPresent());
+        var draftLibrary = maybeDraftLib.get();
+
+        assertNull(draftLibrary.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS));
+        assertNull(draftLibrary.getContained("#input-exp-params"));
+        var draftExpExt = draftLibrary.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        assertNotNull(draftExpExt);
+        var draftExpParams =
+                (Parameters) draftLibrary.getContained(((Reference) draftExpExt.getValue()).getReference());
+        assertEquals(1, draftExpParams.getParameter().size());
+        assertEquals(
+                "http://loinc.org|2.76",
+                ((UriType) draftExpParams.getParameter().get(0).getValue()).getValue());
+    }
+
+    @Test
+    void restoreInputExpansionParams_copies_authored_params_and_cleans_up() {
+        var library = new Library();
+        library.setId("test-library");
+
+        var inputExpParams = new Parameters();
+        inputExpParams.setId("input-exp-params");
+        inputExpParams.addParameter("authored-param", new StringType("authored-value"));
+        library.addContained(inputExpParams);
+        library.addExtension(
+                new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params")));
+
+        var expParams = new Parameters();
+        expParams.setId("exp-params");
+        expParams.addParameter("system-version", new StringType("http://example.com|1.0.0"));
+        expParams.addParameter("system-version", new StringType("http://example.com/other|2.0.0"));
+        library.addContained(expParams);
+        library.addExtension(new Extension(Constants.CQF_EXPANSION_PARAMETERS, new Reference("#exp-params")));
+
+        var adapter = new AdapterFactory().createLibrary(library);
+        org.opencds.cqf.fhir.cr.visitor.r4.DraftVisitor.restoreInputExpansionParams(adapter);
+
+        // assert input-exp-params contained element and extension have been removed
+        assertNull(library.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS));
+        assertNull(library.getContained("#input-exp-params"));
+
+        // assert params from input-exp-params have been copied to exp-params
+        var restoredExpParamsExt = library.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        assertNotNull(restoredExpParamsExt);
+        var restoredExpParams =
+                (Parameters) library.getContained(((Reference) restoredExpParamsExt.getValue()).getReference());
+        assertEquals(1, restoredExpParams.getParameter().size());
+        assertEquals(
+                "authored-value",
+                ((StringType) restoredExpParams.getParameter().get(0).getValue()).getValue());
+    }
+
+    @Test
+    void restoreInputExpansionParams_resets_to_empty_when_author_specified_none() {
+        var library = new Library();
+        library.setId("test-library");
+
+        // input-exp-params is present no params were authored
+        var inputExpParams = new Parameters();
+        inputExpParams.setId("input-exp-params");
+        library.addContained(inputExpParams);
+        library.addExtension(
+                new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params")));
+
+        // exp-params has processing-time entries which should be overwritten
+        var expParams = new Parameters();
+        expParams.setId("exp-params");
+        expParams.addParameter("system-version", new StringType("http://example.com|1.0.0"));
+        library.addContained(expParams);
+        library.addExtension(new Extension(Constants.CQF_EXPANSION_PARAMETERS, new Reference("#exp-params")));
+
+        var adapter = new AdapterFactory().createLibrary(library);
+        org.opencds.cqf.fhir.cr.visitor.r4.DraftVisitor.restoreInputExpansionParams(adapter);
+
+        // assert input-exp-params contained element and extension have been removed
+        assertNull(library.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS));
+        assertNull(library.getContained("#input-exp-params"));
+
+        // assert empty params from input-exp-params have been copied to exp-params
+        var restoredExpParamsExt = library.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS);
+        assertNotNull(restoredExpParamsExt);
+        var restoredExpParams =
+                (Parameters) library.getContained(((Reference) restoredExpParamsExt.getValue()).getReference());
+        assertTrue(restoredExpParams.getParameter().isEmpty());
+    }
+
+    @Test
+    void restoreInputExpansionParams_removes_dangling_extension_when_contained_resource_missing() {
+        var library = new Library();
+        library.setId("test-library");
+        // Extension references a contained resource that was never actually added
+        library.addExtension(
+                new Extension(Constants.CQF_INPUT_EXPANSION_PARAMETERS, new Reference("#input-exp-params")));
+
+        var adapter = new AdapterFactory().createLibrary(library);
+        org.opencds.cqf.fhir.cr.visitor.r4.DraftVisitor.restoreInputExpansionParams(adapter);
+
+        // assert dangling extension was removed
+        assertNull(library.getExtensionByUrl(Constants.CQF_INPUT_EXPANSION_PARAMETERS));
+        // Nothing to restore from, so exp-params should never have been created
+        assertNull(library.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS));
+        assertTrue(library.getContained().isEmpty());
+    }
+
+    @Test
+    void restoreInputExpansionParams_is_noop_when_no_extension_present() {
+        var library = new Library();
+        library.setId("test-library");
+
+        var adapter = new AdapterFactory().createLibrary(library);
+        org.opencds.cqf.fhir.cr.visitor.r4.DraftVisitor.restoreInputExpansionParams(adapter);
+
+        assertTrue(library.getExtension().isEmpty());
+        assertTrue(library.getContained().isEmpty());
+    }
+
+    @Test
+    void library_draft_floats_manifest_and_grouper_leaf_references() {
+        Bundle bundle = (Bundle)
+                jsonParser.parseResource(DraftVisitorTests.class.getResourceAsStream("Bundle-ersd-small-active.json"));
+        repo.transaction(bundle);
+        final var leafUrl = "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6";
+        // Code system versions are pinned deliberately, so the manifest's pinned reference must
+        // not be floated just because the grouper mentions the same system.
+        final var codeSystemUrl = "http://snomed.info/sct";
+        final var pinnedCodeSystem = codeSystemUrl + "|http://snomed.info/sct/731000124108/version/20250901";
+        var grouperToSeed =
+                repo.read(ValueSet.class, new IdType("ValueSet/dxtc")).copy();
+        grouperToSeed.getCompose().addInclude().setSystem(codeSystemUrl);
+        repo.update(grouperToSeed);
+
+        Library library = repo.read(Library.class, new IdType("Library/SpecificationLibrary"))
+                .copy();
+        library.addRelatedArtifact()
+                .setType(RelatedArtifact.RelatedArtifactType.DEPENDSON)
+                .setResource(pinnedCodeSystem);
+        // the manifest and the grouper both pin this leaf before drafting
+        assertTrue(
+                library.getRelatedArtifact().stream().anyMatch(ra -> (leafUrl + "|20210526").equals(ra.getResource())));
+
+        ILibraryAdapter libraryAdapter = new AdapterFactory().createLibrary(library);
+        Parameters params = new Parameters();
+        params.addParameter("version", "1.2.3");
+        Bundle returnedBundle = (Bundle) libraryAdapter.accept(new DraftVisitor(repo), params);
+        assertNotNull(returnedBundle);
+
+        var draftedManifest = returnedBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("Library"))
+                .map(entry ->
+                        repo.read(Library.class, new IdType(entry.getResponse().getLocation())))
+                .filter(lib -> "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary".equals(lib.getUrl()))
+                .findFirst();
+        assertTrue(draftedManifest.isPresent());
+
+        var draftedGrouper = returnedBundle.getEntry().stream()
+                .filter(entry -> entry.getResponse().getLocation().contains("ValueSet"))
+                .map(entry ->
+                        repo.read(ValueSet.class, new IdType(entry.getResponse().getLocation())))
+                .filter(vs -> "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc".equals(vs.getUrl()))
+                .findFirst();
+        assertTrue(draftedGrouper.isPresent());
+
+        var grouperLeafReferences = draftedGrouper.get().getCompose().getInclude().stream()
+                .flatMap(include -> include.getValueSet().stream())
+                .map(PrimitiveType::getValueAsString)
+                .filter(resource -> resource.startsWith(leafUrl))
+                .toList();
+        var manifestLeafReferences = draftedManifest.get().getRelatedArtifact().stream()
+                .map(RelatedArtifact::getResource)
+                .filter(resource -> resource != null && resource.startsWith(leafUrl))
+                .toList();
+
+        // The grouper floats its leaves to latest, the manifest's depends-on has to float with it.
+        // Assert the pair, not just that each side is individually bare.
+        assertFalse(grouperLeafReferences.isEmpty());
+        assertEquals(grouperLeafReferences, manifestLeafReferences);
+        assertEquals(List.of(leafUrl), manifestLeafReferences);
+
+        // only leaf ValueSets float, the code system keeps its pin
+        assertTrue(draftedManifest.get().getRelatedArtifact().stream()
+                .anyMatch(ra -> pinnedCodeSystem.equals(ra.getResource())));
     }
 }

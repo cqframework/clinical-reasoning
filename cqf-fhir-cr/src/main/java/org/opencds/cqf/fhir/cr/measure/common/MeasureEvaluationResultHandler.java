@@ -80,6 +80,13 @@ public class MeasureEvaluationResultHandler {
             }
         }
 
+        EvaluatedExpressionCollector.collect(
+                measureDef,
+                evalResultsPerSubject,
+                measureEvalType,
+                measureEvaluationOptions.getSupportingEvidenceMode(),
+                fhirContext.getVersion().getVersion());
+
         MeasureMultiSubjectEvaluator.postEvaluationMultiSubject(fhirContext, measureDef);
 
         // Score all groups and stratifiers using version-agnostic scorer

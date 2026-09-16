@@ -372,26 +372,28 @@ class CqlFhirParametersConverter(
         else value
     }
 
-    fun toFhirValue(value: Value?): IBase {
+    fun toFhirValue(value: Value): IBase {
         return toFhirValue(value, null)
     }
 
-    fun toFhirValue(valueToConvert: Value?, parentName: kotlin.String?): IBase {
+    /**
+     * Converts a CQL [Value] to a HAPI FHIR structure.
+     *
+     * @param valueToConvert The CQL value to convert.
+     * @param parentName The enclosing FHIR type for nested/inner HAPI FHIR classes representing
+     *   backbone elements.
+     */
+    fun toFhirValue(valueToConvert: Value, parentName: kotlin.String?): IBase {
         var clazz: Class<*>?
         val typeName: kotlin.String
         when (valueToConvert) {
-            is ClassInstance -> {
-                typeName = valueToConvert.type.localPart
-                clazz = modelResolver.resolveType(typeName)
-            }
-
             is NamedTypeValue -> {
                 typeName = valueToConvert.type.localPart
                 clazz = modelResolver.resolveType(typeName)
             }
 
             else -> {
-                typeName = valueToConvert!!.typeAsString
+                typeName = valueToConvert.typeAsString
                 clazz = null
             }
         }
@@ -459,6 +461,12 @@ class CqlFhirParametersConverter(
             definition = fhirContext.getResourceDefinition(resourceClazz)
         }
 
+        // `toFhirValue()` is called recursively for all subelements of the CQL class instance. If
+        // the current class is a nested/inner class, the same parent resource name (type name)
+        // should be used because in HAPI FHIR, all classes representing nested backbone elements
+        // are declared directly inside the named parent class.
+        val parentNameForChildren = if (clazz.enclosingClass == null) typeName else parentName
+
         for (child in definition.getChildren()) {
             val elementValue = (valueToConvert as ClassInstance)[child.elementName]
             if (elementValue == null) {
@@ -466,10 +474,10 @@ class CqlFhirParametersConverter(
             }
             if (elementValue is List) {
                 for (item in elementValue) {
-                    child.mutator.addValue(instance, toFhirValue(item!!, typeName))
+                    child.mutator.addValue(instance, toFhirValue(item!!, parentNameForChildren))
                 }
             } else {
-                child.mutator.addValue(instance, toFhirValue(elementValue, typeName))
+                child.mutator.addValue(instance, toFhirValue(elementValue, parentNameForChildren))
             }
         }
         return instance

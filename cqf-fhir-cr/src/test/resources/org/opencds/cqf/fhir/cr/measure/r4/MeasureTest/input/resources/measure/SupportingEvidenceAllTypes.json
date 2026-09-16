@@ -1,0 +1,183 @@
+{
+  "resourceType": "Measure",
+  "id": "SupportingEvidenceAllTypes",
+  "url": "http://example.com/Measure/SupportingEvidenceAllTypes",
+  "library": [
+    "http://example.com/Library/SupportingEvidenceTypes"
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/measure-scoring",
+        "code": "cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "group-1",
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+          "valueCode": "boolean"
+        }
+      ],
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "Initial Population"
+          },
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "BooleanValue",
+                "expression": "Boolean Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "IntegerValue",
+                "expression": "Integer Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "DecimalValue",
+                "expression": "Decimal Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "StringValue",
+                "expression": "String Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "DateValue",
+                "expression": "Date Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "DateTimeValue",
+                "expression": "DateTime Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "TimeValue",
+                "expression": "Time Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "CodeValue",
+                "expression": "Code Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "IntervalDateValue",
+                "expression": "Interval Date Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "IntervalDateTimeValue",
+                "expression": "Interval DateTime Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "TupleValue",
+                "expression": "Tuple Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "ListIntegerValue",
+                "expression": "List Integer Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "ListTimeValue",
+                "expression": "List Time Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "EmptyListValue",
+                "expression": "Empty List Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "NullValue",
+                "expression": "Null Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "ResourceListValue",
+                "expression": "Resource List Value"
+              }
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/cqf-supportingEvidenceDefinition",
+              "valueExpression": {
+                "language": "text/cql-identifier",
+                "name": "SingleResourceValue",
+                "expression": "Single Resource Value"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

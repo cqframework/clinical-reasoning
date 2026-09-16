@@ -532,8 +532,19 @@ public class MeasureMultiSubjectEvaluator {
 
         if (isFunctionResult) {
             for (FunctionResultEntry entry : result.functionResultEntries()) {
-                rowKeys.add(StratifierRowKey.withInput(
-                        qualifiedSubject, StratifierRowValue.ofFunctionInput(entry.input())));
+                var elements = multiElementList(entry.output());
+                if (elements != null) {
+                    // A single input produced multiple values: register one element alignment key per
+                    // value so this input fans out into one stratum per value (and scalar components
+                    // on the same input align to each).
+                    for (int i = 0; i < elements.size(); i++) {
+                        rowKeys.add(StratifierRowKey.withInput(
+                                qualifiedSubject, StratifierRowValue.ofFunctionInputElement(entry.input(), i)));
+                    }
+                } else {
+                    rowKeys.add(StratifierRowKey.withInput(
+                            qualifiedSubject, StratifierRowValue.ofFunctionInput(entry.input())));
+                }
             }
         } else {
             int index = 0;
@@ -563,7 +574,7 @@ public class MeasureMultiSubjectEvaluator {
         final Object rawValue = result == null ? null : result.raw();
 
         if (result != null && result.isFunctionResult()) {
-            return addFunctionResultRows(qualifiedSubject, result.functionResultEntries());
+            return addFunctionResultRows(qualifiedSubject, result.functionResultEntries(), alignmentRowKeysBySubject);
 
         } else if (rawValue instanceof Iterable<?> iterableValue) {
             return addIterableValueRows(qualifiedSubject, iterableValue);
@@ -619,18 +630,101 @@ public class MeasureMultiSubjectEvaluator {
      * </ul>
      */
     private static List<StratumTableRow> addFunctionResultRows(
-            String qualifiedSubject, List<FunctionResultEntry> functionResults) {
+            String qualifiedSubject,
+            List<FunctionResultEntry> functionResults,
+            Map<String, Set<StratifierRowKey>> alignmentRowKeysBySubject) {
 
-        return functionResults.stream()
-                .map(entry ->
-                        // The output value becomes the stratum value (what's displayed)
-                        // Null values are allowed - they will be grouped into a special "null" stratum
-                        new StratumTableRow(
-                                StratifierRowKey.withInput(
-                                        qualifiedSubject,
-                                        // Build composite row key: "Patient/xxx|Resource/yyy"
-                                        StratifierRowValue.ofFunctionInput(entry.input())),
-                                new StratumValueWrapper(entry.output())))
+        final Set<StratifierRowKey> subjectAlignmentKeys = alignmentRowKeysBySubject.get(qualifiedSubject);
+        final var rows = new ArrayList<StratumTableRow>();
+
+        for (FunctionResultEntry entry : functionResults) {
+            var elements = multiElementList(entry.output());
+            if (elements != null) {
+                // Multi-valued output: fan out into one row (and therefore one stratum) per value.
+                // Each element key still intersects the population on this input, so the input is
+                // counted in every stratum it fans into.
+                for (int i = 0; i < elements.size(); i++) {
+                    rows.add(new StratumTableRow(
+                            StratifierRowKey.withInput(
+                                    qualifiedSubject, StratifierRowValue.ofFunctionInputElement(entry.input(), i)),
+                            new StratumValueWrapper(elements.get(i))));
+                }
+                continue;
+            }
+
+            // Single-valued output. Unwrap a single-element list to its element so that a value that
+            // arrives bare (e.g. from a sibling's fan-out) and the same value arriving as a one-element
+            // list group into the SAME stratum (StratumValueWrapper keys a bare value and a list
+            // differently). Null values are allowed - they group into a special "null" stratum.
+            final var valueWrapper = new StratumValueWrapper(unwrapSingleElement(entry.output()));
+
+            // If another component fanned this same input into element rows, broadcast this value to
+            // each of those element keys so every fanned stratum carries a value from every component.
+            // Otherwise emit the usual single input-keyed row.
+            final List<StratifierRowKey> elementKeys =
+                    elementAlignmentKeysForInput(subjectAlignmentKeys, entry.input());
+            if (!elementKeys.isEmpty()) {
+                for (StratifierRowKey elementKey : elementKeys) {
+                    rows.add(new StratumTableRow(elementKey, valueWrapper));
+                }
+            } else {
+                rows.add(new StratumTableRow(
+                        StratifierRowKey.withInput(qualifiedSubject, StratifierRowValue.ofFunctionInput(entry.input())),
+                        valueWrapper));
+            }
+        }
+
+        return rows;
+    }
+
+    /**
+     * Returns the elements of a multi-valued (two or more) iterable value, or {@code null} for a
+     * scalar or a single-element iterable — neither of which needs to fan out (a single-element list
+     * renders as one value, matching the pre-existing behavior).
+     */
+    private static List<Object> multiElementList(Object value) {
+        if (!(value instanceof Iterable<?> iterable)) {
+            return null;
+        }
+        final var elements = new ArrayList<Object>();
+        iterable.forEach(elements::add);
+        return elements.size() >= 2 ? elements : null;
+    }
+
+    /**
+     * Unwraps a single-element iterable to its element, leaving scalars, empty iterables, and
+     * multi-element iterables untouched. Keeps a one-element function output ({@code {MMO}}) keyed
+     * the same as the bare value ({@code MMO}) so both land in the same stratum.
+     */
+    private static Object unwrapSingleElement(Object value) {
+        if (value instanceof Iterable<?> iterable) {
+            final var iterator = iterable.iterator();
+            if (iterator.hasNext()) {
+                final Object first = iterator.next();
+                if (!iterator.hasNext()) {
+                    return first;
+                }
+            }
+        }
+        return value;
+    }
+
+    /**
+     * The element alignment keys (produced by a multi-valued component) that belong to the given
+     * function input, matched on the input's intersection id. Used to broadcast a scalar component's
+     * value onto every stratum a sibling multi-valued component fanned this input into.
+     */
+    private static List<StratifierRowKey> elementAlignmentKeysForInput(
+            Set<StratifierRowKey> subjectAlignmentKeys, Object input) {
+        if (subjectAlignmentKeys == null || subjectAlignmentKeys.isEmpty()) {
+            return List.of();
+        }
+        final String inputId = StratifierRowValue.ofFunctionInput(input).intersectionValue();
+        return subjectAlignmentKeys.stream()
+                .filter(key -> key.inputParam()
+                        .map(value -> value instanceof StratifierRowValue.ResourceElement
+                                && inputId.equals(value.intersectionValue()))
+                        .orElse(false))
                 .toList();
     }
 

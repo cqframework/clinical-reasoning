@@ -65,7 +65,7 @@ To build against a local checkout of a dependency (e.g., CQL Engine) instead of 
 cp local.properties.example local.properties
 
 # Edit local.properties — uncomment and set the path:
-# cql.engine.path=../clinical_quality_language/Src/java
+# cql.engine.path=../clinical_quality_language
 
 # Build as normal — the settings plugin detects local.properties and includes the linked build
 ./gradlew build

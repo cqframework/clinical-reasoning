@@ -33,7 +33,8 @@ import org.opencds.cqf.fhir.cql.ClassInstanceHelper;
  *   <li>{@link #ofResourceId(String)} — for already-normalised IDs (tests, internal use).</li>
  * </ul>
  */
-public sealed interface StratifierRowValue permits StratifierRowValue.Resource, StratifierRowValue.Scalar {
+public sealed interface StratifierRowValue
+        permits StratifierRowValue.Resource, StratifierRowValue.ResourceElement, StratifierRowValue.Scalar {
 
     /**
      * Stable string form of this value, used as the unique inputParam slot in
@@ -42,8 +43,19 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
     String legacyString();
 
     /**
-     * {@code true} if this value can be intersected against population resource keys; only
-     * {@link Resource} returns true. Iterable-derived {@link Scalar} keys are synthetic
+     * The value used to intersect this row against population resource keys. For most values this is
+     * the same as {@link #legacyString()}. It differs for {@link ResourceElement}, whose
+     * {@code legacyString()} carries a per-element discriminator (so multiple values for one input
+     * land in distinct strata) but whose intersection value is the underlying input id (so the
+     * input is still counted correctly in each stratum it fans into).
+     */
+    default String intersectionValue() {
+        return legacyString();
+    }
+
+    /**
+     * {@code true} if this value can be intersected against population resource keys; {@link Resource}
+     * and {@link ResourceElement} return true. Iterable-derived {@link Scalar} keys are synthetic
      * uniquifiers and must fall back to subject-level resource lookup instead.
      */
     boolean isIntersectable();
@@ -54,11 +66,26 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
      * the now-removed {@code normalizeResourceKey} helper).
      */
     static StratifierRowValue ofFunctionInput(Object obj) {
+        return new Resource(functionInputId(obj));
+    }
+
+    /**
+     * The intersectable id for a function input — a FHIR resource's versionless {@code Type/id}, or
+     * {@link String#valueOf(Object)} for a primitive input (matching {@link #ofFunctionInput(Object)}).
+     */
+    private static String functionInputId(Object obj) {
         final String resourceId = resourceIdOrNull(obj);
-        if (resourceId != null) {
-            return new Resource(resourceId);
-        }
-        return new Resource(String.valueOf(obj));
+        return resourceId != null ? resourceId : String.valueOf(obj);
+    }
+
+    /**
+     * For one element of a multi-valued function output produced by a single input. The row must be
+     * distinct per element (so each value forms its own stratum), yet still intersect the population
+     * on the underlying input id (so that input is counted in each stratum it fans into). Uniqueness
+     * comes from {@code index}; {@link #intersectionValue()} returns the input id.
+     */
+    static StratifierRowValue ofFunctionInputElement(Object input, int index) {
+        return new ResourceElement(functionInputId(input), index);
     }
 
     /**
@@ -117,6 +144,33 @@ public sealed interface StratifierRowValue permits StratifierRowValue.Resource, 
 
         @Override
         public String legacyString() {
+            return resourceId;
+        }
+
+        @Override
+        public boolean isIntersectable() {
+            return true;
+        }
+    }
+
+    /**
+     * Intersectable inputParam for one element of a multi-valued function output. {@code resourceId}
+     * is the underlying input id (used for population intersection); {@code index} makes the key
+     * unique per element so each value forms its own stratum. Encodes {@code <resourceId>#e<index>}.
+     */
+    record ResourceElement(String resourceId, int index) implements StratifierRowValue {
+
+        public ResourceElement {
+            Objects.requireNonNull(resourceId, "resourceId must not be null");
+        }
+
+        @Override
+        public String legacyString() {
+            return resourceId + "#e" + index;
+        }
+
+        @Override
+        public String intersectionValue() {
             return resourceId;
         }
 

@@ -27,7 +27,7 @@ object LinkedBuildRegistry {
         LinkedBuild(
             slug = "cqframework/clinical_quality_language",
             propertyKey = "cql.engine.path",
-            buildRoot = "Src/java",
+            buildRoot = "",
             substitutions =
                 buildMap {
                     // Kotlin/JVM modules — artifact name matches project name

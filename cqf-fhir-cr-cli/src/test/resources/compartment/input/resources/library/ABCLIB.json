@@ -1,7 +1,7 @@
 {
     "resourceType": "Library",
     "id": "ABCLIB",
-    "url": "http://example.com/Library/ABC-LIB",
+    "url": "http://example.com/Library/ABCLIB",
     "name": "ABCLIB",
     "status": "active",
     "type": {

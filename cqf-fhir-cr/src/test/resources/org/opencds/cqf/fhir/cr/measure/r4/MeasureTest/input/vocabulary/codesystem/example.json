@@ -1,0 +1,15 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "example",
+  "url": "http://example.org/CodeSystem/example",
+  "version": "2.1",
+  "name": "ExampleCodeSystem",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "cond-1",
+      "display": "Example condition"
+    }
+  ]
+}

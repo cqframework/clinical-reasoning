@@ -172,6 +172,57 @@ class StratifierMultiSubjectDateBasisTest {
     }
 
     /**
+     * A stratifier <em>function</em> that returns a multi-element list for a single input must fan out
+     * into one stratum per value (the input counting toward each), not collapse into a single stratum
+     * with a comma-joined value.
+     *
+     * <p>Here {@code @2026-01-12} is enrolled in two product lines (MEP and MMO) in the same month, so
+     * {@code Multi Payer Product Line Stratifier} returns {@code {MEP, MMO}} for that date. Expected:
+     * that date counts toward BOTH the MEP and MMO strata. Per-input counts: MMO x3 (01-01, 01-02,
+     * 01-12) / MCD x9 / MEP x1 (01-12) — distinct from a subject-level count, which would report 12 for
+     * every stratum. No component value is comma-joined.
+     */
+    @Test
+    void hedisEnrollmentMultiValueProductLineFansOutPerValue() {
+        MeasureReport report = GIVEN.when()
+                .measureId("StratifierMultiSubjectDateBasisMultiValueComponentMeasure")
+                .subject("Patient/patient-a")
+                .evaluate()
+                .then()
+                .measureReport();
+
+        var group = report.getGroup().stream()
+                .filter(g -> "Enrollment".equals(g.getId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("no Enrollment group in report"));
+        assertEquals(12, group.getPopulationFirstRep().getCount(), "initial-population count");
+
+        assertFalse(group.getStratifier().isEmpty(), "Enrollment group produced no stratifier");
+        var strata = group.getStratifierFirstRep().getStratum();
+        assertEquals(3, strata.size(), "the multi-value date must fan out, yielding three strata (MMO, MCD, MEP)");
+
+        Map<String, Integer> productLineCounts = new HashMap<>();
+        for (var stratum : strata) {
+            assertEquals(2, stratum.getComponent().size(), "each stratum should carry Age + ProductLine");
+            var productLine = stratum.getComponent().stream()
+                    .filter(c -> c.getCode().hasText()
+                            && "ProductLine".equals(c.getCode().getText()))
+                    .map(c -> c.getValue().getText())
+                    .findFirst()
+                    .orElseThrow(() -> new AssertionError("stratum is missing a ProductLine component"));
+            assertFalse(
+                    productLine.contains(","),
+                    "ProductLine value should fan out into separate strata, not comma-join: " + productLine);
+            productLineCounts.put(productLine, stratum.getPopulationFirstRep().getCount());
+        }
+
+        assertEquals(
+                Map.of("MMO", 3, "MCD", 9, "MEP", 1),
+                productLineCounts,
+                "the multi-payer date (01-12) must count toward both MMO and MEP, per input");
+    }
+
+    /**
      * Reproduces the empty/collapsed stratifier reported for HEDIS 2025 (NCQA ENP-Reporting):
      * {@code "stratifier": [ { "id": "enrollment-stratifier" } ]} with no {@code stratum} array.
      *

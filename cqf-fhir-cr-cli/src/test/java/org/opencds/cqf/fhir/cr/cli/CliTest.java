@@ -641,6 +641,87 @@ class CliTest {
         assertTrue(output.contains("\"subject\":{\"reference\":\"Patient/456\""));
     }
 
+    /**
+     * Regression test for a measure whose stratifier components (Age, ProductLine) are CQL
+     * <em>functions</em> (a value/non-subject-value component stratifier on a non-boolean basis).
+     * The CLI measure command must route through CR's engine path so that the stratifier-function
+     * results are actually computed; the old library-only {@code $evaluate} path never invoked the
+     * functions, producing MeasureReports with NULL stratifier component values.
+     *
+     * <p>Also guards multi-value fan-out: {@code @2026-01-12} is tagged with two product lines, so
+     * {@code Product Line Stratifier} returns a two-element list for that single date input. That
+     * input must fan out into BOTH the MEP and MMO strata (counting toward each) rather than
+     * collapsing into one stratum with a comma-joined {@code "MEP,MMO"} value. Expected per-input
+     * counts: Age {@code 18-19}; ProductLine MMO x3 (01-01, 01-02, 01-12) / MCD x9 / MEP x1
+     * (01-12). No component value is the literal {@code "null"} and none is comma-joined.
+     */
+    @Test
+    void stratifierComponentFunctionValues() throws IOException {
+        var root = testResourcePath + "/stratifier-functions";
+        var subjectValue = "patient-a";
+        var reportPath = Path.of(testResultsPath, "stratifier-functions", MEASUREREPORTS_FOLDER);
+
+        String[] args = new String[] {
+            "measure",
+            "-source=" + root + "/input/cql",
+            "-name=StratifierMultiSubjectDateBasis",
+            "-data=" + root,
+            "-c=Patient",
+            "-cv=" + subjectValue,
+            "--measure=StratifierMultiSubjectDateBasisMultiComponentMeasure",
+            "--report-path=" + reportPath,
+        };
+
+        Main.run(args);
+
+        var reportFile = reportPath.resolve(subjectValue + ".json");
+        assertTrue(Files.exists(reportFile), "Expected MeasureReport at " + reportFile);
+        var report = JSON_PARSER.parseResource(MeasureReport.class, Files.readString(reportFile));
+
+        var enrollmentGroup = report.getGroup().stream()
+                .filter(g -> "Enrollment".equals(g.getId()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Missing Enrollment group in MeasureReport"));
+
+        assertFalse(enrollmentGroup.getStratifier().isEmpty(), "Enrollment group has no stratifier");
+        var strata = enrollmentGroup.getStratifier().get(0).getStratum();
+        assertFalse(strata.isEmpty(), "Stratifier has no strata");
+
+        var productLineCounts = new java.util.HashMap<String, Integer>();
+        for (var stratum : strata) {
+            String age = null;
+            String productLine = null;
+            for (var component : stratum.getComponent()) {
+                var code = component.getCode().getText();
+                var value = component.getValue().getText();
+                // The bug produced literal "null" component values; ensure that never happens.
+                assertFalse(
+                        "null".equals(value), "Stratifier component '%s' has a null value (the bug)".formatted(code));
+                // A multi-value stratifier result must fan out into separate strata, never a
+                // comma-joined value like "MEP,MMO".
+                assertFalse(
+                        value != null && value.contains(","),
+                        "Stratifier component '%s' has a comma-joined value '%s' (should fan out into separate strata)"
+                                .formatted(code, value));
+                if ("Age".equals(code)) {
+                    age = value;
+                } else if ("ProductLine".equals(code)) {
+                    productLine = value;
+                }
+            }
+            assertEquals("18-19", age, "Unexpected Age stratifier value");
+            var count = stratum.getPopulationFirstRep().getCount();
+            productLineCounts.put(productLine, count);
+        }
+
+        // @2026-01-12 is tagged both MEP and MMO, so it fans out: it counts toward MMO (with 01-01,
+        // 01-02) and toward MEP. Per-input counting keeps these distinct from a subject-level count
+        // (which would report 12 for every stratum).
+        assertEquals(3, productLineCounts.get("MMO"), "Unexpected count for ProductLine MMO");
+        assertEquals(9, productLineCounts.get("MCD"), "Unexpected count for ProductLine MCD");
+        assertEquals(1, productLineCounts.get("MEP"), "Unexpected count for ProductLine MEP");
+    }
+
     @Test
     @Disabled("This test is failing on the CI Server for reasons unknown. Need to debug that.")
     void sampleContentIG() {

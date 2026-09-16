@@ -39,6 +39,7 @@ import org.opencds.cqf.fhir.cr.measure.common.MeasureProcessorTimeUtils;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReportType;
 import org.opencds.cqf.fhir.cr.measure.common.MultiLibraryIdMeasureEngineDetails;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceMode;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureServiceUtils;
 import org.opencds.cqf.fhir.utility.search.Searches;
@@ -67,6 +68,10 @@ public class R4MeasureProcessor {
     // processor: this may be some sort of federated proxy repository initialized at runtime
     public IRepository getRepository() {
         return repository;
+    }
+
+    private SupportingEvidenceMode supportingEvidenceMode() {
+        return measureEvaluationOptions.getSupportingEvidenceMode();
     }
 
     public MeasureReport evaluateMeasure(
@@ -184,7 +189,7 @@ public class R4MeasureProcessor {
         measureEvaluationResultHandler.processResults(fhirContext, results, measureDef, evaluationType);
 
         // Build Measure Report with Results
-        MeasureReport measureReport = new R4MeasureReportBuilder()
+        MeasureReport measureReport = new R4MeasureReportBuilder(supportingEvidenceMode())
                 .build(
                         measure,
                         measureDef,
@@ -238,7 +243,7 @@ public class R4MeasureProcessor {
         var measurementPeriod = MeasureProcessorTimeUtils.getMeasurementPeriod(periodStart, periodEnd, context);
 
         // Build Measure Report with Results
-        MeasureReport measureReport = new R4MeasureReportBuilder()
+        MeasureReport measureReport = new R4MeasureReportBuilder(supportingEvidenceMode())
                 .build(
                         measure,
                         measureDef,

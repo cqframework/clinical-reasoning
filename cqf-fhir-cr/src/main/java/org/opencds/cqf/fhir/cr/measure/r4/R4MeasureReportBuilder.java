@@ -62,6 +62,7 @@ import org.opencds.cqf.fhir.cr.measure.common.StratifierDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumPopulationDef;
 import org.opencds.cqf.fhir.cr.measure.common.StratumValueWrapper;
+import org.opencds.cqf.fhir.cr.measure.common.SupportingEvidenceMode;
 import org.opencds.cqf.fhir.cr.measure.constant.MeasureConstants;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4DateHelper;
 import org.opencds.cqf.fhir.cr.measure.r4.utils.R4MeasureReportUtils;
@@ -72,6 +73,16 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
     private static final Logger logger = LoggerFactory.getLogger(R4MeasureReportBuilder.class);
     protected static final String POPULATION_SUBJECT_SET = "POPULATION_SUBJECT_SET";
+
+    private final SupportingEvidenceMode supportingEvidenceMode;
+
+    public R4MeasureReportBuilder() {
+        this(SupportingEvidenceMode.DECLARED);
+    }
+
+    public R4MeasureReportBuilder(SupportingEvidenceMode supportingEvidenceMode) {
+        this.supportingEvidenceMode = Objects.requireNonNull(supportingEvidenceMode);
+    }
 
     @Override
     public MeasureReport build(
@@ -93,6 +104,7 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
 
         addEvaluatedResource(bc);
         addSupplementalData(bc);
+        addEvaluatedExpressions(bc);
         bc.addOperationOutcomes();
 
         for (var r : bc.contained().values()) {
@@ -112,6 +124,13 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
                         .anyMatch(t -> t.getResourceType().equals(ResourceType.OperationOutcome))) {
             // Measure Reports that have encountered an error during evaluation will be set to status 'Error'
             bc.report().setStatus(MeasureReportStatus.ERROR);
+        }
+    }
+
+    private void addEvaluatedExpressions(R4MeasureReportBuilderContext bc) {
+        if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)) {
+            R4SupportingEvidenceExtension.addSupportingEvidenceExtensions(
+                    bc.report(), bc.measureDef().evaluatedExpressions());
         }
     }
 
@@ -262,7 +281,8 @@ public class R4MeasureReportBuilder implements MeasureReportBuilder<Measure, Mea
         reportPopulation.setCount(populationDef.getCount());
 
         // Supporting Evidence
-        if (bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
+        if (supportingEvidenceMode != SupportingEvidenceMode.OFF
+                && bc.report().getType().equals(MeasureReport.MeasureReportType.INDIVIDUAL)
                 && populationDef.getSupportingEvidenceDefs() != null
                 && !populationDef.getSupportingEvidenceDefs().isEmpty()) {
             var extDefs = populationDef.getSupportingEvidenceDefs();

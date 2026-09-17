@@ -1,23 +1,40 @@
 [versions]
 hapi = "8.10.0"
 cql = "5.3.0"
-junit = "5.14.3"
-slf4j = "2.0.17"
+
+kotlin = "2.3.20"
+
+spring = "6.2.12"
 spring-boot = "3.4.11"
 picocli = "4.7.7"
-jmh = "1.37"
 jakarta-annotation = "2.1.1"
 commons-compress = "1.28.0"
 commons-codec = "1.21.0"
+
+slf4j = "2.0.17"
+slf4j-test = "3.0.3"
+
+junit = "5.14.3"
 mockito = "5.21.0"
 hamcrest = "3.0"
 jsonassert = "1.5.3"
 equalsverifier = "4.3.1"
 reflections = "0.10.2"
-slf4j-test = "3.0.3"
-spring = "6.2.12"
+jmh = "1.37"
 
+jacoco = "0.8.14"
+
+spotless = "8.4.0"
 sonarqube = "7.2.2.6593"
+checkstyle = "12.2.0"
+palantir-format = "2.89.0"
+ktfmt = "0.56"
+errorprone-gradle = "5.0.0"
+error-prone-core = "2.42.0"
+animalsniffer = "2.0.1"
+gummy-bears = "0.12.0"
+
+vanniktech-publish = "0.36.0"
 
 [libraries]
 # BOMs (used by convention plugins)
@@ -97,5 +114,13 @@ jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
 jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
 
 [plugins]
-sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-gradle" }
+animalsniffer = { id = "ru.vyarus.animalsniffer", version.ref = "animalsniffer" }
+
+vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }

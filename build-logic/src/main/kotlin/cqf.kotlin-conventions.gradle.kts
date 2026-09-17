@@ -17,3 +17,5 @@ kotlin {
         test { kotlin.srcDir("src/test/java") }
     }
 }
+
+dependencies { testImplementation(kotlin("test")) }

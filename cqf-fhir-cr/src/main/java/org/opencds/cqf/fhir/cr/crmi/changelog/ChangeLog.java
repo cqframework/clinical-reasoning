@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.cr.crmi.changelog;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Library;
@@ -273,8 +274,11 @@ public class ChangeLog {
         codeMap.putIfAbsent(createUniqueCodeKey(source, containsComponent.getSystem(), codeValue), code);
     }
 
-    // What the expansion recorded about a code that compose.include cannot express.
-    private record ExpansionDetail(String version, Boolean inactive) {}
+    // What the expansion recorded about a code, whether or not compose.include can express it too.
+    private record ExpansionDetail(String version, Boolean inactive, String display) {}
+
+    // Stand in for a code the expansion says nothing about, so callers can read the fields unguarded.
+    private static final ExpansionDetail NO_EXPANSION_DETAIL = new ExpansionDetail(null, null, null);
 
     /**
      * Collects the code system version and active status the expansion recorded for each code.
@@ -288,18 +292,24 @@ public class ChangeLog {
             if (!contained.hasCode()) {
                 return;
             }
-            // First entry to state a thing wins, per field. Taking the first entry wholesale would let a
+            // First entry to state a thing wins, per field. Taking the first entry blindly would let a
             // contains entry with no version block a later one that has it.
             expansionDetailMap.compute(
                     createUniqueCodeKey(
                             Canonicals.getIdPart(valueSet.getUrl()), contained.getSystem(), contained.getCode()),
-                    (k, existing) -> new ExpansionDetail(
-                            firstNonNull(
-                                    existing == null ? null : existing.version(),
-                                    contained.hasVersion() ? contained.getVersion() : null),
-                            firstNonNull(
-                                    existing == null ? null : existing.inactive(),
-                                    contained.hasInactive() ? contained.getInactive() : null)));
+                    (k, expansionDetail) -> {
+                        var currentExpansionDetail = firstNonNull(expansionDetail, NO_EXPANSION_DETAIL);
+                        return new ExpansionDetail(
+                                firstNonNull(
+                                        currentExpansionDetail.version(),
+                                        contained.hasVersion() ? contained.getVersion() : null),
+                                firstNonNull(
+                                        currentExpansionDetail.inactive(),
+                                        contained.hasInactive() ? contained.getInactive() : null),
+                                firstNonNull(
+                                        currentExpansionDetail.display(),
+                                        contained.hasDisplay() ? contained.getDisplay() : null));
+                    });
         });
         return expansionDetailMap;
     }
@@ -330,14 +340,16 @@ public class ChangeLog {
                 .filter(ValueSet.ConceptReferenceComponent::hasCode)
                 .forEach(conceptReference -> {
                     var key = createUniqueCodeKey(source, system, conceptReference.getCode());
-                    var detail = expansionDetails.get(key);
+                    var detail = expansionDetails.getOrDefault(key, NO_EXPANSION_DETAIL);
                     var code = new ValueSetChild.Code(
                             id,
                             system,
                             conceptReference.getCode(),
-                            version == null || version.isBlank() ? (detail == null ? null : detail.version()) : version,
-                            conceptReference.getDisplay(),
-                            detail == null ? null : detail.inactive(),
+                            // Prefer authoritative compose version
+                            StringUtils.defaultIfBlank(version, detail.version()),
+                            // Prefer expansion display
+                            firstNonNull(detail.display(), conceptReference.getDisplay()),
+                            detail.inactive(),
                             source,
                             name,
                             title,
@@ -431,27 +443,29 @@ public class ChangeLog {
 
     public void handleRelatedArtifacts() {
         var manifest = this.getPage(this.manifestUrl);
-        if (manifest.isPresent()) {
-            var specLibrary = manifest.get();
-            var manifestOldData = (LibraryChild) specLibrary.getOldData();
-            var manifestNewData = (LibraryChild) specLibrary.getNewData();
-            if (manifestNewData != null) {
-                for (final var page : this.pages) {
-                    var oldValueSet = page.getOldData() instanceof ValueSetChild old ? old : null;
-                    var newValueSet = page.getNewData() instanceof ValueSetChild latest ? latest : null;
+        if (manifest.isEmpty()) {
+            return;
+        }
+        var specLibrary = manifest.get();
+        var manifestOldData = (LibraryChild) specLibrary.getOldData();
+        var manifestNewData = (LibraryChild) specLibrary.getNewData();
+        if (manifestNewData == null) {
+            return;
+        }
+        for (final var page : this.pages) {
+            var oldValueSet = page.getOldData() instanceof ValueSetChild old ? old : null;
+            var newValueSet = page.getNewData() instanceof ValueSetChild latest ? latest : null;
 
-                    // Whether a condition or priority changed is a property of the pair of sides, so
-                    // both sides have to be known before either is populated.
-                    var oldStated = statedForLeaves(manifestOldData, oldValueSet);
-                    var newStated = statedForLeaves(manifestNewData, newValueSet);
+            // Whether a condition or priority changed is a property of the pair of sides, so
+            // both sides have to be known before either is populated.
+            var oldStated = statedForLeaves(manifestOldData, oldValueSet);
+            var newStated = statedForLeaves(manifestNewData, newValueSet);
 
-                    // A value set present in only one release already says so through its own insert or
-                    // delete, so a null operation type leaves its conditions and priorities unmarked.
-                    var onBothSides = oldValueSet != null && newValueSet != null;
-                    addConditionsAndPriorities(manifestOldData, oldValueSet, newStated, onBothSides ? DELETE : null);
-                    addConditionsAndPriorities(manifestNewData, newValueSet, oldStated, onBothSides ? INSERT : null);
-                }
-            }
+            // A value set present in only one release already says so through its own insert or
+            // delete, so a null operation type leaves its conditions and priorities unmarked.
+            var onBothSides = oldValueSet != null && newValueSet != null;
+            addConditionsAndPriorities(manifestOldData, oldValueSet, newStated, onBothSides ? DELETE : null);
+            addConditionsAndPriorities(manifestNewData, newValueSet, oldStated, onBothSides ? INSERT : null);
         }
     }
 

@@ -33,13 +33,15 @@ public class ValueAndOperation {
         if (this.operation != null
                 && this.operation.getType().equals(operation.getType())
                 && this.operation.getPath().equals(operation.getPath())) {
+            var existingOperationDescription = describe(this.operation.getNewValue());
+            var proposedOperationDescription = describe(operation.getNewValue());
             logger.warn(
                     "Ignoring a repeat operation on element {}: type={} path={} kept={} ignored={}",
                     this.value,
                     operation.getType(),
                     operation.getPath(),
-                    describe(this.operation.getNewValue()),
-                    describe(operation.getNewValue()));
+                    existingOperationDescription,
+                    proposedOperationDescription);
             return;
         }
         this.operation = operation;

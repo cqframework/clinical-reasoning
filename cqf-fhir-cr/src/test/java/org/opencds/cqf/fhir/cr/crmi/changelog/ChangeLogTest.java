@@ -72,6 +72,24 @@ class ChangeLogTest {
         assertEquals(Boolean.FALSE, onlyCodeOf(leafWithInactive(false)).getInactive());
     }
 
+    /**
+     * The expansion's display wins over compose.include.concept's.
+     */
+    @Test
+    void codeTakesDisplayFromTheExpansion() {
+        assertEquals(
+                "Resolved term",
+                onlyCodeOf(leafWithDisplays("Authored term", "Resolved term")).getDisplay());
+    }
+
+    /** Nothing in the expansion to prefer, so compose's display is used rather than left empty. */
+    @Test
+    void codeKeepsComposeDisplayWhenTheExpansionHasNone() {
+        assertEquals(
+                "Authored term",
+                onlyCodeOf(leafWithDisplays("Authored term", null)).getDisplay());
+    }
+
     /** An absent inactive means the status was never stated - not that the code is active. */
     @Test
     void codeInactiveIsNullWhenTheExpansionDoesNotStateIt() {
@@ -394,8 +412,8 @@ class ChangeLogTest {
     /** A leaf carrying one code, with the version and display that side should report. */
     private static ValueSet leafWithCode(String expansionVersion, String display) {
         var valueSet = emptyLeaf();
-        // display is read from compose.include.concept, because that path claims the code before the
-        // expansion is walked - the expansion only supplies the code system version, via the fallback
+        // both paths state the same display here, so a test using this fixture is not making a claim
+        // about which one is read - see the display tests for that
         valueSet.getCompose()
                 .addInclude()
                 .setSystem(LOINC)
@@ -408,6 +426,22 @@ class ChangeLogTest {
                 .setCode(CODE)
                 .setVersion(expansionVersion)
                 .setDisplay(display);
+        return valueSet;
+    }
+
+    /** A leaf stating a different display on each of the two paths a code can arrive by. */
+    private static ValueSet leafWithDisplays(String composeDisplay, String expansionDisplay) {
+        var valueSet = emptyLeaf();
+        valueSet.getCompose()
+                .addInclude()
+                .setSystem(LOINC)
+                .addConcept()
+                .setCode(CODE)
+                .setDisplay(composeDisplay);
+        var contains = valueSet.getExpansion().addContains().setSystem(LOINC).setCode(CODE);
+        if (expansionDisplay != null) {
+            contains.setDisplay(expansionDisplay);
+        }
         return valueSet;
     }
 

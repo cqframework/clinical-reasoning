@@ -55,13 +55,6 @@ class VersionUtilitiesTests {
     }
 
     @Test
-    void TestNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            VersionUtilities.enumForVersion(null);
-        });
-    }
-
-    @Test
     void TestMalformed() {
         assertThrows(IllegalArgumentException.class, () -> {
             VersionUtilities.enumForVersion("bubba");

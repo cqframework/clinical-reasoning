@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,15 +35,14 @@ class ResourcesTest {
     @Test
     void castOrThrowNull() {
         var result = Resources.castOrThrow(null, Patient.class, "error");
-        assertTrue(result.isEmpty());
+        assertNull(result);
     }
 
     @Test
     void castOrThrowValid() {
         var patient = new Patient();
         var result = Resources.castOrThrow(patient, Patient.class, "error");
-        assertTrue(result.isPresent());
-        assertEquals(patient, result.get());
+        assertEquals(patient, result);
     }
 
     @Test

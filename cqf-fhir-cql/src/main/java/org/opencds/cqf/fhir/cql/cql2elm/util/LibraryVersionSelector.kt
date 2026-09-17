@@ -64,8 +64,8 @@ class LibraryVersionSelector(private val adapterFactory: IAdapterFactory) {
                 return 1
             }
 
-            val string1Values = version1.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }
-            val string2Values = version2!!.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }
+            val string1Values = version1.split(".").dropLastWhile { it.isEmpty() }
+            val string2Values = version2!!.split(".").dropLastWhile { it.isEmpty() }
 
             val length = max(string1Values.size, string2Values.size)
 

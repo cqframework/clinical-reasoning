@@ -1,32 +1,29 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import org.hl7.fhir.exceptions.FHIRException
 
-public class RelatedArtifactUtil {
-
-    private RelatedArtifactUtil() {}
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <T extends Enum> T getRelatedArtifactType(String code, FhirVersionEnum fhirVersion) {
+object RelatedArtifactUtil {
+    @JvmStatic
+    fun <T : Enum<*>> getRelatedArtifactType(code: String?, fhirVersion: FhirVersionEnum): T? {
         try {
-            switch (fhirVersion) {
-                case DSTU3 -> {
-                    return (T) org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.fromCode(code);
-                }
-                case R4 -> {
-                    return (T) org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.fromCode(code);
-                }
-                case R5 -> {
-                    return (T) org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.fromCode(code);
-                }
-                default -> {
-                    throw new UnprocessableEntityException("Unsupported version: " + fhirVersion.toString());
-                }
+            @Suppress("UNCHECKED_CAST")
+            return when (fhirVersion) {
+                FhirVersionEnum.DSTU3 ->
+                    org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.fromCode(code)
+
+                FhirVersionEnum.R4 ->
+                    org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.fromCode(code)
+
+                FhirVersionEnum.R5 ->
+                    org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.fromCode(code)
+
+                else -> throw UnprocessableEntityException("Unsupported version: $fhirVersion")
             }
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
+                as T?
+        } catch (e: FHIRException) {
+            throw UnprocessableEntityException("Invalid related artifact code")
         }
     }
 }

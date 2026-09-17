@@ -1,37 +1,25 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static org.opencds.cqf.fhir.utility.BundleHelper.getEntryResourceFirstRep;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.model.api.IQueryParameterType
+import ca.uhn.fhir.parser.DataFormatException
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import com.google.common.collect.Multimap
+import com.google.common.collect.Multimaps
+import org.hl7.fhir.exceptions.FHIRException
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Canonicals.getResourceType
+import org.opencds.cqf.fhir.utility.Canonicals.getUrl
+import org.opencds.cqf.fhir.utility.Canonicals.getVersion
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.search.Searches
 
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.search.Searches;
-
-@SuppressWarnings("UnstableApiUsage")
-public class SearchHelper {
-
-    private SearchHelper() {}
-
-    @SuppressWarnings("unchecked")
-    protected static Class<IBaseBundle> getBundleClass(IRepository repository) {
-        return (Class<IBaseBundle>)
-                repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
+object SearchHelper {
+    internal fun getBundleClass(repository: IRepository): Class<IBaseBundle> {
+        @Suppress("UNCHECKED_CAST")
+        return repository.fhirContext().getResourceDefinition("Bundle").implementingClass
+            as Class<IBaseBundle>
     }
 
     /**
@@ -41,10 +29,10 @@ public class SearchHelper {
      * @param resourceType String of the resource typeget
      * @return
      */
-    @SuppressWarnings("unchecked")
-    public static Class<IBaseResource> getResourceClass(IRepository repository, String resourceType) {
-        return (Class<IBaseResource>)
-                repository.fhirContext().getResourceDefinition(resourceType).getImplementingClass();
+    @JvmStatic
+    fun getResourceClass(repository: IRepository, resourceType: String?): Class<IBaseResource> {
+        return repository.fhirContext().getResourceDefinition(resourceType).implementingClass
+            as Class<IBaseResource>
     }
 
     /**
@@ -54,8 +42,9 @@ public class SearchHelper {
      * @param id IIdType of the resource
      * @return
      */
-    public static IBaseResource readRepository(IRepository repository, IIdType id) {
-        return repository.read(getResourceClass(repository, id.getResourceType()), id);
+    @JvmStatic
+    fun readRepository(repository: IRepository, id: IIdType): IBaseResource? {
+        return repository.read(getResourceClass(repository, id.resourceType), id)
     }
 
     /**
@@ -64,173 +53,209 @@ public class SearchHelper {
      * @param <CanonicalType>
      * @param repository the repository to search
      * @param canonical the canonical url to search for
-     * @return
+     * @return </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> IBaseResource searchRepositoryByCanonical(
-            IRepository repository, CanonicalType canonical) {
-
-        var resourceType = getResourceType(repository, canonical);
-        return searchRepositoryByCanonical(repository, canonical, resourceType);
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> searchRepositoryByCanonical(
+        repository: IRepository,
+        canonical: CanonicalType,
+    ): IBaseResource {
+        val resourceType = getResourceType(repository, canonical)
+        return SearchHelper.searchRepositoryByCanonical(repository, canonical, resourceType)
     }
 
     /**
-     * Gets the resource type for the given canonical, based on the convention that canonical
-     * URLs are of the form [base]/[resourceType]/[tail]
+     * Gets the resource type for the given canonical, based on the convention that canonical URLs
+     * are of the form <base>/<resourceType>/<tail>
      *
-     * If the URL does not conform to the convention, the cqf-resourceType extension is used
-     * to determine the type of the resource, if present.
+     * If the URL does not conform to the convention, the cqf-resourceType extension is used to
+     * determine the type of the resource, if present.
      *
-     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
-     * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
+     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on the
+     * grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
      *
      * @param <CanonicalType>
      * @param repository the repository to search
      * @param canonical the canonical url to search for
-     * @return
+     * @return </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> Class<? extends IBaseResource> getResourceType(
-            IRepository repository, CanonicalType canonical) {
-        Class<? extends IBaseResource> resourceType = null;
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getResourceType(
+        repository: IRepository,
+        canonical: CanonicalType,
+    ): Class<out IBaseResource> {
+        var resourceType: Class<out IBaseResource>
         try {
-            var resourceTypeString = Canonicals.getResourceType(canonical);
-            if (StringUtils.isEmpty(resourceTypeString)) {
-                throw new DataFormatException();
+            val resourceTypeString = Canonicals.getResourceType(canonical)
+            if (resourceTypeString.isNullOrEmpty()) {
+                throw DataFormatException()
             }
-            resourceType = repository
-                    .fhirContext()
-                    .getResourceDefinition(resourceTypeString)
-                    .getImplementingClass();
-        } catch (DataFormatException e) {
+            resourceType =
+                repository.fhirContext().getResourceDefinition(resourceTypeString).implementingClass
+        } catch (e: DataFormatException) {
             // Use the "cqf-resourceType" extension to figure this out, if it's present
-            var cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(canonical);
-            if (cqfResourceTypeExt.isPresent()) {
+            val cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(canonical)
+            if (cqfResourceTypeExt != null) {
                 try {
-                    resourceType = repository
+                    resourceType =
+                        repository
                             .fhirContext()
-                            .getResourceDefinition(cqfResourceTypeExt.get())
-                            .getImplementingClass();
-                } catch (DataFormatException | NullPointerException e2) {
-                    throw new UnprocessableEntityException(
-                            "cqf-resourceType extension contains invalid resource type: " + cqfResourceTypeExt.get());
+                            .getResourceDefinition(cqfResourceTypeExt)
+                            .implementingClass
+                } catch (e2: DataFormatException) {
+                    throw UnprocessableEntityException(
+                        "cqf-resourceType extension contains invalid resource type: $cqfResourceTypeExt"
+                    )
+                } catch (e2: NullPointerException) {
+                    throw UnprocessableEntityException(
+                        "cqf-resourceType extension contains invalid resource type: $cqfResourceTypeExt"
+                    )
                 }
             } else {
-                // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
-                resourceType = repository
-                        .fhirContext()
-                        .getResourceDefinition("CodeSystem")
-                        .getImplementingClass();
+                // NOTE: This is based on the assumption that only CodeSystems don't follow the
+                // canonical pattern...
+                resourceType =
+                    repository.fhirContext().getResourceDefinition("CodeSystem").implementingClass
             }
         }
-        return resourceType;
+        return resourceType
     }
 
     /**
-     * Gets the resource type for the given canonical, based on the convention that canonical
-     * URLs are of the form [base]/[resourceType]/[tail]
+     * Gets the resource type for the given canonical, based on the convention that canonical URLs
+     * are of the form <base>/<resourceType>/<tail>
      *
-     * If the URL does not conform to the convention, the cqf-resourceType extension is used
-     * to determine the type of the resource, if present.
+     * If the URL does not conform to the convention, the cqf-resourceType extension is used to
+     * determine the type of the resource, if present.
      *
-     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on
-     * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
+     * If no extension is present, the type of the canonical is assumed to be CodeSystem, on the
+     * grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
      *
      * @param repository the repository to search
      * @param dependencyInfo the canonical url to search for
      * @return
      */
-    public static Class<? extends IBaseResource> getResourceType(
-            IRepository repository, IDependencyInfo dependencyInfo) {
-        Class<? extends IBaseResource> resourceType = null;
+    @JvmStatic
+    fun getResourceType(
+        repository: IRepository,
+        dependencyInfo: IDependencyInfo,
+    ): Class<out IBaseResource> {
+        var resourceType: Class<out IBaseResource>
         try {
-            var resourceTypeString = Canonicals.getResourceType(dependencyInfo.getReference());
-            if (StringUtils.isEmpty(resourceTypeString)) {
-                throw new DataFormatException();
+            val resourceTypeString = getResourceType(dependencyInfo.reference)
+            if (resourceTypeString.isNullOrEmpty()) {
+                throw DataFormatException()
             }
-            resourceType = repository
-                    .fhirContext()
-                    .getResourceDefinition(resourceTypeString)
-                    .getImplementingClass();
-        } catch (DataFormatException e) {
+            resourceType =
+                repository.fhirContext().getResourceDefinition(resourceTypeString).implementingClass
+        } catch (e: DataFormatException) {
             // Use the "cqf-resourceType" extension to figure this out, if it's present
-            var cqfResourceTypeExt = getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension());
-            if (cqfResourceTypeExt.isPresent()) {
+            val cqfResourceTypeExt =
+                getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension())
+            if (cqfResourceTypeExt != null) {
                 try {
-                    resourceType = repository
+                    resourceType =
+                        repository
                             .fhirContext()
-                            .getResourceDefinition(cqfResourceTypeExt.get())
-                            .getImplementingClass();
-                } catch (DataFormatException | NullPointerException e2) {
-                    throw new UnprocessableEntityException(
-                            "cqf-resourceType extension contains invalid resource type: " + cqfResourceTypeExt.get());
+                            .getResourceDefinition(cqfResourceTypeExt)
+                            .implementingClass
+                } catch (e2: DataFormatException) {
+                    throw UnprocessableEntityException(
+                        "cqf-resourceType extension contains invalid resource type: $cqfResourceTypeExt"
+                    )
+                } catch (e2: NullPointerException) {
+                    throw UnprocessableEntityException(
+                        "cqf-resourceType extension contains invalid resource type: $cqfResourceTypeExt"
+                    )
                 }
             } else {
-                // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
-                resourceType = repository
-                        .fhirContext()
-                        .getResourceDefinition("CodeSystem")
-                        .getImplementingClass();
+                // NOTE: This is based on the assumption that only CodeSystems don't follow the
+                // canonical pattern...
+                resourceType =
+                    repository.fhirContext().getResourceDefinition("CodeSystem").implementingClass
             }
         }
-        return resourceType;
+        return resourceType
     }
 
-    private static <CanonicalType extends IPrimitiveType<String>>
-            Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(CanonicalType canonical) {
-        return getResourceTypeStringFromCqfResourceTypeExtension(getExtensions(canonical));
+    private fun <
+        CanonicalType : IPrimitiveType<String>
+    > getResourceTypeStringFromCqfResourceTypeExtension(canonical: CanonicalType): String? {
+        return getResourceTypeStringFromCqfResourceTypeExtension(getExtensions(canonical))
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Optional<String> getResourceTypeStringFromCqfResourceTypeExtension(
-            List<? extends IBaseExtension> extensions) {
-        return extensions.stream()
-                .filter(ext -> ext.getUrl().contains("cqf-resourceType"))
-                .findAny()
-                .map(ext -> ((IPrimitiveType<String>) ext.getValue()).getValue());
+    private fun getResourceTypeStringFromCqfResourceTypeExtension(
+        extensions: MutableList<out IBaseExtension<*, *>?>
+    ): String? {
+        @Suppress("UNCHECKED_CAST")
+        return extensions
+            .filter { ext -> ext!!.url.contains("cqf-resourceType") }
+            .map { ext -> (ext!!.value as IPrimitiveType<String>).value }
+            .firstOrNull()
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <CanonicalType extends IPrimitiveType<String>> List<IBaseExtension> getExtensions(
-            CanonicalType canonical) {
-        if (canonical instanceof org.hl7.fhir.dstu3.model.PrimitiveType) {
-            return ((org.hl7.fhir.dstu3.model.PrimitiveType<String>) canonical)
-                    .getExtension().stream().map(ext -> (IBaseExtension) ext).collect(Collectors.toList());
-        } else if (canonical instanceof org.hl7.fhir.r4.model.PrimitiveType) {
-            return ((org.hl7.fhir.r4.model.PrimitiveType<String>) canonical)
-                    .getExtension().stream().map(ext -> (IBaseExtension) ext).collect(Collectors.toList());
-        } else if (canonical instanceof org.hl7.fhir.r5.model.PrimitiveType) {
-            return ((org.hl7.fhir.r5.model.PrimitiveType<String>) canonical)
-                    .getExtension().stream().map(ext -> (IBaseExtension) ext).collect(Collectors.toList());
-        } else {
-            throw new UnprocessableEntityException("Unsupported FHIR version for canonical: " + canonical.getValue());
+    private fun <CanonicalType : IPrimitiveType<String>> getExtensions(
+        canonical: CanonicalType
+    ): MutableList<IBaseExtension<*, *>?> {
+        @Suppress("UNCHECKED_CAST")
+        return when (canonical) {
+            is org.hl7.fhir.dstu3.model.PrimitiveType<*> -> {
+                (canonical as org.hl7.fhir.dstu3.model.PrimitiveType<String>)
+                    .extension
+                    .filterIsInstance<IBaseExtension<*, *>?>()
+                    .toMutableList()
+            }
+
+            is org.hl7.fhir.r4.model.PrimitiveType<*> -> {
+                (canonical as org.hl7.fhir.r4.model.PrimitiveType<String>)
+                    .extension
+                    .filterIsInstance<IBaseExtension<*, *>?>()
+                    .toMutableList()
+            }
+
+            is org.hl7.fhir.r5.model.PrimitiveType<*> -> {
+                (canonical as org.hl7.fhir.r5.model.PrimitiveType<String>)
+                    .extension
+                    .filterIsInstance<IBaseExtension<*, *>?>()
+                    .toMutableList()
+            }
+
+            else -> {
+                throw UnprocessableEntityException(
+                    "Unsupported FHIR version for canonical: " + canonical.value
+                )
+            }
         }
     }
 
     /**
-     * Gets the resource type for the given canonical, based on the convention that canonical
-     * URLs are of the form [base]/[resourceType]/[tail]
+     * Gets the resource type for the given canonical, based on the convention that canonical URLs
+     * are of the form <base>/<resourceType>/<tail>
      *
-     * If the URL does not conform to the convention, the type of the canonical is assumed to be CodeSystem, on
-     * the grounds that most (if not all) non-conventional URLs are for CodeSystem uris.
+     * If the URL does not conform to the convention, the type of the canonical is assumed to be
+     * CodeSystem, on the grounds that most (if not all) non-conventional URLs are for CodeSystem
+     * uris.
      *
      * @param repository
      * @param canonical
      * @return
      */
-    private static Class<? extends IBaseResource> getResourceType(IRepository repository, String canonical) {
-        Class<? extends IBaseResource> resourceType = null;
-        try {
-            resourceType = repository
-                    .fhirContext()
-                    .getResourceDefinition(Canonicals.getResourceType(canonical))
-                    .getImplementingClass();
-        } catch (RuntimeException e) {
-            // Can't use the "cqf-resourceType" extension to figure this out because we just get a canonical string
-            // NOTE: This is based on the assumption that only CodeSystems don't follow the canonical pattern...
-            resourceType =
-                    repository.fhirContext().getResourceDefinition("CodeSystem").getImplementingClass();
+    private fun getResourceType(
+        repository: IRepository,
+        canonical: String,
+    ): Class<out IBaseResource> {
+        return try {
+            repository
+                .fhirContext()
+                .getResourceDefinition(getResourceType(canonical))
+                .implementingClass
+        } catch (e: RuntimeException) {
+            // Can't use the "cqf-resourceType" extension to figure this out because we just get a
+            // canonical string
+            // NOTE: This is based on the assumption that only CodeSystems don't follow the
+            // canonical pattern...
+            repository.fhirContext().getResourceDefinition("CodeSystem").implementingClass
         }
-
-        return resourceType;
     }
 
     /**
@@ -241,22 +266,26 @@ public class SearchHelper {
      * @param repository the repository to search
      * @param canonical the canonical url to search for
      * @param resourceType the class of the IBaseResource type
-     * @return
+     * @return </R></String></CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
-            IBaseResource searchRepositoryByCanonical(
-                    IRepository repository, CanonicalType canonical, Class<R> resourceType) {
-        var url = Canonicals.getUrl(canonical);
-        var version = Canonicals.getVersion(canonical);
-        var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
-        var searchResult = repository.search(getBundleClass(repository), resourceType, searchParams);
-        var result = getEntryResourceFirstRep(searchResult);
-        if (result == null) {
-            throw new FHIRException("No resource of type %s found for url: %s|%s"
-                    .formatted(resourceType.getSimpleName(), url, version));
-        }
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>, R : IBaseResource> searchRepositoryByCanonical(
+        repository: IRepository,
+        canonical: CanonicalType,
+        resourceType: Class<R>,
+    ): IBaseResource {
+        val url = Canonicals.getUrl(canonical)
+        val version = Canonicals.getVersion(canonical)
+        val searchParams =
+            if (version == null) Searches.byUrl(url) else Searches.byUrlAndVersion(url, version)
+        val searchResult = repository.search(getBundleClass(repository), resourceType, searchParams)
+        val result =
+            BundleHelper.getEntryResourceFirstRep(searchResult)
+                ?: throw FHIRException(
+                    "No resource of type ${resourceType.simpleName} found for url: $url|$version"
+                )
 
-        return result;
+        return result
     }
 
     /**
@@ -265,13 +294,20 @@ public class SearchHelper {
      * @param <CanonicalType>
      * @param repository the repository to search
      * @param canonical the canonical url to search for
-     * @return
+     * @return </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
-            IRepository repository, CanonicalType canonical) {
-        var resourceType = getResourceType(repository, canonical);
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> searchRepositoryByCanonicalWithPaging(
+        repository: IRepository,
+        canonical: CanonicalType,
+    ): IBaseBundle {
+        val resourceType = getResourceType(repository, canonical)
 
-        return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
+        return SearchHelper.searchRepositoryByCanonicalWithPaging(
+            repository,
+            canonical,
+            resourceType,
+        )
     }
 
     /**
@@ -280,13 +316,20 @@ public class SearchHelper {
      * @param <CanonicalType>
      * @param repository the repository to search
      * @param canonical the canonical url to search for
-     * @return
+     * @return </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> IBaseBundle searchRepositoryByCanonicalWithPaging(
-            IRepository repository, String canonical) {
-        var resourceType = getResourceType(repository, canonical);
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> searchRepositoryByCanonicalWithPaging(
+        repository: IRepository,
+        canonical: String,
+    ): IBaseBundle {
+        val resourceType = getResourceType(repository, canonical)
 
-        return searchRepositoryByCanonicalWithPaging(repository, canonical, resourceType);
+        return SearchHelper.searchRepositoryByCanonicalWithPaging(
+            repository,
+            canonical,
+            resourceType,
+        )
     }
 
     /**
@@ -297,29 +340,45 @@ public class SearchHelper {
      * @param canonical the canonical url to search for
      * @return
      */
-    public static IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-            IRepository repository,
-            String canonical,
-            Multimap<String, List<IQueryParameterType>> additionalSearchParams) {
-        var resourceType = getResourceType(repository, canonical);
+    @JvmStatic
+    fun searchRepositoryByCanonicalWithPagingWithParams(
+        repository: IRepository,
+        canonical: String,
+        additionalSearchParams: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+    ): IBaseBundle {
+        val resourceType = getResourceType(repository, canonical)
+        return SearchHelper.searchRepositoryByCanonicalWithPagingWithParams(
+            repository,
+            canonical,
+            resourceType,
+            additionalSearchParams,
+        )
+    }
+
+    /**
+     * Searches the given Repository and handles paging to return all entries
+     *
+     * @param <CanonicalType> an IPrimitiveType<String> type
+     * @param <R> an IBaseResource type
+     * @param repository the repository to search
+     * @param canonical the canonical url to search for
+     * @param resourceType the class of the IBaseResource type
+     * @return </R></String></CanonicalType>
+     */
+    fun <
+        CanonicalType : IPrimitiveType<String>,
+        R : IBaseResource,
+    > searchRepositoryByCanonicalWithPaging(
+        repository: IRepository,
+        canonical: CanonicalType,
+        resourceType: Class<R>,
+    ): IBaseBundle {
         return searchRepositoryByCanonicalWithPagingWithParams(
-                repository, canonical, resourceType, additionalSearchParams);
-    }
-
-    /**
-     * Searches the given Repository and handles paging to return all entries
-     *
-     * @param <CanonicalType> an IPrimitiveType<String> type
-     * @param <R> an IBaseResource type
-     * @param repository the repository to search
-     * @param canonical the canonical url to search for
-     * @param resourceType the class of the IBaseResource type
-     * @return
-     */
-    public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
-            IBaseBundle searchRepositoryByCanonicalWithPaging(
-                    IRepository repository, CanonicalType canonical, Class<R> resourceType) {
-        return searchRepositoryByCanonicalWithPagingWithParams(repository, canonical, resourceType, null);
+            repository,
+            canonical,
+            resourceType,
+            null,
+        )
     }
 
     /**
@@ -331,21 +390,25 @@ public class SearchHelper {
      * @param canonical the canonical url to search for
      * @param resourceType the class of the IBaseResource type
      * @param additionalSearchParams extra search parameters to search with
-     * @return
+     * @return </R></String></CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>, R extends IBaseResource>
-            IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-                    IRepository repository,
-                    CanonicalType canonical,
-                    Class<R> resourceType,
-                    Multimap<String, List<IQueryParameterType>> additionalSearchParams) {
-        var url = Canonicals.getUrl(canonical);
-        var version = Canonicals.getVersion(canonical);
-        var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
+    fun <
+        CanonicalType : IPrimitiveType<String>,
+        R : IBaseResource,
+    > searchRepositoryByCanonicalWithPagingWithParams(
+        repository: IRepository,
+        canonical: CanonicalType,
+        resourceType: Class<R>,
+        additionalSearchParams: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+    ): IBaseBundle {
+        val url = Canonicals.getUrl(canonical)
+        val version = Canonicals.getVersion(canonical)
+        val searchParams =
+            if (version == null) Searches.byUrl(url) else Searches.byUrlAndVersion(url, version)
         if (additionalSearchParams != null) {
-            searchParams.putAll(additionalSearchParams);
+            searchParams.putAll(additionalSearchParams)
         }
-        return searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
+        return searchRepositoryWithPaging(repository, resourceType, searchParams, mutableMapOf())
     }
 
     /**
@@ -355,11 +418,19 @@ public class SearchHelper {
      * @param repository the repository to search
      * @param canonical the canonical url to search for
      * @param resourceType the class of the IBaseResource type
-     * @return
+     * @return </R>
      */
-    public static <R extends IBaseResource> IBaseBundle searchRepositoryByCanonicalWithPaging(
-            IRepository repository, String canonical, Class<R> resourceType) {
-        return searchRepositoryByCanonicalWithPagingWithParams(repository, canonical, resourceType, null);
+    fun <R : IBaseResource> searchRepositoryByCanonicalWithPaging(
+        repository: IRepository,
+        canonical: String,
+        resourceType: Class<R>,
+    ): IBaseBundle {
+        return searchRepositoryByCanonicalWithPagingWithParams(
+            repository,
+            canonical,
+            resourceType,
+            null,
+        )
     }
 
     /**
@@ -370,20 +441,22 @@ public class SearchHelper {
      * @param canonical the canonical url to search for
      * @param resourceType the class of the IBaseResource type
      * @param additionalSearchParams extra search parameters to search with
-     * @return
+     * @return </R>
      */
-    public static <R extends IBaseResource> IBaseBundle searchRepositoryByCanonicalWithPagingWithParams(
-            IRepository repository,
-            String canonical,
-            Class<R> resourceType,
-            Multimap<String, List<IQueryParameterType>> additionalSearchParams) {
-        var url = Canonicals.getUrl(canonical);
-        var version = Canonicals.getVersion(canonical);
-        var searchParams = version == null ? Searches.byUrl(url) : Searches.byUrlAndVersion(url, version);
+    fun <R : IBaseResource> searchRepositoryByCanonicalWithPagingWithParams(
+        repository: IRepository,
+        canonical: String,
+        resourceType: Class<R>,
+        additionalSearchParams: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+    ): IBaseBundle {
+        val url = getUrl(canonical)
+        val version = getVersion(canonical)
+        val searchParams =
+            if (version == null) Searches.byUrl(url) else Searches.byUrlAndVersion(url, version)
         if (additionalSearchParams != null) {
-            searchParams.putAll(additionalSearchParams);
+            searchParams.putAll(additionalSearchParams)
         }
-        return searchRepositoryWithPaging(repository, resourceType, searchParams, Collections.emptyMap());
+        return searchRepositoryWithPaging(repository, resourceType, searchParams, mutableMapOf())
     }
 
     /**
@@ -395,16 +468,21 @@ public class SearchHelper {
      * @param resourceType the class of the resource being searched for
      * @param searchParameters the search parameters
      * @param headers the search headers
-     * @return
+     * @return </R></T>
      */
-    @SuppressWarnings("unchecked")
-    public static <T extends IBaseResource, R extends IBaseBundle> R searchRepositoryWithPaging(
-            IRepository repository,
-            Class<T> resourceType,
-            Map<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-
-        return (R) searchRepositoryWithPaging(repository, resourceType, Multimaps.forMap(searchParameters), headers);
+    @JvmStatic
+    fun <T : IBaseResource, R : IBaseBundle> searchRepositoryWithPaging(
+        repository: IRepository,
+        resourceType: Class<T>,
+        searchParameters: MutableMap<String?, MutableList<IQueryParameterType?>?>,
+        headers: MutableMap<String?, String?>?,
+    ): R {
+        return searchRepositoryWithPaging(
+            repository,
+            resourceType,
+            Multimaps.forMap(searchParameters),
+            headers,
+        )
     }
 
     /**
@@ -416,78 +494,94 @@ public class SearchHelper {
      * @param resourceType the class of the resource being searched for
      * @param searchParameters the search parameters
      * @param headers the search headers
-     * @return
+     * @return </R></T>
      */
-    @SuppressWarnings("unchecked")
-    public static <T extends IBaseResource, R extends IBaseBundle> R searchRepositoryWithPaging(
-            IRepository repository,
-            Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        var bundleClass = getBundleClass(repository);
-        var result = repository.search(bundleClass, resourceType, searchParameters, headers);
-        handlePaging(repository, result);
+    @JvmStatic
+    fun <T : IBaseResource, R : IBaseBundle> searchRepositoryWithPaging(
+        repository: IRepository,
+        resourceType: Class<T>,
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+        headers: MutableMap<String?, String?>?,
+    ): R {
+        val bundleClass = getBundleClass(repository)
+        @Suppress("UNCHECKED_CAST")
+        val result = repository.search(bundleClass, resourceType, searchParameters, headers) as R
+        handlePaging(repository, result)
 
-        return (R) result;
+        return result
     }
 
-    private static void handlePaging(IRepository repository, IBaseBundle bundle) {
-        var fhirVersion = repository.fhirContext().getVersion().getVersion();
-        switch (fhirVersion) {
-            case DSTU3:
-                var dstu3Bundle = (org.hl7.fhir.dstu3.model.Bundle) bundle;
-                var dstu3Next = dstu3Bundle.getLink(IBaseBundle.LINK_NEXT);
+    private fun handlePaging(repository: IRepository, bundle: IBaseBundle) {
+        when (val fhirVersion = repository.fhirContext().version.version) {
+            FhirVersionEnum.DSTU3 -> {
+                val dstu3Bundle = bundle as org.hl7.fhir.dstu3.model.Bundle
+                val dstu3Next = dstu3Bundle.getLink(IBaseBundle.LINK_NEXT)
                 if (dstu3Next != null) {
-                    getNextPageDstu3(repository, dstu3Bundle, dstu3Next.getUrl());
+                    getNextPageDstu3(repository, dstu3Bundle, dstu3Next.url)
                 }
-                break;
-            case R4:
-                var r4Bundle = (org.hl7.fhir.r4.model.Bundle) bundle;
-                var r4Next = r4Bundle.getLink(IBaseBundle.LINK_NEXT);
+            }
+
+            FhirVersionEnum.R4 -> {
+                val r4Bundle = bundle as org.hl7.fhir.r4.model.Bundle
+                val r4Next = r4Bundle.getLink(IBaseBundle.LINK_NEXT)
                 if (r4Next != null) {
-                    getNextPageR4(repository, r4Bundle, r4Next.getUrl());
+                    getNextPageR4(repository, r4Bundle, r4Next.url)
                 }
-                break;
-            case R5:
-                var r5Bundle = (org.hl7.fhir.r5.model.Bundle) bundle;
-                var r5Next = r5Bundle.getLink(IBaseBundle.LINK_NEXT);
+            }
+
+            FhirVersionEnum.R5 -> {
+                val r5Bundle = bundle as org.hl7.fhir.r5.model.Bundle
+                val r5Next = r5Bundle.getLink(IBaseBundle.LINK_NEXT)
                 if (r5Next != null) {
-                    getNextPageR5(repository, r5Bundle, r5Next.getUrl());
+                    getNextPageR5(repository, r5Bundle, r5Next.url)
                 }
-                break;
+            }
 
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported version of FHIR: %s".formatted(fhirVersion.getFhirVersionString()));
+            else ->
+                throw IllegalArgumentException(
+                    "Unsupported version of FHIR: ${fhirVersion.fhirVersionString}"
+                )
         }
     }
 
-    private static void getNextPageDstu3(
-            IRepository repository, org.hl7.fhir.dstu3.model.Bundle bundle, String nextUrl) {
-        var nextBundle =
-                (org.hl7.fhir.dstu3.model.Bundle) repository.link(org.hl7.fhir.dstu3.model.Bundle.class, nextUrl);
-        nextBundle.getEntry().forEach(bundle::addEntry);
-        var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);
+    private fun getNextPageDstu3(
+        repository: IRepository,
+        bundle: org.hl7.fhir.dstu3.model.Bundle,
+        nextUrl: String?,
+    ) {
+        val nextBundle =
+            repository.link(org.hl7.fhir.dstu3.model.Bundle::class.java, nextUrl)
+                as org.hl7.fhir.dstu3.model.Bundle
+        nextBundle.entry.forEach { t -> bundle.addEntry(t) }
+        val next = nextBundle.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {
-            getNextPageDstu3(repository, bundle, next.getUrl());
+            getNextPageDstu3(repository, bundle, next.url)
         }
     }
 
-    private static void getNextPageR4(IRepository repository, org.hl7.fhir.r4.model.Bundle bundle, String nextUrl) {
-        var nextBundle = repository.link(org.hl7.fhir.r4.model.Bundle.class, nextUrl);
-        nextBundle.getEntry().forEach(bundle::addEntry);
-        var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);
+    private fun getNextPageR4(
+        repository: IRepository,
+        bundle: org.hl7.fhir.r4.model.Bundle,
+        nextUrl: String?,
+    ) {
+        val nextBundle = repository.link(org.hl7.fhir.r4.model.Bundle::class.java, nextUrl)
+        nextBundle.entry.forEach { t -> bundle.addEntry(t) }
+        val next = nextBundle.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {
-            getNextPageR4(repository, bundle, next.getUrl());
+            getNextPageR4(repository, bundle, next.url)
         }
     }
 
-    private static void getNextPageR5(IRepository repository, org.hl7.fhir.r5.model.Bundle bundle, String nextUrl) {
-        var nextBundle = repository.link(org.hl7.fhir.r5.model.Bundle.class, nextUrl);
-        nextBundle.getEntry().forEach(bundle::addEntry);
-        var next = nextBundle.getLink(IBaseBundle.LINK_NEXT);
+    private fun getNextPageR5(
+        repository: IRepository,
+        bundle: org.hl7.fhir.r5.model.Bundle,
+        nextUrl: String?,
+    ) {
+        val nextBundle = repository.link(org.hl7.fhir.r5.model.Bundle::class.java, nextUrl)
+        nextBundle.entry.forEach { t -> bundle.addEntry(t) }
+        val next = nextBundle.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {
-            getNextPageR5(repository, bundle, next.getUrl());
+            getNextPageR5(repository, bundle, next.url)
         }
     }
 }

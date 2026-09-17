@@ -1,35 +1,25 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import java.util.List;
+class ValidationProfile {
+    var name: String? = null
+    private var ignoreKeys: MutableList<String?>? = null
 
-public class ValidationProfile {
-    private String name;
-    private List<String> ignoreKeys;
+    constructor()
 
-    public ValidationProfile() {}
-
-    public ValidationProfile(String name, List<String> ignoreKeys) {
-        this.name = name;
-        this.ignoreKeys = ignoreKeys;
+    constructor(name: String?, ignoreKeys: MutableList<String?>) {
+        this.name = name
+        this.ignoreKeys = ignoreKeys
     }
 
-    public String getName() {
-        return this.name;
+    fun getIgnoreKeys(): MutableList<String?> {
+        return ignoreKeys!!
     }
 
-    public void setName(String name) {
-        this.name = name;
+    fun setIgnoreKeys(ignoreKeys: MutableList<String?>) {
+        this.ignoreKeys = ignoreKeys
     }
 
-    public List<String> getIgnoreKeys() {
-        return ignoreKeys;
-    }
-
-    public void setIgnoreKeys(List<String> ignoreKeys) {
-        this.ignoreKeys = ignoreKeys;
-    }
-
-    public void addIgnoreKey(String key) {
-        this.ignoreKeys.add(key);
+    fun addIgnoreKey(key: String?) {
+        this.ignoreKeys!!.add(key)
     }
 }

@@ -1,48 +1,27 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.api.BundleInclusionRule
+import ca.uhn.fhir.model.valueset.BundleTypeEnum
+import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.rest.api.BundleLinks
+import ca.uhn.fhir.util.BundleUtil
+import java.io.File
+import java.net.URI
+import java.nio.charset.Charset
+import java.nio.file.FileSystems
+import java.nio.file.FileVisitOption
+import java.nio.file.Files
+import org.apache.commons.io.FileUtils
+import org.hl7.fhir.instance.model.api.IBaseBundle
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.BundleLinks;
-import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
-import ca.uhn.fhir.util.BundleUtil;
-import java.io.File;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/**
- * This class takes a directory and bundles all FHIR resources found in it recursively.
- */
-public class DirectoryBundler {
-
-    private static final Logger logger = LoggerFactory.getLogger(DirectoryBundler.class);
-
-    private FhirContext fhirContext;
-    private IParser xml = null;
-    private IParser json = null;
-
-    public DirectoryBundler(FhirContext fhirContext) {
-        this.fhirContext = fhirContext;
-    }
+/** This class takes a directory and bundles all FHIR resources found in it recursively. */
+class DirectoryBundler(private val fhirContext: FhirContext) {
+    private var xml: IParser? = null
+    private var json: IParser? = null
 
     /**
      * Recursively searches all files and sub-directory and parses all xml and json FHIR resources.
@@ -51,137 +30,151 @@ public class DirectoryBundler {
      * @param path The root directory to bundle.
      * @return A Bundle of all the resources in the root directory and subdirectories
      */
-    public IBaseBundle bundle(String path) {
-        requireNonNull(path, "path must not be null.");
+    fun bundle(path: String): IBaseBundle? {
 
-        URI uri;
+        val uri: URI?
         try {
             // TODO: Should use builder.UriUtil.isUri
-            if (!path.startsWith("file:/") && !path.matches("\\w+?://.*")) {
-                File file = new File(path);
-                uri = file.toURI();
+            if (!path.startsWith("file:/") && !path.matches("\\w+?://.*".toRegex())) {
+                val file = File(path)
+                uri = file.toURI()
             } else {
-                uri = new URI(path);
+                uri = URI(path)
             }
-        } catch (Exception e) {
-            logger.error("error parsing uri from path: %s".formatted(path), e);
-            throw new RuntimeException(e);
+        } catch (e: Exception) {
+            logger.error("error parsing uri from path: $path", e)
+            throw RuntimeException(e)
         }
 
-        Collection<File> files;
-        if (uri.getScheme() != null && uri.getScheme().startsWith("jar")) {
-            files = this.listJar(uri, path);
+        val files: MutableCollection<File>
+        if (uri.scheme != null && uri.scheme.startsWith("jar")) {
+            files = this.listJar(uri, path)
         } else {
-            files = this.listDirectory(uri.getPath());
+            files = this.listDirectory(uri.path)
         }
 
-        return this.bundleFiles(path, files);
+        return this.bundleFiles(path, files)
     }
 
-    private Collection<File> listJar(URI uri, String path) {
+    private fun listJar(uri: URI, path: String): MutableCollection<File> {
         try {
-            FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
-            Path jarPath = fileSystem.getPath(path);
-            try (Stream<Path> walk = Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS)) {
-                return walk.map(x -> x.toFile())
-                        .filter(x -> x.isFile())
-                        .filter(x -> x.getName().endsWith("json") || x.getName().endsWith("xml"))
-                        .collect(Collectors.toList());
+            val fileSystem = FileSystems.newFileSystem(uri, mutableMapOf<String, Any?>())
+            val jarPath = fileSystem.getPath(path)
+            Files.walk(jarPath, FileVisitOption.FOLLOW_LINKS).use { walk ->
+                return walk
+                    .map { x -> x.toFile() }
+                    .filter { x -> x.isFile }
+                    .filter { x -> x.name.endsWith("json") || x.name.endsWith("xml") }
+                    .toList()
+                    .toMutableList()
             }
-        } catch (Exception e) {
-            logger.error("error attempting to list jar: %s".formatted(uri.toString()));
-            throw new RuntimeException(e);
+        } catch (e: Exception) {
+            logger.error("error attempting to list jar: $uri")
+            throw RuntimeException(e)
         }
     }
 
-    private Collection<File> listDirectory(String path) {
-        File resourceDirectory = new File(path);
-        if (!resourceDirectory.getAbsoluteFile().exists()) {
-            throw new IllegalArgumentException(
-                    "The specified path to resource files does not exist: %s".formatted(path));
+    private fun listDirectory(path: String): MutableCollection<File> {
+        val resourceDirectory = File(path)
+        require(resourceDirectory.absoluteFile.exists()) {
+            "The specified path to resource files does not exist: $path"
         }
 
-        if (resourceDirectory.getAbsoluteFile().isDirectory()) {
-            return FileUtils.listFiles(resourceDirectory, new String[] {"xml", "json"}, true);
-        } else if (path.toLowerCase().endsWith("xml") || path.toLowerCase().endsWith("json")) {
-            return Collections.singletonList(resourceDirectory);
+        if (resourceDirectory.absoluteFile.isDirectory) {
+            return FileUtils.listFiles(resourceDirectory, arrayOf("xml", "json"), true)
+        } else if (path.lowercase().endsWith("xml") || path.lowercase().endsWith("json")) {
+            return mutableListOf(resourceDirectory)
         } else {
-            throw new IllegalArgumentException(
-                    "path was not a directory or a recognized FHIR file format (XML, JSON) : %s".formatted(path));
+            throw IllegalArgumentException(
+                "path was not a directory or a recognized FHIR file format (XML, JSON) : $path"
+            )
         }
     }
 
-    private IBaseBundle bundleFiles(String rootPath, Collection<File> files) {
-        List<IBaseResource> resources = new ArrayList<>();
+    private fun bundleFiles(rootPath: String?, files: MutableCollection<File>): IBaseBundle? {
+        val resources = mutableListOf<IBaseResource>()
 
-        for (File f : files) {
-            IBaseResource resource = parseFile(f);
+        for (f in files) {
+            val resource = parseFile(f) ?: continue
 
-            if (resource == null) {
-                continue;
-            }
-
-            if (resource instanceof IBaseBundle bundle) {
-                List<IBaseResource> innerResources = flatten(this.fhirContext, bundle);
-                resources.addAll(innerResources);
+            if (resource is IBaseBundle) {
+                val innerResources = flatten(this.fhirContext, resource)
+                resources.addAll(innerResources)
             } else {
-                resources.add(resource);
+                resources.add(resource)
             }
         }
 
-        IVersionSpecificBundleFactory bundleFactory = this.fhirContext.newBundleFactory();
+        val bundleFactory = this.fhirContext.newBundleFactory()
 
-        BundleLinks bundleLinks = new BundleLinks(rootPath, null, true, BundleTypeEnum.COLLECTION);
+        val bundleLinks = BundleLinks(rootPath, null, true, BundleTypeEnum.COLLECTION)
 
-        bundleFactory.addRootPropertiesToBundle("bundled-directory", bundleLinks, resources.size(), null);
+        bundleFactory.addRootPropertiesToBundle(
+            "bundled-directory",
+            bundleLinks,
+            resources.size,
+            null,
+        )
 
         bundleFactory.addResourcesToBundle(
-                resources, BundleTypeEnum.COLLECTION, "", BundleInclusionRule.BASED_ON_INCLUDES, null);
+            resources,
+            BundleTypeEnum.COLLECTION,
+            "",
+            BundleInclusionRule.BASED_ON_INCLUDES,
+            null,
+        )
 
-        return (IBaseBundle) bundleFactory.getResourceBundle();
+        return bundleFactory.resourceBundle as IBaseBundle?
     }
 
-    private IBaseResource parseFile(File f) {
+    private fun parseFile(f: File): IBaseResource? {
         try {
-            String resource = FileUtils.readFileToString(f, Charset.forName("UTF-8"));
+            val resource = FileUtils.readFileToString(f, Charset.forName("UTF-8"))
 
-            IParser selectedParser = this.selectParser(f.getName());
-            return selectedParser.parseResource(resource);
-        } catch (Exception e) {
-            logger.warn("Error parsing resource {}: {}", f.getAbsolutePath(), e.getMessage());
-            return null;
+            val selectedParser = this.selectParser(f.name)
+            return selectedParser.parseResource(resource)
+        } catch (e: Exception) {
+            logger.warn("Error parsing resource {}: {}", f.absolutePath, e.message)
+            return null
         }
     }
 
-    private IParser selectParser(String filename) {
-        if (filename.toLowerCase().endsWith("json")) {
+    private fun selectParser(filename: String): IParser {
+        if (filename.lowercase().endsWith("json")) {
             if (this.json == null) {
-                this.json = this.fhirContext.newJsonParser();
+                this.json = this.fhirContext.newJsonParser()
             }
 
-            return this.json;
+            return this.json!!
         } else {
             if (this.xml == null) {
-                this.xml = this.fhirContext.newXmlParser();
+                this.xml = this.fhirContext.newXmlParser()
             }
 
-            return this.xml;
+            return this.xml!!
         }
     }
 
-    private List<IBaseResource> flatten(FhirContext fhirContext, IBaseBundle bundle) {
-        List<IBaseResource> resources = new ArrayList<>();
+    private fun flatten(
+        fhirContext: FhirContext,
+        bundle: IBaseBundle?,
+    ): MutableList<IBaseResource> {
+        val resources = mutableListOf<IBaseResource>()
 
-        List<IBaseResource> bundleResources = BundleUtil.toListOfResources(fhirContext, bundle);
-        for (IBaseResource r : bundleResources) {
-            if (r instanceof IBaseBundle baseBundle) {
-                List<IBaseResource> innerResources = flatten(fhirContext, baseBundle);
-                resources.addAll(innerResources);
+        val bundleResources = BundleUtil.toListOfResources(fhirContext, bundle)
+        for (r in bundleResources) {
+            if (r is IBaseBundle) {
+                val innerResources = flatten(fhirContext, r)
+                resources.addAll(innerResources)
             } else {
-                resources.add(r);
+                resources.add(r)
             }
         }
 
-        return resources;
+        return resources
+    }
+
+    companion object {
+        private val logger: Logger = LoggerFactory.getLogger(DirectoryBundler::class.java)
     }
 }

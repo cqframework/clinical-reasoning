@@ -1,19 +1,14 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.model.primitive.IdDt
+import java.util.UUID
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.instance.model.api.IIdType
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.UUID;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-
-public class Ids {
-
-    private Ids() {}
-
+object Ids {
     /**
      * Ensures the id contains the resource type
      *
@@ -21,10 +16,9 @@ public class Ids {
      * @param resourceType the type of the resource
      * @return the id
      */
-    public static String ensureIdType(String id, String resourceType) {
-        checkNotNull(id);
-        checkNotNull(resourceType);
-        return id.contains("/") ? id : "%s/%s".formatted(resourceType, id);
+    @JvmStatic
+    fun ensureIdType(id: String, resourceType: String): String {
+        return if (id.contains("/")) id else "$resourceType/$id"
     }
 
     /**
@@ -34,15 +28,15 @@ public class Ids {
      * @param <IdType> an IIdType type
      * @param resourceTypeClass the type of the Resource to create an Id for
      * @param id the String representation of the Id to generate
-     * @return the id
+     * @return the id </IdType></ResourceType>
      */
-    public static <ResourceType extends IBaseResource, IdType extends IIdType> IdType newId(
-            Class<? extends ResourceType> resourceTypeClass, String id) {
-        checkNotNull(resourceTypeClass);
-        checkNotNull(id);
-
-        FhirVersionEnum versionEnum = FhirVersions.forClass(resourceTypeClass);
-        return newId(versionEnum, resourceTypeClass.getSimpleName(), id);
+    @JvmStatic
+    fun <ResourceType : IBaseResource, IdType : IIdType> newId(
+        resourceTypeClass: Class<out ResourceType>,
+        id: String,
+    ): IdType {
+        val versionEnum = FhirVersions.forClass(resourceTypeClass)
+        return newId(versionEnum, resourceTypeClass.simpleName, id)
     }
 
     /**
@@ -53,16 +47,16 @@ public class Ids {
      * @param baseTypeClass the BaseTypeClass to use for for determining the FHIR Version
      * @param resourceName the type of the Resource to create an Id for
      * @param id the String representation of the Id to generate
-     * @return the id
+     * @return the id </IdType></BaseType>
      */
-    public static <BaseType extends IBase, IdType extends IIdType> IdType newId(
-            Class<? extends BaseType> baseTypeClass, String resourceName, String id) {
-        checkNotNull(baseTypeClass);
-        checkNotNull(resourceName);
-        checkNotNull(id);
-
-        FhirVersionEnum versionEnum = FhirVersions.forClass(baseTypeClass);
-        return newId(versionEnum, resourceName, id);
+    @JvmStatic
+    fun <BaseType : IBase, IdType : IIdType> newId(
+        baseTypeClass: Class<out BaseType>,
+        resourceName: String,
+        id: String,
+    ): IdType {
+        val versionEnum = FhirVersions.forClass(baseTypeClass)
+        return newId(versionEnum, resourceName, id)
     }
 
     /**
@@ -71,16 +65,12 @@ public class Ids {
      * @param <IdType> an IIdType type
      * @param fhirContext the FhirContext to use for Id generation
      * @param resourceType the type of the Resource to create an Id for
-     * @return the id
+     * @return the id </IdType>
      */
-    public static <IdType extends IIdType> IdType newRandomId(FhirContext fhirContext, String resourceType) {
-        checkNotNull(fhirContext);
-        checkNotNull(resourceType);
+    @JvmStatic
+    fun <IdType : IIdType> newRandomId(fhirContext: FhirContext, resourceType: String): IdType {
 
-        return newId(
-                fhirContext.getVersion().getVersion(),
-                resourceType,
-                UUID.randomUUID().toString());
+        return newId(fhirContext.version.version, resourceType, UUID.randomUUID().toString())
     }
 
     /**
@@ -90,14 +80,16 @@ public class Ids {
      * @param fhirContext the FhirContext to use for Id generation
      * @param resourceType the type of the Resource to create an Id for
      * @param id the String representation of the Id to generate
-     * @return the id
+     * @return the id </IdType>
      */
-    public static <IdType extends IIdType> IdType newId(FhirContext fhirContext, String resourceType, String id) {
-        checkNotNull(fhirContext);
-        checkNotNull(resourceType);
-        checkNotNull(id);
+    @JvmStatic
+    fun <IdType : IIdType> newId(
+        fhirContext: FhirContext,
+        resourceType: String,
+        id: String,
+    ): IdType {
 
-        return newId(fhirContext.getVersion().getVersion(), resourceType, id);
+        return newId(fhirContext.version.version, resourceType, id)
     }
 
     /**
@@ -107,15 +99,15 @@ public class Ids {
      * @param fhirVersionEnum the FHIR version to generate an Id for
      * @param resourceType the type of the Resource to create an Id for
      * @param idPart the String representation of the Id to generate
-     * @return the id
+     * @return the id </IdType>
      */
-    public static <IdType extends IIdType> IdType newId(
-            FhirVersionEnum fhirVersionEnum, String resourceType, String idPart) {
-        checkNotNull(fhirVersionEnum);
-        checkNotNull(resourceType);
-        checkNotNull(idPart);
-
-        return newId(fhirVersionEnum, resourceType + "/" + idPart);
+    @JvmStatic
+    fun <IdType : IIdType> newId(
+        fhirVersionEnum: FhirVersionEnum,
+        resourceType: String,
+        idPart: String,
+    ): IdType {
+        return newId(fhirVersionEnum, "$resourceType/$idPart")
     }
 
     /**
@@ -124,79 +116,78 @@ public class Ids {
      * @param <IdType> an IIdType type
      * @param fhirContext the FhirContext to use for Id generation
      * @param id the String representation of the Id to generate
-     * @return the id
+     * @return the id </IdType>
      */
-    public static <IdType extends IIdType> IdType newId(FhirContext fhirContext, String id) {
-        checkNotNull(fhirContext);
-        checkNotNull(id);
+    @JvmStatic
+    fun <IdType : IIdType> newId(fhirContext: FhirContext, id: String): IdType {
 
-        return newId(fhirContext.getVersion().getVersion(), id);
+        return newId(fhirContext.version.version, id)
     }
 
     /**
      * The gets the "simple" Id for the Resource, without qualifiers or versions. For example,
      * "Patient/123".
-     * <p>
+     *
      * This is shorthand for resource.getIdElement().toUnqualifiedVersionless().getValue()
      *
      * @param resource the Resource to get the Id for
      * @return the simple Id
      */
-    public static String simple(IBaseResource resource) {
-        checkNotNull(resource);
-        checkArgument(resource.getIdElement() != null);
+    @JvmStatic
+    fun simple(resource: IBaseResource): String? {
+        requireNotNull(resource.idElement)
 
-        return simple(resource.getIdElement());
+        return simple(resource.idElement)
     }
 
     /**
      * The gets the "simple" Id for the Id, without qualifiers or versions. For example,
      * "Patient/123".
-     * <p>
+     *
      * This is shorthand for id.toUnqualifiedVersionless().getValue()
      *
      * @param id the IIdType to get the Id for
      * @return the simple Id
      */
-    public static String simple(IIdType id) {
-        checkNotNull(id);
-        checkArgument(id.hasResourceType());
-        checkArgument(id.hasIdPart());
+    @JvmStatic
+    fun simple(id: IIdType): String? {
+        require(id.hasResourceType())
+        require(id.hasIdPart())
 
-        return id.toUnqualifiedVersionless().getValue();
+        return id.toUnqualifiedVersionless().value
     }
 
     /**
      * The gets the "simple" Id part for the Id, without qualifiers or versions or the resource
      * Prefix. For example, "123".
-     * <p>
+     *
      * This is shorthand for resource.getIdElement().toUnqualifiedVersionless().getIdPart()
      *
      * @param resource the Resource to get the Id for
      * @return the simple Id part
      */
-    public static String simplePart(IBaseResource resource) {
-        checkNotNull(resource);
-        checkArgument(resource.getIdElement() != null);
+    @JvmStatic
+    fun simplePart(resource: IBaseResource): String? {
+        requireNotNull(resource.idElement)
 
-        return simplePart(resource.getIdElement());
+        return simplePart(resource.idElement)
     }
 
     /**
      * The gets the "simple" Id part for the Id, without qualifiers or versions or the resource
      * Prefix. For example, "123".
-     * <p>
+     *
      * This is shorthand for id.toUnqualifiedVersionless().getIdPart()
      *
      * @param id the IIdType to get the Id for
      * @return the simple Id part
      */
-    public static String simplePart(IIdType id) {
-        checkNotNull(id);
-        checkArgument(id.hasResourceType());
-        checkArgument(id.hasIdPart());
+    @JvmStatic
+    fun simplePart(id: IIdType): String? {
+        require(id.hasResourceType())
+        require(id.hasIdPart())
 
-        return id.toUnqualifiedVersionless().getIdPart();
+        return id.toUnqualifiedVersionless().idPart
     }
 
     /**
@@ -205,31 +196,20 @@ public class Ids {
      * @param <IdType> an IIdType type
      * @param fhirVersionEnum the FHIR version to generate an Id for
      * @param id the String representation of the Id to generate
-     * @return the id
+     * @return the id </IdType>
      */
-    @SuppressWarnings("unchecked")
-    public static <IdType extends IIdType> IdType newId(FhirVersionEnum fhirVersionEnum, String id) {
-        checkNotNull(fhirVersionEnum);
-        checkNotNull(id);
-
-        switch (fhirVersionEnum) {
-            case DSTU2:
-                return (IdType) new ca.uhn.fhir.model.primitive.IdDt(id);
-            case DSTU2_1:
-                return (IdType) new org.hl7.fhir.dstu2016may.model.IdType(id);
-            case DSTU2_HL7ORG:
-                return (IdType) new org.hl7.fhir.dstu2.model.IdType(id);
-            case DSTU3:
-                return (IdType) new org.hl7.fhir.dstu3.model.IdType(id);
-            case R4:
-                return (IdType) new org.hl7.fhir.r4.model.IdType(id);
-            case R4B:
-                return (IdType) new org.hl7.fhir.r4b.model.IdType(id);
-            case R5:
-                return (IdType) new org.hl7.fhir.r5.model.IdType(id);
-            default:
-                throw new IllegalArgumentException(
-                        "newId does not support FHIR version %s".formatted(fhirVersionEnum.getFhirVersionString()));
+    @JvmStatic
+    fun <IdType : IIdType?> newId(fhirVersionEnum: FhirVersionEnum, id: String): IdType {
+        @Suppress("UNCHECKED_CAST")
+        return when (fhirVersionEnum) {
+            FhirVersionEnum.DSTU2 -> IdDt(id)
+            FhirVersionEnum.DSTU2_1 -> org.hl7.fhir.dstu2016may.model.IdType(id)
+            FhirVersionEnum.DSTU2_HL7ORG -> org.hl7.fhir.dstu2.model.IdType(id)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.IdType(id)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.IdType(id)
+            FhirVersionEnum.R4B -> org.hl7.fhir.r4b.model.IdType(id)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.IdType(id)
         }
+            as IdType
     }
 }

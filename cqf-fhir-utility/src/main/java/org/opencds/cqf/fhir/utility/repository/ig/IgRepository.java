@@ -734,8 +734,10 @@ public class IgRepository implements IRepository {
                         BundleHelper.newEntryWithResponse(
                                 version, BundleHelper.newResponseWithLocation(version, location)));
             } else if (BundleHelper.isEntryRequestDelete(version, e)) {
-                var requestId = BundleHelper.getEntryRequestId(version, e)
-                        .orElseThrow(() -> new ResourceNotFoundException("Trying to delete an entry without id"));
+                var requestId = BundleHelper.getEntryRequestId(version, e);
+                if (requestId == null) {
+                    throw new ResourceNotFoundException("Trying to delete an entry without id");
+                }
                 var requestUrl = BundleHelper.getEntryRequestUrl(version, e);
                 var resourceType = Canonicals.getResourceType(requestUrl);
                 var resourceClass =

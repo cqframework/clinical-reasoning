@@ -1,23 +1,22 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.fhirpath.IFhirPath
+import java.util.concurrent.ConcurrentHashMap
 
-public class FhirPathCache {
+object FhirPathCache {
+    private val CACHE: MutableMap<FhirVersionEnum, IFhirPath> = ConcurrentHashMap()
 
-    private FhirPathCache() {}
-
-    private static final Map<FhirVersionEnum, IFhirPath> CACHE = new ConcurrentHashMap<>();
-
-    public static IFhirPath cachedForContext(FhirContext fhirContext) {
-        return CACHE.computeIfAbsent(fhirContext.getVersion().getVersion(), x -> fhirContext.newFhirPath());
+    @JvmStatic
+    fun cachedForContext(fhirContext: FhirContext): IFhirPath {
+        return CACHE.computeIfAbsent(fhirContext.version.version) { x -> fhirContext.newFhirPath() }
     }
 
-    public static IFhirPath cachedForVersion(FhirVersionEnum fhirVersionEnum) {
-        return CACHE.computeIfAbsent(
-                fhirVersionEnum, x -> FhirContext.forCached(x).newFhirPath());
+    @JvmStatic
+    fun cachedForVersion(fhirVersionEnum: FhirVersionEnum): IFhirPath {
+        return CACHE.computeIfAbsent(fhirVersionEnum) { x ->
+            FhirContext.forCached(x).newFhirPath()
+        }
     }
 }

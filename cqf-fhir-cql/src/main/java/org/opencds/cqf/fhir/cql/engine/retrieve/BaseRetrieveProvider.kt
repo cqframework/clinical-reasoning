@@ -129,11 +129,7 @@ protected constructor(
                 }
 
                 if (reference.contains("/")) {
-                    reference =
-                        reference
-                            .split("/".toRegex())
-                            .dropLastWhile { it.isEmpty() }
-                            .toTypedArray()[1]
+                    reference = reference.split("/").dropLastWhile { it.isEmpty() }[1]
                 }
 
                 if (reference != contextValue) {

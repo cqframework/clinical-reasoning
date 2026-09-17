@@ -1,28 +1,24 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import kotlin.math.max
+import kotlin.math.min
+import org.hl7.fhir.instance.model.api.IPrimitiveType
 
-import java.util.ArrayList;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-public class Canonicals {
-
-    private Canonicals() {}
-
+object Canonicals {
     /**
      * Gets the Resource type component of a canonical url
      *
      * @param <CanonicalType> A CanonicalType
      * @param canonicalType the canonical url to parse
-     * @return the Resource type, or null if one can not be parsed
+     * @return the Resource type, or null if one can not be parsed </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getResourceType(CanonicalType canonicalType) {
-        checkNotNull(canonicalType);
-        checkArgument(canonicalType.hasValue());
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getResourceType(
+        canonicalType: CanonicalType
+    ): String? {
+        require(canonicalType.hasValue())
 
-        return getResourceType(canonicalType.getValue());
+        return getResourceType(canonicalType.value)
     }
 
     /**
@@ -31,50 +27,54 @@ public class Canonicals {
      * @param canonical the canonical url to parse
      * @return the ResourceType, or null if one can not be parsed
      */
-    public static String getResourceType(String canonical) {
-        checkNotNull(canonical);
+    @JvmStatic
+    fun getResourceType(canonical: String): String? {
+        var canonical = canonical
 
         if (!canonical.contains("/")) {
-            return null;
+            return null
         }
 
         // Drop only the trailing /<id> segment. Using substring rather than replace,
         // since replace is global and would mangle self-referential URLs like
         // http://hl7.org/fhir/StructureDefinition/StructureDefinition.
-        canonical = canonical.substring(0, canonical.lastIndexOf("/"));
-        return canonical.contains("/") ? canonical.substring(canonical.lastIndexOf("/") + 1) : canonical;
+        canonical = canonical.substring(0, canonical.lastIndexOf("/"))
+        return if (canonical.contains("/")) canonical.substring(canonical.lastIndexOf("/") + 1)
+        else canonical
     }
 
     /**
-     * Gets the ID component of a canonical url. Does not include resource name if present in the url.
+     * Gets the ID component of a canonical url. Does not include resource name if present in the
+     * url.
      *
      * @param <CanonicalType> A CanonicalType
      * @param canonicalType the canonical url to parse
-     * @return the Id, or null if one can not be parsed
+     * @return the Id, or null if one can not be parsed </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getIdPart(CanonicalType canonicalType) {
-        checkNotNull(canonicalType);
-        checkArgument(canonicalType.hasValue());
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getIdPart(canonicalType: CanonicalType): String? {
+        require(canonicalType.hasValue())
 
-        return getIdPart(canonicalType.getValue());
+        return getIdPart(canonicalType.value)
     }
 
     /**
-     * Gets the ID component of a canonical url. Does not include resource name if present in the url.
+     * Gets the ID component of a canonical url. Does not include resource name if present in the
+     * url.
      *
      * @param canonical the canonical url to parse
      * @return the Id, or null if one can not be parsed
      */
-    public static String getIdPart(String canonical) {
-        checkNotNull(canonical);
+    @JvmStatic
+    fun getIdPart(canonical: String): String? {
 
-        var urlPart = canonical.substring(0, calculateLastIndex(canonical));
+        val urlPart = canonical.substring(0, Canonicals.calculateLastIndex(canonical))
 
         if (!urlPart.contains("/")) {
-            return null;
+            return null
         }
 
-        return urlPart.substring(urlPart.lastIndexOf("/") + 1);
+        return urlPart.substring(urlPart.lastIndexOf("/") + 1)
     }
 
     /**
@@ -82,13 +82,13 @@ public class Canonicals {
      *
      * @param <CanonicalType> A CanonicalType
      * @param canonicalType the canonical url to parse
-     * @return the Version, or null if one can not be parsed
+     * @return the Version, or null if one can not be parsed </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getVersion(CanonicalType canonicalType) {
-        checkNotNull(canonicalType);
-        checkArgument(canonicalType.hasValue());
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getVersion(canonicalType: CanonicalType): String? {
+        require(canonicalType.hasValue())
 
-        return getVersion(canonicalType.getValue());
+        return getVersion(canonicalType.value)
     }
 
     /**
@@ -97,53 +97,57 @@ public class Canonicals {
      * @param canonical the canonical url to parse
      * @return the Version, or null if one can not be parsed
      */
-    public static String getVersion(String canonical) {
-        checkNotNull(canonical);
+    @JvmStatic
+    fun getVersion(canonical: String): String? {
 
         if (!canonical.contains("|")) {
-            return null;
+            return null
         }
 
-        int lastIndex = canonical.lastIndexOf("#");
+        var lastIndex = canonical.lastIndexOf("#")
         if (lastIndex == -1) {
-            lastIndex = canonical.length();
+            lastIndex = canonical.length
         }
 
-        return canonical.substring(canonical.lastIndexOf("|") + 1, lastIndex);
+        return canonical.substring(canonical.lastIndexOf("|") + 1, lastIndex)
     }
 
     /**
-     * Gets the Url component of a canonical url. Includes the base url, the resource type, and the id
-     * if present.
+     * Gets the Url component of a canonical url. Includes the base url, the resource type, and the
+     * id if present.
      *
      * @param <CanonicalType> A CanonicalType
      * @param canonicalType the canonical url to parse
-     * @return the Url, or null if one can not be parsed
+     * @return the Url, or null if one can not be parsed </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getUrl(CanonicalType canonicalType) {
-        checkNotNull(canonicalType);
-        checkArgument(canonicalType.hasValue());
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getUrl(canonicalType: CanonicalType): String? {
+        require(canonicalType.hasValue())
 
-        return getUrl(canonicalType.getValue());
+        return getUrl(canonicalType.value)
     }
 
     /**
-     * Get the Url component of a canonical url. Includes the base url, the resource type, and the id
-     * if present.
+     * Get the Url component of a canonical url. Includes the base url, the resource type, and the
+     * id if present.
      *
      * @param canonical the canonical url to parse
      * @return the Url, or null if one can not be parsed
      */
-    public static String getUrl(String canonical) {
-        checkNotNull(canonical);
+    @JvmStatic
+    fun getUrl(canonical: String): String? {
 
-        if (!canonical.contains("/") && !canonical.startsWith("urn:uuid") && !canonical.startsWith("urn:oid")) {
-            return null;
+        if (
+            !canonical.contains("/") &&
+                !canonical.startsWith("urn:uuid") &&
+                !canonical.startsWith("urn:oid")
+        ) {
+            return null
         }
 
-        int lastIndex = calculateLastIndex(canonical);
+        val lastIndex = Canonicals.calculateLastIndex(canonical)
 
-        return canonical.substring(0, lastIndex);
+        return canonical.substring(0, lastIndex)
     }
 
     /**
@@ -153,13 +157,9 @@ public class Canonicals {
      * @param canonicals the set of canonical urls to parse
      * @return the set of Url and null (if one can not be parsed) values
      */
-    public static List<String> getUrls(List<String> canonicals) {
-        checkNotNull(canonicals);
+    fun getUrls(canonicals: List<String>): MutableList<String?> {
 
-        List<String> result = new ArrayList<>();
-        canonicals.forEach(canonical -> result.add(getUrl(canonical)));
-
-        return result;
+        return canonicals.map { getUrl(it) }.toMutableList()
     }
 
     /**
@@ -167,13 +167,15 @@ public class Canonicals {
      *
      * @param <CanonicalType> A CanonicalType
      * @param canonicalType the canonical url to parse
-     * @return the Fragment, or null if one can not be parsed
+     * @return the Fragment, or null if one can not be parsed </CanonicalType>
      */
-    public static <CanonicalType extends IPrimitiveType<String>> String getFragment(CanonicalType canonicalType) {
-        checkNotNull(canonicalType);
-        checkArgument(canonicalType.hasValue());
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getFragment(
+        canonicalType: CanonicalType
+    ): String? {
+        require(canonicalType.hasValue())
 
-        return getFragment(canonicalType.getValue());
+        return getFragment(canonicalType.value)
     }
 
     /**
@@ -182,81 +184,75 @@ public class Canonicals {
      * @param canonical the canonical url to parse
      * @return the Fragment, or null if one can not be parsed
      */
-    public static String getFragment(String canonical) {
-        checkNotNull(canonical);
+    @JvmStatic
+    fun getFragment(canonical: String): String? {
 
         if (!canonical.contains("#")) {
-            return null;
+            return null
         }
 
-        return canonical.substring(canonical.lastIndexOf("#") + 1);
+        return canonical.substring(canonical.lastIndexOf("#") + 1)
     }
 
-    public static <CanonicalType extends IPrimitiveType<String>> CanonicalParts getParts(CanonicalType canonicalType) {
-        checkNotNull(canonicalType);
-        checkArgument(canonicalType.hasValue());
+    @JvmStatic
+    fun <CanonicalType : IPrimitiveType<String>> getParts(
+        canonicalType: CanonicalType
+    ): CanonicalParts {
+        require(canonicalType.hasValue())
 
-        return getParts(canonicalType.getValue());
+        return getParts(canonicalType.value)
     }
 
-    public static CanonicalParts getParts(String canonical) {
-        checkNotNull(canonical);
-
-        String url = getUrl(canonical);
-        String id = getIdPart(canonical);
-        String resourceType = getResourceType(canonical);
-        String version = getVersion(canonical);
-        String fragment = getFragment(canonical);
-        return new CanonicalParts(url, id, resourceType, version, fragment);
+    @JvmStatic
+    fun getParts(canonical: String): CanonicalParts {
+        val url = getUrl(canonical)
+        val id = getIdPart(canonical)
+        val resourceType = getResourceType(canonical)
+        val version = getVersion(canonical)
+        val fragment = getFragment(canonical)
+        return CanonicalParts(url, id, resourceType, version, fragment)
     }
 
-    private static int calculateLastIndex(String canonical) {
-        int lastIndexOfBar = canonical.lastIndexOf("|");
-        int lastIndexOfHash = canonical.lastIndexOf("#");
+    private fun calculateLastIndex(canonical: String): Int {
+        val lastIndexOfBar = canonical.lastIndexOf("|")
+        val lastIndexOfHash = canonical.lastIndexOf("#")
 
-        int lastIndex = canonical.length();
-        int mul = lastIndexOfBar * lastIndexOfHash;
+        var lastIndex = canonical.length
+        val mul = lastIndexOfBar * lastIndexOfHash
         if (mul > 1) {
-            lastIndex = Math.min(lastIndexOfBar, lastIndexOfHash);
+            lastIndex = min(lastIndexOfBar, lastIndexOfHash)
         } else if (mul < 0) {
-            lastIndex = Math.max(lastIndexOfBar, lastIndexOfHash);
+            lastIndex = max(lastIndexOfBar, lastIndexOfHash)
         }
-        return lastIndex;
+        return lastIndex
     }
 
-    public static final class CanonicalParts {
-        private final String url;
-        private final String idPart;
-        private final String resourceType;
-        private final String version;
-        private final String fragment;
-
-        CanonicalParts(String url, String idPart, String resourceType, String version, String fragment) {
-            this.url = url;
-            this.idPart = idPart;
-            this.resourceType = resourceType;
-            this.version = version;
-            this.fragment = fragment;
+    class CanonicalParts
+    internal constructor(
+        private val url: String?,
+        private val idPart: String?,
+        private val resourceType: String?,
+        private val version: String?,
+        private val fragment: String?,
+    ) {
+        fun url(): String? {
+            return this.url
         }
 
-        public String url() {
-            return this.url;
+        fun idPart(): String? {
+            return this.idPart
         }
 
-        public String idPart() {
-            return this.idPart;
+        fun resourceType(): String? {
+            return this.resourceType
         }
 
-        public String resourceType() {
-            return this.resourceType;
+        fun version(): String? {
+            return this.version
         }
 
-        public String version() {
-            return this.version;
-        }
-
-        public String fragment() {
-            return this.fragment;
+        fun fragment(): String? {
+            return this.fragment
         }
     }
 }

@@ -1,219 +1,231 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBaseExtension
+import org.hl7.fhir.instance.model.api.ICompositeType
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
  * it can be used in version agnostic logic.
  */
-public class CqfExpression {
+class CqfExpression {
+    var language: String? = null
+        private set
 
-    private String language;
-    private String expression;
-    private Map<String, String> referencedLibraries;
-    private String libraryUrl;
-    private String altLanguage;
-    private String altExpression;
-    private String altLibraryUrl;
-    private String name;
+    var expression: String? = null
+        private set
 
-    public static CqfExpression of(IBaseExtension<?, ?> extension, Map<String, String> referencedLibraries) {
-        if (extension == null) {
-            return null;
-        }
-        var fhirPackagePath = "org.hl7.fhir.";
-        var className = extension.getClass().getCanonicalName();
-        var modelSplit = className.split(fhirPackagePath);
-        if (modelSplit.length < 2) {
-            throw new IllegalArgumentException();
-        }
-        var model = modelSplit[1];
-        model = model.substring(0, model.indexOf(".")).toUpperCase();
-        var version = FhirVersionEnum.forVersionString(model);
-        return switch (version) {
-            case DSTU3 ->
-                new CqfExpression("text/cql-expression", extension.getValue().toString(), referencedLibraries);
-            case R4 -> CqfExpression.of((org.hl7.fhir.r4.model.Expression) extension.getValue(), referencedLibraries);
-            case R5 -> CqfExpression.of((org.hl7.fhir.r5.model.Expression) extension.getValue(), referencedLibraries);
-            default -> null;
-        };
+    var referencedLibraries: MutableMap<String?, String?>? = null
+        private set
+
+    private var libraryUrl: String? = null
+
+    var altLanguage: String? = null
+        private set
+
+    var altExpression: String? = null
+        private set
+
+    private var altLibraryUrl: String? = null
+
+    var name: String? = null
+        private set
+
+    constructor()
+
+    @JvmOverloads
+    constructor(
+        language: String,
+        expression: String,
+        referencedLibraries: MutableMap<String?, String?>?,
+        libraryUrl: String? = null,
+        altLanguage: String? = null,
+        altExpression: String? = null,
+        altLibraryUrl: String? = null,
+        name: String? = null,
+    ) {
+        this.language = language
+        this.expression = expression
+        this.referencedLibraries = referencedLibraries
+        this.libraryUrl = libraryUrl
+        this.altLanguage = altLanguage
+        this.altExpression = altExpression
+        this.altLibraryUrl = altLibraryUrl
+        this.name = name
     }
 
-    public static CqfExpression of(
-            org.hl7.fhir.r4.model.Expression expression, Map<String, String> referencedLibraries) {
-        if (expression == null) {
-            return null;
-        }
-        var altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT);
-        var altExpression =
-                altExpressionExt == null ? null : (org.hl7.fhir.r4.model.Expression) altExpressionExt.getValue();
-        return new CqfExpression(
-                expression.getLanguage(),
-                expression.getExpression(),
-                referencedLibraries,
-                expression.getReference(),
-                altExpression != null ? altExpression.getLanguage() : null,
-                altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null,
-                expression.getName());
-    }
-
-    public static CqfExpression of(
-            org.hl7.fhir.r5.model.Expression expression, Map<String, String> referencedLibraries) {
-        if (expression == null) {
-            return null;
-        }
-        var altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT);
-        var altExpression =
-                altExpressionExt == null ? null : (org.hl7.fhir.r5.model.Expression) altExpressionExt.getValue();
-        return new CqfExpression(
-                expression.getLanguage(),
-                expression.getExpression(),
-                referencedLibraries,
-                expression.getReference(),
-                altExpression != null ? altExpression.getLanguage() : null,
-                altExpression != null ? altExpression.getExpression() : null,
-                altExpression != null && altExpression.hasReference() ? altExpression.getReference() : null,
-                expression.getName());
-    }
-
-    public CqfExpression() {}
-
-    public CqfExpression(String language, String expression, Map<String, String> referencedLibraries) {
-        this(language, expression, referencedLibraries, null, null, null, null, null);
-    }
-
-    public CqfExpression(
-            String language,
-            String expression,
-            Map<String, String> referencedLibraries,
-            String libraryUrl,
-            String altLanguage,
-            String altExpression,
-            String altLibraryUrl,
-            String name) {
-        this.language = language;
-        this.expression = expression;
-        this.referencedLibraries = referencedLibraries;
-        this.libraryUrl = libraryUrl;
-        this.altLanguage = altLanguage;
-        this.altExpression = altExpression;
-        this.altLibraryUrl = altLibraryUrl;
-        this.name = name;
-    }
-
-    private String resolveLibrary(String lang, String url, String expr) {
+    private fun resolveLibrary(lang: String?, url: String?, expr: String): String? {
         // If the expression is FHIRPath or a raw CQL expression a wrapper Library will be created
-        if (List.of("text/cql.expression", "text/cql-expression", "text/fhirpath")
-                .contains(lang)) {
-            return null;
+        if (listOf("text/cql.expression", "text/cql-expression", "text/fhirpath").contains(lang)) {
+            return null
         }
-        if (expr.contains(".") && lang.equals("text/cql") && StringUtils.isBlank(libraryUrl)) {
-            return null;
+        if (expr.contains(".") && lang == "text/cql" && libraryUrl.isNullOrBlank()) {
+            return null
         }
         // If the expression has a reference use it
-        if (StringUtils.isNotBlank(url)) {
-            return url;
+        if (!url.isNullOrBlank()) {
+            return url
         }
-        // If the expression is an identifier and has no reference there should be a single referenced Library
-        if (referencedLibraries != null && !referencedLibraries.isEmpty()) {
-            return referencedLibraries.values().stream().findFirst().get();
+        // If the expression is an identifier and has no reference there should be a single
+        // referenced Library
+        if (!referencedLibraries.isNullOrEmpty()) {
+            return referencedLibraries!!.values.firstOrNull()
         }
-        throw new IllegalArgumentException("No Library reference found for expression: %s".formatted(expr));
+        throw IllegalArgumentException("No Library reference found for expression: $expr")
     }
 
-    public String getName() {
-        return name;
+    fun setName(name: String?): CqfExpression {
+        this.name = name
+        return this
     }
 
-    public CqfExpression setName(String name) {
-        this.name = name;
-        return this;
+    fun setLanguage(language: String): CqfExpression {
+        this.language = language
+        return this
     }
 
-    public String getLanguage() {
-        return language;
+    fun setExpression(expression: String): CqfExpression {
+        this.expression = expression
+        return this
     }
 
-    public CqfExpression setLanguage(String language) {
-        this.language = language;
-        return this;
+    fun setReferencedLibraries(referencedLibraries: MutableMap<String?, String?>?): CqfExpression {
+        this.referencedLibraries = referencedLibraries
+        return this
     }
 
-    public String getExpression() {
-        return expression;
+    fun getLibraryUrl(): String? {
+        return resolveLibrary(language!!, libraryUrl, expression!!)
     }
 
-    public CqfExpression setExpression(String expression) {
-        this.expression = expression;
-        return this;
+    fun setLibraryUrl(libraryUrl: String?): CqfExpression {
+        this.libraryUrl = libraryUrl
+        return this
     }
 
-    public Map<String, String> getReferencedLibraries() {
-        return referencedLibraries;
+    fun setAltLanguage(altLanguage: String): CqfExpression {
+        this.altLanguage = altLanguage
+        return this
     }
 
-    public CqfExpression setReferencedLibraries(Map<String, String> referencedLibraries) {
-        this.referencedLibraries = referencedLibraries;
-        return this;
+    fun setAltExpression(altExpression: String): CqfExpression {
+        this.altExpression = altExpression
+        return this
     }
 
-    public String getLibraryUrl() {
-        return resolveLibrary(language, libraryUrl, expression);
+    fun getAltLibraryUrl(): String? {
+        return if (altExpression.isNullOrBlank()) null
+        else resolveLibrary(altLanguage, altLibraryUrl, altExpression!!)
     }
 
-    public CqfExpression setLibraryUrl(String libraryUrl) {
-        this.libraryUrl = libraryUrl;
-        return this;
+    fun setAltLibraryUrl(altLibraryUrl: String?): CqfExpression {
+        this.altLibraryUrl = altLibraryUrl
+        return this
     }
 
-    public String getAltLanguage() {
-        return altLanguage;
+    fun toExpressionType(fhirVersion: FhirVersionEnum): ICompositeType? {
+        return when (fhirVersion) {
+            FhirVersionEnum.R4 ->
+                org.hl7.fhir.r4.model
+                    .Expression()
+                    .setLanguage(language)
+                    .setExpression(expression)
+                    .setReference(libraryUrl)
+                    .setName(name)
+
+            FhirVersionEnum.R5 ->
+                org.hl7.fhir.r5.model
+                    .Expression()
+                    .setLanguage(language)
+                    .setExpression(expression)
+                    .setReference(libraryUrl)
+                    .setName(name)
+
+            else -> null
+        }
     }
 
-    public CqfExpression setAltLanguage(String altLanguage) {
-        this.altLanguage = altLanguage;
-        return this;
-    }
+    companion object {
+        @JvmStatic
+        fun of(
+            extension: IBaseExtension<*, *>?,
+            referencedLibraries: MutableMap<String?, String?>?,
+        ): CqfExpression? {
+            if (extension == null) {
+                return null
+            }
+            val fhirPackagePath = "org.hl7.fhir."
+            val className = extension.javaClass.canonicalName
+            val modelSplit =
+                className.split(fhirPackagePath.toRegex()).dropLastWhile { it.isEmpty() }
+            require(modelSplit.size >= 2)
+            var model = modelSplit[1]
+            model = model.substring(0, model.indexOf(".")).uppercase()
+            val version = FhirVersionEnum.forVersionString(model)
+            return when (version) {
+                FhirVersionEnum.DSTU3 ->
+                    CqfExpression(
+                        "text/cql-expression",
+                        extension.value.toString(),
+                        referencedLibraries,
+                    )
 
-    public String getAltExpression() {
-        return altExpression;
-    }
+                FhirVersionEnum.R4 ->
+                    of(extension.value as org.hl7.fhir.r4.model.Expression?, referencedLibraries)
+                FhirVersionEnum.R5 ->
+                    of(extension.value as org.hl7.fhir.r5.model.Expression?, referencedLibraries)
+                else -> null
+            }
+        }
 
-    public CqfExpression setAltExpression(String altExpression) {
-        this.altExpression = altExpression;
-        return this;
-    }
+        @JvmStatic
+        fun of(
+            expression: org.hl7.fhir.r4.model.Expression?,
+            referencedLibraries: MutableMap<String?, String?>?,
+        ): CqfExpression? {
+            if (expression == null) {
+                return null
+            }
+            val altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)
+            val altExpression =
+                if (altExpressionExt == null) null
+                else altExpressionExt.value as org.hl7.fhir.r4.model.Expression?
+            return CqfExpression(
+                expression.language,
+                expression.expression,
+                referencedLibraries,
+                expression.reference,
+                altExpression?.language,
+                altExpression?.expression,
+                if (altExpression != null && altExpression.hasReference()) altExpression.reference
+                else null,
+                expression.name,
+            )
+        }
 
-    public String getAltLibraryUrl() {
-        return StringUtils.isBlank(altExpression) ? null : resolveLibrary(altLanguage, altLibraryUrl, altExpression);
-    }
-
-    public CqfExpression setAltLibraryUrl(String altLibraryUrl) {
-        this.altLibraryUrl = altLibraryUrl;
-        return this;
-    }
-
-    public ICompositeType toExpressionType(FhirVersionEnum fhirVersion) {
-        return switch (fhirVersion) {
-            case R4 ->
-                new org.hl7.fhir.r4.model.Expression()
-                        .setLanguage(language)
-                        .setExpression(expression)
-                        .setReference(libraryUrl)
-                        .setName(name);
-            case R5 ->
-                new org.hl7.fhir.r5.model.Expression()
-                        .setLanguage(language)
-                        .setExpression(expression)
-                        .setReference(libraryUrl)
-                        .setName(name);
-            default -> null;
-        };
+        @JvmStatic
+        fun of(
+            expression: org.hl7.fhir.r5.model.Expression?,
+            referencedLibraries: MutableMap<String?, String?>?,
+        ): CqfExpression? {
+            if (expression == null) {
+                return null
+            }
+            val altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT)
+            val altExpression =
+                if (altExpressionExt == null) null
+                else altExpressionExt.value as org.hl7.fhir.r5.model.Expression?
+            return CqfExpression(
+                expression.language,
+                expression.expression,
+                referencedLibraries,
+                expression.reference,
+                altExpression?.language,
+                altExpression?.expression,
+                if (altExpression != null && altExpression.hasReference()) altExpression.reference
+                else null,
+                expression.name,
+            )
+        }
     }
 }

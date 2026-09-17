@@ -323,7 +323,7 @@ class BundleHelperTest {
         var request = BundleHelper.newRequest(version, "PUT", "Patient/123");
         BundleHelper.setEntryRequest(version, entry, request);
         var id = BundleHelper.getEntryRequestId(version, entry);
-        assertTrue(id.isPresent());
+        assertNotNull(id);
     }
 
     @ParameterizedTest

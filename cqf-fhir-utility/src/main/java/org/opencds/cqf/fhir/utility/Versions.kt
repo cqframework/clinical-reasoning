@@ -1,19 +1,12 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.function.Function
+import kotlin.NumberFormatException
+import kotlin.math.max
+import org.hl7.fhir.instance.model.api.IBaseResource
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-/**
- * This class provides utilities for handling multiple business versions of FHIR Resources.
- */
-public class Versions {
-    private Versions() {}
-
+/** This class provides utilities for handling multiple business versions of FHIR Resources. */
+object Versions {
     /**
      * This function compares two versions using semantic versioning.
      *
@@ -21,150 +14,156 @@ public class Versions {
      * @param version2 the second version to compare
      * @return 0 if versions are equal, 1 if version1 is greater than version2, and -1 otherwise
      */
-    public static int compareVersions(String version1, String version2) {
+    @JvmStatic
+    fun compareVersions(version1: String?, version2: String?): Int {
         // Treat null as MAX VERSION
         if (version1 == null || version2 == null) {
-            return handleNulls(version1, version2);
+            return handleNulls(version1, version2)
         }
 
-        final var v1Valid = isValidSemver(version1);
-        final var v2Valid = isValidSemver(version2);
+        val v1Valid = isValidSemver(version1)
+        val v2Valid = isValidSemver(version2)
 
         if (!v1Valid || !v2Valid) {
-            return handleInvalids(version1, version2, v1Valid, v2Valid);
+            return handleInvalids(version1, version2, v1Valid, v2Valid)
         }
 
-        String[] string1Vals = version1.split("\\.");
-        String[] string2Vals = version2.split("\\.");
+        val string1Vals = version1.split(".").dropLastWhile { it.isEmpty() }
+        val string2Vals = version2.split(".").dropLastWhile { it.isEmpty() }
 
-        int length = Math.max(string1Vals.length, string2Vals.length);
+        val length = max(string1Vals.size, string2Vals.size)
 
-        for (int i = 0; i < length; i++) {
-            if (i > string1Vals.length - 1) {
-                return -1;
+        for (i in 0..<length) {
+            if (i > string1Vals.size - 1) {
+                return -1
             }
-            if (i > string2Vals.length - 1) {
-                return 1;
+            if (i > string2Vals.size - 1) {
+                return 1
             }
             if (i == length - 1) {
-                break;
+                break
             }
-            if (!string1Vals[i].equals(string2Vals[i])) {
-                return stringOrNumberCompare(string1Vals[i], string2Vals[i]);
+            if (string1Vals[i] != string2Vals[i]) {
+                return Versions.stringOrNumberCompare(string1Vals[i], string2Vals[i])
             }
         }
-        final var tail1 = parseTail(string1Vals[length - 1]);
-        final var tail2 = parseTail(string2Vals[length - 1]);
+        val tail1 = Versions.parseTail(string1Vals[length - 1])
+        val tail2 = Versions.parseTail(string2Vals[length - 1])
 
-        if (tail1.getLeft().equals(tail2.getLeft())) {
-            return compareTails(tail1, tail2);
+        if (tail1.first == tail2.first) {
+            return compareTails(tail1, tail2)
         } else {
-            return intCompare(tail1.getLeft(), tail2.getLeft());
+            return Versions.intCompare(tail1.first, tail2.first)
         }
     }
 
-    private static Integer compareTails(Pair<Integer, String> tail1, Pair<Integer, String> tail2) {
-        if (!tail1.getRight().isEmpty() && tail2.getRight().isEmpty()) {
-            return 1;
-        } else if (tail1.getRight().isEmpty() && !tail2.getRight().isEmpty()) {
-            return -1;
+    private fun compareTails(tail1: Pair<Int, String>, tail2: Pair<Int, String>): Int {
+        if (tail1.second.isNotEmpty() && tail2.second.isEmpty()) {
+            return 1
+        } else if (tail1.second.isEmpty() && tail2.second.isNotEmpty()) {
+            return -1
         } else {
-            final var c = tail1.getRight().compareTo(tail2.getRight());
+            val c: Int = tail1.second.compareTo(tail2.second)
             // compareTo returns numbers outside [-1,1]
             if (c > 0) {
-                return 1;
+                return 1
             } else if (c < 0) {
-                return -1;
+                return -1
             } else {
-                return 0;
+                return 0
             }
         }
     }
 
-    private static Integer handleNulls(String version1, String version2) {
+    private fun handleNulls(version1: String?, version2: String?): Int {
         if (version1 == null && version2 == null) {
-            return 0;
+            return 0
         } else if (version1 != null && version2 == null) {
-            return -1;
+            return -1
         } else {
-            return 1;
+            return 1
         }
     }
 
-    private static Integer handleInvalids(String version1, String version2, boolean v1Valid, boolean v2Valid) {
+    private fun handleInvalids(
+        version1: String,
+        version2: String,
+        v1Valid: Boolean,
+        v2Valid: Boolean,
+    ): Int {
         if (!v1Valid && !v2Valid) {
-            return stringOrNumberCompare(version1, version2);
+            return stringOrNumberCompare(version1, version2)
         } else if (v1Valid && !v2Valid) {
-            return -1;
+            return -1
         } else {
-            return 1;
+            return 1
         }
     }
 
-    private static Integer stringOrNumberCompare(String version1, String version2) {
+    private fun stringOrNumberCompare(version1: String, version2: String): Int {
         // try string and number compares if it's not semver
         try {
-            final var d1 = Integer.parseInt(version1);
-            final var d2 = Integer.parseInt(version2);
-            return intCompare(d1, d2);
-        } catch (NumberFormatException e) {
-            final var c = version1.compareTo(version2);
+            val d1 = version1.toInt()
+            val d2 = version2.toInt()
+            return intCompare(d1, d2)
+        } catch (e: NumberFormatException) {
+            val c = version1.compareTo(version2)
             // compareTo returns numbers outside [-1,1]
             if (c > 0) {
-                return 1;
+                return 1
             } else if (c < 0) {
-                return -1;
+                return -1
             } else {
-                return 0;
+                return 0
             }
         }
     }
 
-    private static Integer intCompare(Integer d1, Integer d2) {
+    private fun intCompare(d1: Int, d2: Int): Int {
         if (d1 > d2) {
-            return 1;
+            return 1
         } else if (d2 > d1) {
-            return -1;
+            return -1
         } else {
-            return 0;
+            return 0
         }
     }
 
-    private static boolean isValidSemver(String check) {
-        if (check.length() > 1 && !check.contains(".")) {
-            return false;
+    private fun isValidSemver(check: String): Boolean {
+        if (check.length > 1 && !check.contains(".")) {
+            return false
         }
-        String[] stringVals = check.split("\\.");
-        for (var i = 0; i < stringVals.length - 1; i++) {
+        val stringVals = check.split(".").dropLastWhile { it.isEmpty() }
+        for (i in 0..<stringVals.size - 1) {
             try {
-                Integer.parseInt(stringVals[i]);
-            } catch (NumberFormatException e) {
-                return false;
+                stringVals[i].toInt()
+            } catch (e: NumberFormatException) {
+                return false
             }
         }
         try {
-            parseTail(stringVals[stringVals.length - 1]);
-        } catch (NumberFormatException e) {
-            return false;
+            Versions.parseTail(stringVals[stringVals.size - 1])
+        } catch (e: NumberFormatException) {
+            return false
         }
-        return true;
+        return true
     }
 
-    private static Pair<Integer, String> parseTail(String tail) {
+    private fun parseTail(tail: String): Pair<Int, String> {
         try {
-            return Pair.of(Integer.parseInt(tail), "");
-        } catch (NumberFormatException e) {
+            return tail.toInt() to ""
+        } catch (e: NumberFormatException) {
             if (tail.contains("-")) {
-                final var splitDash = tail.split("-");
-                final var afterDash = String.join("-", Arrays.copyOfRange(splitDash, 1, splitDash.length));
-                return Pair.of(Integer.parseInt(splitDash[0]), afterDash);
+                val splitDash = tail.split("-").dropLastWhile { it.isEmpty() }
+                val afterDash = splitDash.slice(1..<splitDash.size).joinToString("-")
+                return splitDash[0].toInt() to afterDash
             } else {
-                throw e;
+                throw e
             }
         }
     }
 
-    /***
+    /**
      * Given a list of FHIR Resources that have the same name, choose the one with the matching
      * version.
      *
@@ -172,31 +171,39 @@ public class Versions {
      * @param resources a list of Resources to select from
      * @param version the version of the Resource to select
      * @param getVersion a function to access version information for the ResourceType
-     * @return the Resource with a matching version, or the highest version orwise.
+     * @return the Resource with a matching version, or the highest version orwise. </ResourceType>
      */
-    public static <ResourceType extends IBaseResource> ResourceType selectByVersion(
-            List<ResourceType> resources, String version, Function<ResourceType, String> getVersion) {
-        checkNotNull(resources);
-        checkNotNull(getVersion);
+    @JvmStatic
+    fun <ResourceType : IBaseResource?> selectByVersion(
+        resources: MutableList<ResourceType?>,
+        version: String?,
+        getVersion: Function<ResourceType?, String?>,
+    ): ResourceType? {
 
-        ResourceType library = null;
-        ResourceType maxVersion = null;
-        for (ResourceType l : resources) {
-            String currentVersion = getVersion.apply(l);
-            if (version == null && currentVersion == null || version != null && version.equals(currentVersion)) {
-                library = l;
+        var library: ResourceType? = null
+        var maxVersion: ResourceType? = null
+        for (l in resources) {
+            val currentVersion = getVersion.apply(l)
+            if (
+                version == null && currentVersion == null ||
+                    version != null && version == currentVersion
+            ) {
+                library = l
             }
 
-            if (maxVersion == null || compareVersions(currentVersion, getVersion.apply(maxVersion)) >= 0) {
-                maxVersion = l;
+            if (
+                maxVersion == null ||
+                    compareVersions(currentVersion, getVersion.apply(maxVersion)) >= 0
+            ) {
+                maxVersion = l
             }
         }
 
         // If we were not given a version, return the highest found
         if ((version == null || library == null) && maxVersion != null) {
-            return maxVersion;
+            return maxVersion
         }
 
-        return library;
+        return library
     }
 }

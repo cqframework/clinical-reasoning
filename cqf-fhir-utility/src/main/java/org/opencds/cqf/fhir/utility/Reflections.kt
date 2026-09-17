@@ -1,41 +1,33 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IAccessor
+import ca.uhn.fhir.context.FhirContext
+import java.util.function.Function
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IPrimitiveType
 
 /**
  * This class provides utility methods for doing reflection on FHIR resources. It's specifically
  * focused on knowledge artifact resources since there's not a common interface for those across
  * different Resources (and FHIR versions)
  */
-public class Reflections {
-
-    private Reflections() {}
-
+object Reflections {
     /**
      * Gets the IAccessor for the given BaseType and child
      *
      * @param <BaseType> an IBase type
      * @param baseTypeClass the class of the IBase type
      * @param childName the name of the child property of the BaseType to generate an accessor for
-     * @return an IAccessor for the given child and the BaseType
+     * @return an IAccessor for the given child and the BaseType </BaseType>
      */
-    public static <BaseType extends IBase> IAccessor getAccessor(
-            final Class<? extends BaseType> baseTypeClass, String childName) {
-        checkNotNull(baseTypeClass);
-        checkNotNull(childName);
-
-        FhirContext fhirContext = FhirContext.forCached(FhirVersions.forClass(baseTypeClass));
-        BaseRuntimeElementDefinition<?> elementDefinition = fhirContext.getElementDefinition(baseTypeClass);
-        return elementDefinition.getChildByName(childName).getAccessor();
+    @JvmStatic
+    fun <BaseType : IBase> getAccessor(
+        baseTypeClass: Class<out BaseType>,
+        childName: String,
+    ): IAccessor {
+        val fhirContext = FhirContext.forCached(FhirVersions.forClass(baseTypeClass))
+        val elementDefinition = fhirContext.getElementDefinition(baseTypeClass)
+        return elementDefinition.getChildByName(childName).accessor
     }
 
     /**
@@ -46,23 +38,23 @@ public class Reflections {
      * @param baseTypeClass the class of a the IBase type
      * @param childName to create a function for
      * @return a function for accessing the "childName" property of the BaseType
+     *   </ReturnType></BaseType>
      */
-    public static <BaseType extends IBase, ReturnType> Function<BaseType, ReturnType> getPrimitiveFunction(
-            final Class<? extends BaseType> baseTypeClass, String childName) {
-        checkNotNull(baseTypeClass);
-        checkNotNull(childName);
+    fun <BaseType : IBase, ReturnType> getPrimitiveFunction(
+        baseTypeClass: Class<out BaseType>,
+        childName: String,
+    ): java.util.function.Function<BaseType, ReturnType?> {
 
-        IAccessor accessor = getAccessor(baseTypeClass, childName);
-        return r -> {
-            Optional<IBase> value = accessor.getFirstValueOrNull(r);
-            if (value.isEmpty()) {
-                return null;
+        val accessor = getAccessor(baseTypeClass, childName)
+        return Function { r: BaseType ->
+            val value = accessor.getFirstValueOrNull<IBase?>(r)
+            if (value.isEmpty) {
+                return@Function null
             } else {
-                @SuppressWarnings("unchecked")
-                ReturnType x = ((IPrimitiveType<ReturnType>) value.get()).getValue();
-                return x;
+                val x = (value.get() as IPrimitiveType<ReturnType?>).value
+                return@Function x
             }
-        };
+        }
     }
 
     /**
@@ -73,19 +65,18 @@ public class Reflections {
      * @param baseTypeClass the class of a the IBase type
      * @param childName to create a function for
      * @return a function for accessing the "childName" property of the BaseType
+     *   </ReturnType></BaseType>
      */
-    public static <BaseType extends IBase, ReturnType extends List<? extends IBase>>
-            Function<BaseType, ReturnType> getFunction(
-                    final Class<? extends BaseType> baseTypeClass, String childName) {
-        checkNotNull(baseTypeClass);
-        checkNotNull(childName);
+    fun <BaseType : IBase, ReturnType : MutableList<out IBase>?> getFunction(
+        baseTypeClass: Class<out BaseType>,
+        childName: String,
+    ): Function<BaseType, ReturnType?> {
 
-        IAccessor accessor = getAccessor(baseTypeClass, childName);
-        return r -> {
-            @SuppressWarnings("unchecked")
-            ReturnType x = (ReturnType) accessor.getValues(r);
-            return x;
-        };
+        val accessor = getAccessor(baseTypeClass, childName)
+        return Function { r: BaseType ->
+            val x = accessor.getValues(r) as ReturnType?
+            x
+        }
     }
 
     /**
@@ -93,13 +84,13 @@ public class Reflections {
      *
      * @param <BaseType> an IBase type
      * @param baseTypeClass the class of a the IBase type
-     * @return a function for accessing the "version" property of the BaseType
+     * @return a function for accessing the "version" property of the BaseType </BaseType>
      */
-    public static <BaseType extends IBase> Function<BaseType, String> getVersionFunction(
-            final Class<? extends BaseType> baseTypeClass) {
-        checkNotNull(baseTypeClass);
-
-        return getPrimitiveFunction(baseTypeClass, "version");
+    @JvmStatic
+    fun <BaseType : IBase> getVersionFunction(
+        baseTypeClass: Class<out BaseType>
+    ): Function<BaseType, String?> {
+        return getPrimitiveFunction(baseTypeClass, "version")
     }
 
     /**
@@ -107,13 +98,13 @@ public class Reflections {
      *
      * @param <BaseType> an IBase type
      * @param baseTypeClass the class of a the IBase type
-     * @return a function for accessing the "url" property of the BaseType
+     * @return a function for accessing the "url" property of the BaseType </BaseType>
      */
-    public static <BaseType extends IBase> Function<BaseType, String> getUrlFunction(
-            final Class<? extends BaseType> baseTypeClass) {
-        checkNotNull(baseTypeClass);
-
-        return getPrimitiveFunction(baseTypeClass, "url");
+    @JvmStatic
+    fun <BaseType : IBase> getUrlFunction(
+        baseTypeClass: Class<out BaseType>
+    ): Function<BaseType, String?> {
+        return getPrimitiveFunction(baseTypeClass, "url")
     }
 
     /**
@@ -121,12 +112,12 @@ public class Reflections {
      *
      * @param <BaseType> an IBase type
      * @param baseTypeClass the class of a the IBase type
-     * @return a function for accessing the "name" property of the BaseType
+     * @return a function for accessing the "name" property of the BaseType </BaseType>
      */
-    public static <BaseType extends IBase> Function<BaseType, String> getNameFunction(
-            final Class<? extends BaseType> baseTypeClass) {
-        checkNotNull(baseTypeClass);
-
-        return getPrimitiveFunction(baseTypeClass, "name");
+    @JvmStatic
+    fun <BaseType : IBase> getNameFunction(
+        baseTypeClass: Class<out BaseType>
+    ): Function<BaseType, String?> {
+        return getPrimitiveFunction(baseTypeClass, "name")
     }
 }

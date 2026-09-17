@@ -1,15 +1,11 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBaseReference
+import org.hl7.fhir.instance.model.api.IPrimitiveType
 
-public class VersionUtilities {
-    private static final String UNSUPPORTED = "unknown or unsupported FHIR version";
-
-    private VersionUtilities() {
-        // intentionally empty
-    }
+object VersionUtilities {
+    private const val UNSUPPORTED = "unknown or unsupported FHIR version"
 
     /**
      * Returns a FhirVersionEnum for the supplied version string. Supports partial versions (e.g.
@@ -18,134 +14,98 @@ public class VersionUtilities {
      * @param fhirVersion the FHIR version to get an enum for.
      * @return the FhirVersionEnum
      */
-    public static FhirVersionEnum enumForVersion(String fhirVersion) {
-        if (fhirVersion == null || fhirVersion.isEmpty()) {
-            throw new IllegalArgumentException("fhirVersion can not be null or empty");
-        }
+    @JvmStatic
+    fun enumForVersion(fhirVersion: String): FhirVersionEnum {
+        require(fhirVersion.isNotEmpty()) { "fhirVersion can not be empty" }
 
         // This matches "R4", "dstu3", etc.
         try {
-            return FhirVersionEnum.valueOf(fhirVersion.toUpperCase());
-        } catch (Exception e) {
+            return FhirVersionEnum.valueOf(fhirVersion.uppercase())
+        } catch (e: Exception) {
             // intentionally empty, we want to fall through
         }
 
         // This matches specific FHIR versions that match the structure versions
         // e.g. 4.0.1, 3.0.2, etc, including partials.
-        FhirVersionEnum version = FhirVersionEnum.forVersionString(fhirVersion);
+        val version = FhirVersionEnum.forVersionString(fhirVersion)
         if (version != null) {
-            return version;
+            return version
         }
 
         // This returns the closest matching major version
-        switch (fhirVersion.substring(0, 1)) {
-            case "2":
-                return FhirVersionEnum.DSTU2;
-            case "3":
-                return FhirVersionEnum.DSTU3;
-            case "4":
-                return FhirVersionEnum.R4;
-            case "5":
-                return FhirVersionEnum.R5;
-            default:
-                throw new IllegalArgumentException(UNSUPPORTED);
+        return when (fhirVersion.substring(0, 1)) {
+            "2" -> FhirVersionEnum.DSTU2
+            "3" -> FhirVersionEnum.DSTU3
+            "4" -> FhirVersionEnum.R4
+            "5" -> FhirVersionEnum.R5
+            else -> throw IllegalArgumentException(UNSUPPORTED)
         }
     }
 
     /**
-     * Returns a StringType for the supplied FHIR version.
-     *
-     * @param fhirVersion the FHIR version to create a StringType for
-     * @return new StringType
-     */
-    public static IPrimitiveType<String> stringTypeForVersion(FhirVersionEnum fhirVersion) {
-        return stringTypeForVersion(fhirVersion, null);
-    }
-
-    /**
-     * Returns a StringType for the supplied version with a value of the supplied string.
+     * Returns a StringType for the supplied FHIR version with a value of the supplied string.
      *
      * @param fhirVersion the FHIR version to create a StringType for
      * @param string the string value of the StringType
      * @return the new StringType
      */
-    public static IPrimitiveType<String> stringTypeForVersion(FhirVersionEnum fhirVersion, String string) {
-        switch (fhirVersion) {
-            case DSTU2:
-                return new org.hl7.fhir.dstu2.model.StringType(string);
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.StringType(string);
-            case R4:
-                return new org.hl7.fhir.r4.model.StringType(string);
-            case R5:
-                return new org.hl7.fhir.r5.model.StringType(string);
-            default:
-                throw new IllegalArgumentException(UNSUPPORTED);
+    @JvmStatic
+    @JvmOverloads
+    fun stringTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        string: String? = null,
+    ): IPrimitiveType<String?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.StringType(string)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.StringType(string)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.StringType(string)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.StringType(string)
+            else -> throw IllegalArgumentException(UNSUPPORTED)
         }
     }
 
     /**
-     * Returns a UriType for the supplied FHIR version.
-     *
-     * @param fhirVersion the FHIR version to create a UriType for
-     * @return new UriType
-     */
-    public static IPrimitiveType<String> uriTypeForVersion(FhirVersionEnum fhirVersion) {
-        return uriTypeForVersion(fhirVersion, null);
-    }
-
-    /**
-     * Returns a UriType for the supplied version with a value of the supplied uri.
+     * Returns a UriType for the supplied FHIR version with a value of the supplied uri.
      *
      * @param fhirVersion the FHIR version to create a UriType for
      * @param uri the string value of the UriType
      * @return the new UriType
      */
-    public static IPrimitiveType<String> uriTypeForVersion(FhirVersionEnum fhirVersion, String uri) {
-        switch (fhirVersion) {
-            case DSTU2:
-                return new org.hl7.fhir.dstu2.model.UriType(uri);
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.UriType(uri);
-            case R4:
-                return new org.hl7.fhir.r4.model.UriType(uri);
-            case R5:
-                return new org.hl7.fhir.r5.model.UriType(uri);
-            default:
-                throw new IllegalArgumentException(UNSUPPORTED);
+    @JvmStatic
+    @JvmOverloads
+    fun uriTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        uri: String? = null,
+    ): IPrimitiveType<String?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.UriType(uri)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.UriType(uri)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.UriType(uri)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.UriType(uri)
+            else -> throw IllegalArgumentException(UNSUPPORTED)
         }
     }
 
     /**
-     * Returns a CanonicalType for the supplied FHIR version.
-     *
-     * @param fhirVersion the FHIR version to create a CanonicalType for
-     * @return new CanonicalType
-     */
-    public static IPrimitiveType<String> canonicalTypeForVersion(FhirVersionEnum fhirVersion) {
-        return canonicalTypeForVersion(fhirVersion, null);
-    }
-
-    /**
-     * Returns a CanonicalType for the supplied version with a value of the supplied value.
-     * A UriType will be returned for FHIR versions before R4.
+     * Returns a CanonicalType for the supplied version with a value of the supplied value. A
+     * UriType will be returned for FHIR versions before R4.
      *
      * @param fhirVersion the FHIR version to create a CanonicalType for
      * @param value the string value of the CanonicalType
      * @return the new CanonicalType
      */
-    public static IPrimitiveType<String> canonicalTypeForVersion(FhirVersionEnum fhirVersion, String value) {
-        switch (fhirVersion) {
-            case DSTU2:
-                return new org.hl7.fhir.dstu2.model.UriType(value);
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.UriType(value);
-            case R4:
-                return new org.hl7.fhir.r4.model.CanonicalType(value);
-            case R5:
-                return new org.hl7.fhir.r5.model.CanonicalType(value);
-            default:
-                throw new IllegalArgumentException(UNSUPPORTED);
+    @JvmStatic
+    @JvmOverloads
+    fun canonicalTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        value: String? = null,
+    ): IPrimitiveType<String?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.UriType(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.UriType(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.CanonicalType(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.CanonicalType(value)
+            else -> throw IllegalArgumentException(UNSUPPORTED)
         }
     }
 
@@ -156,14 +116,18 @@ public class VersionUtilities {
      * @param value the value of the BooleanType
      * @return the new BooleanType
      */
-    public static IPrimitiveType<Boolean> booleanTypeForVersion(FhirVersionEnum fhirVersion, boolean value) {
-        return switch (fhirVersion) {
-            case DSTU2 -> new org.hl7.fhir.dstu2.model.BooleanType(value);
-            case DSTU3 -> new org.hl7.fhir.dstu3.model.BooleanType(value);
-            case R4 -> new org.hl7.fhir.r4.model.BooleanType(value);
-            case R5 -> new org.hl7.fhir.r5.model.BooleanType(value);
-            default -> throw new IllegalArgumentException(UNSUPPORTED);
-        };
+    @JvmStatic
+    fun booleanTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        value: Boolean,
+    ): IPrimitiveType<Boolean> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.BooleanType(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.BooleanType(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.BooleanType(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.BooleanType(value)
+            else -> throw IllegalArgumentException(UNSUPPORTED)
+        }
     }
 
     /**
@@ -173,18 +137,14 @@ public class VersionUtilities {
      * @param code the string value of the CodeType
      * @return the new CodeType
      */
-    public static IPrimitiveType<String> codeTypeForVersion(FhirVersionEnum fhirVersion, String code) {
-        switch (fhirVersion) {
-            case DSTU2:
-                return new org.hl7.fhir.dstu2.model.CodeType(code);
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.CodeType(code);
-            case R4:
-                return new org.hl7.fhir.r4.model.CodeType(code);
-            case R5:
-                return new org.hl7.fhir.r5.model.CodeType(code);
-            default:
-                throw new IllegalArgumentException(UNSUPPORTED);
+    @JvmStatic
+    fun codeTypeForVersion(fhirVersion: FhirVersionEnum, code: String?): IPrimitiveType<String?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.CodeType(code)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.CodeType(code)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.CodeType(code)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.CodeType(code)
+            else -> throw IllegalArgumentException(UNSUPPORTED)
         }
     }
 
@@ -195,18 +155,14 @@ public class VersionUtilities {
      * @param value the string value of the Reference
      * @return the new Reference
      */
-    public static IBaseReference referenceTypeForVersion(FhirVersionEnum fhirVersion, String value) {
-        switch (fhirVersion) {
-            case DSTU2:
-                return new org.hl7.fhir.dstu2.model.Reference().setReference(value);
-            case DSTU3:
-                return new org.hl7.fhir.dstu3.model.Reference().setReference(value);
-            case R4:
-                return new org.hl7.fhir.r4.model.Reference().setReference(value);
-            case R5:
-                return new org.hl7.fhir.r5.model.Reference().setReference(value);
-            default:
-                throw new IllegalArgumentException(UNSUPPORTED);
+    @JvmStatic
+    fun referenceTypeForVersion(fhirVersion: FhirVersionEnum, value: String?): IBaseReference {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.Reference().setReference(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.Reference().setReference(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.Reference().setReference(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.Reference().setReference(value)
+            else -> throw IllegalArgumentException(UNSUPPORTED)
         }
     }
 }

@@ -1,29 +1,20 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Function
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.opencds.cqf.fhir.utility.Reflections.getNameFunction
+import org.opencds.cqf.fhir.utility.Reflections.getPrimitiveFunction
+import org.opencds.cqf.fhir.utility.Reflections.getVersionFunction
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-/**
- * This is a utility class for content Libraries
- */
-public class Libraries {
-
-    private Libraries() {
-        // intentionally empty
-    }
-
-    private static final Map<FhirVersionEnum, LibraryFunctions> cachedFunctions = new ConcurrentHashMap<>();
-    private static final String LIBRARY_RESOURCE_TYPE = "Library";
+/** This is a utility class for content Libraries */
+object Libraries {
+    private val cachedFunctions: MutableMap<FhirVersionEnum, LibraryFunctions> = ConcurrentHashMap()
+    private const val LIBRARY_RESOURCE_TYPE = "Library"
 
     /**
      * Creates the appropriate content for a given library, library function and content type
@@ -33,18 +24,22 @@ public class Libraries {
      * @param contentType the library content type used like XML/JSON
      * @return the content
      */
-    static Optional<byte[]> getContent(IBaseResource library, LibraryFunctions libraryFunctions, String contentType) {
-        for (IBase attachment : libraryFunctions.getAttachments().apply(library)) {
-            String libraryContentType = libraryFunctions.getContentType().apply(attachment);
-            if (libraryContentType != null && libraryContentType.equals(contentType)) {
-                byte[] content = libraryFunctions.getContent().apply(attachment);
+    fun getContent(
+        library: IBaseResource,
+        libraryFunctions: LibraryFunctions,
+        contentType: String?,
+    ): Optional<ByteArray> {
+        for (attachment in libraryFunctions.attachments!!.apply(library)!!) {
+            val libraryContentType = libraryFunctions.contentType!!.apply(attachment)
+            if (libraryContentType != null && libraryContentType == contentType) {
+                val content = libraryFunctions.content!!.apply(attachment)
                 if (content != null) {
-                    return Optional.of(content);
+                    return Optional.of(content)
                 }
             }
         }
 
-        return Optional.empty();
+        return Optional.empty()
     }
 
     /**
@@ -54,35 +49,41 @@ public class Libraries {
      * @param contentType the library content type used like XML/JSON
      * @return the content
      */
-    public static Optional<byte[]> getContent(IBaseResource library, String contentType) {
-        checkNotNull(library);
-        checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
-        checkNotNull(contentType);
+    @JvmStatic
+    fun getContent(library: IBaseResource, contentType: String): Optional<ByteArray> {
+        require(library.fhirType() == LIBRARY_RESOURCE_TYPE)
 
-        LibraryFunctions libraryFunctions = getFunctions(library);
-        return getContent(library, libraryFunctions, contentType);
+        val libraryFunctions = Libraries.getFunctions(library)
+        return getContent(library, libraryFunctions, contentType)
     }
 
-    static LibraryFunctions getFunctions(IBaseResource library) {
-        FhirVersionEnum fhirVersion = library.getStructureFhirVersionEnum();
-        return cachedFunctions.computeIfAbsent(fhirVersion, Libraries::getFunctions);
+    fun getFunctions(library: IBaseResource): LibraryFunctions {
+        val fhirVersion = library.structureFhirVersionEnum
+        return cachedFunctions.computeIfAbsent(fhirVersion) { obj -> Libraries.getFunctions(obj) }
     }
 
-    static LibraryFunctions getFunctions(FhirVersionEnum fhirVersionEnum) {
-        FhirContext fhirContext = FhirContext.forCached(fhirVersionEnum);
+    fun getFunctions(fhirVersionEnum: FhirVersionEnum?): LibraryFunctions {
+        val fhirContext = FhirContext.forCached(fhirVersionEnum)
 
-        Class<? extends IBaseResource> libraryClass =
-                fhirContext.getResourceDefinition(LIBRARY_RESOURCE_TYPE).getImplementingClass();
-        Function<IBase, List<IBase>> attachments = Reflections.getFunction(libraryClass, "content");
+        val libraryClass =
+            fhirContext.getResourceDefinition(LIBRARY_RESOURCE_TYPE).implementingClass
+        val attachments =
+            Reflections.getFunction<IBase, MutableList<IBase>?>(libraryClass, "content")
 
-        Function<IBase, String> contentType = Reflections.getPrimitiveFunction(
-                fhirContext.getElementDefinition("Attachment").getImplementingClass(), "contentType");
+        val contentType =
+            getPrimitiveFunction<IBase, String?>(
+                fhirContext.getElementDefinition("Attachment")!!.implementingClass,
+                "contentType",
+            )
 
-        Function<IBase, byte[]> content = Reflections.getPrimitiveFunction(
-                fhirContext.getElementDefinition("Attachment").getImplementingClass(), "data");
-        Function<IBase, String> version = Reflections.getVersionFunction(libraryClass);
-        Function<IBase, String> name = Reflections.getNameFunction(libraryClass);
-        return new LibraryFunctions(attachments, contentType, content, version, name);
+        val content =
+            getPrimitiveFunction<IBase, ByteArray?>(
+                fhirContext.getElementDefinition("Attachment")!!.implementingClass,
+                "data",
+            )
+        val version = getVersionFunction<IBase>(libraryClass)
+        val name = getNameFunction<IBase>(libraryClass)
+        return LibraryFunctions(attachments, contentType, content, version, name)
     }
 
     /**
@@ -91,12 +92,12 @@ public class Libraries {
      * @param library an IBase type
      * @return the Library version
      */
-    public static String getVersion(IBaseResource library) {
-        checkNotNull(library);
-        checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
+    @JvmStatic
+    fun getVersion(library: IBaseResource): String? {
+        require(library.fhirType() == LIBRARY_RESOURCE_TYPE)
 
-        LibraryFunctions libraryFunctions = getFunctions(library);
-        return libraryFunctions.getVersion().apply(library);
+        val libraryFunctions = Libraries.getFunctions(library)
+        return libraryFunctions.version!!.apply(library)
     }
 
     /**
@@ -105,53 +106,20 @@ public class Libraries {
      * @param library an IBase type
      * @return the Library name
      */
-    public static String getName(IBaseResource library) {
-        checkNotNull(library);
-        checkArgument(library.fhirType().equals(LIBRARY_RESOURCE_TYPE));
+    @JvmStatic
+    fun getName(library: IBaseResource): String? {
+        require(library.fhirType() == LIBRARY_RESOURCE_TYPE)
 
-        LibraryFunctions libraryFunctions = getFunctions(library);
-        return libraryFunctions.getName().apply(library);
+        val libraryFunctions = Libraries.getFunctions(library)
+        return libraryFunctions.name!!.apply(library)
     }
 
-    public static final class LibraryFunctions {
-
-        private final Function<IBase, List<IBase>> getAttachments;
-        private final Function<IBase, String> getContentType;
-        private final Function<IBase, byte[]> getContent;
-        private final Function<IBase, String> getVersion;
-        private final Function<IBase, String> getName;
-
-        LibraryFunctions(
-                Function<IBase, List<IBase>> getAttachments,
-                Function<IBase, String> getContentType,
-                Function<IBase, byte[]> getContent,
-                Function<IBase, String> getVersion,
-                Function<IBase, String> getName) {
-            this.getAttachments = getAttachments;
-            this.getContentType = getContentType;
-            this.getContent = getContent;
-            this.getVersion = getVersion;
-            this.getName = getName;
-        }
-
-        public Function<IBase, List<IBase>> getAttachments() {
-            return this.getAttachments;
-        }
-
-        public Function<IBase, String> getContentType() {
-            return this.getContentType;
-        }
-
-        public Function<IBase, byte[]> getContent() {
-            return this.getContent;
-        }
-
-        public Function<IBase, String> getVersion() {
-            return this.getVersion;
-        }
-
-        public Function<IBase, String> getName() {
-            return this.getName;
-        }
-    }
+    class LibraryFunctions
+    internal constructor(
+        val attachments: Function<IBase, MutableList<IBase>?>?,
+        val contentType: Function<IBase, String?>?,
+        val content: Function<IBase, ByteArray?>?,
+        val version: Function<IBase, String?>?,
+        val name: Function<IBase, String?>?,
+    )
 }

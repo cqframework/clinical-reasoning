@@ -6,8 +6,6 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.validation.FhirValidator
 import ca.uhn.fhir.validation.ResultSeverityEnum
-import kotlin.RuntimeException
-import kotlin.collections.MutableMap
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport

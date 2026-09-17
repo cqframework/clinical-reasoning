@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility
 
 import java.util.function.Function
-import kotlin.NumberFormatException
 import kotlin.math.max
 import org.hl7.fhir.instance.model.api.IBaseResource
 

@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.cql
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.context.FhirVersionEnum
 import ca.uhn.fhir.fhirpath.IFhirPath
-import org.apache.commons.lang3.StringUtils
 import org.opencds.cqf.fhir.cql.engine.parameters.CqlParameterDefinition
 import org.opencds.cqf.fhir.utility.FhirPathCache
 import org.slf4j.Logger
@@ -111,7 +110,7 @@ class LibraryConstructor(protected var fhirContext: FhirContext) {
     }
 
     private fun constructContext(sb: StringBuilder, contextType: String?) {
-        sb.append("context ${if (StringUtils.isBlank(contextType)) "Patient" else contextType}\n\n")
+        sb.append("context ${if (contextType.isNullOrBlank()) "Patient" else contextType}\n\n")
     }
 
     companion object {

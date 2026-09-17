@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.util.ParametersUtil
 import java.time.ZonedDateTime
-import kotlin.IllegalArgumentException
-import org.apache.commons.lang3.StringUtils
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider
 import org.hl7.elm.r1.VersionedIdentifier
 import org.hl7.fhir.instance.model.api.IBase
@@ -104,7 +102,10 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         }
         if (fhirType.contains(".")) {
             val split = fhirType.split(".").dropLastWhile { it.isEmpty() }
-            fhirType = split.joinToString(".") { str -> StringUtils.capitalize(str) }
+            fhirType =
+                split.joinToString(".") { str ->
+                    str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                }
         }
         return "FHIR.$fhirType"
     }

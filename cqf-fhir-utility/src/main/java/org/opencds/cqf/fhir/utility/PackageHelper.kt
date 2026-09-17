@@ -53,7 +53,7 @@ open class PackageHelper {
         @JvmStatic
         fun packageParameters(
             fhirVersion: FhirVersionEnum,
-            artifactEndpointConfiguration: MutableList<IBase?>?,
+            artifactEndpointConfiguration: List<IBase?>?,
             terminologyEndpoint: IBaseResource?,
             isPut: Boolean,
         ): IBaseParameters? {
@@ -90,7 +90,7 @@ open class PackageHelper {
             offset: IPrimitiveType<Int?>?,
             count: IPrimitiveType<Int?>?,
             bundleType: String?,
-            include: MutableList<String?>?,
+            include: List<String?>?,
             terminologyEndpoint: IBaseResource?,
             isPut: Boolean,
         ): IBaseParameters? {

@@ -58,14 +58,14 @@ object Versions {
     }
 
     private fun compareTails(tail1: Pair<Int, String>, tail2: Pair<Int, String>): Int {
-        if (tail1.second.isNotEmpty() && tail2.second.isEmpty()) {
-            return 1
+        return if (tail1.second.isNotEmpty() && tail2.second.isEmpty()) {
+            1
         } else if (tail1.second.isEmpty() && tail2.second.isNotEmpty()) {
-            return -1
+            -1
         } else {
             val c: Int = tail1.second.compareTo(tail2.second)
             // compareTo returns numbers outside [-1,1]
-            return if (c > 0) {
+            if (c > 0) {
                 1
             } else if (c < 0) {
                 -1

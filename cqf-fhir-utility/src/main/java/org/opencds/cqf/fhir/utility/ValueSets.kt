@@ -150,7 +150,7 @@ object ValueSets {
         val expansionChild = getExpansionDefinition(fhirContext)
         val expansion = expansionChild.accessor.getValues(valueSet)
 
-        if (expansion == null || expansion.isEmpty()) {
+        if (expansion.isNullOrEmpty()) {
             return null
         }
 

@@ -46,17 +46,17 @@ class DirectoryBundler(private val fhirContext: FhirContext) {
             throw RuntimeException(e)
         }
 
-        val files: MutableCollection<File>
-        if (uri.scheme != null && uri.scheme.startsWith("jar")) {
-            files = this.listJar(uri, path)
-        } else {
-            files = this.listDirectory(uri.path)
-        }
+        val files =
+            if (uri.scheme != null && uri.scheme.startsWith("jar")) {
+                this.listJar(uri, path)
+            } else {
+                this.listDirectory(uri.path)
+            }
 
         return this.bundleFiles(path, files)
     }
 
-    private fun listJar(uri: URI, path: String): MutableCollection<File> {
+    private fun listJar(uri: URI, path: String): Collection<File> {
         try {
             val fileSystem = FileSystems.newFileSystem(uri, mutableMapOf<String, Any?>())
             val jarPath = fileSystem.getPath(path)
@@ -66,7 +66,6 @@ class DirectoryBundler(private val fhirContext: FhirContext) {
                     .filter { x -> x.isFile }
                     .filter { x -> x.name.endsWith("json") || x.name.endsWith("xml") }
                     .toList()
-                    .toMutableList()
             }
         } catch (e: Exception) {
             logger.error("error attempting to list jar: $uri")
@@ -74,16 +73,16 @@ class DirectoryBundler(private val fhirContext: FhirContext) {
         }
     }
 
-    private fun listDirectory(path: String): MutableCollection<File> {
+    private fun listDirectory(path: String): Collection<File> {
         val resourceDirectory = File(path)
         require(resourceDirectory.absoluteFile.exists()) {
             "The specified path to resource files does not exist: $path"
         }
 
-        if (resourceDirectory.absoluteFile.isDirectory) {
-            return FileUtils.listFiles(resourceDirectory, arrayOf("xml", "json"), true)
+        return if (resourceDirectory.absoluteFile.isDirectory) {
+            FileUtils.listFiles(resourceDirectory, arrayOf("xml", "json"), true)
         } else if (path.lowercase().endsWith("xml") || path.lowercase().endsWith("json")) {
-            return mutableListOf(resourceDirectory)
+            listOf(resourceDirectory)
         } else {
             throw IllegalArgumentException(
                 "path was not a directory or a recognized FHIR file format (XML, JSON) : $path"
@@ -140,18 +139,18 @@ class DirectoryBundler(private val fhirContext: FhirContext) {
     }
 
     private fun selectParser(filename: String): IParser {
-        if (filename.lowercase().endsWith("json")) {
+        return if (filename.lowercase().endsWith("json")) {
             if (this.json == null) {
                 this.json = this.fhirContext.newJsonParser()
             }
 
-            return this.json!!
+            this.json!!
         } else {
             if (this.xml == null) {
                 this.xml = this.fhirContext.newXmlParser()
             }
 
-            return this.xml!!
+            this.xml!!
         }
     }
 

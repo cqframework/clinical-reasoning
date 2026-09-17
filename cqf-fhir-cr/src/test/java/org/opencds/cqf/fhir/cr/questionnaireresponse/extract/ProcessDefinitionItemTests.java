@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newExtractRequestForVersion;
 import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireResponse.open;
@@ -11,7 +14,9 @@ import static org.opencds.cqf.fhir.cr.questionnaireresponse.TestQuestionnaireRes
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
+import com.google.common.collect.Multimap;
 import java.util.List;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
@@ -24,6 +29,8 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -177,5 +184,65 @@ class ProcessDefinitionItemTests {
         assertEquals(2, names.size());
         assertEquals("test1", names.get(0).getText());
         assertEquals("test2", names.get(1).getText());
+    }
+
+    @Test
+    void testExtractsMultipleIdentifierSlices() {
+        var fhirVersion = FhirVersionEnum.R4;
+        var profileUrl = "http://example.org/fhir/StructureDefinition/ChPatient";
+        var ahvSystem = "urn:oid:2.16.756.5.32";
+        var zidSystem = "urn:oid:2.16.756.5.30.1.127.3.10.3";
+        var ahvValue = "7561234567890";
+        var zidValue = "ZID-001";
+
+        var profile = new StructureDefinition().setUrl(profileUrl).setType("Patient");
+        profile.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier");
+        var ahvSlice = profile.getDifferential().addElement().setPath("Patient.identifier");
+        ahvSlice.setId("Patient.identifier:ahv");
+        ahvSlice.setSliceName("ahv");
+        var ahvSystemElement = profile.getDifferential().addElement().setPath("Patient.identifier.system");
+        ahvSystemElement.setId("Patient.identifier:ahv.system");
+        ahvSystemElement.setFixed(new UriType(ahvSystem));
+        var zidSlice = profile.getDifferential().addElement().setPath("Patient.identifier");
+        zidSlice.setId("Patient.identifier:zid");
+        zidSlice.setSliceName("zid");
+        var zidSystemElement = profile.getDifferential().addElement().setPath("Patient.identifier.system");
+        zidSystemElement.setId("Patient.identifier:zid.system");
+        zidSystemElement.setFixed(new UriType(zidSystem));
+
+        var searchResult = new Bundle();
+        searchResult.addEntry().setResource(profile);
+        doReturn(searchResult)
+                .when(repository)
+                .search(eq(Bundle.class), any(), any(Multimap.class));
+
+        var ahvItem = new QuestionnaireItemComponent()
+                .setLinkId("ahv")
+                .setType(QuestionnaireItemType.STRING)
+                .setDefinition(profileUrl + "#Patient.identifier:ahv.value");
+        var zidItem = new QuestionnaireItemComponent()
+                .setLinkId("zid")
+                .setType(QuestionnaireItemType.STRING)
+                .setDefinition(profileUrl + "#Patient.identifier:zid.value");
+        var questionnaire = new Questionnaire().setItem(List.of(ahvItem, zidItem));
+        questionnaire.addExtension(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                .setValue(new CanonicalType().setValue(profileUrl)));
+
+        var ahvResponse = new QuestionnaireResponseItemComponent().setLinkId("ahv");
+        ahvResponse.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(ahvValue)));
+        var zidResponse = new QuestionnaireResponseItemComponent().setLinkId("zid");
+        zidResponse.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(zidValue)));
+        var response = new QuestionnaireResponse().setItem(List.of(ahvResponse, zidResponse));
+
+        var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
+        var actual = fixture.processDefinitionItem(request, new ItemPair(null, null));
+
+        assertInstanceOf(Patient.class, actual);
+        var identifiers = ((Patient) actual).getIdentifier();
+        assertEquals(2, identifiers.size());
+        assertTrue(identifiers.stream()
+                .anyMatch(id -> ahvSystem.equals(id.getSystem()) && ahvValue.equals(id.getValue())));
+        assertTrue(identifiers.stream()
+                .anyMatch(id -> zidSystem.equals(id.getSystem()) && zidValue.equals(id.getValue())));
     }
 }

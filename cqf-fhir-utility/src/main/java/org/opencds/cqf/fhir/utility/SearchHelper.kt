@@ -56,7 +56,7 @@ object SearchHelper {
      * @return </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> searchRepositoryByCanonical(
+    fun <CanonicalType : IPrimitiveType<String?>> searchRepositoryByCanonical(
         repository: IRepository,
         canonical: CanonicalType,
     ): IBaseResource {
@@ -80,7 +80,7 @@ object SearchHelper {
      * @return </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getResourceType(
+    fun <CanonicalType : IPrimitiveType<String?>> getResourceType(
         repository: IRepository,
         canonical: CanonicalType,
     ): Class<out IBaseResource> {
@@ -179,7 +179,7 @@ object SearchHelper {
     }
 
     private fun <
-        CanonicalType : IPrimitiveType<String>
+        CanonicalType : IPrimitiveType<String?>
     > getResourceTypeStringFromCqfResourceTypeExtension(canonical: CanonicalType): String? {
         return getResourceTypeStringFromCqfResourceTypeExtension(getExtensions(canonical))
     }
@@ -190,31 +190,31 @@ object SearchHelper {
         @Suppress("UNCHECKED_CAST")
         return extensions
             .filter { ext -> ext!!.url.contains("cqf-resourceType") }
-            .map { ext -> (ext!!.value as IPrimitiveType<String>).value }
+            .map { ext -> (ext!!.value as IPrimitiveType<String?>).value }
             .firstOrNull()
     }
 
-    private fun <CanonicalType : IPrimitiveType<String>> getExtensions(
+    private fun <CanonicalType : IPrimitiveType<String?>> getExtensions(
         canonical: CanonicalType
     ): MutableList<IBaseExtension<*, *>?> {
         @Suppress("UNCHECKED_CAST")
         return when (canonical) {
             is org.hl7.fhir.dstu3.model.PrimitiveType<*> -> {
-                (canonical as org.hl7.fhir.dstu3.model.PrimitiveType<String>)
+                (canonical as org.hl7.fhir.dstu3.model.PrimitiveType<String?>)
                     .extension
                     .filterIsInstance<IBaseExtension<*, *>?>()
                     .toMutableList()
             }
 
             is org.hl7.fhir.r4.model.PrimitiveType<*> -> {
-                (canonical as org.hl7.fhir.r4.model.PrimitiveType<String>)
+                (canonical as org.hl7.fhir.r4.model.PrimitiveType<String?>)
                     .extension
                     .filterIsInstance<IBaseExtension<*, *>?>()
                     .toMutableList()
             }
 
             is org.hl7.fhir.r5.model.PrimitiveType<*> -> {
-                (canonical as org.hl7.fhir.r5.model.PrimitiveType<String>)
+                (canonical as org.hl7.fhir.r5.model.PrimitiveType<String?>)
                     .extension
                     .filterIsInstance<IBaseExtension<*, *>?>()
                     .toMutableList()
@@ -269,7 +269,7 @@ object SearchHelper {
      * @return </R></String></CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>, R : IBaseResource> searchRepositoryByCanonical(
+    fun <CanonicalType : IPrimitiveType<String?>, R : IBaseResource> searchRepositoryByCanonical(
         repository: IRepository,
         canonical: CanonicalType,
         resourceType: Class<R>,
@@ -297,7 +297,7 @@ object SearchHelper {
      * @return </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> searchRepositoryByCanonicalWithPaging(
+    fun <CanonicalType : IPrimitiveType<String?>> searchRepositoryByCanonicalWithPaging(
         repository: IRepository,
         canonical: CanonicalType,
     ): IBaseBundle {
@@ -319,7 +319,7 @@ object SearchHelper {
      * @return </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> searchRepositoryByCanonicalWithPaging(
+    fun <CanonicalType : IPrimitiveType<String?>> searchRepositoryByCanonicalWithPaging(
         repository: IRepository,
         canonical: String,
     ): IBaseBundle {
@@ -366,7 +366,7 @@ object SearchHelper {
      * @return </R></String></CanonicalType>
      */
     fun <
-        CanonicalType : IPrimitiveType<String>,
+        CanonicalType : IPrimitiveType<String?>,
         R : IBaseResource,
     > searchRepositoryByCanonicalWithPaging(
         repository: IRepository,
@@ -393,7 +393,7 @@ object SearchHelper {
      * @return </R></String></CanonicalType>
      */
     fun <
-        CanonicalType : IPrimitiveType<String>,
+        CanonicalType : IPrimitiveType<String?>,
         R : IBaseResource,
     > searchRepositoryByCanonicalWithPagingWithParams(
         repository: IRepository,

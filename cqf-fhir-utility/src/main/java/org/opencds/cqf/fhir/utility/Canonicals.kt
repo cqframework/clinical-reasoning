@@ -13,12 +13,12 @@ object Canonicals {
      * @return the Resource type, or null if one can not be parsed </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getResourceType(
+    fun <CanonicalType : IPrimitiveType<String?>> getResourceType(
         canonicalType: CanonicalType
     ): String? {
         require(canonicalType.hasValue())
 
-        return getResourceType(canonicalType.value)
+        return getResourceType(canonicalType.value!!)
     }
 
     /**
@@ -52,10 +52,10 @@ object Canonicals {
      * @return the Id, or null if one can not be parsed </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getIdPart(canonicalType: CanonicalType): String? {
+    fun <CanonicalType : IPrimitiveType<String?>> getIdPart(canonicalType: CanonicalType): String? {
         require(canonicalType.hasValue())
 
-        return getIdPart(canonicalType.value)
+        return getIdPart(canonicalType.value!!)
     }
 
     /**
@@ -85,10 +85,12 @@ object Canonicals {
      * @return the Version, or null if one can not be parsed </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getVersion(canonicalType: CanonicalType): String? {
+    fun <CanonicalType : IPrimitiveType<String?>> getVersion(
+        canonicalType: CanonicalType
+    ): String? {
         require(canonicalType.hasValue())
 
-        return getVersion(canonicalType.value)
+        return getVersion(canonicalType.value!!)
     }
 
     /**
@@ -121,10 +123,10 @@ object Canonicals {
      * @return the Url, or null if one can not be parsed </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getUrl(canonicalType: CanonicalType): String? {
+    fun <CanonicalType : IPrimitiveType<String?>> getUrl(canonicalType: CanonicalType): String? {
         require(canonicalType.hasValue())
 
-        return getUrl(canonicalType.value)
+        return getUrl(canonicalType.value!!)
     }
 
     /**
@@ -170,12 +172,12 @@ object Canonicals {
      * @return the Fragment, or null if one can not be parsed </CanonicalType>
      */
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getFragment(
+    fun <CanonicalType : IPrimitiveType<String?>> getFragment(
         canonicalType: CanonicalType
     ): String? {
         require(canonicalType.hasValue())
 
-        return getFragment(canonicalType.value)
+        return getFragment(canonicalType.value!!)
     }
 
     /**
@@ -195,12 +197,12 @@ object Canonicals {
     }
 
     @JvmStatic
-    fun <CanonicalType : IPrimitiveType<String>> getParts(
+    fun <CanonicalType : IPrimitiveType<String?>> getParts(
         canonicalType: CanonicalType
     ): CanonicalParts {
         require(canonicalType.hasValue())
 
-        return getParts(canonicalType.value)
+        return getParts(canonicalType.value!!)
     }
 
     @JvmStatic

@@ -81,7 +81,7 @@ class ResourceValidator : IResourceValidator {
             this.validator = this.context!!.newValidator()
         } else {
             val supportChain = ValidationSupportChain()
-            supportChain.addValidationSupport(DefaultProfileValidationSupport(this.context))
+            supportChain.addValidationSupport(DefaultProfileValidationSupport(this.context!!))
             supportChain.addValidationSupport(CommonCodeSystemsTerminologyService(this.context))
             supportChain.addValidationSupport(
                 InMemoryTerminologyServerValidationSupport(this.context)

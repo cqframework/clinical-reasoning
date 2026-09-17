@@ -51,6 +51,7 @@ object Reflections {
             if (value.isEmpty) {
                 return@Function null
             } else {
+                @Suppress("UNCHECKED_CAST")
                 val x = (value.get() as IPrimitiveType<ReturnType?>).value
                 return@Function x
             }
@@ -74,7 +75,7 @@ object Reflections {
 
         val accessor = getAccessor(baseTypeClass, childName)
         return Function { r: BaseType ->
-            val x = accessor.getValues(r) as ReturnType?
+            @Suppress("UNCHECKED_CAST") val x = accessor.getValues(r) as ReturnType?
             x
         }
     }

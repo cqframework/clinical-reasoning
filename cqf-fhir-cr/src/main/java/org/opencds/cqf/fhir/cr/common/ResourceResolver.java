@@ -67,8 +67,7 @@ public class ResourceResolver {
 
         requireNonNull(baseResource, "Unable to resolve %s".formatted(resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType))
-                .orElse(null);
+        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType));
     }
 
     @SuppressWarnings("unchecked")
@@ -77,7 +76,6 @@ public class ResourceResolver {
 
         requireNonNull(baseResource, "Unable to resolve %s".formatted(resourceType));
 
-        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType))
-                .orElse(null);
+        return (T) castOrThrow(baseResource, clazz, invalidResourceType.formatted(resourceType));
     }
 }

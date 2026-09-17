@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.util.ParametersUtil
 import java.time.ZonedDateTime
-import kotlin.IllegalArgumentException
-import org.apache.commons.lang3.StringUtils
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider
 import org.hl7.elm.r1.VersionedIdentifier
 import org.hl7.fhir.instance.model.api.IBase
@@ -103,8 +101,11 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             return "Tuple { ${properties.joinToString(", ")} }"
         }
         if (fhirType.contains(".")) {
-            val split = fhirType.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }
-            fhirType = split.joinToString(".") { str -> StringUtils.capitalize(str) }
+            val split = fhirType.split(".").dropLastWhile { it.isEmpty() }
+            fhirType =
+                split.joinToString(".") { str ->
+                    str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                }
         }
         return "FHIR.$fhirType"
     }
@@ -172,7 +173,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
     fun getExpressionResult(
         subjectId: String?,
         expression: String,
-        language: String?,
+        language: String,
         libraryToBeEvaluated: String?,
         referencedLibraries: MutableMap<String?, String?>?,
         parameters: IBaseParameters?,
@@ -181,7 +182,6 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         contextParameter: IBase?,
         resourceParameter: IBase?,
     ): MutableList<IBase?>? {
-        validateExpression(language, expression)
         var results: MutableList<IBase?>?
         val parametersResult: IBaseParameters
         if (libraryToBeEvaluated == null) {
@@ -222,16 +222,6 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         }
 
         return results
-    }
-
-    fun validateExpression(language: String?, expression: String?) {
-        if (language == null) {
-            logger.error("Missing language type for the Expression")
-            throw IllegalArgumentException("Missing language type for the Expression")
-        } else if (expression == null) {
-            logger.error("Missing expression for the Expression")
-            throw IllegalArgumentException("Missing expression for the Expression")
-        }
     }
 
     fun validateLibrary(libraryUrl: String?) {
@@ -282,8 +272,8 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         var result =
             getExpressionResult(
                 patientId,
-                expression.expression,
-                expression.language,
+                expression.expression!!,
+                expression.language!!,
                 expression.libraryUrl,
                 expression.referencedLibraries,
                 params,
@@ -296,8 +286,8 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             result =
                 getExpressionResult(
                     patientId,
-                    expression.altExpression,
-                    expression.altLanguage,
+                    expression.altExpression!!,
+                    expression.altLanguage!!,
                     expression.altLibraryUrl,
                     expression.referencedLibraries,
                     params,

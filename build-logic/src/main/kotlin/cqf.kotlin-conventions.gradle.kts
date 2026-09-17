@@ -1,6 +1,6 @@
 plugins {
     id("cqf.java-conventions")
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 kotlin {

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.context.FhirVersionEnum
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
 import org.hl7.fhir.instance.model.api.IBase
@@ -28,18 +27,18 @@ object Libraries {
         library: IBaseResource,
         libraryFunctions: LibraryFunctions,
         contentType: String?,
-    ): Optional<ByteArray> {
+    ): ByteArray? {
         for (attachment in libraryFunctions.attachments!!.apply(library)!!) {
             val libraryContentType = libraryFunctions.contentType!!.apply(attachment)
             if (libraryContentType != null && libraryContentType == contentType) {
                 val content = libraryFunctions.content!!.apply(attachment)
                 if (content != null) {
-                    return Optional.of(content)
+                    return content
                 }
             }
         }
 
-        return Optional.empty()
+        return null
     }
 
     /**
@@ -50,7 +49,7 @@ object Libraries {
      * @return the content
      */
     @JvmStatic
-    fun getContent(library: IBaseResource, contentType: String): Optional<ByteArray> {
+    fun getContent(library: IBaseResource, contentType: String): ByteArray? {
         require(library.fhirType() == LIBRARY_RESOURCE_TYPE)
 
         val libraryFunctions = Libraries.getFunctions(library)

@@ -18,7 +18,9 @@ class CqfExpression {
     var referencedLibraries: MutableMap<String?, String?>? = null
         private set
 
-    private var libraryUrl: String? = null
+    var libraryUrl: String? = null
+        get() = resolveLibrary(language!!, field, expression!!)
+        private set
 
     var altLanguage: String? = null
         private set
@@ -26,7 +28,11 @@ class CqfExpression {
     var altExpression: String? = null
         private set
 
-    private var altLibraryUrl: String? = null
+    var altLibraryUrl: String? = null
+        get() =
+            if (altExpression.isNullOrBlank()) null
+            else resolveLibrary(altLanguage, field, altExpression!!)
+        private set
 
     var name: String? = null
         private set
@@ -59,7 +65,7 @@ class CqfExpression {
         if (listOf("text/cql.expression", "text/cql-expression", "text/fhirpath").contains(lang)) {
             return null
         }
-        if (expr.contains(".") && lang == "text/cql" && libraryUrl.isNullOrBlank()) {
+        if (expr.contains(".") && lang == "text/cql" && url.isNullOrBlank()) {
             return null
         }
         // If the expression has a reference use it
@@ -94,10 +100,6 @@ class CqfExpression {
         return this
     }
 
-    fun getLibraryUrl(): String? {
-        return resolveLibrary(language!!, libraryUrl, expression!!)
-    }
-
     fun setLibraryUrl(libraryUrl: String?): CqfExpression {
         this.libraryUrl = libraryUrl
         return this
@@ -111,11 +113,6 @@ class CqfExpression {
     fun setAltExpression(altExpression: String): CqfExpression {
         this.altExpression = altExpression
         return this
-    }
-
-    fun getAltLibraryUrl(): String? {
-        return if (altExpression.isNullOrBlank()) null
-        else resolveLibrary(altLanguage, altLibraryUrl, altExpression!!)
     }
 
     fun setAltLibraryUrl(altLibraryUrl: String?): CqfExpression {

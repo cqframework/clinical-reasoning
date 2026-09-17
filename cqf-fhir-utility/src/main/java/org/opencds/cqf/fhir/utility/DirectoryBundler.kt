@@ -91,7 +91,7 @@ class DirectoryBundler(private val fhirContext: FhirContext) {
         }
     }
 
-    private fun bundleFiles(rootPath: String?, files: MutableCollection<File>): IBaseBundle? {
+    private fun bundleFiles(rootPath: String?, files: Collection<File>): IBaseBundle? {
         val resources = mutableListOf<IBaseResource>()
 
         for (f in files) {
@@ -155,10 +155,7 @@ class DirectoryBundler(private val fhirContext: FhirContext) {
         }
     }
 
-    private fun flatten(
-        fhirContext: FhirContext,
-        bundle: IBaseBundle?,
-    ): MutableList<IBaseResource> {
+    private fun flatten(fhirContext: FhirContext, bundle: IBaseBundle?): List<IBaseResource> {
         val resources = mutableListOf<IBaseResource>()
 
         val bundleResources = BundleUtil.toListOfResources(fhirContext, bundle)

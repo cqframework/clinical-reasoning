@@ -185,7 +185,7 @@ object SearchHelper {
     }
 
     private fun getResourceTypeStringFromCqfResourceTypeExtension(
-        extensions: MutableList<out IBaseExtension<*, *>?>
+        extensions: List<IBaseExtension<*, *>?>
     ): String? {
         @Suppress("UNCHECKED_CAST")
         return extensions

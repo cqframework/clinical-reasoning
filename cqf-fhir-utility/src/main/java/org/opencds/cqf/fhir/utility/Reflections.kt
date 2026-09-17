@@ -43,17 +43,14 @@ object Reflections {
     fun <BaseType : IBase, ReturnType> getPrimitiveFunction(
         baseTypeClass: Class<out BaseType>,
         childName: String,
-    ): java.util.function.Function<BaseType, ReturnType?> {
-
+    ): Function<BaseType, ReturnType?> {
         val accessor = getAccessor(baseTypeClass, childName)
         return Function { r: BaseType ->
             val value = accessor.getFirstValueOrNull<IBase?>(r)
-            if (value.isEmpty) {
-                return@Function null
+            return@Function if (value.isEmpty) {
+                null
             } else {
-                @Suppress("UNCHECKED_CAST")
-                val x = (value.get() as IPrimitiveType<ReturnType?>).value
-                return@Function x
+                @Suppress("UNCHECKED_CAST") (value.get() as IPrimitiveType<ReturnType?>).value
             }
         }
     }

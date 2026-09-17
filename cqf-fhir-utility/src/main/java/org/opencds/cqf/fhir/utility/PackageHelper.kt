@@ -132,8 +132,8 @@ open class PackageHelper {
             offset: IPrimitiveType<Int?>?,
             count: IPrimitiveType<Int?>?,
             bundleType: String?,
-            include: MutableList<String?>?,
-            artifactEndpointConfiguration: MutableList<IBase?>?,
+            include: List<String?>?,
+            artifactEndpointConfiguration: List<IBase?>?,
             terminologyEndpoint: IBaseResource?,
             isPut: Boolean,
         ): IBaseParameters? {

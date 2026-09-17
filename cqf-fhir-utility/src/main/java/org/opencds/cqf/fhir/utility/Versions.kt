@@ -50,10 +50,10 @@ object Versions {
         val tail1 = Versions.parseTail(string1Vals[length - 1])
         val tail2 = Versions.parseTail(string2Vals[length - 1])
 
-        if (tail1.first == tail2.first) {
-            return compareTails(tail1, tail2)
+        return if (tail1.first == tail2.first) {
+            compareTails(tail1, tail2)
         } else {
-            return Versions.intCompare(tail1.first, tail2.first)
+            Versions.intCompare(tail1.first, tail2.first)
         }
     }
 
@@ -65,23 +65,23 @@ object Versions {
         } else {
             val c: Int = tail1.second.compareTo(tail2.second)
             // compareTo returns numbers outside [-1,1]
-            if (c > 0) {
-                return 1
+            return if (c > 0) {
+                1
             } else if (c < 0) {
-                return -1
+                -1
             } else {
-                return 0
+                0
             }
         }
     }
 
     private fun handleNulls(version1: String?, version2: String?): Int {
-        if (version1 == null && version2 == null) {
-            return 0
+        return if (version1 == null && version2 == null) {
+            0
         } else if (version1 != null && version2 == null) {
-            return -1
+            -1
         } else {
-            return 1
+            1
         }
     }
 
@@ -91,12 +91,12 @@ object Versions {
         v1Valid: Boolean,
         v2Valid: Boolean,
     ): Int {
-        if (!v1Valid && !v2Valid) {
-            return stringOrNumberCompare(version1, version2)
+        return if (!v1Valid && !v2Valid) {
+            stringOrNumberCompare(version1, version2)
         } else if (v1Valid && !v2Valid) {
-            return -1
+            -1
         } else {
-            return 1
+            1
         }
     }
 
@@ -109,23 +109,23 @@ object Versions {
         } catch (e: NumberFormatException) {
             val c = version1.compareTo(version2)
             // compareTo returns numbers outside [-1,1]
-            if (c > 0) {
-                return 1
+            return if (c > 0) {
+                1
             } else if (c < 0) {
-                return -1
+                -1
             } else {
-                return 0
+                0
             }
         }
     }
 
     private fun intCompare(d1: Int, d2: Int): Int {
-        if (d1 > d2) {
-            return 1
+        return if (d1 > d2) {
+            1
         } else if (d2 > d1) {
-            return -1
+            -1
         } else {
-            return 0
+            0
         }
     }
 
@@ -175,7 +175,7 @@ object Versions {
      */
     @JvmStatic
     fun <ResourceType : IBaseResource?> selectByVersion(
-        resources: MutableList<ResourceType?>,
+        resources: List<ResourceType?>,
         version: String?,
         getVersion: Function<ResourceType?, String?>,
     ): ResourceType? {

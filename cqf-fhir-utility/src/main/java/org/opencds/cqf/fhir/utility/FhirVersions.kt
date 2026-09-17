@@ -14,22 +14,17 @@ object FhirVersions {
     @JvmStatic
     fun <BaseType : IBase?> forClass(baseTypeClass: Class<out BaseType?>): FhirVersionEnum {
         val packageName = baseTypeClass.`package`.name
-        if (packageName.contains("r5")) {
-            return FhirVersionEnum.R5
-        } else if (packageName.contains("r4")) {
-            return FhirVersionEnum.R4
-        } else if (packageName.contains("dstu3")) {
-            return FhirVersionEnum.DSTU3
-        } else if (packageName.contains("dstu2016may")) {
-            return FhirVersionEnum.DSTU2_1
-        } else if (packageName.contains("org.hl7.fhir.dstu2")) {
-            return FhirVersionEnum.DSTU2_HL7ORG
-        } else if (packageName.contains("ca.uhn.fhir.model.dstu2")) {
-            return FhirVersionEnum.DSTU2
-        } else {
-            throw IllegalArgumentException(
-                "Unable to determine FHIR version for IBaseResource type: ${baseTypeClass.name}"
-            )
+        return when {
+            packageName.contains("r5") -> FhirVersionEnum.R5
+            packageName.contains("r4") -> FhirVersionEnum.R4
+            packageName.contains("dstu3") -> FhirVersionEnum.DSTU3
+            packageName.contains("dstu2016may") -> FhirVersionEnum.DSTU2_1
+            packageName.contains("org.hl7.fhir.dstu2") -> FhirVersionEnum.DSTU2_HL7ORG
+            packageName.contains("ca.uhn.fhir.model.dstu2") -> FhirVersionEnum.DSTU2
+            else ->
+                throw IllegalArgumentException(
+                    "Unable to determine FHIR version for IBaseResource type: ${baseTypeClass.name}"
+                )
         }
     }
 }

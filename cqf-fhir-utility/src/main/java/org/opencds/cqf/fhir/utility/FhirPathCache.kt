@@ -10,7 +10,7 @@ object FhirPathCache {
 
     @JvmStatic
     fun cachedForContext(fhirContext: FhirContext): IFhirPath {
-        return CACHE.computeIfAbsent(fhirContext.version.version) { x -> fhirContext.newFhirPath() }
+        return CACHE.computeIfAbsent(fhirContext.version.version) { fhirContext.newFhirPath() }
     }
 
     @JvmStatic

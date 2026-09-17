@@ -50,7 +50,7 @@ object ValueSets {
         val excludeChild = getExcludeDefinition(fhirContext)
         val excludeComponents = excludeChild.accessor.getValues(compose)
 
-        if (excludeComponents == null || excludeComponents.isEmpty()) {
+        if (excludeComponents.isNullOrEmpty()) {
             return null
         }
 
@@ -169,7 +169,7 @@ object ValueSets {
 
         val contains = containsDefinition.accessor.getValues(expansion)
 
-        if (contains == null || contains.isEmpty()) {
+        if (contains.isNullOrEmpty()) {
             return null
         }
 
@@ -216,10 +216,7 @@ object ValueSets {
     }
 
     @JvmStatic
-    fun getCodesInContains(
-        fhirContext: FhirContext,
-        contains: MutableList<IBase?>?,
-    ): MutableList<Code>? {
+    fun getCodesInContains(fhirContext: FhirContext, contains: List<IBase?>?): MutableList<Code>? {
         if (contains == null) {
             return null
         }
@@ -362,7 +359,7 @@ object ValueSets {
         }
 
         val values = accessor.getValues(value)
-        if (values == null || values.isEmpty()) {
+        if (values.isNullOrEmpty()) {
             return null
         }
 

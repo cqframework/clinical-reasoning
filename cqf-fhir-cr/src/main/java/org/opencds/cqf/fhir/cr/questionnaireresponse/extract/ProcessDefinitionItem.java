@@ -223,9 +223,8 @@ public class ProcessDefinitionItem {
                 var value = e.getDefaultOrFixedOrPattern();
                 if (value != null) {
                     var path = getPath(e);
-                    var idSplit = e.getId().split(":");
-                    // Ignore child slices, they are handled while processing the parent item
-                    if (!(idSplit.length > 1 && idSplit[1].contains("."))) {
+                    // Sliced elements (including slice roots) are applied in processSliceItem
+                    if (!e.getId().contains(":")) {
                         resource.setValue(path, value);
                     }
                 }
@@ -320,7 +319,8 @@ public class ProcessDefinitionItem {
 
     protected String getPath(IStructureDefinitionAdapter profile, String id) {
         var path = id;
-        if (profile != null) {
+        // Preserve slice names so processSliceItem can distinguish identifier slices
+        if (profile != null && !id.contains(":")) {
             var element = profile.getElement(id);
             if (element != null) {
                 path = element.getPath();
@@ -525,9 +525,24 @@ public class ProcessDefinitionItem {
                 if (slicePath.equals("extension")) {
                     setAnswerValue(request, sliceValue, propertyDefs.get("url"), "url", extensionUrl, profile);
                 }
-                setAnswerValue(request, parent, propertyDefs.get(sliceName), slicePath, sliceValue.get(), profile);
+                appendSliceValue(request, parent, propertyDefs.get(sliceName), slicePath, sliceValue.get(), profile);
             }
         });
+    }
+
+    protected void appendSliceValue(
+            ExtractRequest request,
+            IAdapter<?> parent,
+            BaseRuntimeChildDefinition pathDefinition,
+            String slicePath,
+            IBase sliceValue,
+            IStructureDefinitionAdapter profile) {
+        if (pathDefinition != null && pathDefinition.isMultipleCardinality()) {
+            // BaseAdapter.setValue appends Iterable values; pass only the new slice
+            parent.setValue(slicePath, Collections.singletonList(sliceValue));
+            return;
+        }
+        setAnswerValue(request, parent, pathDefinition, slicePath, sliceValue, profile);
     }
 
     protected IBase getExtensionUrl(IStructureDefinitionAdapter profile, String sliceName) {

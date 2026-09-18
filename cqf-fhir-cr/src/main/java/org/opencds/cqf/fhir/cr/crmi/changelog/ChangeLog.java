@@ -170,8 +170,8 @@ public class ChangeLog {
             ArtifactDiffProcessor.DiffCache cache,
             ValueSetChild.Leaf leafData,
             boolean isSource) {
-            // compose.include carries no code system version or active status, so fall back to what
-            // the ValueSet's expansion recorded per code.
+        // compose.include carries no code system version or active status, so fall back to what
+        // the ValueSet's expansion recorded per code.
         var expansionDetails = collectExpansionDetailsByCode(valueSet);
         valueSet.getCompose().getInclude().forEach(concept -> {
             if (concept.hasConcept()) {

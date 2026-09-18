@@ -2,13 +2,16 @@ package org.opencds.cqf.fhir.cr.crmi.changelog;
 
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor;
+import org.opencds.cqf.fhir.cr.crmi.KnowledgeArtifactProcessor;
 import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 import org.opencds.cqf.fhir.utility.Canonicals;
 
@@ -22,6 +25,13 @@ public class ChangeLog {
     public static final String REPLACE = "replace";
     public static final String INSERT = "insert";
     public static final String DELETE = "delete";
+    public static final String INACTIVE = "inactive";
+    public static final String UPDATED_DESCRIPTION = "updated code description";
+    // Conditions and priorities are compared between sides rather than diffed, so their operations have no
+    // FhirPatch path - this stands in for one.
+    private static final String CONDITION_PATH = "condition";
+    private static final String PRIORITY_PATH = "priority";
+    private static final String CODE_PATH = "code";
 
     public ChangeLog(String url) {
         this.pages = new ArrayList<>();
@@ -52,12 +62,15 @@ public class ChangeLog {
                 && !sourceResource.getUrl().equals(targetResource.getUrl())) {
             throw new UnprocessableEntityException(URLS_DONT_MATCH);
         }
-        // Map< [Code], [Object with code, version, system, etc.] >
-        Map<String, ValueSetChild.Code> codeMap = new HashMap<>();
+        // Map< [leafOid|system|code], [Object with code, version, system, etc.] > - one per side.
+        //
+        // One code map per side. Allows each side to correctly record details of a given code.
+        Map<String, ValueSetChild.Code> sourceCodeMap = new LinkedHashMap<>();
+        Map<String, ValueSetChild.Code> targetCodeMap = new LinkedHashMap<>();
         // Map< [URL], Map <[Version], [Object with name, version, and other metadata] >>
         Map<String, Map<String, ValueSetChild.Leaf>> leafMetadataMap = new HashMap<>();
-        updateCodeMapAndLeafMetadataMap(codeMap, leafMetadataMap, sourceResource, cache);
-        updateCodeMapAndLeafMetadataMap(codeMap, leafMetadataMap, targetResource, cache);
+        updateCodeMapAndLeafMetadataMap(sourceCodeMap, leafMetadataMap, sourceResource, cache, true);
+        updateCodeMapAndLeafMetadataMap(targetCodeMap, leafMetadataMap, targetResource, cache, false);
         var oldData = sourceResource == null
                 ? null
                 : new ValueSetChild(
@@ -67,8 +80,7 @@ public class ChangeLog {
                         sourceResource.getName(),
                         sourceResource.getUrl(),
                         sourceResource.getCompose().getInclude(),
-                        sourceResource.getExpansion().getContains(),
-                        codeMap,
+                        sourceCodeMap,
                         leafMetadataMap,
                         getPriority(sourceResource).orElse(null));
         var newData = targetResource == null
@@ -80,14 +92,41 @@ public class ChangeLog {
                         targetResource.getName(),
                         targetResource.getUrl(),
                         targetResource.getCompose().getInclude(),
-                        targetResource.getExpansion().getContains(),
-                        codeMap,
+                        targetCodeMap,
                         leafMetadataMap,
                         getPriority(targetResource).orElse(null));
+        setCodeOperations(sourceCodeMap, targetCodeMap);
         var url = getPageUrl(sourceResource, targetResource);
         var page = new Page<>(url, oldData, newData);
         this.pages.add(page);
         return page;
+    }
+
+    /**
+     * A code's change is decided by comparing the two sides' membership, keyed by leaf, system and code.
+     *
+     * <p>The FhirPatch diff reports the grouper's own expansion, which cannot see a code that left one
+     * referenced value set while remaining in the grouper through another. The manual change log
+     * reports that as a removal from the leaf value set that dropped it, so this does too.
+     */
+    private static void setCodeOperations(
+            Map<String, ValueSetChild.Code> sourceCodeMap, Map<String, ValueSetChild.Code> targetCodeMap) {
+        sourceCodeMap.forEach((key, code) -> {
+            if (!targetCodeMap.containsKey(key)) {
+                code.setOperation(new Operation(DELETE, CODE_PATH, null, code.getCodeValue()));
+            }
+        });
+        targetCodeMap.forEach((key, code) -> {
+            var previous = sourceCodeMap.get(key);
+            if (previous == null) {
+                code.setOperation(new Operation(INSERT, CODE_PATH, code.getCodeValue(), null));
+            } else if (Boolean.TRUE.equals(code.getInactive()) && !Boolean.TRUE.equals(previous.getInactive())) {
+                code.setOperation(new Operation(INACTIVE, CODE_PATH, code.getInactive(), previous.getInactive()));
+            } else if (!Objects.equals(code.getDisplay(), previous.getDisplay())) {
+                code.setOperation(
+                        new Operation(UPDATED_DESCRIPTION, CODE_PATH, code.getDisplay(), previous.getDisplay()));
+            }
+        });
     }
 
     public String getPageUrl(MetadataResource source, MetadataResource target) {
@@ -109,13 +148,16 @@ public class ChangeLog {
             Map<String, ValueSetChild.Code> codeMap,
             Map<String, Map<String, ValueSetChild.Leaf>> leafMap,
             ValueSet valueSet,
-            ArtifactDiffProcessor.DiffCache cache) {
+            ArtifactDiffProcessor.DiffCache cache,
+            boolean isSource) {
         if (valueSet != null) {
-            var leafData = updateLeafMap(leafMap, valueSet);
+            var leafData = getOrCreateLeaf(leafMap, valueSet);
             if (valueSet.getCompose().hasInclude()) {
-                handleValueSetInclude(codeMap, leafMap, valueSet, cache, leafData);
+                handleValueSetInclude(codeMap, leafMap, valueSet, cache, leafData, isSource);
             }
-            if (valueSet.getExpansion().hasContains()) {
+            // A grouper's own expansion already holds every code its referenced value sets contribute.
+            // Only the leaf attribution is wanted.
+            if (valueSet.getExpansion().hasContains() && !KnowledgeArtifactProcessor.isGrouper(valueSet)) {
                 handleValueSetContains(codeMap, valueSet, leafData);
             }
         }
@@ -126,14 +168,14 @@ public class ChangeLog {
             Map<String, Map<String, ValueSetChild.Leaf>> leafMap,
             ValueSet valueSet,
             ArtifactDiffProcessor.DiffCache cache,
-            ValueSetChild.Leaf leafData) {
-        // compose.include carries no code system version in practice, so fallback to the versions the
-        // ValueSet's expansion recorded per code. Without this the changelog cannot show which code
-        // system version a code came from, which is the only thing that explains a repin's insert/delete pairs.
-        var codeSystemVersions = collectCodeSystemVersionsFromExpansion(valueSet);
+            ValueSetChild.Leaf leafData,
+            boolean isSource) {
+        // compose.include carries no code system version or active status, so fall back to what
+        // the ValueSet's expansion recorded per code.
+        var expansionDetails = collectExpansionDetailsByCode(valueSet);
         valueSet.getCompose().getInclude().forEach(concept -> {
             if (concept.hasConcept()) {
-                updateLeafData(concept.getSystem(), leafData);
+                addCodeSystemToLeaf(concept.getSystem(), leafData);
                 mapConceptSetToCodeMap(
                         codeMap,
                         concept,
@@ -141,38 +183,39 @@ public class ChangeLog {
                         valueSet.getName(),
                         valueSet.getTitle(),
                         valueSet.getUrl(),
-                        codeSystemVersions);
+                        expansionDetails);
             }
             if (concept.hasValueSet()) {
                 concept.getValueSet().stream()
-                        .map(vs -> cache.getResource(vs.getValue()).map(v -> (ValueSet) v))
+                        // this side's copy of the leaf: asking the cache without saying which side
+                        // returned whichever release was cached last, so both sides read the target's
+                        // expansion and no change to a code's version or status was ever visible
+                        .map(vs -> cache.getResource(vs.getValue(), isSource).map(v -> (ValueSet) v))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .forEach(vs -> {
-                            updateLeafMap(leafMap, vs);
-                            updateCodeMapAndLeafMetadataMap(codeMap, leafMap, vs, cache);
-                        });
+                        .forEach(vs -> updateCodeMapAndLeafMetadataMap(codeMap, leafMap, vs, cache, isSource));
             }
         });
     }
 
     private void handleValueSetContains(
             Map<String, ValueSetChild.Code> codeMap, ValueSet valueSet, ValueSetChild.Leaf leafData) {
-        valueSet.getExpansion().getContains().forEach(cnt -> {
-            if (!codeMap.containsKey(cnt.getCode())) {
-                updateLeafData(cnt.getSystem(), leafData);
-                mapExpansionContainsToCodeMap(
-                        codeMap,
-                        cnt,
-                        Canonicals.getIdPart(valueSet.getUrl()),
-                        valueSet.getName(),
-                        valueSet.getTitle(),
-                        valueSet.getUrl());
-            }
+        valueSet.getExpansion().getContains().forEach(containsComponent -> {
+            addCodeSystemToLeaf(containsComponent.getSystem(), leafData);
+            mapExpansionContainsToCodeMap(
+                    codeMap,
+                    containsComponent,
+                    Canonicals.getIdPart(valueSet.getUrl()),
+                    valueSet.getName(),
+                    valueSet.getTitle(),
+                    valueSet.getUrl());
         });
     }
 
-    private static void updateLeafData(String system, ValueSetChild.Leaf leafData) {
+    /**
+     * Appends code system details to the leafs codeSystem list, if not already present.
+     */
+    private static void addCodeSystemToLeaf(String system, ValueSetChild.Leaf leafData) {
         var codeSystemName = ValueSetChild.Code.getCodeSystemName(system);
         var codeSystemOid = ValueSetChild.Code.getCodeSystemOid(system);
         var doesOidExistInList = leafData.getCodeSystems().stream()
@@ -183,7 +226,11 @@ public class ChangeLog {
         }
     }
 
-    private ValueSetChild.Leaf updateLeafMap(Map<String, Map<String, ValueSetChild.Leaf>> leafMap, ValueSet valueSet)
+    /**
+     * Create the leaf entry at first sight, return existing leaf after. Keyed by url and version so
+     * two releases of the same ValueSet are separate entries.
+     */
+    private ValueSetChild.Leaf getOrCreateLeaf(Map<String, Map<String, ValueSetChild.Leaf>> leafMap, ValueSet valueSet)
             throws UnprocessableEntityException {
         if (!valueSet.hasVersion()) {
             throw new UnprocessableEntityException("ValueSet " + valueSet.getUrl() + " does not have a version");
@@ -221,22 +268,61 @@ public class ChangeLog {
         var version = containsComponent.getVersion();
         var codeValue = containsComponent.getCode();
         var display = containsComponent.getDisplay();
-        var code = new ValueSetChild.Code(id, system, codeValue, version, display, source, name, title, url, null);
-        codeMap.put(codeValue, code);
+        var inactive = containsComponent.hasInactive() ? containsComponent.getInactive() : null;
+        var code = new ValueSetChild.Code(
+                id, system, codeValue, version, display, inactive, source, name, title, url, null);
+        codeMap.putIfAbsent(createUniqueCodeKey(source, containsComponent.getSystem(), codeValue), code);
     }
 
-    // Collects the code system version the expansion recorded for each code.
-    private Map<String, String> collectCodeSystemVersionsFromExpansion(ValueSet valueSet) {
+    // What the expansion recorded about a code, whether or not compose.include can express it too.
+    private record ExpansionDetail(String version, Boolean inactive, String display) {}
+
+    // Stand in for a code the expansion says nothing about, so callers can read the fields unguarded.
+    private static final ExpansionDetail NO_EXPANSION_DETAIL = new ExpansionDetail(null, null, null);
+
+    /**
+     * Collects the code system version and active status the expansion recorded for each code.
+     */
+    private Map<String, ExpansionDetail> collectExpansionDetailsByCode(ValueSet valueSet) {
         if (!valueSet.getExpansion().hasContains()) {
             return Map.of();
         }
-        Map<String, String> versionsByCode = new HashMap<>();
+        Map<String, ExpansionDetail> expansionDetailMap = new HashMap<>();
         valueSet.getExpansion().getContains().forEach(contained -> {
-            if (contained.hasCode() && contained.hasVersion()) {
-                versionsByCode.putIfAbsent(contained.getCode(), contained.getVersion());
+            if (!contained.hasCode()) {
+                return;
             }
+            // First entry to state a thing wins, per field. Taking the first entry blindly would let a
+            // contains entry with no version block a later one that has it.
+            expansionDetailMap.compute(
+                    createUniqueCodeKey(
+                            Canonicals.getIdPart(valueSet.getUrl()), contained.getSystem(), contained.getCode()),
+                    (k, expansionDetail) -> {
+                        var currentExpansionDetail = firstNonNull(expansionDetail, NO_EXPANSION_DETAIL);
+                        return new ExpansionDetail(
+                                firstNonNull(
+                                        currentExpansionDetail.version(),
+                                        contained.hasVersion() ? contained.getVersion() : null),
+                                firstNonNull(
+                                        currentExpansionDetail.inactive(),
+                                        contained.hasInactive() ? contained.getInactive() : null),
+                                firstNonNull(
+                                        currentExpansionDetail.display(),
+                                        contained.hasDisplay() ? contained.getDisplay() : null));
+                    });
         });
-        return versionsByCode;
+        return expansionDetailMap;
+    }
+
+    private static <T> T firstNonNull(T preferred, T fallback) {
+        return preferred != null ? preferred : fallback;
+    }
+
+    /**
+     * A code string is only unique within its code system and leaf, so key it as such.
+     */
+    private static String createUniqueCodeKey(String memberOid, String system, String code) {
+        return memberOid + "|" + (system == null ? "" : system) + "|" + code;
     }
 
     private void mapConceptSetToCodeMap(
@@ -246,29 +332,30 @@ public class ChangeLog {
             String name,
             String title,
             String url,
-            Map<String, String> codeSystemVersions) {
+            Map<String, ExpansionDetail> expansionDetails) {
         var system = concept.getSystem();
         var id = concept.getId();
         var version = concept.getVersion();
         concept.getConcept().stream()
                 .filter(ValueSet.ConceptReferenceComponent::hasCode)
                 .forEach(conceptReference -> {
-                    if (!codeMap.containsKey(conceptReference.getCode())) {
-                        var code = new ValueSetChild.Code(
-                                id,
-                                system,
-                                conceptReference.getCode(),
-                                version == null || version.isBlank()
-                                        ? codeSystemVersions.get(conceptReference.getCode())
-                                        : version,
-                                conceptReference.getDisplay(),
-                                source,
-                                name,
-                                title,
-                                url,
-                                null);
-                        codeMap.put(conceptReference.getCode(), code);
-                    }
+                    var key = createUniqueCodeKey(source, system, conceptReference.getCode());
+                    var detail = expansionDetails.getOrDefault(key, NO_EXPANSION_DETAIL);
+                    var code = new ValueSetChild.Code(
+                            id,
+                            system,
+                            conceptReference.getCode(),
+                            // Prefer authoritative compose version
+                            StringUtils.defaultIfBlank(version, detail.version()),
+                            // Prefer expansion display
+                            firstNonNull(detail.display(), conceptReference.getDisplay()),
+                            detail.inactive(),
+                            source,
+                            name,
+                            title,
+                            url,
+                            null);
+                    codeMap.put(key, code);
                 });
     }
 
@@ -356,49 +443,154 @@ public class ChangeLog {
 
     public void handleRelatedArtifacts() {
         var manifest = this.getPage(this.manifestUrl);
-        if (manifest.isPresent()) {
-            var specLibrary = manifest.get();
-            var manifestOldData = (LibraryChild) specLibrary.getOldData();
-            var manifestNewData = (LibraryChild) specLibrary.getNewData();
-            if (manifestNewData != null) {
-                for (final var page : this.pages) {
-                    if (page.getOldData() instanceof ValueSetChild oldValueSet) {
-                        updateConditionsAndPriorities(manifestOldData, oldValueSet);
-                    }
-                    if (page.getNewData() instanceof ValueSetChild newValueSet) {
-                        updateConditionsAndPriorities(manifestNewData, newValueSet);
-                    }
+        if (manifest.isEmpty()) {
+            return;
+        }
+        var specLibrary = manifest.get();
+        var manifestOldData = (LibraryChild) specLibrary.getOldData();
+        var manifestNewData = (LibraryChild) specLibrary.getNewData();
+        if (manifestNewData == null) {
+            return;
+        }
+        for (final var page : this.pages) {
+            var oldValueSet = page.getOldData() instanceof ValueSetChild old ? old : null;
+            var newValueSet = page.getNewData() instanceof ValueSetChild latest ? latest : null;
+
+            // Whether a condition or priority changed is a property of the pair of sides, so
+            // both sides have to be known before either is populated.
+            var oldStated = statedForLeaves(manifestOldData, oldValueSet);
+            var newStated = statedForLeaves(manifestNewData, newValueSet);
+
+            // A value set present in only one release already says so through its own insert or
+            // delete, so a null operation type leaves its conditions and priorities unmarked.
+            var onBothSides = oldValueSet != null && newValueSet != null;
+            addConditionsAndPriorities(manifestOldData, oldValueSet, newStated, onBothSides ? DELETE : null);
+            addConditionsAndPriorities(manifestNewData, newValueSet, oldStated, onBothSides ? INSERT : null);
+        }
+    }
+
+    /** What one side's manifest states for the leaves that side holds, to mark the other side against. */
+    private record StatedForLeaves(
+            Set<String> leafOids, Set<String> conditionKeys, Map<String, String> priorityByLeafOid) {}
+
+    /** Reads only; nothing is modified. Called for both sides before either is populated. */
+    private static StatedForLeaves statedForLeaves(LibraryChild manifest, ValueSetChild side) {
+        Set<String> leafOids = new HashSet<>();
+        Set<String> conditionKeys = new HashSet<>();
+        Map<String, String> priorityByLeafOid = new HashMap<>();
+        if (side == null) {
+            return new StatedForLeaves(leafOids, conditionKeys, priorityByLeafOid);
+        }
+        // read from the side itself
+        side.getLeafValueSets().forEach(leaf -> leafOids.add(leaf.getMemberOid()));
+        if (manifest == null) {
+            return new StatedForLeaves(leafOids, conditionKeys, priorityByLeafOid);
+        }
+        for (final var relatedArtifact : manifest.getRelatedArtifacts()) {
+            for (final var leaf : leavesFor(side, relatedArtifact)) {
+                for (final var condition : conditionsOf(relatedArtifact)) {
+                    conditionKeys.add(conditionKey(leaf, condition));
+                }
+                var priority = priorityCodeOf(relatedArtifact);
+                if (priority != null) {
+                    priorityByLeafOid.put(leaf.getMemberOid(), priority);
                 }
             }
         }
+        return new StatedForLeaves(leafOids, conditionKeys, priorityByLeafOid);
     }
 
-    private void updateConditionsAndPriorities(LibraryChild manifestData, ValueSetChild pageData) {
-        for (final var ra : manifestData.getRelatedArtifacts()) {
-            pageData.getLeafValueSets().stream()
-                    .filter(leafValueSet -> leafValueSet.getMemberOid() != null
-                            && leafValueSet.getMemberOid().equals(Canonicals.getIdPart(ra.getValue())))
-                    .forEach(leafValueSet -> {
-                        updateConditions(ra, leafValueSet);
-                        updatePriorities(ra, leafValueSet);
-                    });
+    /**
+     * Adds the manifest's conditions and priorities to one side, each already marked.
+     *
+     * @param otherSide what the other side states, so a change can be recognised as it is added
+     * @param operationType what being absent from the other side means here, or null to mark nothing
+     */
+    private void addConditionsAndPriorities(
+            LibraryChild manifest, ValueSetChild side, StatedForLeaves otherSide, String operationType) {
+        if (manifest == null || side == null) {
+            return;
         }
-    }
-
-    private void updateConditions(RelatedArtifactUrlWithOperation ra, ValueSetChild.Leaf leafValueSet) {
-        ra.getConditions().forEach(condition -> {
-            if (condition.getValue() != null) {
-                var c = leafValueSet.tryAddCondition(condition.getValue());
-                c.setOperation(condition.getOperation());
+        for (final var relatedArtifact : manifest.getRelatedArtifacts()) {
+            for (final var leaf : leavesFor(side, relatedArtifact)) {
+                // A leaf the other side does not hold is already reported by its own insert or delete,
+                // and every condition and priority it carries arrived or left along with it. Marking
+                // those states nothing.
+                var leafOperationType = otherSide.leafOids().contains(leaf.getMemberOid()) ? operationType : null;
+                for (final var condition : conditionsOf(relatedArtifact)) {
+                    var statedOnOtherSide = otherSide.conditionKeys().contains(conditionKey(leaf, condition));
+                    leaf.tryAddCondition(
+                            condition, statedOnOtherSide ? null : conditionOperation(condition, leafOperationType));
+                }
+                updatePriority(relatedArtifact, leaf, otherSide.priorityByLeafOid(), leafOperationType);
             }
-        });
+        }
     }
 
-    private void updatePriorities(RelatedArtifactUrlWithOperation ra, ValueSetChild.Leaf leafValueSet) {
-        if (ra.getPriority().getValue() != null) {
-            var coding = ra.getPriority().getValue().getCodingFirstRep();
-            leafValueSet.getPriority().setValue(coding.getCode());
-            leafValueSet.getPriority().setOperation(ra.getPriority().getOperation());
+    /**
+     * This operation is derived from comparing the sides, and has no FhirPatch path of its own. This
+     * avoids reporting positional changes in the collection of conditions.
+     */
+    private static Operation conditionOperation(CodeableConcept condition, String operationType) {
+        if (operationType == null) {
+            return null;
         }
+        return new Operation(
+                operationType, CONDITION_PATH, condition.getCodingFirstRep().getCode(), null);
+    }
+
+    private static List<CodeableConcept> conditionsOf(RelatedArtifactUrlWithOperation relatedArtifact) {
+        return relatedArtifact.getConditions().stream()
+                .map(RelatedArtifactUrlWithOperation.CodeableConceptWithOperation::getValue)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    /**
+     * The leaves on this side that the given manifest entry describes. The manifest lists every leaf in
+     * the program, a page holds only the ones its grouper composes. Both identify a leaf by the OID
+     * in its canonical, so that is what they are matched on.
+     */
+    private static List<ValueSetChild.Leaf> leavesFor(
+            ValueSetChild side, RelatedArtifactUrlWithOperation manifestEntry) {
+        var leafOid = Canonicals.getIdPart(manifestEntry.getValue());
+        return side.getLeafValueSets().stream()
+                .filter(leaf ->
+                        leaf.getMemberOid() != null && leaf.getMemberOid().equals(leafOid))
+                .toList();
+    }
+
+    /** A condition should be identified by leaf, system, and code. Never by its position. */
+    private static String conditionKey(ValueSetChild.Leaf leaf, CodeableConcept condition) {
+        return leaf.getMemberOid() + "|"
+                + condition.getCodingFirstRep().getSystem() + "|"
+                + condition.getCodingFirstRep().getCode();
+    }
+
+    /**
+     * A leaf's priority, marked when the other side states a different one.
+     *
+     * Priority sits in the same relatedArtifact extension collection as conditions and had the same
+     * defect: diff reports that collection positionally, it flagged nearly every leaf as a result.
+     */
+    private void updatePriority(
+            RelatedArtifactUrlWithOperation relatedArtifact,
+            ValueSetChild.Leaf leaf,
+            Map<String, String> otherSidePriorities,
+            String operationType) {
+        var priority = priorityCodeOf(relatedArtifact);
+        if (priority == null) {
+            return;
+        }
+        leaf.getPriority().setValue(priority);
+        var otherSidePriority = otherSidePriorities.get(leaf.getMemberOid());
+        if (operationType != null && !Objects.equals(priority, otherSidePriority)) {
+            leaf.getPriority().setOperation(new Operation(REPLACE, PRIORITY_PATH, priority, otherSidePriority));
+        }
+    }
+
+    private static String priorityCodeOf(RelatedArtifactUrlWithOperation relatedArtifact) {
+        var value = relatedArtifact.getPriority().getValue();
+        return value == null ? null : value.getCodingFirstRep().getCode();
     }
 }

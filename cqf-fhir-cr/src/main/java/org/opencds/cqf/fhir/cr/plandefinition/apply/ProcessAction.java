@@ -8,7 +8,6 @@ import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -109,8 +108,7 @@ public class ProcessAction {
                 requestAction.addAction(childRequestAction);
             }
             if (applicabilityBehavior.equals(CqfApplicabilityBehavior.ANY)
-                    && (metConditionsCount < metConditions.size()
-                            || (request.isPauseOnUnknownApplicability() && applicable == null))) {
+                    && (metConditionsCount < metConditions.size() || applicable == null)) {
                 break;
             }
         }
@@ -165,48 +163,8 @@ public class ProcessAction {
                 .collect(Collectors.toList()));
     }
 
-    protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
-        if (request.isPauseOnUnknownApplicability()) {
-            return evaluateNullableConditions(request, action);
-        }
-        var conditions = action.getCondition().stream()
-                .filter(c -> "applicability"
-                        .equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
-                .map(c -> request.getAdapterFactory().createBase(c))
-                .toList();
-        if (conditions.isEmpty()) {
-            return true;
-        }
-        var inputParams = request.resolveInputParameters(action.getInputDataRequirement().stream()
-                .map(IDataRequirementAdapter::get)
-                .map(ICompositeType.class::cast)
-                .toList());
-        for (var condition : conditions) {
-            var conditionExpression = expressionProcessor.getCqfExpressionForElement(request, condition);
-            if (conditionExpression != null) {
-                IBase result = null;
-                try {
-                    var expressionResult =
-                            expressionProcessor.getExpressionResult(request, conditionExpression, inputParams, null);
-                    result = expressionResult.isEmpty() ? null : expressionResult.get(0);
-                } catch (Exception e) {
-                    var message = "Condition expression %s encountered exception: %s"
-                            .formatted(conditionExpression.getExpression(), e.getMessage());
-                    logger.error(message);
-                    request.logException(message);
-                }
-                var valid = validateResult(result, conditionExpression.getExpression());
-                if (!valid) {
-                    return false;
-                }
-                logger.debug("The result of condition expression {} is true", conditionExpression.getExpression());
-            }
-        }
-        return true;
-    }
-
     /** Three-state conjunction, with evaluation failures taking precedence over false. */
-    private Boolean evaluateNullableConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
+    protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         var conditions = action.getCondition().stream()
                 .filter(c -> "applicability"
                         .equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
@@ -277,25 +235,6 @@ public class ProcessAction {
             return false;
         }
         return unknown ? null : Boolean.TRUE;
-    }
-
-    protected boolean validateResult(IBase result, String expression) {
-        if (result == null) {
-            logger.warn("Condition expression {} returned null", expression);
-            return false;
-        }
-        if (!(result instanceof IBaseBooleanDatatype)) {
-            logger.warn(
-                    "Condition expression {} returned a non-boolean value: {}",
-                    expression,
-                    result.getClass().getSimpleName());
-            return false;
-        }
-        if (Boolean.FALSE.equals(((IBaseBooleanDatatype) result).getValue())) {
-            logger.debug("The result of condition expression {} is false", expression);
-            return false;
-        }
-        return true;
     }
 
     protected IRequestActionAdapter generateRequestAction(IPlanDefinitionActionAdapter action) {

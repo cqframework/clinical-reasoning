@@ -96,8 +96,7 @@ class ProcessActionTests {
         action.addInput(new org.hl7.fhir.r4.model.DataRequirement()
                 .addProfile("http://fhir.org/test/StructureDefinition/test"));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(false);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         fixture.addQuestionnaireItemForInput(request, actionAdapter);
@@ -118,8 +117,7 @@ class ProcessActionTests {
                 .setExpression(
                         new Expression().setLanguage("text/cql-expression").setExpression(expression));
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(false);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doThrow(new IllegalArgumentException())
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), eq(null), any(), eq(null));
@@ -131,7 +129,7 @@ class ProcessActionTests {
         assertTrue(oc.getIssueFirstRep()
                 .getDiagnosticsElement()
                 .getValue()
-                .contains("Condition expression %s encountered exception:".formatted(expression)));
+                .contains("Error evaluating applicability for action"));
     }
 
     @Test
@@ -140,15 +138,14 @@ class ProcessActionTests {
         var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(false);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doReturn(null)
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var result = fixture.meetsConditions(request, actionAdapter);
-        Assertions.assertFalse(result);
+        assertNull(result);
         assertNull(request.getOperationOutcome());
     }
 
@@ -158,16 +155,15 @@ class ProcessActionTests {
         var expression = new Expression().setLanguage("text/fhirpath").setExpression("null");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY).setExpression(expression);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(false);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         doReturn(List.of(new StringType("Test")))
                 .when(libraryEngine)
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var result = fixture.meetsConditions(request, actionAdapter);
-        Assertions.assertFalse(result);
-        assertNull(request.getOperationOutcome());
+        assertNull(result);
+        Assertions.assertNotNull(request.getOperationOutcome());
     }
 
     org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent actionWithChildren() {
@@ -195,8 +191,7 @@ class ProcessActionTests {
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var requestAction = fixture.generateRequestAction(actionAdapter);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(false);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
         doReturn(List.of(new BooleanType(true)))
                 .when(libraryEngine)
@@ -221,8 +216,7 @@ class ProcessActionTests {
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var requestAction = fixture.generateRequestAction(actionAdapter);
         var request = RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(false);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
         fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
         assertTrue(requestAction.getAction().isEmpty());
@@ -245,10 +239,9 @@ class ProcessActionTests {
         return action;
     }
 
-    private ApplyRequest interactiveRequest(boolean enabled) {
+    private ApplyRequest requestForApply() {
         return RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .setPauseOnUnknownApplicability(enabled);
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
     }
 
     private IPlanDefinitionActionAdapter adapt(PlanDefinitionActionComponent action) {
@@ -278,15 +271,15 @@ class ProcessActionTests {
     void interactiveConjunctionPreservesFalseAndUnknown() {
         literalResults();
         for (var pair : List.of(List.of("false", "null"), List.of("null", "false"))) {
-            var request = interactiveRequest(true);
+            var request = requestForApply();
             Assertions.assertFalse(
                     fixture.meetsConditions(request, adapt(conditionAction("a", pair.toArray(String[]::new)))));
             assertNull(request.getOperationOutcome());
         }
-        assertNull(fixture.meetsConditions(interactiveRequest(true), adapt(conditionAction("a", "true", "null"))));
-        assertNull(fixture.meetsConditions(interactiveRequest(true), adapt(conditionAction("a", "emptyBoolean"))));
-        Assertions.assertTrue(fixture.meetsConditions(interactiveRequest(true), adapt(conditionAction("a", "true"))));
-        Assertions.assertTrue(fixture.meetsConditions(interactiveRequest(true), adapt(conditionAction("a"))));
+        assertNull(fixture.meetsConditions(requestForApply(), adapt(conditionAction("a", "true", "null"))));
+        assertNull(fixture.meetsConditions(requestForApply(), adapt(conditionAction("a", "emptyBoolean"))));
+        Assertions.assertTrue(fixture.meetsConditions(requestForApply(), adapt(conditionAction("a", "true"))));
+        Assertions.assertTrue(fixture.meetsConditions(requestForApply(), adapt(conditionAction("a"))));
     }
 
     @Test
@@ -294,7 +287,7 @@ class ProcessActionTests {
         literalResults();
         for (var invalid : List.of("throws", "nonBoolean", "multiple", "multipleWithNull")) {
             for (var pair : List.of(List.of("false", invalid), List.of(invalid, "false"))) {
-                var request = interactiveRequest(true);
+                var request = requestForApply();
                 assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", pair.toArray(String[]::new)))));
                 Assertions.assertNotNull(request.getOperationOutcome(), pair.toString());
             }
@@ -305,18 +298,18 @@ class ProcessActionTests {
     void interactiveMissingExpressionIsAnError() {
         var action = conditionAction("a");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY);
-        var request = interactiveRequest(true);
+        var request = requestForApply();
         assertNull(fixture.meetsConditions(request, adapt(action)));
         Assertions.assertNotNull(request.getOperationOutcome());
     }
 
-    private List<String> visitGroup(String behavior, boolean enabled, String expression) {
+    private List<String> visitGroup(String behavior, String expression) {
         var first = conditionAction("first", expression);
         first.addAction(conditionAction("descendant"));
         var group = conditionAction("group");
         group.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType(behavior));
         group.setAction(List.of(first, conditionAction("fallback")));
-        var request = interactiveRequest(enabled).setQuestionnaire(new org.hl7.fhir.r4.model.Questionnaire());
+        var request = requestForApply().setQuestionnaire(new org.hl7.fhir.r4.model.Questionnaire());
         var visited = new ArrayList<String>();
         org.mockito.Mockito.doAnswer(invocation -> {
                     visited.add(((IPlanDefinitionActionAdapter) invocation.getArgument(1)).getId());
@@ -331,7 +324,7 @@ class ProcessActionTests {
                 new ArrayList<>(),
                 adapt(group),
                 result);
-        if (enabled && behavior.equals("any") && expression.equals("null")) {
+        if (behavior.equals("any") && expression.equals("null")) {
             assertTrue(result.getAction().isEmpty());
         }
         return visited;
@@ -340,33 +333,27 @@ class ProcessActionTests {
     @Test
     void interactiveAnyStopsAtUnknownAndKeepsOnlyReachedQuestion() {
         literalResults();
-        assertEquals(List.of("first"), visitGroup("any", true, "null"));
+        assertEquals(List.of("first"), visitGroup("any", "null"));
         org.mockito.Mockito.verify(libraryEngine, org.mockito.Mockito.times(1))
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
     }
 
     @Test
-    void disabledPauseAnyStillFallsThroughUnknown() {
-        literalResults();
-        assertEquals(List.of("first", "fallback"), visitGroup("any", false, "null"));
-    }
-
-    @Test
     void interactiveFalsePrunesDescendantsAndReachesSibling() {
         literalResults();
-        assertEquals(List.of("first", "fallback"), visitGroup("any", true, "false"));
+        assertEquals(List.of("first", "fallback"), visitGroup("any", "false"));
     }
 
     @Test
     void interactiveTruePrunesLaterSibling() {
         literalResults();
-        assertEquals(List.of("first", "descendant"), visitGroup("any", true, "true"));
+        assertEquals(List.of("first", "descendant"), visitGroup("any", "true"));
     }
 
     @Test
     void interactiveAllKeepsIndependentSibling() {
         literalResults();
-        assertEquals(List.of("first", "fallback"), visitGroup("all", true, "null"));
+        assertEquals(List.of("first", "fallback"), visitGroup("all", "null"));
     }
 
     @Test
@@ -380,7 +367,7 @@ class ProcessActionTests {
         outer.setAction(List.of(inner, conditionAction("outerFallback")));
         var result = fixture.generateRequestAction(adapt(outer));
         fixture.processChildActions(
-                interactiveRequest(true),
+                requestForApply(),
                 IAdapterFactory.createAdapterForResource(new RequestGroup()),
                 new ArrayList<>(),
                 adapt(outer),
@@ -388,23 +375,5 @@ class ProcessActionTests {
         assertEquals(1, result.getAction().size());
         assertEquals("selected", result.getAction().get(0).getId());
         assertTrue(result.getAction().get(0).getAction().isEmpty());
-    }
-
-    @Test
-    void interactiveSettingIsRequestScopedAndCopiedToNestedPlan() {
-        assertTrue(RequestHelpers.newPDApplyRequestForVersion(
-                        FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver)
-                .isPauseOnUnknownApplicability());
-        var request = interactiveRequest(false);
-        Assertions.assertFalse(request.isPauseOnUnknownApplicability());
-        Assertions.assertFalse(request.copy(request.getPlanDefinition()).isPauseOnUnknownApplicability());
-        request.setPauseOnUnknownApplicability(true);
-        assertTrue(request.copy(request.getPlanDefinition()).isPauseOnUnknownApplicability());
-        Assertions.assertFalse(interactiveRequest(false).isPauseOnUnknownApplicability());
-        var settings = org.opencds.cqf.fhir.cr.CrSettings.getDefault();
-        assertTrue(settings.isPauseOnUnknownApplicability());
-        assertTrue(settings.withPauseOnUnknownApplicability(true).isPauseOnUnknownApplicability());
-        settings.setPauseOnUnknownApplicability(false);
-        Assertions.assertFalse(settings.isPauseOnUnknownApplicability());
     }
 }

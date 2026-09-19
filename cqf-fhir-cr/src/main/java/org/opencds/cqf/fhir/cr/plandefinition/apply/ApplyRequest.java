@@ -70,17 +70,6 @@ public class ApplyRequest implements ICpgRequest {
     private IQuestionnaireAdapter questionnaireAdapter;
     private IQuestionnaireResponseAdapter questionnaireResponseAdapter;
     private Boolean containResources;
-    private boolean pauseOnUnknownApplicability = true;
-
-    public boolean isPauseOnUnknownApplicability() {
-        return pauseOnUnknownApplicability;
-    }
-
-    public ApplyRequest setPauseOnUnknownApplicability(boolean pauseOnUnknownApplicability) {
-        this.pauseOnUnknownApplicability = pauseOnUnknownApplicability;
-        return this;
-    }
-
     private Set<String> questionnaireDefinitions;
     // actionId is used to ensure all actions have an Id so they can be mapped
     private int actionId;
@@ -158,8 +147,7 @@ public class ApplyRequest implements ICpgRequest {
                         inputParameterResolver)
                 .setQuestionnaire(getQuestionnaireAdapter())
                 .setQuestionnaireResponse(getQuestionnaireResponseAdapter())
-                .setContainResources(containResources)
-                .setPauseOnUnknownApplicability(pauseOnUnknownApplicability);
+                .setContainResources(containResources);
     }
 
     public org.opencds.cqf.fhir.cr.activitydefinition.apply.ApplyRequest toActivityRequest(

@@ -9,7 +9,7 @@ import org.opencds.cqf.fhir.utility.FhirPathCache
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class LibraryConstructor(protected var fhirContext: FhirContext) {
+class LibraryConstructor(protected var fhirContext: FhirContext, protected var evaluationSettings: EvaluationSettings) {
     protected var fhirPath: IFhirPath = FhirPathCache.cachedForContext(fhirContext)
 
     fun constructCqlLibrary(
@@ -59,8 +59,12 @@ class LibraryConstructor(protected var fhirContext: FhirContext) {
     }
 
     private fun constructIncludes(sb: StringBuilder, libraries: MutableMap<String?, String?>?) {
+        var fhirHelpersInclude = "FHIRHelpers";
+        if (evaluationSettings.registeredNamespaces.contains("hl7.fhir.uv.cql")) {
+            fhirHelpersInclude = "hl7.fhir.uv.cql.".plus(fhirHelpersInclude);
+        }
         sb.append(
-            "include FHIRHelpers version '${getFhirVersionString(fhirContext.version.version)}' called FHIRHelpers\n"
+            "include $fhirHelpersInclude version '${getFhirVersionString(fhirContext.version.version)}' called FHIRHelpers\n"
         )
 
         if (libraries != null) {

@@ -30,7 +30,8 @@ public interface IQuestionnaireAdapter extends IKnowledgeArtifactAdapter {
         var defs = new HashSet<String>();
         items.forEach(item -> {
             if (item.hasDefinition()) {
-                defs.add(item.getDefinition());
+                var def = item.getDefinition().split("#");
+                defs.add(def[0]);
             }
             if (item.hasItem()) {
                 defs.addAll(getItemDefs(item.getItem()));

@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
 
@@ -70,7 +71,7 @@ public class ObservationResolver {
                 .setIssued(authoredDate)
                 .setPerformer(singletonList(questionnaireResponseAdapter.getAuthor()))
                 .setValue(getAnswerValue(request, answerAdapter, itemAdapter));
-        obs.setId(request.getExtractId() + "." + linkId);
+        obs.setId(GeneratedIds.fromComposite(request.getExtractId() + "." + linkId));
         var linkIdExtension = obs.addExtension();
         linkIdExtension.setUrl("http://hl7.org/fhir/uv/sdc/StructureDefinition/derivedFromLinkId");
         var innerLinkIdExtension = ((IBaseHasExtensions) linkIdExtension).addExtension();

@@ -14,7 +14,7 @@ public final class GeneratedIds {
 
     private GeneratedIds() {}
 
-    /** Preserve legal IDs; otherwise retain a readable stem and a digest of the complete UTF-8 input. */
+    /** Preserve valid IDs; otherwise retain a readable stem and a digest of the complete UTF-8 input. */
     public static String fromComposite(String original) {
         Objects.requireNonNull(original, "original");
         if (VALID_ID.matcher(original).matches()) {

@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.cr.plandefinition.apply;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -129,7 +130,7 @@ class ProcessActionTests {
         assertTrue(oc.getIssueFirstRep()
                 .getDiagnosticsElement()
                 .getValue()
-                .contains("Condition expression %s encountered exception:".formatted(expression)));
+                .contains("Condition expression '%s' encountered exception:".formatted(expression)));
     }
 
     @Test
@@ -145,7 +146,7 @@ class ProcessActionTests {
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
         var result = fixture.meetsConditions(request, actionAdapter);
-        Assertions.assertFalse(result);
+        assertNull(result);
         assertNull(request.getOperationOutcome());
     }
 
@@ -219,11 +220,170 @@ class ProcessActionTests {
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
         fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
-        assertTrue(requestAction.getAction().isEmpty());
+        assertFalse(requestAction.getAction().isEmpty());
 
         action.setExtension(null);
         action.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("bad"));
         fixture.processChildActions(request, requestOrchestration, metConditions, actionAdapter, requestAction);
-        assertTrue(requestAction.getAction().isEmpty());
+        assertFalse(requestAction.getAction().isEmpty());
+    }
+
+    private PlanDefinitionActionComponent conditionAction(String id, String... expressions) {
+        var action = new PlanDefinitionActionComponent();
+        action.setId(id);
+        for (var expression : expressions) {
+            action.addCondition()
+                    .setKind(ActionConditionKind.APPLICABILITY)
+                    .setExpression(
+                            new Expression().setLanguage("text/cql-expression").setExpression(expression));
+        }
+        return action;
+    }
+
+    private ApplyRequest pdRequest() {
+        return RequestHelpers.newPDApplyRequestForVersion(
+                FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
+    }
+
+    private IPlanDefinitionActionAdapter adapt(PlanDefinitionActionComponent action) {
+        return (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
+    }
+
+    private void literalResults() {
+        org.mockito.Mockito.doAnswer(invocation -> {
+                    var expression = (org.opencds.cqf.fhir.utility.CqfExpression) invocation.getArgument(1);
+                    return switch (expression.getExpression()) {
+                        case "true" -> List.of(new BooleanType(true));
+                        case "false" -> List.of(new BooleanType(false));
+                        case "null" -> List.of();
+                        case "nullList" -> null;
+                        case "nullElement" -> java.util.Collections.singletonList(null);
+                        case "emptyBoolean" -> List.of(new BooleanType());
+                        case "multiple" -> List.of(new BooleanType(true), new BooleanType(false));
+                        case "multipleWithNull" -> java.util.Arrays.asList(new BooleanType(true), new BooleanType());
+                        case "nonBoolean" -> List.of(new StringType("invalid"));
+                        case "throws" -> throw new IllegalArgumentException("test evaluation failure");
+                        default -> throw new IllegalArgumentException("unexpected test expression");
+                    };
+                })
+                .when(libraryEngine)
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
+    }
+
+    @Test
+    void missingExpressionIsNOTAnError() {
+        var action = conditionAction("a");
+        action.addCondition().setKind(ActionConditionKind.APPLICABILITY);
+        var request = pdRequest();
+        assertTrue(fixture.meetsConditions(request, adapt(action)));
+        assertNull(request.getOperationOutcome());
+    }
+
+    @Test
+    void nullResultsRemainUnknownWithoutErrors() {
+        literalResults();
+        for (var expression : List.of("nullList", "nullElement")) {
+            var request = pdRequest();
+            assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", expression))));
+            assertNull(request.getOperationOutcome());
+        }
+    }
+
+    @Test
+    void disabledPauseRetainsLegacyNullFiltering() {
+        literalResults();
+        var request = pdRequest();
+        assertTrue(fixture.meetsConditions(request, adapt(conditionAction("a", "multipleWithNull"))));
+        assertNull(request.getOperationOutcome());
+    }
+
+    @Test
+    void conditionFailureStopsProcessing() {
+        literalResults();
+        var request = pdRequest();
+        assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", "throws", "false", "nonBoolean"))));
+        var outcome = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
+        assertEquals(1, outcome.getIssue().size());
+        assertEquals(
+                "Condition expression 'throws' encountered exception: test evaluation failure",
+                outcome.getIssue().get(0).getDiagnostics());
+        org.mockito.Mockito.verify(libraryEngine, org.mockito.Mockito.times(1))
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
+    }
+
+    private List<String> visitGroup(String behavior, String expression) {
+        var first = conditionAction("first", expression);
+        first.addAction(conditionAction("descendant"));
+        var group = conditionAction("group");
+        group.addExtension(CQF_APPLICABILITY_BEHAVIOR, new StringType(behavior));
+        group.setAction(List.of(first, conditionAction("fallback")));
+        var request = pdRequest().setQuestionnaire(new org.hl7.fhir.r4.model.Questionnaire());
+        var visited = new ArrayList<String>();
+        org.mockito.Mockito.doAnswer(invocation -> {
+                    visited.add(((IPlanDefinitionActionAdapter) invocation.getArgument(1)).getId());
+                    return null;
+                })
+                .when(fixture)
+                .addQuestionnaireItemForInput(eq(request), any());
+        var result = (RequestGroupActionComponent) fixture.processAction(
+                request, IAdapterFactory.createAdapterForResource(new RequestGroup()), new ArrayList<>(), adapt(group));
+        //        var result = fixture.generateRequestAction(adapt(group));
+        //        fixture.processChildActions(
+        //            request,
+        //            IAdapterFactory.createAdapterForResource(new RequestGroup()),
+        //            new ArrayList<>(),
+        //            adapt(group),
+        //            result);
+        if (behavior.equals("any") && expression.equals("null")) {
+            assertEquals(1, result.getAction().size());
+        }
+        return visited;
+    }
+
+    @Test
+    void anyStopsAtUnknownAndKeepsOnlyReachedQuestion() {
+        literalResults();
+        assertEquals(List.of("group", "first"), visitGroup("any", "null"));
+        org.mockito.Mockito.verify(libraryEngine, org.mockito.Mockito.times(1))
+                .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
+    }
+
+    @Test
+    void falsePrunesDescendantsAndReachesSibling() {
+        literalResults();
+        assertEquals(List.of("group", "first", "fallback"), visitGroup("any", "false"));
+    }
+
+    @Test
+    void truePrunesLaterSibling() {
+        literalResults();
+        assertEquals(List.of("group", "first", "descendant"), visitGroup("any", "true"));
+    }
+
+    @Test
+    void allKeepsIndependentSibling() {
+        literalResults();
+        assertEquals(List.of("group", "first", "fallback"), visitGroup("all", "null"));
+    }
+
+    @Test
+    void nestedAnyDoesNotEscapePausedSelectedBranch() {
+        literalResults();
+        var inner = conditionAction("selected");
+        inner.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("any"));
+        inner.setAction(List.of(conditionAction("unknown", "null"), conditionAction("innerFallback")));
+        var outer = conditionAction("outer");
+        outer.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("any"));
+        outer.setAction(List.of(inner, conditionAction("outerFallback")));
+        var result = fixture.generateRequestAction(adapt(outer));
+        fixture.processChildActions(
+                pdRequest(),
+                IAdapterFactory.createAdapterForResource(new RequestGroup()),
+                new ArrayList<>(),
+                adapt(outer),
+                result);
+        assertEquals(1, result.getAction().size());
+        assertEquals("selected", result.getAction().get(0).getId());
+        assertFalse(result.getAction().get(0).getAction().isEmpty());
     }
 }

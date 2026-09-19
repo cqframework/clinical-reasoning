@@ -56,17 +56,22 @@ public class ProcessAction {
         if (!request.getFhirVersion().equals(FhirVersionEnum.DSTU3) && request.getQuestionnaire() != null) {
             addQuestionnaireItemForInput(request, action);
         }
-
-        if (Boolean.TRUE.equals(meetsConditions(request, action))) {
+        var conditionResult = meetsConditions(request, action);
+        if (conditionResult == null || conditionResult) {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
             var requestAction = generateRequestAction(action);
-            extensionProcessor.processExtensions(request, requestAction, (IElement) action.get(), new ArrayList<>());
-            processChildActions(request, requestOrchestration, metConditions, action, requestAction);
-            var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
-            var adapter = resource == null ? null : request.getAdapterFactory().createResource(resource);
-            dynamicValueProcessor.processDynamicValues(
-                    request, request.getPlanDefinitionAdapter(), adapter, (IElement) action.get(), (IElement)
-                            requestAction.get());
+            if (Boolean.TRUE.equals(conditionResult)) {
+                extensionProcessor.processExtensions(
+                        request, requestAction, (IElement) action.get(), new ArrayList<>());
+                processChildActions(request, requestOrchestration, metConditions, action, requestAction);
+                var resource =
+                        processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
+                var adapter =
+                        resource == null ? null : request.getAdapterFactory().createResource(resource);
+                dynamicValueProcessor.processDynamicValues(
+                        request, request.getPlanDefinitionAdapter(), adapter, (IElement) action.get(), (IElement)
+                                requestAction.get());
+            }
             return (IBaseBackboneElement) requestAction.get();
         }
 
@@ -174,26 +179,26 @@ public class ProcessAction {
                             expressionProcessor.getExpressionResult(request, conditionExpression, inputParams, null);
                     result = expressionResult.isEmpty() ? null : expressionResult.get(0);
                 } catch (Exception e) {
-                    var message = "Condition expression %s encountered exception: %s"
+                    var message = "Condition expression '%s' encountered exception: %s"
                             .formatted(conditionExpression.getExpression(), e.getMessage());
                     logger.error(message);
                     request.logException(message);
+                }
+                if (result == null) {
+                    logger.warn("Condition expression '{}' returned null", conditionExpression);
+                    return null;
                 }
                 var valid = validateResult(result, conditionExpression.getExpression());
                 if (!valid) {
                     return false;
                 }
-                logger.debug("The result of condition expression {} is true", conditionExpression.getExpression());
+                logger.debug("The result of condition expression '{}' is true", conditionExpression.getExpression());
             }
         }
         return true;
     }
 
     protected boolean validateResult(IBase result, String expression) {
-        if (result == null) {
-            logger.warn("Condition expression {} returned null", expression);
-            return false;
-        }
         if (!(result instanceof IBaseBooleanDatatype)) {
             logger.warn(
                     "Condition expression {} returned a non-boolean value: {}",
@@ -220,6 +225,7 @@ public class ProcessAction {
                 .setType(action.getType())
                 .setPriority(action.getPriority())
                 .setSelectionBehavior(action.getSelectionBehavior());
+        // .setConditionResult());
 
         if (action.hasCondition()) {
             action.getCondition().forEach(requestAction::addCondition);

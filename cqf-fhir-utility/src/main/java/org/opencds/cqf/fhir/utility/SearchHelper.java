@@ -29,7 +29,7 @@ public class SearchHelper {
     private SearchHelper() {}
 
     @SuppressWarnings("unchecked")
-    protected static Class<IBaseBundle> getBundleClass(IRepository repository) {
+    public static Class<IBaseBundle> getBundleClass(IRepository repository) {
         return (Class<IBaseBundle>)
                 repository.fhirContext().getResourceDefinition("Bundle").getImplementingClass();
     }

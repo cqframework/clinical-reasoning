@@ -3,6 +3,8 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,9 +23,11 @@ import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 
 @SuppressWarnings("UnstableApiUsage")
 public class GenerateRequest implements IQuestionnaireRequest {
-    private final IStructureDefinitionAdapter profileAdapter;
+    private final List<IStructureDefinitionAdapter> profiles;
+    private final List<String> addedProfiles;
+    private IStructureDefinitionAdapter profileAdapter;
     private final boolean supportedOnly;
-    private final boolean requiredOnly;
+    private final boolean minimalOnly;
     private final LibraryEngine libraryEngine;
     private final FhirVersionEnum fhirVersion;
     private Map<String, String> referencedLibraries;
@@ -32,24 +36,48 @@ public class GenerateRequest implements IQuestionnaireRequest {
     private List<IElementDefinitionAdapter> snapshotElements;
 
     public GenerateRequest(
-            IBaseResource profile, boolean supportedOnly, boolean requiredOnly, LibraryEngine libraryEngine) {
-        checkNotNull(profile, "expected non-null value for profile");
+            List<IBaseResource> profiles, boolean supportedOnly, boolean minimalOnly, LibraryEngine libraryEngine) {
+        checkNotNull(profiles, "expected non-null value for profiles");
         checkNotNull(libraryEngine, "expected non-null value for libraryEngine");
-        fhirVersion = profile.getStructureFhirVersionEnum();
-        profileAdapter = (IStructureDefinitionAdapter)
-                getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) profile);
+        if (profiles.isEmpty()) {
+            throw new IllegalArgumentException("expected non-empty list for profiles");
+        }
+        fhirVersion = libraryEngine.getRepository().fhirContext().getVersion().getVersion();
+        this.profiles = profiles.stream()
+                .map(p -> (IStructureDefinitionAdapter)
+                        getAdapterFactory().createKnowledgeArtifactAdapter((IDomainResource) p))
+                .toList();
+        addedProfiles = new ArrayList<>();
         this.supportedOnly = supportedOnly;
-        this.requiredOnly = requiredOnly;
+        this.minimalOnly = minimalOnly;
         this.libraryEngine = libraryEngine;
-        referencedLibraries = profileAdapter.getReferencedLibraries();
+        referencedLibraries = new HashMap<>();
     }
 
     public IBaseResource getProfile() {
         return profileAdapter.get();
     }
 
+    public List<IStructureDefinitionAdapter> getProfiles() {
+        return profiles;
+    }
+
     public IStructureDefinitionAdapter getProfileAdapter() {
         return profileAdapter;
+    }
+
+    public boolean setNextProfileAdapter() {
+        var profile = profiles.stream()
+                .filter(p -> !addedProfiles.contains(p.getId()))
+                .findFirst()
+                .orElse(null);
+        if (profile == null) {
+            return false;
+        }
+        profileAdapter = profile;
+        addedProfiles.add(profile.getId());
+        referencedLibraries.putAll(profileAdapter.getReferencedLibraries());
+        return true;
     }
 
     public IQuestionnaireAdapter getQuestionnaireAdapter() {
@@ -83,8 +111,8 @@ public class GenerateRequest implements IQuestionnaireRequest {
         return supportedOnly;
     }
 
-    public boolean getRequiredOnly() {
-        return requiredOnly;
+    public boolean getMinimalOnly() {
+        return minimalOnly;
     }
 
     public GenerateRequest setReferencedLibraries(Map<String, String> libraries) {

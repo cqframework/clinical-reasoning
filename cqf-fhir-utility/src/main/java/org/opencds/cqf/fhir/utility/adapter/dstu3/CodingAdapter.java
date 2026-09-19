@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
@@ -27,6 +28,11 @@ public class CodingAdapter extends BaseElementAdapter implements ICodingAdapter 
     @Override
     public String getCode() {
         return get().getCode();
+    }
+
+    @Override
+    public CodeType getCodeType() {
+        return get().getCodeElement();
     }
 
     @Override

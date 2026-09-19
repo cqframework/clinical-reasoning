@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
@@ -42,6 +43,25 @@ public class CqfExpression {
             case R5 -> CqfExpression.of((org.hl7.fhir.r5.model.Expression) extension.getValue(), referencedLibraries);
             default -> null;
         };
+    }
+
+    public static CqfExpression of(IAdapter<?> expression, Map<String, String> referencedLibraries) {
+        if (expression == null) {
+            return null;
+        }
+        var altExpressionExt = expression.getExtensionByUrl(Constants.ALT_EXPRESSION_EXT);
+        var altExpression = altExpressionExt == null
+                ? null
+                : expression.getAdapterFactory().createBase(altExpressionExt.getValue());
+        return new CqfExpression(
+                expression.resolvePathString("language"),
+                expression.resolvePathString("expression"),
+                referencedLibraries,
+                expression.resolvePathString("reference"),
+                altExpression != null ? altExpression.resolvePathString("language") : null,
+                altExpression != null ? altExpression.resolvePathString("expression") : null,
+                altExpression != null ? altExpression.resolvePathString("reference") : null,
+                expression.resolvePathString("name"));
     }
 
     public static CqfExpression of(

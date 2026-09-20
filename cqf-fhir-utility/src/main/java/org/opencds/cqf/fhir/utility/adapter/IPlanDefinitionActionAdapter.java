@@ -49,6 +49,13 @@ public interface IPlanDefinitionActionAdapter extends IAdapter<IBase> {
 
     <T extends IBaseBackboneElement> List<T> getCondition();
 
+    default List<? extends IAdapter<?>> getApplicabilityConditions() {
+        return getCondition().stream()
+                .filter(c -> "applicability".equals(resolvePathString(c, "kind")))
+                .map(c -> getAdapterFactory().createBase(c))
+                .toList();
+    }
+
     boolean hasInput();
 
     List<IDataRequirementAdapter> getInputDataRequirement();

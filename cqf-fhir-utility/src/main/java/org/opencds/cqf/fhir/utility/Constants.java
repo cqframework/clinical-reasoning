@@ -94,6 +94,9 @@ public class Constants {
     public static final String CPG_RELATED_SUMMARY_DEFINITION =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition";
 
+    public static final String CPG_ACTION_CONDITION_RESULT =
+            "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-action-condition-result";
+
     public static final String CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT =
             "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-definitionPopulationContext";
 

@@ -7,11 +7,10 @@ import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import kotlin.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBooleanDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
@@ -20,6 +19,7 @@ import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
@@ -56,11 +56,11 @@ public class ProcessAction {
         if (!request.getFhirVersion().equals(FhirVersionEnum.DSTU3) && request.getQuestionnaire() != null) {
             addQuestionnaireItemForInput(request, action);
         }
-        var conditionResult = meetsConditions(request, action);
-        if (conditionResult == null || conditionResult) {
+        var conditionResults = evaluateConditions(request, action);
+        if (conditionResults.stream().map(Pair::getSecond).noneMatch(Boolean.FALSE::equals)) {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
-            var requestAction = generateRequestAction(action);
-            if (Boolean.TRUE.equals(conditionResult)) {
+            var requestAction = generateRequestAction(action, conditionResults);
+            if (conditionResults.stream().map(Pair::getSecond).allMatch(Boolean.TRUE::equals)) {
                 extensionProcessor.processExtensions(
                         request, requestAction, (IElement) action.get(), new ArrayList<>());
                 processChildActions(request, requestOrchestration, metConditions, action, requestAction);
@@ -74,7 +74,6 @@ public class ProcessAction {
             }
             return (IBaseBackboneElement) requestAction.get();
         }
-
         return null;
     }
 
@@ -143,34 +142,19 @@ public class ProcessAction {
         }
     }
 
-    protected ICompositeType getDataRequirementElement(ApplyRequest request, IElement input) {
-        return (ICompositeType)
-                (request.getFhirVersion().isEqualOrNewerThan(FhirVersionEnum.R5)
-                        ? request.getPlanDefinitionAdapter().resolvePath(input, "requirement")
-                        : input);
-    }
-
-    protected IBaseParameters resolveInputParameters(ApplyRequest request, IBaseBackboneElement action) {
-        var actionInput = request.getPlanDefinitionAdapter().resolvePathList(action, "input", IElement.class);
-        return request.resolveInputParameters(actionInput.stream()
-                .map(input -> getDataRequirementElement(request, input))
-                .collect(Collectors.toList()));
-    }
-
-    protected Boolean meetsConditions(ApplyRequest request, IPlanDefinitionActionAdapter action) {
-        var conditions = action.getCondition().stream()
-                .filter(c -> "applicability"
-                        .equals(request.getPlanDefinitionAdapter().resolvePathString(c, "kind")))
-                .map(c -> request.getAdapterFactory().createBase(c))
-                .toList();
+    protected List<Pair<IAdapter<?>, Boolean>> evaluateConditions(
+            ApplyRequest request, IPlanDefinitionActionAdapter action) {
+        var resultList = new ArrayList<Pair<IAdapter<?>, Boolean>>();
+        var conditions = action.getApplicabilityConditions();
         if (conditions.isEmpty()) {
-            return true;
+            return resultList;
         }
         var inputParams = request.resolveInputParameters(action.getInputDataRequirement().stream()
                 .map(IDataRequirementAdapter::get)
                 .map(ICompositeType.class::cast)
                 .toList());
-        for (var condition : conditions) {
+        conditions.forEach(condition -> {
+            Boolean conditionResult = null;
             var conditionExpression = expressionProcessor.getCqfExpressionForElement(request, condition);
             if (conditionExpression != null) {
                 IBase result = null;
@@ -186,16 +170,17 @@ public class ProcessAction {
                 }
                 if (result == null) {
                     logger.warn("Condition expression '{}' returned null", conditionExpression);
-                    return null;
+                } else {
+                    conditionResult = validateResult(result, conditionExpression.getExpression());
+                    logger.debug(
+                            "The result of condition expression '{}' is {}",
+                            conditionExpression.getExpression(),
+                            conditionResult);
                 }
-                var valid = validateResult(result, conditionExpression.getExpression());
-                if (!valid) {
-                    return false;
-                }
-                logger.debug("The result of condition expression '{}' is true", conditionExpression.getExpression());
             }
-        }
-        return true;
+            resultList.add(new Pair<>(condition, conditionResult));
+        });
+        return resultList;
     }
 
     protected boolean validateResult(IBase result, String expression) {
@@ -206,14 +191,11 @@ public class ProcessAction {
                     result.getClass().getSimpleName());
             return false;
         }
-        if (Boolean.FALSE.equals(((IBaseBooleanDatatype) result).getValue())) {
-            logger.debug("The result of condition expression {} is false", expression);
-            return false;
-        }
-        return true;
+        return Boolean.TRUE.equals(((IBaseBooleanDatatype) result).getValue());
     }
 
-    protected IRequestActionAdapter generateRequestAction(IPlanDefinitionActionAdapter action) {
+    protected IRequestActionAdapter generateRequestAction(
+            IPlanDefinitionActionAdapter action, List<Pair<IAdapter<?>, Boolean>> conditionResults) {
         var requestAction = action.newRequestAction()
                 .setId(action.getId())
                 .setTitle(action.getTitle())
@@ -225,9 +207,10 @@ public class ProcessAction {
                 .setType(action.getType())
                 .setPriority(action.getPriority())
                 .setSelectionBehavior(action.getSelectionBehavior());
-        // .setConditionResult());
 
-        if (action.hasCondition()) {
+        if (conditionResults != null && !conditionResults.isEmpty()) {
+            conditionResults.forEach(requestAction::addCondition);
+        } else if (action.hasCondition()) {
             action.getCondition().forEach(requestAction::addCondition);
         }
 

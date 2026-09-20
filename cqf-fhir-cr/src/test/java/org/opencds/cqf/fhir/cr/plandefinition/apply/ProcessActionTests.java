@@ -15,6 +15,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.List;
+import kotlin.Pair;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Expression;
@@ -24,7 +25,6 @@ import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -69,7 +69,7 @@ class ProcessActionTests {
         var action = new org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent();
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.DSTU3, action);
-        var requestAction = fixture.generateRequestAction(actionAdapter);
+        var requestAction = fixture.generateRequestAction(actionAdapter, null);
         assertInstanceOf(org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent.class, requestAction.get());
     }
 
@@ -78,7 +78,7 @@ class ProcessActionTests {
         var action = new org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent();
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
-        var requestAction = fixture.generateRequestAction(actionAdapter);
+        var requestAction = fixture.generateRequestAction(actionAdapter, null);
         assertInstanceOf(RequestGroupActionComponent.class, requestAction.get());
     }
 
@@ -87,7 +87,7 @@ class ProcessActionTests {
         var action = new org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent();
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R5, action);
-        var requestAction = fixture.generateRequestAction(actionAdapter);
+        var requestAction = fixture.generateRequestAction(actionAdapter, null);
         assertInstanceOf(RequestOrchestrationActionComponent.class, requestAction.get());
     }
 
@@ -124,7 +124,7 @@ class ProcessActionTests {
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), eq(null), eq(null), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
-        fixture.meetsConditions(request, actionAdapter);
+        fixture.evaluateConditions(request, actionAdapter);
         var oc = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
         assertTrue(oc.hasIssue());
         assertTrue(oc.getIssueFirstRep()
@@ -145,8 +145,9 @@ class ProcessActionTests {
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
-        var result = fixture.meetsConditions(request, actionAdapter);
-        assertNull(result);
+        var results = fixture.evaluateConditions(request, actionAdapter);
+        assertEquals(1, results.size());
+        assertNull(results.get(0).getSecond());
         assertNull(request.getOperationOutcome());
     }
 
@@ -162,8 +163,8 @@ class ProcessActionTests {
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
-        var result = fixture.meetsConditions(request, actionAdapter);
-        Assertions.assertFalse(result);
+        var results = fixture.evaluateConditions(request, actionAdapter);
+        assertTrue(results.stream().noneMatch(Pair::getSecond));
         assertNull(request.getOperationOutcome());
     }
 
@@ -190,7 +191,7 @@ class ProcessActionTests {
         var requestOrchestration = IAdapterFactory.createAdapterForResource(new RequestGroup());
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
-        var requestAction = fixture.generateRequestAction(actionAdapter);
+        var requestAction = fixture.generateRequestAction(actionAdapter, null);
         var request = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
@@ -215,7 +216,7 @@ class ProcessActionTests {
         var requestOrchestration = IAdapterFactory.createAdapterForResource(new RequestGroup());
         var actionAdapter =
                 (IPlanDefinitionActionAdapter) IAdapterFactory.createAdapterForBase(FhirVersionEnum.R4, action);
-        var requestAction = fixture.generateRequestAction(actionAdapter);
+        var requestAction = fixture.generateRequestAction(actionAdapter, null);
         var request = RequestHelpers.newPDApplyRequestForVersion(
                 FhirVersionEnum.R4, libraryEngine, null, inputParameterResolver);
         var metConditions = new ArrayList<String>();
@@ -275,7 +276,9 @@ class ProcessActionTests {
         var action = conditionAction("a");
         action.addCondition().setKind(ActionConditionKind.APPLICABILITY);
         var request = pdRequest();
-        assertTrue(fixture.meetsConditions(request, adapt(action)));
+        var results = fixture.evaluateConditions(request, adapt(action));
+        assertEquals(1, results.size());
+        assertNull(results.get(0).getSecond());
         assertNull(request.getOperationOutcome());
     }
 
@@ -284,7 +287,9 @@ class ProcessActionTests {
         literalResults();
         for (var expression : List.of("nullList", "nullElement")) {
             var request = pdRequest();
-            assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", expression))));
+            var results = fixture.evaluateConditions(request, adapt(conditionAction("a", expression)));
+            assertEquals(1, results.size());
+            assertNull(results.get(0).getSecond());
             assertNull(request.getOperationOutcome());
         }
     }
@@ -293,7 +298,8 @@ class ProcessActionTests {
     void disabledPauseRetainsLegacyNullFiltering() {
         literalResults();
         var request = pdRequest();
-        assertTrue(fixture.meetsConditions(request, adapt(conditionAction("a", "multipleWithNull"))));
+        var results = fixture.evaluateConditions(request, adapt(conditionAction("a", "multipleWithNull")));
+        assertTrue(results.stream().allMatch(Pair::getSecond));
         assertNull(request.getOperationOutcome());
     }
 
@@ -301,13 +307,14 @@ class ProcessActionTests {
     void conditionFailureStopsProcessing() {
         literalResults();
         var request = pdRequest();
-        assertNull(fixture.meetsConditions(request, adapt(conditionAction("a", "throws", "false", "nonBoolean"))));
+        var results = fixture.evaluateConditions(request, adapt(conditionAction("a", "throws", "false", "nonBoolean")));
+        assertTrue(results.stream().noneMatch(p -> Boolean.TRUE.equals(p.getSecond())));
         var outcome = (org.hl7.fhir.r4.model.OperationOutcome) request.getOperationOutcome();
         assertEquals(1, outcome.getIssue().size());
         assertEquals(
                 "Condition expression 'throws' encountered exception: test evaluation failure",
                 outcome.getIssue().get(0).getDiagnostics());
-        org.mockito.Mockito.verify(libraryEngine, org.mockito.Mockito.times(1))
+        org.mockito.Mockito.verify(libraryEngine, org.mockito.Mockito.times(3))
                 .resolveExpression(eq(RequestHelpers.PATIENT_ID), any(), eq(null), any(), any(), any(), eq(null));
     }
 
@@ -327,13 +334,6 @@ class ProcessActionTests {
                 .addQuestionnaireItemForInput(eq(request), any());
         var result = (RequestGroupActionComponent) fixture.processAction(
                 request, IAdapterFactory.createAdapterForResource(new RequestGroup()), new ArrayList<>(), adapt(group));
-        //        var result = fixture.generateRequestAction(adapt(group));
-        //        fixture.processChildActions(
-        //            request,
-        //            IAdapterFactory.createAdapterForResource(new RequestGroup()),
-        //            new ArrayList<>(),
-        //            adapt(group),
-        //            result);
         if (behavior.equals("any") && expression.equals("null")) {
             assertEquals(1, result.getAction().size());
         }
@@ -375,7 +375,7 @@ class ProcessActionTests {
         var outer = conditionAction("outer");
         outer.addExtension(CQF_APPLICABILITY_BEHAVIOR, new CodeType("any"));
         outer.setAction(List.of(inner, conditionAction("outerFallback")));
-        var result = fixture.generateRequestAction(adapt(outer));
+        var result = fixture.generateRequestAction(adapt(outer), null);
         fixture.processChildActions(
                 pdRequest(),
                 IAdapterFactory.createAdapterForResource(new RequestGroup()),

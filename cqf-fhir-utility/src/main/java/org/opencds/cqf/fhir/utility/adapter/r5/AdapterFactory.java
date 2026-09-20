@@ -123,7 +123,7 @@ public class AdapterFactory implements IAdapterFactory {
         } else if (resource instanceof GraphDefinition graphDefinition) {
             adapter = new GraphDefinitionAdapter(graphDefinition);
         } else if (resource instanceof Group group) {
-            adapter = createGroup(resource);
+            adapter = createGroup(group);
         } else {
             if (resource instanceof MetadataResource metadataResource) {
                 adapter = new KnowledgeArtifactAdapter(metadataResource);

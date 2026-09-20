@@ -20,6 +20,12 @@
           "priority": "routine",
           "condition": [
             {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-action-condition-result",
+                  "valueBoolean": true
+                }
+              ],
               "kind": "applicability",
               "expression": {
                 "language": "text/cql.identifier",

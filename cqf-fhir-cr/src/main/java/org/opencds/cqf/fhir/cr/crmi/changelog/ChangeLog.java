@@ -68,9 +68,14 @@ public class ChangeLog {
         Map<String, ValueSetChild.Code> sourceCodeMap = new LinkedHashMap<>();
         Map<String, ValueSetChild.Code> targetCodeMap = new LinkedHashMap<>();
         // Map< [URL], Map <[Version], [Object with name, version, and other metadata] >>
-        Map<String, Map<String, ValueSetChild.Leaf>> leafMetadataMap = new HashMap<>();
-        updateCodeMapAndLeafMetadataMap(sourceCodeMap, leafMetadataMap, sourceResource, cache, true);
-        updateCodeMapAndLeafMetadataMap(targetCodeMap, leafMetadataMap, targetResource, cache, false);
+        //
+        // One leaf map per side, for the same reason. A leaf repinned between releases is registered
+        // under both versions, and a compose reference is usually unversioned, so a shared map left
+        // each side picking one of the two arbitrarily.
+        Map<String, Map<String, ValueSetChild.Leaf>> sourceLeafMap = new HashMap<>();
+        Map<String, Map<String, ValueSetChild.Leaf>> targetLeafMap = new HashMap<>();
+        updateCodeMapAndLeafMetadataMap(sourceCodeMap, sourceLeafMap, sourceResource, cache, true);
+        updateCodeMapAndLeafMetadataMap(targetCodeMap, targetLeafMap, targetResource, cache, false);
         var oldData = sourceResource == null
                 ? null
                 : new ValueSetChild(
@@ -81,7 +86,7 @@ public class ChangeLog {
                         sourceResource.getUrl(),
                         sourceResource.getCompose().getInclude(),
                         sourceCodeMap,
-                        leafMetadataMap,
+                        sourceLeafMap,
                         getPriority(sourceResource).orElse(null));
         var newData = targetResource == null
                 ? null
@@ -93,7 +98,7 @@ public class ChangeLog {
                         targetResource.getUrl(),
                         targetResource.getCompose().getInclude(),
                         targetCodeMap,
-                        leafMetadataMap,
+                        targetLeafMap,
                         getPriority(targetResource).orElse(null));
         setCodeOperations(sourceCodeMap, targetCodeMap);
         var url = getPageUrl(sourceResource, targetResource);

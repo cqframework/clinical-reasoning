@@ -464,11 +464,26 @@ class ChangeLogTest {
         return valueSet;
     }
 
+    /** The one leaf at a given version, drawing its code from each of the given code systems. */
+    private static ValueSet leafAtVersion(String version, String... systems) {
+        var valueSet = emptyLeaf();
+        valueSet.setVersion(version);
+        for (var system : systems) {
+            valueSet.getCompose().addInclude().setSystem(system).addConcept().setCode(CODE);
+        }
+        return valueSet;
+    }
+
     /** A grouper whose compose points at the one leaf, as eRSD groupers do. */
     private static ValueSet grouper(String version) {
+        return grouper(version, LEAF_CANONICAL);
+    }
+
+    /** A grouper referencing its leaf by the given canonical, with or without a version on it. */
+    private static ValueSet grouper(String version, String leafCanonical) {
         var grouper = new ValueSet();
         grouper.setUrl(GROUPER_URL).setVersion(version).setName("dxtc").setTitle("Diagnosis");
-        grouper.getCompose().addInclude().addValueSet(LEAF_CANONICAL);
+        grouper.getCompose().addInclude().addValueSet(leafCanonical);
         return grouper;
     }
 
@@ -594,6 +609,13 @@ class ChangeLogTest {
                 .toList();
     }
 
+    private static List<String> codeSystemsOf(ValueSetChild data) {
+        return data.getLeafValueSets().stream()
+                .flatMap(leaf -> leaf.getCodeSystems().stream())
+                .map(ValueSetChild.Leaf.NameAndOid::getName)
+                .toList();
+    }
+
     private static List<String> describeConditions(ValueSetChild data) {
         return data.getLeafValueSets().stream()
                 .flatMap(leaf -> leaf.getConditions().stream())
@@ -641,5 +663,21 @@ class ChangeLogTest {
         // takes the other's version.
         assertEquals("2.81", codeOfSystem(valueSet, LOINC).getVersion());
         assertEquals("2026", codeOfSystem(valueSet, ICD10).getVersion());
+    }
+
+    /**
+     * A leaf repinned between releases is registered under both, so a map shared by
+     * the two sides could only offer one of them to both. Each side should read its own.
+     */
+    @Test
+    void eachSideReportsTheLeafItPinnedWhenTheReferenceHasNoVersion() {
+        var cache = new DiffCache();
+        cache.addSource(LEAF_URL, leafAtVersion("20240619", LOINC));
+        cache.addTarget(LEAF_URL, leafAtVersion("20250101", LOINC, ICD10));
+
+        var page = new ChangeLog(MANIFEST_URL).addPage(grouper("3.1.2", LEAF_URL), grouper("3.2.0", LEAF_URL), cache);
+
+        assertEquals(List.of("LOINC"), codeSystemsOf(page.getOldData()));
+        assertEquals(List.of("LOINC", "ICD10CM"), codeSystemsOf(page.getNewData()));
     }
 }

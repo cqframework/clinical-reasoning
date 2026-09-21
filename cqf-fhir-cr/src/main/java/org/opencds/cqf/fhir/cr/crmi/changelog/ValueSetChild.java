@@ -349,24 +349,18 @@ public class ValueSetChild extends PageBase {
                     .filter(PrimitiveType::hasValue)
                     .map(PrimitiveType::getValue)
                     .forEach(vs -> {
-                        // sometimes the value set reference is unversioned - implying that the latest version
-                        // should be used
-                        // we need to make sure the diff operation only has the latest version in it, thereby we
-                        // can get away with just having one url in the map and taking it
                         var urlPart = Canonicals.getUrl(vs);
-                        if (Canonicals.getVersion(vs) == null) {
-                            // assume there is only the latest version
-                            var latest = leafMetadataMap
-                                    .get(urlPart)
-                                    .entrySet()
-                                    .iterator()
-                                    .next()
-                                    .getValue();
-                            // creating a new object because modifying it causes weirdness later
-                            leafValueSets.add(latest.copy());
-                        } else {
-                            var versionPart = Canonicals.getVersion(vs);
-                            var leaf = leafMetadataMap.get(urlPart).get(versionPart);
+                        var leavesByVersion = leafMetadataMap.get(urlPart);
+                        if (leavesByVersion == null) {
+                            return;
+                        }
+                        var versionPart = Canonicals.getVersion(vs);
+                        // The map holds one side only, and that side resolved each URL once, so there is
+                        // a single entry to take.
+                        var leaf = versionPart == null
+                                ? leavesByVersion.values().iterator().next()
+                                : leavesByVersion.get(versionPart);
+                        if (leaf != null) {
                             // creating a new object because modifying it causes weirdness later
                             leafValueSets.add(leaf.copy());
                         }

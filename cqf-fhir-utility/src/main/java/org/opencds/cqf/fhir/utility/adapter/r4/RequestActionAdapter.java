@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
@@ -193,7 +194,7 @@ public class RequestActionAdapter extends BaseElementAdapter implements IRequest
     public Extension getConditionResult(Boolean result) {
         var ext = new Extension(Constants.CPG_ACTION_CONDITION_RESULT);
         if (result == null) {
-            ext.addExtension(new Extension(Constants.DATA_ABSENT_REASON));
+            ext.addExtension(new Extension(Constants.DATA_ABSENT_REASON, new CodeType("asked-unknown")));
         } else {
             ext.setValue(IAdapter.newBooleanType(fhirVersion, result));
         }

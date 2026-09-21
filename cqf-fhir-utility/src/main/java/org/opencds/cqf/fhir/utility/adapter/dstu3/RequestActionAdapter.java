@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
 import kotlin.Pair;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionConditionComponent;
@@ -191,7 +192,7 @@ public class RequestActionAdapter extends BaseElementAdapter implements IRequest
     public Extension getConditionResult(Boolean result) {
         var ext = new Extension(Constants.CPG_ACTION_CONDITION_RESULT);
         if (result == null) {
-            ext.addExtension(new Extension(Constants.DATA_ABSENT_REASON));
+            ext.addExtension(new Extension(Constants.DATA_ABSENT_REASON, new CodeType("asked-unknown")));
         } else {
             ext.setValue(IAdapter.newBooleanType(fhirVersion, result));
         }

@@ -351,7 +351,7 @@ public class ApplyRequest implements ICpgRequest {
         if (questionnaireAdapter != null) {
             questionnaireAdapter.addItem(item);
             if (item.hasDefinition()) {
-                questionnaireDefinitions.add(item.getDefinition());
+                questionnaireDefinitions.add(item.getDefinition().split("#")[0]);
             }
         }
     }

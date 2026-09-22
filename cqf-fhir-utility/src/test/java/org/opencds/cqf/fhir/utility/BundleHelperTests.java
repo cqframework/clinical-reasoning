@@ -22,10 +22,6 @@ import static org.opencds.cqf.fhir.utility.BundleHelper.newResponseWithLocation;
 import static org.opencds.cqf.fhir.utility.BundleHelper.resourceToRuntimeSearchParam;
 import static org.opencds.cqf.fhir.utility.BundleHelper.setBundleTotal;
 import static org.opencds.cqf.fhir.utility.BundleHelper.setBundleType;
-import static org.opencds.cqf.fhir.utility.BundleHelper.setEntryFullUrl;
-import static org.opencds.cqf.fhir.utility.BundleHelper.setEntryRequest;
-import static org.opencds.cqf.fhir.utility.BundleHelper.setRequestIfNoneExist;
-import static org.opencds.cqf.fhir.utility.BundleHelper.setRequestUrl;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.Collections;
@@ -95,18 +91,6 @@ class BundleHelperTests {
         });
         assertThrows(IllegalArgumentException.class, () -> {
             newRequest(fhirVersion, null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            setRequestUrl(fhirVersion, null, null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            setRequestIfNoneExist(fhirVersion, null, null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            setEntryFullUrl(fhirVersion, null, null);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            setEntryRequest(fhirVersion, null, null);
         });
         assertThrows(IllegalArgumentException.class, () -> {
             resourceToRuntimeSearchParam(resource);
@@ -227,8 +211,7 @@ class BundleHelperTests {
 
         var res = BundleHelper.getEntryRequestId(FhirVersionEnum.DSTU3, bundle);
 
-        assertTrue(res.isPresent());
-        assertEquals(new org.hl7.fhir.dstu3.model.IdType("123"), res.get());
+        assertEquals(new org.hl7.fhir.dstu3.model.IdType("123"), res);
     }
 
     @Test
@@ -240,8 +223,7 @@ class BundleHelperTests {
 
         var res = BundleHelper.getEntryRequestId(FhirVersionEnum.R4, bundle);
 
-        assertTrue(res.isPresent());
-        assertEquals(new IdType("123"), res.get());
+        assertEquals(new IdType("123"), res);
     }
 
     @Test
@@ -255,8 +237,7 @@ class BundleHelperTests {
 
         var res = BundleHelper.getEntryRequestId(FhirVersionEnum.R5, bundle);
 
-        assertTrue(res.isPresent());
-        assertEquals(new org.hl7.fhir.r5.model.IdType("123"), res.get());
+        assertEquals(new org.hl7.fhir.r5.model.IdType("123"), res);
     }
 
     @Test

@@ -1,43 +1,26 @@
-package org.opencds.cqf.fhir.utility;
+package org.opencds.cqf.fhir.utility
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition.IMutator
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.util.ParametersUtil
+import kotlin.jvm.optionals.getOrNull
+import org.hl7.fhir.instance.model.api.*
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.ParametersUtil;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-/**
- * A utility class for parameter creation and functions in clinical reasoning
- */
-public class Parameters {
-    private Parameters() {}
-
-    private static BaseRuntimeChildDefinition getParameterChild(FhirContext fhirContext) {
-        return fhirContext.getResourceDefinition("Parameters").getChildByName("parameter");
+/** A utility class for parameter creation and functions in clinical reasoning */
+object Parameters {
+    private fun getParameterChild(fhirContext: FhirContext): BaseRuntimeChildDefinition {
+        return fhirContext.getResourceDefinition("Parameters").getChildByName("parameter")
     }
 
-    private static BaseRuntimeElementDefinition<?> getParameterElement(FhirContext fhirContext) {
-        return getParameterChild(fhirContext).getChildByName("parameter");
+    private fun getParameterElement(fhirContext: FhirContext): BaseRuntimeElementDefinition<*>? {
+        return getParameterChild(fhirContext).getChildByName("parameter")
     }
 
-    private static BaseRuntimeChildDefinition.IMutator getValueMutator(FhirContext fhirContext) {
-        return getParameterElement(fhirContext).getChildByName("value[x]").getMutator();
-    }
-
-    private static void validateNameAndValue(String name, Object value) {
-        checkNotNull(name);
-        checkNotNull(value);
+    private fun getValueMutator(fhirContext: FhirContext): IMutator {
+        return getParameterElement(fhirContext)!!.getChildByName("value[x]").mutator
     }
 
     /**
@@ -48,16 +31,19 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameters
      */
-    public static IBaseParameters newParameters(FhirContext fhirContext, IIdType id, IBase... parts) {
-        checkNotNull(id);
-        IBaseParameters newParameters = ParametersUtil.newInstance(fhirContext);
-        newParameters.setId(id);
-        BaseRuntimeChildDefinition.IMutator mutator =
-                getParameterChild(fhirContext).getMutator();
-        for (IBase part : parts) {
-            mutator.addValue(newParameters, part);
+    @JvmStatic
+    fun newParameters(
+        fhirContext: FhirContext,
+        id: IIdType,
+        vararg parts: IBase?,
+    ): IBaseParameters {
+        val newParameters = ParametersUtil.newInstance(fhirContext)
+        newParameters.setId(id)
+        val mutator = getParameterChild(fhirContext).mutator
+        for (part in parts) {
+            mutator.addValue(newParameters, part)
         }
-        return newParameters;
+        return newParameters
     }
 
     /**
@@ -68,12 +54,11 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameters
      */
-    public static IBaseParameters newParameters(FhirContext fhirContext, String id, IBase... parts) {
-        checkNotNull(id);
-        IIdType newId = (IIdType)
-                Objects.requireNonNull(fhirContext.getElementDefinition("id")).newInstance();
-        newId.setValue(id);
-        return newParameters(fhirContext, newId, parts);
+    @JvmStatic
+    fun newParameters(fhirContext: FhirContext, id: String, vararg parts: IBase?): IBaseParameters {
+        val newId = fhirContext.getElementDefinition("id")!!.newInstance() as IIdType
+        newId.value = id
+        return Parameters.newParameters(fhirContext, newId, *parts)
     }
 
     /**
@@ -83,14 +68,14 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameters
      */
-    public static IBaseParameters newParameters(FhirContext fhirContext, IBase... parts) {
-        IBaseParameters newParameters = ParametersUtil.newInstance(fhirContext);
-        BaseRuntimeChildDefinition.IMutator mutator =
-                getParameterChild(fhirContext).getMutator();
-        for (IBase part : parts) {
-            mutator.addValue(newParameters, part);
+    @JvmStatic
+    fun newParameters(fhirContext: FhirContext, vararg parts: IBase?): IBaseParameters {
+        val newParameters = ParametersUtil.newInstance(fhirContext)
+        val mutator = getParameterChild(fhirContext).mutator
+        for (part in parts) {
+            mutator.addValue(newParameters, part)
         }
-        return newParameters;
+        return newParameters
     }
 
     /**
@@ -101,20 +86,17 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameter Part
      */
-    public static IBase newPart(FhirContext fhirContext, String name, IBase... parts) {
-        checkNotNull(name);
-        BaseRuntimeChildDefinition.IMutator nameMutator =
-                getParameterElement(fhirContext).getChildByName("name").getMutator();
-        BaseRuntimeChildDefinition.IMutator partMutator =
-                getParameterElement(fhirContext).getChildByName("part").getMutator();
-        IBase parameterBase = getParameterElement(fhirContext).newInstance();
-        IBase theName = Objects.requireNonNull(fhirContext.getElementDefinition("string"))
-                .newInstance(name);
-        nameMutator.setValue(parameterBase, theName);
-        for (IBase part : parts) {
-            partMutator.addValue(parameterBase, part);
+    @JvmStatic
+    fun newPart(fhirContext: FhirContext, name: String, vararg parts: IBase?): IBase {
+        val nameMutator = getParameterElement(fhirContext)!!.getChildByName("name").mutator
+        val partMutator = getParameterElement(fhirContext)!!.getChildByName("part").mutator
+        val parameterBase = getParameterElement(fhirContext)!!.newInstance()
+        val theName = fhirContext.getElementDefinition("string")!!.newInstance(name)
+        nameMutator.setValue(parameterBase, theName)
+        for (part in parts) {
+            partMutator.addValue(parameterBase, part)
         }
-        return parameterBase;
+        return parameterBase
     }
 
     /**
@@ -128,14 +110,18 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameter Part
      */
-    public static <T extends IBaseDatatype> IBase newPart(
-            FhirContext fhirContext, Class<T> type, String name, Object value, IBase... parts) {
-        validateNameAndValue(name, value);
-        IBase newPpc = newPart(fhirContext, name, parts);
-        IBase typeValue =
-                Objects.requireNonNull(fhirContext.getElementDefinition(type)).newInstance(value);
-        getValueMutator(fhirContext).setValue(newPpc, typeValue);
-        return newPpc;
+    @JvmStatic
+    fun <T : IBaseDatatype?> newPart(
+        fhirContext: FhirContext,
+        type: Class<T>,
+        name: String,
+        value: Any,
+        vararg parts: IBase?,
+    ): IBase {
+        val newPpc = newPart(fhirContext, name, *parts)
+        val typeValue = fhirContext.getElementDefinition(type)!!.newInstance(value)
+        getValueMutator(fhirContext).setValue(newPpc, typeValue)
+        return newPpc
     }
 
     /**
@@ -149,13 +135,18 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameter Part
      */
-    public static IBase newPart(FhirContext fhirContext, String typeName, String name, Object value, IBase... parts) {
-        validateNameAndValue(name, value);
-        IBase newPpc = newPart(fhirContext, name, parts);
-        IBase typeValue = Objects.requireNonNull(fhirContext.getElementDefinition(typeName))
-                .newInstance(value.toString());
-        getValueMutator(fhirContext).setValue(newPpc, typeValue);
-        return newPpc;
+    @JvmStatic
+    fun newPart(
+        fhirContext: FhirContext,
+        typeName: String,
+        name: String,
+        value: Any,
+        vararg parts: IBase?,
+    ): IBase {
+        val newPpc = newPart(fhirContext, name, *parts)
+        val typeValue = fhirContext.getElementDefinition(typeName)!!.newInstance(value.toString())
+        getValueMutator(fhirContext).setValue(newPpc, typeValue)
+        return newPpc
     }
 
     /**
@@ -168,11 +159,19 @@ public class Parameters {
      * @param parts IBase types as interface marker for convergence between Hapi and HL7
      * @return new parameter Part
      */
-    public static IBase newPart(FhirContext fhirContext, String name, IBaseResource value, IBase... parts) {
-        validateNameAndValue(name, value);
-        IBase newPpc = newPart(fhirContext, name, parts);
-        getParameterElement(fhirContext).getChildByName("resource").getMutator().setValue(newPpc, value);
-        return newPpc;
+    @JvmStatic
+    fun newPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: IBaseResource,
+        vararg parts: IBase?,
+    ): IBase {
+        val newPpc = newPart(fhirContext, name, *parts)
+        getParameterElement(fhirContext)!!
+            .getChildByName("resource")
+            .mutator
+            .setValue(newPpc, value)
+        return newPpc
     }
 
     /**
@@ -183,11 +182,18 @@ public class Parameters {
      * @param parameters IBaseResource values
      * @return parameter string name
      */
-    public static Optional<String> getSingularStringPart(
-            FhirContext fhirContext, IBaseResource parameters, String name) {
-        checkNotNull(parameters);
-        checkNotNull(name);
-        return ParametersUtil.getNamedParameterValueAsString(fhirContext, (IBaseParameters) parameters, name);
+    @JvmStatic
+    fun getSingularStringPart(
+        fhirContext: FhirContext,
+        parameters: IBaseResource,
+        name: String,
+    ): String? {
+        return ParametersUtil.getNamedParameterValueAsString(
+                fhirContext,
+                parameters as IBaseParameters,
+                name,
+            )
+            .getOrNull()
     }
 
     /**
@@ -198,10 +204,13 @@ public class Parameters {
      * @param parameters IBaseResource values
      * @return parameter string name
      */
-    public static List<IBase> getPartsByName(FhirContext fhirContext, IBaseResource parameters, String name) {
-        checkNotNull(parameters);
-        checkNotNull(name);
-        return ParametersUtil.getNamedParameters(fhirContext, parameters, name);
+    @JvmStatic
+    fun getPartsByName(
+        fhirContext: FhirContext,
+        parameters: IBaseResource,
+        name: String,
+    ): MutableList<IBase?> {
+        return ParametersUtil.getNamedParameters(fhirContext, parameters, name)
     }
 
     /**
@@ -214,8 +223,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new base64 binary part
      */
-    public static IBase newBase64BinaryPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "base64binary", name, value, parts);
+    @JvmStatic
+    fun newBase64BinaryPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "base64binary", name, value, *parts)
     }
 
     /**
@@ -228,8 +243,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new boolean part
      */
-    public static IBase newBooleanPart(FhirContext fhirContext, String name, boolean value, IBase... parts) {
-        return newPart(fhirContext, "boolean", name, value, parts);
+    @JvmStatic
+    fun newBooleanPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: Boolean,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "boolean", name, value, *parts)
     }
 
     /**
@@ -242,13 +263,19 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new canonical part
      */
-    public static IBase newCanonicalPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "canonical", name, value, parts);
+    @JvmStatic
+    fun newCanonicalPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "canonical", name, value, *parts)
     }
 
     /**
-     * method create code part from parameters using FhirContext, Parameter name, value of parameter,
-     * parameter parts
+     * method create code part from parameters using FhirContext, Parameter name, value of
+     * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -256,13 +283,19 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new code part
      */
-    public static IBase newCodePart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "code", name, value, parts);
+    @JvmStatic
+    fun newCodePart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "code", name, value, *parts)
     }
 
     /**
-     * method create date part from parameters using FhirContext, Parameter name, value of parameter,
-     * parameter parts
+     * method create date part from parameters using FhirContext, Parameter name, value of
+     * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -270,8 +303,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new date part
      */
-    public static IBase newDatePart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "date", name, value, parts);
+    @JvmStatic
+    fun newDatePart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "date", name, value, *parts)
     }
 
     /**
@@ -284,8 +323,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new datetime part
      */
-    public static IBase newDateTimePart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "datetime", name, value, parts);
+    @JvmStatic
+    fun newDateTimePart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "datetime", name, value, *parts)
     }
 
     /**
@@ -298,8 +343,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new decimal part
      */
-    public static IBase newDecimalPart(FhirContext fhirContext, String name, double value, IBase... parts) {
-        return newPart(fhirContext, "decimal", name, value, parts);
+    @JvmStatic
+    fun newDecimalPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: Double,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "decimal", name, value, *parts)
     }
 
     /**
@@ -312,8 +363,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new ID part
      */
-    public static IBase newIdPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "id", name, value, parts);
+    @JvmStatic
+    fun newIdPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "id", name, value, *parts)
     }
 
     /**
@@ -326,8 +383,13 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new instant part
      */
-    public static IBase newInstantPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "instant", name, value, parts);
+    fun newInstantPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "instant", name, value, *parts)
     }
 
     /**
@@ -340,13 +402,19 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new integer part
      */
-    public static IBase newIntegerPart(FhirContext fhirContext, String name, int value, IBase... parts) {
-        return newPart(fhirContext, "integer", name, value, parts);
+    @JvmStatic
+    fun newIntegerPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: Int,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "integer", name, value, *parts)
     }
 
     /**
-     * method create integer base 64 part from parameters using FhirContext, Parameter name, value of
-     * parameter, parameter parts
+     * method create integer base 64 part from parameters using FhirContext, Parameter name, value
+     * of parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -354,8 +422,13 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new base64 integer part
      */
-    public static IBase newInteger64Part(FhirContext fhirContext, String name, long value, IBase... parts) {
-        return newPart(fhirContext, "integer64", name, value, parts);
+    fun newInteger64Part(
+        fhirContext: FhirContext,
+        name: String,
+        value: Long,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "integer64", name, value, *parts)
     }
 
     /**
@@ -368,8 +441,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new markdown part
      */
-    public static IBase newMarkdownPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "markdown", name, value, parts);
+    @JvmStatic
+    fun newMarkdownPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "markdown", name, value, *parts)
     }
 
     /**
@@ -382,8 +461,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new OID part
      */
-    public static IBase newOidPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "oid", name, value, parts);
+    @JvmStatic
+    fun newOidPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "oid", name, value, *parts)
     }
 
     /**
@@ -396,8 +481,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new positive int part
      */
-    public static IBase newPositiveIntPart(FhirContext fhirContext, String name, int value, IBase... parts) {
-        return newPart(fhirContext, "positiveint", name, value, parts);
+    @JvmStatic
+    fun newPositiveIntPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: Int,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "positiveint", name, value, *parts)
     }
 
     /**
@@ -410,13 +501,19 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new string part
      */
-    public static IBase newStringPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "string", name, value, parts);
+    @JvmStatic
+    fun newStringPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "string", name, value, *parts)
     }
 
     /**
-     * method create time part from parameters using FhirContext, Parameter name, value of parameter,
-     * parameter parts
+     * method create time part from parameters using FhirContext, Parameter name, value of
+     * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -424,8 +521,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new time part
      */
-    public static IBase newTimePart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "time", name, value, parts);
+    @JvmStatic
+    fun newTimePart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "time", name, value, *parts)
     }
 
     /**
@@ -438,8 +541,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new unsigned int part
      */
-    public static IBase newUnsignedIntPart(FhirContext fhirContext, String name, int value, IBase... parts) {
-        return newPart(fhirContext, "unsignedint", name, value, parts);
+    @JvmStatic
+    fun newUnsignedIntPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: Int,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "unsignedint", name, value, *parts)
     }
 
     /**
@@ -452,8 +561,14 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new uri part
      */
-    public static IBase newUriPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "uri", name, value, parts);
+    @JvmStatic
+    fun newUriPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "uri", name, value, *parts)
     }
 
     /**
@@ -466,13 +581,19 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new url part
      */
-    public static IBase newUrlPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "url", name, value, parts);
+    @JvmStatic
+    fun newUrlPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "url", name, value, *parts)
     }
 
     /**
-     * method create uuid part from parameters using FhirContext, Parameter name, value of parameter,
-     * parameter parts
+     * method create uuid part from parameters using FhirContext, Parameter name, value of
+     * parameter, parameter parts
      *
      * @param fhirContext the FhirContext for fhir AP I
      * @param name String representation of parameter name
@@ -480,36 +601,39 @@ public class Parameters {
      * @param parts IBase type parameter parts
      * @return new uuid part
      */
-    public static IBase newUuidPart(FhirContext fhirContext, String name, String value, IBase... parts) {
-        return newPart(fhirContext, "uuid", name, value, parts);
+    @JvmStatic
+    fun newUuidPart(
+        fhirContext: FhirContext,
+        name: String,
+        value: String,
+        vararg parts: IBase?,
+    ): IBase {
+        return newPart(fhirContext, "uuid", name, value, *parts)
     }
 
     /**
      * Removes a parameter from a Parameters object by name
+     *
      * @param parameters the Parameters object to remove the parameter from
      * @param name the name of the parameter to remove
      */
-    public static void removeParameter(IBaseParameters parameters, String name) {
-        checkNotNull(parameters);
-        checkNotNull(name);
+    @JvmStatic
+    fun removeParameter(parameters: IBaseParameters, name: String) {
+        val ctx = FhirContext.forCached(parameters.structureFhirVersionEnum)
+        val child = getParameterChild(ctx)
 
-        var ctx = FhirContext.forCached(parameters.getStructureFhirVersionEnum());
-        var child = getParameterChild(ctx);
+        val values = child.accessor.getValues(parameters)
 
-        var values = child.getAccessor().getValues(parameters);
-
-        for (int i = 0; i < values.size(); i++) {
-            var ppc = (IBase) values.get(i);
-            var partParameterDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition(ppc.getClass());
-            var nameChild = partParameterDef.getChildByName("name");
-            var nameValues = nameChild.getAccessor().getValues(ppc);
-            var ppcName = nameValues.stream()
-                    .filter(t -> t instanceof IPrimitiveType<?>)
-                    .map(t -> ((IPrimitiveType<?>) t))
-                    .findFirst();
-            if (ppcName.isPresent() && ppcName.get().getValue().equals(name)) {
-                values.remove(i);
-                return;
+        for (i in values.indices) {
+            val ppc = values[i] as IBase
+            val partParameterDef =
+                ctx.getElementDefinition(ppc.javaClass) as BaseRuntimeElementCompositeDefinition<*>
+            val nameChild = partParameterDef.getChildByName("name")
+            val nameValues = nameChild.accessor.getValues(ppc)
+            val ppcName = nameValues.filterIsInstance<IPrimitiveType<*>>().firstOrNull()
+            if (ppcName != null && ppcName.value == name) {
+                values.removeAt(i)
+                return
             }
         }
     }

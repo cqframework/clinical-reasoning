@@ -3,7 +3,6 @@ package org.opencds.cqf.fhir.utility;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -19,7 +18,7 @@ class LibrariesTest {
 
         var content = Libraries.getContent(library, "text/cql");
 
-        assertTrue(content.isEmpty());
+        assertNull(content);
     }
 
     @Test
@@ -29,7 +28,7 @@ class LibrariesTest {
 
         var content = Libraries.getContent(library, "text/cql");
 
-        assertEquals(content.get(), testData);
+        assertEquals(testData, content);
     }
 
     @Test
@@ -39,7 +38,7 @@ class LibrariesTest {
 
         var content = Libraries.getContent(library, "text/elm");
 
-        assertTrue(content.isEmpty());
+        assertNull(content);
     }
 
     @Test
@@ -49,7 +48,7 @@ class LibrariesTest {
 
         var content = Libraries.getContent(library, "text/cql");
 
-        assertEquals(content.get(), testData);
+        assertEquals(testData, content);
     }
 
     @Test

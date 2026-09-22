@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.utility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.IdType;
@@ -168,15 +168,14 @@ class ParametersCreationTest {
         var params = new org.hl7.fhir.r4.model.Parameters();
         params.addParameter().setName("test").setValue(new StringType("hello"));
         var result = Parameters.getSingularStringPart(CTX, params, "test");
-        assertTrue(result.isPresent());
-        assertEquals("hello", result.get());
+        assertEquals("hello", result);
     }
 
     @Test
     void getSingularStringPartNotFound() {
         var params = new org.hl7.fhir.r4.model.Parameters();
         var result = Parameters.getSingularStringPart(CTX, params, "missing");
-        assertTrue(result.isEmpty());
+        assertNull(result);
     }
 
     @Test

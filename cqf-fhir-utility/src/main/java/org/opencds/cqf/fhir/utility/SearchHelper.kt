@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package org.opencds.cqf.fhir.utility
 
 import ca.uhn.fhir.context.FhirVersionEnum
@@ -16,7 +18,8 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
 import org.opencds.cqf.fhir.utility.search.Searches
 
 object SearchHelper {
-    internal fun getBundleClass(repository: IRepository): Class<IBaseBundle> {
+    @JvmStatic
+    fun getBundleClass(repository: IRepository): Class<IBaseBundle> {
         @Suppress("UNCHECKED_CAST")
         return repository.fhirContext().getResourceDefinition("Bundle").implementingClass
             as Class<IBaseBundle>

@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.utility
 
 import ca.uhn.fhir.context.FhirVersionEnum
+import java.math.BigDecimal
+import java.util.Date
+import org.hl7.fhir.instance.model.api.IAnyResource
 import org.hl7.fhir.instance.model.api.IBaseReference
 import org.hl7.fhir.instance.model.api.IPrimitiveType
 
@@ -163,6 +166,105 @@ object VersionUtilities {
             FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.Reference().setReference(value)
             FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.Reference().setReference(value)
             else -> throw IllegalArgumentException(UNSUPPORTED)
+        }
+    }
+
+    /**
+     * Returns a Reference for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a Reference for
+     * @param value the resource value of the Reference
+     * @return the new Reference
+     */
+    @JvmStatic
+    fun referenceTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        value: IAnyResource?,
+    ): IBaseReference {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.Reference(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.Reference(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.Reference(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.Reference(value)
+            else -> throw java.lang.IllegalArgumentException(UNSUPPORTED)
+        }
+    }
+
+    /**
+     * Returns an IntegerType for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a IntegerType for
+     * @param value the integer value of the IntegerType
+     * @return the new IntegerType
+     */
+    @JvmStatic
+    fun integerTypeForVersion(fhirVersion: FhirVersionEnum, value: Int): IPrimitiveType<Int?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.IntegerType(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.IntegerType(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.IntegerType(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.IntegerType(value)
+            else -> throw java.lang.IllegalArgumentException(UNSUPPORTED)
+        }
+    }
+
+    /**
+     * Returns a DecimalType for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a DecimalType for
+     * @param value the decimal value of the DecimalType
+     * @return the new DecimalType
+     */
+    @JvmStatic
+    fun decimalTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        value: BigDecimal?,
+    ): IPrimitiveType<BigDecimal?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.DecimalType(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.DecimalType(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.DecimalType(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.DecimalType(value)
+            else -> throw java.lang.IllegalArgumentException(UNSUPPORTED)
+        }
+    }
+
+    /**
+     * Returns a DateTimeType for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a DateTimeType for
+     * @param value the string value of the DateTimeType
+     * @return the new DateTimeType
+     */
+    @JvmStatic
+    fun dateTimeTypeForVersion(
+        fhirVersion: FhirVersionEnum,
+        value: String?,
+    ): IPrimitiveType<Date?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.DateTimeType(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.DateTimeType(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.DateTimeType(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.DateTimeType(value)
+            else -> throw java.lang.IllegalArgumentException(UNSUPPORTED)
+        }
+    }
+
+    /**
+     * Returns an InstantType for the supplied version with a value of the supplied value.
+     *
+     * @param fhirVersion the FHIR version to create a InstantType for
+     * @param value the string value of the InstantType
+     * @return the new InstantType
+     */
+    @JvmStatic
+    fun instantTypeForVersion(fhirVersion: FhirVersionEnum, value: String?): IPrimitiveType<Date?> {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU2 -> org.hl7.fhir.dstu2.model.InstantType(value)
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.InstantType(value)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.InstantType(value)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.InstantType(value)
+            else -> throw java.lang.IllegalArgumentException(UNSUPPORTED)
         }
     }
 }

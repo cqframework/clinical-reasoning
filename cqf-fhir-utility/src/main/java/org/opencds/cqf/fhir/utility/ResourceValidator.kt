@@ -98,10 +98,7 @@ class ResourceValidator : IResourceValidator {
                 for (resourceComponent in ig.definition.resource) {
                     if (
                         listOf("CodeSystem", "StructureDefinition", "ValueSet")
-                            .contains(
-                                resourceComponent.reference.reference
-                                    .split("/")[0]
-                            )
+                            .contains(resourceComponent.reference.reference.split("/")[0])
                     ) {
                         try {
                             val resource =

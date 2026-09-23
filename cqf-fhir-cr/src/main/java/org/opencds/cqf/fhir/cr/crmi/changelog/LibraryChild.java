@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.opencds.cqf.fhir.cr.crmi.TransformProperties;
 
 public class LibraryChild extends PageBase {
 
@@ -65,55 +63,6 @@ public class LibraryChild extends PageBase {
                 .findAny();
     }
 
-    private void tryAddConditionOperation(
-            Extension maybeCondition, RelatedArtifactUrlWithOperation target, Operation newOperation) {
-        if (maybeCondition.getUrl().equals(TransformProperties.vsmCondition)) {
-            target.getConditions().stream()
-                    .filter(e -> e.getValue()
-                                    .getCodingFirstRep()
-                                    .getSystem()
-                                    .equals(((CodeableConcept) maybeCondition.getValue())
-                                            .getCodingFirstRep()
-                                            .getSystem())
-                            && e.getValue()
-                                    .getCodingFirstRep()
-                                    .getCode()
-                                    .equals(((CodeableConcept) maybeCondition.getValue())
-                                            .getCodingFirstRep()
-                                            .getCode()))
-                    .findAny()
-                    .ifPresent(condition -> condition.setOperation(newOperation));
-        }
-    }
-
-    private void tryAddPriorityOperation(
-            Extension maybePriority, RelatedArtifactUrlWithOperation target, Operation newOperation) {
-        if (maybePriority.getUrl().equals(TransformProperties.vsmPriority)
-                && (target.getPriority().getValue() != null
-                        && target.getPriority()
-                                .getValue()
-                                .getCodingFirstRep()
-                                .getSystem()
-                                .equals(((CodeableConcept) maybePriority.getValue())
-                                        .getCodingFirstRep()
-                                        .getSystem())
-                        && target.getPriority()
-                                .getValue()
-                                .getCodingFirstRep()
-                                .getCode()
-                                .equals(((CodeableConcept) maybePriority.getValue())
-                                        .getCodingFirstRep()
-                                        .getCode()))) {
-            // priority will always be replace because:
-            // insert = an extension exists where it did not before, which is a replacement from "routine"
-            // to "emergent"
-            // delete = an extension does not exist where it did before, which is a replacement from
-            // "emergent" to "routine"
-            newOperation.setType(ChangeLog.REPLACE);
-            target.getPriority().setOperation(newOperation);
-        }
-    }
-
     @Override
     public void addOperation(String type, String path, Object currentValue, Object originalValue) {
         if (type != null) {
@@ -147,27 +96,13 @@ public class LibraryChild extends PageBase {
                 operationTarget = Optional.of(this.relatedArtifacts.get(relatedArtifactIndex));
             }
         }
-        if (operationTarget.isPresent()) {
-            if (path.contains("xtension[")) {
-                var matcher = Pattern.compile("xtension\\[(\\d+)]").matcher(path);
-                if (matcher.find()) {
-                    var extension = operationTarget
-                            .get()
-                            .getFullRelatedArtifact()
-                            .getExtension()
-                            .get(Integer.parseInt(matcher.group(1)));
-                    tryAddConditionOperation(extension, operationTarget.orElse(null), newOperation);
-                    tryAddPriorityOperation(extension, operationTarget.orElse(null), newOperation);
-                }
-            } else if (currentValue instanceof Extension currentExtension) {
-                tryAddConditionOperation(currentExtension, operationTarget.orElse(null), newOperation);
-                tryAddPriorityOperation(currentExtension, operationTarget.orElse(null), newOperation);
-            } else if (originalValue instanceof Extension originalExtension) {
-                tryAddConditionOperation(originalExtension, operationTarget.orElse(null), newOperation);
-                tryAddPriorityOperation(originalExtension, operationTarget.orElse(null), newOperation);
-            } else {
-                operationTarget.get().setOperation(newOperation);
-            }
+        // An operation on one of a relatedArtifact's extensions is a condition or a priority. Both are
+        // decided by comparing the two sides in ChangeLog.addConditionsAndPriorities. Deliberately
+        // drop diffs positionally reported operations here.
+        var isExtensionOperation =
+                path.contains("xtension[") || currentValue instanceof Extension || originalValue instanceof Extension;
+        if (operationTarget.isPresent() && !isExtensionOperation) {
+            operationTarget.get().setOperation(newOperation);
         }
     }
 }

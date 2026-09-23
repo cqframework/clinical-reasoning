@@ -35,7 +35,9 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
 
     public static class DiffCache {
         private final Map<String, Parameters> diffs = new HashMap<>();
-        private final Map<String, DiffCacheResource> resources = new HashMap<>();
+        // One map per side. This prevents the target resource from overwriting the source resource.
+        private final Map<String, MetadataResource> sourceResources = new HashMap<>();
+        private final Map<String, MetadataResource> targetResources = new HashMap<>();
 
         public DiffCache() {
             super();
@@ -50,51 +52,43 @@ public class ArtifactDiffProcessor implements IArtifactDiffProcessor {
         }
 
         public void addSource(String url, MetadataResource resource) {
-            this.resources.put(url, new DiffCacheResource(resource, true));
+            this.sourceResources.put(url, resource);
         }
 
         public void addTarget(String url, MetadataResource resource) {
-            this.resources.put(url, new DiffCacheResource(resource, false));
+            this.targetResources.put(url, resource);
         }
 
-        public Optional<MetadataResource> getResource(String url) {
-            var resource = Optional.ofNullable(this.resources.get(url)).map(r -> r.resource);
+        // The resource the given side holds for a canonical
+        public Optional<MetadataResource> getResource(String url, boolean isSource) {
+            var side = isSource ? this.sourceResources : this.targetResources;
+            var resource = Optional.ofNullable(side.get(url));
             if (resource.isEmpty()) {
-                var possibleMatches = getResourcesForUrl(url);
+                var possibleMatches = resourcesForUrl(url, side);
                 if (!possibleMatches.isEmpty()) {
                     if (possibleMatches.size() > 1) {
                         throw new UnprocessableEntityException(
                                 "Artifact contains multiple resources with the same URL:" + url);
                     }
-                    resource = Optional.of(possibleMatches.get(0).resource);
+                    resource = Optional.of(possibleMatches.get(0));
                 }
             }
             return resource;
         }
 
-        public List<DiffCacheResource> getResourcesForUrl(String url) {
-            return this.resources.keySet().stream()
+        private static List<MetadataResource> resourcesForUrl(String url, Map<String, MetadataResource> side) {
+            return side.keySet().stream()
                     .filter(k -> url.equals(Canonicals.getUrl(k)))
-                    .map(this.resources::get)
+                    .map(side::get)
                     .toList();
         }
 
-        public Optional<DiffCacheResource> getSourceResourceForUrl(String url) {
-            return getResourcesForUrl(url).stream().filter(res -> res.isSource).findFirst();
+        public Optional<MetadataResource> getSourceResourceForUrl(String url) {
+            return resourcesForUrl(url, this.sourceResources).stream().findFirst();
         }
 
-        public Optional<DiffCacheResource> getTargetResourceForUrl(String url) {
-            return getResourcesForUrl(url).stream().filter(res -> !res.isSource).findFirst();
-        }
-
-        public static class DiffCacheResource {
-            public final MetadataResource resource;
-            public final boolean isSource;
-
-            DiffCacheResource(MetadataResource resource, boolean isSource) {
-                this.resource = resource;
-                this.isSource = isSource;
-            }
+        public Optional<MetadataResource> getTargetResourceForUrl(String url) {
+            return resourcesForUrl(url, this.targetResources).stream().findFirst();
         }
     }
 }

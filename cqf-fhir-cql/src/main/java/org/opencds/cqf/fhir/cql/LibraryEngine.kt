@@ -101,7 +101,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             return "Tuple { ${properties.joinToString(", ")} }"
         }
         if (fhirType.contains(".")) {
-            val split = fhirType.split(".").dropLastWhile { it.isEmpty() }
+            val split = fhirType.split(".")
             fhirType =
                 split.joinToString(".") { str ->
                     str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }

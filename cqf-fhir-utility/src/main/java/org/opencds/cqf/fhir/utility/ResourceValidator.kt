@@ -100,8 +100,7 @@ class ResourceValidator : IResourceValidator {
                         listOf("CodeSystem", "StructureDefinition", "ValueSet")
                             .contains(
                                 resourceComponent.reference.reference
-                                    .split("/")
-                                    .dropLastWhile { it.isEmpty() }[0]
+                                    .split("/")[0]
                             )
                     ) {
                         try {

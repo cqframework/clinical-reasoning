@@ -154,7 +154,7 @@ class CqfExpression {
             val fhirPackagePath = "org.hl7.fhir."
             val className = extension.javaClass.canonicalName
             val modelSplit =
-                className.split(fhirPackagePath.toRegex()).dropLastWhile { it.isEmpty() }
+                className.split(fhirPackagePath.toRegex())
             require(modelSplit.size >= 2)
             var model = modelSplit[1]
             model = model.substring(0, model.indexOf(".")).uppercase()

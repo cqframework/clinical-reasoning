@@ -241,7 +241,8 @@ public class ActivityDefinitionProcessor implements IActivityDefinitionProcessor
                     repository,
                     requestResolverFactory != null
                             ? requestResolverFactory
-                            : IRequestResolverFactory.getDefault(fhirVersion));
+                            : IRequestResolverFactory.getDefault(fhirVersion),
+                    crSettings.getExtensionPropagationPolicy());
         }
     }
 

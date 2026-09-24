@@ -5,7 +5,6 @@ import static org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanoni
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.repository.IRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -17,6 +16,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
+import org.opencds.cqf.fhir.cr.common.ExtensionPropagationPolicy;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
@@ -39,10 +39,18 @@ public class ProcessAction {
     final DynamicValueProcessor dynamicValueProcessor;
 
     public ProcessAction(IRepository repository, ApplyProcessor applyProcessor, GenerateProcessor generateProcessor) {
+        this(repository, applyProcessor, generateProcessor, ExtensionPropagationPolicy.legacy());
+    }
+
+    public ProcessAction(
+            IRepository repository,
+            ApplyProcessor applyProcessor,
+            GenerateProcessor generateProcessor,
+            ExtensionPropagationPolicy propagationPolicy) {
         this.repository = repository;
         this.generateProcessor = generateProcessor;
         this.processDefinition = new ProcessDefinition(repository, applyProcessor);
-        extensionProcessor = new ExtensionProcessor();
+        extensionProcessor = new ExtensionProcessor(propagationPolicy);
         expressionProcessor = new ExpressionProcessor();
         dynamicValueProcessor = new DynamicValueProcessor();
     }
@@ -60,7 +68,13 @@ public class ProcessAction {
         if (Boolean.TRUE.equals(meetsConditions(request, action))) {
             metConditions.add(action.hasId() ? action.getId() : request.getNextActionId());
             var requestAction = generateRequestAction(action);
-            extensionProcessor.processExtensions(request, requestAction, (IElement) action.get(), new ArrayList<>());
+            extensionProcessor.processExtensions(
+                    request,
+                    requestAction,
+                    (IElement) action.get(),
+                    List.of(),
+                    "PlanDefinition.action",
+                    requestOrchestration.get().fhirType() + ".action");
             processChildActions(request, requestOrchestration, metConditions, action, requestAction);
             var resource = processDefinition.resolveDefinition(request, requestOrchestration, action, requestAction);
             var adapter = resource == null ? null : request.getAdapterFactory().createResource(resource);

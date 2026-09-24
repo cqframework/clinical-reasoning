@@ -1,6 +1,9 @@
 package org.opencds.cqf.fhir.cr;
 
+import static java.util.Objects.requireNonNull;
+
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
+import org.opencds.cqf.fhir.cr.common.ExtensionPropagationPolicy;
 import org.opencds.cqf.fhir.utility.IResourceValidator;
 import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
 
@@ -8,6 +11,7 @@ public class CrSettings {
     private EvaluationSettings evaluationSettings;
     private TerminologyServerClientSettings terminologyServerClientSettings;
     private IResourceValidator resourceValidator;
+    private ExtensionPropagationPolicy extensionPropagationPolicy;
 
     public static CrSettings getDefault() {
         return new CrSettings();
@@ -17,6 +21,22 @@ public class CrSettings {
         evaluationSettings = EvaluationSettings.getDefault();
         terminologyServerClientSettings = TerminologyServerClientSettings.getDefault();
         resourceValidator = null;
+        extensionPropagationPolicy = ExtensionPropagationPolicy.legacy();
+    }
+
+    public ExtensionPropagationPolicy getExtensionPropagationPolicy() {
+        return extensionPropagationPolicy;
+    }
+
+    /** Configures automatic extension copying. Set before the processors are first used. */
+    public CrSettings withExtensionPropagationPolicy(ExtensionPropagationPolicy extensionPropagationPolicy) {
+        setExtensionPropagationPolicy(extensionPropagationPolicy);
+        return this;
+    }
+
+    public void setExtensionPropagationPolicy(ExtensionPropagationPolicy extensionPropagationPolicy) {
+        this.extensionPropagationPolicy =
+                requireNonNull(extensionPropagationPolicy, "extensionPropagationPolicy can not be null");
     }
 
     public EvaluationSettings getEvaluationSettings() {

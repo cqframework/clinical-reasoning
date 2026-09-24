@@ -24,11 +24,10 @@ import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
@@ -59,9 +58,12 @@ class ProcessActionTests {
     @Mock
     private IInputParameterResolver inputParameterResolver;
 
-    @Spy
-    @InjectMocks
     ProcessAction fixture;
+
+    @BeforeEach
+    void setup() {
+        fixture = new ProcessAction(repository, applyProcessor, generateProcessor);
+    }
 
     @Test
     void dstu3Request() {

@@ -6,6 +6,7 @@ import java.util.List;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.common.DynamicValueProcessor;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
+import org.opencds.cqf.fhir.cr.common.ExtensionPropagationPolicy;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.slf4j.Logger;
@@ -23,9 +24,16 @@ public class ApplyProcessor implements IApplyProcessor {
     protected final DynamicValueProcessor dynamicValueProcessor;
 
     public ApplyProcessor(IRepository repository, IRequestResolverFactory resolverFactory) {
+        this(repository, resolverFactory, ExtensionPropagationPolicy.legacy());
+    }
+
+    public ApplyProcessor(
+            IRepository repository,
+            IRequestResolverFactory resolverFactory,
+            ExtensionPropagationPolicy propagationPolicy) {
         this.repository = repository;
         this.resolverFactory = resolverFactory;
-        this.extensionProcessor = new ExtensionProcessor();
+        this.extensionProcessor = new ExtensionProcessor(propagationPolicy);
         this.dynamicValueProcessor = new DynamicValueProcessor();
     }
 

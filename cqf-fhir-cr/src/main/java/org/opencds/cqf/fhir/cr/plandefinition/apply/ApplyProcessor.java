@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.cr.common.ExtensionProcessor;
+import org.opencds.cqf.fhir.cr.common.ExtensionPropagationPolicy;
 import org.opencds.cqf.fhir.cr.common.ICpgRequest;
 import org.opencds.cqf.fhir.cr.questionnaire.generate.GenerateProcessor;
 import org.opencds.cqf.fhir.cr.questionnaire.populate.PopulateProcessor;
@@ -60,15 +61,22 @@ public class ApplyProcessor implements IApplyProcessor {
     public ApplyProcessor(
             IRepository repository,
             org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor) {
+        this(repository, activityProcessor, ExtensionPropagationPolicy.legacy());
+    }
+
+    public ApplyProcessor(
+            IRepository repository,
+            org.opencds.cqf.fhir.cr.activitydefinition.apply.IApplyProcessor activityProcessor,
+            ExtensionPropagationPolicy propagationPolicy) {
         this.repository = repository;
         this.activityProcessor = activityProcessor;
-        extensionProcessor = new ExtensionProcessor();
+        extensionProcessor = new ExtensionProcessor(propagationPolicy);
         generateProcessor = new GenerateProcessor(this.repository);
         populateProcessor = new PopulateProcessor();
         extractProcessor = new QuestionnaireResponseProcessor(this.repository);
         processRequest = new ResponseBuilder(populateProcessor);
-        processGoal = new ProcessGoal();
-        processAction = new ProcessAction(this.repository, this, generateProcessor);
+        processGoal = new ProcessGoal(propagationPolicy);
+        processAction = new ProcessAction(this.repository, this, generateProcessor, propagationPolicy);
     }
 
     /*

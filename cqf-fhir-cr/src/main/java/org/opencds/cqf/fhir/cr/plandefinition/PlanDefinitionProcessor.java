@@ -90,9 +90,12 @@ public class PlanDefinitionProcessor {
                     repository,
                     requestResolverFactory != null
                             ? requestResolverFactory
-                            : IRequestResolverFactory.getDefault(fhirVersion));
+                            : IRequestResolverFactory.getDefault(fhirVersion),
+                    crSettings.getExtensionPropagationPolicy());
         }
-        applyProcessor = applyProcessor != null ? applyProcessor : new ApplyProcessor(repository, activityProcessor);
+        applyProcessor = applyProcessor != null
+                ? applyProcessor
+                : new ApplyProcessor(repository, activityProcessor, crSettings.getExtensionPropagationPolicy());
     }
 
     protected <C extends IPrimitiveType<String>, R extends IBaseResource> R resolvePlanDefinition(

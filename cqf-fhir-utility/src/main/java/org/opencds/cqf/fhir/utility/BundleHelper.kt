@@ -223,7 +223,7 @@ object BundleHelper {
      * @return IBaseBackboneElement
      */
     @JvmStatic
-    fun <T : IBaseBackboneElement> getEntry(bundle: IBaseBundle): MutableList<T> {
+    fun <T : IBaseBackboneElement> getEntry(bundle: IBaseBundle): MutableList<T?> {
         @Suppress("UNCHECKED_CAST")
         return when (val fhirVersion = bundle.structureFhirVersionEnum) {
             FhirVersionEnum.DSTU3 -> (bundle as org.hl7.fhir.dstu3.model.Bundle).entry
@@ -234,7 +234,7 @@ object BundleHelper {
                     BundleHelper.UNSUPPORTED_VERSION_OF_FHIR(fhirVersion.fhirVersionString)
                 )
         }
-            as MutableList<T>
+            as MutableList<T?>
     }
 
     /**
@@ -291,7 +291,7 @@ object BundleHelper {
         val entry = getEntry<IBaseBackboneElement>(bundle)
 
         return entry
-            .map { BundleHelper.getEntryResource(fhirVersion, it)!!.idElement }
+            .map { BundleHelper.getEntryResource(fhirVersion, it!!)!!.idElement }
             .toMutableList()
     }
 

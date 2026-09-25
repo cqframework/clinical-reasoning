@@ -169,7 +169,7 @@ public class ProcessAction {
                     request.logException(message);
                 }
                 if (result == null) {
-                    logger.warn("Condition expression '{}' returned null", conditionExpression);
+                    logger.warn("Condition expression '{}' returned null", conditionExpression.getExpression());
                 } else {
                     conditionResult = validateResult(result, conditionExpression.getExpression());
                     logger.debug(

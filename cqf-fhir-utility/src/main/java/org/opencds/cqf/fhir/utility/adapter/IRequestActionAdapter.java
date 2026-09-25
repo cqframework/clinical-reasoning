@@ -1,9 +1,11 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import java.util.List;
+import kotlin.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -55,6 +57,10 @@ public interface IRequestActionAdapter extends IAdapter<IBase> {
     <T extends IBaseBackboneElement> List<T> getCondition();
 
     void addCondition(IBaseBackboneElement condition);
+
+    void addCondition(Pair<IAdapter<?>, Boolean> conditionResult);
+
+    IBaseExtension<?, ?> getConditionResult(Boolean result);
 
     boolean hasRelatedAction();
 

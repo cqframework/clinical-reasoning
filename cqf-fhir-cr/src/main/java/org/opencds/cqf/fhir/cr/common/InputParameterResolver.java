@@ -99,7 +99,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                     .getResourceDefinition(subjectId.getResourceType())
                     .getImplementingClass();
             var subject = readRepository(subjectClass, subjectId);
-            if (subject != null) {
+            if (subject != null && !params.hasParameter("%subject")) {
                 params.addParameter("%subject", subject);
             }
         }
@@ -108,7 +108,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                     .getResourceDefinition(encounterId.getResourceType())
                     .getImplementingClass();
             var encounter = readRepository(encounterClass, encounterId);
-            if (encounter != null) {
+            if (encounter != null && !params.hasParameter("%encounter")) {
                 params.addParameter("%encounter", encounter);
             }
         }
@@ -117,7 +117,7 @@ public class InputParameterResolver implements IInputParameterResolver {
                     .getResourceDefinition(practitionerId.getResourceType())
                     .getImplementingClass();
             var practitioner = readRepository(practitionerClass, practitionerId);
-            if (practitioner != null) {
+            if (practitioner != null && !params.hasParameter("%practitioner")) {
                 params.addParameter("%practitioner", practitioner);
             }
         }

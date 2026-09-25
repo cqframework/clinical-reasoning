@@ -35,5 +35,8 @@ class CodeableConceptAdapterTest {
         var adapter = adapterFactory.createCodeableConcept(codeableConcept);
         assertTrue(adapter.hasCoding("test"));
         assertEquals(1, adapter.getCoding().size());
+        adapter.addCoding("test.com", "test2", "Test2");
+        assertTrue(adapter.hasCoding("test2"));
+        assertEquals(2, adapter.getCoding().size());
     }
 }

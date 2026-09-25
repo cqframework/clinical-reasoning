@@ -239,4 +239,14 @@ public interface IAdapter<T extends IBase> {
             default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
         };
     }
+
+    @SuppressWarnings("unchecked")
+    static <T extends IPrimitiveType<Boolean>> T newBooleanType(FhirVersionEnum version, Boolean value) {
+        return switch (version) {
+            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.BooleanType(value);
+            case R4 -> (T) new org.hl7.fhir.r4.model.BooleanType(value);
+            case R5 -> (T) new org.hl7.fhir.r5.model.BooleanType(value);
+            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
+        };
+    }
 }

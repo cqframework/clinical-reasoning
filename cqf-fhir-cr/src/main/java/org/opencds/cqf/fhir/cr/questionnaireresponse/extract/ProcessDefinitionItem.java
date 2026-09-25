@@ -34,6 +34,7 @@ import org.opencds.cqf.fhir.cr.common.ICqlOperationRequest;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.CqfExpression;
 import org.opencds.cqf.fhir.utility.FhirPathCache;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
@@ -47,6 +48,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "UnstableApiUsage"})
 public class ProcessDefinitionItem {
     protected static final String ID_PATH = "id";
+    protected static final String CODEABLE_CONCEPT = "CodeableConcept";
     protected static final String DEFINITION_PATH = "definition";
     protected static final String VALUE_PATH = "value";
     protected static final Logger logger = LoggerFactory.getLogger(ProcessDefinitionItem.class);
@@ -181,7 +183,7 @@ public class ProcessDefinitionItem {
                 id = id.concat("-%s".formatted(linkId));
             }
             // casting here to identify the signature
-            resource.setId((IIdType) Ids.newId(request.getFhirVersion(), id));
+            resource.setId((IIdType) Ids.newId(request.getFhirVersion(), GeneratedIds.fromComposite(id)));
             resolveMeta(resource, profile);
         }
         getValueExtensions(request, item)
@@ -621,10 +623,14 @@ public class ProcessDefinitionItem {
                 profile == null ? null : profile.getElementByPath(answerPath.split(":")[0]);
         var answerType = pathElement == null ? null : pathElement.getTypeCode();
         if (answerType != null && !answerValue.fhirType().equals(answerType)) {
-            var newAnswerValue =
-                    request.getAdapterFactory().createBase(newBaseForVersion(answerType, request.getFhirVersion()));
-            newAnswerValue.setValue(VALUE_PATH, answerValue);
-            answerValue = newAnswerValue.get();
+            if (answerType.equals(CODEABLE_CONCEPT)) {
+                answerValue = transformValueToResource(request.getFhirVersion(), answerValue);
+            } else {
+                var newAnswerValue =
+                        request.getAdapterFactory().createBase(newBaseForVersion(answerType, request.getFhirVersion()));
+                newAnswerValue.setValue(VALUE_PATH, answerValue);
+                answerValue = newAnswerValue.get();
+            }
         } else {
             // Check if answer type matches path types available and transform if necessary
             if (!(pathDefinition instanceof RuntimeChildPrimitiveEnumerationDatatypeDefinition)

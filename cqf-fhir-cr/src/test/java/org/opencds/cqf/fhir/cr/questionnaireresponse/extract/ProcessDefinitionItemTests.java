@@ -21,6 +21,7 @@ import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
@@ -232,6 +233,74 @@ class ProcessDefinitionItemTests {
         ahvResponse.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(ahvValue)));
         var zidResponse = new QuestionnaireResponseItemComponent().setLinkId("zid");
         zidResponse.addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(zidValue)));
+        var response = new QuestionnaireResponse().setItem(List.of(ahvResponse, zidResponse));
+
+        var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);
+        var actual = fixture.processDefinitionItem(request, new ItemPair(null, null));
+
+        assertInstanceOf(Patient.class, actual);
+        var identifiers = ((Patient) actual).getIdentifier();
+        assertEquals(2, identifiers.size());
+        assertTrue(identifiers.stream()
+                .anyMatch(id -> ahvSystem.equals(id.getSystem()) && ahvValue.equals(id.getValue())));
+        assertTrue(identifiers.stream()
+                .anyMatch(id -> zidSystem.equals(id.getSystem()) && zidValue.equals(id.getValue())));
+    }
+
+    @Test
+    void testExtractsGroupedIdentifierSlicesWithoutResolvingSlicePath() {
+        var fhirVersion = FhirVersionEnum.R4;
+        var profileUrl = "http://example.org/fhir/StructureDefinition/ChPatient";
+        var ahvSystem = "urn:oid:2.16.756.5.32";
+        var zidSystem = "urn:oid:2.16.756.5.30.1.127.3.10.3";
+        var ahvValue = "7561234567897";
+        var zidValue = "761337610411353650";
+
+        var profile = new StructureDefinition().setUrl(profileUrl).setType("Patient");
+        profile.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier");
+        var ahvSlice = profile.getDifferential().addElement().setPath("Patient.identifier");
+        ahvSlice.setId("Patient.identifier:AHVN13");
+        ahvSlice.setSliceName("AHVN13");
+        ahvSlice.setPattern(new Identifier().setSystem(ahvSystem));
+        var zidSlice = profile.getDifferential().addElement().setPath("Patient.identifier");
+        zidSlice.setId("Patient.identifier:EPR-SPID");
+        zidSlice.setSliceName("EPR-SPID");
+        zidSlice.setPattern(new Identifier().setSystem(zidSystem));
+
+        var searchResult = new Bundle();
+        searchResult.addEntry().setResource(profile);
+        doReturn(searchResult)
+                .when(repository)
+                .search(eq(Bundle.class), any(), any(Multimap.class));
+
+        var ahvGroup = new QuestionnaireItemComponent()
+                .setLinkId("ahvn13")
+                .setType(QuestionnaireItemType.GROUP)
+                .setDefinition(profileUrl + "#Patient.identifier:AHVN13")
+                .setItem(List.of(new QuestionnaireItemComponent()
+                        .setLinkId("ahvn13-value")
+                        .setType(QuestionnaireItemType.STRING)
+                        .setDefinition(profileUrl + "#Patient.identifier:AHVN13.value")));
+        var zidGroup = new QuestionnaireItemComponent()
+                .setLinkId("epr-spid")
+                .setType(QuestionnaireItemType.GROUP)
+                .setDefinition(profileUrl + "#Patient.identifier:EPR-SPID")
+                .setItem(List.of(new QuestionnaireItemComponent()
+                        .setLinkId("epr-spid-value")
+                        .setType(QuestionnaireItemType.STRING)
+                        .setDefinition(profileUrl + "#Patient.identifier:EPR-SPID.value")));
+        var questionnaire = new Questionnaire().setItem(List.of(ahvGroup, zidGroup));
+        questionnaire.addExtension(new Extension(Constants.SDC_QUESTIONNAIRE_ITEM_EXTRACTION_CONTEXT)
+                .setValue(new CanonicalType().setValue(profileUrl)));
+
+        var ahvResponse = new QuestionnaireResponseItemComponent().setLinkId("ahvn13");
+        ahvResponse.addItem(new QuestionnaireResponseItemComponent()
+                .setLinkId("ahvn13-value")
+                .addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(ahvValue))));
+        var zidResponse = new QuestionnaireResponseItemComponent().setLinkId("epr-spid");
+        zidResponse.addItem(new QuestionnaireResponseItemComponent()
+                .setLinkId("epr-spid-value")
+                .addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(zidValue))));
         var response = new QuestionnaireResponse().setItem(List.of(ahvResponse, zidResponse));
 
         var request = newExtractRequestForVersion(fhirVersion, libraryEngine, response, questionnaire);

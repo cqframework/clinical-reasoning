@@ -341,6 +341,10 @@ public class ProcessDefinitionItem {
         var definition = getDefinition(itemPair);
         var children = itemPair.getResponseItem().getItem();
         var repeats = itemPair.getItem() != null && itemPair.getItem().getRepeats();
+        if (delegateSliceGroup(
+                request, resourceDefinition, profile, parent, itemPair, isNestedRepeating, parentPath, children)) {
+            return;
+        }
         if (StringUtils.isBlank(definition)) {
             processItems(
                     request,
@@ -504,16 +508,26 @@ public class ProcessDefinitionItem {
                 ? def.getDatatype()
                 : getClassForTypeAndVersion("Extension", request.getFhirVersion());
         var sliceElements = profile.getSliceElements(sliceName);
-        var answerPath = getChildProperty(identifiers, sliceIndex + 1);
+        // A leaf definition such as Patient.identifier:AHVN13 has no child path.
+        var answerPath = sliceIndex + 1 < identifiers.length ? getChildProperty(identifiers, sliceIndex + 1) : "value";
         var extensionUrl = getExtensionUrl(profile, sliceName);
+        var sliceRoot = profile.getElement(profile.getType() + "." + sliceName);
         answers.forEach(answer -> {
             var answerValue = answer.getValue();
             if (answerValue != null) {
                 var sliceValue = request.getAdapterFactory().createBase(newBase(sliceClass));
                 setAnswerValue(request, sliceValue, propertyDefs.get(answerPath), answerPath, answerValue, profile);
+                if (sliceRoot != null) {
+                    applyPatternIdentifier(request, sliceValue, sliceRoot.getDefaultOrFixedOrPattern());
+                }
                 for (var slice : sliceElements) {
                     var sliceElementPath = slice.getId().replace("%s.%s.".formatted(profile.getType(), sliceName), "");
                     var sliceElementValue = slice.getDefaultOrFixedOrPattern();
+                    if (sliceElementPath.contains(":")
+                            || (sliceElementValue != null && "Identifier".equals(sliceElementValue.fhirType()))) {
+                        applyPatternIdentifier(request, sliceValue, sliceElementValue);
+                        continue;
+                    }
                     setAnswerValue(
                             request,
                             sliceValue,
@@ -617,9 +631,77 @@ public class ProcessDefinitionItem {
     }
 
     protected IBase getElement(IAdapter<?> parent, String path) {
-        var elementPath = path.split("\\.")[0];
-        var value = parent.resolvePathList(elementPath);
-        return value.isEmpty() ? null : value.get(0);
+        if (StringUtils.isBlank(path) || path.contains(":")) {
+            // Slice names are not FHIRPath. Resolving identifier:AHVN13 fails the whole extract.
+            return null;
+        }
+        try {
+            var elementPath = path.split("\\.")[0];
+            var value = parent.resolvePathList(elementPath);
+            return value.isEmpty() ? null : value.get(0);
+        } catch (RuntimeException ex) {
+            if (isUnresolvablePath(ex)) {
+                return null;
+            }
+            throw ex;
+        }
+    }
+
+    /**
+     * A group such as Patient.identifier:AHVN13 is not a resolvable element. Keep processing its children
+     * against the same parent so leaf slices can still be appended, and never fail extract.
+     */
+    private boolean delegateSliceGroup(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            Optional<IStructureDefinitionAdapter> profile,
+            IAdapter<?> parent,
+            ItemPair itemPair,
+            boolean isNestedRepeating,
+            String parentPath,
+            List<? extends IItemComponentAdapter> children) {
+        var definition = getDefinition(itemPair);
+        if (StringUtils.isBlank(definition) || !definition.contains("#") || children == null || children.isEmpty()) {
+            return false;
+        }
+        var path = getPathAdapter(request, profile, definition).getLeft();
+        if (path == null || !path.contains(":")) {
+            return false;
+        }
+        var repeats = itemPair.getItem() != null && Boolean.TRUE.equals(itemPair.getItem().getRepeats());
+        List<? extends IItemComponentAdapter> questionnaireItems =
+                itemPair.getItem() == null ? Collections.emptyList() : itemPair.getItem().getItem();
+        processItems(
+                request,
+                resourceDefinition,
+                profile,
+                parent,
+                new ImmutablePair<>(children, questionnaireItems),
+                repeats || isNestedRepeating,
+                parentPath);
+        return true;
+    }
+
+    private void applyPatternIdentifier(ExtractRequest request, IAdapter<?> sliceValue, IBase pattern) {
+        if (pattern == null || !"Identifier".equals(pattern.fhirType())) {
+            return;
+        }
+        var system = request.getAdapterFactory().createBase(pattern).resolvePath(pattern, "system");
+        if (system != null && sliceValue.resolvePath(sliceValue.get(), "system") == null) {
+            sliceValue.setValue("system", system);
+        }
+    }
+
+    private static boolean isUnresolvablePath(Throwable ex) {
+        var current = ex;
+        while (current != null) {
+            var message = current.getMessage();
+            if (message != null && message.contains("Unable to resolve path")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     protected List<Class<? extends IBase>> getChoices(BaseRuntimeChildDefinition pathDefinition) {

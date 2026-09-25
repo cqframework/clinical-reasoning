@@ -60,7 +60,21 @@ public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
 
     default List<IElementDefinitionAdapter> getSliceElements(String sliceName) {
         return getDifferentialElements().stream()
-                .filter(e -> e.getId().contains(sliceName) && StringUtils.isBlank(e.getSliceName()))
+                .filter(e -> matchesSliceElementId(e.getId(), sliceName) && StringUtils.isBlank(e.getSliceName()))
                 .toList();
+    }
+
+    /**
+     * Matches slice ids on name boundaries so {@code identifier:id} does not also match
+     * {@code identifier:idType}.
+     */
+    private static boolean matchesSliceElementId(String id, String sliceName) {
+        if (StringUtils.isBlank(id) || StringUtils.isBlank(sliceName)) {
+            return false;
+        }
+        return id.contains("." + sliceName + ".")
+                || id.endsWith("." + sliceName)
+                || id.contains(":" + sliceName + ".")
+                || id.endsWith(":" + sliceName);
     }
 }

@@ -56,7 +56,7 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
                             referenceSource,
                             ct.value,
                             ct.extension,
-                            { theValue -> ct.setValue(theValue) },
+                            { theValue -> ct.value = theValue },
                         )
                     )
                 }

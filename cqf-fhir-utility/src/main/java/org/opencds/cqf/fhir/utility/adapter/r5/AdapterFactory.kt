@@ -12,16 +12,12 @@ import org.opencds.cqf.fhir.utility.adapter.*
 
 class AdapterFactory : IAdapterFactory {
     override fun createResource(resource: IBaseResource): IResourceAdapter {
-        if (resource is MetadataResource) {
-            return createKnowledgeArtifactAdapter(resource)
-        } else if (resource is Endpoint) {
-            return createEndpoint(resource)
-        } else if (resource is Parameters) {
-            return createParameters(resource)
-        } else if (resource is Group) {
-            return createGroup(resource)
-        } else {
-            return ResourceAdapter(resource)
+        return when (resource) {
+            is MetadataResource -> createKnowledgeArtifactAdapter(resource)
+            is Endpoint -> createEndpoint(resource)
+            is Parameters -> createParameters(resource)
+            is Group -> createGroup(resource)
+            else -> ResourceAdapter(resource)
         }
     }
 

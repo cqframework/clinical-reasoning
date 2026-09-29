@@ -62,7 +62,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                         referenceSource,
                         ct.value,
                         ct.extension,
-                        { theValue -> ct.setValue(theValue) },
+                        { theValue -> ct.value = theValue },
                     )
                 references.add(dependency)
             }
@@ -81,7 +81,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                             referenceSource,
                             (ext.value as CanonicalType).value,
                             ext.extension,
-                            { reference -> ext.setValue(CanonicalType(reference)) },
+                            { reference -> ext.value = CanonicalType(reference) },
                         )
                     )
                 }
@@ -106,7 +106,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                                 referenceSource,
                                 profile!!.value,
                                 profile.extension,
-                                { theValue -> profile.setValue(theValue) },
+                                { theValue -> profile.value = theValue },
                             )
                         )
                     }
@@ -119,7 +119,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                                 referenceSource,
                                 cf!!.valueSet,
                                 cf.extension,
-                                { value -> cf.setValueSet(value) },
+                                { value -> cf.valueSet = value },
                             )
                         )
                     }
@@ -135,7 +135,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                         referenceSource,
                         expression!!.reference,
                         expression.extension,
-                        { value -> expression.setReference(value) },
+                        { value -> expression.reference = value },
                     )
                 )
             }
@@ -150,7 +150,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                         referenceSource,
                         expression!!.reference,
                         expression.extension,
-                        { value -> expression.setReference(value) },
+                        { value -> expression.reference = value },
                     )
                 )
             }
@@ -166,7 +166,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                             referenceSource,
                             profile!!.value,
                             profile.extension,
-                            { theValue -> profile.setValue(theValue) },
+                            { theValue -> profile.value = theValue },
                         )
                     )
                 }
@@ -180,7 +180,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                             referenceSource,
                             cf!!.valueSet,
                             cf.extension,
-                            { value -> cf.setValueSet(value) },
+                            { value -> cf.valueSet = value },
                         )
                     )
                 }
@@ -193,7 +193,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                     referenceSource,
                     definition.value,
                     definition.extension,
-                    { theValue -> definition.setValue(theValue) },
+                    { theValue -> definition.value = theValue },
                 )
             )
         }

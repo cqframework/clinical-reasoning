@@ -186,7 +186,7 @@ class DependencyInfo(
                         source,
                         ra.resource,
                         ra.extension,
-                        { value -> ra.setResource(value) },
+                        { value -> ra.resource = value },
                     )
 
                 // R5 can have either a Resource (canonical URL) or a ResourceReference
@@ -202,7 +202,7 @@ class DependencyInfo(
                             )
                             .firstNotNullOfOrNull { it },
                         ra.extension,
-                        { value -> ra.setResource(value) },
+                        { value -> ra.resource = value },
                     )
 
                 else ->

@@ -30,7 +30,7 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
     }
 
     override fun setId(id: String): IQuestionnaireResponseAdapter {
-        get().setId(id)
+        get().id = id
         return this
     }
 
@@ -49,7 +49,7 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
         }
 
     override fun setQuestionnaire(canonical: String?): IQuestionnaireResponseAdapter {
-        get().setQuestionnaire(canonical)
+        get().questionnaire = canonical
         return this
     }
 
@@ -63,17 +63,17 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
         }
 
     override fun setSubject(subject: IIdType?): IQuestionnaireResponseAdapter {
-        get().setSubject(Reference(subject))
+        get().subject = Reference(subject)
         return this
     }
 
     override fun setAuthored(date: Date?): IQuestionnaireResponseAdapter {
-        get().setAuthored(date)
+        get().authored = date
         return this
     }
 
     override fun setStatus(status: String?): IQuestionnaireResponseAdapter {
-        get().setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.fromCode(status))
+        get().status = QuestionnaireResponse.QuestionnaireResponseStatus.fromCode(status)
         return this
     }
 
@@ -90,7 +90,7 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
                 .toMutableList()
         }
         set(items) {
-            this.questionnaireResponse.setItem(
+            this.questionnaireResponse.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj ->
@@ -99,7 +99,6 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
                             .cast(obj)
                     }
                     .toMutableList()
-            )
         }
 
     override fun addItem(item: IQuestionnaireResponseItemComponentAdapter?) {

@@ -28,7 +28,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setId(id: String?): IRequestActionAdapter {
-        get().setId(id)
+        get().id = id
         return this
     }
 
@@ -42,7 +42,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setTitle(title: String?): IRequestActionAdapter {
-        get().setTitle(title)
+        get().title = title
         return this
     }
 
@@ -56,7 +56,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setDescription(description: String?): IRequestActionAdapter {
-        get().setDescription(description)
+        get().description = description
         return this
     }
 
@@ -70,7 +70,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setTextEquivalent(text: String?): IRequestActionAdapter {
-        get().setTextEquivalent(text)
+        get().textEquivalent = text
         return this
     }
 
@@ -84,7 +84,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setPriority(priority: String?): IRequestActionAdapter {
-        get().setPriority(RequestGroup.RequestPriority.fromCode(priority))
+        get().priority = RequestGroup.RequestPriority.fromCode(priority)
         return this
     }
 
@@ -92,13 +92,13 @@ class RequestActionAdapter(requestAction: IBase) :
         return get().hasCode()
     }
 
-    override val code: ICodeableConceptAdapter?
+    override val code: ICodeableConceptAdapter
         get() {
             return adapterFactory.createCodeableConcept(get().code.get(0))
         }
 
     override fun setCode(code: ICodeableConceptAdapter?): IRequestActionAdapter {
-        get().setCode(if (code == null) null else mutableListOf(code.get() as CodeableConcept?))
+        get().code = if (code == null) null else mutableListOf(code.get() as CodeableConcept?)
         return this
     }
 
@@ -116,10 +116,9 @@ class RequestActionAdapter(requestAction: IBase) :
     override fun <T> setDocumentation(documentation: MutableList<T?>?): IRequestActionAdapter where
     T : ICompositeType,
     T : IBaseHasExtensions {
-        get()
-            .setDocumentation(
-                documentation!!.map { obj -> RelatedArtifact::class.java.cast(obj) }.toMutableList()
-            )
+        get().documentation =
+            documentation!!.map { obj -> RelatedArtifact::class.java.cast(obj) }.toMutableList()
+
         return this
     }
 
@@ -180,7 +179,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setTiming(timing: IBaseDatatype?): IRequestActionAdapter {
-        get().setTiming(timing as Type?)
+        get().timing = timing as Type?
         return this
     }
 
@@ -194,7 +193,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setType(type: ICodeableConceptAdapter?): IRequestActionAdapter {
-        get().setType(type!!.get() as CodeableConcept?)
+        get().type = type!!.get() as CodeableConcept?
         return this
     }
 
@@ -208,7 +207,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setSelectionBehavior(behavior: String?): IRequestActionAdapter {
-        get().setSelectionBehavior(RequestGroup.ActionSelectionBehavior.fromCode(behavior))
+        get().selectionBehavior = RequestGroup.ActionSelectionBehavior.fromCode(behavior)
         return this
     }
 
@@ -222,7 +221,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setResource(resource: IBaseReference?): IRequestActionAdapter {
-        get().setResource(resource as Reference?)
+        get().resource = resource as Reference?
         return this
     }
 
@@ -246,17 +245,14 @@ class RequestActionAdapter(requestAction: IBase) :
     }
 
     override fun setAction(actions: MutableList<IRequestActionAdapter?>?): IRequestActionAdapter {
-        get()
-            .setAction(
-                if (actions == null) null
-                else
-                    actions
-                        .map { obj -> obj!!.get() }
-                        .map { obj ->
-                            RequestGroup.RequestGroupActionComponent::class.java.cast(obj)
-                        }
-                        .toMutableList()
-            )
+        get().action =
+            if (actions == null) null
+            else
+                actions
+                    .map { obj -> obj!!.get() }
+                    .map { obj -> RequestGroup.RequestGroupActionComponent::class.java.cast(obj) }
+                    .toMutableList()
+
         return this
     }
 }

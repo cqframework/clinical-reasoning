@@ -63,7 +63,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                         referenceSource,
                         derivedRef!!.asStringValue(),
                         derivedRef.extension,
-                        { theValue -> derivedRef.setValue(theValue) },
+                        { theValue -> derivedRef.value = theValue },
                     )
                 )
             }
@@ -74,7 +74,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                         referenceSource,
                         (libraryExt!!.value as CanonicalType).asStringValue(),
                         libraryExt.extension,
-                        { reference -> libraryExt.setValue(CanonicalType(reference)) },
+                        { reference -> libraryExt.value = CanonicalType(reference) },
                     )
                 )
             }
@@ -89,7 +89,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -118,7 +118,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                     referenceSource,
                     item.answerValueSet,
                     item.extension,
-                    { value -> item.setAnswerValueSet(value) },
+                    { value -> item.answerValueSet = value },
                 )
             )
         }
@@ -130,7 +130,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                         referenceSource,
                         (referenceExt!!.value as CanonicalType).asStringValue(),
                         referenceExt.extension,
-                        { reference -> referenceExt.setValue(CanonicalType(reference)) },
+                        { reference -> referenceExt.value = CanonicalType(reference) },
                     )
                 )
             }
@@ -144,7 +144,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                         referenceSource,
                         expression!!.reference,
                         expression.extension,
-                        { value -> expression.setReference(value) },
+                        { value -> expression.reference = value },
                     )
                 )
             }
@@ -166,12 +166,11 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                 .toMutableList()
         }
         set(items) {
-            this.questionnaire.setItem(
+            this.questionnaire.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
                     .toMutableList()
-            )
         }
 
     override fun addItem(item: IBaseBackboneElement?) {

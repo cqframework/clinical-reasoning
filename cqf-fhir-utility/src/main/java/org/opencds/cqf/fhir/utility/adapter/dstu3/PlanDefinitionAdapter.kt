@@ -86,7 +86,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                             referenceSource,
                             reference.value,
                             ext.extension,
-                            { theValue -> reference.setValue(theValue) },
+                            { theValue -> reference.value = theValue },
                         )
                     )
                 }
@@ -111,7 +111,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                                 referenceSource,
                                 profile!!.value,
                                 profile.extension,
-                                { theValue -> profile.setValue(theValue) },
+                                { theValue -> profile.value = theValue },
                             )
                         )
                     }
@@ -132,7 +132,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                             referenceSource,
                             profile!!.value,
                             profile.extension,
-                            { theValue -> profile.setValue(theValue) },
+                            { theValue -> profile.value = theValue },
                         )
                     )
                 }
@@ -168,7 +168,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                 this.planDefinition.url,
                 vs.value,
                 vs.extension,
-                { theValue -> vs.setValue(theValue) },
+                { theValue -> vs.value = theValue },
             )
         } else if (vs is Reference) {
             return DependencyInfo(

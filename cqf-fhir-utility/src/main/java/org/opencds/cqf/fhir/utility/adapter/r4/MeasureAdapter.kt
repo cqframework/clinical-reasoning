@@ -41,8 +41,8 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
 
     private fun getEdrReferenceConsumer(edrExtension: Extension): (String?) -> Unit {
         return if (edrExtension.url.contains("cqfm"))
-            { reference -> edrExtension.setValue(Reference(reference)) }
-        else { reference -> edrExtension.setValue(CanonicalType(reference)) }
+            { reference -> edrExtension.value = Reference(reference) }
+        else { reference -> edrExtension.value = CanonicalType(reference) }
     }
 
     private fun findEffectiveDataRequirements() {
@@ -124,7 +124,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                         referenceSource,
                         library.value,
                         library.extension,
-                        { theValue -> library.setValue(theValue) },
+                        { theValue -> library.value = theValue },
                     )
                 references.add(dependency)
             }
@@ -139,7 +139,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                                 referenceSource,
                                 p!!.criteria.reference,
                                 p.criteria.extension,
-                                { reference -> p.criteria.setReference(reference) },
+                                { reference -> p.criteria.reference = reference },
                             )
                         )
                     }
@@ -151,7 +151,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                                 referenceSource,
                                 stratifier.criteria.reference,
                                 stratifier.criteria.extension,
-                                { reference -> stratifier.criteria.setReference(reference) },
+                                { reference -> stratifier.criteria.reference = reference },
                             )
                         )
                     }
@@ -164,7 +164,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                                     referenceSource,
                                     component!!.criteria.reference,
                                     component.criteria.extension,
-                                    { reference -> component.criteria.setReference(reference) },
+                                    { reference -> component.criteria.reference = reference },
                                 )
                             )
                         }
@@ -180,7 +180,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                             referenceSource,
                             supplement!!.criteria.reference,
                             supplement.criteria.extension,
-                            { reference -> supplement.criteria.setReference(reference) },
+                            { reference -> supplement.criteria.reference = reference },
                         )
                     )
                 }
@@ -213,7 +213,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                             referenceSource,
                             (referenceExt!!.value as Reference).reference,
                             referenceExt.extension,
-                            { reference -> referenceExt.setValue(Reference(reference)) },
+                            { reference -> referenceExt.value = Reference(reference) },
                         )
                     )
                 }
@@ -227,7 +227,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                             referenceSource,
                             ref.resource,
                             ref.extension,
-                            { value -> ref.setResource(value) },
+                            { value -> ref.resource = value },
                         )
                     references.add(dep)
                 }

@@ -57,7 +57,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                         referenceSource,
                         get().baseDefinition,
                         get().baseDefinitionElement.extension,
-                        { reference -> get().setBaseDefinition(reference) },
+                        { reference -> get().baseDefinition = reference },
                     )
                 )
             }
@@ -72,7 +72,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -87,7 +87,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -102,7 +102,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -125,7 +125,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                         referenceSource,
                         profile!!.valueAsString,
                         profile.extension,
-                        { theValue -> profile.setValue(theValue) },
+                        { theValue -> profile.value = theValue },
                     )
                 )
             }
@@ -135,7 +135,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                         referenceSource,
                         profile!!.valueAsString,
                         profile.extension,
-                        { theValue -> profile.setValue(theValue) },
+                        { theValue -> profile.value = theValue },
                     )
                 )
             }
@@ -146,7 +146,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                     referenceSource,
                     element.binding.valueSet,
                     element.binding.extension,
-                    { reference -> element.binding.setValueSet(reference) },
+                    { reference -> element.binding.valueSet = reference },
                 )
             )
         }

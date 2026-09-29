@@ -103,7 +103,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
                     refValue.reference,
                     url.valueAsString,
                     read.extension,
-                    { theValue -> url.setValue(theValue) },
+                    { theValue -> url.value = theValue },
                 )
             )
         } else if (read is DomainResource && read.getExtensionByUrl(artifactUrlExt) != null) {
@@ -114,7 +114,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
                     refValue.reference,
                     url.valueAsString,
                     read.extension,
-                    { theValue -> url.setValue(theValue) },
+                    { theValue -> url.value = theValue },
                 )
             )
         } else {

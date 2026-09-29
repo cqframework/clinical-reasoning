@@ -41,7 +41,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
 
     private fun getEdrReferenceConsumer(edrExtension: Extension): (String?) -> Unit {
         return if (edrExtension.url.contains("cqfm"))
-            { reference -> edrExtension.setValue(Reference(reference)) }
+            { reference -> edrExtension.value = Reference(reference) }
         else { reference -> edrExtension.setValue(UriType(reference)) }
     }
 
@@ -157,7 +157,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                             referenceSource,
                             (referenceExt!!.value as Reference).reference,
                             referenceExt.extension,
-                            { reference -> referenceExt.setValue(Reference(reference)) },
+                            { reference -> referenceExt.value = Reference(reference) },
                         )
                     )
                 }
@@ -173,7 +173,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                                 referenceSource,
                                 ref.resource.reference,
                                 ref.extension,
-                                { reference -> ref.resource.setReference(reference) },
+                                { reference -> ref.resource.reference = reference },
                             )
                         references.add(dep)
                     }

@@ -28,12 +28,12 @@ class QuestionnaireResponseItemComponentAdapter(item: IBase) :
         }
 
     override fun setLinkId(linkId: String?): IQuestionnaireResponseItemComponentAdapter {
-        get().setLinkId(linkId)
+        get().linkId = linkId
         return this
     }
 
     override fun setDefinition(definition: String?): IQuestionnaireResponseItemComponentAdapter {
-        get().setDefinition(definition)
+        get().definition = definition
         return this
     }
 
@@ -59,7 +59,7 @@ class QuestionnaireResponseItemComponentAdapter(item: IBase) :
                 .toMutableList()
         }
         set(items) {
-            _item.setItem(
+            _item.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj ->
@@ -68,7 +68,6 @@ class QuestionnaireResponseItemComponentAdapter(item: IBase) :
                             .cast(obj)
                     }
                     .toMutableList()
-            )
         }
 
     override fun addItem(item: IItemComponentAdapter?) {
@@ -101,26 +100,18 @@ class QuestionnaireResponseItemComponentAdapter(item: IBase) :
                 .toMutableList()
         }
         set(answers) {
-            _item.setAnswer(
+            _item.answer =
                 answers!!
                     .map { obj -> obj!!.get() }
-                    .filter { o ->
-                        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent::class
-                            .java
-                            .isInstance(o)
-                    }
-                    .map { obj ->
-                        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent::class
-                            .java
-                            .cast(obj)
-                    }
+                    .filterIsInstance<
+                        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent
+                    >()
                     .toMutableList()
-            )
         }
 
     override fun newAnswer(
         value: IBaseDatatype?
-    ): IQuestionnaireResponseItemAnswerComponentAdapter? {
+    ): IQuestionnaireResponseItemAnswerComponentAdapter {
         return adapterFactory.createQuestionnaireResponseItemAnswer(
             QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
                 .setValue(value as Type?)

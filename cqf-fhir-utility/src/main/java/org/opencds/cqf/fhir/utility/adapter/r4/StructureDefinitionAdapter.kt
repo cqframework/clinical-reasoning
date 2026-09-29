@@ -47,7 +47,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                         referenceSource,
                         get().baseDefinition,
                         get().baseDefinitionElement.extension,
-                        { reference -> get().setBaseDefinition(reference) },
+                        { reference -> get().baseDefinition = reference },
                     )
                 )
             }
@@ -62,7 +62,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -77,7 +77,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -92,7 +92,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                             referenceSource,
                             expression!!.reference,
                             expression.extension,
-                            { value -> expression.setReference(value) },
+                            { value -> expression.reference = value },
                         )
                     )
                 }
@@ -115,7 +115,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                         referenceSource,
                         profile!!.valueAsString,
                         profile.extension,
-                        { theValue -> profile.setValue(theValue) },
+                        { theValue -> profile.value = theValue },
                     )
                 )
             }
@@ -125,7 +125,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                         referenceSource,
                         profile!!.valueAsString,
                         profile.extension,
-                        { theValue -> profile.setValue(theValue) },
+                        { theValue -> profile.value = theValue },
                     )
                 )
             }
@@ -136,7 +136,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                     referenceSource,
                     element.binding.valueSet,
                     element.binding.extension,
-                    { reference -> element.binding.setValueSet(reference) },
+                    { reference -> element.binding.valueSet = reference },
                 )
             )
         }

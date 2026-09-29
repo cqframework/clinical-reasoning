@@ -35,7 +35,7 @@ class QuestionnaireResponseItemAnswerComponentAdapter internal constructor(answe
         }
 
     override fun setValue(value: IBaseDatatype?) {
-        answer.setValue(value as Type?)
+        answer.value = value as Type?
     }
 
     override fun hasItem(): Boolean {
@@ -51,7 +51,7 @@ class QuestionnaireResponseItemAnswerComponentAdapter internal constructor(answe
                 .toMutableList()
         }
         set(items) {
-            answer.setItem(
+            answer.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj ->
@@ -60,6 +60,5 @@ class QuestionnaireResponseItemAnswerComponentAdapter internal constructor(answe
                             .cast(obj)
                     }
                     .toMutableList()
-            )
         }
 }

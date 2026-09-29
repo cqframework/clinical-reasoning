@@ -49,7 +49,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
                                 referenceSource,
                                 ct!!.value,
                                 ct.extension,
-                                { theValue -> ct.setValue(theValue) },
+                                { theValue -> ct.value = theValue },
                             )
                         )
                     }
@@ -60,7 +60,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
                             referenceSource,
                             component.system,
                             component.systemElement.extension,
-                            { value -> component.setSystem(value) },
+                            { value -> component.system = value },
                         )
                     )
                 }
@@ -97,7 +97,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
     }
 
     override fun <T : IBaseBackboneElement> setExpansion(expansion: T?) {
-        this.valueSet.setExpansion(expansion as ValueSet.ValueSetExpansionComponent?)
+        this.valueSet.expansion = expansion as ValueSet.ValueSetExpansionComponent?
     }
 
     override fun <T : IBaseBackboneElement> getExpansion(): T? {
@@ -145,7 +145,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
         if (countParam != null) {
             var count = (countParam.value as IntegerType).value
             count += expansionContains.size
-            countParam.setValue(IntegerType(count))
+            countParam.value = IntegerType(count)
         }
     }
 
@@ -265,6 +265,6 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
                 .setVersion(code.version)
                 .setDisplay(code.display)
         }
-        this.valueSet.setExpansion(expansion)
+        this.valueSet.expansion = expansion
     }
 }

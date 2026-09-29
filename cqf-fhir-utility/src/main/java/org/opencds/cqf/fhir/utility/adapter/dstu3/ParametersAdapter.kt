@@ -34,13 +34,12 @@ internal class ParametersAdapter(parameters: IBaseResource) :
         }
 
     override fun setParameter(parametersParameterComponents: MutableList<IBaseBackboneElement?>?) {
-        this.parameters.setParameter(
+        this.parameters.parameter =
             if (parametersParameterComponents == null) null
             else
                 parametersParameterComponents
                     .map { x -> x as Parameters.ParametersParameterComponent? }
                     .toMutableList()
-        )
     }
 
     override fun addParameter(name: String?, value: String?) {

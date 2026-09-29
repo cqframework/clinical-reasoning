@@ -48,7 +48,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                         referenceSource,
                         get().baseDefinition,
                         get().baseDefinitionElement.extension,
-                        { reference -> get().setBaseDefinition(reference) },
+                        { reference -> get().baseDefinition = reference },
                     )
                 )
             }

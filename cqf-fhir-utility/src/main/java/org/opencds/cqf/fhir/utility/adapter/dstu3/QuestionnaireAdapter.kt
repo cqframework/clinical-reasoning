@@ -65,7 +65,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                         referenceSource,
                         (libraryExt!!.value as Reference).reference,
                         libraryExt.extension,
-                        { reference -> libraryExt.setValue(Reference(reference)) },
+                        { reference -> libraryExt.value = Reference(reference) },
                     )
                 )
             }
@@ -129,12 +129,11 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                 .toMutableList()
         }
         set(items) {
-            this.questionnaire.setItem(
+            this.questionnaire.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
                     .toMutableList()
-            )
         }
 
     override fun addItem(item: IBaseBackboneElement?) {

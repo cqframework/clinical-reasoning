@@ -72,7 +72,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
                                 referenceSource,
                                 profile!!.value,
                                 profile.extension,
-                                { theValue -> profile.setValue(theValue) },
+                                { theValue -> profile.value = theValue },
                             )
                         )
                     }
@@ -84,7 +84,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
                                 referenceSource,
                                 cf!!.getValueSetReference().reference,
                                 cf.valueSet.extension,
-                                { reference -> cf.getValueSetReference().setReference(reference) },
+                                { reference -> cf.getValueSetReference().reference = reference },
                             )
                         )
                     }

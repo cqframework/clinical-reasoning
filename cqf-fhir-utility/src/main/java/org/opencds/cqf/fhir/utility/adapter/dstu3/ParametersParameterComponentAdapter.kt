@@ -32,7 +32,7 @@ internal class ParametersParameterComponentAdapter(parametersParameterComponent:
         }
 
     override fun setName(name: String?): IParametersParameterComponentAdapter {
-        this.parametersParameterComponent.setName(name)
+        this.parametersParameterComponent.name = name
         return this
     }
 
@@ -61,13 +61,13 @@ internal class ParametersParameterComponentAdapter(parametersParameterComponent:
     override fun setPart(
         parametersParameterComponents: MutableList<IBaseBackboneElement?>?
     ): IParametersParameterComponentAdapter {
-        this.parametersParameterComponent.setPart(
+        this.parametersParameterComponent.part =
             if (parametersParameterComponents == null) null
             else
                 parametersParameterComponents
                     .map { x -> x as Parameters.ParametersParameterComponent? }
                     .toMutableList()
-        )
+
         return this
     }
 
@@ -98,7 +98,7 @@ internal class ParametersParameterComponentAdapter(parametersParameterComponent:
         }
 
     override fun setResource(resource: IBaseResource?): IParametersParameterComponentAdapter {
-        this.parametersParameterComponent.setResource(resource as Resource?)
+        this.parametersParameterComponent.resource = resource as Resource?
         return this
     }
 
@@ -111,7 +111,7 @@ internal class ParametersParameterComponentAdapter(parametersParameterComponent:
     }
 
     override fun setValue(value: IBaseDatatype?): IParametersParameterComponentAdapter {
-        this.parametersParameterComponent.setValue(value as Type?)
+        this.parametersParameterComponent.value = value as Type?
         return this
     }
 

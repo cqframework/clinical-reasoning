@@ -37,8 +37,8 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
 
     private fun getEdrReferenceConsumer(edrExtension: Extension): (String?) -> Unit {
         return if (edrExtension.url.contains("cqfm"))
-            { reference -> edrExtension.setValue(Reference(reference)) }
-        else { reference -> edrExtension.setValue(CanonicalType(reference)) }
+            { reference -> edrExtension.value = Reference(reference) }
+        else { reference -> edrExtension.value = CanonicalType(reference) }
     }
 
     private fun findEffectiveDataRequirements() {
@@ -117,7 +117,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
                                 referenceSource,
                                 expression.reference,
                                 expression.extension,
-                                { reference -> expression.setReference(reference) },
+                                { reference -> expression.reference = reference },
                             )
                         )
                     }
@@ -152,7 +152,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
                             referenceSource,
                             (referenceExt!!.value as Reference).reference,
                             referenceExt.extension,
-                            { reference -> referenceExt.setValue(Reference(reference)) },
+                            { reference -> referenceExt.value = Reference(reference) },
                         )
                     )
                 }
@@ -166,7 +166,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
                             referenceSource,
                             ref.resource,
                             ref.extension,
-                            { value -> ref.setResource(value) },
+                            { value -> ref.resource = value },
                         )
                     references.add(dep)
                 }

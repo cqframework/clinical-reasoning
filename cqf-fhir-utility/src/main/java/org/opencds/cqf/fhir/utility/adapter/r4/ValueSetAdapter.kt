@@ -49,7 +49,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
                                 referenceSource,
                                 ct!!.value,
                                 ct.extension,
-                                { theValue -> ct.setValue(theValue) },
+                                { theValue -> ct.value = theValue },
                             )
                         )
                     }
@@ -60,7 +60,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
                             referenceSource,
                             component.system,
                             component.systemElement.extension,
-                            { value -> component.setSystem(value) },
+                            { value -> component.system = value },
                         )
                     )
                 }
@@ -97,7 +97,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
     }
 
     override fun <T : IBaseBackboneElement> setExpansion(expansion: T?) {
-        this.valueSet.setExpansion(expansion as ValueSet.ValueSetExpansionComponent?)
+        this.valueSet.expansion = expansion as ValueSet.ValueSetExpansionComponent?
     }
 
     override fun <T : IBaseBackboneElement> getExpansion(): T? {
@@ -142,7 +142,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
         if (countParam != null) {
             var count = (countParam.value as IntegerType).value
             count += expansionContains.size
-            countParam.setValue(IntegerType(count))
+            countParam.value = IntegerType(count)
         }
     }
 
@@ -184,13 +184,13 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
     override fun hasComposeExclude(): Boolean {
         return this.valueSet.hasCompose() &&
             this.valueSet.compose.hasExclude() &&
-            !this.valueSet.compose.exclude.isEmpty()
+            this.valueSet.compose.exclude.isNotEmpty()
     }
 
     override fun hasComposeFilters(): Boolean {
         return this.valueSet.hasCompose() &&
-            (this.valueSet.compose.include.any { i -> i!!.hasFilter() && !i.filter.isEmpty() } ||
-                this.valueSet.compose.exclude.any { e -> e!!.hasFilter() && !e.filter.isEmpty() })
+            (this.valueSet.compose.include.any { i -> i!!.hasFilter() && i.filter.isNotEmpty() } ||
+                this.valueSet.compose.exclude.any { e -> e!!.hasFilter() && e.filter.isNotEmpty() })
     }
 
     override val composeInclude: MutableList<IValueSetConceptSetAdapter?>
@@ -225,12 +225,12 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
 
     override fun hasExplicitConcepts(): Boolean {
         return this.valueSet.hasCompose() &&
-            this.valueSet.compose.include.any { i -> i!!.hasConcept() && !i.concept.isEmpty() }
+            this.valueSet.compose.include.any { i -> i!!.hasConcept() && i.concept.isNotEmpty() }
     }
 
     override fun hasValueSetReferences(): Boolean {
         return this.valueSet.hasCompose() &&
-            this.valueSet.compose.include.any { i -> i!!.hasValueSet() && !i.valueSet.isEmpty() }
+            this.valueSet.compose.include.any { i -> i!!.hasValueSet() && i.valueSet.isNotEmpty() }
     }
 
     override fun hasNaiveParameter(): Boolean {
@@ -260,6 +260,6 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
                 .setVersion(code.version)
                 .setDisplay(code.display)
         }
-        this.valueSet.setExpansion(expansion)
+        this.valueSet.expansion = expansion
     }
 }

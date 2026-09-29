@@ -85,7 +85,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
                                 referenceSource,
                                 profile.value,
                                 profile.extension,
-                                { theValue -> profile.setValue(theValue) },
+                                { theValue -> profile.value = theValue },
                             )
                         dep.addFhirPath(
                             "dataRequirement[" + drIndex + "].profile[" + profileIndex + "]"
@@ -104,7 +104,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
                                 referenceSource,
                                 cf.valueSet,
                                 cf.extension,
-                                { value -> cf.setValueSet(value) },
+                                { value -> cf.valueSet = value },
                             )
                         dep.addFhirPath(
                             "dataRequirement[" + drIndex + "].codeFilter[" + cfIndex + "].valueSet"

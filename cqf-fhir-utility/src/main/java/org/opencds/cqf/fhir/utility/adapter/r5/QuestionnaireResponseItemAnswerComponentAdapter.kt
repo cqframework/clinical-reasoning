@@ -51,7 +51,7 @@ class QuestionnaireResponseItemAnswerComponentAdapter internal constructor(answe
                 .toMutableList()
         }
         set(items) {
-            answer.setItem(
+            answer.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj ->
@@ -60,6 +60,5 @@ class QuestionnaireResponseItemAnswerComponentAdapter internal constructor(answe
                             .cast(obj)
                     }
                     .toMutableList()
-            )
         }
 }

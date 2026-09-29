@@ -28,7 +28,7 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
         }
 
     override fun setLinkId(linkId: String?): IQuestionnaireItemComponentAdapter {
-        get().setLinkId(linkId)
+        get().linkId = linkId
         return this
     }
 
@@ -37,7 +37,7 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
     }
 
     override fun setDefinition(definition: String?): IQuestionnaireItemComponentAdapter {
-        _item.setDefinition(definition)
+        _item.definition = definition
         return this
     }
 
@@ -59,12 +59,11 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
                 .toMutableList()
         }
         set(items) {
-            _item.setItem(
+            _item.item =
                 items!!
                     .map { obj -> obj!!.get() }
                     .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
                     .toMutableList()
-            )
         }
 
     override fun addItem(item: IItemComponentAdapter?) {
@@ -89,7 +88,7 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
         }
 
     override fun setText(text: String?): IQuestionnaireItemComponentAdapter {
-        _item.setText(text)
+        _item.text = text
         return this
     }
 
@@ -99,7 +98,7 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
         }
 
     override fun setType(type: String?): IQuestionnaireItemComponentAdapter {
-        _item.setType(Questionnaire.QuestionnaireItemType.fromCode(type))
+        _item.type = Questionnaire.QuestionnaireItemType.fromCode(type)
         return this
     }
 
@@ -119,7 +118,7 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
         }
 
     override fun setRequired(required: Boolean): IQuestionnaireItemComponentAdapter {
-        get().setRequired(required)
+        get().required = required
         return this
     }
 
@@ -129,12 +128,12 @@ class QuestionnaireItemComponentAdapter(item: IBase) :
         }
 
     override fun setRepeats(repeats: Boolean): IQuestionnaireItemComponentAdapter {
-        get().setRepeats(repeats)
+        get().repeats = repeats
         return this
     }
 
     override fun addAnswerOption(option: ICodingAdapter?) {
-        get().addAnswerOption().setValue(option!!.get() as Coding?)
+        get().addAnswerOption().value = option!!.get() as Coding?
     }
 
     override fun hasInitial(): Boolean {

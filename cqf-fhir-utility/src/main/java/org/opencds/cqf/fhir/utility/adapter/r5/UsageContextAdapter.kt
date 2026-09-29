@@ -36,7 +36,7 @@ class UsageContextAdapter(usageContext: IBase) :
         }
 
     override fun setCode(code: ICodingAdapter?): IUsageContextAdapter {
-        get().setCode(code!!.get() as Coding?)
+        get().code = code!!.get() as Coding?
         return this
     }
 

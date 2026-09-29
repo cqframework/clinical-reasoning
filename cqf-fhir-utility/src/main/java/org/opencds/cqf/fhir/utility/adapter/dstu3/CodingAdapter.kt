@@ -59,7 +59,7 @@ class CodingAdapter(coding: IBase) :
     }
 
     override fun setSystem(system: String?): ICodingAdapter {
-        get().setSystem(system)
+        get().system = system
         return this
     }
 }

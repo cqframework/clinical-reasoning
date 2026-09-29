@@ -1,119 +1,107 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.DataType;
-import org.hl7.fhir.r5.model.IntegerType;
-import org.hl7.fhir.r5.model.Parameters;
-import org.hl7.fhir.r5.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.r5.model.DataType
+import org.hl7.fhir.r5.model.IntegerType
+import org.hl7.fhir.r5.model.Parameters
+import org.hl7.fhir.r5.model.Resource
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 
-class ParametersAdapter extends ResourceAdapter implements IParametersAdapter {
+internal class ParametersAdapter(parameters: IBaseResource) :
+    ResourceAdapter(parameters), IParametersAdapter {
+    protected val parameters: Parameters
 
-    public ParametersAdapter(IBaseResource parameters) {
-        super(parameters);
-
-        if (!parameters.fhirType().equals("Parameters")) {
-            throw new IllegalArgumentException("resource passed as parameters argument is not a Parameters resource");
+    init {
+        require(parameters.fhirType() == "Parameters") {
+            "resource passed as parameters argument is not a Parameters resource"
         }
 
-        this.parameters = (Parameters) parameters;
+        this.parameters = parameters as Parameters
     }
 
-    private final Parameters parameters;
-
-    protected Parameters getParameters() {
-        return this.parameters;
+    override fun hasParameter(): Boolean {
+        return parameters.hasParameter()
     }
 
-    @Override
-    public boolean hasParameter() {
-        return parameters.hasParameter();
+    override val parameter: MutableList<IParametersParameterComponentAdapter?>
+        get() {
+            return this.parameters.parameter
+                .map { parametersParameterComponent ->
+                    adapterFactory.createParametersParameter(parametersParameterComponent)
+                }
+                .toMutableList()
+        }
+
+    override fun <T : IBaseDatatype> getParameterValues(name: String?): MutableList<T?>? {
+        return this.parameters.getParameterValues(name) as MutableList<T?>?
     }
 
-    @Override
-    public List<IParametersParameterComponentAdapter> getParameter() {
-        return getParameters().getParameter().stream()
-                .map(adapterFactory::createParametersParameter)
-                .toList();
+    override fun hasParameter(name: String?): Boolean {
+        return parameters.hasParameter(name)
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<DataType> getParameterValues(String name) {
-        return this.getParameters().getParameterValues(name);
+    override fun getParameter(name: String?): IParametersParameterComponentAdapter? {
+        val param = this.parameters.getParameter(name)
+        return if (param == null) null else adapterFactory.createParametersParameter(param)
     }
 
-    @Override
-    public boolean hasParameter(String name) {
-        return parameters.hasParameter(name);
+    override fun setParameter(parametersParameterComponents: MutableList<IBaseBackboneElement?>?) {
+        this.parameters.setParameter(
+            if (parametersParameterComponents == null) null
+            else
+                parametersParameterComponents
+                    .map { x -> x as Parameters.ParametersParameterComponent? }
+                    .toMutableList()
+        )
     }
 
-    @Override
-    public IParametersParameterComponentAdapter getParameter(String name) {
-        var param = getParameters().getParameter(name);
-        return param == null ? null : adapterFactory.createParametersParameter(param);
+    override fun addParameter(name: String?, value: String?) {
+        this.parameters.addParameter(name, value)
     }
 
-    @Override
-    public void setParameter(List<IBaseBackboneElement> parametersParameterComponents) {
-        this.getParameters()
-                .setParameter(
-                        parametersParameterComponents == null
-                                ? null
-                                : parametersParameterComponents.stream()
-                                        .map(x -> (ParametersParameterComponent) x)
-                                        .toList());
-    }
-
-    @Override
-    public void addParameter(String name, String value) {
-        getParameters().addParameter(name, value);
-    }
-
-    @Override
-    public void setParameter(String name, int value) {
+    override fun setParameter(name: String?, value: Int) {
         if (hasParameter(name)) {
-            getParameter(name).setValue(new IntegerType(value));
+            getParameter(name)!!.setValue(IntegerType(value))
         } else {
-            getParameters().addParameter(name, value);
+            this.parameters.addParameter(name, value)
         }
     }
 
-    @Override
-    public void addParameter(String name, IBase value) {
-        if (value instanceof DataType type) {
-            getParameters().addParameter(name, type);
+    override fun addParameter(name: String?, value: IBase?) {
+        if (value is DataType) {
+            this.parameters.addParameter(name, value)
         } else {
-            throw new IllegalArgumentException("element passed as value argument is not a valid data type");
+            throw IllegalArgumentException(
+                "element passed as value argument is not a valid data type"
+            )
         }
     }
 
-    @Override
-    public void addParameter(String name, IBaseResource resource) {
-        if (resource instanceof Resource resource1) {
-            getParameters().addParameter().setName(name).setResource(resource1);
+    override fun addParameter(name: String?, resource: IBaseResource?) {
+        if (resource is Resource) {
+            this.parameters.addParameter().setName(name).setResource(resource)
         } else {
-            throw new IllegalArgumentException("element passed as value argument is not a valid data type");
+            throw IllegalArgumentException(
+                "element passed as value argument is not a valid data type"
+            )
         }
     }
 
-    @Override
-    public void addParameter(IBase parameter) {
-        if (parameter instanceof ParametersParameterComponent component) {
-            getParameters().addParameter(component);
+    override fun addParameter(parameter: IBase?) {
+        if (parameter is Parameters.ParametersParameterComponent) {
+            this.parameters.addParameter(parameter)
         } else {
-            throw new IllegalArgumentException(
-                    "element passed as parameter argument is not a valid parameter component");
+            throw IllegalArgumentException(
+                "element passed as parameter argument is not a valid parameter component"
+            )
         }
     }
 
-    @Override
-    public IParametersParameterComponentAdapter addParameter() {
-        return adapterFactory.createParametersParameter(this.getParameters().addParameter());
+    override fun addParameter(): IParametersParameterComponentAdapter {
+        return adapterFactory.createParametersParameter(this.parameters.addParameter())
     }
 }

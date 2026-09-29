@@ -1,259 +1,223 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r4
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.ElementDefinition;
-import org.hl7.fhir.r4.model.PrimitiveType;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement
+import org.hl7.fhir.r4.model.*
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter
 
-public class ElementDefinitionAdapter extends BaseElementAdapter implements IElementDefinitionAdapter {
+class ElementDefinitionAdapter(elementDefinition: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R4, elementDefinition), IElementDefinitionAdapter {
+    private val elementDefinition: ElementDefinition
 
-    private final ElementDefinition elementDefinition;
-
-    public ElementDefinitionAdapter(IBase elementDefinition) {
-        super(FhirVersionEnum.R4, elementDefinition);
-        if (!(elementDefinition instanceof ElementDefinition)) {
-            throw new IllegalArgumentException(
-                    "object passed as elementDefinition argument is not a ElementDefinition data type");
+    init {
+        require(elementDefinition is ElementDefinition) {
+            "object passed as elementDefinition argument is not a ElementDefinition data type"
         }
-        this.elementDefinition = (ElementDefinition) elementDefinition;
+        this.elementDefinition = elementDefinition
     }
 
-    @Override
-    public ElementDefinition get() {
-        return elementDefinition;
+    override fun get(): ElementDefinition {
+        return elementDefinition
     }
 
-    @Override
-    public String getId() {
-        return get().getId();
-    }
-
-    @Override
-    public String getPath() {
-        return get().getPath();
-    }
-
-    @Override
-    public String getSliceName() {
-        return get().getSliceName();
-    }
-
-    @Override
-    public boolean hasSlicing() {
-        return get().hasSlicing();
-    }
-
-    @Override
-    public String getLabel() {
-        return get().getLabel();
-    }
-
-    @Override
-    public boolean hasLabel() {
-        return get().hasLabel();
-    }
-
-    @Override
-    public List<ICodingAdapter> getCode() {
-        return get().getCode().stream().map(adapterFactory::createCoding).toList();
-    }
-
-    @Override
-    public String getShort() {
-        return get().getShort();
-    }
-
-    @Override
-    public boolean hasShort() {
-        return get().hasShort();
-    }
-
-    @Override
-    public String getDefinition() {
-        return get().getDefinition();
-    }
-
-    @Override
-    public String getComment() {
-        return get().getComment();
-    }
-
-    @Override
-    public String getRequirements() {
-        return get().getRequirements();
-    }
-
-    @Override
-    public List<String> getAlias() {
-        return get().getAlias().stream().map(PrimitiveType::asStringValue).toList();
-    }
-
-    @Override
-    public int getMin() {
-        return get().getMin();
-    }
-
-    @Override
-    public boolean hasMin() {
-        return get().hasMin();
-    }
-
-    @Override
-    public String getMax() {
-        return get().getMax();
-    }
-
-    @Override
-    public boolean hasMax() {
-        return get().hasMax();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends IBase> List<T> getType() {
-        return get().getType().stream().map(t -> (T) t).toList();
-    }
-
-    @Override
-    public String getTypeCode() {
-        var firstType = get().getTypeFirstRep();
-        var typeExt = firstType.getExtensionByUrl(Constants.FHIR_TYPE_EXTENSION);
-        if (typeExt != null) {
-            return typeExt.getValueAsPrimitive().getValueAsString();
+    override val id: String?
+        get() {
+            return get().id
         }
-        return firstType.getCode();
+
+    override val path: String?
+        get() {
+            return get().path
+        }
+
+    override val sliceName: String?
+        get() {
+            return get().sliceName
+        }
+
+    override fun hasSlicing(): Boolean {
+        return get().hasSlicing()
     }
 
-    @Override
-    public String getTypeProfile() {
-        return get().getTypeFirstRep().getProfile().stream()
-                .findFirst()
-                .orElse(new CanonicalType())
-                .asStringValue();
+    override val label: String?
+        get() {
+            return get().label
+        }
+
+    override fun hasLabel(): Boolean {
+        return get().hasLabel()
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends IBaseDatatype> T getDefaultValue() {
-        return (T) get().getDefaultValue();
+    override val code: MutableList<ICodingAdapter?>
+        get() {
+            return get().code.map { coding -> adapterFactory.createCoding(coding) }.toMutableList()
+        }
+
+    override val short: String?
+        get() {
+            return get().short
+        }
+
+    override fun hasShort(): Boolean {
+        return get().hasShort()
     }
 
-    @Override
-    public boolean hasDefaultValue() {
-        return get().hasDefaultValue();
+    override val definition: String?
+        get() {
+            return get().definition
+        }
+
+    override val comment: String?
+        get() {
+            return get().comment
+        }
+
+    override val requirements: String?
+        get() {
+            return get().requirements
+        }
+
+    override val alias: MutableList<String?>
+        get() {
+            return get().alias.map { obj -> obj!!.asStringValue() }.toMutableList()
+        }
+
+    override val min: Int
+        get() {
+            return get().min
+        }
+
+    override fun hasMin(): Boolean {
+        return get().hasMin()
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends IBaseDatatype> T getFixed() {
-        return (T) get().getFixed();
+    override val max: String?
+        get() {
+            return get().max
+        }
+
+    override fun hasMax(): Boolean {
+        return get().hasMax()
     }
 
-    @Override
-    public boolean hasFixed() {
-        return get().hasFixed();
+    override fun <T : IBase?> getType(): MutableList<T?> {
+        return get().type.map { t -> t as T? }.toMutableList()
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends IBaseDatatype> T getPattern() {
-        return (T) get().getPattern();
+    override val typeCode: String?
+        get() {
+            val firstType = get().typeFirstRep
+            val typeExt = firstType.getExtensionByUrl(Constants.FHIR_TYPE_EXTENSION)
+            if (typeExt != null) {
+                return typeExt.valueAsPrimitive.valueAsString
+            }
+            return firstType.code
+        }
+
+    override val typeProfile: String?
+        get() {
+            return (get().typeFirstRep.profile.firstOrNull() ?: CanonicalType()).asStringValue()
+        }
+
+    override fun <T : IBaseDatatype?> getDefaultValue(): T? {
+        return get().defaultValue as T?
     }
 
-    @Override
-    public boolean hasPattern() {
-        return get().hasPattern();
+    override fun hasDefaultValue(): Boolean {
+        return get().hasDefaultValue()
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends IBaseDatatype> T getFixedOrPattern() {
-        return (T) get().getFixedOrPattern();
+    override fun <T : IBaseDatatype?> getFixed(): T? {
+        return get().fixed as T?
     }
 
-    @Override
-    public boolean hasFixedOrPattern() {
-        return get().hasFixedOrPattern();
+    override fun hasFixed(): Boolean {
+        return get().hasFixed()
     }
 
-    @Override
-    public <T extends IBaseDatatype> T getDefaultOrFixedOrPattern() {
-        return hasFixedOrPattern() ? getFixedOrPattern() : getDefaultValue();
+    override fun <T : IBaseDatatype?> getPattern(): T? {
+        return get().pattern as T?
     }
 
-    @Override
-    public boolean hasDefaultOrFixedOrPattern() {
-        return hasDefaultValue() || hasFixedOrPattern();
+    override fun hasPattern(): Boolean {
+        return get().hasPattern()
     }
 
-    @Override
-    public boolean getMustSupport() {
-        return get().getMustSupport();
+    override fun <T : IBaseDatatype?> getFixedOrPattern(): T? {
+        return get().getFixedOrPattern() as T?
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends IBaseDatatypeElement> T getBinding() {
-        return (T) get().getBinding();
+    override fun hasFixedOrPattern(): Boolean {
+        return get().hasFixedOrPattern()
     }
 
-    @Override
-    public boolean hasBinding() {
-        return get().hasBinding();
+    override fun <T : IBaseDatatype?> getDefaultOrFixedOrPattern(): T? {
+        return if (hasFixedOrPattern()) getFixedOrPattern<T?>() else getDefaultValue<T?>()
     }
 
-    @Override
-    public String getBindingValueSet() {
-        return hasBinding() ? get().getBinding().getValueSet() : null;
+    override fun hasDefaultOrFixedOrPattern(): Boolean {
+        return hasDefaultValue() || hasFixedOrPattern()
     }
 
-    @Override
-    public boolean isModifier() {
-        return get().getIsModifier();
+    override val mustSupport: Boolean
+        get() {
+            return get().mustSupport
+        }
+
+    override fun <T : IBaseDatatypeElement?> getBinding(): T? {
+        return get().binding as T?
     }
 
-    @Override
-    public boolean hasCondition() {
-        return get().hasCondition();
+    override fun hasBinding(): Boolean {
+        return get().hasBinding()
     }
 
-    @Override
-    public int getBaseMin() {
-        return get().hasBase() ? get().getBase().getMin() : 0;
+    override val bindingValueSet: String?
+        get() {
+            return if (hasBinding()) get().binding.valueSet else null
+        }
+
+    override val isModifier: Boolean
+        get() {
+            return get().isModifier
+        }
+
+    override fun hasCondition(): Boolean {
+        return get().hasCondition()
     }
 
-    @Override
-    public String getBaseMax() {
-        return get().hasBase() ? get().getBase().getMax() : "*";
+    override val baseMin: Int
+        get() {
+            return if (get().hasBase()) get().base.min else 0
+        }
+
+    override val baseMax: String?
+        get() {
+            return if (get().hasBase()) get().base.max else "*"
+        }
+
+    override val basePath: String?
+        get() {
+            return if (get().hasBase()) get().base.path else null
+        }
+
+    override val bindingStrength: String?
+        get() {
+            return if (hasBinding() && get().binding.hasStrength()) get().binding.strength.toCode()
+            else null
+        }
+
+    override fun hasMaxLength(): Boolean {
+        return get().hasMaxLength()
     }
 
-    @Override
-    public String getBasePath() {
-        return get().hasBase() ? get().getBase().getPath() : null;
-    }
-
-    @Override
-    public String getBindingStrength() {
-        return hasBinding() && get().getBinding().hasStrength()
-                ? get().getBinding().getStrength().toCode()
-                : null;
-    }
-
-    @Override
-    public boolean hasMaxLength() {
-        return get().hasMaxLength();
-    }
-
-    @Override
-    public List<String> getExtensionUrls() {
-        return get().getExtension().stream().map(e -> e.getUrl()).toList();
-    }
+    override val extensionUrls: MutableList<String?>
+        get() {
+            return get().extension.map { e -> e!!.url }.toMutableList()
+        }
 }

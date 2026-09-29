@@ -1,41 +1,37 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.r5.model.ValueSet
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter
 
-public class ValueSetConceptReferenceAdapter extends BaseElementAdapter implements IValueSetConceptReferenceAdapter {
+class ValueSetConceptReferenceAdapter(conceptReference: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R5, conceptReference), IValueSetConceptReferenceAdapter {
+    private val conceptReference: ValueSet.ConceptReferenceComponent
 
-    private final ConceptReferenceComponent conceptReference;
-
-    public ValueSetConceptReferenceAdapter(IBase conceptReference) {
-        super(FhirVersionEnum.R5, conceptReference);
-        if (!(conceptReference instanceof ConceptReferenceComponent)) {
-            throw new IllegalArgumentException(
-                    "element passed as conceptReference argument is not a ConceptReferenceComponent element");
+    init {
+        require(conceptReference is ValueSet.ConceptReferenceComponent) {
+            "element passed as conceptReference argument is not a ConceptReferenceComponent element"
         }
-        this.conceptReference = (ConceptReferenceComponent) conceptReference;
+        this.conceptReference = conceptReference
     }
 
-    @Override
-    public ConceptReferenceComponent get() {
-        return conceptReference;
+    override fun get(): ValueSet.ConceptReferenceComponent {
+        return conceptReference
     }
 
-    @Override
-    public boolean hasCode() {
-        return get().hasCode();
+    override fun hasCode(): Boolean {
+        return get().hasCode()
     }
 
-    @Override
-    public String getCode() {
-        return get().getCode();
-    }
+    override val code: String?
+        get() {
+            return get().code
+        }
 
-    @Override
-    public String getDisplay() {
-        return get().getDisplay();
-    }
+    override val display: String?
+        get() {
+            return get().display
+        }
 }

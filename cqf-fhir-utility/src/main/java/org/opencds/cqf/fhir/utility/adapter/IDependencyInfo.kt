@@ -1,42 +1,37 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBaseExtension
 
 /**
  * Represents a dependency on another FHIR artifact.
- * <p>
- * The {@code reference} property is intended to be a FHIR canonical reference (i.e., {@code url} or {@code url|version})
- * as defined by the FHIR specification. Implementations are responsible for resolving any non-canonical references
- * to canonical form before returning them via this interface.
+ *
+ * The `reference` property is intended to be a FHIR canonical reference (i.e., `url` or
+ * `url|version`) as defined by the FHIR specification. Implementations are responsible for
+ * resolving any non-canonical references to canonical form before returning them via this
+ * interface.
  */
-public interface IDependencyInfo {
-    String getReferenceSource();
+interface IDependencyInfo {
 
-    void setReferenceSource(String referenceSource);
+    var referenceSource: String?
 
     /**
-     * Returns the canonical reference string (url or url|version) for the dependency.
-     * This must not be a relative reference or a plain id.
+     * Returns the canonical reference string (url or url|version) for the dependency. This must not
+     * be a relative reference or a plain id.
      *
      * @return the canonical reference string for the dependency
      */
-    String getReference();
-
     /**
-     * Sets the canonical reference string (url or url|version) for the dependency.
-     * Callers must supply a canonical reference string; implementations may normalize or validate the reference.
+     * Sets the canonical reference string (url or url|version) for the dependency. Callers must
+     * supply a canonical reference string; implementations may normalize or validate the reference.
      *
      * @param reference the canonical reference string for the dependency
      */
-    void setReference(String reference);
+    var reference: String?
 
-    String getReferencePackageId();
+    var referencePackageId: String?
 
-    void setReferencePackageId(String referencePackageId);
-
-    <E extends IBaseExtension<?, ?>> List<E> getExtension();
+    fun <E : IBaseExtension<*, *>> getExtension(): MutableList<E?>?
 
     /**
      * Returns the list of dependency roles (key, default, example, test) for this dependency.
@@ -44,44 +39,46 @@ public interface IDependencyInfo {
      *
      * @return the list of role codes
      */
-    List<String> getRoles();
-
     /**
      * Sets the list of dependency roles for this dependency.
      *
      * @param roles the list of role codes
      */
-    void setRoles(List<String> roles);
+    var roles: MutableList<String?>
 
     /**
      * Adds a single role to this dependency.
      *
      * @param role the role code to add
      */
-    void addRole(String role);
+    fun addRole(role: String?)
 
     /**
      * Returns the list of FHIRPath expressions indicating where this dependency was referenced.
      *
      * @return the list of FHIRPath expressions
      */
-    List<String> getFhirPaths();
+    val fhirPaths: MutableList<String?>?
 
     /**
      * Adds a FHIRPath expression indicating where this dependency was referenced.
      *
      * @param fhirPath the FHIRPath expression
      */
-    void addFhirPath(String fhirPath);
+    fun addFhirPath(fhirPath: String?)
 
     /**
-     * Builds the CRMI dependency extensions (role, package-source, reference-source) for this dependency.
+     * Builds the CRMI dependency extensions (role, package-source, reference-source) for this
+     * dependency.
      *
      * @param <E> the extension type
      * @param fhirVersion the FHIR version to build extensions for
-     * @param sourceArtifactUrl the canonical URL of the source artifact (for reference-source extensions)
-     * @return list of extensions representing this dependency's metadata
+     * @param sourceArtifactUrl the canonical URL of the source artifact (for reference-source
+     *   extensions)
+     * @return list of extensions representing this dependency's metadata </E>
      */
-    <E extends IBaseExtension<?, ?>> List<E> buildDependencyExtensions(
-            FhirVersionEnum fhirVersion, String sourceArtifactUrl);
+    fun <E : IBaseExtension<*, *>> buildDependencyExtensions(
+        fhirVersion: FhirVersionEnum?,
+        sourceArtifactUrl: String?,
+    ): MutableList<E?>?
 }

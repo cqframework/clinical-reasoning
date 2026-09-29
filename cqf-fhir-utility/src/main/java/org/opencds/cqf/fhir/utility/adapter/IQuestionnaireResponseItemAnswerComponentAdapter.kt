@@ -1,20 +1,16 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseDatatype
 
-public interface IQuestionnaireResponseItemAnswerComponentAdapter extends IAdapter<IBase> {
+interface IQuestionnaireResponseItemAnswerComponentAdapter : IAdapter<IBase> {
+    fun hasValue(): Boolean
 
-    boolean hasValue();
+    val value: IBase?
 
-    IBase getValue();
+    fun setValue(value: IBaseDatatype?)
 
-    void setValue(IBaseDatatype value);
+    fun hasItem(): Boolean
 
-    boolean hasItem();
-
-    List<IQuestionnaireResponseItemComponentAdapter> getItem();
-
-    void setItem(List<IQuestionnaireResponseItemComponentAdapter> items);
+    var item: MutableList<IQuestionnaireResponseItemComponentAdapter?>?
 }

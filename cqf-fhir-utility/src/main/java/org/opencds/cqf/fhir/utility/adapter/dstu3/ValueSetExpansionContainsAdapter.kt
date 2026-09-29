@@ -1,56 +1,50 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.ValueSet
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter
 
-public class ValueSetExpansionContainsAdapter extends BaseElementAdapter implements IValueSetExpansionContainsAdapter {
+class ValueSetExpansionContainsAdapter(contains: IBase) :
+    BaseElementAdapter(FhirVersionEnum.DSTU3, contains), IValueSetExpansionContainsAdapter {
+    private val contains: ValueSet.ValueSetExpansionContainsComponent
 
-    private final ValueSetExpansionContainsComponent contains;
-
-    public ValueSetExpansionContainsAdapter(IBase contains) {
-        super(FhirVersionEnum.DSTU3, contains);
-        if (!(contains instanceof ValueSetExpansionContainsComponent)) {
-            throw new IllegalArgumentException(
-                    "element passed as contains argument is not a ValueSetExpansionContainsComponent element");
+    init {
+        require(contains is ValueSet.ValueSetExpansionContainsComponent) {
+            "element passed as contains argument is not a ValueSetExpansionContainsComponent element"
         }
-        this.contains = (ValueSetExpansionContainsComponent) contains;
+        this.contains = contains
     }
 
-    @Override
-    public ValueSetExpansionContainsComponent get() {
-        return contains;
+    override fun get(): ValueSet.ValueSetExpansionContainsComponent {
+        return contains
     }
 
-    @Override
-    public boolean hasCode() {
-        return get().hasCode();
+    override fun hasCode(): Boolean {
+        return get().hasCode()
     }
 
-    @Override
-    public String getCode() {
-        return get().getCode();
+    override val code: String?
+        get() {
+            return get().code
+        }
+
+    override fun hasSystem(): Boolean {
+        return get().hasSystem()
     }
 
-    @Override
-    public boolean hasSystem() {
-        return get().hasSystem();
+    override val system: String?
+        get() {
+            return get().system
+        }
+
+    override fun hasDisplay(): Boolean {
+        return get().hasDisplay()
     }
 
-    @Override
-    public String getSystem() {
-        return get().getSystem();
-    }
-
-    @Override
-    public boolean hasDisplay() {
-        return get().hasDisplay();
-    }
-
-    @Override
-    public String getDisplay() {
-        return get().getDisplay();
-    }
+    override val display: String?
+        get() {
+            return get().display
+        }
 }

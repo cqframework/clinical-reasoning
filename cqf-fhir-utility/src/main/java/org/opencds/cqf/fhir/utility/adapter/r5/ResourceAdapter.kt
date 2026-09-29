@@ -1,101 +1,87 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import static java.util.Optional.ofNullable;
+import ca.uhn.fhir.context.FhirVersionEnum
+import java.util.*
+import org.hl7.fhir.exceptions.FHIRException
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.r5.model.Base
+import org.hl7.fhir.r5.model.DomainResource
+import org.hl7.fhir.r5.model.Resource
+import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.Optional;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Base;
-import org.hl7.fhir.r5.model.DomainResource;
-import org.hl7.fhir.r5.model.Resource;
-import org.opencds.cqf.fhir.utility.adapter.BaseResourceAdapter;
-
-class ResourceAdapter extends BaseResourceAdapter {
-
-    public ResourceAdapter(IBaseResource resource) {
-        super(resource);
-
-        if (!resource.getStructureFhirVersionEnum().equals(FhirVersionEnum.R5)) {
-            throw new IllegalArgumentException("resource is incorrect fhir version for this adapter");
+open class ResourceAdapter(resource: IBaseResource) : BaseResourceAdapter(resource) {
+    init {
+        require(resource.structureFhirVersionEnum == FhirVersionEnum.R5) {
+            "resource is incorrect fhir version for this adapter"
         }
     }
 
-    protected Resource getResource() {
-        return (Resource) resource;
+    override val resource: Resource
+        get() = super.resource as Resource
+
+    val isDomainResource: Boolean
+        get() = domainResource != null
+
+    val domainResource: DomainResource?
+        get() = resource as? DomainResource
+
+    @Throws(FHIRException::class)
+    override fun setProperty(name: String, value: IBase?): IBase? {
+        return this.resource.setProperty(name, value as Base?)
     }
 
-    protected boolean isDomainResource() {
-        return getDomainResource().isPresent();
+    @Throws(FHIRException::class)
+    override fun addChild(name: String): IBase? {
+        return this.resource.addChild(name)
     }
 
-    protected Optional<DomainResource> getDomainResource() {
-        return ofNullable(resource instanceof DomainResource domainResource ? domainResource : null);
-    }
+    @Throws(FHIRException::class)
+    override fun getSingleProperty(name: String): IBase? {
+        val values = getProperty(name, true)
 
-    @Override
-    public IBase setProperty(String name, IBase value) throws FHIRException {
-        return getResource().setProperty(name, (Base) value);
-    }
-
-    @Override
-    public IBase addChild(String name) throws FHIRException {
-        return getResource().addChild(name);
-    }
-
-    @Override
-    public IBase getSingleProperty(String name) throws FHIRException {
-        IBase[] values = getProperty(name, true);
-
-        if (values == null || values.length == 0) {
-            return null;
+        if (values == null || values.size == 0) {
+            return null
         }
 
-        if (values.length > 1) {
-            throw new IllegalArgumentException("more than one value found for property: %s".formatted(name));
-        }
+        require(values.size <= 1) { "more than one value found for property: $name" }
 
-        return values[0];
+        return values[0]
     }
 
-    @Override
-    public IBase[] getProperty(String name) throws FHIRException {
-        return getProperty(name, true);
+    @Throws(FHIRException::class)
+    override fun getProperty(name: String): Array<out IBase?>? {
+        return getProperty(name, true)
     }
 
-    @Override
-    public IBase[] getProperty(String name, boolean checkValid) throws FHIRException {
-        return getResource().getProperty(name.hashCode(), name, checkValid);
+    @Throws(FHIRException::class)
+    override fun getProperty(name: String, checkValid: Boolean): Array<out IBase?>? {
+        return this.resource.getProperty(name.hashCode(), name, checkValid)
     }
 
-    @Override
-    public IBase makeProperty(String name) throws FHIRException {
-        return getResource().makeProperty(name.hashCode(), name);
+    @Throws(FHIRException::class)
+    override fun makeProperty(name: String): IBase? {
+        return this.resource.makeProperty(name.hashCode(), name)
     }
 
-    @Override
-    public String[] getTypesForProperty(String name) throws FHIRException {
-        return getResource().getTypesForProperty(name.hashCode(), name);
+    @Throws(FHIRException::class)
+    override fun getTypesForProperty(name: String): Array<String?>? {
+        return this.resource.getTypesForProperty(name.hashCode(), name)
     }
 
-    @Override
-    public IBaseResource copy() {
-        return getResource().copy();
+    override fun copy(): IBaseResource? {
+        return this.resource.copy()
     }
 
-    @Override
-    public void copyValues(IBaseResource dst) {
-        getResource().copyValues((Resource) dst);
+    override fun copyValues(dst: IBaseResource?) {
+        this.resource.copyValues(dst as Resource?)
     }
 
-    @Override
-    public boolean equalsDeep(IBase other) {
-        return getResource().equalsDeep((Base) other);
+    override fun equalsDeep(other: IBase?): Boolean {
+        return this.resource.equalsDeep(other as Base?)
     }
 
-    @Override
-    public boolean equalsShallow(IBase other) {
-        return getResource().equalsShallow((Base) other);
+    override fun equalsShallow(other: IBase?): Boolean {
+        return this.resource.equalsShallow(other as Base?)
     }
 }

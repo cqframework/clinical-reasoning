@@ -1,41 +1,32 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
 
-/**
- * This interface exposes common functionality across all FHIR Questionnaire versions.
- */
-public interface IQuestionnaireAdapter extends IKnowledgeArtifactAdapter {
+/** This interface exposes common functionality across all FHIR Questionnaire versions. */
+interface IQuestionnaireAdapter : IKnowledgeArtifactAdapter {
+    fun hasItem(): Boolean
 
-    boolean hasItem();
+    var item: MutableList<IQuestionnaireItemComponentAdapter?>?
 
-    List<IQuestionnaireItemComponentAdapter> getItem();
+    fun addItem(item: IBaseBackboneElement?)
 
-    void setItem(List<IQuestionnaireItemComponentAdapter> items);
+    fun addItem(item: IQuestionnaireItemComponentAdapter?)
 
-    void addItem(IBaseBackboneElement item);
+    fun addItems(items: MutableList<IQuestionnaireItemComponentAdapter?>?)
 
-    void addItem(IQuestionnaireItemComponentAdapter item);
+    val allItemDefinitions: MutableSet<String?>
+        get() = getItemDefs(this.item!!)
 
-    void addItems(List<IQuestionnaireItemComponentAdapter> items);
-
-    default Set<String> getAllItemDefinitions() {
-        return getItemDefs(getItem());
-    }
-
-    default Set<String> getItemDefs(List<? extends IItemComponentAdapter> items) {
-        var defs = new HashSet<String>();
-        items.forEach(item -> {
-            if (item.hasDefinition()) {
-                defs.add(item.getDefinition());
+    fun getItemDefs(items: MutableList<out IItemComponentAdapter?>): MutableSet<String?> {
+        val defs = HashSet<String?>()
+        items.forEach { item ->
+            if (item!!.hasDefinition()) {
+                defs.add(item.definition)
             }
             if (item.hasItem()) {
-                defs.addAll(getItemDefs(item.getItem()));
+                defs.addAll(getItemDefs(item.item!!))
             }
-        });
-        return defs;
+        }
+        return defs
     }
 }

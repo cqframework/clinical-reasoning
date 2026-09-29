@@ -1,59 +1,59 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.IBaseResource
 
-public interface IParametersParameterComponentAdapter extends IAdapter<IBase> {
+interface IParametersParameterComponentAdapter : IAdapter<IBase> {
+    override fun get(): IBaseBackboneElement?
 
-    IBaseBackboneElement get();
+    val name: String?
 
-    String getName();
+    fun setName(name: String?): IParametersParameterComponentAdapter?
 
-    IParametersParameterComponentAdapter setName(String name);
+    fun hasName(): Boolean
 
-    boolean hasName();
+    val part: MutableList<IParametersParameterComponentAdapter?>?
 
-    List<IParametersParameterComponentAdapter> getPart();
+    fun getPartValues(name: String?): MutableList<IBase?>?
 
-    List<IBase> getPartValues(String name);
+    fun setPart(
+        parametersParameterComponents: MutableList<IBaseBackboneElement?>?
+    ): IParametersParameterComponentAdapter?
 
-    IParametersParameterComponentAdapter setPart(List<IBaseBackboneElement> parametersParameterComponents);
+    fun addPart(): IParametersParameterComponentAdapter?
 
-    IParametersParameterComponentAdapter addPart();
+    fun hasPart(): Boolean
 
-    boolean hasPart();
+    fun hasPart(name: String?): Boolean
 
-    boolean hasPart(String name);
+    fun hasResource(): Boolean
 
-    boolean hasResource();
+    val resource: IBaseResource?
 
-    IBaseResource getResource();
+    fun setResource(resource: IBaseResource?): IParametersParameterComponentAdapter?
 
-    IParametersParameterComponentAdapter setResource(IBaseResource resource);
+    fun hasValue(): Boolean
 
-    boolean hasValue();
+    fun hasPrimitiveValue(): Boolean
 
-    boolean hasPrimitiveValue();
+    val primitiveValue: String?
 
-    String getPrimitiveValue();
+    fun setValue(value: IBaseDatatype?): IParametersParameterComponentAdapter?
 
-    IParametersParameterComponentAdapter setValue(IBaseDatatype value);
+    val value: IBaseDatatype?
 
-    IBaseDatatype getValue();
+    fun newTupleWithParts(): IBase?
 
-    IBase newTupleWithParts();
-
-    default IBase getPartValue(IParametersParameterComponentAdapter part) {
+    fun getPartValue(part: IParametersParameterComponentAdapter): IBase? {
         if (part.hasValue()) {
-            return part.getValue();
+            return part.value
         } else if (part.hasResource()) {
-            return part.getResource();
+            return part.resource
         } else if (part.hasPart()) {
-            return part.newTupleWithParts();
+            return part.newTupleWithParts()
         }
-        return null;
+        return null
     }
 }

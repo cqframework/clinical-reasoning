@@ -1,24 +1,21 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
 
-/**
- * This interface exposes common functionality across all FHIR PlanDefinition versions.
- */
-public interface IPlanDefinitionAdapter extends IKnowledgeArtifactAdapter {
+/** This interface exposes common functionality across all FHIR PlanDefinition versions. */
+interface IPlanDefinitionAdapter : IKnowledgeArtifactAdapter {
 
-    String getDescription();
+    val description: String?
 
-    boolean hasLibrary();
+    fun hasLibrary(): Boolean
 
-    List<String> getLibrary();
+    val library: MutableList<String?>?
 
-    boolean hasGoal();
+    fun hasGoal(): Boolean
 
-    List<IBaseBackboneElement> getGoal();
+    val goal: MutableList<IBaseBackboneElement?>?
 
-    boolean hasAction();
+    fun hasAction(): Boolean
 
-    List<IPlanDefinitionActionAdapter> getAction();
+    val action: MutableList<IPlanDefinitionActionAdapter?>?
 }

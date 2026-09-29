@@ -1,16 +1,12 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
 
-/**
- * This interface exposes common functionality across all FHIR GraphDefinition versions.
- */
-public interface IGraphDefinitionAdapter extends IKnowledgeArtifactAdapter {
-
+/** This interface exposes common functionality across all FHIR GraphDefinition versions. */
+interface IGraphDefinitionAdapter : IKnowledgeArtifactAdapter {
     // R4
-    List<IBaseBackboneElement> getBackBoneElements();
+    val backBoneElements: MutableList<IBaseBackboneElement?>?
 
     // R5
-    List<IBaseBackboneElement> getNode();
+    val node: MutableList<IBaseBackboneElement?>?
 }

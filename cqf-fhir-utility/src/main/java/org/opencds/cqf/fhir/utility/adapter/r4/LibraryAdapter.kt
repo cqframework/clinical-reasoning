@@ -1,248 +1,239 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r4
 
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.ParameterDefinition;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.RelatedArtifact;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import java.util.*
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions
+import org.hl7.fhir.instance.model.api.IBaseParameters
+import org.hl7.fhir.instance.model.api.ICompositeType
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.r4.model.*
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter
+import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter
 
-public class LibraryAdapter extends KnowledgeArtifactAdapter implements ILibraryAdapter {
-    public LibraryAdapter(IDomainResource library) {
-        super(library);
-        if (!(library instanceof Library)) {
-            throw new IllegalArgumentException("resource passed as library argument is not a Library resource");
+class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
+    constructor(library: IDomainResource) : super(library) {
+        require(library is Library) {
+            "resource passed as library argument is not a Library resource"
         }
     }
 
-    public LibraryAdapter(Library library) {
-        super(library);
+    constructor(library: Library) : super(library)
+
+    protected val library: Library
+        get() = resource as Library
+
+    override fun get(): Library {
+        return resource as Library
     }
 
-    protected Library getLibrary() {
-        return (Library) resource;
+    override fun copy(): Library? {
+        return get()!!.copy()
     }
 
-    @Override
-    public Library get() {
-        return (Library) resource;
+    override fun hasContent(): Boolean {
+        return this.library.hasContent()
     }
 
-    @Override
-    public Library copy() {
-        return get().copy();
+    override fun <T : ICompositeType> getContent(): MutableList<T?>? {
+        return this.library.content?.toMutableList() as MutableList<T?>?
     }
 
-    @Override
-    public boolean hasContent() {
-        return getLibrary().hasContent();
+    override fun setContent(attachments: MutableList<out ICompositeType?>?) {
+        val castAttachments = attachments!!.map { x -> x as Attachment? }.toMutableList()
+        this.library.setContent(castAttachments)
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Attachment> getContent() {
-        return getLibrary().getContent().stream().toList();
+    override fun addContent(): Attachment? {
+        return this.library.addContent()
     }
 
-    @Override
-    public void setContent(List<? extends ICompositeType> attachments) {
-        List<Attachment> castAttachments =
-                attachments.stream().map(x -> (Attachment) x).collect(Collectors.toList());
-        getLibrary().setContent(castAttachments);
-    }
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-    @Override
-    public Attachment addContent() {
-        return getLibrary().addContent();
-    }
-
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
-
-        // relatedArtifact[].resource
-        var relatedArtifacts = getRelatedArtifactsOfType(DEPENDSON);
-        for (int i = 0; i < relatedArtifacts.size(); i++) {
-            RelatedArtifact ra = relatedArtifacts.get(i);
-            if (ra.hasResource()) {
-                IDependencyInfo dep = DependencyInfo.convertRelatedArtifact(ra, referenceSource);
-                dep.addFhirPath("relatedArtifact[" + i + "].resource");
-                references.add(dep);
-            }
-        }
-
-        var dataRequirements = getLibrary().getDataRequirement();
-        for (int drIndex = 0; drIndex < dataRequirements.size(); drIndex++) {
-            var dr = dataRequirements.get(drIndex);
-
-            // dataRequirement[].profile[]
-            var profiles = dr.getProfile();
-            for (int profileIndex = 0; profileIndex < profiles.size(); profileIndex++) {
-                var profile = profiles.get(profileIndex);
-                if (profile.hasValue()) {
-                    IDependencyInfo dep = new DependencyInfo(
-                            referenceSource, profile.getValue(), profile.getExtension(), profile::setValue);
-                    dep.addFhirPath("dataRequirement[" + drIndex + "].profile[" + profileIndex + "]");
-                    references.add(dep);
+            // relatedArtifact[].resource
+            val relatedArtifacts =
+                getRelatedArtifactsOfType<RelatedArtifact>(IKnowledgeArtifactAdapter.DEPENDSON)!!
+            for (i in relatedArtifacts.indices) {
+                val ra = relatedArtifacts.get(i)!!
+                if (ra.hasResource()) {
+                    val dep = DependencyInfo.convertRelatedArtifact(ra, referenceSource)
+                    dep.addFhirPath("relatedArtifact[" + i + "].resource")
+                    references.add(dep)
                 }
             }
 
-            // dataRequirement[].codeFilter[].valueSet
-            var codeFilters = dr.getCodeFilter();
-            for (int cfIndex = 0; cfIndex < codeFilters.size(); cfIndex++) {
-                var cf = codeFilters.get(cfIndex);
-                if (cf.hasValueSet()) {
-                    IDependencyInfo dep =
-                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet);
-                    dep.addFhirPath("dataRequirement[" + drIndex + "].codeFilter[" + cfIndex + "].valueSet");
-                    references.add(dep);
-                }
-            }
-        }
+            val dataRequirements = this.library.dataRequirement
+            for (drIndex in dataRequirements.indices) {
+                val dr = dataRequirements.get(drIndex)
 
-        return references;
-    }
-
-    @Override
-    public Map<String, String> getReferencedLibraries() {
-        var map = new HashMap<String, String>();
-        map.put(getName(), getCanonical());
-        return map;
-    }
-
-    @Override
-    public Map<String, ILibraryAdapter> retrieveReferencedLibraries(IRepository repository) {
-        var map = new HashMap<String, ILibraryAdapter>();
-        map.put(getName(), this);
-        return map;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getComponents() {
-        return getRelatedArtifactsOfType("composed-of");
-    }
-
-    @Override
-    public ICompositeType getType() {
-        return getLibrary().getType();
-    }
-
-    @Override
-    public LibraryAdapter setType(String type) {
-        if (LIBRARY_TYPES.contains(type)) {
-            getLibrary()
-                    .setType(new CodeableConcept(new Coding("http://hl7.org/fhir/ValueSet/library-type", type, "")));
-        } else {
-            throw new UnprocessableEntityException("Invalid type: {}", type);
-        }
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<ParameterDefinition> getParameter() {
-        return getLibrary().getParameter();
-    }
-
-    @Override
-    public boolean hasDataRequirement() {
-        return getLibrary().hasDataRequirement();
-    }
-
-    @Override
-    public List<IDataRequirementAdapter> getDataRequirement() {
-        return getLibrary().getDataRequirement().stream()
-                .map(DataRequirementAdapter::new)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public LibraryAdapter addDataRequirement(ICompositeType dataRequirement) {
-        getLibrary().addDataRequirement((DataRequirement) dataRequirement);
-        return this;
-    }
-
-    @Override
-    public <T extends ICompositeType> LibraryAdapter setDataRequirement(List<T> dataRequirement) {
-        getLibrary()
-                .setDataRequirement(
-                        dataRequirement.stream().map(dr -> (DataRequirement) dr).collect(Collectors.toList()));
-        return this;
-    }
-
-    @Override
-    public Optional<IBaseParameters> getExpansionParameters() {
-        var expansionParameters = getLibrary().getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(Constants.CQF_EXPANSION_PARAMETERS))
-                .findAny()
-                .map(ext -> ((Reference) ext.getValue()).getReference())
-                .map(ref -> {
-                    if (getLibrary().hasContained()) {
-                        return getLibrary().getContained().stream()
-                                .filter(containedResource -> ref.equals("#" + containedResource.getId()))
-                                .filter(IBaseParameters.class::isInstance)
-                                .map(IBaseParameters.class::cast)
-                                .findFirst()
-                                .orElse(null);
+                // dataRequirement[].profile[]
+                val profiles = dr.profile
+                for (profileIndex in profiles.indices) {
+                    val profile = profiles.get(profileIndex)
+                    if (profile.hasValue()) {
+                        val dep: IDependencyInfo =
+                            DependencyInfo(
+                                referenceSource,
+                                profile.value,
+                                profile.extension,
+                                { theValue -> profile.setValue(theValue) },
+                            )
+                        dep.addFhirPath(
+                            "dataRequirement[" + drIndex + "].profile[" + profileIndex + "]"
+                        )
+                        references.add(dep)
                     }
-                    return null;
-                });
+                }
 
-        if (expansionParameters.isPresent()) {
-            return expansionParameters;
-        } else {
-            var id = "exp-params";
-            var newExpansionParameters = new Parameters();
-            newExpansionParameters.setId(id);
-            getLibrary().addContained(newExpansionParameters);
-            if (getLibrary().getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS) == null) {
-                var expansionParamsExt = getLibrary().addExtension();
-                expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS);
-                expansionParamsExt.setValue(new Reference("#" + id));
+                // dataRequirement[].codeFilter[].valueSet
+                val codeFilters = dr.codeFilter
+                for (cfIndex in codeFilters.indices) {
+                    val cf = codeFilters.get(cfIndex)
+                    if (cf.hasValueSet()) {
+                        val dep: IDependencyInfo =
+                            DependencyInfo(
+                                referenceSource,
+                                cf.valueSet,
+                                cf.extension,
+                                { value -> cf.setValueSet(value) },
+                            )
+                        dep.addFhirPath(
+                            "dataRequirement[" + drIndex + "].codeFilter[" + cfIndex + "].valueSet"
+                        )
+                        references.add(dep)
+                    }
+                }
             }
-            setExpansionParameters(newExpansionParameters);
-            return Optional.of(newExpansionParameters);
+
+            return references
         }
+
+    override val referencedLibraries: MutableMap<String?, String?>
+        get() {
+            val map = HashMap<String?, String?>()
+            map.put(name, canonical)
+            return map
+        }
+
+    override fun retrieveReferencedLibraries(
+        repository: IRepository?
+    ): MutableMap<String?, ILibraryAdapter?> {
+        val map = HashMap<String?, ILibraryAdapter?>()
+        map.put(name, this)
+        return map
     }
 
-    @Override
-    public void setExpansionParameters(IBaseParameters expansionParameters) {
-        if (expansionParameters != null
-                && !((Parameters) expansionParameters).getParameter().isEmpty()) {
-            var newParameters = new ArrayList<ParametersParameterComponent>();
+    override fun <T> getComponents(): MutableList<T?>? where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        return getRelatedArtifactsOfType("composed-of")
+    }
 
-            for (ParametersParameterComponent parameter : ((Parameters) expansionParameters).getParameter()) {
-                var param = new ParametersParameterComponent();
-                param.setName(parameter.getName());
-                param.setValue(parameter.getValue());
-                newParameters.add(param);
+    override val type: ICompositeType?
+        get() {
+            return this.library.type
+        }
+
+    override fun setType(type: String?): LibraryAdapter {
+        if (LIBRARY_TYPES.contains(type)) {
+            this.library.setType(
+                CodeableConcept(Coding("http://hl7.org/fhir/ValueSet/library-type", type, ""))
+            )
+        } else {
+            throw UnprocessableEntityException("Invalid type: {}", type)
+        }
+        return this
+    }
+
+    override fun <T : ICompositeType> getParameter(): MutableList<T?>? {
+        return this.library.parameter as MutableList<T?>?
+    }
+
+    override fun hasDataRequirement(): Boolean {
+        return this.library.hasDataRequirement()
+    }
+
+    override val dataRequirement: MutableList<IDataRequirementAdapter?>
+        get() {
+            return this.library.dataRequirement
+                .map { compositeType -> DataRequirementAdapter(compositeType) }
+                .toMutableList()
+        }
+
+    override fun addDataRequirement(dataRequirement: ICompositeType?): LibraryAdapter {
+        this.library.addDataRequirement(dataRequirement as DataRequirement?)
+        return this
+    }
+
+    override fun <T : ICompositeType> setDataRequirement(
+        dataRequirement: MutableList<T?>?
+    ): LibraryAdapter {
+        this.library.setDataRequirement(
+            dataRequirement!!.map { dr -> dr as DataRequirement? }.toMutableList()
+        )
+        return this
+    }
+
+    override val expansionParameters: Optional<IBaseParameters>
+        get() {
+            val expansionParameters =
+                this.library.extension
+                    .filter { ext -> ext!!.url == Constants.CQF_EXPANSION_PARAMETERS }
+                    .firstOrNull()
+                    ?.let { ext -> (ext.value as Reference).reference }
+                    ?.let { ref ->
+                        if (this.library.hasContained()) {
+                            return@let this.library.contained
+                                .filter { containedResource -> ref == "#${containedResource!!.id}" }
+                                .filter { o -> IBaseParameters::class.java.isInstance(o) }
+                                .map { obj -> IBaseParameters::class.java.cast(obj) }
+                                .firstOrNull()
+                        }
+                        null
+                    }
+
+            if (expansionParameters != null) {
+                return Optional.of(expansionParameters)
+            } else {
+                val id = "exp-params"
+                val newExpansionParameters = Parameters()
+                newExpansionParameters.setId(id)
+                this.library.addContained(newExpansionParameters)
+                if (this.library.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS) == null) {
+                    val expansionParamsExt = this.library.addExtension()
+                    expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS)
+                    expansionParamsExt.setValue(Reference("#$id"))
+                }
+                setExpansionParameters(newExpansionParameters)
+                return Optional.of(newExpansionParameters)
+            }
+        }
+
+    override fun setExpansionParameters(expansionParameters: IBaseParameters?) {
+        if (
+            expansionParameters != null && !(expansionParameters as Parameters).parameter.isEmpty()
+        ) {
+            val newParameters = ArrayList<Parameters.ParametersParameterComponent?>()
+
+            for (parameter in expansionParameters.parameter) {
+                val param = Parameters.ParametersParameterComponent()
+                param.setName(parameter.name)
+                param.setValue(parameter.value)
+                newParameters.add(param)
             }
 
-            var existingExpansionParameters = getExpansionParameters();
-            existingExpansionParameters.ifPresent(parameters -> ((Parameters) parameters).setParameter(newParameters));
+            val existingExpansionParameters = this.expansionParameters
+            existingExpansionParameters.ifPresent { parameters ->
+                (parameters as Parameters).setParameter(newParameters)
+            }
         }
     }
 }

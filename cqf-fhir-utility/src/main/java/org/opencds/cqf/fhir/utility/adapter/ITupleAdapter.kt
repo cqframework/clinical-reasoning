@@ -1,11 +1,9 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.LinkedHashMap;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface ITupleAdapter extends IAdapter<IBase> {
+interface ITupleAdapter : IAdapter<IBase> {
+    fun getProperty(name: String?): Any?
 
-    Object getProperty(String name);
-
-    LinkedHashMap<String, Object> getProperties();
+    val properties: LinkedHashMap<String, Any?>
 }

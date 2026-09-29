@@ -1,19 +1,19 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface IUsageContextAdapter extends IAdapter<IBase> {
-    boolean hasCode();
+interface IUsageContextAdapter : IAdapter<IBase> {
+    fun hasCode(): Boolean
 
-    ICodingAdapter getCode();
+    val code: ICodingAdapter?
 
-    IUsageContextAdapter setCode(ICodingAdapter code);
+    fun setCode(code: ICodingAdapter?): IUsageContextAdapter?
 
-    boolean hasValue();
+    fun hasValue(): Boolean
 
-    boolean hasValueCodeableConcept();
+    fun hasValueCodeableConcept(): Boolean
 
-    ICodeableConceptAdapter getValueCodeableConcept();
+    val valueCodeableConcept: ICodeableConceptAdapter?
 
-    boolean equalsDeep(IUsageContextAdapter other);
+    fun equalsDeep(other: IUsageContextAdapter?): Boolean
 }

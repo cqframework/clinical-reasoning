@@ -1,55 +1,45 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.r5.model.Attachment;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.ICompositeType
+import org.hl7.fhir.r5.model.Attachment
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter
 
-class AttachmentAdapter extends BaseElementAdapter implements IAttachmentAdapter {
+internal class AttachmentAdapter(attachment: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R5, attachment), IAttachmentAdapter {
+    protected val attachment: Attachment
 
-    private final Attachment attachment;
-
-    public AttachmentAdapter(IBase attachment) {
-        super(FhirVersionEnum.R5, attachment);
-        if (!attachment.fhirType().equals("Attachment")) {
-            throw new IllegalArgumentException("resource passed as attachment argument is not an Attachment resource");
+    init {
+        require(attachment.fhirType() == "Attachment") {
+            "resource passed as attachment argument is not an Attachment resource"
         }
 
-        if (!(attachment instanceof Attachment)) {
-            throw new IllegalArgumentException("attachment is incorrect fhir version for this adapter");
+        require(attachment is Attachment) {
+            "attachment is incorrect fhir version for this adapter"
         }
 
-        this.attachment = (Attachment) attachment;
+        this.attachment = attachment
     }
 
-    protected Attachment getAttachment() {
-        return this.attachment;
+    override fun get(): ICompositeType {
+        return this.attachment
     }
 
-    @Override
-    public ICompositeType get() {
-        return this.attachment;
-    }
+    override var contentType: String?
+        get() {
+            return this.attachment.contentType
+        }
+        set(contentType) {
+            this.attachment.setContentType(contentType)
+        }
 
-    @Override
-    public String getContentType() {
-        return this.getAttachment().getContentType();
-    }
-
-    @Override
-    public void setContentType(String contentType) {
-        this.getAttachment().setContentType(contentType);
-    }
-
-    @Override
-    public byte[] getData() {
-        return this.getAttachment().getData();
-    }
-
-    @Override
-    public void setData(byte[] data) {
-        this.getAttachment().setData(data);
-    }
+    override var data: ByteArray?
+        get() {
+            return this.attachment.data
+        }
+        set(data) {
+            this.attachment.setData(data)
+        }
 }

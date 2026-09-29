@@ -142,7 +142,7 @@ object SearchHelper {
     ): Class<out IBaseResource> {
         var resourceType: Class<out IBaseResource>
         try {
-            val resourceTypeString = getResourceType(dependencyInfo.reference)
+            val resourceTypeString = getResourceType(dependencyInfo.reference!!)
             if (resourceTypeString.isNullOrEmpty()) {
                 throw DataFormatException()
             }
@@ -151,7 +151,7 @@ object SearchHelper {
         } catch (e: DataFormatException) {
             // Use the "cqf-resourceType" extension to figure this out, if it's present
             val cqfResourceTypeExt =
-                getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension())
+                getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension()!!)
             if (cqfResourceTypeExt != null) {
                 try {
                     resourceType =

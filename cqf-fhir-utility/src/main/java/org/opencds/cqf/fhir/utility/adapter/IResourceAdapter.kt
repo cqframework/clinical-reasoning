@@ -1,130 +1,127 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.Ids;
+import org.hl7.fhir.exceptions.FHIRException
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.Ids
+import org.opencds.cqf.fhir.utility.Ids.ensureIdType
 
-public interface IResourceAdapter extends IAdapter<IBaseResource> {
+interface IResourceAdapter : IAdapter<IBaseResource> {
+    override fun get(): IBaseResource?
 
-    IBaseResource get();
+    val id: String?
+        /**
+         * Returns the id of the resource including the type. i.e. Patient/id
+         *
+         * @return String
+         */
+        get() =
+            if (this.idElement == null) null
+            else String.format("%s/%s", get()!!.fhirType(), this.idElement!!.idPart)
 
-    /**
-     * Returns the id of the resource including the type. i.e. Patient/id
-     * @return String
-     */
-    default String getId() {
-        return getIdElement() == null
-                ? null
-                : String.format("%s/%s", get().fhirType(), getIdElement().getIdPart());
+    val idPart: String?
+        /**
+         * Returns just the id part of the id of the resource
+         *
+         * @return String
+         */
+        get() = if (this.idElement == null) null else this.idElement!!.idPart
+
+    val idElement: IIdType?
+        get() = resolvePath(get(), "id", IIdType::class.java)
+
+    fun setId(id: String): IAdapter<*>? {
+        setId(Ids.newId(fhirContext()!!, ensureIdType(id, get()!!.fhirType())) as IIdType)
+        return this
     }
 
-    /**
-     * Returns just the id part of the id of the resource
-     * @return String
-     */
-    default String getIdPart() {
-        return getIdElement() == null ? null : getIdElement().getIdPart();
+    fun setId(id: IIdType?)
+
+    @Throws(FHIRException::class) fun setProperty(name: String, value: IBase?): IBase?
+
+    @Throws(FHIRException::class) fun addChild(name: String): IBase?
+
+    @Throws(FHIRException::class) fun getSingleProperty(name: String): IBase?
+
+    @Throws(FHIRException::class) fun getProperty(name: String): Array<out IBase?>?
+
+    @Throws(FHIRException::class)
+    fun getProperty(name: String, checkValid: Boolean): Array<out IBase?>?
+
+    @Throws(FHIRException::class) fun makeProperty(name: String): IBase?
+
+    @Throws(FHIRException::class) fun getTypesForProperty(name: String): Array<String?>?
+
+    fun copy(): IBaseResource?
+
+    fun copyValues(destination: IBaseResource?)
+
+    fun equalsDeep(other: IBase?): Boolean
+
+    fun equalsShallow(other: IBase?): Boolean
+
+    fun <R : IBaseResource> getContained(): MutableList<R?> {
+        return getContained(get())
     }
 
-    default IIdType getIdElement() {
-        return resolvePath(get(), "id", IIdType.class);
+    fun hasContained(): Boolean {
+        return hasContained(get())
     }
 
-    default IAdapter<?> setId(String id) {
-        setId((IIdType) Ids.newId(fhirContext(), Ids.ensureIdType(id, get().fhirType())));
-        return this;
+    fun <R : IBaseResource> getContained(base: IBaseResource?): MutableList<R?> {
+        @Suppress("UNCHECKED_CAST")
+        return resolvePathList(base, "contained", IBaseResource::class.java)
+            .map { r -> r as R? }
+            .toMutableList()
     }
 
-    void setId(IIdType id);
-
-    IBase setProperty(String name, IBase value) throws FHIRException;
-
-    IBase addChild(String name) throws FHIRException;
-
-    IBase getSingleProperty(String name) throws FHIRException;
-
-    IBase[] getProperty(String name) throws FHIRException;
-
-    IBase[] getProperty(String name, boolean checkValid) throws FHIRException;
-
-    IBase makeProperty(String name) throws FHIRException;
-
-    String[] getTypesForProperty(String name) throws FHIRException;
-
-    IBaseResource copy();
-
-    void copyValues(IBaseResource destination);
-
-    boolean equalsDeep(IBase other);
-
-    boolean equalsShallow(IBase other);
-
-    default <R extends IBaseResource> List<R> getContained() {
-        return getContained(get());
+    fun hasContained(base: IBaseResource?): Boolean {
+        return getContained<IBaseResource>(base).isNotEmpty()
     }
 
-    default boolean hasContained() {
-        return hasContained(get());
+    fun addContained(base: IBaseResource?) {
+        val res = resolvePathList(get(), "contained", IBaseResource::class.java)
+        res.add(base)
+        setValue(get(), "contained", res)
     }
 
-    @SuppressWarnings("unchecked")
-    default <R extends IBaseResource> List<R> getContained(IBaseResource base) {
-        return resolvePathList(base, "contained", IBaseResource.class).stream()
-                .map(r -> (R) r)
-                .collect(Collectors.toList());
-    }
-
-    default Boolean hasContained(IBaseResource base) {
-        return !getContained(base).isEmpty();
-    }
-
-    default void addContained(IBaseResource base) {
-        var res = resolvePathList(get(), "contained", IBaseResource.class);
-        res.add(base);
-        setValue(get(), "contained", res);
-    }
-
-    default boolean hasProperty(String propertyName) {
+    fun hasProperty(propertyName: String?): Boolean {
         // should consider caching this?
-        Set<String> propNames = fhirContext().getResourceDefinition(get()).getChildren().stream()
-                .map(BaseRuntimeChildDefinition::getElementName)
-                .collect(Collectors.toSet());
-        return propNames.contains(propertyName);
+        val propNames =
+            fhirContext()!!
+                .getResourceDefinition(get())
+                .children
+                .map { obj -> obj!!.elementName }
+                .toSet()
+        return propNames.contains(propertyName)
     }
 
-    @SuppressWarnings("unchecked")
-    default <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifact() {
-        List<T> artifacts = new ArrayList<>();
+    fun <T> getRelatedArtifact(): MutableList<T?> where T : ICompositeType, T : IBaseHasExtensions {
+        val artifacts = mutableListOf<T?>()
         if (hasProperty("relatedArtifact")) {
-            List<T> relatedArtifacts = resolvePathList(get(), "relatedArtifact").stream()
-                    .map(r -> (T) r)
-                    .toList();
-            artifacts.addAll(relatedArtifacts);
+            @Suppress("UNCHECKED_CAST")
+            val relatedArtifacts =
+                resolvePathList(get(), "relatedArtifact").map { r -> r as T? }.toList()
+            artifacts.addAll(relatedArtifacts)
         } else {
             // for KnowledgeResources that do not have relatedArtifact properties,
             // we'll filter the extensions for these 2 RelatedArtifact
-            List<T> extensionArtifacts =
-                    getExtensionsByUrls(
-                                    get(), Set.of(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT))
-                            .stream()
-                            .filter(ext -> {
-                                return ext.getValue() != null
-                                        && ext.getValue().fhirType().equals("RelatedArtifact");
-                            })
-                            .map(ext -> (T) ext.getValue())
-                            .toList();
-            artifacts.addAll(extensionArtifacts);
+            @Suppress("UNCHECKED_CAST")
+            val extensionArtifacts =
+                getExtensionsByUrls<IBaseExtension<*, *>>(
+                        get(),
+                        mutableSetOf(
+                            Constants.CPG_RELATED_ARTIFACT,
+                            Constants.ARTIFACT_RELATED_ARTIFACT,
+                        ),
+                    )
+                    .filter { ext ->
+                        ext!!.value != null && ext.value.fhirType() == "RelatedArtifact"
+                    }
+                    .map { ext -> ext!!.value as T? }
+                    .toList()
+            artifacts.addAll(extensionArtifacts)
         }
-        return artifacts;
+        return artifacts
     }
 }

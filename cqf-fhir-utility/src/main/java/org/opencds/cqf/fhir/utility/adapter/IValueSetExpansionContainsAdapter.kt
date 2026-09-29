@@ -1,18 +1,17 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface IValueSetExpansionContainsAdapter extends IAdapter<IBase> {
+interface IValueSetExpansionContainsAdapter : IAdapter<IBase> {
+    fun hasCode(): Boolean
 
-    boolean hasCode();
+    val code: String?
 
-    String getCode();
+    fun hasSystem(): Boolean
 
-    boolean hasSystem();
+    val system: String?
 
-    String getSystem();
+    fun hasDisplay(): Boolean
 
-    boolean hasDisplay();
-
-    String getDisplay();
+    val display: String?
 }

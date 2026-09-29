@@ -1,69 +1,64 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.UsageContext;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.CodeableConcept
+import org.hl7.fhir.dstu3.model.Coding
+import org.hl7.fhir.dstu3.model.UsageContext
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
+import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter
 
-public class UsageContextAdapter extends BaseElementAdapter implements IUsageContextAdapter {
+class UsageContextAdapter(usageContext: IBase) :
+    BaseElementAdapter(FhirVersionEnum.DSTU3, usageContext), IUsageContextAdapter {
+    private val usageContext: UsageContext
 
-    private final UsageContext usageContext;
-
-    public UsageContextAdapter(IBase usageContext) {
-        super(FhirVersionEnum.DSTU3, usageContext);
-        if (!(usageContext instanceof UsageContext)) {
-            throw new IllegalArgumentException("object passed as coding argument is not a UsageContext data type");
+    init {
+        require(usageContext is UsageContext) {
+            "object passed as coding argument is not a UsageContext data type"
         }
-        this.usageContext = (UsageContext) usageContext;
+        this.usageContext = usageContext
     }
 
-    @Override
-    public UsageContext get() {
-        return usageContext;
+    override fun get(): UsageContext {
+        return usageContext
     }
 
-    @Override
-    public boolean hasCode() {
-        return usageContext.hasCode();
+    override fun hasCode(): Boolean {
+        return usageContext.hasCode()
     }
 
-    @Override
-    public ICodingAdapter getCode() {
-        if (usageContext == null || usageContext.getCode() == null) return null;
-        return new CodingAdapter(get().getCode());
+    override val code: ICodingAdapter?
+        get() {
+            if (usageContext == null || usageContext.code == null) return null
+            return CodingAdapter(get().code)
+        }
+
+    override fun setCode(code: ICodingAdapter?): IUsageContextAdapter {
+        get().setCode(code!!.get() as Coding?)
+        return this
     }
 
-    @Override
-    public IUsageContextAdapter setCode(ICodingAdapter code) {
-        get().setCode((Coding) code.get());
-        return this;
+    override fun hasValue(): Boolean {
+        return usageContext.hasValue()
     }
 
-    @Override
-    public boolean hasValue() {
-        return usageContext.hasValue();
+    override fun hasValueCodeableConcept(): Boolean {
+        return usageContext != null &&
+            usageContext.hasValue() &&
+            usageContext.value is CodeableConcept
     }
 
-    @Override
-    public boolean hasValueCodeableConcept() {
-        return usageContext != null && usageContext.hasValue() && usageContext.getValue() instanceof CodeableConcept;
-    }
+    override val valueCodeableConcept: ICodeableConceptAdapter?
+        get() {
+            if (!hasValueCodeableConcept()) return null
+            val valueCodeableConcept = usageContext.valueCodeableConcept
+            return CodeableConceptAdapter(valueCodeableConcept)
+        }
 
-    @Override
-    public ICodeableConceptAdapter getValueCodeableConcept() {
-        if (!hasValueCodeableConcept()) return null;
-        CodeableConcept valueCodeableConcept = usageContext.getValueCodeableConcept();
-        return new CodeableConceptAdapter(valueCodeableConcept);
-    }
-
-    @Override
-    public boolean equalsDeep(IUsageContextAdapter obj) {
-        if (!(obj instanceof UsageContextAdapter usageContextAdapter)) return false;
-        return get().equalsDeep(usageContextAdapter.get());
+    override fun equalsDeep(obj: IUsageContextAdapter?): Boolean {
+        if (obj !is UsageContextAdapter) return false
+        return get().equalsDeep(obj.get())
     }
 }

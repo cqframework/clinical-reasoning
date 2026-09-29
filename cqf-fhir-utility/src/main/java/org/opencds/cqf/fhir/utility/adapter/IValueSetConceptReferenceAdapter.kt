@@ -1,12 +1,11 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface IValueSetConceptReferenceAdapter extends IAdapter<IBase> {
+interface IValueSetConceptReferenceAdapter : IAdapter<IBase> {
+    fun hasCode(): Boolean
 
-    boolean hasCode();
+    val code: String?
 
-    String getCode();
-
-    String getDisplay();
+    val display: String?
 }

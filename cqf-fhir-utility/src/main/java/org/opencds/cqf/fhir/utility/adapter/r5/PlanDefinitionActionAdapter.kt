@@ -1,224 +1,194 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionComponent;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionConditionComponent;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionInputComponent;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
-import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent;
-import org.opencds.cqf.fhir.utility.adapter.*;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.*
+import org.hl7.fhir.r5.model.PlanDefinition
+import org.hl7.fhir.r5.model.RequestOrchestration.RequestOrchestrationActionComponent
+import org.opencds.cqf.fhir.utility.adapter.*
 
-public class PlanDefinitionActionAdapter extends BaseElementAdapter implements IPlanDefinitionActionAdapter {
+class PlanDefinitionActionAdapter(action: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R5, action), IPlanDefinitionActionAdapter {
+    private val _action: PlanDefinition.PlanDefinitionActionComponent
 
-    private final PlanDefinitionActionComponent action;
-
-    public PlanDefinitionActionAdapter(IBase action) {
-        super(FhirVersionEnum.R5, action);
-        if (!(action instanceof PlanDefinitionActionComponent)) {
-            throw new IllegalArgumentException(
-                    "object passed as action argument is not a PlanDefinitionActionComponent data type");
+    init {
+        require(action is PlanDefinition.PlanDefinitionActionComponent) {
+            "object passed as action argument is not a PlanDefinitionActionComponent data type"
         }
-        this.action = (PlanDefinitionActionComponent) action;
+        this._action = action
     }
 
-    @Override
-    public PlanDefinitionActionComponent get() {
-        return action;
+    override fun get(): PlanDefinition.PlanDefinitionActionComponent {
+        return _action
     }
 
-    @Override
-    public boolean hasId() {
-        return get().hasId();
+    override fun hasId(): Boolean {
+        return get().hasId()
     }
 
-    @Override
-    public String getId() {
-        return get().getId();
-    }
-
-    @Override
-    public boolean hasTitle() {
-        return get().hasTitle();
-    }
-
-    @Override
-    public String getTitle() {
-        return get().getTitle();
-    }
-
-    @Override
-    public boolean hasDescription() {
-        return get().hasDescription();
-    }
-
-    @Override
-    public String getDescription() {
-        return get().getDescription();
-    }
-
-    @Override
-    public boolean hasTextEquivalent() {
-        return get().hasTextEquivalent();
-    }
-
-    @Override
-    public String getTextEquivalent() {
-        return get().getTextEquivalent();
-    }
-
-    @Override
-    public boolean hasPriority() {
-        return get().hasPriority();
-    }
-
-    @Override
-    public String getPriority() {
-        if (hasPriority()) {
-            return get().getPriority().toCode();
-        } else {
-            return null;
+    override val id: String?
+        get() {
+            return get().id
         }
+
+    override fun hasTitle(): Boolean {
+        return get().hasTitle()
     }
 
-    @Override
-    public boolean hasCode() {
-        return get().hasCode();
-    }
-
-    @Override
-    public ICodeableConceptAdapter getCode() {
-        return getAdapterFactory().createCodeableConcept(get().getCode());
-    }
-
-    @Override
-    public boolean hasDocumentation() {
-        return get().hasDocumentation();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> List<T> getDocumentation() {
-        return get().getDocumentation().stream().map(d -> (T) d).toList();
-    }
-
-    @Override
-    public boolean hasTrigger() {
-        return get().hasTrigger();
-    }
-
-    @Override
-    public List<ITriggerDefinitionAdapter> getTrigger() {
-        return get().getTrigger().stream().map(TriggerDefinitionAdapter::new).collect(Collectors.toUnmodifiableList());
-    }
-
-    @Override
-    public List<String> getTriggerType() {
-        return get().getTrigger().stream().map(t -> t.getType().toCode()).toList();
-    }
-
-    @Override
-    public boolean hasCondition() {
-        return get().hasCondition();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<PlanDefinitionActionConditionComponent> getCondition() {
-        return get().getCondition();
-    }
-
-    @Override
-    public boolean hasInput() {
-        return get().hasInput();
-    }
-
-    @Override
-    public List<IDataRequirementAdapter> getInputDataRequirement() {
-        return get().getInput().stream()
-                .filter(PlanDefinitionActionInputComponent::hasRequirement)
-                .map(PlanDefinitionActionInputComponent::getRequirement)
-                .map(getAdapterFactory()::createDataRequirement)
-                .toList();
-    }
-
-    @Override
-    public boolean hasRelatedAction() {
-        return get().hasRelatedAction();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<PlanDefinitionActionRelatedActionComponent> getRelatedAction() {
-        return get().getRelatedAction();
-    }
-
-    @Override
-    public boolean hasTiming() {
-        return get().hasTiming();
-    }
-
-    @Override
-    public IBaseDatatype getTiming() {
-        return get().getTiming();
-    }
-
-    @Override
-    public boolean hasType() {
-        return get().hasType();
-    }
-
-    @Override
-    public ICodeableConceptAdapter getType() {
-        return getAdapterFactory().createCodeableConcept(get().getType());
-    }
-
-    @Override
-    public boolean hasSelectionBehavior() {
-        return get().hasSelectionBehavior();
-    }
-
-    @Override
-    public String getSelectionBehavior() {
-        if (hasSelectionBehavior()) {
-            return get().getSelectionBehavior().toCode();
-        } else {
-            return null;
+    override val title: String?
+        get() {
+            return get().title
         }
+
+    override fun hasDescription(): Boolean {
+        return get().hasDescription()
     }
 
-    @Override
-    public boolean hasDefinition() {
-        return get().hasDefinition();
+    override val description: String?
+        get() {
+            return get().description
+        }
+
+    override fun hasTextEquivalent(): Boolean {
+        return get().hasTextEquivalent()
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public IPrimitiveType<String> getDefinition() {
-        return (IPrimitiveType<String>) get().getDefinition();
+    override val textEquivalent: String?
+        get() {
+            return get().textEquivalent
+        }
+
+    override fun hasPriority(): Boolean {
+        return get().hasPriority()
     }
 
-    @Override
-    public boolean hasAction() {
-        return get().hasAction();
+    override val priority: String?
+        get() {
+            if (hasPriority()) {
+                return get().priority.toCode()
+            } else {
+                return null
+            }
+        }
+
+    override fun hasCode(): Boolean {
+        return get().hasCode()
     }
 
-    @Override
-    public List<IPlanDefinitionActionAdapter> getAction() {
-        return get().getAction().stream()
-                .map(getAdapterFactory()::createPlanDefinitionAction)
-                .toList();
+    override val code: ICodeableConceptAdapter?
+        get() {
+            return adapterFactory.createCodeableConcept(get().code)
+        }
+
+    override fun hasDocumentation(): Boolean {
+        return get().hasDocumentation()
     }
 
-    @Override
-    public IRequestActionAdapter newRequestAction() {
-        return getAdapterFactory().createRequestAction(new RequestOrchestrationActionComponent());
+    override fun <T> getDocumentation(): MutableList<T?> where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        return get().documentation.map { d -> d as T? }.toMutableList()
+    }
+
+    override fun hasTrigger(): Boolean {
+        return get().hasTrigger()
+    }
+
+    override val trigger: MutableList<ITriggerDefinitionAdapter?>
+        get() {
+            return get()
+                .trigger
+                .map { triggerDefinition -> TriggerDefinitionAdapter(triggerDefinition) }
+                .toMutableList()
+        }
+
+    override val triggerType: MutableList<String?>
+        get() {
+            return get().trigger.map { t -> t!!.type.toCode() }.toMutableList()
+        }
+
+    override fun hasCondition(): Boolean {
+        return get().hasCondition()
+    }
+
+    override fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>? {
+        return get().condition as MutableList<T?>?
+    }
+
+    override fun hasInput(): Boolean {
+        return get().hasInput()
+    }
+
+    override val inputDataRequirement: MutableList<IDataRequirementAdapter?>
+        get() {
+            return get()
+                .input
+                .filter { obj -> obj!!.hasRequirement() }
+                .map { obj -> obj!!.requirement }
+                .map { dataRequirement -> adapterFactory.createDataRequirement(dataRequirement) }
+                .toMutableList()
+        }
+
+    override fun hasRelatedAction(): Boolean {
+        return get().hasRelatedAction()
+    }
+
+    override fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>? {
+        return get().relatedAction as MutableList<T?>?
+    }
+
+    override fun hasTiming(): Boolean {
+        return get().hasTiming()
+    }
+
+    override val timing: IBaseDatatype?
+        get() {
+            return get().timing
+        }
+
+    override fun hasType(): Boolean {
+        return get().hasType()
+    }
+
+    override val type: ICodeableConceptAdapter
+        get() {
+            return adapterFactory.createCodeableConcept(get().type)
+        }
+
+    override fun hasSelectionBehavior(): Boolean {
+        return get().hasSelectionBehavior()
+    }
+
+    override val selectionBehavior: String?
+        get() {
+            if (hasSelectionBehavior()) {
+                return get().selectionBehavior.toCode()
+            } else {
+                return null
+            }
+        }
+
+    override fun hasDefinition(): Boolean {
+        return get().hasDefinition()
+    }
+
+    override val definition: IPrimitiveType<String?>?
+        get() {
+            return get().definition as IPrimitiveType<String?>?
+        }
+
+    override fun hasAction(): Boolean {
+        return get().hasAction()
+    }
+
+    override val action: MutableList<IPlanDefinitionActionAdapter?>
+        get() {
+            return get()
+                .action
+                .map { action -> adapterFactory.createPlanDefinitionAction(action) }
+                .toMutableList()
+        }
+
+    override fun newRequestAction(): IRequestActionAdapter {
+        return adapterFactory.createRequestAction(RequestOrchestrationActionComponent())
     }
 }

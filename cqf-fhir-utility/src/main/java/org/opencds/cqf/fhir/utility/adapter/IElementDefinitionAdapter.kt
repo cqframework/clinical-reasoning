@@ -1,116 +1,114 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.Collections;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseDatatypeElement;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.IBaseDatatypeElement
 
-public interface IElementDefinitionAdapter extends IAdapter<IBase> {
-    String getId();
+interface IElementDefinitionAdapter : IAdapter<IBase> {
 
-    String getPath();
+    val id: String?
 
-    String getSliceName();
+    val path: String?
 
-    boolean hasSlicing();
+    val sliceName: String?
 
-    String getLabel();
+    fun hasSlicing(): Boolean
 
-    boolean hasLabel();
+    val label: String?
 
-    List<ICodingAdapter> getCode();
+    fun hasLabel(): Boolean
 
-    String getShort();
+    val code: MutableList<ICodingAdapter?>?
 
-    boolean hasShort();
+    val short: String?
 
-    String getDefinition();
+    fun hasShort(): Boolean
 
-    String getComment();
+    val definition: String?
 
-    String getRequirements();
+    val comment: String?
 
-    List<String> getAlias();
+    val requirements: String?
 
-    int getMin();
+    val alias: MutableList<String?>?
 
-    boolean hasMin();
+    val min: Int
 
-    default boolean isRequired() {
-        return getMin() != 0;
-    }
+    fun hasMin(): Boolean
 
-    String getMax();
+    val isRequired: Boolean
+        get() = this.min != 0
 
-    boolean hasMax();
+    val max: String?
 
-    <T extends IBase> List<T> getType();
+    fun hasMax(): Boolean
+
+    fun <T : IBase?> getType(): MutableList<T?>?
 
     /**
      * Returns the code of the first rep of the type property.
+     *
      * @return
      */
-    String getTypeCode();
+    val typeCode: String?
 
     /**
      * Returns the first profile of the first rep of the type property.
+     *
      * @return
      */
-    String getTypeProfile();
+    val typeProfile: String?
 
-    <T extends IBaseDatatype> T getDefaultValue();
+    fun <T : IBaseDatatype?> getDefaultValue(): T?
 
-    boolean hasDefaultValue();
+    fun hasDefaultValue(): Boolean
 
-    <T extends IBaseDatatype> T getFixed();
+    fun <T : IBaseDatatype?> getFixed(): T?
 
-    boolean hasFixed();
+    fun hasFixed(): Boolean
 
-    <T extends IBaseDatatype> T getPattern();
+    fun <T : IBaseDatatype?> getPattern(): T?
 
-    boolean hasPattern();
+    fun hasPattern(): Boolean
 
-    <T extends IBaseDatatype> T getFixedOrPattern();
+    fun <T : IBaseDatatype?> getFixedOrPattern(): T?
 
-    boolean hasFixedOrPattern();
+    fun hasFixedOrPattern(): Boolean
 
-    <T extends IBaseDatatype> T getDefaultOrFixedOrPattern();
+    fun <T : IBaseDatatype?> getDefaultOrFixedOrPattern(): T?
 
-    boolean hasDefaultOrFixedOrPattern();
+    fun hasDefaultOrFixedOrPattern(): Boolean
 
-    boolean getMustSupport();
+    val mustSupport: Boolean
 
-    <T extends IBaseDatatypeElement> T getBinding();
+    fun <T : IBaseDatatypeElement?> getBinding(): T?
 
-    boolean hasBinding();
+    fun hasBinding(): Boolean
 
-    String getBindingValueSet();
+    val bindingValueSet: String?
 
-    boolean isModifier();
+    val isModifier: Boolean
 
-    boolean hasCondition();
+    fun hasCondition(): Boolean
 
-    int getBaseMin();
+    val baseMin: Int
 
-    String getBaseMax();
+    val baseMax: String?
 
-    String getBasePath();
+    val basePath: String?
 
-    String getBindingStrength();
+    val bindingStrength: String?
 
-    boolean hasMaxLength();
+    fun hasMaxLength(): Boolean
 
-    default List<String> getExtensionUrls() {
-        return Collections.emptyList();
-    }
+    val extensionUrls: MutableList<String?>
+        get() = mutableListOf()
 
     /**
-     * Returns true if this element has R5-specific key constraints
-     * (mustHaveValue, valueAlternatives, minValue, maxValue).
-     * Default returns false for non-R5 versions.
+     * Returns true if this element has R5-specific key constraints (mustHaveValue,
+     * valueAlternatives, minValue, maxValue). Default returns false for non-R5 versions.
      */
-    default boolean hasR5KeyConstraints() {
-        return false;
+    fun hasR5KeyConstraints(): Boolean {
+        return false
     }
 }

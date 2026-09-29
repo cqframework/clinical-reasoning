@@ -1,60 +1,52 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDataRequirementCodeFilterAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IPrimitiveType
+import org.hl7.fhir.r5.model.DataRequirement
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
+import org.opencds.cqf.fhir.utility.adapter.IDataRequirementCodeFilterAdapter
 
-public class DataRequirementCodeFilterAdapter extends BaseElementAdapter implements IDataRequirementCodeFilterAdapter {
+class DataRequirementCodeFilterAdapter(codeFilter: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R5, codeFilter), IDataRequirementCodeFilterAdapter {
+    private val codeFilter: DataRequirement.DataRequirementCodeFilterComponent
 
-    private final DataRequirementCodeFilterComponent codeFilter;
-
-    public DataRequirementCodeFilterAdapter(IBase codeFilter) {
-        super(FhirVersionEnum.R5, codeFilter);
-        if (!(codeFilter instanceof DataRequirementCodeFilterComponent)) {
-            throw new IllegalArgumentException(
-                    "object passed as codeFilter argument is not a DataRequirementCodeFilterComponent data type");
+    init {
+        require(codeFilter is DataRequirement.DataRequirementCodeFilterComponent) {
+            "object passed as codeFilter argument is not a DataRequirementCodeFilterComponent data type"
         }
-        this.codeFilter = (DataRequirementCodeFilterComponent) codeFilter;
+        this.codeFilter = codeFilter
     }
 
-    @Override
-    public DataRequirementCodeFilterComponent get() {
-        return codeFilter;
+    override fun get(): DataRequirement.DataRequirementCodeFilterComponent {
+        return codeFilter
     }
 
-    @Override
-    public boolean hasCode() {
-        return get().hasCode();
+    override fun hasCode(): Boolean {
+        return get().hasCode()
     }
 
-    @Override
-    public List<ICodingAdapter> getCode() {
-        return get().getCode().stream().map(CodingAdapter::new).collect(Collectors.toList());
+    override val code: MutableList<ICodingAdapter?>
+        get() {
+            return get().code.map { coding -> CodingAdapter(coding) }.toMutableList()
+        }
+
+    override fun hasPath(): Boolean {
+        return get().hasPath()
     }
 
-    @Override
-    public boolean hasPath() {
-        return get().hasPath();
+    override val path: String?
+        get() {
+            return get().path
+        }
+
+    override fun hasValueSet(): Boolean {
+        return get().hasValueSet()
     }
 
-    @Override
-    public String getPath() {
-        return get().getPath();
-    }
-
-    @Override
-    public boolean hasValueSet() {
-        return get().hasValueSet();
-    }
-
-    @Override
-    public IPrimitiveType<String> getValueSet() {
-        return get().getValueSetElement();
-    }
+    override val valueSet: IPrimitiveType<String?>?
+        get() {
+            return get().valueSetElement
+        }
 }

@@ -1,122 +1,129 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r4
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
-import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.r4.model.QuestionnaireResponse
+import org.hl7.fhir.r4.model.Type
+import org.opencds.cqf.fhir.utility.adapter.*
 
-public class QuestionnaireResponseItemComponentAdapter extends BaseElementAdapter
-        implements IQuestionnaireResponseItemComponentAdapter {
+class QuestionnaireResponseItemComponentAdapter(item: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R4, item), IQuestionnaireResponseItemComponentAdapter {
+    private val _item: QuestionnaireResponse.QuestionnaireResponseItemComponent
 
-    private final QuestionnaireResponseItemComponent item;
-
-    public QuestionnaireResponseItemComponentAdapter(IBase item) {
-        super(FhirVersionEnum.R4, item);
-        if (!(item instanceof QuestionnaireResponseItemComponent)) {
-            throw new IllegalArgumentException(
-                    "object passed as item argument is not a QuestionnaireResponseItemComponent data type");
+    init {
+        require(item is QuestionnaireResponse.QuestionnaireResponseItemComponent) {
+            "object passed as item argument is not a QuestionnaireResponseItemComponent data type"
         }
-        this.item = (QuestionnaireResponseItemComponent) item;
+        _item = item
     }
 
-    @Override
-    public QuestionnaireResponseItemComponent get() {
-        return item;
+    override fun get(): QuestionnaireResponse.QuestionnaireResponseItemComponent {
+        return _item
     }
 
-    @Override
-    public String getLinkId() {
-        return item.getLinkId();
+    override val linkId: String?
+        get() {
+            return _item.linkId
+        }
+
+    override fun setLinkId(linkId: String?): IQuestionnaireResponseItemComponentAdapter {
+        get().setLinkId(linkId)
+        return this
     }
 
-    @Override
-    public IQuestionnaireResponseItemComponentAdapter setLinkId(String linkId) {
-        get().setLinkId(linkId);
-        return this;
+    override fun setDefinition(definition: String?): IQuestionnaireResponseItemComponentAdapter {
+        get().setDefinition(definition)
+        return this
     }
 
-    @Override
-    public IQuestionnaireResponseItemComponentAdapter setDefinition(String definition) {
-        get().setDefinition(definition);
-        return this;
+    override fun hasDefinition(): Boolean {
+        return _item.hasDefinition()
     }
 
-    @Override
-    public boolean hasDefinition() {
-        return item.hasDefinition();
+    override val definition: String?
+        get() {
+            return _item.definition
+        }
+
+    override fun hasItem(): Boolean {
+        return _item.hasItem()
     }
 
-    @Override
-    public String getDefinition() {
-        return item.getDefinition();
+    override var item: MutableList<out IItemComponentAdapter?>?
+        get() {
+            return _item.item
+                .map { questionnaireResponseItem ->
+                    adapterFactory.createQuestionnaireResponseItem(questionnaireResponseItem)
+                }
+                .toMutableList()
+        }
+        set(items) {
+            _item.setItem(
+                items!!
+                    .map { obj -> obj!!.get() }
+                    .map { obj ->
+                        QuestionnaireResponse.QuestionnaireResponseItemComponent::class
+                            .java
+                            .cast(obj)
+                    }
+                    .toMutableList()
+            )
+        }
+
+    override fun addItem(item: IItemComponentAdapter?) {
+        this._item.addItem(
+            item!!.get() as QuestionnaireResponse.QuestionnaireResponseItemComponent?
+        )
     }
 
-    @Override
-    public boolean hasItem() {
-        return item.hasItem();
+    override fun addItems(items: MutableList<IQuestionnaireResponseItemComponentAdapter?>?) {
+        items!!
+            .map { obj -> obj!!.get() }
+            .map { obj: IBase? ->
+                QuestionnaireResponse.QuestionnaireResponseItemComponent::class.java.cast(obj)
+            }
+            .forEach { t -> this._item.addItem(t) }
     }
 
-    @Override
-    public List<IQuestionnaireResponseItemComponentAdapter> getItem() {
-        return item.getItem().stream()
-                .map(adapterFactory::createQuestionnaireResponseItem)
-                .toList();
+    override fun hasAnswer(): Boolean {
+        return _item.hasAnswer()
     }
 
-    @Override
-    public void setItem(List<? extends IItemComponentAdapter> items) {
-        item.setItem(items.stream()
-                .map(IAdapter::get)
-                .map(QuestionnaireResponseItemComponent.class::cast)
-                .collect(Collectors.toList()));
-    }
+    override var answer: MutableList<IQuestionnaireResponseItemAnswerComponentAdapter?>?
+        get() {
+            return _item.answer
+                .map { questionnaireResponseItemAnswer ->
+                    adapterFactory.createQuestionnaireResponseItemAnswer(
+                        questionnaireResponseItemAnswer
+                    )
+                }
+                .toMutableList()
+        }
+        set(answers) {
+            _item.setAnswer(
+                answers!!
+                    .map { obj -> obj!!.get() }
+                    .filter { o ->
+                        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent::class
+                            .java
+                            .isInstance(o)
+                    }
+                    .map { obj ->
+                        QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent::class
+                            .java
+                            .cast(obj)
+                    }
+                    .toMutableList()
+            )
+        }
 
-    @Override
-    public void addItem(IItemComponentAdapter item) {
-        this.item.addItem((QuestionnaireResponseItemComponent) item.get());
-    }
-
-    @Override
-    public void addItems(List<IQuestionnaireResponseItemComponentAdapter> items) {
-        items.stream()
-                .map(IAdapter::get)
-                .map(QuestionnaireResponseItemComponent.class::cast)
-                .forEach(this.item::addItem);
-    }
-
-    @Override
-    public boolean hasAnswer() {
-        return item.hasAnswer();
-    }
-
-    @Override
-    public List<IQuestionnaireResponseItemAnswerComponentAdapter> getAnswer() {
-        return item.getAnswer().stream()
-                .map(adapterFactory::createQuestionnaireResponseItemAnswer)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void setAnswer(List<IQuestionnaireResponseItemAnswerComponentAdapter> answers) {
-        item.setAnswer(answers.stream()
-                .map(IAdapter::get)
-                .filter(QuestionnaireResponseItemAnswerComponent.class::isInstance)
-                .map(QuestionnaireResponseItemAnswerComponent.class::cast)
-                .toList());
-    }
-
-    @Override
-    public IQuestionnaireResponseItemAnswerComponentAdapter newAnswer(IBaseDatatype value) {
+    override fun newAnswer(
+        value: IBaseDatatype?
+    ): IQuestionnaireResponseItemAnswerComponentAdapter? {
         return adapterFactory.createQuestionnaireResponseItemAnswer(
-                new QuestionnaireResponseItemAnswerComponent().setValue((Type) value));
+            QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent()
+                .setValue(value as Type?)
+        )
     }
 }

@@ -1,67 +1,66 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import java.util.*
+import org.hl7.fhir.instance.model.api.IIdType
+import org.hl7.fhir.instance.model.api.IPrimitiveType
 
-/**
- * This interface exposes common functionality across all FHIR Questionnaire versions.
- */
-public interface IQuestionnaireResponseAdapter extends IResourceAdapter {
+/** This interface exposes common functionality across all FHIR Questionnaire versions. */
+interface IQuestionnaireResponseAdapter : IResourceAdapter {
+    override fun setId(id: String): IQuestionnaireResponseAdapter?
 
-    IQuestionnaireResponseAdapter setId(String id);
+    fun hasQuestionnaire(): Boolean
 
-    boolean hasQuestionnaire();
+    val questionnaire: String?
 
-    String getQuestionnaire();
+    val questionnaireCanonical: IPrimitiveType<String?>?
 
-    IPrimitiveType<String> getQuestionnaireCanonical();
+    fun setQuestionnaire(canonical: String?): IQuestionnaireResponseAdapter?
 
-    IQuestionnaireResponseAdapter setQuestionnaire(String canonical);
+    fun hasSubject(): Boolean
 
-    boolean hasSubject();
+    val subject: IIdType?
 
-    IIdType getSubject();
+    fun setSubject(subject: IIdType?): IQuestionnaireResponseAdapter?
 
-    IQuestionnaireResponseAdapter setSubject(IIdType subject);
+    fun setAuthored(date: Date?): IQuestionnaireResponseAdapter?
 
-    IQuestionnaireResponseAdapter setAuthored(Date date);
+    fun setStatus(status: String?): IQuestionnaireResponseAdapter?
 
-    IQuestionnaireResponseAdapter setStatus(String status);
+    fun hasItem(): Boolean
 
-    boolean hasItem();
-
-    default boolean hasItem(String linkId) {
-        return !getItem(linkId).isEmpty();
+    fun hasItem(linkId: String): Boolean {
+        return getItem(linkId).isNotEmpty()
     }
 
-    List<IQuestionnaireResponseItemComponentAdapter> getItem();
+    var item: MutableList<IQuestionnaireResponseItemComponentAdapter?>?
 
-    default List<IQuestionnaireResponseItemComponentAdapter> getItem(String linkId) {
-        return getItemsWithLinkId(getItem(), linkId);
+    fun getItem(linkId: String): MutableList<IQuestionnaireResponseItemComponentAdapter?> {
+        return getItemsWithLinkId(this.item!!, linkId)
     }
 
-    default List<IQuestionnaireResponseItemComponentAdapter> getItemsWithLinkId(
-            List<IQuestionnaireResponseItemComponentAdapter> items, String linkId) {
-        var matchingItems =
-                items.stream().filter(i -> linkId.equals(i.getLinkId())).collect(Collectors.toList());
-        items.forEach(i -> {
-            if (i.hasItem()) {
-                matchingItems.addAll(getItemsWithLinkId(
-                        i.getItem().stream()
-                                .map(IQuestionnaireResponseItemComponentAdapter.class::cast)
-                                .toList(),
-                        linkId));
+    fun getItemsWithLinkId(
+        items: List<IQuestionnaireResponseItemComponentAdapter?>,
+        linkId: String,
+    ): MutableList<IQuestionnaireResponseItemComponentAdapter?> {
+        val matchingItems = items.filter { i -> linkId == i!!.linkId }.toMutableList()
+        items.forEach { i ->
+            if (i!!.hasItem()) {
+                matchingItems.addAll(
+                    getItemsWithLinkId(
+                        i.item!!
+                            .map { obj ->
+                                IQuestionnaireResponseItemComponentAdapter::class.java.cast(obj)
+                            }
+                            .toList(),
+                        linkId,
+                    )
+                )
             }
-        });
-        return matchingItems;
+        }
+        return matchingItems
     }
 
-    void setItem(List<IQuestionnaireResponseItemComponentAdapter> items);
+    fun addItem(item: IQuestionnaireResponseItemComponentAdapter?)
 
-    void addItem(IQuestionnaireResponseItemComponentAdapter item);
-
-    void addItems(List<IQuestionnaireResponseItemComponentAdapter> items);
+    fun addItems(items: MutableList<IQuestionnaireResponseItemComponentAdapter?>?)
 }

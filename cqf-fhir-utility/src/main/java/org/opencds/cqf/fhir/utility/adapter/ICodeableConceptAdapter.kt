@@ -1,18 +1,17 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface ICodeableConceptAdapter extends IAdapter<IBase> {
+interface ICodeableConceptAdapter : IAdapter<IBase> {
+    fun hasCoding(): Boolean
 
-    boolean hasCoding();
+    val coding: MutableList<ICodingAdapter?>
 
-    List<ICodingAdapter> getCoding();
+    fun hasCoding(code: String?): Boolean
 
-    boolean hasCoding(String code);
-
-    default ICodingAdapter getCodingFirstRep() {
-        List<ICodingAdapter> codings = getCoding();
-        return codings.isEmpty() ? null : codings.get(0);
-    }
+    val codingFirstRep: ICodingAdapter?
+        get() {
+            val codings = this.coding
+            return if (codings.isEmpty()) null else codings[0]
+        }
 }

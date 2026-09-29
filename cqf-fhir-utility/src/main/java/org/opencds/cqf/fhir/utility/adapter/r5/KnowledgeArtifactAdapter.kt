@@ -1,140 +1,128 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.CanonicalResource;
-import org.hl7.fhir.r5.model.DateTimeType;
-import org.hl7.fhir.r5.model.DomainResource;
-import org.hl7.fhir.r5.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r5.model.Period;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType;
-import org.hl7.fhir.r5.model.UsageContext;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import java.util.*
+import org.hl7.fhir.exceptions.FHIRException
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions
+import org.hl7.fhir.instance.model.api.ICompositeType
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.instance.model.api.IPrimitiveType
+import org.hl7.fhir.r5.model.*
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter
 
-public class KnowledgeArtifactAdapter extends ResourceAdapter implements IKnowledgeArtifactAdapter {
-    CanonicalResource adaptedResource;
+open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter {
+    var adaptedResource: CanonicalResource? = null
 
-    public KnowledgeArtifactAdapter(IDomainResource resource) {
-        super(resource);
-        if (resource instanceof CanonicalResource) {
-            adaptedResource = (CanonicalResource) resource;
+    constructor(resource: IDomainResource) : super(resource) {
+        if (resource is CanonicalResource) {
+            adaptedResource = resource
         }
     }
 
-    public KnowledgeArtifactAdapter(CanonicalResource resource) {
-        super(resource);
-        adaptedResource = resource;
+    constructor(resource: CanonicalResource) : super(resource) {
+        adaptedResource = resource
     }
 
-    @Override
-    public DomainResource get() {
-        return adaptedResource;
+    override fun get(): DomainResource {
+        return adaptedResource!!
     }
 
-    public CanonicalResource getCanonicalResource() {
-        checkAdaptedResource();
-        return adaptedResource;
-    }
+    val canonicalResource: CanonicalResource
+        get() {
+            checkAdaptedResource()
+            return adaptedResource!!
+        }
 
-    // TODO: All these elements should be implemented as a super that handles the case where the element does not exist,
+    // TODO: All these elements should be implemented as a super that handles the case where the
+    // element does not exist,
     // but the appropriate artifact-xxx extension does
-    protected void checkAdaptedResource() {
-        if (adaptedResource == null) {
-            throw new IllegalArgumentException("resource passed as a resource argument is not a MetadataResource");
+    protected fun checkAdaptedResource() {
+        requireNotNull(adaptedResource) {
+            "resource passed as a resource argument is not a MetadataResource"
         }
     }
 
-    @Override
-    public DomainResource copy() {
-        return get().copy();
+    override fun copy(): DomainResource? {
+        return get().copy()
     }
 
-    @Override
-    public void setDateElement(IPrimitiveType<Date> date) {
-        if (date != null && !(date instanceof DateTimeType)) {
-            throw new UnprocessableEntityException("Date must be " + DateTimeType.class.getName());
+    override fun setDateElement(date: IPrimitiveType<Date?>?) {
+        if (date != null && date !is DateTimeType) {
+            throw UnprocessableEntityException("Date must be " + DateTimeType::class.java.name)
         }
-        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setDateElement(date);
+        super<IKnowledgeArtifactAdapter>.setDateElement(date)
     }
 
-    @Override
-    public void setEffectivePeriod(ICompositeType effectivePeriod) {
-        if (effectivePeriod != null && !(effectivePeriod instanceof Period)) {
-            throw new UnprocessableEntityException("EffectivePeriod must be a valid " + Period.class.getName());
+    override var effectivePeriod: ICompositeType?
+        get() = super.effectivePeriod
+        set(effectivePeriod) {
+            if (effectivePeriod != null && effectivePeriod !is Period) {
+                throw UnprocessableEntityException(
+                    "EffectivePeriod must be a valid ${Period::class.java.name}"
+                )
+            }
+            super<IKnowledgeArtifactAdapter>.effectivePeriod = effectivePeriod
         }
-        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setEffectivePeriod(effectivePeriod);
+
+    override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
+        return this.canonicalResource.useContext as MutableList<T?>?
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<UsageContext> getUseContext() {
-        return getCanonicalResource().getUseContext();
-    }
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
+            return references
+        }
 
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
-        return references;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getRelatedArtifactsOfType(String codeString) {
-        RelatedArtifactType type;
+    override fun <T> getRelatedArtifactsOfType(codeString: String?): MutableList<T?>? where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        val type: RelatedArtifact.RelatedArtifactType?
         try {
-            type = RelatedArtifactType.fromCode(codeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid related artifact code");
+            type = RelatedArtifact.RelatedArtifactType.fromCode(codeString)
+        } catch (e: FHIRException) {
+            throw UnprocessableEntityException("Invalid related artifact code")
         }
-        return getRelatedArtifact().stream()
-                .map(ra -> (RelatedArtifact) ra)
-                .filter(ra -> ra.getType() == type)
-                .collect(Collectors.toList());
+        return getRelatedArtifact<RelatedArtifact>()
+            .map { ra -> ra as RelatedArtifact? }
+            .filter { ra -> ra!!.type == type }
+            .toMutableList() as MutableList<T?>
     }
 
-    @Override
-    public String getStatus() {
-        return getCanonicalResource().getStatus() == null
-                ? null
-                : getCanonicalResource().getStatus().toCode();
-    }
-
-    @Override
-    public void setStatus(String statusCodeString) {
-        PublicationStatus status;
-        try {
-            status = PublicationStatus.fromCode(statusCodeString);
-        } catch (FHIRException e) {
-            throw new UnprocessableEntityException("Invalid status code");
+    override var status: String?
+        get() {
+            return if (this.canonicalResource.status == null) null
+            else this.canonicalResource.status.toCode()
         }
-        getCanonicalResource().setStatus(status);
-    }
+        set(statusCodeString: String?) {
+            val status: Enumerations.PublicationStatus?
+            try {
+                status = Enumerations.PublicationStatus.fromCode(statusCodeString)
+            } catch (e: FHIRException) {
+                throw UnprocessableEntityException("Invalid status code")
+            }
+            this.canonicalResource.setStatus(status)
+        }
 
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts)
-            throws UnprocessableEntityException {
-        org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter.super.setRelatedArtifact(
-                relatedArtifacts.stream()
-                        .map(ra -> {
-                            try {
-                                return (RelatedArtifact) ra;
-                            } catch (ClassCastException e) {
-                                throw new UnprocessableEntityException(
-                                        "All related artifacts must be of type " + RelatedArtifact.class.getName());
-                            }
-                        })
-                        .collect(Collectors.toList()));
+    @Throws(UnprocessableEntityException::class)
+    override fun <T> setRelatedArtifact(relatedArtifacts: MutableList<T?>) where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        super<IKnowledgeArtifactAdapter>.setRelatedArtifact(
+            relatedArtifacts
+                .map { ra ->
+                    try {
+                        return@map ra as RelatedArtifact?
+                    } catch (e: ClassCastException) {
+                        throw UnprocessableEntityException(
+                            "All related artifacts must be of type ${RelatedArtifact::class.java.name}"
+                        )
+                    }
+                }
+                .toMutableList()
+        )
     }
 }

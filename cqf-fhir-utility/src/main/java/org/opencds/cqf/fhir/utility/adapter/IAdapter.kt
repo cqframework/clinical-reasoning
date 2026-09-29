@@ -1,242 +1,249 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import java.util.Date
+import org.hl7.fhir.instance.model.api.*
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Marker interface for HL7 Structure adapters
  *
  * @param <T> An HL7 Structure Type
  */
-public interface IAdapter<T extends IBase> {
-    public static final Logger logger = LoggerFactory.getLogger(IAdapter.class);
+interface IAdapter<T : IBase> {
+    /** @return returns the underlying HL7 Structure for this adapter */
+    fun get(): T?
 
-    String UNSUPPORTED_VERSION = "Unsupported version: %s";
-    String MISSING_EXTENSION = "Field 'extension' does not exist on Element type {}";
+    fun fhirContext(): FhirContext?
 
-    /**
-     * @return returns the underlying HL7 Structure for this adapter
-     */
-    T get();
-
-    FhirContext fhirContext();
-
-    default FhirVersionEnum fhirVersion() {
-        return fhirContext().getVersion().getVersion();
+    fun fhirVersion(): FhirVersionEnum? {
+        return fhirContext()!!.version.version
     }
 
-    IAdapterFactory getAdapterFactory();
+    val adapterFactory: IAdapterFactory?
 
-    default void setExtension(List<? extends IBaseExtension<?, ?>> extensions) {
+    fun setExtension(extensions: MutableList<out IBaseExtension<*, *>?>?) {
         try {
-            setValue(get(), "extension", null);
-            setValue(get(), "extension", extensions);
-        } catch (Exception e) {
+            setValue(get(), "extension", null)
+            setValue(get(), "extension", extensions)
+        } catch (e: Exception) {
             // Do nothing
-            logger.debug(MISSING_EXTENSION, get().fhirType());
+            logger.debug(MISSING_EXTENSION, get()!!.fhirType())
         }
     }
 
-    @SuppressWarnings("unchecked")
-    default <E extends IBaseExtension<?, ?>> E addExtension() {
-        if (get() instanceof IBaseHasExtensions baseHasExtensions) {
-            return (E) baseHasExtensions.addExtension();
+    fun <E : IBaseExtension<*, *>> addExtension(): E? {
+        if (get() is IBaseHasExtensions) {
+            @Suppress("UNCHECKED_CAST")
+            return (get() as IBaseHasExtensions).addExtension() as E?
         }
-        return null;
+        return null
     }
 
-    default <E extends IBaseExtension<?, ?>> void addExtension(E extension) {
+    fun <E : IBaseExtension<*, *>> addExtension(extension: E?) {
         try {
-            setValue(get(), "extension", Collections.singletonList(extension));
-        } catch (Exception e) {
+            setValue(get(), "extension", mutableListOf(extension))
+        } catch (e: Exception) {
             // Do nothing
-            logger.debug(MISSING_EXTENSION, get().fhirType());
+            logger.debug(MISSING_EXTENSION, get()!!.fhirType())
         }
     }
 
-    default boolean hasExtension() {
-        return !getExtension().isEmpty();
+    fun hasExtension(): Boolean {
+        return getExtension<IBaseExtension<*, *>>().isNotEmpty()
     }
 
-    default boolean hasExtension(String url) {
-        return hasExtension(get(), url);
+    fun hasExtension(url: String?): Boolean {
+        return hasExtension(get(), url)
     }
 
-    default <E extends IBaseExtension<?, ?>> List<E> getExtension() {
-        return getExtension(get());
+    fun <E : IBaseExtension<*, *>> getExtension(): MutableList<E?> {
+        return getExtension(get())
     }
 
-    default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(String url) {
-        return getExtensionByUrl(get(), url);
+    fun <E : IBaseExtension<*, *>> getExtensionByUrl(url: String?): E? {
+        return getExtensionByUrl(get(), url)
     }
 
-    default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(String url) {
-        return getExtensionsByUrl(get(), url);
+    fun <E : IBaseExtension<*, *>> getExtensionsByUrl(url: String?): MutableList<E?> {
+        return getExtensionsByUrl(get(), url)
     }
 
-    @SuppressWarnings("unchecked")
-    default <E extends IBaseExtension<?, ?>> List<E> getExtension(IBase base) {
-        return resolvePathList(base, "extension").stream().map(e -> (E) e).collect(Collectors.toList());
+    fun <E : IBaseExtension<*, *>> getExtension(base: IBase?): MutableList<E?> {
+        @Suppress("UNCHECKED_CAST")
+        return resolvePathList(base, "extension").map { e -> e as E? }.toMutableList()
     }
 
-    @SuppressWarnings("unchecked")
-    default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrl(IBase base, String url) {
-        return getExtension(base).stream()
-                .filter(e -> e.getUrl().equals(url))
-                .map(e -> (E) e)
-                .collect(Collectors.toList());
+    fun <E : IBaseExtension<*, *>> getExtensionsByUrl(base: IBase?, url: String?): MutableList<E?> {
+        @Suppress("UNCHECKED_CAST")
+        return getExtension<IBaseExtension<*, *>>(base)
+            .filter { e -> e!!.url == url }
+            .map { e -> e as E }
+            .toMutableList()
     }
 
-    @SuppressWarnings("unchecked")
-    default <E extends IBaseExtension<?, ?>> List<E> getExtensionsByUrls(IBase base, Set<String> urls) {
-        return getExtension(base).stream()
-                .filter(e -> urls.contains(e.getUrl()))
-                .map(e -> (E) e)
-                .collect(Collectors.toList());
+    fun <E : IBaseExtension<*, *>> getExtensionsByUrls(
+        base: IBase?,
+        urls: Set<String?>,
+    ): MutableList<E?> {
+        @Suppress("UNCHECKED_CAST")
+        return getExtension<IBaseExtension<*, *>>(base)
+            .filter { e -> urls.contains(e!!.url) }
+            .map { e -> e as E }
+            .toMutableList()
     }
 
-    @SuppressWarnings("unchecked")
-    default <E extends IBaseExtension<?, ?>> E getExtensionByUrl(IBase base, String url) {
-        return getExtensionsByUrl(base, url).stream()
-                .map(e -> (E) e)
-                .findFirst()
-                .orElse(null);
+    fun <E : IBaseExtension<*, *>> getExtensionByUrl(base: IBase?, url: String?): E? {
+        @Suppress("UNCHECKED_CAST")
+        return getExtensionsByUrl<IBaseExtension<*, *>>(base, url)
+            .map { e -> e as E? }
+            .firstOrNull()
     }
 
-    default Boolean hasExtension(IBase base, String url) {
-        return getExtension(base).stream().anyMatch(e -> e.getUrl().equals(url));
+    fun hasExtension(base: IBase?, url: String?): Boolean {
+        return getExtension<IBaseExtension<*, *>>(base).any { e -> e!!.url == url }
     }
 
-    Object resolvePath(Object target, String path);
+    fun resolvePath(target: Any?, path: String): Any?
 
-    default List<IBase> resolvePathList(String path) {
-        return resolvePathList(get(), path);
+    fun resolvePathList(path: String): MutableList<IBase?> {
+        return resolvePathList(get(), path)
     }
 
-    @SuppressWarnings("unchecked")
-    default List<IBase> resolvePathList(IBase base, String path) {
-        var pathResult = resolvePath(base, path);
-        return pathResult instanceof List ? (List<IBase>) pathResult : new ArrayList<>();
+    fun resolvePathList(base: IBase?, path: String): MutableList<IBase?> {
+        val pathResult = resolvePath(base, path)
+        @Suppress("UNCHECKED_CAST")
+        return if (pathResult is MutableList<*>) pathResult as MutableList<IBase?>
+        else mutableListOf()
     }
 
-    @SuppressWarnings("unchecked")
-    default <B extends IBase> List<B> resolvePathList(IBase base, String path, Class<B> clazz) {
-        return resolvePathList(base, path).stream().map(i -> (B) i).collect(Collectors.toList());
+    fun <B : IBase> resolvePathList(base: IBase?, path: String, clazz: Class<B>?): MutableList<B?> {
+        @Suppress("UNCHECKED_CAST")
+        return resolvePathList(base, path).map { i -> i as B? }.toMutableList()
     }
 
-    default String resolvePathString(String path) {
-        return resolvePathString(get(), path);
+    fun resolvePathString(path: String): String? {
+        return resolvePathString(get(), path)
     }
 
-    default String resolvePathString(IBase base, String path) {
-        var result = resolvePath(base, path);
-        if (result == null) {
-            return null;
-        } else if (result instanceof IPrimitiveType<?> primitive && primitive.getValue() instanceof String string) {
-            return string;
-        } else if (result instanceof IBaseReference reference) {
-            return reference.getReferenceElement().getValue();
-        } else if (result instanceof IBaseEnumeration<?> enumeration) {
-            return enumeration.getValueAsString();
-        } else {
-            throw new UnprocessableEntityException(String.format(
-                    "Path (%s) on element of type (%s) could not be resolved",
-                    path, base.getClass().getSimpleName()));
+    fun resolvePathString(base: IBase?, path: String): String? {
+        return when (val result = resolvePath(base, path)) {
+            null -> null
+
+            is IPrimitiveType<*> if result.value is String -> result.value as String
+
+            is IBaseReference -> result.referenceElement.value
+
+            is IBaseEnumeration<*> -> result.valueAsString
+
+            else ->
+                throw UnprocessableEntityException(
+                    "Path ($path) on element of type (${base?.javaClass?.simpleName}) could not be resolved"
+                )
         }
     }
 
-    default Object resolvePath(String path) {
-        return resolvePath(get(), path);
+    fun resolvePath(path: String): Any? {
+        return resolvePath(get(), path)
     }
 
-    default <B extends IBase> B resolvePath(String path, Class<B> clazz) {
-        return resolvePath(get(), path, clazz);
+    fun <B : IBase> resolvePath(path: String, clazz: Class<B>?): B? {
+        return resolvePath(get(), path, clazz)
     }
 
-    @SuppressWarnings("unchecked")
-    default <B extends IBase> B resolvePath(IBase base, String path, Class<B> clazz) {
-        return (B) resolvePath(base, path);
+    fun <B : IBase> resolvePath(base: IBase?, path: String, clazz: Class<B>?): B? {
+        @Suppress("UNCHECKED_CAST")
+        return resolvePath(base, path) as B?
     }
 
-    void setValue(IBase base, String path, Object value);
+    fun setValue(base: IBase?, path: String, value: Any?)
 
-    default void setValue(String path, Object value) {
-        setValue(get(), path, value);
+    fun setValue(path: String, value: Any?) {
+        setValue(get(), path, value)
     }
 
-    @SuppressWarnings("unchecked")
-    static <T extends ICompositeType> T newPeriod(FhirVersionEnum version) {
-        return switch (version) {
-            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.Period();
-            case R4 -> (T) new org.hl7.fhir.r4.model.Period();
-            case R5 -> (T) new org.hl7.fhir.r5.model.Period();
-            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
-        };
-    }
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(IAdapter::class.java)
 
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<String>> T newStringType(FhirVersionEnum version, String string) {
-        return switch (version) {
-            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.StringType(string);
-            case R4 -> (T) new org.hl7.fhir.r4.model.StringType(string);
-            case R5 -> (T) new org.hl7.fhir.r5.model.StringType(string);
-            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
-        };
-    }
+        @JvmStatic
+        fun <T : ICompositeType> newPeriod(version: FhirVersionEnum): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.Period()
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.Period()
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.Period()
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
 
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<String>> T newUriType(FhirVersionEnum version, String string) {
-        return switch (version) {
-            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.UriType(string);
-            case R4 -> (T) new org.hl7.fhir.r4.model.UriType(string);
-            case R5 -> (T) new org.hl7.fhir.r5.model.UriType(string);
-            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
-        };
-    }
+        @JvmStatic
+        fun <T : IPrimitiveType<String?>> newStringType(
+            version: FhirVersionEnum,
+            string: String?,
+        ): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.StringType(string)
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.StringType(string)
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.StringType(string)
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
 
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<String>> T newUrlType(FhirVersionEnum version, String string) {
-        return switch (version) {
-            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.UriType(string);
-            case R4 -> (T) new org.hl7.fhir.r4.model.UrlType(string);
-            case R5 -> (T) new org.hl7.fhir.r5.model.UrlType(string);
-            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
-        };
-    }
+        @JvmStatic
+        fun <T : IPrimitiveType<String?>> newUriType(version: FhirVersionEnum, string: String?): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.UriType(string)
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.UriType(string)
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.UriType(string)
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
 
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<Date>> T newDateType(FhirVersionEnum version, Date date) {
-        return switch (version) {
-            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.DateType(date);
-            case R4 -> (T) new org.hl7.fhir.r4.model.DateType(date);
-            case R5 -> (T) new org.hl7.fhir.r5.model.DateType(date);
-            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
-        };
-    }
+        @JvmStatic
+        fun <T : IPrimitiveType<String?>> newUrlType(version: FhirVersionEnum, string: String?): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.UriType(string)
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.UrlType(string)
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.UrlType(string)
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
 
-    @SuppressWarnings("unchecked")
-    static <T extends IPrimitiveType<Date>> T newDateTimeType(FhirVersionEnum version, Date date) {
-        return switch (version) {
-            case DSTU3 -> (T) new org.hl7.fhir.dstu3.model.DateTimeType(date);
-            case R4 -> (T) new org.hl7.fhir.r4.model.DateTimeType(date);
-            case R5 -> (T) new org.hl7.fhir.r5.model.DateTimeType(date);
-            default -> throw new UnprocessableEntityException(UNSUPPORTED_VERSION.formatted(version.toString()));
-        };
+        @JvmStatic
+        fun <T : IPrimitiveType<Date?>> newDateType(version: FhirVersionEnum, date: Date?): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.DateType(date)
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.DateType(date)
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.DateType(date)
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
+
+        @JvmStatic
+        fun <T : IPrimitiveType<Date?>> newDateTimeType(version: FhirVersionEnum, date: Date?): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.DateTimeType(date)
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.DateTimeType(date)
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.DateTimeType(date)
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
+
+        val UNSUPPORTED_VERSION = { v: FhirVersionEnum -> "Unsupported version: $v" }
+        const val MISSING_EXTENSION: String = "Field 'extension' does not exist on Element type {}"
     }
 }

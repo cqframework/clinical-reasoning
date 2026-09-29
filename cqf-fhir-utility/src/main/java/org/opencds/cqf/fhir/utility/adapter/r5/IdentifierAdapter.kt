@@ -1,45 +1,41 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r5.model.Identifier;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.r5.model.Identifier
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter
 
-public class IdentifierAdapter extends BaseElementAdapter implements IIdentifierAdapter {
+class IdentifierAdapter(identifier: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R5, identifier), IIdentifierAdapter {
+    private val identifier: Identifier
 
-    private final Identifier identifier;
-
-    public IdentifierAdapter(IBase identifier) {
-        super(FhirVersionEnum.R5, identifier);
-        if (!(identifier instanceof Identifier)) {
-            throw new IllegalArgumentException("object passed as identifier argument is not an Identifier data type");
+    init {
+        require(identifier is Identifier) {
+            "object passed as identifier argument is not an Identifier data type"
         }
-        this.identifier = (Identifier) identifier;
+        this.identifier = identifier
     }
 
-    @Override
-    public Identifier get() {
-        return identifier;
+    override fun get(): Identifier {
+        return identifier
     }
 
-    @Override
-    public String getValue() {
-        return get().getValue();
+    override val value: String?
+        get() {
+            return get().value
+        }
+
+    override fun hasValue(): Boolean {
+        return get().hasValue()
     }
 
-    @Override
-    public boolean hasValue() {
-        return get().hasValue();
-    }
+    override val system: String?
+        get() {
+            return get().system
+        }
 
-    @Override
-    public String getSystem() {
-        return get().getSystem();
-    }
-
-    @Override
-    public boolean hasSystem() {
-        return get().hasSystem();
+    override fun hasSystem(): Boolean {
+        return get().hasSystem()
     }
 }

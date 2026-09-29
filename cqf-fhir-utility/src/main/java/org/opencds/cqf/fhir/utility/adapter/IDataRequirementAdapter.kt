@@ -1,24 +1,22 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IPrimitiveType
 
-public interface IDataRequirementAdapter extends IAdapter<IBase> {
+interface IDataRequirementAdapter : IAdapter<IBase> {
+    fun hasId(): Boolean
 
-    boolean hasId();
+    val id: String?
 
-    String getId();
+    fun hasType(): Boolean
 
-    boolean hasType();
+    val type: String?
 
-    String getType();
+    fun hasProfile(): Boolean
 
-    boolean hasProfile();
+    val profile: MutableList<IPrimitiveType<String?>?>?
 
-    List<IPrimitiveType<String>> getProfile();
+    fun hasCodeFilter(): Boolean
 
-    boolean hasCodeFilter();
-
-    List<IDataRequirementCodeFilterAdapter> getCodeFilter();
+    val codeFilter: MutableList<IDataRequirementCodeFilterAdapter?>?
 }

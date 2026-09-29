@@ -1,169 +1,177 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r5.model.CanonicalType;
-import org.hl7.fhir.r5.model.Expression;
-import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.Group;
-import org.hl7.fhir.r5.model.Library;
-import org.hl7.fhir.r5.model.Reference;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.hl7.fhir.r5.model.UriType;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter;
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.r5.model.*
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter
 
-public class GroupAdapter extends KnowledgeArtifactAdapter implements IGroupAdapter {
-
-    public GroupAdapter(IDomainResource group) {
-        super(group);
-        if (!(group instanceof Group)) {
-            // This is NOT due to a bad request/user error.  It's a system error.
-            throw new IllegalArgumentException("resource passed as group argument is not a Group resource");
-        }
+class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
+    constructor(group: IDomainResource) : super(group) {
+        require(group is Group) { "resource passed as group argument is not a Group resource" }
     }
 
-    public GroupAdapter(Group group) {
-        super(group);
+    constructor(group: Group) : super(group)
+
+    protected val group: Group
+        get() = resource as Group
+
+    override fun get(): Group {
+        return this.group
     }
 
-    protected Group getGroup() {
-        return (Group) resource;
+    override fun copy(): Group? {
+        return get()!!.copy()
     }
 
-    @Override
-    public Group get() {
-        return getGroup();
+    private var checkedEffectiveDataRequirements = false
+    private var effectiveDataRequirements: Library? = null
+    private var effectiveDataRequirementsAdapter: LibraryAdapter? = null
+
+    private fun getEdrReferenceString(edrExtension: Extension): String? {
+        return if (edrExtension.url.contains("cqfm")) (edrExtension.value as Reference).reference
+        else (edrExtension.value as UriType).value
     }
 
-    @Override
-    public Group copy() {
-        return get().copy();
+    private fun getEdrReferenceConsumer(edrExtension: Extension): (String?) -> Unit {
+        return if (edrExtension.url.contains("cqfm"))
+            { reference -> edrExtension.setValue(Reference(reference)) }
+        else { reference -> edrExtension.setValue(CanonicalType(reference)) }
     }
 
-    private boolean checkedEffectiveDataRequirements;
-    private Library effectiveDataRequirements;
-    private LibraryAdapter effectiveDataRequirementsAdapter;
-
-    private String getEdrReferenceString(Extension edrExtension) {
-        return edrExtension.getUrl().contains("cqfm")
-                ? ((Reference) edrExtension.getValue()).getReference()
-                : ((UriType) edrExtension.getValue()).getValue();
-    }
-
-    private Consumer<String> getEdrReferenceConsumer(Extension edrExtension) {
-        return edrExtension.getUrl().contains("cqfm")
-                ? reference -> edrExtension.setValue(new Reference(reference))
-                : reference -> edrExtension.setValue(new CanonicalType(reference));
-    }
-
-    private void findEffectiveDataRequirements() {
+    private fun findEffectiveDataRequirements() {
         if (!checkedEffectiveDataRequirements) {
-            var edrExtensions = this.getGroup().getExtension().stream()
-                    .filter(ext -> ext.getUrl().endsWith("-effectiveDataRequirements"))
-                    .filter(Extension::hasValue)
-                    .collect(Collectors.toList());
+            val edrExtensions =
+                this.group.extension
+                    .filter { ext -> ext!!.url.endsWith("-effectiveDataRequirements") }
+                    .filter { obj -> obj!!.hasValue() }
+                    .toMutableList()
 
-            var edrExtension = edrExtensions.size() == 1 ? edrExtensions.get(0) : null;
-            // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a canonical
-            var maybeEdrReference = Optional.ofNullable(edrExtension).map(this::getEdrReferenceString);
+            val edrExtension = if (edrExtensions.size == 1) edrExtensions[0] else null
+            // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a
+            // canonical
+            val maybeEdrReference =
+                edrExtension?.let { edrExtension -> this.getEdrReferenceString(edrExtension) }
+
             if (edrExtension != null) {
-                var edrReference = maybeEdrReference.get();
-                for (var c : getGroup().getContained()) {
-                    if (c.hasId()
-                            && (edrReference.equals(c.getId()) || edrReference.equals("#" + c.getId()))
-                            && c instanceof Library library) {
-                        effectiveDataRequirements = library;
-                        effectiveDataRequirementsAdapter = new LibraryAdapter(effectiveDataRequirements);
+                val edrReference = maybeEdrReference
+                for (c in this.group.contained) {
+                    if (
+                        c.hasId() &&
+                            (edrReference == c.id || edrReference == "#${c.id}") &&
+                            c is Library
+                    ) {
+                        effectiveDataRequirements = c
+                        effectiveDataRequirementsAdapter =
+                            LibraryAdapter(effectiveDataRequirements!!)
                     }
                 }
             }
-            checkedEffectiveDataRequirements = true;
+            checkedEffectiveDataRequirements = true
         }
     }
 
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-        // If an effectiveDataRequirements library is present, use it exclusively
-        findEffectiveDataRequirements();
-        if (effectiveDataRequirements != null) {
-            references.addAll(effectiveDataRequirementsAdapter.getDependencies());
-            return references;
-        }
+            // If an effectiveDataRequirements library is present, use it exclusively
+            findEffectiveDataRequirements()
+            if (effectiveDataRequirements != null) {
+                references.addAll(effectiveDataRequirementsAdapter!!.dependencies)
+                return references
+            }
 
-        // Otherwise, fall back to the relatedArtifact and library
+            // Otherwise, fall back to the relatedArtifact and library
 
-        /*
-         relatedArtifact[].resource
-         extension[cqf-library]
-         extension[characteristicExpression].reference
-         extension[cqfm-inputParameters][]
-         extension[cqfm-expansionParameters][]
-         extension[cqfm-effectiveDataRequirements]
-         extension[cqfm-cqlOptions]
-         extension[crmi-effectiveDataRequirements]
-        */
+            /*
+             relatedArtifact[].resource
+             extension[cqf-library]
+             extension[characteristicExpression].reference
+             extension[cqfm-inputParameters][]
+             extension[cqfm-expansionParameters][]
+             extension[cqfm-effectiveDataRequirements]
+             extension[cqfm-cqlOptions]
+             extension[crmi-effectiveDataRequirements]
+            */
 
-        // relatedArtifact[].resource
-        getRelatedArtifactsOfType(DEPENDSON).stream()
-                .filter(RelatedArtifact::hasResource)
-                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .forEach(references::add);
+            // relatedArtifact[].resource
+            getRelatedArtifactsOfType<RelatedArtifact>(IKnowledgeArtifactAdapter.DEPENDSON)!!
+                .filter { obj -> obj!!.hasResource() }
+                .map { ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource) }
+                .forEach { e -> references.add(e) }
 
-        for (var expressionExtension :
-                getGroup().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/characteristicExpression")) {
-            if (expressionExtension.getValue() instanceof Expression expression) {
-                if (expression.hasReference()) {
-                    references.add(new DependencyInfo(
-                            referenceSource,
-                            expression.getReference(),
-                            expression.getExtension(),
-                            reference -> expression.setReference(reference)));
+            for (expressionExtension in
+                this.group.getExtensionsByUrl(
+                    "http://hl7.org/fhir/StructureDefinition/characteristicExpression"
+                )) {
+                val expression = expressionExtension.value
+                if (expression is Expression) {
+                    if (expression.hasReference()) {
+                        references.add(
+                            DependencyInfo(
+                                referenceSource,
+                                expression.reference,
+                                expression.extension,
+                                { reference -> expression.setReference(reference) },
+                            )
+                        )
+                    }
                 }
             }
-        }
 
-        // extension[cqfm-effectiveDataRequirements]
-        // extension[crmi-effectiveDataRequirements]
-        get().getExtension().stream()
-                .filter(e -> CANONICAL_EXTENSIONS.contains(e.getUrl()))
-                .forEach(referenceExt -> references.add(new DependencyInfo(
-                        referenceSource,
-                        getEdrReferenceString(referenceExt),
-                        referenceExt.getExtension(),
-                        getEdrReferenceConsumer(referenceExt))));
+            // extension[cqfm-effectiveDataRequirements]
+            // extension[crmi-effectiveDataRequirements]
+            get()!!
+                .extension
+                .filter { e -> CANONICAL_EXTENSIONS.contains(e!!.url) }
+                .forEach { referenceExt ->
+                    references.add(
+                        DependencyInfo(
+                            referenceSource,
+                            getEdrReferenceString(referenceExt!!),
+                            referenceExt.extension,
+                            getEdrReferenceConsumer(referenceExt),
+                        )
+                    )
+                }
 
-        // extension[cqfm-inputParameters][]
-        // extension[cqfm-expansionParameters][]
-        // extension[cqfm-cqlOptions]
-        get().getExtension().stream()
-                .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
-                .forEach(referenceExt -> references.add(new DependencyInfo(
-                        referenceSource,
-                        ((Reference) referenceExt.getValue()).getReference(),
-                        referenceExt.getExtension(),
-                        reference -> referenceExt.setValue(new Reference(reference)))));
+            // extension[cqfm-inputParameters][]
+            // extension[cqfm-expansionParameters][]
+            // extension[cqfm-cqlOptions]
+            get()!!
+                .extension
+                .filter { e -> REFERENCE_EXTENSIONS.contains(e!!.url) }
+                .forEach { referenceExt ->
+                    references.add(
+                        DependencyInfo(
+                            referenceSource,
+                            (referenceExt!!.value as Reference).reference,
+                            referenceExt.extension,
+                            { reference -> referenceExt.setValue(Reference(reference)) },
+                        )
+                    )
+                }
 
-        // extension[cqfm-component][].resource
-        get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach(ext -> {
-            final var ref = (RelatedArtifact) ext.getValue();
-            if (ref.hasResource()) {
-                final var dep =
-                        new DependencyInfo(referenceSource, ref.getResource(), ref.getExtension(), ref::setResource);
-                references.add(dep);
+            // extension[cqfm-component][].resource
+            get()!!.getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach { ext ->
+                val ref = ext!!.value as RelatedArtifact
+                if (ref.hasResource()) {
+                    val dep =
+                        DependencyInfo(
+                            referenceSource,
+                            ref.resource,
+                            ref.extension,
+                            { value -> ref.setResource(value) },
+                        )
+                    references.add(dep)
+                }
             }
-        });
 
-        return references;
-    }
+            return references
+        }
 }

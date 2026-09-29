@@ -1,49 +1,45 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.r5.model.CodeableConcept
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
 
-public class CodeableConceptAdapter extends BaseElementAdapter implements ICodeableConceptAdapter {
+class CodeableConceptAdapter(codeableConcept: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R5, codeableConcept), ICodeableConceptAdapter {
+    private val codeableConcept: CodeableConcept
 
-    private final CodeableConcept codeableConcept;
-
-    public CodeableConceptAdapter(IBase codeableConcept) {
-        super(FhirVersionEnum.R5, codeableConcept);
-        if (!(codeableConcept instanceof CodeableConcept)) {
-            throw new IllegalArgumentException(
-                    "object passed as codeableConcept argument is not a CodeableConcept data type");
+    init {
+        require(codeableConcept is CodeableConcept) {
+            "object passed as codeableConcept argument is not a CodeableConcept data type"
         }
-        this.codeableConcept = (CodeableConcept) codeableConcept;
+        this.codeableConcept = codeableConcept
     }
 
-    @Override
-    public CodeableConcept get() {
-        return codeableConcept;
+    override fun get(): CodeableConcept {
+        return codeableConcept
     }
 
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
+    override fun fhirContext(): FhirContext? {
+        return fhirContext
     }
 
-    @Override
-    public boolean hasCoding() {
-        return get().hasCoding();
+    override fun hasCoding(): Boolean {
+        return get().hasCoding()
     }
 
-    @Override
-    public List<ICodingAdapter> getCoding() {
-        return get().getCoding().stream().map(adapterFactory::createCoding).toList();
-    }
+    override val coding: MutableList<ICodingAdapter?>
+        get() {
+            return get()
+                .coding
+                .map { coding -> adapterFactory.createCoding(coding) }
+                .toMutableList()
+        }
 
-    @Override
-    public boolean hasCoding(String code) {
-        return get().getCoding().stream().anyMatch(coding -> coding.getCode().equals(code));
+    override fun hasCoding(code: String?): Boolean {
+        return get().coding.any { coding -> coding!!.code == code }
     }
 }

@@ -1,424 +1,429 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.Resources;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.fhir.utility.Resources.newBaseForVersion
 
-public class AdapterHelper {
-    private static final String CAST_ERROR_MESSAGE = "Cannot cast a value of type %s as %s.";
-    private static final String CANONICAL = "CanonicalType";
-    private static final String CODE = "Code";
-    private static final String CODEABLECONCEPT = "CodeableConcept";
-    private static final String PRIMITIVE = "IPrimitiveType";
-    private static final String URI = "UriType";
+object AdapterHelper {
+    private val CAST_ERROR_MESSAGE = { t1: String, t2: String ->
+        "Cannot cast a value of type $t1 as $t2."
+    }
+    private const val CANONICAL = "CanonicalType"
+    private const val CODE = "Code"
+    private const val CODEABLECONCEPT = "CodeableConcept"
+    private const val PRIMITIVE = "IPrimitiveType"
+    private const val URI = "UriType"
 
-    private AdapterHelper() {
-        // intentionally empty
+    fun `as`(fhirVersion: FhirVersionEnum, value: Any?, type: Class<*>): Any? {
+        if (value == null) {
+            return null
+        }
+
+        if (value.javaClass.simpleName == "Tuple") {
+            val adapterFactory: IAdapterFactory = IAdapterFactory.forFhirVersion(fhirVersion)
+            val tupleAdapter = adapterFactory.createTuple(value as IBase)
+            val result = adapterFactory.createBase(newBaseForVersion(type.simpleName, fhirVersion))
+            tupleAdapter.properties.forEach { (path, value) -> result.setValue(path, value) }
+            return result.get()
+        }
+
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU3 -> asDstu3(value, type)
+            FhirVersionEnum.R4 -> asR4(value, type)
+            FhirVersionEnum.R5 -> asR5(value, type)
+            else -> null
+        }
     }
 
-    public static Object as(FhirVersionEnum fhirVersion, Object value, Class<?> type) {
+    private fun asDstu3(value: Any?, type: Class<*>): Any? {
         if (value == null) {
-            return null;
+            return null
         }
 
-        if (value.getClass().getSimpleName().equals("Tuple")) {
-            var adapterFactory = IAdapterFactory.forFhirVersion(fhirVersion);
-            var tupleAdapter = adapterFactory.createTuple((IBase) value);
-            var result = adapterFactory.createBase(Resources.newBaseForVersion(type.getSimpleName(), fhirVersion));
-            tupleAdapter.getProperties().forEach(result::setValue);
-            return result.get();
+        if (type.isAssignableFrom(value.javaClass)) {
+            return value
         }
 
-        return switch (fhirVersion) {
-            case DSTU3 -> asDstu3(value, type);
-            case R4 -> asR4(value, type);
-            case R5 -> asR5(value, type);
-            default -> null;
-        };
+        if (value is org.hl7.fhir.dstu3.model.UriType) {
+            when (type.simpleName) {
+                "AnnotatedUuidType",
+                "UuidType" ->
+                    return if (value.hasPrimitiveValue() && value.value.startsWith("urn:uuid:"))
+                        org.hl7.fhir.dstu3.model.UuidType(value.primitiveValue())
+                    else null
+
+                "OidType" ->
+                    return if (value.hasPrimitiveValue() && value.value.startsWith("urn:oid:"))
+                        org.hl7.fhir.dstu3.model.OidType(value.primitiveValue())
+                    else null
+
+                else -> {}
+            }
+        }
+
+        if (value is org.hl7.fhir.dstu3.model.IntegerType) {
+            when (type.simpleName) {
+                "PositiveIntType" ->
+                    return if (value.hasPrimitiveValue() && value.value > 0)
+                        org.hl7.fhir.dstu3.model.PositiveIntType(value.primitiveValue())
+                    else null
+
+                "UnsignedIntType" ->
+                    return if (value.hasPrimitiveValue() && value.value >= 0)
+                        org.hl7.fhir.dstu3.model.UnsignedIntType(value.primitiveValue())
+                    else null
+
+                else -> {}
+            }
+        }
+
+        if (value is org.hl7.fhir.dstu3.model.StringType) {
+            when (type.simpleName) {
+                "CodeType" -> return value.castToCode(value)
+                "MarkdownType" -> return value.castToMarkdown(value)
+                "IdType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.dstu3.model.IdType(value.primitiveValue())
+                    else null
+
+                CODEABLECONCEPT -> return value.castToCodeableConcept(value.castToCode(value))
+                URI -> return value.castToUri(value)
+                else -> {}
+            }
+        }
+
+        if (value is org.hl7.fhir.dstu3.model.Coding) {
+            when (type.simpleName) {
+                CODE,
+                PRIMITIVE -> return value.codeElement
+                else -> {}
+            }
+        }
+
+        if (value is org.hl7.fhir.dstu3.model.Quantity) {
+            when (type.simpleName) {
+                "Age" -> {
+                    val age = org.hl7.fhir.dstu3.model.Age()
+                    age.setValue(value.value)
+                    age.setCode(value.code)
+                    age.setUnit(value.unit)
+                    age.setSystem(value.system)
+                    age.setComparator(value.comparator)
+                    return age
+                }
+
+                "Distance" -> {
+                    val distance = org.hl7.fhir.dstu3.model.Distance()
+                    distance.setValue(value.value)
+                    distance.setCode(value.code)
+                    distance.setUnit(value.unit)
+                    distance.setSystem(value.system)
+                    distance.setComparator(value.comparator)
+                    return distance
+                }
+
+                "Duration" -> {
+                    val duration = org.hl7.fhir.dstu3.model.Duration()
+                    duration.setValue(value.value)
+                    duration.setCode(value.code)
+                    duration.setUnit(value.unit)
+                    duration.setSystem(value.system)
+                    duration.setComparator(value.comparator)
+                    return duration
+                }
+
+                "Count" -> {
+                    val count = org.hl7.fhir.dstu3.model.Count()
+                    count.setValue(value.value)
+                    count.setCode(value.code)
+                    count.setUnit(value.unit)
+                    count.setSystem(value.system)
+                    count.setComparator(value.comparator)
+                    return count
+                }
+
+                "SimpleQuantity" -> return value.castToSimpleQuantity(value)
+                else -> {}
+            }
+        }
+
+        throw IllegalArgumentException(CAST_ERROR_MESSAGE(value.javaClass.name, type.name))
     }
 
-    private static Object asDstu3(Object value, Class<?> type) {
+    private fun asR4(value: Any?, type: Class<*>): Any? {
         if (value == null) {
-            return null;
+            return null
         }
 
-        if (type.isAssignableFrom(value.getClass())) {
-            return value;
+        if (type.isAssignableFrom(value.javaClass)) {
+            return value
         }
 
-        if (value instanceof org.hl7.fhir.dstu3.model.UriType uriType) {
-            switch (type.getSimpleName()) {
-                case "AnnotatedUuidType":
-                case "UuidType":
-                    return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:uuid:")
-                            ? new org.hl7.fhir.dstu3.model.UuidType(uriType.primitiveValue())
-                            : null;
-                case "OidType":
-                    return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:oid:")
-                            ? new org.hl7.fhir.dstu3.model.OidType(uriType.primitiveValue())
-                            : null;
-                default:
-                    break;
+        if (value is org.hl7.fhir.r4.model.UriType) {
+            when (type.simpleName) {
+                "UrlType" -> return value.castToUrl(value)
+                "CanonicalType" -> return value.castToCanonical(value)
+                "AnnotatedUuidType",
+                "UuidType" ->
+                    return if (value.hasPrimitiveValue() && value.value.startsWith("urn:uuid:"))
+                        org.hl7.fhir.r4.model.UuidType(value.primitiveValue())
+                    else null
+
+                "OidType" ->
+                    return if (value.hasPrimitiveValue() && value.value.startsWith("urn:oid:"))
+                        org.hl7.fhir.r4.model.OidType(value.primitiveValue())
+                    else null
+
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.dstu3.model.IntegerType integerType) {
-            switch (type.getSimpleName()) {
-                case "PositiveIntType":
-                    return integerType.hasPrimitiveValue() && integerType.getValue() > 0
-                            ? new org.hl7.fhir.dstu3.model.PositiveIntType(integerType.primitiveValue())
-                            : null;
-                case "UnsignedIntType":
-                    return integerType.hasPrimitiveValue() && integerType.getValue() >= 0
-                            ? new org.hl7.fhir.dstu3.model.UnsignedIntType(integerType.primitiveValue())
-                            : null;
-                default:
-                    break;
+        if (value is org.hl7.fhir.r4.model.IntegerType) {
+            when (type.simpleName) {
+                "PositiveIntType" ->
+                    return if (value.hasPrimitiveValue() && value.value > 0)
+                        org.hl7.fhir.r4.model.PositiveIntType(value.primitiveValue())
+                    else null
+
+                "UnsignedIntType" ->
+                    return if (value.hasPrimitiveValue() && value.value >= 0)
+                        org.hl7.fhir.r4.model.UnsignedIntType(value.primitiveValue())
+                    else null
+
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.dstu3.model.StringType stringType) {
-            switch (type.getSimpleName()) {
-                case "CodeType":
-                    return stringType.castToCode(stringType);
-                case "MarkdownType":
-                    return stringType.castToMarkdown(stringType);
-                case "IdType":
-                    return stringType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.dstu3.model.IdType(stringType.primitiveValue())
-                            : null;
-                case CODEABLECONCEPT:
-                    return stringType.castToCodeableConcept(stringType.castToCode(stringType));
-                case URI:
-                    return stringType.castToUri(stringType);
-                default:
-                    break;
+        if (value is org.hl7.fhir.r4.model.StringType) {
+            when (type.simpleName) {
+                "CodeType" -> return value.castToCode(value)
+                "MarkdownType" -> return value.castToMarkdown(value)
+                "IdType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.r4.model.IdType(value.primitiveValue())
+                    else null
+
+                CODEABLECONCEPT -> return value.castToCodeableConcept(value.castToCode(value))
+                CANONICAL -> return value.castToCanonical(value)
+                URI -> return value.castToUri(value)
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.dstu3.model.Coding coding) {
-            switch (type.getSimpleName()) {
-                case CODE:
-                case PRIMITIVE:
-                    return coding.getCodeElement();
-                default:
-                    break;
+        if (value is org.hl7.fhir.r4.model.Coding) {
+            when (type.simpleName) {
+                CODE,
+                PRIMITIVE -> return value.codeElement
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.dstu3.model.Quantity quantity) {
-            switch (type.getSimpleName()) {
-                case "Age":
-                    var age = new org.hl7.fhir.dstu3.model.Age();
-                    age.setValue(quantity.getValue());
-                    age.setCode(quantity.getCode());
-                    age.setUnit(quantity.getUnit());
-                    age.setSystem(quantity.getSystem());
-                    age.setComparator(quantity.getComparator());
-                    return age;
-                case "Distance":
-                    var distance = new org.hl7.fhir.dstu3.model.Distance();
-                    distance.setValue(quantity.getValue());
-                    distance.setCode(quantity.getCode());
-                    distance.setUnit(quantity.getUnit());
-                    distance.setSystem(quantity.getSystem());
-                    distance.setComparator(quantity.getComparator());
-                    return distance;
-                case "Duration":
-                    var duration = new org.hl7.fhir.dstu3.model.Duration();
-                    duration.setValue(quantity.getValue());
-                    duration.setCode(quantity.getCode());
-                    duration.setUnit(quantity.getUnit());
-                    duration.setSystem(quantity.getSystem());
-                    duration.setComparator(quantity.getComparator());
-                    return duration;
-                case "Count":
-                    var count = new org.hl7.fhir.dstu3.model.Count();
-                    count.setValue(quantity.getValue());
-                    count.setCode(quantity.getCode());
-                    count.setUnit(quantity.getUnit());
-                    count.setSystem(quantity.getSystem());
-                    count.setComparator(quantity.getComparator());
-                    return count;
-                case "SimpleQuantity":
-                    return quantity.castToSimpleQuantity(quantity);
-                // NOTE: This is wrong in that it is copying the comparator, it should be
-                // ensuring comparator is not set...
-                default:
-                    break;
+        if (value is org.hl7.fhir.r4.model.Quantity) {
+            when (type.simpleName) {
+                "Age" -> {
+                    val age = org.hl7.fhir.r4.model.Age()
+                    age.setValue(value.value)
+                    age.setCode(value.code)
+                    age.setUnit(value.unit)
+                    age.setSystem(value.system)
+                    age.setComparator(value.comparator)
+                    return age
+                }
+
+                "Distance" -> {
+                    val distance = org.hl7.fhir.r4.model.Distance()
+                    distance.setValue(value.value)
+                    distance.setCode(value.code)
+                    distance.setUnit(value.unit)
+                    distance.setSystem(value.system)
+                    distance.setComparator(value.comparator)
+                    return distance
+                }
+
+                "Duration" -> {
+                    val duration = org.hl7.fhir.r4.model.Duration()
+                    duration.setValue(value.value)
+                    duration.setCode(value.code)
+                    duration.setUnit(value.unit)
+                    duration.setSystem(value.system)
+                    duration.setComparator(value.comparator)
+                    return duration
+                }
+
+                "Count" -> {
+                    val count = org.hl7.fhir.r4.model.Count()
+                    count.setValue(value.value)
+                    count.setCode(value.code)
+                    count.setUnit(value.unit)
+                    count.setSystem(value.system)
+                    count.setComparator(value.comparator)
+                    return count
+                }
+
+                "SimpleQuantity" -> return value.castToSimpleQuantity(value)
+                "MoneyQuantity" -> {
+                    val moneyQuantity = org.hl7.fhir.r4.model.MoneyQuantity()
+                    moneyQuantity.setValue(value.value)
+                    moneyQuantity.setCode(value.code)
+                    moneyQuantity.setUnit(value.unit)
+                    moneyQuantity.setSystem(value.system)
+                    moneyQuantity.setComparator(value.comparator)
+                    return moneyQuantity
+                }
+
+                else -> {}
             }
         }
 
-        throw new IllegalArgumentException(
-                CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));
+        throw IllegalArgumentException(CAST_ERROR_MESSAGE(value.javaClass.name, type.name))
     }
 
-    private static Object asR4(Object value, Class<?> type) {
+    private fun asR5(value: Any?, type: Class<*>): Any? {
         if (value == null) {
-            return null;
+            return null
         }
 
-        if (type.isAssignableFrom(value.getClass())) {
-            return value;
+        if (type.isAssignableFrom(value.javaClass)) {
+            return value
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.UriType uriType) {
-            switch (type.getSimpleName()) {
-                case "UrlType":
-                    return uriType.castToUrl(uriType);
-                case "CanonicalType":
-                    return uriType.castToCanonical(uriType);
-                case "AnnotatedUuidType":
-                case "UuidType":
-                    return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:uuid:")
-                            ? new org.hl7.fhir.r4.model.UuidType(uriType.primitiveValue())
-                            : null;
-                case "OidType":
-                    return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:oid:")
-                            ? new org.hl7.fhir.r4.model.OidType(uriType.primitiveValue())
-                            : null;
-                default:
-                    break;
+        if (value is org.hl7.fhir.r5.model.UriType) {
+            when (type.simpleName) {
+                "UrlType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.r5.model.UrlType(value.primitiveValue())
+                    else null
+
+                "CanonicalType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.r5.model.CanonicalType(value.primitiveValue())
+                    else null
+
+                "AnnotatedUuidType",
+                "UuidType" ->
+                    return if (value.hasPrimitiveValue() && value.value.startsWith("urn:uuid:"))
+                        org.hl7.fhir.r5.model.UuidType(value.primitiveValue())
+                    else null
+
+                "OidType" ->
+                    return if (value.hasPrimitiveValue() && value.value.startsWith("urn:oid:"))
+                        org.hl7.fhir.r5.model.OidType(value.primitiveValue())
+                    else null
+
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.IntegerType integerType) {
-            switch (type.getSimpleName()) {
-                case "PositiveIntType":
-                    return integerType.hasPrimitiveValue() && integerType.getValue() > 0
-                            ? new org.hl7.fhir.r4.model.PositiveIntType(integerType.primitiveValue())
-                            : null;
-                case "UnsignedIntType":
-                    return integerType.hasPrimitiveValue() && integerType.getValue() >= 0
-                            ? new org.hl7.fhir.r4.model.UnsignedIntType(integerType.primitiveValue())
-                            : null;
-                default:
-                    break;
+        if (value is org.hl7.fhir.r5.model.IntegerType) {
+            when (type.simpleName) {
+                "PositiveIntType" ->
+                    return if (value.hasPrimitiveValue() && value.value > 0)
+                        org.hl7.fhir.r5.model.PositiveIntType(value.primitiveValue())
+                    else null
+
+                "UnsignedIntType" ->
+                    return if (value.hasPrimitiveValue() && value.value >= 0)
+                        org.hl7.fhir.r5.model.UnsignedIntType(value.primitiveValue())
+                    else null
+
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.StringType stringType) {
-            switch (type.getSimpleName()) {
-                case "CodeType":
-                    return stringType.castToCode(stringType);
-                case "MarkdownType":
-                    return stringType.castToMarkdown(stringType);
-                case "IdType":
-                    return stringType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.r4.model.IdType(stringType.primitiveValue())
-                            : null;
-                case CODEABLECONCEPT:
-                    return stringType.castToCodeableConcept(stringType.castToCode(stringType));
-                case CANONICAL:
-                    return stringType.castToCanonical(stringType);
-                case URI:
-                    return stringType.castToUri(stringType);
-                default:
-                    break;
+        if (value is org.hl7.fhir.r5.model.StringType) {
+            when (type.simpleName) {
+                "CodeType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.r5.model.CodeType(value.primitiveValue())
+                    else null
+
+                "MarkdownType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.r5.model.MarkdownType(value.primitiveValue())
+                    else null
+
+                "IdType" ->
+                    return if (value.hasPrimitiveValue())
+                        org.hl7.fhir.r5.model.IdType(value.primitiveValue())
+                    else null
+
+                CODEABLECONCEPT ->
+                    return org.hl7.fhir.r5.model.CodeableConcept(
+                        org.hl7.fhir.r5.model.Coding(null, value.asStringValue(), null)
+                    )
+
+                CANONICAL -> return org.hl7.fhir.r5.model.CanonicalType(value.asStringValue())
+                URI -> return org.hl7.fhir.r5.model.UriType(value.asStringValue())
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.Coding coding) {
-            switch (type.getSimpleName()) {
-                case CODE:
-                case PRIMITIVE:
-                    return coding.getCodeElement();
-                default:
-                    break;
+        if (value is org.hl7.fhir.r5.model.Coding) {
+            when (type.simpleName) {
+                CODE,
+                PRIMITIVE -> return value.codeElement
+                else -> {}
             }
         }
 
-        if (value instanceof org.hl7.fhir.r4.model.Quantity quantity) {
-            switch (type.getSimpleName()) {
-                case "Age":
-                    var age = new org.hl7.fhir.r4.model.Age();
-                    age.setValue(quantity.getValue());
-                    age.setCode(quantity.getCode());
-                    age.setUnit(quantity.getUnit());
-                    age.setSystem(quantity.getSystem());
-                    age.setComparator(quantity.getComparator());
-                    return age;
-                case "Distance":
-                    var distance = new org.hl7.fhir.r4.model.Distance();
-                    distance.setValue(quantity.getValue());
-                    distance.setCode(quantity.getCode());
-                    distance.setUnit(quantity.getUnit());
-                    distance.setSystem(quantity.getSystem());
-                    distance.setComparator(quantity.getComparator());
-                    return distance;
-                case "Duration":
-                    var duration = new org.hl7.fhir.r4.model.Duration();
-                    duration.setValue(quantity.getValue());
-                    duration.setCode(quantity.getCode());
-                    duration.setUnit(quantity.getUnit());
-                    duration.setSystem(quantity.getSystem());
-                    duration.setComparator(quantity.getComparator());
-                    return duration;
-                case "Count":
-                    var count = new org.hl7.fhir.r4.model.Count();
-                    count.setValue(quantity.getValue());
-                    count.setCode(quantity.getCode());
-                    count.setUnit(quantity.getUnit());
-                    count.setSystem(quantity.getSystem());
-                    count.setComparator(quantity.getComparator());
-                    return count;
-                case "SimpleQuantity":
-                    return quantity.castToSimpleQuantity(quantity);
-                // NOTE: This is wrong in that it is copying the comparator, it should be
-                // ensuring comparator is not set...
-                case "MoneyQuantity":
-                    var moneyQuantity = new org.hl7.fhir.r4.model.MoneyQuantity();
-                    moneyQuantity.setValue(quantity.getValue());
-                    moneyQuantity.setCode(quantity.getCode());
-                    moneyQuantity.setUnit(quantity.getUnit());
-                    moneyQuantity.setSystem(quantity.getSystem());
-                    moneyQuantity.setComparator(quantity.getComparator());
-                    return moneyQuantity;
-                default:
-                    break;
+        if (value is org.hl7.fhir.r5.model.Quantity) {
+            when (type.simpleName) {
+                "Age" -> {
+                    val age = org.hl7.fhir.r5.model.Age()
+                    age.setValue(value.value)
+                    age.setCode(value.code)
+                    age.setUnit(value.unit)
+                    age.setSystem(value.system)
+                    age.setComparator(value.comparator)
+                    return age
+                }
+
+                "Distance" -> {
+                    val distance = org.hl7.fhir.r5.model.Distance()
+                    distance.setValue(value.value)
+                    distance.setCode(value.code)
+                    distance.setUnit(value.unit)
+                    distance.setSystem(value.system)
+                    distance.setComparator(value.comparator)
+                    return distance
+                }
+
+                "Duration" -> {
+                    val duration = org.hl7.fhir.r5.model.Duration()
+                    duration.setValue(value.value)
+                    duration.setCode(value.code)
+                    duration.setUnit(value.unit)
+                    duration.setSystem(value.system)
+                    duration.setComparator(value.comparator)
+                    return duration
+                }
+
+                "Count" -> {
+                    val count = org.hl7.fhir.r5.model.Count()
+                    count.setValue(value.value)
+                    count.setCode(value.code)
+                    count.setUnit(value.unit)
+                    count.setSystem(value.system)
+                    count.setComparator(value.comparator)
+                    return count
+                }
+
+                "SimpleQuantity" ->
+                    return org.hl7.fhir.r5.model.TypeConvertor.castToSimpleQuantity(value)
+                "MoneyQuantity" -> {
+                    val moneyQuantity = org.hl7.fhir.r5.model.MoneyQuantity()
+                    moneyQuantity.setValue(value.value)
+                    moneyQuantity.setCode(value.code)
+                    moneyQuantity.setUnit(value.unit)
+                    moneyQuantity.setSystem(value.system)
+                    moneyQuantity.setComparator(value.comparator)
+                    return moneyQuantity
+                }
+
+                else -> {}
             }
         }
 
-        throw new IllegalArgumentException(
-                CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));
-    }
-
-    private static Object asR5(Object value, Class<?> type) {
-        if (value == null) {
-            return null;
-        }
-
-        if (type.isAssignableFrom(value.getClass())) {
-            return value;
-        }
-
-        if (value instanceof org.hl7.fhir.r5.model.UriType uriType) {
-            switch (type.getSimpleName()) {
-                case "UrlType":
-                    return uriType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.r5.model.UrlType(uriType.primitiveValue())
-                            : null;
-                case "CanonicalType":
-                    return uriType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.r5.model.CanonicalType(uriType.primitiveValue())
-                            : null;
-                case "AnnotatedUuidType":
-                case "UuidType":
-                    return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:uuid:")
-                            ? new org.hl7.fhir.r5.model.UuidType(uriType.primitiveValue())
-                            : null;
-                case "OidType":
-                    return uriType.hasPrimitiveValue() && uriType.getValue().startsWith("urn:oid:")
-                            ? new org.hl7.fhir.r5.model.OidType(uriType.primitiveValue())
-                            : null;
-                default:
-                    break;
-            }
-        }
-
-        if (value instanceof org.hl7.fhir.r5.model.IntegerType integerType) {
-            switch (type.getSimpleName()) {
-                case "PositiveIntType":
-                    return integerType.hasPrimitiveValue() && integerType.getValue() > 0
-                            ? new org.hl7.fhir.r5.model.PositiveIntType(integerType.primitiveValue())
-                            : null;
-                case "UnsignedIntType":
-                    return integerType.hasPrimitiveValue() && integerType.getValue() >= 0
-                            ? new org.hl7.fhir.r5.model.UnsignedIntType(integerType.primitiveValue())
-                            : null;
-                default:
-                    break;
-            }
-        }
-
-        if (value instanceof org.hl7.fhir.r5.model.StringType stringType) {
-            switch (type.getSimpleName()) {
-                case "CodeType":
-                    return stringType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.r5.model.CodeType(stringType.primitiveValue())
-                            : null;
-                case "MarkdownType":
-                    return stringType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.r5.model.MarkdownType(stringType.primitiveValue())
-                            : null;
-                case "IdType":
-                    return stringType.hasPrimitiveValue()
-                            ? new org.hl7.fhir.r5.model.IdType(stringType.primitiveValue())
-                            : null;
-                case CODEABLECONCEPT:
-                    return new org.hl7.fhir.r5.model.CodeableConcept(
-                            new org.hl7.fhir.r5.model.Coding(null, stringType.asStringValue(), null));
-                case CANONICAL:
-                    return new org.hl7.fhir.r5.model.CanonicalType(stringType.asStringValue());
-                case URI:
-                    return new org.hl7.fhir.r5.model.UriType(stringType.asStringValue());
-                default:
-                    break;
-            }
-        }
-
-        if (value instanceof org.hl7.fhir.r5.model.Coding coding) {
-            switch (type.getSimpleName()) {
-                case CODE:
-                case PRIMITIVE:
-                    return coding.getCodeElement();
-                default:
-                    break;
-            }
-        }
-
-        if (value instanceof org.hl7.fhir.r5.model.Quantity quantity) {
-            switch (type.getSimpleName()) {
-                case "Age":
-                    var age = new org.hl7.fhir.r5.model.Age();
-                    age.setValue(quantity.getValue());
-                    age.setCode(quantity.getCode());
-                    age.setUnit(quantity.getUnit());
-                    age.setSystem(quantity.getSystem());
-                    age.setComparator(quantity.getComparator());
-                    return age;
-                case "Distance":
-                    var distance = new org.hl7.fhir.r5.model.Distance();
-                    distance.setValue(quantity.getValue());
-                    distance.setCode(quantity.getCode());
-                    distance.setUnit(quantity.getUnit());
-                    distance.setSystem(quantity.getSystem());
-                    distance.setComparator(quantity.getComparator());
-                    return distance;
-                case "Duration":
-                    var duration = new org.hl7.fhir.r5.model.Duration();
-                    duration.setValue(quantity.getValue());
-                    duration.setCode(quantity.getCode());
-                    duration.setUnit(quantity.getUnit());
-                    duration.setSystem(quantity.getSystem());
-                    duration.setComparator(quantity.getComparator());
-                    return duration;
-                case "Count":
-                    var count = new org.hl7.fhir.r5.model.Count();
-                    count.setValue(quantity.getValue());
-                    count.setCode(quantity.getCode());
-                    count.setUnit(quantity.getUnit());
-                    count.setSystem(quantity.getSystem());
-                    count.setComparator(quantity.getComparator());
-                    return count;
-                case "SimpleQuantity":
-                    return org.hl7.fhir.r5.model.TypeConvertor.castToSimpleQuantity(quantity);
-                // NOTE: This is wrong in that it is copying the comparator,
-                // it should be ensuring comparator is not set...
-                case "MoneyQuantity":
-                    var moneyQuantity = new org.hl7.fhir.r5.model.MoneyQuantity();
-                    moneyQuantity.setValue(quantity.getValue());
-                    moneyQuantity.setCode(quantity.getCode());
-                    moneyQuantity.setUnit(quantity.getUnit());
-                    moneyQuantity.setSystem(quantity.getSystem());
-                    moneyQuantity.setComparator(quantity.getComparator());
-                    return moneyQuantity;
-                default:
-                    break;
-            }
-        }
-
-        throw new IllegalArgumentException(
-                CAST_ERROR_MESSAGE.formatted(value.getClass().getName(), type.getName()));
+        throw IllegalArgumentException(CAST_ERROR_MESSAGE(value.javaClass.name, type.name))
     }
 }

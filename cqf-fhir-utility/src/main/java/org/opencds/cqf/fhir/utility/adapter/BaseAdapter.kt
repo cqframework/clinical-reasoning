@@ -1,452 +1,469 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import static java.lang.Integer.parseInt;
-import static org.opencds.cqf.fhir.utility.adapter.AdapterHelper.as;
+import ca.uhn.fhir.context.*
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import org.hl7.fhir.instance.model.api.*
 
-import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
-import ca.uhn.fhir.context.RuntimeChildPrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimeChildPrimitiveEnumerationDatatypeDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseElement;
-import org.hl7.fhir.instance.model.api.IBaseEnumFactory;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+abstract class BaseAdapter(protected val fhirContext: FhirContext) {
+    protected val fhirVersion = this.fhirContext.version.version
+    val adapterFactory: IAdapterFactory = IAdapterFactory.forFhirContext(this.fhirContext)
 
-public abstract class BaseAdapter {
-    protected static final String ENUMERATION = "Enumeration";
-    protected static final Pattern EXTENSION_PATTERN = Pattern.compile("extension\\('([^']+)'\\)(\\[(\\d+)])?");
+    @JvmRecord data class ExtensionInfo(val url: String?, val index: Int)
 
-    protected final FhirContext fhirContext;
-    protected final FhirVersionEnum fhirVersion;
-    protected final IAdapterFactory adapterFactory;
-
-    protected record ExtensionInfo(String url, int index) {}
-
-    public BaseAdapter(FhirContext fhirContext) {
-        this.fhirContext = fhirContext;
-        fhirVersion = this.fhirContext.getVersion().getVersion();
-        adapterFactory = IAdapterFactory.forFhirContext(this.fhirContext);
+    open fun fhirContext(): FhirContext? {
+        return fhirContext
     }
 
-    public FhirContext fhirContext() {
-        return fhirContext;
-    }
-
-    public IAdapterFactory getAdapterFactory() {
-        return adapterFactory;
-    }
-
-    public Object resolvePath(Object target, String path) {
-        String[] identifiers = path.split("\\.");
-        for (String identifier : identifiers) {
+    open fun resolvePath(target: Any?, path: String): Any? {
+        var target = target
+        val identifiers = path.split(".")
+        for (identifier in identifiers) {
             // handling indexes: i.e. item[0].code
             if (identifier.contains("[")) {
-                int index = parseInt(identifier.substring(identifier.indexOf("[") + 1, identifier.indexOf("]")));
-                target = resolveProperty(target, identifier.replaceAll("\\[\\d+]", ""));
-                if (!(target instanceof List<?> list) || index >= list.size()) {
-                    return null;
+                val index =
+                    identifier
+                        .substring(identifier.indexOf("[") + 1, identifier.indexOf("]"))
+                        .toInt()
+                target = resolveProperty(target, identifier.replace("\\[\\d+]".toRegex(), ""))
+                if (target !is MutableList<*> || index >= target.size) {
+                    return null
                 }
-                target = list.get(index);
+                target = target[index]
             } else {
-                target = resolveProperty(target, identifier);
+                target = resolveProperty(target, identifier)
             }
         }
 
-        return target;
+        return target
     }
 
-    protected Object resolveProperty(Object target, String path) {
-        if (target == null) {
-            return null;
+    protected fun resolveProperty(target: Any?, path: String): Any? {
+        var target: Any? = target ?: return null
+
+        if (target is IBaseEnumeration<*> && path == "value") {
+            return target.valueAsString
         }
 
-        if (target instanceof IBaseEnumeration && path.equals("value")) {
-            return ((IBaseEnumeration<?>) target).getValueAsString();
+        if (target is IAnyResource && target.fhirType() == path) {
+            return target
         }
 
-        if (target instanceof IAnyResource resource && resource.fhirType().equals(path)) {
-            return target;
-        }
-
-        if (target instanceof List<?> list) {
-            var index = 0;
+        if (target is MutableList<*>) {
+            var index = 0
             if (path.contains("[\\d]")) {
                 try {
-                    index = parseInt(path.substring(path.indexOf("[")).replace("]", ""));
-                } catch (NumberFormatException e) {
+                    index = path.substring(path.indexOf("[")).replace("]", "").toInt()
+                } catch (e: NumberFormatException) {
                     // Do nothing
                 }
             }
-            target = list.get(index);
+            target = target[index]
         }
 
-        IBase base = (IBase) target;
-        BaseRuntimeElementCompositeDefinition<?> definition;
-        if (base instanceof IPrimitiveType) {
-            return path.equals("value") ? ((IPrimitiveType<?>) target).getValue() : target;
+        val base = target as IBase
+        val definition: BaseRuntimeElementCompositeDefinition<*>
+        if (base is IPrimitiveType<*>) {
+            return if (path == "value") (target as IPrimitiveType<*>).value else target
         } else {
-            definition = resolveRuntimeDefinition(base);
+            definition = resolveRuntimeDefinition<IBase>(base)
         }
 
-        BaseRuntimeChildDefinition child = definition.getChildByName(path);
+        var child = definition.getChildByName(path)
         if (child == null) {
-            child = resolveChoiceProperty(definition, path);
+            child = resolveChoiceProperty(definition, path)
         }
 
         if (child == null) {
-            return null;
+            return null
         }
 
-        List<IBase> values = child.getAccessor().getValues(base);
+        val values = child.accessor.getValues(base)
 
         if (values == null || values.isEmpty()) {
-            return null;
+            return null
         }
 
-        // If the instance is a primitive (including (or even especially an enumeration), and it has no value, return
+        // If the instance is a primitive (including (or even especially an enumeration), and it has
+        // no value, return
         // null
-        if (child instanceof RuntimeChildPrimitiveDatatypeDefinition) {
-            IBase value = values.get(0);
-            if (value instanceof IPrimitiveType) {
-                if (!((IPrimitiveType<?>) value).hasValue()) {
-                    return null;
+        if (child is RuntimeChildPrimitiveDatatypeDefinition) {
+            val value = values[0]
+            if (value is IPrimitiveType<*>) {
+                if (!value.hasValue()) {
+                    return null
                 }
             }
         }
 
-        if (child instanceof RuntimeChildChoiceDefinition
-                && !child.getElementName().equalsIgnoreCase(path)) {
-            if (!values.get(0)
-                    .getClass()
-                    .getSimpleName()
-                    .equalsIgnoreCase(
-                            child.getChildByName(path).getImplementingClass().getSimpleName())) {
-                return null;
+        if (
+            child is RuntimeChildChoiceDefinition &&
+                !child.elementName.equals(path, ignoreCase = true)
+        ) {
+            if (
+                !values[0]!!
+                    .javaClass
+                    .simpleName
+                    .equals(
+                        child.getChildByName(path).implementingClass.simpleName,
+                        ignoreCase = true,
+                    )
+            ) {
+                return null
             }
         }
 
-        return child.getMax() < 1 ? values : values.get(0);
+        return if (child.max < 1) values else values[0]
     }
 
-    public void setValue(IBase target, String path, Object value) {
+    fun setValue(target: IBase?, path: String, value: Any?) {
+        var value = value
         if (target == null) {
-            return;
+            return
         }
 
-        var definition = resolveRuntimeDefinition(target);
+        val definition = resolveRuntimeDefinition<IBase>(target)
         if (path.contains(("."))) {
-            setNestedValue(target, path, value, definition);
+            setNestedValue(target, path, value, definition)
         } else {
             if (!path.contains("[x]")) {
-                var childDef = definition.getChildByName(path);
+                val childDef = definition.getChildByName(path)
                 if (childDef != null) {
-                    var elementDef = childDef.getChildByName(path);
-                    if (elementDef != null
-                            && elementDef.getImplementingClass().getSimpleName().equals(ENUMERATION)
-                            && value != null
-                            && !value.getClass().getSimpleName().equals(ENUMERATION)) {
-                        value = getEnumValue((RuntimeChildPrimitiveEnumerationDatatypeDefinition) childDef, value);
+                    val elementDef = childDef.getChildByName(path)
+                    if (
+                        elementDef != null &&
+                            elementDef.implementingClass.simpleName == ENUMERATION &&
+                            value != null &&
+                            (value.javaClass.simpleName != ENUMERATION)
+                    ) {
+                        value =
+                            getEnumValue<Enum<*>, IBaseEnumeration<Enum<*>>>(
+                                childDef as RuntimeChildPrimitiveEnumerationDatatypeDefinition,
+                                value,
+                            )
                     }
                 }
             }
 
-            if (target instanceof IBaseEnumeration<?> enumeration && path.equals("value")) {
-                enumeration.setValueAsString((String) value);
-                return;
+            if (target is IBaseEnumeration<*> && path == "value") {
+                target.setValueAsString(value as String?)
+                return
             }
 
-            if (target instanceof IPrimitiveType<?> primitiveType) {
-                setPrimitiveValue(value, primitiveType);
-                return;
+            if (target is IPrimitiveType<*>) {
+                setPrimitiveValue(value!!, target)
+                return
             }
 
-            BaseRuntimeChildDefinition child = definition.getChildByName(path);
+            var child = definition.getChildByName(path)
             if (child == null) {
-                child = resolveChoiceProperty(definition, path);
+                child = resolveChoiceProperty(definition, path)
             }
 
-            if (child == null) {
-                throw new IllegalArgumentException(String.format("Unable to resolve path %s.", path));
-            }
+            requireNotNull(child) { "Unable to resolve path $path." }
 
             try {
-                if (value instanceof Iterable) {
-                    for (Object val : (Iterable<?>) value) {
-                        child.getMutator().addValue(target, setBaseValue(val, target, getChildType(child)));
+                if (value is Iterable<*>) {
+                    for (`val` in value) {
+                        child.mutator.addValue(
+                            target,
+                            setBaseValue(`val`, target, getChildType(child)),
+                        )
                     }
                 } else {
-                    child.getMutator().setValue(target, setBaseValue(value, target, getChildType(child)));
+                    child.mutator.setValue(target, setBaseValue(value, target, getChildType(child)))
                 }
-            } catch (IllegalArgumentException le) {
-                throw new UnprocessableEntityException(
-                        String.format("Configuration error encountered: %s", le.getMessage()));
+            } catch (le: IllegalArgumentException) {
+                throw UnprocessableEntityException("Configuration error encountered: ${le.message}")
             }
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    protected void setPrimitiveValue(Object value, IPrimitiveType target) {
-        String simpleName = target.getClass().getSimpleName();
-        switch (simpleName) {
-            case "DateTimeType":
-            case "InstantType":
-                target.setValueAsString(value.toString());
-                break;
-            case "TimeType":
-                target.setValue(value.toString());
-                break;
-            case "Base64BinaryType":
-                target.setValueAsString((String) value);
-                break;
-            default:
-                target.setValue(value);
+    protected fun setPrimitiveValue(value: Any?, target: IPrimitiveType<*>) {
+        val simpleName = target.javaClass.simpleName
+        @Suppress("UNCHECKED_CAST")
+        when (simpleName) {
+            "DateTimeType",
+            "InstantType" -> target.valueAsString = value.toString()
+            "TimeType" -> (target as IPrimitiveType<String?>).value = value.toString()
+            "Base64BinaryType" -> target.valueAsString = value as String?
+            else -> (target as IPrimitiveType<Any?>).value = value
         }
     }
 
-    protected IBase setBaseValue(Object value, IBase target, Class<?> type) {
-        if (target instanceof IPrimitiveType<?> primitiveType) {
-            setPrimitiveValue(value, primitiveType);
+    protected fun setBaseValue(value: Any?, target: IBase?, type: Class<*>?): IBase? {
+        if (target is IPrimitiveType<*>) {
+            setPrimitiveValue(value, target)
         }
-        return (IBase) (type == null ? value : as(fhirVersion, value, type));
+        return (if (type == null) value else AdapterHelper.`as`(fhirVersion, value, type)) as IBase?
     }
 
-    protected Class<?> getChildType(BaseRuntimeChildDefinition child) {
-        if (child instanceof BaseRuntimeChildDatatypeDefinition datatypeDefinition) {
-            return datatypeDefinition.getDatatype();
+    protected fun getChildType(child: BaseRuntimeChildDefinition?): Class<*>? {
+        if (child is BaseRuntimeChildDatatypeDefinition) {
+            return child.datatype
         }
-        return null;
+        return null
     }
 
-    @SuppressWarnings("unchecked")
-    protected <T extends IBase> BaseRuntimeElementCompositeDefinition<T> resolveRuntimeDefinition(IBase base) {
-        if (base instanceof IAnyResource resource) {
-            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getResourceDefinition(resource);
-        } else if (base instanceof IBaseBackboneElement || base instanceof IBaseElement) {
-            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getElementDefinition(base.getClass());
-        } else if (base instanceof ICompositeType) {
-            return (BaseRuntimeElementCompositeDefinition<T>) fhirContext.getElementDefinition(base.getClass());
-        }
+    protected fun <T : IBase> resolveRuntimeDefinition(
+        base: IBase
+    ): BaseRuntimeElementCompositeDefinition<T?> {
+        @Suppress("UNCHECKED_CAST")
+        return when (base) {
+            is IAnyResource -> fhirContext.getResourceDefinition(base)
 
-        throw new UnprocessableEntityException("Unable to resolve the runtime definition for %s"
-                .formatted(base.getClass().getName()));
+            is IBaseBackboneElement,
+            is IBaseElement -> fhirContext.getElementDefinition(base.javaClass)
+
+            is ICompositeType -> fhirContext.getElementDefinition(base.javaClass)
+
+            else ->
+                throw UnprocessableEntityException(
+                    "Unable to resolve the runtime definition for ${base.javaClass.name}"
+                )
+        }
+            as BaseRuntimeElementCompositeDefinition<T?>
     }
 
-    protected BaseRuntimeChildDefinition resolveChoiceProperty(
-            BaseRuntimeElementCompositeDefinition<?> definition, String path) {
-        for (Object child : definition.getChildren()) {
-            if (child instanceof RuntimeChildChoiceDefinition choiceDefinition) {
-                if (choiceDefinition.getElementName().startsWith(path)) {
-                    return choiceDefinition;
+    protected fun resolveChoiceProperty(
+        definition: BaseRuntimeElementCompositeDefinition<*>,
+        path: String,
+    ): BaseRuntimeChildDefinition? {
+        for (child in definition.children) {
+            if (child is RuntimeChildChoiceDefinition) {
+                if (child.elementName.startsWith(path)) {
+                    return child
                 }
             }
         }
 
-        return null;
+        return null
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected <T extends Enum<?>, E extends IBaseEnumeration<T>> E getEnumValue(
-            RuntimeChildPrimitiveEnumerationDatatypeDefinition targetDef, Object value) {
-        String enumValue;
-        if (value instanceof IPrimitiveType<?> primitiveType) {
-            enumValue = primitiveType.getValueAsString();
-        } else if (value instanceof IBaseCoding coding) {
-            enumValue = coding.getCode();
+    protected fun <T : Enum<*>, E : IBaseEnumeration<T>> getEnumValue(
+        targetDef: RuntimeChildPrimitiveEnumerationDatatypeDefinition,
+        value: Any?,
+    ): E? {
+        val enumValue: String?
+        if (value is IPrimitiveType<*>) {
+            enumValue = value.valueAsString
+        } else if (value is IBaseCoding) {
+            enumValue = value.code
         } else {
-            enumValue = value.toString();
+            enumValue = value.toString()
         }
-        return switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3 ->
-                (E) new org.hl7.fhir.dstu3.model.Enumeration(toEnumFactory(targetDef.getBoundEnumType()), enumValue);
-            case R4 ->
-                (E) new org.hl7.fhir.r4.model.Enumeration(toEnumFactory(targetDef.getBoundEnumType()), enumValue);
-            case R5 ->
-                (E) new org.hl7.fhir.r5.model.Enumeration(toEnumFactory(targetDef.getBoundEnumType()), enumValue);
-            default -> null;
-        };
+        @Suppress("UNCHECKED_CAST")
+        return when (fhirContext.version.version) {
+            FhirVersionEnum.DSTU3 ->
+                org.hl7.fhir.dstu3.model.Enumeration<T>(
+                    toEnumFactory(targetDef.boundEnumType),
+                    enumValue,
+                )
+            FhirVersionEnum.R4 ->
+                org.hl7.fhir.r4.model.Enumeration<T>(
+                    toEnumFactory(targetDef.boundEnumType),
+                    enumValue,
+                )
+
+            FhirVersionEnum.R5 ->
+                org.hl7.fhir.r5.model.Enumeration<T>(
+                    toEnumFactory(targetDef.boundEnumType),
+                    enumValue,
+                )
+
+            else -> null
+        }
+            as E?
     }
 
-    @SuppressWarnings("unchecked")
-    static <E extends IBaseEnumFactory<?>> E toEnumFactory(Class<?> enumerationType) {
-        Class<?> clazz;
-        String className = enumerationType.getName() + "EnumFactory";
-        E retVal;
-        try {
-            clazz = Class.forName(className);
-            retVal = (E) clazz.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new UnprocessableEntityException("Failed to instantiate %s".formatted(className));
-        }
-        return retVal;
-    }
-
-    public void setNestedValue(IBase target, String path, Object value, BaseRuntimeElementDefinition<?> def) {
-        var segments = splitPathSegments(path);
-        for (int i = 0; i < segments.size(); i++) {
-            var segment = segments.get(i);
-            var isLast = i == segments.size() - 1;
+    fun setNestedValue(
+        target: IBase,
+        path: String,
+        value: Any?,
+        def: BaseRuntimeElementDefinition<*>,
+    ) {
+        var target = target
+        var def = def
+        val segments = splitPathSegments(path)
+        for (i in segments.indices) {
+            val segment = segments[i]
+            val isLast = i == segments.size - 1
 
             if (isExtensionSegment(segment)) {
-                var extInfo = parseExtensionSegment(segment);
-                target = resolveOrCreateExtension(target, extInfo);
+                val extInfo: ExtensionInfo = parseExtensionSegment(segment)
+                target = resolveOrCreateExtension(target, extInfo)!!
                 if (!isLast) {
-                    def = fhirContext.getElementDefinition(target.getClass());
+                    def = fhirContext.getElementDefinition(target.javaClass)
                 }
             } else {
-                var isList = segment.contains("[");
-                var isSlice = segment.contains(":");
-                var sliceName = isSlice ? segment.split(":")[1] : null;
-                var index = isList ? Character.getNumericValue(segment.charAt(segment.indexOf("[") + 1)) : 0;
-                var targetPath = getTargetPath(segment, isList, isSlice);
-                var targetDef = def.getChildByName(targetPath);
+                val isList = segment.contains("[")
+                val isSlice = segment.contains(":")
+                val sliceName = if (isSlice) segment.split(":")[1] else null
+                val index =
+                    if (isList) Character.getNumericValue(segment[segment.indexOf("[") + 1]) else 0
+                val targetPath = getTargetPath(segment, isList, isSlice)
+                val targetDef = def.getChildByName(targetPath)
                 if (targetDef != null) {
-                    var targetValues = targetDef.getAccessor().getValues(target);
-                    var targetValue = (targetValues.size() >= index + 1 && !isLast)
-                            ? getTargetValueFromList(sliceName, index, targetValues)
-                            : getTargetValue(target, value, isLast, targetPath, targetDef);
-                    target = targetValue == null ? target : targetValue;
+                    val targetValues = targetDef.accessor.getValues(target)
+                    val targetValue =
+                        if (targetValues.size >= index + 1 && !isLast)
+                            getTargetValueFromList(sliceName, index, targetValues)
+                        else getTargetValue(target, value, isLast, targetPath, targetDef)
+                    target = targetValue ?: target
                     if (!isLast) {
-                        var nextDef = fhirContext.getElementDefinition(target.getClass());
-                        if (nextDef instanceof BaseRuntimeElementCompositeDefinition<?>) def = nextDef;
-                        else if (nextDef instanceof RuntimePrimitiveDatatypeDefinition) def = nextDef;
+                        val nextDef = fhirContext.getElementDefinition(target.javaClass)
+                        if (nextDef is BaseRuntimeElementCompositeDefinition<*>) def = nextDef
+                        else if (nextDef is RuntimePrimitiveDatatypeDefinition) def = nextDef
                         else
-                            throw new UnprocessableEntityException("Unable to resolve the runtime definition for %s"
-                                    .formatted(target.getClass().getName()));
+                            throw UnprocessableEntityException(
+                                "Unable to resolve the runtime definition for ${target.javaClass.name}"
+                            )
                     }
                 }
             }
         }
     }
 
-    protected static List<String> splitPathSegments(String path) {
-        var segments = new ArrayList<String>();
-        var current = new StringBuilder();
-        boolean inQuotes = false;
-        for (int i = 0; i < path.length(); i++) {
-            char c = path.charAt(i);
-            if (c == '\'') {
-                inQuotes = !inQuotes;
-                current.append(c);
-            } else if (c == '.' && !inQuotes) {
-                segments.add(current.toString());
-                current = new StringBuilder();
-            } else {
-                current.append(c);
-            }
+    protected fun resolveOrCreateExtension(target: IBase, info: ExtensionInfo): IBase? {
+        require(target is IBaseHasExtensions) {
+            "Target does not support extensions: ${target.javaClass.name}"
         }
-        if (current.length() > 0) {
-            segments.add(current.toString());
+        val matching = target.extension.filter { ext -> info.url == ext!!.url }.toList()
+        if (matching.size > info.index) {
+            return matching[info.index]
         }
-        return segments;
+        val extensionList = target.extension as MutableList<IBaseExtension<*, *>>
+        var created: IBaseExtension<*, *>? = null
+        for (i in matching.size..info.index) {
+            created = newExtension(info.url)
+            extensionList.add(created)
+        }
+        return created
     }
 
-    protected static boolean isExtensionSegment(String segment) {
-        return EXTENSION_PATTERN.matcher(segment).matches();
+    protected fun newExtension(url: String?): IBaseExtension<*, *> {
+        return when (fhirContext.version.version) {
+            FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.Extension(url)
+            FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.Extension(url)
+            FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.Extension(url)
+            else ->
+                throw IllegalStateException(
+                    "Unsupported FHIR version: ${fhirContext.version.version}"
+                )
+        }
     }
 
-    protected static ExtensionInfo parseExtensionSegment(String segment) {
-        var matcher = EXTENSION_PATTERN.matcher(segment);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Not an extension segment: " + segment);
-        }
-        var url = matcher.group(1);
-        var index = matcher.group(3) != null ? parseInt(matcher.group(3)) : 0;
-        return new ExtensionInfo(url, index);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    protected IBase resolveOrCreateExtension(IBase target, ExtensionInfo info) {
-        if (!(target instanceof IBaseHasExtensions hasExtensions)) {
-            throw new IllegalArgumentException(
-                    "Target does not support extensions: " + target.getClass().getName());
-        }
-        var matching = hasExtensions.getExtension().stream()
-                .filter(ext -> info.url().equals(ext.getUrl()))
-                .toList();
-        if (matching.size() > info.index()) {
-            return matching.get(info.index());
-        }
-        var extensionList = (List) hasExtensions.getExtension();
-        IBaseExtension<?, ?> created = null;
-        for (int i = matching.size(); i <= info.index(); i++) {
-            created = newExtension(info.url());
-            extensionList.add(created);
-        }
-        return created;
-    }
-
-    protected IBaseExtension<?, ?> newExtension(String url) {
-        return switch (fhirContext.getVersion().getVersion()) {
-            case DSTU3 -> new org.hl7.fhir.dstu3.model.Extension(url);
-            case R4 -> new org.hl7.fhir.r4.model.Extension(url);
-            case R5 -> new org.hl7.fhir.r5.model.Extension(url);
-            default ->
-                throw new IllegalStateException(
-                        "Unsupported FHIR version: " + fhirContext.getVersion().getVersion());
-        };
-    }
-
-    protected String getTargetPath(String identifier, boolean isList, boolean isSlice) {
+    protected fun getTargetPath(identifier: String, isList: Boolean, isSlice: Boolean): String {
         if (isList) {
-            return identifier.replaceAll("\\[\\d]", "");
+            return identifier.replace("\\[\\d]".toRegex(), "")
         }
         if (isSlice) {
-            return identifier.substring(0, identifier.indexOf(":"));
+            return identifier.substring(0, identifier.indexOf(":"))
         }
-        return identifier;
+        return identifier
     }
 
-    protected IBase getTargetValue(
-            IBase target, Object value, boolean isLast, String targetPath, BaseRuntimeChildDefinition targetDef) {
-        IBase targetValue = null;
-        var elementDef = targetDef.getChildByName(targetPath);
+    protected fun getTargetValue(
+        target: IBase?,
+        value: Any?,
+        isLast: Boolean,
+        targetPath: String?,
+        targetDef: BaseRuntimeChildDefinition,
+    ): IBase? {
+        var targetValue: IBase? = null
+        val elementDef = targetDef.getChildByName(targetPath)
         if (isLast) {
-            var elementClass = elementDef.getImplementingClass();
-            if (elementClass.getSimpleName().equals(ENUMERATION)) {
-                if (as(fhirVersion, value, IPrimitiveType.class) instanceof IPrimitiveType<?> primitiveType) {
-                    targetValue = getEnumValue(
-                            (RuntimeChildPrimitiveEnumerationDatatypeDefinition) targetDef,
-                            primitiveType.getValueAsString());
+            val elementClass: Class<out IBase?> = elementDef.implementingClass
+            if (elementClass.simpleName == ENUMERATION) {
+                if (
+                    AdapterHelper.`as`(fhirVersion, value, IPrimitiveType::class.java)
+                        is IPrimitiveType<*>
+                ) {
+                    targetValue =
+                        getEnumValue<Enum<*>, IBaseEnumeration<Enum<*>>>(
+                            targetDef as RuntimeChildPrimitiveEnumerationDatatypeDefinition,
+                            (AdapterHelper.`as`(fhirVersion, value, IPrimitiveType::class.java)
+                                    as IPrimitiveType<*>)
+                                .valueAsString,
+                        )
                 }
             } else {
-                targetValue = (IBase) as(fhirVersion, value, elementClass);
+                targetValue = AdapterHelper.`as`(fhirVersion, value, elementClass) as IBase?
             }
         } else {
-            targetValue = elementDef.newInstance(targetDef.getInstanceConstructorArguments());
+            targetValue = elementDef.newInstance(targetDef.instanceConstructorArguments)
         }
         if (targetValue != null) {
-            targetDef.getMutator().addValue(target, targetValue);
+            targetDef.mutator.addValue(target, targetValue)
         }
-        return targetValue;
+        return targetValue
     }
 
-    protected IBase getTargetValueFromList(String sliceName, int index, List<IBase> targetValues) {
-        IBase targetValue;
-        if (targetValues.size() > 1 && StringUtils.isNotBlank(sliceName)) {
+    protected fun getTargetValueFromList(
+        sliceName: String?,
+        index: Int,
+        targetValues: MutableList<IBase?>,
+    ): IBase? {
+        val targetValue: IBase?
+        if (targetValues.size > 1 && !sliceName.isNullOrBlank()) {
             // TODO: handle slice names
             // targetValue = targetValues.stream()
-            targetValue = targetValues.get(0);
+            targetValue = targetValues[0]
         } else {
-            targetValue = targetValues.get(index);
+            targetValue = targetValues[index]
         }
-        return targetValue;
+        return targetValue
+    }
+
+    companion object {
+        protected const val ENUMERATION = "Enumeration"
+        protected val EXTENSION_PATTERN = "extension\\('([^']+)'\\)(\\[(\\d+)])?".toRegex()
+
+        fun <E : IBaseEnumFactory<*>> toEnumFactory(enumerationType: Class<*>): E {
+            val clazz: Class<*>?
+            val className = enumerationType.name + "EnumFactory"
+            try {
+                clazz = Class.forName(className)
+                @Suppress("UNCHECKED_CAST")
+                return clazz.getDeclaredConstructor().newInstance() as E
+            } catch (e: Exception) {
+                throw UnprocessableEntityException("Failed to instantiate $className")
+            }
+        }
+
+        protected fun splitPathSegments(path: String): MutableList<String> {
+            val segments = mutableListOf<String>()
+            var current = StringBuilder()
+            var inQuotes = false
+            for (i in path.indices) {
+                val c = path[i]
+                if (c == '\'') {
+                    inQuotes = !inQuotes
+                    current.append(c)
+                } else if (c == '.' && !inQuotes) {
+                    segments.add(current.toString())
+                    current = StringBuilder()
+                } else {
+                    current.append(c)
+                }
+            }
+            if (current.isNotEmpty()) {
+                segments.add(current.toString())
+            }
+            return segments
+        }
+
+        protected fun isExtensionSegment(segment: String): Boolean {
+            return EXTENSION_PATTERN.matches(segment)
+        }
+
+        protected fun parseExtensionSegment(segment: String): ExtensionInfo {
+            val matchResult = EXTENSION_PATTERN.matchEntire(segment)
+            requireNotNull(matchResult) { "Not an extension segment: $segment" }
+            val url = matchResult.groupValues[1]
+            val index =
+                if (matchResult.groupValues[3].isNotEmpty()) matchResult.groupValues[3].toInt()
+                else 0
+            return ExtensionInfo(url, index)
+        }
     }
 }

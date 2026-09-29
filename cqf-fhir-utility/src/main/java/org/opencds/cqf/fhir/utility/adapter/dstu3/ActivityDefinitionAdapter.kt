@@ -1,97 +1,91 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
+import org.hl7.fhir.dstu3.model.ActivityDefinition
+import org.hl7.fhir.dstu3.model.RelatedArtifact
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.opencds.cqf.fhir.utility.Canonicals.getIdPart
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import org.hl7.fhir.dstu3.model.ActivityDefinition;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-
-public class ActivityDefinitionAdapter extends KnowledgeArtifactAdapter implements IActivityDefinitionAdapter {
-
-    public ActivityDefinitionAdapter(IDomainResource activityDefinition) {
-        super(activityDefinition);
-        if (!(activityDefinition instanceof ActivityDefinition)) {
-            throw new IllegalArgumentException(
-                    "resource passed as activityDefinition argument is not an ActivityDefinition resource");
+class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionAdapter {
+    constructor(activityDefinition: IDomainResource) : super(activityDefinition) {
+        require(activityDefinition is ActivityDefinition) {
+            "resource passed as activityDefinition argument is not an ActivityDefinition resource"
         }
     }
 
-    public ActivityDefinitionAdapter(ActivityDefinition activityDefinition) {
-        super(activityDefinition);
+    constructor(activityDefinition: ActivityDefinition) : super(activityDefinition)
+
+    protected val activityDefinition: ActivityDefinition
+        get() = resource as ActivityDefinition
+
+    override fun get(): ActivityDefinition {
+        return this.activityDefinition
     }
 
-    protected ActivityDefinition getActivityDefinition() {
-        return (ActivityDefinition) resource;
+    override fun copy(): ActivityDefinition? {
+        return get().copy()
     }
 
-    @Override
-    public ActivityDefinition get() {
-        return getActivityDefinition();
-    }
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-    @Override
-    public ActivityDefinition copy() {
-        return get().copy();
-    }
+            /*
+            relatedArtifact[].resource
+            library[]
 
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
+            */
 
-        /*
-        relatedArtifact[].resource
-        library[]
+            // relatedArtifact[].resource
+            getRelatedArtifactsOfType<RelatedArtifact>(IKnowledgeArtifactAdapter.DEPENDSON)
+                .filter { obj -> obj!!.hasResource() }
+                .map { ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource) }
+                .forEach { e -> references.add(e) }
 
-        */
-
-        // relatedArtifact[].resource
-        getRelatedArtifactsOfType(DEPENDSON).stream()
-                .filter(RelatedArtifact::hasResource)
-                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .forEach(references::add);
-
-        // library[]
-        if (hasLibrary()) {
-            for (var reference : getActivityDefinition().getLibrary()) {
-                references.add(new DependencyInfo(
-                        referenceSource, reference.getReference(), reference.getExtension(), reference::setReference));
+            // library[]
+            if (hasLibrary()) {
+                for (reference in this.activityDefinition.library) {
+                    references.add(
+                        DependencyInfo(
+                            referenceSource,
+                            reference.reference,
+                            reference.extension,
+                            { value: String? -> reference.setReference(value) },
+                        )
+                    )
+                }
             }
+
+            return references
         }
 
-        return references;
+    override val referencedLibraries: MutableMap<String?, String?>
+        get() {
+            val libraries =
+                this.activityDefinition.library
+                    .associate { l -> getIdPart(l.reference) to l.reference }
+                    .toMutableMap()
+
+            libraries.putAll(resolveCqfLibraries())
+            return libraries
+        }
+
+    override val description: String?
+        get() {
+            return get().description
+        }
+
+    override fun hasLibrary(): Boolean {
+        return get().hasLibrary()
     }
 
-    @Override
-    public Map<String, String> getReferencedLibraries() {
-        var libraries = getActivityDefinition().getLibrary().stream()
-                .collect(toMap(l -> requireNonNull(Canonicals.getIdPart(l.getReference())), Reference::getReference));
-        libraries.putAll(resolveCqfLibraries());
-        return libraries;
-    }
-
-    @Override
-    public String getDescription() {
-        return get().getDescription();
-    }
-
-    @Override
-    public boolean hasLibrary() {
-        return get().hasLibrary();
-    }
-
-    @Override
-    public List<String> getLibrary() {
-        return get().getLibrary().stream().map(Reference::getReference).toList();
-    }
+    override val library: MutableList<String?>
+        get() {
+            return get().library.map { obj -> obj!!.reference }.toMutableList()
+        }
 }

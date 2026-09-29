@@ -1,294 +1,260 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import static org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose;
+import java.time.Instant
+import java.util.*
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.r5.model.*
+import org.opencds.cqf.fhir.utility.ValueSets.getCodesInCompose
+import org.opencds.cqf.fhir.utility.adapter.*
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r5.model.BooleanType;
-import org.hl7.fhir.r5.model.IntegerType;
-import org.hl7.fhir.r5.model.PrimitiveType;
-import org.hl7.fhir.r5.model.StringType;
-import org.hl7.fhir.r5.model.UsageContext;
-import org.hl7.fhir.r5.model.ValueSet;
-import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.opencds.cqf.cql.engine.runtime.Code;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetExpansionContainsAdapter;
-
-public class ValueSetAdapter extends KnowledgeArtifactAdapter implements IValueSetAdapter {
-
-    public ValueSetAdapter(IDomainResource valueSet) {
-        super(valueSet);
-        if (!(valueSet instanceof ValueSet)) {
-            throw new IllegalArgumentException("resource passed as valueSet argument is not a ValueSet resource");
+class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
+    constructor(valueSet: IDomainResource) : super(valueSet) {
+        require(valueSet is ValueSet) {
+            "resource passed as valueSet argument is not a ValueSet resource"
         }
     }
 
-    public ValueSetAdapter(ValueSet valueSet) {
-        super(valueSet);
+    constructor(valueSet: ValueSet) : super(valueSet)
+
+    protected val valueSet: ValueSet
+        get() = resource as ValueSet
+
+    override fun get(): ValueSet {
+        return resource as ValueSet
     }
 
-    protected ValueSet getValueSet() {
-        return (ValueSet) resource;
+    override fun copy(): ValueSet? {
+        return get().copy()
     }
 
-    @Override
-    public ValueSet get() {
-        return (ValueSet) resource;
-    }
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-    @Override
-    public ValueSet copy() {
-        return get().copy();
-    }
-
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
-
-        /*
-          compose.include[].valueSet
-          compose.include[].system
-          compose.exclude[].valueSet
-          compose.exclude[].system
-        */
-        Stream.concat(
-                        getValueSet().getCompose().getInclude().stream(),
-                        getValueSet().getCompose().getExclude().stream())
-                .forEach(component -> {
-                    if (component.hasValueSet()) {
-                        component
-                                .getValueSet()
-                                .forEach(ct -> references.add(new DependencyInfo(
-                                        referenceSource, ct.getValue(), ct.getExtension(), ct::setValue)));
-                    }
-                    if (component.hasSystem()) {
-                        references.add(new DependencyInfo(
+            /*
+              compose.include[].valueSet
+              compose.include[].system
+              compose.exclude[].valueSet
+              compose.exclude[].system
+            */
+            (this.valueSet.compose.include + this.valueSet.compose.exclude).forEach { component ->
+                if (component!!.hasValueSet()) {
+                    component.valueSet.forEach { ct ->
+                        references.add(
+                            DependencyInfo(
                                 referenceSource,
-                                component.getSystem(),
-                                component.getSystemElement().getExtension(),
-                                component::setSystem));
+                                ct!!.value,
+                                ct.extension,
+                                { theValue -> ct.setValue(theValue) },
+                            )
+                        )
                     }
-                });
-        return references;
-    }
+                }
+                if (component.hasSystem()) {
+                    references.add(
+                        DependencyInfo(
+                            referenceSource,
+                            component.system,
+                            component.systemElement.extension,
+                            { value -> component.setSystem(value) },
+                        )
+                    )
+                }
+            }
+            return references
+        }
 
-    @Override
-    public IValueSetAdapter addUseContext(IUsageContextAdapter usageContext) {
-        if (usageContext == null) return this;
+    override fun addUseContext(usageContext: IUsageContextAdapter?): IValueSetAdapter {
+        if (usageContext == null) return this
 
         // underlying ValueSet from this adapter
-        ValueSet vs = get();
-        if (vs == null) return this;
+        val vs = get()
+        if (vs == null) return this
 
-        Object underlying = usageContext.get();
-        if (!(underlying instanceof UsageContext)) return this;
-        UsageContext incoming = (UsageContext) underlying;
+        val underlying: Any? = usageContext.get()
+        if (underlying !is UsageContext) return this
+        val incoming = underlying
 
-        List<UsageContext> existingUseContexts = vs.getUseContext();
+        val existingUseContexts = vs.useContext
         if (existingUseContexts == null || existingUseContexts.isEmpty()) {
-            vs.addUseContext(incoming);
-            return this;
+            vs.addUseContext(incoming)
+            return this
         }
 
-        boolean alreadyExists =
-                existingUseContexts.stream().anyMatch(existing -> existing != null && existing.equalsDeep(incoming));
+        val alreadyExists =
+            existingUseContexts.any { existing ->
+                existing != null && existing.equalsDeep(incoming)
+            }
 
         if (!alreadyExists) {
-            vs.addUseContext(incoming);
+            vs.addUseContext(incoming)
         }
 
-        return this;
+        return this
     }
 
-    @Override
-    public <T extends IBaseBackboneElement> void setExpansion(T expansion) {
-        getValueSet().setExpansion((ValueSetExpansionComponent) expansion);
+    override fun <T : IBaseBackboneElement> setExpansion(expansion: T?) {
+        this.valueSet.setExpansion(expansion as ValueSet.ValueSetExpansionComponent?)
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public ValueSetExpansionComponent getExpansion() {
-        return getValueSet().getExpansion();
+    override fun <T : IBaseBackboneElement> getExpansion(): T? {
+        return this.valueSet.expansion as T?
     }
 
-    @Override
-    public boolean hasExpansion() {
-        return getValueSet().hasExpansion();
+    override fun hasExpansion(): Boolean {
+        return this.valueSet.hasExpansion()
     }
 
-    @Override
-    public boolean hasExpansionContains() {
-        return getExpansion().hasContains();
+    override fun hasExpansionContains(): Boolean {
+        return this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!.hasContains()
     }
 
-    @Override
-    public int getExpansionTotal() {
-        return getExpansion().getTotal();
-    }
+    override val expansionTotal: Int
+        get() {
+            return this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!.total
+        }
 
-    @Override
-    public List<IValueSetExpansionContainsAdapter> getExpansionContains() {
-        return getExpansion().getContains().stream()
-                .map(ValueSetExpansionContainsAdapter::new)
-                .collect(Collectors.toList());
-    }
+    override val expansionContains: MutableList<IValueSetExpansionContainsAdapter?>
+        get() {
+            return this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!
+                .contains
+                .map { contains -> ValueSetExpansionContainsAdapter(contains) }
+                .toMutableList()
+        }
 
-    @Override
-    public void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains) {
-        getExpansion()
-                .getContains()
-                .addAll((expansionContains.stream()
-                        .map(e -> (ValueSetExpansionContainsComponent) e.get())
-                        .toList()));
+    override fun appendExpansionContains(
+        expansionContains: MutableList<IValueSetExpansionContainsAdapter?>?
+    ) {
+        this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!
+            .contains
+            .addAll(
+                (expansionContains!!
+                    .map { e -> e!!.get() as ValueSet.ValueSetExpansionContainsComponent? }
+                    .toMutableList())
+            )
 
-        var countParam = (getExpansion().getParameter().stream()
-                .filter(param -> param.getName().equals("count"))
-                .findFirst());
-        if (countParam.isPresent()) {
-            var count = ((IntegerType) countParam.get().getValue()).getValue();
-            count += expansionContains.size();
-            countParam.get().setValue(new IntegerType(count));
+        val countParam =
+            (this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!.parameter.firstOrNull {
+                param ->
+                param!!.name == "count"
+            })
+        if (countParam != null) {
+            var count = (countParam.value as IntegerType).value
+            count += expansionContains.size
+            countParam.value = IntegerType(count)
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public ValueSetExpansionComponent newExpansion() {
-        var expansion = new ValueSet.ValueSetExpansionComponent(Date.from(Instant.now()));
-        expansion.getContains();
-        return expansion;
+    override fun <T : IBaseBackboneElement> newExpansion(): T {
+        val expansion = ValueSet.ValueSetExpansionComponent(Date.from(Instant.now()))
+        expansion.contains
+        return expansion as T
     }
 
-    @Override
-    public void addExpansionStringParameter(String name, String value) {
-        getExpansion().addParameter().setName(name).setValue(new StringType(value));
+    override fun addExpansionStringParameter(name: String?, value: String?) {
+        this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!
+            .addParameter()
+            .setName(name)
+            .setValue(StringType(value))
     }
 
-    @Override
-    public boolean hasExpansionStringParameter(String name, String value) {
-        return hasExpansion() && getExpansion().hasParameterValue(name, value);
+    override fun hasExpansionStringParameter(name: String?, value: String?): Boolean {
+        return hasExpansion() &&
+            this.getExpansion<ValueSet.ValueSetExpansionComponent>()!!.hasParameterValue(
+                name,
+                value,
+            )
     }
 
-    @Override
-    public boolean hasCompose() {
-        return this.get().hasCompose();
+    override fun hasCompose(): Boolean {
+        return this.get().hasCompose()
     }
 
-    @Override
-    public boolean hasComposeInclude() {
-        return this.get().getCompose().hasInclude();
+    override fun hasComposeInclude(): Boolean {
+        return this.get().compose.hasInclude()
     }
 
-    @Override
-    public List<IValueSetConceptSetAdapter> getComposeInclude() {
-        return getValueSet().getCompose().getInclude().stream()
-                .map(ValueSetConceptSetAdapter::new)
-                .collect(Collectors.toUnmodifiableList());
-    }
+    override val composeInclude: MutableList<IValueSetConceptSetAdapter?>
+        get() {
+            return this.valueSet.compose.include
+                .map { conceptSet -> ValueSetConceptSetAdapter(conceptSet) }
+                .toMutableList()
+        }
 
-    @Override
-    public List<String> getValueSetIncludes() {
-        return getValueSet().getCompose().getInclude().stream()
-                .map(ConceptSetComponent::getValueSet)
-                .flatMap(Collection::stream)
-                .map(PrimitiveType::asStringValue)
+    override val valueSetIncludes: MutableList<String?>
+        get() {
+            return this.valueSet.compose.include
+                .flatMap { obj -> obj!!.valueSet }
+                .map { obj -> obj!!.asStringValue() }
                 .distinct()
-                .toList();
+                .toMutableList()
+        }
+
+    override fun hasComposeExclude(): Boolean {
+        return this.valueSet.hasCompose() &&
+            this.valueSet.compose.hasExclude() &&
+            this.valueSet.compose.exclude.isNotEmpty()
     }
 
-    @Override
-    public boolean hasComposeExclude() {
-        return getValueSet().hasCompose()
-                && getValueSet().getCompose().hasExclude()
-                && !getValueSet().getCompose().getExclude().isEmpty();
+    override fun hasComposeFilters(): Boolean {
+        return this.valueSet.hasCompose() &&
+            (this.valueSet.compose.include.any { i -> i!!.hasFilter() && i.filter.isNotEmpty() } ||
+                this.valueSet.compose.exclude.any { e -> e!!.hasFilter() && e.filter.isNotEmpty() })
     }
 
-    @Override
-    public boolean hasComposeFilters() {
-        return getValueSet().hasCompose()
-                && (getValueSet().getCompose().getInclude().stream()
-                                .anyMatch(i -> i.hasFilter() && !i.getFilter().isEmpty())
-                        || getValueSet().getCompose().getExclude().stream()
-                                .anyMatch(e -> e.hasFilter() && !e.getFilter().isEmpty()));
+    override fun hasSimpleCompose(): Boolean {
+        return this.valueSet.hasCompose() &&
+            !this.valueSet.compose.hasExclude() &&
+            this.valueSet.compose.include.none { csc ->
+                csc!!.hasFilter() || csc.hasValueSet() || !csc.hasSystem() || !csc.hasConcept()
+            }
     }
 
-    @Override
-    public boolean hasSimpleCompose() {
-        return getValueSet().hasCompose()
-                && !getValueSet().getCompose().hasExclude()
-                && getValueSet().getCompose().getInclude().stream()
-                        .noneMatch(
-                                csc -> csc.hasFilter() || csc.hasValueSet() || !csc.hasSystem() || !csc.hasConcept());
+    override fun hasGroupingCompose(): Boolean {
+        return this.valueSet.hasCompose() &&
+            !this.valueSet.compose.hasExclude() &&
+            this.valueSet.compose.include.none { csc -> !csc!!.hasValueSet() || csc.hasFilter() }
     }
 
-    @Override
-    public boolean hasGroupingCompose() {
-        return getValueSet().hasCompose()
-                && !getValueSet().getCompose().hasExclude()
-                && getValueSet().getCompose().getInclude().stream()
-                        .noneMatch(csc -> !csc.hasValueSet() || csc.hasFilter());
+    override fun hasExplicitConcepts(): Boolean {
+        return this.valueSet.hasCompose() &&
+            this.valueSet.compose.include.any { i -> i!!.hasConcept() && i.concept.isNotEmpty() }
     }
 
-    @Override
-    public boolean hasExplicitConcepts() {
-        return getValueSet().hasCompose()
-                && getValueSet().getCompose().getInclude().stream()
-                        .anyMatch(i -> i.hasConcept() && !i.getConcept().isEmpty());
+    override fun hasValueSetReferences(): Boolean {
+        return this.valueSet.hasCompose() &&
+            this.valueSet.compose.include.any { i -> i!!.hasValueSet() && i.valueSet.isNotEmpty() }
     }
 
-    @Override
-    public boolean hasValueSetReferences() {
-        return getValueSet().hasCompose()
-                && getValueSet().getCompose().getInclude().stream()
-                        .anyMatch(i -> i.hasValueSet() && !i.getValueSet().isEmpty());
+    override fun hasNaiveParameter(): Boolean {
+        return this.valueSet.expansion.parameter.any { p -> p!!.name == "naive" }
     }
 
-    @Override
-    public boolean hasNaiveParameter() {
-        return getValueSet().getExpansion().getParameter().stream()
-                .anyMatch(p -> p.getName().equals("naive"));
+    override fun <T : IBaseBackboneElement> createNaiveParameter(): T {
+        return ValueSet.ValueSetExpansionParameterComponent()
+            .setName("naive")
+            .setValue(BooleanType(true)) as T
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public ValueSet.ValueSetExpansionParameterComponent createNaiveParameter() {
-        return new ValueSet.ValueSetExpansionParameterComponent()
-                .setName("naive")
-                .setValue(new BooleanType(true));
-    }
+    override fun naiveExpand() {
+        val expansion =
+            newExpansion<ValueSet.ValueSetExpansionComponent>().addParameter(createNaiveParameter())
 
-    @Override
-    public void naiveExpand() {
-        var expansion = newExpansion().addParameter(createNaiveParameter());
-
-        final List<Code> codesInCompose = getCodesInCompose(fhirContext, getValueSet());
+        val codesInCompose = getCodesInCompose(fhirContext, this.valueSet)
         if (codesInCompose == null) {
-            return;
+            return
         }
-        for (var code : codesInCompose) {
+        for (code in codesInCompose) {
             expansion
-                    .addContains()
-                    .setCode(code.getCode())
-                    .setSystem(code.getSystem())
-                    .setVersion(code.getVersion())
-                    .setDisplay(code.getDisplay());
+                .addContains()
+                .setCode(code.code)
+                .setSystem(code.system)
+                .setVersion(code.version)
+                .setDisplay(code.display)
         }
-        getValueSet().setExpansion(expansion);
+        this.valueSet.setExpansion(expansion)
     }
 }

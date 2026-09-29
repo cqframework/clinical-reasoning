@@ -1,21 +1,18 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface IItemComponentAdapter extends IAdapter<IBase> {
+interface IItemComponentAdapter : IAdapter<IBase> {
 
-    String getLinkId();
+    val linkId: String?
 
-    boolean hasDefinition();
+    fun hasDefinition(): Boolean
 
-    String getDefinition();
+    val definition: String?
 
-    boolean hasItem();
+    fun hasItem(): Boolean
 
-    List<? extends IItemComponentAdapter> getItem();
+    var item: MutableList<out IItemComponentAdapter?>?
 
-    void setItem(List<? extends IItemComponentAdapter> item);
-
-    void addItem(IItemComponentAdapter item);
+    fun addItem(item: IItemComponentAdapter?)
 }

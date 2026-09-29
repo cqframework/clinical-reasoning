@@ -1,72 +1,64 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r4
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.DataRequirement;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDataRequirementCodeFilterAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IPrimitiveType
+import org.hl7.fhir.r4.model.DataRequirement
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IDataRequirementCodeFilterAdapter
 
-public class DataRequirementAdapter extends BaseElementAdapter implements IDataRequirementAdapter {
+class DataRequirementAdapter(compositeType: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R4, compositeType), IDataRequirementAdapter {
+    private val dataRequirement: DataRequirement
 
-    private final DataRequirement dataRequirement;
-
-    public DataRequirementAdapter(IBase compositeType) {
-        super(FhirVersionEnum.R4, compositeType);
-        if (!(compositeType instanceof DataRequirement dataRequirementInner)) {
-            throw new IllegalArgumentException(
-                    "object passed as dataRequirement argument is not a DataRequirement data type");
+    init {
+        require(compositeType is DataRequirement) {
+            "object passed as dataRequirement argument is not a DataRequirement data type"
         }
-        this.dataRequirement = dataRequirementInner;
+        this.dataRequirement = compositeType
     }
 
-    @Override
-    public DataRequirement get() {
-        return dataRequirement;
+    override fun get(): DataRequirement {
+        return dataRequirement
     }
 
-    @Override
-    public boolean hasId() {
-        return get().hasId();
+    override fun hasId(): Boolean {
+        return get().hasId()
     }
 
-    @Override
-    public String getId() {
-        return get().getId();
+    override val id: String?
+        get() {
+            return get().id
+        }
+
+    override fun hasType(): Boolean {
+        return get().hasType()
     }
 
-    @Override
-    public boolean hasType() {
-        return get().hasType();
+    override val type: String?
+        get() {
+            return get().type
+        }
+
+    override fun hasProfile(): Boolean {
+        return get().hasProfile()
     }
 
-    @Override
-    public String getType() {
-        return get().getType();
+    override val profile: MutableList<IPrimitiveType<String?>?>
+        get() {
+            return get().profile.map { p -> p as IPrimitiveType<String?>? }.toMutableList()
+        }
+
+    override fun hasCodeFilter(): Boolean {
+        return get().hasCodeFilter()
     }
 
-    @Override
-    public boolean hasProfile() {
-        return get().hasProfile();
-    }
-
-    @Override
-    public List<IPrimitiveType<String>> getProfile() {
-        return get().getProfile().stream().map(p -> (IPrimitiveType<String>) p).toList();
-    }
-
-    @Override
-    public boolean hasCodeFilter() {
-        return get().hasCodeFilter();
-    }
-
-    @Override
-    public List<IDataRequirementCodeFilterAdapter> getCodeFilter() {
-        return get().getCodeFilter().stream()
-                .map(DataRequirementCodeFilterAdapter::new)
-                .collect(Collectors.toUnmodifiableList());
-    }
+    override val codeFilter: MutableList<IDataRequirementCodeFilterAdapter?>
+        get() {
+            return get()
+                .codeFilter
+                .map { codeFilter -> DataRequirementCodeFilterAdapter(codeFilter) }
+                .toMutableList()
+        }
 }

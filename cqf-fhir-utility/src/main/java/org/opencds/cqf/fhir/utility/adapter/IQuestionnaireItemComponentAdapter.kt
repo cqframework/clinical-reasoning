@@ -1,51 +1,49 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IBaseCoding
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.ICompositeType
 
-public interface IQuestionnaireItemComponentAdapter extends IItemComponentAdapter {
+interface IQuestionnaireItemComponentAdapter : IItemComponentAdapter {
+    fun setLinkId(linkId: String?): IQuestionnaireItemComponentAdapter?
 
-    IQuestionnaireItemComponentAdapter setLinkId(String linkId);
+    fun setDefinition(definition: String?): IQuestionnaireItemComponentAdapter?
 
-    IQuestionnaireItemComponentAdapter setDefinition(String definition);
+    fun addItems(items: MutableList<IQuestionnaireItemComponentAdapter?>?)
 
-    void addItems(List<IQuestionnaireItemComponentAdapter> items);
+    val code: MutableList<IBaseCoding?>?
 
-    List<IBaseCoding> getCode();
+    val text: String?
 
-    String getText();
+    fun setText(text: String?): IQuestionnaireItemComponentAdapter?
 
-    IQuestionnaireItemComponentAdapter setText(String text);
+    val type: String?
 
-    String getType();
+    fun setType(type: String?): IQuestionnaireItemComponentAdapter?
 
-    IQuestionnaireItemComponentAdapter setType(String type);
+    val isGroupItem: Boolean
 
-    boolean isGroupItem();
+    val isChoiceItem: Boolean
 
-    boolean isChoiceItem();
+    val required: Boolean
 
-    boolean getRequired();
+    fun setRequired(required: Boolean): IQuestionnaireItemComponentAdapter?
 
-    IQuestionnaireItemComponentAdapter setRequired(boolean required);
+    val repeats: Boolean
 
-    boolean getRepeats();
+    fun setRepeats(repeats: Boolean): IQuestionnaireItemComponentAdapter?
 
-    IQuestionnaireItemComponentAdapter setRepeats(boolean repeats);
+    fun addAnswerOption(option: ICodingAdapter?)
 
-    void addAnswerOption(ICodingAdapter option);
+    fun hasInitial(): Boolean
 
-    boolean hasInitial();
+    val initial: MutableList<out IBaseDatatype?>?
 
-    List<? extends IBaseDatatype> getInitial();
+    fun newResponseItem(): IQuestionnaireResponseItemComponentAdapter?
 
-    IQuestionnaireResponseItemComponentAdapter newResponseItem();
+    fun newExpression(language: String?, expression: String?): ICompositeType?
 
-    ICompositeType newExpression(String language, String expression);
-
-    default ICompositeType newExpression(String expression) {
-        return newExpression("text/cql-expression", expression);
+    fun newExpression(expression: String?): ICompositeType? {
+        return newExpression("text/cql-expression", expression)
     }
 }

@@ -1,34 +1,32 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.IBaseResource
 
-public interface IParametersAdapter extends IResourceAdapter {
+interface IParametersAdapter : IResourceAdapter {
+    fun hasParameter(): Boolean
 
-    boolean hasParameter();
+    val parameter: MutableList<IParametersParameterComponentAdapter?>?
 
-    List<IParametersParameterComponentAdapter> getParameter();
+    fun hasParameter(name: String?): Boolean
 
-    boolean hasParameter(String name);
+    fun getParameter(name: String?): IParametersParameterComponentAdapter?
 
-    IParametersParameterComponentAdapter getParameter(String name);
+    fun <T : IBaseDatatype> getParameterValues(name: String?): MutableList<T?>?
 
-    <T extends IBaseDatatype> List<T> getParameterValues(String name);
+    fun setParameter(parametersParameterComponents: MutableList<IBaseBackboneElement?>?)
 
-    void setParameter(List<IBaseBackboneElement> parametersParameterComponents);
+    fun addParameter(parameter: IBase?)
 
-    void addParameter(IBase parameter);
+    fun addParameter(name: String?, value: String?)
 
-    void addParameter(String name, String value);
+    fun setParameter(name: String?, value: Int)
 
-    void setParameter(String name, int value);
+    fun addParameter(name: String?, value: IBase?)
 
-    void addParameter(String name, IBase value);
+    fun addParameter(name: String?, resource: IBaseResource?)
 
-    void addParameter(String name, IBaseResource resource);
-
-    IParametersParameterComponentAdapter addParameter();
+    fun addParameter(): IParametersParameterComponentAdapter?
 }

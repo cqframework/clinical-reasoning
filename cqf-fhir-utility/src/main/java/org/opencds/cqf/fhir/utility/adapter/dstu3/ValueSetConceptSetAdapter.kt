@@ -1,51 +1,45 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.ValueSet
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptReferenceAdapter
+import org.opencds.cqf.fhir.utility.adapter.IValueSetConceptSetAdapter
 
-public class ValueSetConceptSetAdapter extends BaseElementAdapter implements IValueSetConceptSetAdapter {
+class ValueSetConceptSetAdapter(conceptSet: IBase) :
+    BaseElementAdapter(FhirVersionEnum.DSTU3, conceptSet), IValueSetConceptSetAdapter {
+    private val conceptSet: ValueSet.ConceptSetComponent
 
-    private final ConceptSetComponent conceptSet;
-
-    public ValueSetConceptSetAdapter(IBase conceptSet) {
-        super(FhirVersionEnum.DSTU3, conceptSet);
-        if (!(conceptSet instanceof ConceptSetComponent)) {
-            throw new IllegalArgumentException(
-                    "element passed as conceptSet argument is not a ConceptSetComponent element");
+    init {
+        require(conceptSet is ValueSet.ConceptSetComponent) {
+            "element passed as conceptSet argument is not a ConceptSetComponent element"
         }
-        this.conceptSet = (ConceptSetComponent) conceptSet;
+        this.conceptSet = conceptSet
     }
 
-    @Override
-    public ConceptSetComponent get() {
-        return conceptSet;
+    override fun get(): ValueSet.ConceptSetComponent {
+        return conceptSet
     }
 
-    @Override
-    public boolean hasConcept() {
-        return get().hasConcept();
+    override fun hasConcept(): Boolean {
+        return get().hasConcept()
     }
 
-    @Override
-    public List<IValueSetConceptReferenceAdapter> getConcept() {
-        return get().getConcept().stream()
-                .map(ValueSetConceptReferenceAdapter::new)
-                .collect(Collectors.toList());
+    override val concept: MutableList<IValueSetConceptReferenceAdapter?>
+        get() {
+            return get()
+                .concept
+                .map { conceptReference -> ValueSetConceptReferenceAdapter(conceptReference) }
+                .toMutableList()
+        }
+
+    override fun hasSystem(): Boolean {
+        return get().hasSystem()
     }
 
-    @Override
-    public boolean hasSystem() {
-        return get().hasSystem();
-    }
-
-    @Override
-    public String getSystem() {
-        return get().getSystem();
-    }
+    override val system: String?
+        get() {
+            return get().system
+        }
 }

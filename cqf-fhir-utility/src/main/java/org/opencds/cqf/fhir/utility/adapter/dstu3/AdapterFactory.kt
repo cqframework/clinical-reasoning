@@ -1,266 +1,206 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.hl7.fhir.dstu3.model.ActivityDefinition;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.GraphDefinition;
-import org.hl7.fhir.dstu3.model.Group;
-import org.hl7.fhir.dstu3.model.ImplementationGuide;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.hl7.fhir.dstu3.model.MetadataResource;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
-import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
-import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.adapter.ElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IAttachmentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDataRequirementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IGraphDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IGroupAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IIdentifierAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IImplementationGuideAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ILibraryAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ITupleAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IUsageContextAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import org.hl7.fhir.dstu3.model.*
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseParameters
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.opencds.cqf.fhir.utility.adapter.*
 
-public class AdapterFactory implements IAdapterFactory {
-
-    @Override
-    public IResourceAdapter createResource(IBaseResource resource) {
-        if (resource instanceof MetadataResource metadataResource) {
-            return createKnowledgeArtifactAdapter(metadataResource);
-        } else if (resource instanceof Endpoint) {
-            return createEndpoint(resource);
-        } else if (resource instanceof Parameters parameters) {
-            return createParameters(parameters);
-        } else if (resource instanceof Group group) {
-            return createGroup(group);
+class AdapterFactory : IAdapterFactory {
+    override fun createResource(resource: IBaseResource): IResourceAdapter {
+        if (resource is MetadataResource) {
+            return createKnowledgeArtifactAdapter(resource)
+        } else if (resource is Endpoint) {
+            return createEndpoint(resource)
+        } else if (resource is Parameters) {
+            return createParameters(resource)
+        } else if (resource is Group) {
+            return createGroup(resource)
         } else {
-            return new ResourceAdapter(resource);
+            return ResourceAdapter(resource as Resource)
         }
     }
 
-    @Override
-    public IAdapter<?> createBase(IBase element) {
-        if (element instanceof IBaseResource resource) {
-            return createResource(resource);
-        } else if (element instanceof QuestionnaireItemComponent item) {
-            return createQuestionnaireItem(item);
-        } else if (element instanceof QuestionnaireResponseItemComponent responseItem) {
-            return createQuestionnaireResponseItem(responseItem);
-        } else if (element instanceof QuestionnaireResponseItemAnswerComponent answer) {
-            return createQuestionnaireResponseItemAnswer(answer);
-        } else if (element instanceof PlanDefinitionActionComponent action) {
-            return createPlanDefinitionAction(action);
-        } else if (element instanceof RequestGroupActionComponent requestAction) {
-            return createRequestAction(requestAction);
-        } else if (element instanceof ParametersParameterComponent parametersParameterComponent) {
-            return createParametersParameter(parametersParameterComponent);
+    override fun createBase(element: IBase): IAdapter<*> {
+        if (element is IBaseResource) {
+            return createResource(element)
+        } else if (element is Questionnaire.QuestionnaireItemComponent) {
+            return createQuestionnaireItem(element)
+        } else if (element is QuestionnaireResponse.QuestionnaireResponseItemComponent) {
+            return createQuestionnaireResponseItem(element)
+        } else if (element is QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent) {
+            return createQuestionnaireResponseItemAnswer(element)
+        } else if (element is PlanDefinition.PlanDefinitionActionComponent) {
+            return createPlanDefinitionAction(element)
+        } else if (element is RequestGroup.RequestGroupActionComponent) {
+            return createRequestAction(element)
+        } else if (element is Parameters.ParametersParameterComponent) {
+            return createParametersParameter(element)
         } else {
-            return new ElementAdapter(FhirVersionEnum.DSTU3, element);
+            return ElementAdapter(FhirVersionEnum.DSTU3, element)
         }
     }
 
-    @Override
-    public IKnowledgeArtifactAdapter createKnowledgeArtifactAdapter(IDomainResource resource) {
-        IKnowledgeArtifactAdapter adapter;
-        if (resource instanceof Library) {
-            adapter = createLibrary(resource);
-        } else if (resource instanceof Measure measure) {
-            adapter = new MeasureAdapter(measure);
-        } else if (resource instanceof ActivityDefinition activityDefinition) {
-            adapter = new ActivityDefinitionAdapter(activityDefinition);
-        } else if (resource instanceof ImplementationGuide implementationGuide) {
-            adapter = new ImplementationGuideAdapter(implementationGuide);
-        } else if (resource instanceof PlanDefinition planDefinition) {
-            adapter = new PlanDefinitionAdapter(planDefinition);
-        } else if (resource instanceof Questionnaire questionnaire) {
-            adapter = new QuestionnaireAdapter(questionnaire);
-        } else if (resource instanceof StructureDefinition structureDefinition) {
-            adapter = new StructureDefinitionAdapter(structureDefinition);
-        } else if (resource instanceof ValueSet valueSet) {
-            adapter = new ValueSetAdapter(valueSet);
-        } else if (resource instanceof GraphDefinition graphDefinition) {
-            adapter = new GraphDefinitionAdapter(graphDefinition);
-        } else if (resource instanceof Group group) {
-            adapter = createGroup(group);
+    override fun createKnowledgeArtifactAdapter(
+        resource: IDomainResource
+    ): IKnowledgeArtifactAdapter {
+        val adapter: IKnowledgeArtifactAdapter
+        if (resource is Library) {
+            adapter = createLibrary(resource)
+        } else if (resource is Measure) {
+            adapter = MeasureAdapter(resource)
+        } else if (resource is ActivityDefinition) {
+            adapter = ActivityDefinitionAdapter(resource)
+        } else if (resource is ImplementationGuide) {
+            adapter = ImplementationGuideAdapter(resource)
+        } else if (resource is PlanDefinition) {
+            adapter = PlanDefinitionAdapter(resource)
+        } else if (resource is Questionnaire) {
+            adapter = QuestionnaireAdapter(resource)
+        } else if (resource is StructureDefinition) {
+            adapter = StructureDefinitionAdapter(resource)
+        } else if (resource is ValueSet) {
+            adapter = ValueSetAdapter(resource)
+        } else if (resource is GraphDefinition) {
+            adapter = GraphDefinitionAdapter(resource)
+        } else if (resource is Group) {
+            adapter = createGroup(resource)
         } else {
-            if (resource instanceof MetadataResource metadataResource) {
-                adapter = new KnowledgeArtifactAdapter(metadataResource);
+            if (resource is MetadataResource) {
+                adapter = KnowledgeArtifactAdapter(resource)
             } else {
-                throw new UnprocessableEntityException(
-                        "Resource must be instance of %s".formatted(MetadataResource.class.getName()));
+                throw UnprocessableEntityException(
+                    "Resource must be instance of ${MetadataResource::class.java.name}"
+                )
             }
         }
-        return adapter;
+        return adapter
     }
 
-    @Override
-    public ILibraryAdapter createLibrary(IBaseResource library) {
-        return new LibraryAdapter((IDomainResource) library);
+    override fun createLibrary(library: IBaseResource): ILibraryAdapter {
+        return LibraryAdapter(library as IDomainResource)
     }
 
-    @Override
-    public IGroupAdapter createGroup(IBaseResource group) {
-        throw new UnsupportedOperationException("Groups a knowledge artifact are not supported in DSTU3 at this time.");
+    override fun createGroup(group: IBaseResource): IGroupAdapter {
+        throw UnsupportedOperationException(
+            "Groups a knowledge artifact are not supported in DSTU3 at this time."
+        )
     }
 
-    @Override
-    public IAttachmentAdapter createAttachment(IBase attachment) {
-        return new AttachmentAdapter(attachment);
+    override fun createAttachment(attachment: IBase): IAttachmentAdapter {
+        return AttachmentAdapter(attachment)
     }
 
-    @Override
-    public IParametersAdapter createParameters(IBaseParameters parameters) {
-        return new ParametersAdapter(parameters);
+    override fun createParameters(parameters: IBaseParameters): IParametersAdapter {
+        return ParametersAdapter(parameters)
     }
 
-    @Override
-    public IParametersParameterComponentAdapter createParametersParameter(IBase parametersParametersComponent) {
-        return new ParametersParameterComponentAdapter(parametersParametersComponent);
+    override fun createParametersParameter(
+        parametersParametersComponent: IBase
+    ): IParametersParameterComponentAdapter {
+        return ParametersParameterComponentAdapter(parametersParametersComponent)
     }
 
-    @Override
-    public IEndpointAdapter createEndpoint(IBaseResource endpoint) {
-        return new EndpointAdapter(endpoint);
+    override fun createEndpoint(endpoint: IBaseResource): IEndpointAdapter {
+        return EndpointAdapter(endpoint)
     }
 
-    @Override
-    public ICodeableConceptAdapter createCodeableConcept(IBase codeableConcept) {
-        return new CodeableConceptAdapter(codeableConcept);
+    override fun createCodeableConcept(codeableConcept: IBase): ICodeableConceptAdapter {
+        return CodeableConceptAdapter(codeableConcept)
     }
 
-    @Override
-    public ICodingAdapter createCoding(IBase coding) {
-        return new CodingAdapter(coding);
+    override fun createCoding(coding: IBase): ICodingAdapter {
+        return CodingAdapter(coding)
     }
 
-    @Override
-    public IIdentifierAdapter createIdentifier(IBase identifier) {
-        return new IdentifierAdapter(identifier);
+    override fun createIdentifier(identifier: IBase): IIdentifierAdapter {
+        return IdentifierAdapter(identifier)
     }
 
-    @Override
-    public IElementDefinitionAdapter createElementDefinition(IBase element) {
-        return new ElementDefinitionAdapter(element);
+    override fun createElementDefinition(element: IBase): IElementDefinitionAdapter {
+        return ElementDefinitionAdapter(element)
     }
 
-    @Override
-    public IActivityDefinitionAdapter createActivityDefinition(IBaseResource activityDefinition) {
-        return new ActivityDefinitionAdapter((IDomainResource) activityDefinition);
+    override fun createActivityDefinition(
+        activityDefinition: IBaseResource
+    ): IActivityDefinitionAdapter {
+        return ActivityDefinitionAdapter(activityDefinition as IDomainResource)
     }
 
-    @Override
-    public IPlanDefinitionAdapter createPlanDefinition(IBaseResource planDefinition) {
-        return new PlanDefinitionAdapter((IDomainResource) planDefinition);
+    override fun createPlanDefinition(planDefinition: IBaseResource): IPlanDefinitionAdapter {
+        return PlanDefinitionAdapter(planDefinition as IDomainResource)
     }
 
-    @Override
-    public IPlanDefinitionActionAdapter createPlanDefinitionAction(IBase action) {
-        return new PlanDefinitionActionAdapter(action);
+    override fun createPlanDefinitionAction(action: IBase): IPlanDefinitionActionAdapter {
+        return PlanDefinitionActionAdapter(action)
     }
 
-    @Override
-    public IRequestActionAdapter createRequestAction(IBase action) {
-        return new RequestActionAdapter(action);
+    override fun createRequestAction(action: IBase): IRequestActionAdapter {
+        return RequestActionAdapter(action)
     }
 
-    @Override
-    public IDataRequirementAdapter createDataRequirement(IBase dataRequirement) {
-        return new DataRequirementAdapter(dataRequirement);
+    override fun createDataRequirement(dataRequirement: IBase): IDataRequirementAdapter {
+        return DataRequirementAdapter(dataRequirement)
     }
 
-    @Override
-    public IQuestionnaireAdapter createQuestionnaire(IBaseResource questionnaire) {
-        return new QuestionnaireAdapter((IDomainResource) questionnaire);
+    override fun createQuestionnaire(questionnaire: IBaseResource): IQuestionnaireAdapter {
+        return QuestionnaireAdapter(questionnaire as IDomainResource)
     }
 
-    @Override
-    public IQuestionnaireItemComponentAdapter createQuestionnaireItem() {
-        return new QuestionnaireItemComponentAdapter(new QuestionnaireItemComponent());
+    override fun createQuestionnaireItem(): IQuestionnaireItemComponentAdapter {
+        return QuestionnaireItemComponentAdapter(Questionnaire.QuestionnaireItemComponent())
     }
 
-    @Override
-    public IQuestionnaireItemComponentAdapter createQuestionnaireItem(IBase item) {
-        return new QuestionnaireItemComponentAdapter(item);
+    override fun createQuestionnaireItem(item: IBase): IQuestionnaireItemComponentAdapter {
+        return QuestionnaireItemComponentAdapter(item)
     }
 
-    @Override
-    public IQuestionnaireResponseAdapter createQuestionnaireResponse(IBaseResource questionnaireResponse) {
-        return new QuestionnaireResponseAdapter((IDomainResource) questionnaireResponse);
+    override fun createQuestionnaireResponse(
+        questionnaireResponse: IBaseResource
+    ): IQuestionnaireResponseAdapter {
+        return QuestionnaireResponseAdapter(questionnaireResponse as IDomainResource)
     }
 
-    @Override
-    public IQuestionnaireResponseItemComponentAdapter createQuestionnaireResponseItem(IBase item) {
-        return new QuestionnaireResponseItemComponentAdapter(item);
+    override fun createQuestionnaireResponseItem(
+        item: IBase
+    ): IQuestionnaireResponseItemComponentAdapter {
+        return QuestionnaireResponseItemComponentAdapter(item)
     }
 
-    @Override
-    public IQuestionnaireResponseItemAnswerComponentAdapter createQuestionnaireResponseItemAnswer(IBase answer) {
-        return new QuestionnaireResponseItemAnswerComponentAdapter(answer);
+    override fun createQuestionnaireResponseItemAnswer(
+        answer: IBase
+    ): IQuestionnaireResponseItemAnswerComponentAdapter {
+        return QuestionnaireResponseItemAnswerComponentAdapter(answer)
     }
 
-    @Override
-    public IUsageContextAdapter createUsageContext(IBase usageContext) {
-        return new UsageContextAdapter(usageContext);
+    override fun createUsageContext(usageContext: IBase): IUsageContextAdapter {
+        return UsageContextAdapter(usageContext)
     }
 
-    @Override
-    public IValueSetAdapter createValueSet(IBaseResource valueSet) {
-        return new ValueSetAdapter((IDomainResource) valueSet);
+    override fun createValueSet(valueSet: IBaseResource): IValueSetAdapter {
+        return ValueSetAdapter(valueSet as IDomainResource)
     }
 
-    @Override
-    public IGraphDefinitionAdapter createGraphDefinition(IBaseResource graphDefinition) {
-        return new GraphDefinitionAdapter((IDomainResource) graphDefinition);
+    override fun createGraphDefinition(graphDefinition: IBaseResource): IGraphDefinitionAdapter {
+        return GraphDefinitionAdapter(graphDefinition as IDomainResource)
     }
 
-    @Override
-    public IStructureDefinitionAdapter createStructureDefinition(IBaseResource structureDefinition) {
-        return new StructureDefinitionAdapter((IDomainResource) structureDefinition);
+    override fun createStructureDefinition(
+        structureDefinition: IBaseResource
+    ): IStructureDefinitionAdapter {
+        return StructureDefinitionAdapter(structureDefinition as IDomainResource)
     }
 
-    @Override
-    public IImplementationGuideAdapter createImplementationGuide(IBaseResource implementationGuide) {
-        return new ImplementationGuideAdapter((IDomainResource) implementationGuide);
+    override fun createImplementationGuide(
+        implementationGuide: IBaseResource
+    ): IImplementationGuideAdapter {
+        return ImplementationGuideAdapter(implementationGuide as IDomainResource)
     }
 
-    @Override
-    public ITupleAdapter createTuple(IBase tuple) {
-        throw new UnprocessableEntityException("No FHIR type Tuple exists in version DSTU3");
+    override fun createTuple(tuple: IBase): ITupleAdapter {
+        throw UnprocessableEntityException("No FHIR type Tuple exists in version DSTU3")
     }
 }

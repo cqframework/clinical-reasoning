@@ -1,102 +1,101 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior;
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.Constants.CqfApplicabilityBehavior
 
-public interface IPlanDefinitionActionAdapter extends IAdapter<IBase> {
-    boolean hasId();
+interface IPlanDefinitionActionAdapter : IAdapter<IBase> {
+    fun hasId(): Boolean
 
-    String getId();
+    val id: String?
 
-    boolean hasTitle();
+    fun hasTitle(): Boolean
 
-    String getTitle();
+    val title: String?
 
-    boolean hasDescription();
+    fun hasDescription(): Boolean
 
-    String getDescription();
+    val description: String?
 
-    boolean hasTextEquivalent();
+    fun hasTextEquivalent(): Boolean
 
-    String getTextEquivalent();
+    val textEquivalent: String?
 
-    boolean hasPriority();
+    fun hasPriority(): Boolean
 
-    String getPriority();
+    val priority: String?
 
-    boolean hasCode();
+    fun hasCode(): Boolean
 
-    ICodeableConceptAdapter getCode();
+    val code: ICodeableConceptAdapter?
 
-    boolean hasDocumentation();
+    fun hasDocumentation(): Boolean
 
-    <T extends ICompositeType & IBaseHasExtensions> List<T> getDocumentation();
+    fun <T> getDocumentation(): MutableList<T?>? where T : ICompositeType, T : IBaseHasExtensions
 
-    boolean hasTrigger();
+    fun hasTrigger(): Boolean
 
-    List<ITriggerDefinitionAdapter> getTrigger();
+    val trigger: MutableList<ITriggerDefinitionAdapter?>?
 
-    List<String> getTriggerType();
+    val triggerType: MutableList<String?>?
 
-    boolean hasCondition();
+    fun hasCondition(): Boolean
 
-    <T extends IBaseBackboneElement> List<T> getCondition();
+    fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>?
 
-    boolean hasInput();
+    fun hasInput(): Boolean
 
-    List<IDataRequirementAdapter> getInputDataRequirement();
+    val inputDataRequirement: MutableList<IDataRequirementAdapter?>?
 
-    boolean hasRelatedAction();
+    fun hasRelatedAction(): Boolean
 
-    <T extends IBaseBackboneElement> List<T> getRelatedAction();
+    fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>?
 
-    boolean hasTiming();
+    fun hasTiming(): Boolean
 
-    IBaseDatatype getTiming();
+    val timing: IBaseDatatype?
 
-    boolean hasType();
+    fun hasType(): Boolean
 
-    ICodeableConceptAdapter getType();
+    val type: ICodeableConceptAdapter?
 
-    // These will need to be overridden starting with R6 when this is introduced as an element on action
-    default boolean hasApplicabilityBehavior() {
-        return hasExtension(Constants.CQF_APPLICABILITY_BEHAVIOR);
+    // These will need to be overridden starting with R6 when this is introduced as an element on
+    // action
+    fun hasApplicabilityBehavior(): Boolean {
+        return hasExtension(Constants.CQF_APPLICABILITY_BEHAVIOR)
     }
 
-    // These will need to be overridden starting with R6 when this is introduced as an element on action
-    default CqfApplicabilityBehavior getApplicabilityBehavior() {
-        var extension = getExtensionByUrl(Constants.CQF_APPLICABILITY_BEHAVIOR);
-        if (extension != null && extension.getValue() instanceof IPrimitiveType<?> primitiveType) {
-            try {
-                return CqfApplicabilityBehavior.valueOf(
-                        primitiveType.getValueAsString().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(
-                        "Encountered invalid value for applicabilityBehavior extension %s.  Expected `all` or `any`."
-                                .formatted(primitiveType.getValueAsString()));
+    val applicabilityBehavior: Constants.CqfApplicabilityBehavior
+        // These will need to be overridden starting with R6 when this is introduced as an element
+        // on action
+        get() {
+            val extension =
+                getExtensionByUrl<IBaseExtension<*, *>>(Constants.CQF_APPLICABILITY_BEHAVIOR)
+            if (extension != null && extension.value is IPrimitiveType<*>) {
+                try {
+                    return CqfApplicabilityBehavior.valueOf(
+                        (extension.value as IPrimitiveType<*>).valueAsString.uppercase()
+                    )
+                } catch (e: IllegalArgumentException) {
+                    throw IllegalArgumentException(
+                        "Encountered invalid value for applicabilityBehavior extension ${(extension.value as IPrimitiveType<*>).valueAsString}.  Expected `all` or `any`."
+                    )
+                }
             }
+            return CqfApplicabilityBehavior.ALL
         }
-        return CqfApplicabilityBehavior.ALL;
-    }
 
-    boolean hasSelectionBehavior();
+    fun hasSelectionBehavior(): Boolean
 
-    String getSelectionBehavior();
+    val selectionBehavior: String?
 
-    boolean hasDefinition();
+    fun hasDefinition(): Boolean
 
-    IPrimitiveType<String> getDefinition();
+    val definition: IPrimitiveType<String?>?
 
-    boolean hasAction();
+    fun hasAction(): Boolean
 
-    List<IPlanDefinitionActionAdapter> getAction();
+    val action: MutableList<IPlanDefinitionActionAdapter?>?
 
-    IRequestActionAdapter newRequestAction();
+    fun newRequestAction(): IRequestActionAdapter?
 }

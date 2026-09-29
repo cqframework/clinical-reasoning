@@ -1,46 +1,41 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.dstu3.model.TriggerDefinition;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ITriggerDefinitionAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.TriggerDefinition
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ITriggerDefinitionAdapter
 
-public class TriggerDefinitionAdapter extends BaseElementAdapter implements ITriggerDefinitionAdapter {
+class TriggerDefinitionAdapter(triggerDefinition: IBase) :
+    BaseElementAdapter(FhirVersionEnum.DSTU3, triggerDefinition), ITriggerDefinitionAdapter {
+    private val triggerDefinition: TriggerDefinition
 
-    private final TriggerDefinition triggerDefinition;
-
-    public TriggerDefinitionAdapter(IBase triggerDefinition) {
-        super(FhirVersionEnum.DSTU3, triggerDefinition);
-        if (!(triggerDefinition instanceof TriggerDefinition)) {
-            throw new IllegalArgumentException(
-                    "object passed as triggerDefinition argument is not a TriggerDefinition data type");
+    init {
+        require(triggerDefinition is TriggerDefinition) {
+            "object passed as triggerDefinition argument is not a TriggerDefinition data type"
         }
-        this.triggerDefinition = (TriggerDefinition) triggerDefinition;
+        this.triggerDefinition = triggerDefinition
     }
 
-    @Override
-    public TriggerDefinition get() {
-        return triggerDefinition;
+    override fun get(): TriggerDefinition {
+        return triggerDefinition
     }
 
-    @Override
-    public boolean hasName() {
-        return get().hasEventName();
+    override fun hasName(): Boolean {
+        return get().hasEventName()
     }
 
-    @Override
-    public String getName() {
-        return get().getEventName();
+    override val name: String?
+        get() {
+            return get().getEventName()
+        }
+
+    override fun hasType(): Boolean {
+        return get().hasType()
     }
 
-    @Override
-    public boolean hasType() {
-        return get().hasType();
-    }
-
-    @Override
-    public String getType() {
-        return get().getType().toCode();
-    }
+    override val type: String?
+        get() {
+            return get().type.toCode()
+        }
 }

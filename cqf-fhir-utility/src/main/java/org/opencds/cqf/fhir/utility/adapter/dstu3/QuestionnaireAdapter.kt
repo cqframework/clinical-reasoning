@@ -1,152 +1,158 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Questionnaire;
-import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
+import org.hl7.fhir.dstu3.model.Extension
+import org.hl7.fhir.dstu3.model.Questionnaire
+import org.hl7.fhir.dstu3.model.Reference
+import org.hl7.fhir.dstu3.model.UriType
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter
 
-public class QuestionnaireAdapter extends KnowledgeArtifactAdapter implements IQuestionnaireAdapter {
-
-    public QuestionnaireAdapter(IDomainResource questionnaire) {
-        super(questionnaire);
-
-        if (!(questionnaire instanceof Questionnaire)) {
-            throw new IllegalArgumentException(
-                    "resource passed as questionnaire argument is not a Questionnaire resource");
+class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
+    constructor(questionnaire: IDomainResource) : super(questionnaire) {
+        require(questionnaire is Questionnaire) {
+            "resource passed as questionnaire argument is not a Questionnaire resource"
         }
     }
 
-    public QuestionnaireAdapter(Questionnaire questionnaire) {
-        super(questionnaire);
+    constructor(questionnaire: Questionnaire) : super(questionnaire)
+
+    protected val questionnaire: Questionnaire
+        get() = resource as Questionnaire
+
+    override fun get(): Questionnaire {
+        return resource as Questionnaire
     }
 
-    protected Questionnaire getQuestionnaire() {
-        return (Questionnaire) resource;
-    }
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-    @Override
-    public Questionnaire get() {
-        return (Questionnaire) resource;
-    }
+            /*
+               derivedFrom
+               extension[cqf-library]
+               extension[launchContext]
+               extension[variable].reference
+               item[]..definition // NOTE: This is not a simple canonical, it will have a fragment to identify the specific element
+               item[]..answerValueSet
+               item[]..extension[itemMedia]
+               item[]..extension[itemAnswerMedia]
+               item[]..extension[unitValueSet]
+               item[]..extension[referenceProfile]
+               item[]..extension[candidateExpression].reference
+               item[]..extension[lookupQuestionnaire]
+               item[]..extension[variable].reference
+               item[]..extension[initialExpression].reference
+               item[]..extension[calculatedExpression].reference
+               item[]..extension[cqf-calculatedValue].reference
+               item[]..extension[cqf-expression].reference
+               item[]..extension[sdc-questionnaire-subQuestionnaire]
+            */
 
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
-
-        /*
-           derivedFrom
-           extension[cqf-library]
-           extension[launchContext]
-           extension[variable].reference
-           item[]..definition // NOTE: This is not a simple canonical, it will have a fragment to identify the specific element
-           item[]..answerValueSet
-           item[]..extension[itemMedia]
-           item[]..extension[itemAnswerMedia]
-           item[]..extension[unitValueSet]
-           item[]..extension[referenceProfile]
-           item[]..extension[candidateExpression].reference
-           item[]..extension[lookupQuestionnaire]
-           item[]..extension[variable].reference
-           item[]..extension[initialExpression].reference
-           item[]..extension[calculatedExpression].reference
-           item[]..extension[cqf-calculatedValue].reference
-           item[]..extension[cqf-expression].reference
-           item[]..extension[sdc-questionnaire-subQuestionnaire]
-        */
-
-        // Not looking at launchContext as it references only base spec profiles and these are included implicitly as
-        // dependencies per the CRMI IG
-
-        getQuestionnaire()
-                .getExtensionsByUrl(Constants.CQIF_LIBRARY)
-                .forEach(libraryExt -> references.add(new DependencyInfo(
+            // Not looking at launchContext as it references only base spec profiles and these are
+            // included implicitly as
+            // dependencies per the CRMI IG
+            this.questionnaire.getExtensionsByUrl(Constants.CQIF_LIBRARY).forEach {
+                libraryExt: Extension? ->
+                references.add(
+                    DependencyInfo(
                         referenceSource,
-                        ((Reference) libraryExt.getValue()).getReference(),
-                        libraryExt.getExtension(),
-                        reference -> libraryExt.setValue(new Reference(reference)))));
+                        (libraryExt!!.value as Reference).reference,
+                        libraryExt.extension,
+                        { reference -> libraryExt.setValue(Reference(reference)) },
+                    )
+                )
+            }
 
-        // Expression type does not exist in Stu3.
+            // Expression type does not exist in Stu3.
+            this.questionnaire.item.forEach { item ->
+                getDependenciesOfItem(item!!, references, referenceSource)
+            }
 
-        getQuestionnaire().getItem().forEach(item -> getDependenciesOfItem(item, references, referenceSource));
+            return references
+        }
 
-        return references;
-    }
-
-    private void getDependenciesOfItem(
-            QuestionnaireItemComponent item, List<IDependencyInfo> references, String referenceSource) {
+    private fun getDependenciesOfItem(
+        item: Questionnaire.QuestionnaireItemComponent,
+        references: MutableList<IDependencyInfo?>,
+        referenceSource: String?,
+    ) {
         if (item.hasDefinition()) {
-            var definition = item.getDefinition().split("#")[0];
-            // Not passing an updateReferenceConsumer here because the reference is not a simple canonical
-            references.add(new DependencyInfo(referenceSource, definition, item.getExtension(), null));
+            val definition = item.definition.split("#")[0]
+            // Not passing an updateReferenceConsumer here because the reference is not a simple
+            // canonical
+            references.add(DependencyInfo(referenceSource, definition, item.extension, null))
         }
         if (item.hasOptions()) {
-            references.add(new DependencyInfo(
+            references.add(
+                DependencyInfo(
                     referenceSource,
-                    item.getOptions().getReference(),
-                    item.getExtension(),
-                    reference -> item.setOptions(new Reference(reference))));
+                    item.getOptions().reference,
+                    item.extension,
+                    { reference -> item.setOptions(Reference(reference)) },
+                )
+            )
         }
-        item.getExtension().stream()
-                .filter(e -> REFERENCE_EXTENSIONS.contains(e.getUrl()))
-                .forEach(referenceExt -> references.add(new DependencyInfo(
+        item.extension
+            .filter { e -> REFERENCE_EXTENSIONS.contains(e!!.url) }
+            .forEach { referenceExt ->
+                references.add(
+                    DependencyInfo(
                         referenceSource,
-                        ((UriType) referenceExt.getValue()).asStringValue(),
-                        referenceExt.getExtension(),
-                        reference -> referenceExt.setValue(new UriType(reference)))));
-        item.getItem().forEach(childItem -> getDependenciesOfItem(childItem, references, referenceSource));
+                        (referenceExt!!.value as UriType).asStringValue(),
+                        referenceExt.extension,
+                        { reference -> referenceExt.setValue(UriType(reference)) },
+                    )
+                )
+            }
+        item.item.forEach({ childItem ->
+            getDependenciesOfItem(childItem!!, references, referenceSource)
+        })
     }
 
-    @Override
-    public boolean hasItem() {
-        return getQuestionnaire().hasItem();
+    override fun hasItem(): Boolean {
+        return this.questionnaire.hasItem()
     }
 
-    @Override
-    public List<IQuestionnaireItemComponentAdapter> getItem() {
-        return getQuestionnaire().getItem().stream()
-                .map(adapterFactory::createQuestionnaireItem)
-                .toList();
-    }
+    override var item: MutableList<IQuestionnaireItemComponentAdapter?>?
+        get() {
+            return this.questionnaire.item
+                .map { questionnaireItem ->
+                    adapterFactory.createQuestionnaireItem(questionnaireItem)
+                }
+                .toMutableList()
+        }
+        set(items) {
+            this.questionnaire.setItem(
+                items!!
+                    .map { obj -> obj!!.get() }
+                    .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
+                    .toMutableList()
+            )
+        }
 
-    @Override
-    public void setItem(List<IQuestionnaireItemComponentAdapter> items) {
-        getQuestionnaire()
-                .setItem(items.stream()
-                        .map(IAdapter::get)
-                        .map(QuestionnaireItemComponent.class::cast)
-                        .collect(Collectors.toList()));
-    }
-
-    @Override
-    public void addItem(IBaseBackboneElement item) {
-        if (item instanceof QuestionnaireItemComponent itemComponent) {
-            getQuestionnaire().addItem(itemComponent);
+    override fun addItem(item: IBaseBackboneElement?) {
+        if (item is Questionnaire.QuestionnaireItemComponent) {
+            this.questionnaire.addItem(item)
         }
     }
 
-    @Override
-    public void addItem(IQuestionnaireItemComponentAdapter item) {
-        getQuestionnaire().addItem((QuestionnaireItemComponent) item.get());
+    override fun addItem(item: IQuestionnaireItemComponentAdapter?) {
+        this.questionnaire.addItem(item!!.get() as Questionnaire.QuestionnaireItemComponent?)
     }
 
-    @Override
-    public void addItems(List<IQuestionnaireItemComponentAdapter> items) {
-        items.stream()
-                .map(IAdapter::get)
-                .map(QuestionnaireItemComponent.class::cast)
-                .forEach(item -> getQuestionnaire().addItem(item));
+    override fun addItems(items: MutableList<IQuestionnaireItemComponentAdapter?>?) {
+        items!!
+            .map { obj -> obj!!.get() }
+            .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
+            .forEach { item: Questionnaire.QuestionnaireItemComponent? ->
+                this.questionnaire.addItem(item)
+            }
     }
 }

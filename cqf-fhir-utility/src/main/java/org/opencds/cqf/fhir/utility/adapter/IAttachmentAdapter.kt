@@ -1,20 +1,13 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.ICompositeType
 
-/**
- * This interface exposes common functionality across all FHIR Attachment versions.
- */
-public interface IAttachmentAdapter extends IAdapter<IBase> {
+/** This interface exposes common functionality across all FHIR Attachment versions. */
+interface IAttachmentAdapter : IAdapter<IBase> {
+    override fun get(): ICompositeType?
 
-    ICompositeType get();
+    var contentType: String?
 
-    String getContentType();
-
-    void setContentType(String contentType);
-
-    byte[] getData();
-
-    void setData(byte[] data);
+    var data: ByteArray?
 }

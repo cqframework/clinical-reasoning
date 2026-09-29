@@ -1,163 +1,134 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r4
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Tuple;
-import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import java.util.*
+import org.hl7.fhir.instance.model.api.*
+import org.hl7.fhir.r4.model.*
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 
-class ParametersParameterComponentAdapter extends BaseElementAdapter implements IParametersParameterComponentAdapter {
+internal class ParametersParameterComponentAdapter(parametersParameterComponent: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R4, parametersParameterComponent),
+    IParametersParameterComponentAdapter {
+    protected val parametersParameterComponent: Parameters.ParametersParameterComponent
 
-    private final Parameters.ParametersParameterComponent parametersParameterComponent;
-
-    protected Parameters.ParametersParameterComponent getParametersParameterComponent() {
-        return this.parametersParameterComponent;
-    }
-
-    public ParametersParameterComponentAdapter(IBase parametersParameterComponent) {
-        super(FhirVersionEnum.R4, parametersParameterComponent);
-        if (!parametersParameterComponent.fhirType().equals("Parameters.parameter")) {
-            throw new IllegalArgumentException(
-                    "element passed as parametersParameterComponent argument is not a ParametersParameterComponent Element");
+    init {
+        require(parametersParameterComponent.fhirType() == "Parameters.parameter") {
+            "element passed as parametersParameterComponent argument is not a ParametersParameterComponent Element"
         }
 
-        this.parametersParameterComponent = (ParametersParameterComponent) parametersParameterComponent;
+        this.parametersParameterComponent =
+            parametersParameterComponent as Parameters.ParametersParameterComponent
     }
 
-    @Override
-    public IBaseBackboneElement get() {
-        return this.parametersParameterComponent;
+    override fun get(): IBaseBackboneElement {
+        return this.parametersParameterComponent
     }
 
-    @Override
-    public String getName() {
-        return this.getParametersParameterComponent().getName();
+    override val name: String?
+        get() {
+            return this.parametersParameterComponent.name
+        }
+
+    override fun setName(name: String?): IParametersParameterComponentAdapter {
+        this.parametersParameterComponent.setName(name)
+        return this
     }
 
-    @Override
-    public IParametersParameterComponentAdapter setName(String name) {
-        this.getParametersParameterComponent().setName(name);
-        return this;
+    override fun hasName(): Boolean {
+        return this.parametersParameterComponent.hasName()
     }
 
-    @Override
-    public boolean hasName() {
-        return this.getParametersParameterComponent().hasName();
+    override val part: MutableList<IParametersParameterComponentAdapter?>
+        get() {
+            return this.parametersParameterComponent.part
+                .map { parametersParameterComponent ->
+                    adapterFactory.createParametersParameter(parametersParameterComponent)
+                }
+                .toMutableList()
+        }
+
+    override fun getPartValues(name: String?): MutableList<IBase?> {
+        return this.parametersParameterComponent.part
+            .filter { p -> p!!.name == name }
+            .map { p -> if (p!!.hasResource()) p.resource else p.value }
+            .filter { obj -> Objects.nonNull(obj) }
+            .map { obj -> IBase::class.java.cast(obj) }
+            .toMutableList()
     }
 
-    @Override
-    public List<IParametersParameterComponentAdapter> getPart() {
-        return this.getParametersParameterComponent().getPart().stream()
-                .map(adapterFactory::createParametersParameter)
-                .toList();
+    override fun setPart(
+        parametersParameterComponents: MutableList<IBaseBackboneElement?>?
+    ): IParametersParameterComponentAdapter {
+        this.parametersParameterComponent.setPart(
+            if (parametersParameterComponents == null) null
+            else
+                parametersParameterComponents
+                    .map { x -> x as Parameters.ParametersParameterComponent? }
+                    .toMutableList()
+        )
+        return this
     }
 
-    @Override
-    public List<IBase> getPartValues(String name) {
-        return this.getParametersParameterComponent().getPart().stream()
-                .filter(p -> p.getName().equals(name))
-                .map(p -> p.hasResource() ? p.getResource() : p.getValue())
-                .filter(Objects::nonNull)
-                .map(IBase.class::cast)
-                .toList();
+    override fun addPart(): IParametersParameterComponentAdapter {
+        return adapterFactory.createParametersParameter(this.parametersParameterComponent.addPart())
     }
 
-    @Override
-    public IParametersParameterComponentAdapter setPart(List<IBaseBackboneElement> parametersParameterComponents) {
-        this.getParametersParameterComponent()
-                .setPart(
-                        parametersParameterComponents == null
-                                ? null
-                                : parametersParameterComponents.stream()
-                                        .map(x -> (ParametersParameterComponent) x)
-                                        .collect(Collectors.toList()));
-        return this;
+    override fun hasPart(): Boolean {
+        return this.parametersParameterComponent.hasPart()
     }
 
-    @Override
-    public IParametersParameterComponentAdapter addPart() {
-        return adapterFactory.createParametersParameter(
-                this.getParametersParameterComponent().addPart());
-    }
-
-    @Override
-    public boolean hasPart() {
-        return this.getParametersParameterComponent().hasPart();
-    }
-
-    @Override
-    public boolean hasPart(String name) {
-        for (var part : getPart()) {
-            if (name.equals(part.getName())) {
-                return true;
+    override fun hasPart(name: String?): Boolean {
+        for (part in this.part) {
+            if (name == part!!.name) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
-    @Override
-    public boolean hasResource() {
-        return this.getParametersParameterComponent().hasResource();
+    override fun hasResource(): Boolean {
+        return this.parametersParameterComponent.hasResource()
     }
 
-    @Override
-    public IBaseResource getResource() {
-        return this.getParametersParameterComponent().getResource();
+    override val resource: IBaseResource?
+        get() = this.parametersParameterComponent.resource
+
+    override fun setResource(resource: IBaseResource?): IParametersParameterComponentAdapter {
+        this.parametersParameterComponent.setResource(resource as Resource?)
+        return this
     }
 
-    @Override
-    public IParametersParameterComponentAdapter setResource(IBaseResource resource) {
-        this.getParametersParameterComponent().setResource((Resource) resource);
-        return this;
+    override fun hasValue(): Boolean {
+        return this.parametersParameterComponent.hasValue()
     }
 
-    @Override
-    public boolean hasValue() {
-        return this.getParametersParameterComponent().hasValue();
+    override fun hasPrimitiveValue(): Boolean {
+        return hasValue() && this.value is IPrimitiveType<*>
     }
 
-    @Override
-    public boolean hasPrimitiveValue() {
-        return hasValue() && getValue() instanceof IPrimitiveType<?>;
+    override fun setValue(value: IBaseDatatype?): IParametersParameterComponentAdapter {
+        this.parametersParameterComponent.setValue(value as Type?)
+        return this
     }
 
-    @Override
-    public IParametersParameterComponentAdapter setValue(IBaseDatatype value) {
-        this.getParametersParameterComponent().setValue((Type) value);
-        return this;
-    }
+    override val value: IBaseDatatype?
+        get() {
+            return this.parametersParameterComponent.value
+        }
 
-    @Override
-    public IBaseDatatype getValue() {
-        return this.getParametersParameterComponent().getValue();
-    }
+    override val primitiveValue: String?
+        get() {
+            return if (hasPrimitiveValue()) this.parametersParameterComponent.value.primitiveValue()
+            else null
+        }
 
-    @Override
-    public String getPrimitiveValue() {
-        return hasPrimitiveValue()
-                ? this.getParametersParameterComponent().getValue().primitiveValue()
-                : null;
-    }
-
-    @Override
-    public IBase newTupleWithParts() {
-        var tuple = new Tuple();
-        getPart().forEach(p -> {
-            var value = p.getPartValue(p);
-            tuple.addProperty(p.getName(), value == null ? null : List.of((Base) value));
-        });
-        return tuple;
+    override fun newTupleWithParts(): IBase {
+        val tuple = Tuple()
+        this.part.forEach { p ->
+            val value = p!!.getPartValue(p)
+            tuple.addProperty(p.name, if (value == null) null else mutableListOf(value as Base))
+        }
+        return tuple
     }
 }

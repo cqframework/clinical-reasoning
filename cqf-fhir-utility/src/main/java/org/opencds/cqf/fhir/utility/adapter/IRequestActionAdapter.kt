@@ -1,96 +1,92 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.*
 
-public interface IRequestActionAdapter extends IAdapter<IBase> {
+interface IRequestActionAdapter : IAdapter<IBase> {
 
-    String getId();
+    val id: String?
 
-    IRequestActionAdapter setId(String id);
+    fun setId(id: String?): IRequestActionAdapter?
 
-    boolean hasTitle();
+    fun hasTitle(): Boolean
 
-    String getTitle();
+    val title: String?
 
-    IRequestActionAdapter setTitle(String title);
+    fun setTitle(title: String?): IRequestActionAdapter?
 
-    boolean hasDescription();
+    fun hasDescription(): Boolean
 
-    String getDescription();
+    val description: String?
 
-    IRequestActionAdapter setDescription(String description);
+    fun setDescription(description: String?): IRequestActionAdapter?
 
-    boolean hasTextEquivalent();
+    fun hasTextEquivalent(): Boolean
 
-    String getTextEquivalent();
+    val textEquivalent: String?
 
-    IRequestActionAdapter setTextEquivalent(String text);
+    fun setTextEquivalent(text: String?): IRequestActionAdapter?
 
-    boolean hasPriority();
+    fun hasPriority(): Boolean
 
-    String getPriority();
+    val priority: String?
 
-    IRequestActionAdapter setPriority(String priority);
+    fun setPriority(priority: String?): IRequestActionAdapter?
 
-    boolean hasCode();
+    fun hasCode(): Boolean
 
-    ICodeableConceptAdapter getCode();
+    val code: ICodeableConceptAdapter?
 
-    IRequestActionAdapter setCode(ICodeableConceptAdapter code);
+    fun setCode(code: ICodeableConceptAdapter?): IRequestActionAdapter?
 
-    boolean hasDocumentation();
+    fun hasDocumentation(): Boolean
 
-    <T extends ICompositeType & IBaseHasExtensions> List<T> getDocumentation();
+    fun <T> getDocumentation(): MutableList<T?>? where T : ICompositeType, T : IBaseHasExtensions
 
-    <T extends ICompositeType & IBaseHasExtensions> IRequestActionAdapter setDocumentation(List<T> documentation);
+    fun <T> setDocumentation(documentation: MutableList<T?>?): IRequestActionAdapter? where
+    T : ICompositeType,
+    T : IBaseHasExtensions
 
-    boolean hasCondition();
+    fun hasCondition(): Boolean
 
-    <T extends IBaseBackboneElement> List<T> getCondition();
+    fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>?
 
-    void addCondition(IBaseBackboneElement condition);
+    fun addCondition(condition: IBaseBackboneElement?)
 
-    boolean hasRelatedAction();
+    fun hasRelatedAction(): Boolean
 
-    <T extends IBaseBackboneElement> List<T> getRelatedAction();
+    fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>?
 
-    void addRelatedAction(IBaseBackboneElement relatedAction);
+    fun addRelatedAction(relatedAction: IBaseBackboneElement?)
 
-    boolean hasTiming();
+    fun hasTiming(): Boolean
 
-    IBaseDatatype getTiming();
+    val timing: IBaseDatatype?
 
-    IRequestActionAdapter setTiming(IBaseDatatype timing);
+    fun setTiming(timing: IBaseDatatype?): IRequestActionAdapter?
 
-    boolean hasType();
+    fun hasType(): Boolean
 
-    ICodeableConceptAdapter getType();
+    val type: ICodeableConceptAdapter?
 
-    IRequestActionAdapter setType(ICodeableConceptAdapter type);
+    fun setType(type: ICodeableConceptAdapter?): IRequestActionAdapter?
 
-    boolean hasSelectionBehavior();
+    fun hasSelectionBehavior(): Boolean
 
-    String getSelectionBehavior();
+    val selectionBehavior: String?
 
-    IRequestActionAdapter setSelectionBehavior(String behavior);
+    fun setSelectionBehavior(behavior: String?): IRequestActionAdapter?
 
-    boolean hasResource();
+    fun hasResource(): Boolean
 
-    IBaseReference getResource();
+    val resource: IBaseReference?
 
-    IRequestActionAdapter setResource(IBaseReference resource);
+    fun setResource(resource: IBaseReference?): IRequestActionAdapter?
 
-    boolean hasAction();
+    fun hasAction(): Boolean
 
-    List<IRequestActionAdapter> getAction();
+    val action: MutableList<IRequestActionAdapter?>?
 
-    void addAction(IBaseBackboneElement action);
+    fun addAction(action: IBaseBackboneElement?)
 
-    IRequestActionAdapter setAction(List<IRequestActionAdapter> actions);
+    fun setAction(actions: MutableList<IRequestActionAdapter?>?): IRequestActionAdapter?
 }

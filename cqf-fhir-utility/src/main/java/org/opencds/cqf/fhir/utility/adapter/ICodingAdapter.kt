@@ -1,23 +1,24 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface ICodingAdapter extends IAdapter<IBase> {
-    String getCode();
+interface ICodingAdapter : IAdapter<IBase> {
 
-    boolean hasCode();
+    val code: String?
 
-    ICodingAdapter setCode(String code);
+    fun hasCode(): Boolean
 
-    String getDisplay();
+    fun setCode(code: String?): ICodingAdapter?
 
-    boolean hasDisplay();
+    val display: String?
 
-    ICodingAdapter setDisplay(String display);
+    fun hasDisplay(): Boolean
 
-    String getSystem();
+    fun setDisplay(display: String?): ICodingAdapter?
 
-    boolean hasSystem();
+    val system: String?
 
-    ICodingAdapter setSystem(String system);
+    fun hasSystem(): Boolean
+
+    fun setSystem(system: String?): ICodingAdapter?
 }

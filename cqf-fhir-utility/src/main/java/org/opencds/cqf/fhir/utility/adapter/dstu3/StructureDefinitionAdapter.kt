@@ -1,154 +1,168 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import java.util.ArrayList;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.ElementDefinition;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
+import org.hl7.fhir.dstu3.model.ElementDefinition
+import org.hl7.fhir.dstu3.model.StructureDefinition
+import org.hl7.fhir.dstu3.model.UriType
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.instance.model.api.IPrimitiveType
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter
+import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter
 
-public class StructureDefinitionAdapter extends KnowledgeArtifactAdapter implements IStructureDefinitionAdapter {
-
-    public StructureDefinitionAdapter(IDomainResource structureDefinition) {
-        super(structureDefinition);
-        if (!(structureDefinition instanceof StructureDefinition)) {
-            throw new IllegalArgumentException(
-                    "resource passed as planDefinition argument is not a StructureDefinition resource");
+class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitionAdapter {
+    constructor(structureDefinition: IDomainResource) : super(structureDefinition) {
+        require(structureDefinition is StructureDefinition) {
+            "resource passed as planDefinition argument is not a StructureDefinition resource"
         }
     }
 
-    public StructureDefinitionAdapter(StructureDefinition structureDefinition) {
-        super(structureDefinition);
-    }
+    constructor(structureDefinition: StructureDefinition) : super(structureDefinition)
 
-    protected StructureDefinition getStructureDefinition() {
-        return (StructureDefinition) resource;
-    }
+    protected val structureDefinition: StructureDefinition
+        get() = resource as StructureDefinition
 
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-        /*
-           extension[].url
-           modifierExtension[].url
-           baseDefinition
-           differential.element[].type.code
-           differential.element[].type.profile[]
-           differential.element[].type.targetProfile[]
-           differential.element[].binding.valueSet
-           differential.element[].extension[].url
-           differential.element[].modifierExtension[].url
-           extension[cpg-inferenceExpression].reference
-           extension[cpg-assertionExpression].reference
-           extension[cpg-featureExpression].reference
-        */
-
-        if (get().hasBaseDefinition()) {
-            references.add(new DependencyInfo(
-                    referenceSource,
-                    get().getBaseDefinition(),
-                    get().getBaseDefinitionElement().getExtension(),
-                    reference -> get().setBaseDefinition(reference)));
-        }
-
-        get().getDifferential()
-                .getElement()
-                .forEach(element -> getDependenciesOfDifferential(element, references, referenceSource));
-
-        return references;
-    }
-
-    private void getDependenciesOfDifferential(
-            ElementDefinition element, List<IDependencyInfo> references, String referenceSource) {
-        element.getType().forEach(type -> {
-            if (type.hasProfile()) {
-                references.add(new DependencyInfo(
+            /*
+               extension[].url
+               modifierExtension[].url
+               baseDefinition
+               differential.element[].type.code
+               differential.element[].type.profile[]
+               differential.element[].type.targetProfile[]
+               differential.element[].binding.valueSet
+               differential.element[].extension[].url
+               differential.element[].modifierExtension[].url
+               extension[cpg-inferenceExpression].reference
+               extension[cpg-assertionExpression].reference
+               extension[cpg-featureExpression].reference
+            */
+            if (get().hasBaseDefinition()) {
+                references.add(
+                    DependencyInfo(
                         referenceSource,
-                        type.getProfile(),
-                        type.getProfileElement().getExtension(),
-                        type::setProfile));
+                        get().baseDefinition,
+                        get().baseDefinitionElement.extension,
+                        { reference -> get().setBaseDefinition(reference) },
+                    )
+                )
+            }
+
+            get()
+                .differential
+                .element
+                .forEach({ element ->
+                    getDependenciesOfDifferential(element!!, references, referenceSource)
+                })
+
+            return references
+        }
+
+    private fun getDependenciesOfDifferential(
+        element: ElementDefinition,
+        references: MutableList<IDependencyInfo?>,
+        referenceSource: String?,
+    ) {
+        element.type.forEach({ type ->
+            if (type!!.hasProfile()) {
+                references.add(
+                    DependencyInfo(
+                        referenceSource,
+                        type.profile,
+                        type.getProfileElement().extension,
+                        { value -> type.setProfile(value) },
+                    )
+                )
             }
             if (type.hasTargetProfile()) {
-                references.add(new DependencyInfo(
+                references.add(
+                    DependencyInfo(
                         referenceSource,
-                        type.getTargetProfile(),
-                        type.getTargetProfileElement().getExtension(),
-                        type::setTargetProfile));
+                        type.targetProfile,
+                        type.getTargetProfileElement().extension,
+                        { value -> type.setTargetProfile(value) },
+                    )
+                )
             }
-        });
-        if (element.getBinding().hasValueSet()) {
-            references.add(new DependencyInfo(
+        })
+        if (element.binding.hasValueSet()) {
+            references.add(
+                DependencyInfo(
                     referenceSource,
-                    element.getBinding().getValueSet().primitiveValue(),
-                    element.getBinding().getExtension(),
-                    reference -> element.getBinding().setValueSet(new UriType(reference))));
+                    element.binding.valueSet.primitiveValue(),
+                    element.binding.extension,
+                    { reference -> element.binding.setValueSet(UriType(reference)) },
+                )
+            )
         }
     }
 
-    @Override
-    public StructureDefinition get() {
-        return getStructureDefinition();
+    override fun get(): StructureDefinition {
+        return this.structureDefinition
     }
 
-    @Override
-    public StructureDefinition copy() {
-        return get().copy();
+    override fun copy(): StructureDefinition? {
+        return get().copy()
     }
 
-    @Override
-    public String getDerivation() {
-        return get().hasDerivation() ? get().getDerivation().toCode() : null;
+    override val derivation: String?
+        get() {
+            return if (get().hasDerivation()) get().derivation.toCode() else null
+        }
+
+    override val baseDefinition: IPrimitiveType<String?>?
+        get() {
+            return get().baseDefinitionElement
+        }
+
+    override fun hasSnapshot(): Boolean {
+        return get().hasSnapshot()
     }
 
-    @Override
-    public IPrimitiveType<String> getBaseDefinition() {
-        return get().getBaseDefinitionElement();
-    }
+    override val snapshotElements: MutableList<IElementDefinitionAdapter?>
+        get() {
+            return get()
+                .snapshot
+                .element
+                .filter { obj -> obj!!.hasPath() }
+                .filter { e -> e!!.path.split(".").size > 1 }
+                .map { element -> adapterFactory.createElementDefinition(element) }
+                .toMutableList()
+        }
 
-    @Override
-    public boolean hasSnapshot() {
-        return get().hasSnapshot();
-    }
+    override val allSnapshotElements: MutableList<IElementDefinitionAdapter?>
+        get() {
+            return get()
+                .snapshot
+                .element
+                .filter { obj -> obj!!.hasPath() }
+                .map { element -> adapterFactory.createElementDefinition(element) }
+                .toMutableList()
+        }
 
-    @Override
-    public List<IElementDefinitionAdapter> getSnapshotElements() {
-        return get().getSnapshot().getElement().stream()
-                .filter(ElementDefinition::hasPath)
-                .filter(e -> e.getPath().split("\\.").length > 1)
-                .map(adapterFactory::createElementDefinition)
-                .toList();
-    }
+    override val allDifferentialElements: MutableList<IElementDefinitionAdapter?>
+        get() {
+            return get()
+                .differential
+                .element
+                .filter { obj -> obj!!.hasPath() }
+                .map { element -> adapterFactory.createElementDefinition(element) }
+                .toMutableList()
+        }
 
-    @Override
-    public List<IElementDefinitionAdapter> getAllSnapshotElements() {
-        return get().getSnapshot().getElement().stream()
-                .filter(ElementDefinition::hasPath)
-                .map(adapterFactory::createElementDefinition)
-                .toList();
-    }
-
-    @Override
-    public List<IElementDefinitionAdapter> getAllDifferentialElements() {
-        return get().getDifferential().getElement().stream()
-                .filter(ElementDefinition::hasPath)
-                .map(adapterFactory::createElementDefinition)
-                .toList();
-    }
-
-    @Override
-    public List<IElementDefinitionAdapter> getDifferentialElements() {
-        return get().getDifferential().getElement().stream()
-                .filter(ElementDefinition::hasPath)
-                .filter(e -> e.getPath().split("\\.").length > 1)
-                .map(adapterFactory::createElementDefinition)
-                .toList();
-    }
+    override val differentialElements: MutableList<IElementDefinitionAdapter?>
+        get() {
+            return get()
+                .differential
+                .element
+                .filter { obj -> obj!!.hasPath() }
+                .filter { e -> e!!.path.split(".").size > 1 }
+                .map { element -> adapterFactory.createElementDefinition(element) }
+                .toMutableList()
+        }
 }

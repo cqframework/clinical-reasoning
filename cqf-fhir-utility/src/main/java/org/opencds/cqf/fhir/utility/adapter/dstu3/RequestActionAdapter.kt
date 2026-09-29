@@ -1,289 +1,258 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionConditionComponent;
-import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RequestGroup.ActionConditionKind;
-import org.hl7.fhir.dstu3.model.RequestGroup.ActionRelationshipType;
-import org.hl7.fhir.dstu3.model.RequestGroup.ActionSelectionBehavior;
-import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionComponent;
-import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionConditionComponent;
-import org.hl7.fhir.dstu3.model.RequestGroup.RequestGroupActionRelatedActionComponent;
-import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.*
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter
+import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter
 
-public class RequestActionAdapter extends BaseElementAdapter implements IRequestActionAdapter {
+class RequestActionAdapter(requestAction: IBase) :
+    BaseElementAdapter(FhirVersionEnum.DSTU3, requestAction), IRequestActionAdapter {
+    private val requestAction: RequestGroup.RequestGroupActionComponent
 
-    private final RequestGroupActionComponent requestAction;
-
-    public RequestActionAdapter(IBase requestAction) {
-        super(FhirVersionEnum.DSTU3, requestAction);
-        if (!(requestAction instanceof RequestGroupActionComponent)) {
-            throw new IllegalArgumentException(
-                    "element passed as action argument is not a RequestGroupActionComponent Element");
+    init {
+        require(requestAction is RequestGroup.RequestGroupActionComponent) {
+            "element passed as action argument is not a RequestGroupActionComponent Element"
         }
-        this.requestAction = (RequestGroupActionComponent) requestAction;
+        this.requestAction = requestAction
     }
 
-    @Override
-    public RequestGroupActionComponent get() {
-        return requestAction;
+    override fun get(): RequestGroup.RequestGroupActionComponent {
+        return requestAction
     }
 
-    @Override
-    public String getId() {
-        return get().getId();
+    override val id: String?
+        get() {
+            return get().id
+        }
+
+    override fun setId(id: String?): IRequestActionAdapter {
+        get().setId(id)
+        return this
     }
 
-    @Override
-    public IRequestActionAdapter setId(String id) {
-        get().setId(id);
-        return this;
+    override fun hasTitle(): Boolean {
+        return get().hasTitle()
     }
 
-    @Override
-    public boolean hasTitle() {
-        return get().hasTitle();
+    override val title: String?
+        get() {
+            return get().title
+        }
+
+    override fun setTitle(title: String?): IRequestActionAdapter {
+        get().setTitle(title)
+        return this
     }
 
-    @Override
-    public String getTitle() {
-        return get().getTitle();
+    override fun hasDescription(): Boolean {
+        return get().hasDescription()
     }
 
-    @Override
-    public IRequestActionAdapter setTitle(String title) {
-        get().setTitle(title);
-        return this;
+    override val description: String?
+        get() {
+            return get().description
+        }
+
+    override fun setDescription(description: String?): IRequestActionAdapter {
+        get().setDescription(description)
+        return this
     }
 
-    @Override
-    public boolean hasDescription() {
-        return get().hasDescription();
+    override fun hasTextEquivalent(): Boolean {
+        return get().hasTextEquivalent()
     }
 
-    @Override
-    public String getDescription() {
-        return get().getDescription();
+    override val textEquivalent: String?
+        get() {
+            return get().textEquivalent
+        }
+
+    override fun setTextEquivalent(text: String?): IRequestActionAdapter {
+        get().setTextEquivalent(text)
+        return this
     }
 
-    @Override
-    public IRequestActionAdapter setDescription(String description) {
-        get().setDescription(description);
-        return this;
+    override fun hasPriority(): Boolean {
+        return false
     }
 
-    @Override
-    public boolean hasTextEquivalent() {
-        return get().hasTextEquivalent();
+    override val priority: String?
+        get() {
+            return null
+        }
+
+    override fun setPriority(priority: String?): IRequestActionAdapter {
+        return this
     }
 
-    @Override
-    public String getTextEquivalent() {
-        return get().getTextEquivalent();
+    override fun hasCode(): Boolean {
+        return get().hasCode()
     }
 
-    @Override
-    public IRequestActionAdapter setTextEquivalent(String text) {
-        get().setTextEquivalent(text);
-        return this;
+    override val code: ICodeableConceptAdapter
+        get() {
+            return adapterFactory.createCodeableConcept(get().code.get(0))
+        }
+
+    override fun setCode(code: ICodeableConceptAdapter?): IRequestActionAdapter {
+        get().setCode(if (code == null) null else mutableListOf(code.get() as CodeableConcept?))
+        return this
     }
 
-    @Override
-    public boolean hasPriority() {
-        return false;
+    override fun hasDocumentation(): Boolean {
+        return get().hasDocumentation()
     }
 
-    @Override
-    public String getPriority() {
-        return null;
+    override fun <T> getDocumentation(): MutableList<T?>? where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        @Suppress("UNCHECKED_CAST")
+        return get().documentation as MutableList<T?>?
     }
 
-    @Override
-    public IRequestActionAdapter setPriority(String priority) {
-        return this;
+    override fun <T> setDocumentation(documentation: MutableList<T?>?): IRequestActionAdapter where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        get()
+            .setDocumentation(
+                documentation!!.map { obj -> RelatedArtifact::class.java.cast(obj) }.toMutableList()
+            )
+        return this
     }
 
-    @Override
-    public boolean hasCode() {
-        return get().hasCode();
+    override fun hasCondition(): Boolean {
+        return get().hasCondition()
     }
 
-    @Override
-    public ICodeableConceptAdapter getCode() {
-        return getAdapterFactory().createCodeableConcept(get().getCode().get(0));
+    override fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
+        return get().condition as MutableList<T?>?
     }
 
-    @Override
-    public IRequestActionAdapter setCode(ICodeableConceptAdapter code) {
-        get().setCode(code == null ? null : List.of((CodeableConcept) code.get()));
-        return this;
-    }
-
-    @Override
-    public boolean hasDocumentation() {
-        return get().hasDocumentation();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RelatedArtifact> getDocumentation() {
-        return get().getDocumentation();
-    }
-
-    @Override
-    public <T extends ICompositeType & IBaseHasExtensions> IRequestActionAdapter setDocumentation(
-            List<T> documentation) {
-        get().setDocumentation(
-                        documentation.stream().map(RelatedArtifact.class::cast).toList());
-        return this;
-    }
-
-    @Override
-    public boolean hasCondition() {
-        return get().hasCondition();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RequestGroupActionConditionComponent> getCondition() {
-        return get().getCondition();
-    }
-
-    @Override
-    public void addCondition(IBaseBackboneElement element) {
-        if (element instanceof PlanDefinitionActionConditionComponent condition) {
-            get().addCondition(new RequestGroupActionConditionComponent()
-                    .setKind(ActionConditionKind.fromCode(condition.getKind().toCode()))
-                    .setExpression(condition.getExpression()));
+    override fun addCondition(element: IBaseBackboneElement?) {
+        if (element is PlanDefinition.PlanDefinitionActionConditionComponent) {
+            get()
+                .addCondition(
+                    RequestGroup.RequestGroupActionConditionComponent()
+                        .setKind(RequestGroup.ActionConditionKind.fromCode(element.kind.toCode()))
+                        .setExpression(element.expression)
+                )
         }
     }
 
-    @Override
-    public boolean hasRelatedAction() {
-        return get().hasRelatedAction();
+    override fun hasRelatedAction(): Boolean {
+        return get().hasRelatedAction()
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<RequestGroupActionRelatedActionComponent> getRelatedAction() {
-        return get().getRelatedAction();
+    override fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
+        return get().relatedAction as MutableList<T?>?
     }
 
-    @Override
-    public void addRelatedAction(IBaseBackboneElement element) {
-        if (element instanceof PlanDefinitionActionRelatedActionComponent relatedAction) {
-            get().addRelatedAction(new RequestGroupActionRelatedActionComponent()
-                    .setActionId(relatedAction.getActionId())
-                    .setRelationship(ActionRelationshipType.fromCode(
-                            relatedAction.getRelationship().toCode()))
-                    .setOffset(relatedAction.getOffset()));
+    override fun addRelatedAction(element: IBaseBackboneElement?) {
+        if (element is PlanDefinition.PlanDefinitionActionRelatedActionComponent) {
+            get()
+                .addRelatedAction(
+                    RequestGroup.RequestGroupActionRelatedActionComponent()
+                        .setActionId(element.getActionId())
+                        .setRelationship(
+                            RequestGroup.ActionRelationshipType.fromCode(
+                                element.relationship.toCode()
+                            )
+                        )
+                        .setOffset(element.offset)
+                )
         }
     }
 
-    @Override
-    public boolean hasTiming() {
-        return get().hasTiming();
+    override fun hasTiming(): Boolean {
+        return get().hasTiming()
     }
 
-    @Override
-    public IBaseDatatype getTiming() {
-        return get().getTiming();
+    override val timing: IBaseDatatype?
+        get() {
+            return get().timing
+        }
+
+    override fun setTiming(timing: IBaseDatatype?): IRequestActionAdapter {
+        get().setTiming(timing as Type?)
+        return this
     }
 
-    @Override
-    public IRequestActionAdapter setTiming(IBaseDatatype timing) {
-        get().setTiming((Type) timing);
-        return this;
+    override fun hasType(): Boolean {
+        return get().hasType()
     }
 
-    @Override
-    public boolean hasType() {
-        return get().hasType();
+    override val type: ICodeableConceptAdapter
+        get() {
+            return CodeableConceptAdapter(CodeableConcept().addCoding(get().type))
+        }
+
+    override fun setType(type: ICodeableConceptAdapter?): IRequestActionAdapter {
+        get().setType((type!!.get() as CodeableConcept).getCodingFirstRep())
+        return this
     }
 
-    @Override
-    public ICodeableConceptAdapter getType() {
-        return new CodeableConceptAdapter(new CodeableConcept().addCoding(get().getType()));
+    override fun hasSelectionBehavior(): Boolean {
+        return get().hasSelectionBehavior()
     }
 
-    @Override
-    public IRequestActionAdapter setType(ICodeableConceptAdapter type) {
-        get().setType(((CodeableConcept) type.get()).getCodingFirstRep());
-        return this;
+    override val selectionBehavior: String?
+        get() {
+            return get().selectionBehavior.toCode()
+        }
+
+    override fun setSelectionBehavior(behavior: String?): IRequestActionAdapter {
+        get().setSelectionBehavior(RequestGroup.ActionSelectionBehavior.fromCode(behavior))
+        return this
     }
 
-    @Override
-    public boolean hasSelectionBehavior() {
-        return get().hasSelectionBehavior();
+    override fun hasResource(): Boolean {
+        return get().hasResource()
     }
 
-    @Override
-    public String getSelectionBehavior() {
-        return get().getSelectionBehavior().toCode();
+    override val resource: Reference?
+        get() {
+            return get().resource
+        }
+
+    override fun setResource(resource: IBaseReference?): IRequestActionAdapter {
+        get().setResource(resource as Reference?)
+        return this
     }
 
-    @Override
-    public IRequestActionAdapter setSelectionBehavior(String behavior) {
-        get().setSelectionBehavior(ActionSelectionBehavior.fromCode(behavior));
-        return this;
+    override fun hasAction(): Boolean {
+        return get().hasAction()
     }
 
-    @Override
-    public boolean hasResource() {
-        return get().hasResource();
-    }
+    override val action: MutableList<IRequestActionAdapter?>
+        get() {
+            return get()
+                .action
+                .map { requestAction -> RequestActionAdapter(requestAction) }
+                .toMutableList()
+        }
 
-    @Override
-    public Reference getResource() {
-        return get().getResource();
-    }
-
-    @Override
-    public IRequestActionAdapter setResource(IBaseReference resource) {
-        get().setResource((Reference) resource);
-        return this;
-    }
-
-    @Override
-    public boolean hasAction() {
-        return get().hasAction();
-    }
-
-    @Override
-    public List<IRequestActionAdapter> getAction() {
-        return get().getAction().stream().map(RequestActionAdapter::new).collect(Collectors.toUnmodifiableList());
-    }
-
-    @Override
-    public void addAction(IBaseBackboneElement element) {
-        if (element instanceof RequestGroupActionComponent action) {
-            get().addAction(action);
+    override fun addAction(element: IBaseBackboneElement?) {
+        if (element is RequestGroup.RequestGroupActionComponent) {
+            get().addAction(element)
         }
     }
 
-    @Override
-    public IRequestActionAdapter setAction(List<IRequestActionAdapter> actions) {
-        get().setAction(
-                        actions == null
-                                ? null
-                                : actions.stream()
-                                        .map(IRequestActionAdapter::get)
-                                        .map(RequestGroupActionComponent.class::cast)
-                                        .toList());
-        return this;
+    override fun setAction(actions: MutableList<IRequestActionAdapter?>?): IRequestActionAdapter {
+        get()
+            .setAction(
+                if (actions == null) null
+                else
+                    actions
+                        .map { obj -> obj!!.get() }
+                        .map { obj ->
+                            RequestGroup.RequestGroupActionComponent::class.java.cast(obj)
+                        }
+                        .toMutableList()
+            )
+        return this
     }
 }

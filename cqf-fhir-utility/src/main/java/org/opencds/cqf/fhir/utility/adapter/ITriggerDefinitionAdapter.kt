@@ -1,14 +1,13 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBase
 
-public interface ITriggerDefinitionAdapter extends IAdapter<IBase> {
+interface ITriggerDefinitionAdapter : IAdapter<IBase> {
+    fun hasName(): Boolean
 
-    boolean hasName();
+    val name: String?
 
-    String getName();
+    fun hasType(): Boolean
 
-    boolean hasType();
-
-    String getType();
+    val type: String?
 }

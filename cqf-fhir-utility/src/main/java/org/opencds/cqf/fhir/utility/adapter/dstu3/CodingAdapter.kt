@@ -1,74 +1,65 @@
-package org.opencds.cqf.fhir.utility.adapter.dstu3;
+package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.Coding
+import org.hl7.fhir.instance.model.api.IBase
+import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
 
-public class CodingAdapter extends BaseElementAdapter implements ICodingAdapter {
+class CodingAdapter(coding: IBase) :
+    BaseElementAdapter(FhirVersionEnum.DSTU3, coding), ICodingAdapter {
+    private val coding: Coding
 
-    private final Coding coding;
-
-    public CodingAdapter(IBase coding) {
-        super(FhirVersionEnum.DSTU3, coding);
-        if (!(coding instanceof Coding)) {
-            throw new IllegalArgumentException(
-                    "object passed as codeableConcept argument is not a CodeableConcept data type");
+    init {
+        require(coding is Coding) {
+            "object passed as codeableConcept argument is not a CodeableConcept data type"
         }
-        this.coding = (Coding) coding;
+        this.coding = coding
     }
 
-    @Override
-    public Coding get() {
-        return coding;
+    override fun get(): Coding {
+        return coding
     }
 
-    @Override
-    public String getCode() {
-        return get().getCode();
+    override val code: String?
+        get() {
+            return get().code
+        }
+
+    override fun hasCode(): Boolean {
+        return get().hasCode()
     }
 
-    @Override
-    public boolean hasCode() {
-        return get().hasCode();
+    override fun setCode(code: String?): ICodingAdapter {
+        get().setCode(code)
+        return this
     }
 
-    @Override
-    public ICodingAdapter setCode(String code) {
-        get().setCode(code);
-        return this;
+    override val display: String?
+        get() {
+            return get().display
+        }
+
+    override fun hasDisplay(): Boolean {
+        return get().hasDisplay()
     }
 
-    @Override
-    public String getDisplay() {
-        return get().getDisplay();
+    override fun setDisplay(display: String?): ICodingAdapter {
+        get().setDisplay(display)
+        return this
     }
 
-    @Override
-    public boolean hasDisplay() {
-        return get().hasDisplay();
+    override val system: String?
+        get() {
+            return get().system
+        }
+
+    override fun hasSystem(): Boolean {
+        return get().hasSystem()
     }
 
-    @Override
-    public ICodingAdapter setDisplay(String display) {
-        get().setDisplay(display);
-        return this;
-    }
-
-    @Override
-    public String getSystem() {
-        return get().getSystem();
-    }
-
-    @Override
-    public boolean hasSystem() {
-        return get().hasSystem();
-    }
-
-    @Override
-    public ICodingAdapter setSystem(String system) {
-        get().setSystem(system);
-        return this;
+    override fun setSystem(system: String?): ICodingAdapter {
+        get().setSystem(system)
+        return this
     }
 }

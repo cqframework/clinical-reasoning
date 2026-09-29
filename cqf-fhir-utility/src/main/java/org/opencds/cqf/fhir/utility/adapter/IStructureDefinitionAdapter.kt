@@ -1,66 +1,52 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType
 
-public interface IStructureDefinitionAdapter extends IKnowledgeArtifactAdapter {
+interface IStructureDefinitionAdapter : IKnowledgeArtifactAdapter {
+    val type: String?
+        get() = resolvePathString(get()!!, "type")
 
-    default String getType() {
-        return resolvePathString(get(), "type");
-    }
+    val derivation: String?
 
-    String getDerivation();
+    val baseDefinition: IPrimitiveType<String?>?
 
-    IPrimitiveType<String> getBaseDefinition();
+    fun hasSnapshot(): Boolean
 
-    boolean hasSnapshot();
+    val snapshotElements: MutableList<IElementDefinitionAdapter?>?
 
-    List<IElementDefinitionAdapter> getSnapshotElements();
+    /** Returns all snapshot elements including the root element. */
+    val allSnapshotElements: MutableList<IElementDefinitionAdapter?>?
 
-    /**
-     * Returns all snapshot elements including the root element.
-     */
-    List<IElementDefinitionAdapter> getAllSnapshotElements();
+    /** Returns all differential elements including the root element. */
+    val allDifferentialElements: MutableList<IElementDefinitionAdapter?>?
 
-    /**
-     * Returns all differential elements including the root element.
-     */
-    List<IElementDefinitionAdapter> getAllDifferentialElements();
+    val differentialElements: MutableList<IElementDefinitionAdapter?>?
 
-    List<IElementDefinitionAdapter> getDifferentialElements();
-
-    default IElementDefinitionAdapter getElement(String elementId) {
-        return getDifferentialElements().stream()
-                .filter(e -> e.getId().equals(elementId))
-                .findFirst()
-                .orElseGet(() -> getSnapshotElements().stream()
-                        .filter(e -> e.getId().equals(elementId))
-                        .findFirst()
-                        .orElse(null));
+    fun getElement(elementId: String?): IElementDefinitionAdapter? {
+        return this.differentialElements!!.firstOrNull { e -> e!!.id.equals(elementId) }
+            ?: this.snapshotElements!!.firstOrNull { e -> e!!.id.equals(elementId) }
     }
 
     /**
-     * Returns the first element found with a matching path. Differential elements will be returned first. Elements with a slicing defined will be ignored.
-     * @param path The path of the element without the preceding resource type. e.g. value[x] rather than Observation.value[x]
+     * Returns the first element found with a matching path. Differential elements will be returned
+     * first. Elements with a slicing defined will be ignored.
+     *
+     * @param path The path of the element without the preceding resource type. e.g. value\[x]
+     *   rather than Observation.value\[x]
      * @return IElementDefinitionAdapter
      */
-    default IElementDefinitionAdapter getElementByPath(String path) {
-        return getDifferentialElements().stream()
-                .filter(e -> !e.hasSlicing())
-                .filter(e -> path.equals(e.getPath().substring(e.getPath().indexOf(".") + 1)))
-                .findFirst()
-                .orElseGet(() -> getSnapshotElements().stream()
-                        .filter(e -> !e.hasSlicing())
-                        .filter(e ->
-                                path.equals(e.getPath().substring(e.getPath().indexOf(".") + 1)))
-                        .findFirst()
-                        .orElse(null));
+    fun getElementByPath(path: String): IElementDefinitionAdapter? {
+        return this.differentialElements!!
+            .filter { e -> !e!!.hasSlicing() }
+            .firstOrNull { e -> path == e!!.path!!.substring(e.path!!.indexOf(".") + 1) }
+            ?: this.snapshotElements!!
+                .filter { e -> !e!!.hasSlicing() }
+                .firstOrNull { e -> path == e!!.path!!.substring(e.path!!.indexOf(".") + 1) }
     }
 
-    default List<IElementDefinitionAdapter> getSliceElements(String sliceName) {
-        return getDifferentialElements().stream()
-                .filter(e -> e.getId().contains(sliceName) && StringUtils.isBlank(e.getSliceName()))
-                .toList();
+    fun getSliceElements(sliceName: String?): MutableList<IElementDefinitionAdapter?> {
+        return this.differentialElements!!
+            .filter { e -> e!!.id!!.contains(sliceName!!) && e.sliceName.isNullOrBlank() }
+            .toMutableList()
     }
 }

@@ -1,211 +1,254 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
+import java.util.*
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.r5.model.*
+import org.opencds.cqf.fhir.utility.Canonicals
+import org.opencds.cqf.fhir.utility.adapter.*
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.CanonicalType;
-import org.hl7.fhir.r5.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.hl7.fhir.r5.model.Expression;
-import org.hl7.fhir.r5.model.Extension;
-import org.hl7.fhir.r5.model.PlanDefinition;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionConditionComponent;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionDynamicValueComponent;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionInputComponent;
-import org.hl7.fhir.r5.model.PlanDefinition.PlanDefinitionActionOutputComponent;
-import org.hl7.fhir.r5.model.PrimitiveType;
-import org.hl7.fhir.r5.model.RelatedArtifact;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.DependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo;
-import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionAdapter;
-
-public class PlanDefinitionAdapter extends KnowledgeArtifactAdapter implements IPlanDefinitionAdapter {
-
-    public PlanDefinitionAdapter(IDomainResource planDefinition) {
-        super(planDefinition);
-        if (!(planDefinition instanceof PlanDefinition)) {
-            throw new IllegalArgumentException(
-                    "resource passed as planDefinition argument is not a PlanDefinition resource");
+class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
+    constructor(planDefinition: IDomainResource) : super(planDefinition) {
+        require(planDefinition is PlanDefinition) {
+            "resource passed as planDefinition argument is not a PlanDefinition resource"
         }
     }
 
-    public PlanDefinitionAdapter(PlanDefinition planDefinition) {
-        super(planDefinition);
+    constructor(planDefinition: PlanDefinition) : super(planDefinition)
+
+    protected val planDefinition: PlanDefinition
+        get() = resource as PlanDefinition
+
+    override fun get(): PlanDefinition {
+        return this.planDefinition
     }
 
-    protected PlanDefinition getPlanDefinition() {
-        return (PlanDefinition) resource;
+    override fun copy(): PlanDefinition? {
+        return get().copy()
     }
 
-    @Override
-    public PlanDefinition get() {
-        return getPlanDefinition();
-    }
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
 
-    @Override
-    public PlanDefinition copy() {
-        return get().copy();
-    }
+            /*
+             relatedArtifact[].resource
+             library[]
+             action[]..trigger[].dataRequirement[].profile[]
+             action[]..trigger[].dataRequirement[].codeFilter[].valueSet
+             action[]..condition[].expression.reference
+             action[]..input[].profile[]
+             action[]..input[].codeFilter[].valueSet
+             action[]..output[].profile[]
+             action[]..output[].codeFilter[].valueSet
+             action[]..definitionCanonical
+             action[]..dynamicValue[].expression.reference
+             extension[cpg-partOf]
+            */
 
-    @Override
-    public List<IDependencyInfo> getDependencies() {
-        List<IDependencyInfo> references = new ArrayList<>();
-        final String referenceSource = getReferenceSource();
-        addProfileReferences(references, referenceSource);
+            // relatedArtifact[].resource
+            getRelatedArtifactsOfType<RelatedArtifact>(IKnowledgeArtifactAdapter.DEPENDSON)!!
+                .filter { obj -> obj!!.hasResource() }
+                .map { ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource) }
+                .forEach { e -> references.add(e) }
 
-        /*
-         relatedArtifact[].resource
-         library[]
-         action[]..trigger[].dataRequirement[].profile[]
-         action[]..trigger[].dataRequirement[].codeFilter[].valueSet
-         action[]..condition[].expression.reference
-         action[]..input[].profile[]
-         action[]..input[].codeFilter[].valueSet
-         action[]..output[].profile[]
-         action[]..output[].codeFilter[].valueSet
-         action[]..definitionCanonical
-         action[]..dynamicValue[].expression.reference
-         extension[cpg-partOf]
-        */
-
-        // relatedArtifact[].resource
-        getRelatedArtifactsOfType(DEPENDSON).stream()
-                .filter(RelatedArtifact::hasResource)
-                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource))
-                .forEach(references::add);
-
-        // library[]
-        List<CanonicalType> libraries = getPlanDefinition().getLibrary();
-        for (CanonicalType ct : libraries) {
-            DependencyInfo dependency =
-                    new DependencyInfo(referenceSource, ct.getValue(), ct.getExtension(), ct::setValue);
-            references.add(dependency);
-        }
-        // action[]
-        getPlanDefinition().getAction().forEach(action -> getDependenciesOfAction(action, references, referenceSource));
-        getPlanDefinition().getExtension().stream()
-                .filter(ext -> ext.getUrl().contains("cpg-partOf"))
-                .filter(Extension::hasValue)
-                .findAny()
-                .ifPresent(ext -> references.add(new DependencyInfo(
+            // library[]
+            val libraries = this.planDefinition.library
+            for (ct in libraries) {
+                val dependency =
+                    DependencyInfo(
                         referenceSource,
-                        ((CanonicalType) ext.getValue()).getValue(),
-                        ext.getExtension(),
-                        reference -> ext.setValue(new CanonicalType(reference)))));
-        return references;
-    }
+                        ct.value,
+                        ct.extension,
+                        { theValue -> ct.setValue(theValue) },
+                    )
+                references.add(dependency)
+            }
+            // action[]
+            this.planDefinition.action.forEach { action ->
+                getDependenciesOfAction(action!!, references, referenceSource)
+            }
+            this.planDefinition.extension
+                .filter { ext -> ext!!.url.contains("cpg-partOf") }
+                .filter { obj -> obj!!.hasValue() }
+                .firstOrNull()
+                ?.let { ext ->
+                    references.add(
+                        DependencyInfo(
+                            referenceSource,
+                            (ext!!.value as CanonicalType).value,
+                            ext.extension,
+                            { reference -> ext.setValue(CanonicalType(reference)) },
+                        )
+                    )
+                }
+            return references
+        }
 
-    private void getDependenciesOfAction(
-            PlanDefinition.PlanDefinitionActionComponent action,
-            List<IDependencyInfo> references,
-            String referenceSource) {
-        action.getTrigger().stream().flatMap(t -> t.getData().stream()).forEach(eventData -> {
-            // trigger[].dataRequirement[].profile[]
-            eventData.getProfile().stream()
-                    .filter(IPrimitiveType::hasValue)
-                    .forEach(profile -> references.add(new DependencyInfo(
-                            referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
-            // trigger[].dataRequirement[].codeFilter[].valueSet
-            eventData.getCodeFilter().stream()
-                    .filter(DataRequirementCodeFilterComponent::hasValueSet)
-                    .forEach(cf -> references.add(
-                            new DependencyInfo(referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
-        });
+    private fun getDependenciesOfAction(
+        action: PlanDefinition.PlanDefinitionActionComponent,
+        references: MutableList<IDependencyInfo?>,
+        referenceSource: String?,
+    ) {
+        action.trigger
+            .flatMap { t -> t!!.data }
+            .forEach { eventData ->
+                // trigger[].dataRequirement[].profile[]
+                eventData!!
+                    .profile
+                    .filter { obj -> obj!!.hasValue() }
+                    .forEach { profile ->
+                        references.add(
+                            DependencyInfo(
+                                referenceSource,
+                                profile!!.value,
+                                profile.extension,
+                                { theValue -> profile.setValue(theValue) },
+                            )
+                        )
+                    }
+                // trigger[].dataRequirement[].codeFilter[].valueSet
+                eventData.codeFilter
+                    .filter { obj -> obj!!.hasValueSet() }
+                    .forEach { cf ->
+                        references.add(
+                            DependencyInfo(
+                                referenceSource,
+                                cf!!.valueSet,
+                                cf.extension,
+                                { value -> cf.setValueSet(value) },
+                            )
+                        )
+                    }
+            }
         // condition[].expression.reference
-        action.getCondition().stream()
-                .filter(PlanDefinitionActionConditionComponent::hasExpression)
-                .map(PlanDefinitionActionConditionComponent::getExpression)
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
+        action.condition
+            .filter { obj -> obj!!.hasExpression() }
+            .map { obj -> obj!!.expression }
+            .filter { obj -> obj!!.hasReference() }
+            .forEach { expression ->
+                references.add(
+                    DependencyInfo(
                         referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
+                        expression!!.reference,
+                        expression.extension,
+                        { value -> expression.setReference(value) },
+                    )
+                )
+            }
         // dynamicValue[].expression.reference
-        action.getDynamicValue().stream()
-                .filter(PlanDefinitionActionDynamicValueComponent::hasExpression)
-                .map(PlanDefinitionActionDynamicValueComponent::getExpression)
-                .filter(Expression::hasReference)
-                .forEach(expression -> references.add(new DependencyInfo(
+        action.dynamicValue
+            .filter { obj -> obj!!.hasExpression() }
+            .map { obj -> obj!!.expression }
+            .filter { obj -> obj!!.hasReference() }
+            .forEach { expression ->
+                references.add(
+                    DependencyInfo(
                         referenceSource,
-                        expression.getReference(),
-                        expression.getExtension(),
-                        expression::setReference)));
-        Stream.concat(
-                        action.getInput().stream().map(PlanDefinitionActionInputComponent::getRequirement),
-                        action.getOutput().stream().map(PlanDefinitionActionOutputComponent::getRequirement))
-                .forEach(inputOrOutput -> {
-                    // ..input[].profile[]
-                    // ..output[].profile[]
-                    inputOrOutput.getProfile().stream()
-                            .filter(IPrimitiveType::hasValue)
-                            .forEach(profile -> references.add(new DependencyInfo(
-                                    referenceSource, profile.getValue(), profile.getExtension(), profile::setValue)));
-                    // input[].codeFilter[].valueSet
-                    // output[].codeFilter[].valueSet
-                    inputOrOutput.getCodeFilter().stream()
-                            .filter(DataRequirementCodeFilterComponent::hasValueSet)
-                            .forEach(cf -> references.add(new DependencyInfo(
-                                    referenceSource, cf.getValueSet(), cf.getExtension(), cf::setValueSet)));
-                });
+                        expression!!.reference,
+                        expression.extension,
+                        { value -> expression.setReference(value) },
+                    )
+                )
+            }
+        (action.input.map { obj -> obj!!.requirement } +
+                action.output.map { obj -> obj!!.requirement })
+            .forEach { inputOrOutput ->
+                // ..input[].profile[]
+                // ..output[].profile[]
+                inputOrOutput!!
+                    .profile
+                    .filter { obj -> obj!!.hasValue() }
+                    .forEach { profile ->
+                        references.add(
+                            DependencyInfo(
+                                referenceSource,
+                                profile!!.value,
+                                profile.extension,
+                                { theValue -> profile.setValue(theValue) },
+                            )
+                        )
+                    }
+                // input[].codeFilter[].valueSet
+                // output[].codeFilter[].valueSet
+                inputOrOutput.codeFilter
+                    .filter { obj -> obj!!.hasValueSet() }
+                    .forEach { cf ->
+                        references.add(
+                            DependencyInfo(
+                                referenceSource,
+                                cf!!.valueSet,
+                                cf.extension,
+                                { value -> cf.setValueSet(value) },
+                            )
+                        )
+                    }
+            }
         // action..definitionCanonical
-        var definition = action.getDefinitionCanonicalType();
+        val definition = action.definitionCanonicalType
         if (definition != null && definition.hasValue()) {
-            references.add(new DependencyInfo(
-                    referenceSource, definition.getValue(), definition.getExtension(), definition::setValue));
+            references.add(
+                DependencyInfo(
+                    referenceSource,
+                    definition.value,
+                    definition.extension,
+                    { theValue -> definition.setValue(theValue) },
+                )
+            )
         }
-        action.getAction().forEach(nestedAction -> getDependenciesOfAction(nestedAction, references, referenceSource));
+        action.action.forEach { nestedAction ->
+            getDependenciesOfAction(nestedAction!!, references, referenceSource)
+        }
     }
 
-    @Override
-    public Map<String, String> getReferencedLibraries() {
-        var libraries = getPlanDefinition().getLibrary().stream()
-                .collect(toMap(l -> requireNonNull(Canonicals.getIdPart(l)), CanonicalType::getCanonical));
-        libraries.putAll(resolveCqfLibraries());
-        return libraries;
+    override val referencedLibraries: MutableMap<String?, String?>
+        get() {
+            val libraries =
+                this.planDefinition.library
+                    .associate { l -> Canonicals.getIdPart(l) to l!!.canonical }
+                    .toMutableMap()
+
+            libraries.putAll(resolveCqfLibraries())
+            return libraries
+        }
+
+    override val description: String?
+        get() {
+            return get().description
+        }
+
+    override fun hasLibrary(): Boolean {
+        return get().hasLibrary()
     }
 
-    @Override
-    public String getDescription() {
-        return get().getDescription();
+    override val library: MutableList<String?>
+        get() {
+            return get().library.map { obj -> obj!!.asStringValue() }.toMutableList()
+        }
+
+    override fun hasGoal(): Boolean {
+        return get().hasGoal()
     }
 
-    @Override
-    public boolean hasLibrary() {
-        return get().hasLibrary();
+    override val goal: MutableList<IBaseBackboneElement?>
+        get() {
+            return get()
+                .goal
+                .map { obj -> IBaseBackboneElement::class.java.cast(obj) }
+                .toMutableList()
+        }
+
+    override fun hasAction(): Boolean {
+        return get().hasAction()
     }
 
-    @Override
-    public List<String> getLibrary() {
-        return get().getLibrary().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean hasGoal() {
-        return get().hasGoal();
-    }
-
-    @Override
-    public List<IBaseBackboneElement> getGoal() {
-        return get().getGoal().stream().map(IBaseBackboneElement.class::cast).toList();
-    }
-
-    @Override
-    public boolean hasAction() {
-        return get().hasAction();
-    }
-
-    @Override
-    public List<IPlanDefinitionActionAdapter> getAction() {
-        return get().getAction().stream().map(PlanDefinitionActionAdapter::new).collect(Collectors.toList());
-    }
+    override val action: MutableList<IPlanDefinitionActionAdapter?>
+        get() {
+            return get()
+                .action
+                .map { action -> PlanDefinitionActionAdapter(action) }
+                .toMutableList()
+        }
 }

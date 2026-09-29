@@ -1,106 +1,106 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
 
-/**
- * This interface exposes common functionality across all FHIR ValueSet versions.
- */
-public interface IValueSetAdapter extends IKnowledgeArtifactAdapter {
-    IValueSetAdapter addUseContext(IUsageContextAdapter usageContext);
+/** This interface exposes common functionality across all FHIR ValueSet versions. */
+interface IValueSetAdapter : IKnowledgeArtifactAdapter {
+    fun addUseContext(usageContext: IUsageContextAdapter?): IValueSetAdapter?
 
-    <T extends IBaseBackboneElement> void setExpansion(T expansion);
+    fun <T : IBaseBackboneElement> setExpansion(expansion: T?)
 
-    <T extends IBaseBackboneElement> T getExpansion();
+    fun <T : IBaseBackboneElement> getExpansion(): T?
 
-    boolean hasExpansion();
+    fun hasExpansion(): Boolean
 
-    boolean hasExpansionContains();
+    fun hasExpansionContains(): Boolean
 
-    int getExpansionTotal();
+    val expansionTotal: Int
 
-    List<IValueSetExpansionContainsAdapter> getExpansionContains();
+    val expansionContains: MutableList<IValueSetExpansionContainsAdapter?>?
 
-    void appendExpansionContains(List<IValueSetExpansionContainsAdapter> expansionContains);
+    fun appendExpansionContains(expansionContains: MutableList<IValueSetExpansionContainsAdapter?>?)
 
-    <T extends IBaseBackboneElement> T newExpansion();
+    fun <T : IBaseBackboneElement> newExpansion(): T?
 
-    void addExpansionStringParameter(String name, String value);
+    fun addExpansionStringParameter(name: String?, value: String?)
 
-    boolean hasExpansionStringParameter(String name, String value);
+    fun hasExpansionStringParameter(name: String?, value: String?): Boolean
 
-    List<IValueSetConceptSetAdapter> getComposeInclude();
+    val composeInclude: MutableList<IValueSetConceptSetAdapter?>?
 
-    List<String> getValueSetIncludes();
+    val valueSetIncludes: MutableList<String?>?
 
-    boolean hasCompose();
+    fun hasCompose(): Boolean
 
-    boolean hasComposeInclude();
+    fun hasComposeInclude(): Boolean
 
-    public boolean hasComposeExclude();
+    fun hasComposeExclude(): Boolean
 
-    public boolean hasComposeFilters();
+    fun hasComposeFilters(): Boolean
 
     /**
-     * A simple compose element of a ValueSet must have a compose without an exclude element. Each element of the
-     * include cannot have a filter or reference a ValueSet and must have a system and enumerate concepts.
+     * A simple compose element of a ValueSet must have a compose without an exclude element. Each
+     * element of the include cannot have a filter or reference a ValueSet and must have a system
+     * and enumerate concepts.
      *
      * @return boolean
      */
-    boolean hasSimpleCompose();
+    fun hasSimpleCompose(): Boolean
 
     /**
-     * A grouping compose element of a ValueSet must have a compose without an exclude element and each element of the
-     * include must reference a ValueSet.
+     * A grouping compose element of a ValueSet must have a compose without an exclude element and
+     * each element of the include must reference a ValueSet.
      *
      * @return boolean
      */
-    boolean hasGroupingCompose();
+    fun hasGroupingCompose(): Boolean
 
     /**
      * Indicates whether this ValueSet's compose element contains explicitly enumerated concepts.
      *
-     * <p>This method returns {@code true} if any {@code compose.include} component defines one or more
-     * {@code concept} entries. Explicit concepts represent directly specified codes that may be
-     * expanded locally using naive expansion, without requiring a terminology service.
+     * This method returns `true` if any `compose.include` component defines one or more `concept`
+     * entries. Explicit concepts represent directly specified codes that may be expanded locally
+     * using naive expansion, without requiring a terminology service.
      *
-     * <p>This method is used by expansion logic to determine whether local expansion should include
+     * This method is used by expansion logic to determine whether local expansion should include
      * explicitly defined codes. A ValueSet may contain both explicit concepts and referenced
      * ValueSets (a hybrid compose), in which case both sources must be included in the expansion.
      *
-     * <p>This method does not evaluate exclude elements or filters. Presence of filters may still
+     * This method does not evaluate exclude elements or filters. Presence of filters may still
      * require terminology service expansion depending on implementation capabilities.
      *
-     * @return {@code true} if the ValueSet compose includes explicitly enumerated concepts;
-     *         {@code false} otherwise
+     * @return `true` if the ValueSet compose includes explicitly enumerated concepts; `false`
+     *   otherwise
      */
-    boolean hasExplicitConcepts();
+    fun hasExplicitConcepts(): Boolean
 
     /**
      * Indicates whether this ValueSet's compose element includes references to other ValueSets.
      *
-     * <p>This method returns {@code true} if any {@code compose.include} component specifies one or
-     * more {@code valueSet} canonical references. Referenced ValueSets must be expanded and their
-     * resulting codes incorporated into this ValueSet's expansion.
+     * This method returns `true` if any `compose.include` component specifies one or more
+     * `valueSet` canonical references. Referenced ValueSets must be expanded and their resulting
+     * codes incorporated into this ValueSet's expansion.
      *
-     * <p>This method is used by expansion logic to determine whether recursive expansion of dependent
-     * ValueSets is required. A ValueSet may contain both referenced ValueSets and explicitly enumerated
-     * concepts (a hybrid compose), in which case both must be expanded and merged.
+     * This method is used by expansion logic to determine whether recursive expansion of dependent
+     * ValueSets is required. A ValueSet may contain both referenced ValueSets and explicitly
+     * enumerated concepts (a hybrid compose), in which case both must be expanded and merged.
      *
-     * <p>This method does not evaluate exclude elements or filters. Referenced ValueSets that require
-     * terminology service expansion may still be delegated depending on implementation capabilities.
+     * This method does not evaluate exclude elements or filters. Referenced ValueSets that require
+     * terminology service expansion may still be delegated depending on implementation
+     * capabilities.
      *
-     * @return {@code true} if the ValueSet compose includes references to other ValueSets;
-     *         {@code false} otherwise
+     * @return `true` if the ValueSet compose includes references to other ValueSets; `false`
+     *   otherwise
      */
-    boolean hasValueSetReferences();
+    fun hasValueSetReferences(): Boolean
 
     /**
-     * Performs a naive expansion on the ValueSet by collecting all codes within the compose.  Can only be performed on a ValueSet with a simple compose.
+     * Performs a naive expansion on the ValueSet by collecting all codes within the compose. Can
+     * only be performed on a ValueSet with a simple compose.
      */
-    void naiveExpand();
+    fun naiveExpand()
 
-    boolean hasNaiveParameter();
+    fun hasNaiveParameter(): Boolean
 
-    <T extends IBaseBackboneElement> T createNaiveParameter();
+    fun <T : IBaseBackboneElement> createNaiveParameter(): T?
 }

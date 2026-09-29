@@ -1,21 +1,17 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseDatatype
 
-public interface IQuestionnaireResponseItemComponentAdapter extends IItemComponentAdapter {
+interface IQuestionnaireResponseItemComponentAdapter : IItemComponentAdapter {
+    fun setLinkId(linkId: String?): IQuestionnaireResponseItemComponentAdapter?
 
-    IQuestionnaireResponseItemComponentAdapter setLinkId(String linkId);
+    fun setDefinition(definition: String?): IQuestionnaireResponseItemComponentAdapter?
 
-    IQuestionnaireResponseItemComponentAdapter setDefinition(String definition);
+    fun addItems(items: MutableList<IQuestionnaireResponseItemComponentAdapter?>?)
 
-    void addItems(List<IQuestionnaireResponseItemComponentAdapter> items);
+    fun hasAnswer(): Boolean
 
-    boolean hasAnswer();
+    var answer: MutableList<IQuestionnaireResponseItemAnswerComponentAdapter?>?
 
-    List<IQuestionnaireResponseItemAnswerComponentAdapter> getAnswer();
-
-    void setAnswer(List<IQuestionnaireResponseItemAnswerComponentAdapter> answers);
-
-    IQuestionnaireResponseItemAnswerComponentAdapter newAnswer(IBaseDatatype value);
+    fun newAnswer(value: IBaseDatatype?): IQuestionnaireResponseItemAnswerComponentAdapter?
 }

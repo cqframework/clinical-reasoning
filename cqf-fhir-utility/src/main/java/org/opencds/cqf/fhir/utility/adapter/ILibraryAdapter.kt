@@ -1,73 +1,82 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.ParametersUtil;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.Constants;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.util.ParametersUtil
+import org.apache.commons.lang3.StringUtils
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Constants
 
-/**
- * This interface exposes common functionality across all FHIR Library versions.
- */
-public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
+/** This interface exposes common functionality across all FHIR Library versions. */
+interface ILibraryAdapter : IKnowledgeArtifactAdapter {
+    fun hasContent(): Boolean
 
-    public final String CQF_MESSAGES_EXT_URL = "http://hl7.org/fhir/StructureDefinition/cqf-messages";
+    fun <T : ICompositeType> getContent(): MutableList<T?>?
 
-    boolean hasContent();
+    fun setContent(attachments: MutableList<out ICompositeType?>?)
 
-    <T extends ICompositeType> List<T> getContent();
+    fun addContent(): ICompositeType?
 
-    void setContent(List<? extends ICompositeType> attachments);
+    val type: ICompositeType?
 
-    ICompositeType addContent();
+    fun setType(type: String?): ILibraryAdapter
 
-    ICompositeType getType();
+    fun <T : ICompositeType> getParameter(): MutableList<T?>?
 
-    ILibraryAdapter setType(String type);
+    fun hasDataRequirement(): Boolean
 
-    <T extends ICompositeType> List<T> getParameter();
+    val dataRequirement: MutableList<IDataRequirementAdapter?>?
 
-    boolean hasDataRequirement();
+    fun addDataRequirement(dataRequirement: ICompositeType?): ILibraryAdapter
 
-    List<IDataRequirementAdapter> getDataRequirement();
+    fun <T : ICompositeType> setDataRequirement(dataRequirement: MutableList<T?>?): ILibraryAdapter
 
-    ILibraryAdapter addDataRequirement(ICompositeType dataRequirement);
+    fun setExpansionParameters(expansionParameters: IBaseParameters?)
 
-    <T extends ICompositeType> ILibraryAdapter setDataRequirement(List<T> dataRequirement);
-
-    void setExpansionParameters(IBaseParameters expansionParameters);
-
-    default void ensureExpansionParametersEntry(IKnowledgeArtifactAdapter artifactAdapter, String crmiVersion) {
-        var maybeExpansionParameters = this.getExpansionParameters();
-        if (maybeExpansionParameters.isPresent()) {
-            IBaseParameters expansionParameters = maybeExpansionParameters.get();
-            var resourceType = artifactAdapter.get().fhirType();
-            var url = artifactAdapter.getUrl();
-            var canonical = url + "|" + artifactAdapter.getVersion();
-            var parameterName = this.getExpansionParameterName(resourceType, crmiVersion);
+    fun ensureExpansionParametersEntry(
+        artifactAdapter: IKnowledgeArtifactAdapter,
+        crmiVersion: String?,
+    ) {
+        val maybeExpansionParameters = this.expansionParameters
+        if (maybeExpansionParameters.isPresent) {
+            val expansionParameters = maybeExpansionParameters.get()
+            val resourceType = artifactAdapter.get()!!.fhirType()
+            val url = artifactAdapter.url
+            val canonical = url + "|" + artifactAdapter.version
+            val parameterName = this.getExpansionParameterName(resourceType, crmiVersion)
             if (!this.parameterExists(expansionParameters, parameterName, canonical)) {
-                IPrimitiveType<String> canonicalToAdd =
-                        buildCanonicalToAdd(artifactAdapter, crmiVersion, resourceType, canonical, this.fhirContext());
+                val canonicalToAdd =
+                    buildCanonicalToAdd(
+                        artifactAdapter,
+                        crmiVersion,
+                        resourceType,
+                        canonical,
+                        this.fhirContext()!!,
+                    )
                 ParametersUtil.addParameterToParameters(
-                        this.fhirContext(), expansionParameters, parameterName, canonicalToAdd);
+                    this.fhirContext(),
+                    expansionParameters,
+                    parameterName,
+                    canonicalToAdd,
+                )
             }
         }
     }
 
-    default boolean parameterExists(IBaseParameters parameters, String parameterName, String canonical) {
+    fun parameterExists(
+        parameters: IBaseParameters?,
+        parameterName: String?,
+        canonical: String?,
+    ): Boolean {
         if (parameters == null) {
-            return false;
+            return false
         } else {
-            List<String> nameMatchedParameters =
-                    ParametersUtil.getNamedParameterValuesAsString(this.fhirContext(), parameters, parameterName);
-            return nameMatchedParameters.stream().anyMatch(p -> p.equals(canonical));
+            val nameMatchedParameters =
+                ParametersUtil.getNamedParameterValuesAsString(
+                    this.fhirContext(),
+                    parameters,
+                    parameterName,
+                )
+            return nameMatchedParameters.any { p -> p == canonical }
         }
     }
 
@@ -75,97 +84,101 @@ public interface ILibraryAdapter extends IKnowledgeArtifactAdapter {
      * Build a canonical-like primitive with extensions in a FHIR-version-agnostic way.
      *
      * @param artifactAdapter Adapter providing descriptor
-     * @param crmiVersion     CRMI version
-     * @param resourceType    Resource type string
-     * @param canonical       Canonical value
-     * @param ctx             FhirContext for the version in use
+     * @param crmiVersion CRMI version
+     * @param resourceType Resource type string
+     * @param canonical Canonical value
+     * @param ctx FhirContext for the version in use
      * @return IPrimitiveType<String> with extensions added
      */
-    private IPrimitiveType<String> buildCanonicalToAdd(
-            IKnowledgeArtifactAdapter artifactAdapter,
-            String crmiVersion,
-            String resourceType,
-            String canonical,
-            FhirContext ctx) {
+    private fun buildCanonicalToAdd(
+        artifactAdapter: IKnowledgeArtifactAdapter,
+        crmiVersion: String?,
+        resourceType: String,
+        canonical: String?,
+        ctx: FhirContext,
+    ): IPrimitiveType<String?> {
+        @Suppress("UNCHECKED_CAST")
+        val canonicalToAdd =
+            ctx.getElementDefinition("canonical")!!.newInstance() as IPrimitiveType<String?>
+        canonicalToAdd.setValueAsString(canonical)
 
-        @SuppressWarnings("unchecked")
-        IPrimitiveType<String> canonicalToAdd =
-                (IPrimitiveType<String>) ctx.getElementDefinition("canonical").newInstance();
-        canonicalToAdd.setValueAsString(canonical);
-
-        if (canonicalToAdd instanceof IBaseHasExtensions hasExtensions) {
-
+        if (canonicalToAdd is IBaseHasExtensions) {
             // Helper to add to extension list
-            @SuppressWarnings("unchecked")
-            List<IBaseExtension<?, ?>> extensions = (List<IBaseExtension<?, ?>>) hasExtensions.getExtension();
+
+            val extensions = canonicalToAdd.extension as MutableList<IBaseExtension<*, *>?>
 
             // ResourceType extension
             if (shouldAddResourceTypeExtension(crmiVersion, resourceType)) {
-                IBaseExtension<?, ?> resourceTypeExt = (IBaseExtension<?, ?>)
-                        ctx.getElementDefinition("Extension").newInstance();
-                resourceTypeExt.setUrl(Constants.CQF_RESOURCETYPE);
+                val resourceTypeExt =
+                    ctx.getElementDefinition("Extension")!!.newInstance() as IBaseExtension<*, *>
+                resourceTypeExt.url = Constants.CQF_RESOURCETYPE
 
-                @SuppressWarnings("unchecked")
-                IPrimitiveType<String> codeValue = (IPrimitiveType<String>)
-                        ctx.getElementDefinition("code").newInstance();
-                codeValue.setValueAsString(resourceType);
+                @Suppress("UNCHECKED_CAST")
+                val codeValue =
+                    ctx.getElementDefinition("code")!!.newInstance() as IPrimitiveType<String?>
+                codeValue.valueAsString = resourceType
 
-                resourceTypeExt.setValue(codeValue);
-                extensions.add(resourceTypeExt);
+                resourceTypeExt.value = codeValue
+                extensions.add(resourceTypeExt)
             }
 
             // Display extension
-            IBaseExtension<?, ?> displayExt =
-                    (IBaseExtension<?, ?>) ctx.getElementDefinition("Extension").newInstance();
-            displayExt.setUrl(Constants.DISPLAY_EXTENSION);
+            val displayExt =
+                ctx.getElementDefinition("Extension")!!.newInstance() as IBaseExtension<*, *>
+            displayExt.url = Constants.DISPLAY_EXTENSION
 
-            @SuppressWarnings("unchecked")
-            IPrimitiveType<String> displayValue =
-                    (IPrimitiveType<String>) ctx.getElementDefinition("string").newInstance();
-            displayValue.setValueAsString(artifactAdapter.getDescriptor());
+            @Suppress("UNCHECKED_CAST")
+            val displayValue =
+                ctx.getElementDefinition("string")!!.newInstance() as IPrimitiveType<String?>
+            displayValue.valueAsString = artifactAdapter.descriptor
 
-            displayExt.setValue(displayValue);
-            extensions.add(displayExt);
+            displayExt.value = displayValue
+            extensions.add(displayExt)
         }
 
-        return canonicalToAdd;
+        return canonicalToAdd
     }
 
-    default String getExpansionParameterName(String resourceType, String crmiVersion) {
-        if (StringUtils.isBlank(resourceType)) {
-            throw new IllegalArgumentException("Missing required parameter: 'resourceType'");
-        }
+    fun getExpansionParameterName(resourceType: String?, crmiVersion: String?): String {
+        require(!StringUtils.isBlank(resourceType)) { "Missing required parameter: 'resourceType'" }
 
-        boolean isCrmiV1 = crmiVersion != null && crmiVersion.equals(Constants.CRMI_VERSION_1);
+        val isCrmiV1 = crmiVersion != null && crmiVersion == Constants.CRMI_VERSION_1
 
-        if (resourceType.equals("CodeSystem")) {
-            return isCrmiV1 ? Constants.SYSTEM_VERSION : Constants.DEFAULT_SYSTEM_VERSION;
-        } else if (resourceType.equals("ValueSet")) {
-            return isCrmiV1 ? Constants.CANONICAL_VERSION : Constants.DEFAULT_VALUESET_VERSION;
+        return if (resourceType == "CodeSystem") {
+            if (isCrmiV1) Constants.SYSTEM_VERSION else Constants.DEFAULT_SYSTEM_VERSION
+        } else if (resourceType == "ValueSet") {
+            if (isCrmiV1) Constants.CANONICAL_VERSION else Constants.DEFAULT_VALUESET_VERSION
         } else {
-            return isCrmiV1 ? Constants.CANONICAL_VERSION : Constants.DEFAULT_CANONICAL_VERSION;
+            if (isCrmiV1) Constants.CANONICAL_VERSION else Constants.DEFAULT_CANONICAL_VERSION
         }
     }
 
     // For CRMI Version 1, entries for all resource types other than CodeSystem should have the
     // resourceType extension. For CRMI Version 2, only entries for ValueSets should have the
     // resourceType extension.
-    default boolean shouldAddResourceTypeExtension(String crmiVersion, String resourceType) {
-        var isV1AndQualifies = (crmiVersion == null || crmiVersion.equals(Constants.CRMI_VERSION_1))
-                && !resourceType.equals(Constants.RESOURCETYPE_CODESYSTEM);
+    fun shouldAddResourceTypeExtension(crmiVersion: String?, resourceType: String): Boolean {
+        val isV1AndQualifies =
+            (crmiVersion == null || crmiVersion == Constants.CRMI_VERSION_1) &&
+                resourceType != Constants.RESOURCETYPE_CODESYSTEM
 
-        var isV2AndQualifies = (crmiVersion != null && !crmiVersion.equals(Constants.CRMI_VERSION_1))
-                && resourceType.equals(Constants.RESOURCETYPE_VALUESET);
+        val isV2AndQualifies =
+            (crmiVersion != null && crmiVersion != Constants.CRMI_VERSION_1) &&
+                resourceType == Constants.RESOURCETYPE_VALUESET
 
-        return isV1AndQualifies || isV2AndQualifies;
+        return isV1AndQualifies || isV2AndQualifies
     }
 
-    default void addCqfMessagesExtension(IBaseOperationOutcome messages) {
-        addContained(messages);
-        var ext = addExtension();
-        ext.setUrl(CQF_MESSAGES_EXT_URL);
-        var ref =
-                (IBaseReference) fhirContext().getElementDefinition("Reference").newInstance();
-        ext.setValue(ref.setReference("#messages"));
+    fun addCqfMessagesExtension(messages: IBaseOperationOutcome?) {
+        addContained(messages)
+        val ext = addExtension<IBaseExtension<*, *>>()
+        ext!!.url = CQF_MESSAGES_EXT_URL
+        val ref =
+            fhirContext()!!.getElementDefinition("Reference")!!.newInstance() as IBaseReference
+        ext.value = ref.setReference("#messages")
+    }
+
+    companion object {
+        const val CQF_MESSAGES_EXT_URL: String =
+            "http://hl7.org/fhir/StructureDefinition/cqf-messages"
     }
 }

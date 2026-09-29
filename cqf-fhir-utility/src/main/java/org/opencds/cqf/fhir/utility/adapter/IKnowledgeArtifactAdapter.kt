@@ -1,386 +1,436 @@
-package org.opencds.cqf.fhir.utility.adapter;
+package org.opencds.cqf.fhir.utility.adapter
 
-import static java.util.stream.Collectors.toMap;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateTimeType;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newDateType;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newPeriod;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newStringType;
-import static org.opencds.cqf.fhir.utility.adapter.IAdapter.newUriType;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import java.util.Date
+import java.util.Optional
+import org.apache.commons.lang3.StringUtils
+import org.hl7.fhir.dstu3.model.MetadataResource
+import org.hl7.fhir.dstu3.model.Reference
+import org.hl7.fhir.dstu3.model.RelatedArtifact
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources
+import org.opencds.cqf.fhir.utility.Canonicals
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.SearchHelper.searchRepositoryByCanonical
+import org.opencds.cqf.fhir.utility.VersionComparator
+import org.opencds.cqf.fhir.utility.VersionUtilities
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo.Companion.convertRelatedArtifact
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.Companion.forFhirVersion
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.SearchHelper;
-import org.opencds.cqf.fhir.utility.VersionComparator;
-import org.opencds.cqf.fhir.utility.VersionUtilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+interface IKnowledgeArtifactAdapter : IResourceAdapter {
+    override fun get(): IDomainResource?
 
-@SuppressWarnings("UnstableApiUsage")
-public interface IKnowledgeArtifactAdapter extends IResourceAdapter {
-    public static final Logger logger = LoggerFactory.getLogger(IKnowledgeArtifactAdapter.class);
-    static final String DEPENDSON = "depends-on";
+    override fun copy(): IDomainResource?
 
-    IDomainResource get();
-
-    IDomainResource copy();
-
-    default boolean hasName() {
-        return StringUtils.isNotBlank(getName());
+    fun hasName(): Boolean {
+        return StringUtils.isNotBlank(this.name)
     }
 
-    default String getName() {
-        return resolvePathString(get(), "name");
+    var name: String?
+        get() = resolvePathString(get()!!, "name")
+        set(name) {
+            setValue(get(), "name", IAdapter.Companion.newStringType(fhirVersion()!!, name))
+        }
+
+    fun hasTitle(): Boolean {
+        return StringUtils.isNotBlank(this.title)
     }
 
-    default void setName(String name) {
-        setValue(get(), "name", newStringType(fhirVersion(), name));
+    var title: String?
+        get() = resolvePathString(get()!!, "title")
+        set(title) {
+            setValue(get(), "title", IAdapter.Companion.newStringType(fhirVersion()!!, title))
+        }
+
+    val descriptor: String
+        get() =
+            "${this.get()!!.fhirType()} ${if (this.hasTitle()) this.title else this.name}${if (this.hasVersion()) ", " + this.version else ""}"
+
+    fun hasUrl(): Boolean {
+        return StringUtils.isNotBlank(this.url)
     }
 
-    default boolean hasTitle() {
-        return StringUtils.isNotBlank(getTitle());
+    var url: String?
+        get() = resolvePathString(get()!!, "url")
+        set(url) {
+            setValue(get(), "url", IAdapter.Companion.newUriType(fhirVersion()!!, url))
+        }
+
+    fun hasVersion(): Boolean {
+        return StringUtils.isNotBlank(this.version)
     }
 
-    default String getTitle() {
-        return resolvePathString(get(), "title");
-    }
+    var version: String?
+        get() = resolvePathString(get()!!, "version")
+        set(version) {
+            setValue(get(), "version", IAdapter.Companion.newStringType(fhirVersion()!!, version))
+        }
 
-    default void setTitle(String title) {
-        setValue(get(), "title", newStringType(fhirVersion(), title));
-    }
+    val canonical: String?
+        /**
+         * Returns the url of the artifact appended with '|' version if the artifact has a version.
+         *
+         * @return canonical url of artifact
+         */
+        get() {
+            val url = if (hasUrl()) this.url else id
+            return if (url == null) null else (url + if (hasVersion()) "|${this.version}" else "")
+        }
 
-    default String getDescriptor() {
-        return "%s %s%s"
-                .formatted(
-                        this.get().fhirType(),
-                        this.hasTitle() ? this.getTitle() : this.getName(),
-                        this.hasVersion() ? ", " + this.getVersion() : "");
-    }
+    val dependencies: MutableList<IDependencyInfo?>?
 
-    default boolean hasUrl() {
-        return StringUtils.isNotBlank(getUrl());
-    }
-
-    default String getUrl() {
-        return resolvePathString(get(), "url");
-    }
-
-    default void setUrl(String url) {
-        setValue(get(), "url", newUriType(fhirVersion(), url));
-    }
-
-    default boolean hasVersion() {
-        return StringUtils.isNotBlank(getVersion());
-    }
-
-    default String getVersion() {
-        return resolvePathString(get(), "version");
-    }
-
-    default void setVersion(String version) {
-        setValue(get(), "version", newStringType(fhirVersion(), version));
-    }
-
-    /**
-     * Returns the url of the artifact appended with '|' version if the artifact has a version.
-     * @return canonical url of artifact
-     */
-    default String getCanonical() {
-        var url = hasUrl() ? getUrl() : getId();
-        return url == null ? null : url.concat(hasVersion() ? "|%s".formatted(getVersion()) : "");
-    }
-
-    List<IDependencyInfo> getDependencies();
-
-    default List<IDependencyInfo> getDependencies(IRepository repository) {
+    fun getDependencies(repository: IRepository?): MutableList<IDependencyInfo?>? {
         // TODO: this should be smarter
-        return getDependencies();
+        return this.dependencies
     }
 
-    default String getReferenceSource() {
-        return hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
-    }
+    val referenceSource: String?
+        get() = if (hasVersion()) this.url + "|" + this.version else this.url
 
-    default void addProfileReferences(List<IDependencyInfo> references, String referenceSource) {
-        get().getMeta().getProfile().forEach(x -> {
-            var p = (IPrimitiveType<String>) x;
-            var e = (IBaseHasExtensions) x;
-            references.add(new DependencyInfo(referenceSource, p.getValueAsString(), e.getExtension(), p::setValue));
-        });
-    }
-
-    @SuppressWarnings("unchecked")
-    default Date getApprovalDate() {
-        IPrimitiveType<Date> approvalDate = resolvePath(get(), "approvalDate", IPrimitiveType.class);
-        return approvalDate == null ? null : approvalDate.getValue();
-    }
-
-    default void setApprovalDate(Date approvalDate) {
-        setApprovalDateElement(newDateType(fhirVersion(), approvalDate));
-    }
-
-    default void setApprovalDateElement(IPrimitiveType<Date> approvalDate) {
-        try {
-            setValue(get(), "approvalDate", approvalDate);
-        } catch (Exception e) {
-            // Do nothing
-            logger.debug("Field 'approvalDate' does not exist on Resource type {}", get().fhirType());
+    fun addProfileReferences(references: MutableList<IDependencyInfo?>, referenceSource: String?) {
+        get()!!.meta.profile.forEach { x ->
+            val p = x as IPrimitiveType<String?>
+            val e = x as IBaseHasExtensions?
+            references.add(
+                DependencyInfo(
+                    referenceSource,
+                    p.valueAsString,
+                    e!!.extension,
+                    { theValue -> p.value = theValue },
+                )
+            )
         }
     }
 
-    @SuppressWarnings("unchecked")
-    default Date getDate() {
-        IPrimitiveType<Date> date = resolvePath(get(), "date", IPrimitiveType.class);
-        return date == null ? null : date.getValue();
-    }
+    var approvalDate: Date?
+        get() {
+            @Suppress("UNCHECKED_CAST")
+            val approvalDate =
+                resolvePath(get(), "approvalDate", IPrimitiveType::class.java)
+                    as IPrimitiveType<Date?>?
+            return approvalDate?.value
+        }
+        set(approvalDate) {
+            setApprovalDateElement(IAdapter.Companion.newDateType(fhirVersion()!!, approvalDate))
+        }
 
-    default void setDate(Date date) {
-        setDateElement(newDateTimeType(fhirVersion(), date));
-    }
-
-    default void setDateElement(IPrimitiveType<Date> date) {
-        setValue(get(), "date", date);
-    }
-
-    default String getPurpose() {
-        return resolvePathString(get(), "purpose");
-    }
-
-    <T extends ICompositeType> List<T> getUseContext();
-
-    String getStatus();
-
-    void setStatus(String status);
-
-    default ICompositeType getEffectivePeriod() {
-        var effectivePeriod = resolvePath(get(), "effectivePeriod", ICompositeType.class);
-        return effectivePeriod == null ? newPeriod(fhirVersion()) : effectivePeriod;
-    }
-
-    default void setEffectivePeriod(ICompositeType period) {
+    fun setApprovalDateElement(approvalDate: IPrimitiveType<Date?>?) {
         try {
-            setValue(get(), "effectivePeriod", period);
-        } catch (Exception e) {
+            setValue(get(), "approvalDate", approvalDate)
+        } catch (e: Exception) {
             // Do nothing
-            logger.debug("Field 'effectivePeriod' does not exist on Resource type {}", get().fhirType());
+            logger.debug(
+                "Field 'approvalDate' does not exist on Resource type {}",
+                get()!!.fhirType(),
+            )
         }
     }
 
-    @SuppressWarnings("unchecked")
-    default boolean getExperimental() {
-        var experimental = resolvePath(get(), "experimental", IPrimitiveType.class);
-        return experimental != null && ((IPrimitiveType<Boolean>) experimental).getValue();
+    var date: Date?
+        get() {
+            @Suppress("UNCHECKED_CAST")
+            val date =
+                resolvePath(get(), "date", IPrimitiveType::class.java) as IPrimitiveType<Date?>?
+            return date?.value
+        }
+        set(date) {
+            setDateElement(IAdapter.Companion.newDateTimeType(fhirVersion()!!, date))
+        }
+
+    fun setDateElement(date: IPrimitiveType<Date?>?) {
+        setValue(get(), "date", date)
     }
 
-    @SuppressWarnings("unchecked")
-    static <T extends ICompositeType & IBaseHasExtensions> T newRelatedArtifact(
-            FhirVersionEnum version, String type, String reference, String display) {
-        switch (version) {
-            case DSTU3:
-                var dstu3 = new org.hl7.fhir.dstu3.model.RelatedArtifact();
-                dstu3.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.fromCode(type))
-                        .setResource(new Reference(reference))
-                        .setDisplay(display);
-                return (T) dstu3;
-            case R4:
-                var r4 = new org.hl7.fhir.r4.model.RelatedArtifact();
-                r4.setType(org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.fromCode(type))
+    val purpose: String?
+        get() = resolvePathString(get()!!, "purpose")
+
+    fun <T : ICompositeType> getUseContext(): MutableList<T?>?
+
+    var status: String?
+
+    var effectivePeriod: ICompositeType?
+        get() {
+            val effectivePeriod = resolvePath(get(), "effectivePeriod", ICompositeType::class.java)
+            return effectivePeriod ?: IAdapter.newPeriod(fhirVersion()!!)
+        }
+        set(period) {
+            try {
+                setValue(get(), "effectivePeriod", period)
+            } catch (e: Exception) {
+                // Do nothing
+                logger.debug(
+                    "Field 'effectivePeriod' does not exist on Resource type {}",
+                    get()!!.fhirType(),
+                )
+            }
+        }
+
+    val experimental: Boolean
+        get() {
+            val experimental = resolvePath(get(), "experimental", IPrimitiveType::class.java)
+            @Suppress("UNCHECKED_CAST")
+            return experimental != null && (experimental as IPrimitiveType<Boolean?>).value!!
+        }
+
+    fun <T> hasRelatedArtifact(): Boolean where T : ICompositeType, T : IBaseHasExtensions {
+        return getRelatedArtifact<T>().isNotEmpty()
+    }
+
+    fun <T> addRelatedArtifact(relatedArtifact: T?) where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        try {
+            setValue(get(), "relatedArtifact", mutableListOf(relatedArtifact))
+        } catch (e: Exception) {
+            // Do nothing
+            logger.debug(
+                "Field 'relatedArtifact' does not exist on Resource type {}",
+                get()!!.fhirType(),
+            )
+        }
+    }
+
+    fun <T> setRelatedArtifact(relatedArtifacts: MutableList<T?>) where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        try {
+            setValue(get(), "relatedArtifact", null)
+            setValue(get(), "relatedArtifact", relatedArtifacts)
+        } catch (e: Exception) {
+            // Do nothing
+            logger.debug(
+                "Field 'relatedArtifact' does not exist on Resource type {}",
+                get()!!.fhirType(),
+            )
+        }
+    }
+
+    fun <T> getRelatedArtifactsOfType(codeString: String?): MutableList<T?>? where
+    T : ICompositeType,
+    T : IBaseHasExtensions
+
+    fun <T> getComponents(): MutableList<T?>? where T : ICompositeType, T : IBaseHasExtensions {
+        return getRelatedArtifactsOfType<T>("composed-of")
+    }
+
+    fun <T> combineComponentsAndDependencies(): MutableList<IDependencyInfo?> where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        val referenceSource = if (hasVersion()) this.url + "|" + this.version else this.url
+
+        return (getComponents<T>()!!.filterNotNull().map { ra ->
+                convertRelatedArtifact(ra, referenceSource)
+            } + this.dependencies!!)
+            .toMutableList()
+    }
+
+    fun accept(visitor: IKnowledgeArtifactVisitor, operationParameters: IBaseParameters?): IBase? {
+        return visitor.visit(this, operationParameters)
+    }
+
+    fun <T> getOwnedRelatedArtifacts(): MutableList<T?> where
+    T : ICompositeType,
+    T : IBaseHasExtensions {
+        return getRelatedArtifactsOfType<T>("composed-of")!!
+            .filter { relatedArtifact -> checkIfRelatedArtifactIsOwned(relatedArtifact) }
+            .toMutableList()
+    }
+
+    val expansionParameters: Optional<IBaseParameters>
+        get() = Optional.empty<IBaseParameters>()
+
+    val referencedLibraries: MutableMap<String?, String?>
+        get() = resolveCqfLibraries()
+
+    fun retrieveReferencedLibraries(
+        repository: IRepository?
+    ): MutableMap<String?, ILibraryAdapter?> {
+        return this.referencedLibraries.values
+            .map { url ->
+                adapterFactory!!.createLibrary(
+                    searchRepositoryByCanonical(
+                        repository!!,
+                        VersionUtilities.canonicalTypeForVersion(fhirVersion()!!, url),
+                    )
+                )
+            }
+            .associateBy { it.name }
+            .toMutableMap()
+    }
+
+    fun resolveCqfLibraries(): MutableMap<String?, String?> {
+        return getExtension<IBaseExtension<*, *>>()
+            .filter { e -> Constants.CQF_LIBRARY == e!!.url }
+            .map { obj -> obj!!.value }
+            .filterIsInstance<IPrimitiveType<*>>()
+            .map { obj -> obj.valueAsString }
+            .filter { l -> !Canonicals.getIdPart(l!!).isNullOrBlank() }
+            .associateBy { l -> Canonicals.getIdPart(l!!)!! }
+            .toMutableMap()
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(IKnowledgeArtifactAdapter::class.java)
+        const val DEPENDSON: String = "depends-on"
+
+        @JvmStatic
+        fun <T> newRelatedArtifact(
+            version: FhirVersionEnum,
+            type: String?,
+            reference: String?,
+            display: String?,
+        ): T where T : ICompositeType, T : IBaseHasExtensions {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> {
+                    val dstu3 = RelatedArtifact()
+                    dstu3
+                        .setType(RelatedArtifact.RelatedArtifactType.fromCode(type))
+                        .setResource(Reference(reference))
+                        .setDisplay(display)
+                    dstu3
+                }
+
+                FhirVersionEnum.R4 -> {
+                    val r4 = org.hl7.fhir.r4.model.RelatedArtifact()
+                    r4.setType(
+                            org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.fromCode(type)
+                        )
                         .setResource(reference)
-                        .setDisplay(display);
-                return (T) r4;
-            case R5:
-                var r5 = new org.hl7.fhir.r5.model.RelatedArtifact();
-                r5.setType(org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.fromCode(type))
+                        .setDisplay(display)
+                    r4
+                }
+
+                FhirVersionEnum.R5 -> {
+                    val r5 = org.hl7.fhir.r5.model.RelatedArtifact()
+                    r5.setType(
+                            org.hl7.fhir.r5.model.RelatedArtifact.RelatedArtifactType.fromCode(type)
+                        )
                         .setResource(reference)
-                        .setDisplay(display);
-                return (T) r5;
+                        .setDisplay(display)
+                    r5
+                }
 
-            default:
-                throw new UnprocessableEntityException("Unsupported version: " + version.toString());
+                else -> throw UnprocessableEntityException("Unsupported version: $version")
+            }
+                as T
         }
-    }
 
-    static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactReference(T relatedArtifact) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
-            return artifact2.getResource().getReference();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
-            return artifact1.getResource();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
-            return artifact.getResource();
-        } else {
-            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
+        @JvmStatic
+        fun <T> getRelatedArtifactReference(relatedArtifact: T?): String? where
+        T : ICompositeType,
+        T : IBaseHasExtensions {
+            return when (relatedArtifact) {
+                is RelatedArtifact -> relatedArtifact.resource.reference
+
+                is org.hl7.fhir.r4.model.RelatedArtifact -> relatedArtifact.resource
+
+                is org.hl7.fhir.r5.model.RelatedArtifact -> relatedArtifact.resource
+
+                else -> throw UnprocessableEntityException(VALID_RELATED_ARTIFACT)
+            }
         }
-    }
 
-    static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactDisplay(T relatedArtifact) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
-            return artifact2.getDisplay();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
-            return artifact1.getDisplay();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
-            return artifact.getDisplay();
-        } else {
-            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
+        @JvmStatic
+        fun <T> getRelatedArtifactDisplay(relatedArtifact: T?): String? where
+        T : ICompositeType,
+        T : IBaseHasExtensions {
+            return when (relatedArtifact) {
+                is RelatedArtifact -> relatedArtifact.display
+
+                is org.hl7.fhir.r4.model.RelatedArtifact -> relatedArtifact.display
+
+                is org.hl7.fhir.r5.model.RelatedArtifact -> relatedArtifact.display
+
+                else -> throw UnprocessableEntityException(VALID_RELATED_ARTIFACT)
+            }
         }
-    }
 
-    static <T extends ICompositeType & IBaseHasExtensions> String getRelatedArtifactType(T relatedArtifact) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
-            return artifact2.getType().toCode();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
-            return artifact1.getType().toCode();
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
-            return artifact.getType().toCode();
-        } else {
-            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
+        @JvmStatic
+        fun <T> getRelatedArtifactType(relatedArtifact: T?): String? where
+        T : ICompositeType,
+        T : IBaseHasExtensions {
+            return when (relatedArtifact) {
+                is RelatedArtifact -> relatedArtifact.type.toCode()
+
+                is org.hl7.fhir.r4.model.RelatedArtifact -> relatedArtifact.type.toCode()
+
+                is org.hl7.fhir.r5.model.RelatedArtifact -> relatedArtifact.type.toCode()
+
+                else -> throw UnprocessableEntityException(VALID_RELATED_ARTIFACT)
+            }
         }
-    }
 
-    static <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifactReference(
-            T relatedArtifact, String reference, String display) {
-        if (relatedArtifact instanceof org.hl7.fhir.dstu3.model.RelatedArtifact artifact2) {
-            artifact2.getResource().setReference(reference).setDisplay(display);
-        } else if (relatedArtifact instanceof org.hl7.fhir.r4.model.RelatedArtifact artifact1) {
-            artifact1.setResource(reference).setDisplay(display);
-        } else if (relatedArtifact instanceof org.hl7.fhir.r5.model.RelatedArtifact artifact) {
-            artifact.setResource(reference).setDisplay(display);
-        } else {
-            throw new UnprocessableEntityException(VALID_RELATED_ARTIFACT);
+        @JvmStatic
+        fun <T> setRelatedArtifactReference(
+            relatedArtifact: T?,
+            reference: String?,
+            display: String?,
+        ) where T : ICompositeType, T : IBaseHasExtensions {
+            when (relatedArtifact) {
+                is RelatedArtifact -> {
+                    relatedArtifact.resource.setReference(reference).setDisplay(display)
+                }
+
+                is org.hl7.fhir.r4.model.RelatedArtifact -> {
+                    relatedArtifact.setResource(reference).setDisplay(display)
+                }
+
+                is org.hl7.fhir.r5.model.RelatedArtifact -> {
+                    relatedArtifact.setResource(reference).setDisplay(display)
+                }
+
+                else -> {
+                    throw UnprocessableEntityException(VALID_RELATED_ARTIFACT)
+                }
+            }
         }
-    }
 
-    default boolean hasRelatedArtifact() {
-        return !getRelatedArtifact().isEmpty();
-    }
-
-    default <T extends ICompositeType & IBaseHasExtensions> void addRelatedArtifact(T relatedArtifact) {
-        try {
-            setValue(get(), "relatedArtifact", List.of(relatedArtifact));
-        } catch (Exception e) {
-            // Do nothing
-            logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
+        @JvmStatic
+        fun <T> checkIfRelatedArtifactIsOwned(relatedArtifact: T?): Boolean where
+        T : ICompositeType,
+        T : IBaseHasExtensions {
+            return relatedArtifact!!.extension.any { ext -> ext!!.url == IS_OWNED_URL }
         }
-    }
 
-    default <T extends ICompositeType & IBaseHasExtensions> void setRelatedArtifact(List<T> relatedArtifacts) {
-        try {
-            setValue(get(), "relatedArtifact", null);
-            setValue(get(), "relatedArtifact", relatedArtifacts);
-        } catch (Exception e) {
-            // Do nothing
-            logger.debug("Field 'relatedArtifact' does not exist on Resource type {}", get().fhirType());
+        fun isSupportedMetadataResource(resource: IBaseResource?): Boolean {
+            return resource is MetadataResource ||
+                resource is org.hl7.fhir.r4.model.MetadataResource ||
+                resource is org.hl7.fhir.r5.model.MetadataResource
         }
-    }
 
-    <T extends ICompositeType & IBaseHasExtensions> List<T> getRelatedArtifactsOfType(String codeString);
-
-    default <T extends ICompositeType & IBaseHasExtensions> List<T> getComponents() {
-        return getRelatedArtifactsOfType("composed-of");
-    }
-
-    static <T extends ICompositeType & IBaseHasExtensions> boolean checkIfRelatedArtifactIsOwned(T relatedArtifact) {
-        return relatedArtifact.getExtension().stream()
-                .anyMatch(ext -> ext.getUrl().equals(IS_OWNED_URL));
-    }
-
-    @SuppressWarnings({"squid:S1612"})
-    default List<IDependencyInfo> combineComponentsAndDependencies() {
-        final String referenceSource = hasVersion() ? getUrl() + "|" + getVersion() : getUrl();
-        return Stream.concat(
-                        getComponents().stream()
-                                .filter(Objects::nonNull)
-                                .map(ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource)),
-                        getDependencies().stream())
-                .collect(Collectors.toList());
-    }
-
-    default IBase accept(IKnowledgeArtifactVisitor visitor, IBaseParameters operationParameters) {
-        return visitor.visit(this, operationParameters);
-    }
-
-    @SuppressWarnings("unchecked")
-    default <T extends ICompositeType & IBaseHasExtensions> List<T> getOwnedRelatedArtifacts() {
-        return (List<T>) getRelatedArtifactsOfType("composed-of").stream()
-                .filter(IKnowledgeArtifactAdapter::checkIfRelatedArtifactIsOwned)
-                .collect(Collectors.toList());
-    }
-
-    static boolean isSupportedMetadataResource(IBaseResource resource) {
-        return resource instanceof org.hl7.fhir.dstu3.model.MetadataResource
-                || resource instanceof org.hl7.fhir.r4.model.MetadataResource
-                || resource instanceof org.hl7.fhir.r5.model.MetadataResource;
-    }
-
-    static Optional<IDomainResource> findLatestVersion(IBaseBundle bundle) {
-        var versionComparator = new VersionComparator();
-        var sorted = BundleHelper.getEntryResources(bundle).stream()
-                .filter(IKnowledgeArtifactAdapter::isSupportedMetadataResource)
-                .map(r -> (IKnowledgeArtifactAdapter) IAdapterFactory.forFhirVersion(r.getStructureFhirVersionEnum())
-                        .createResource(r))
-                .sorted((a, b) -> versionComparator.compare(a.getVersion(), b.getVersion()))
-                .toList();
-        if (!sorted.isEmpty()) {
-            return Optional.of(sorted.get(sorted.size() - 1).get());
-        } else {
-            return Optional.empty();
+        @JvmStatic
+        fun findLatestVersion(bundle: IBaseBundle): Optional<IDomainResource> {
+            val versionComparator = VersionComparator()
+            val sorted =
+                getEntryResources(bundle)
+                    .filter { resource -> isSupportedMetadataResource(resource) }
+                    .map { r ->
+                        forFhirVersion(r.structureFhirVersionEnum).createResource(r)
+                            as IKnowledgeArtifactAdapter?
+                    }
+                    .sortedWith { a, b -> versionComparator.compare(a!!.version!!, b!!.version!!) }
+            return if (sorted.isNotEmpty()) {
+                Optional.of(sorted[sorted.size - 1]!!.get()!!)
+            } else {
+                Optional.empty()
+            }
         }
-    }
 
-    default Optional<IBaseParameters> getExpansionParameters() {
-        return Optional.empty();
+        const val VALID_RELATED_ARTIFACT: String = "Must be a valid RelatedArtifact"
+        const val RELEASE_LABEL_URL: String =
+            "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel"
+        const val RELEASE_DESCRIPTION_URL: String =
+            "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription"
+        const val US_PH_CONTEXT_TYPE_URL: String =
+            "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type"
+        const val CONTEXT_TYPE_URL: String =
+            "http://terminology.hl7.org/CodeSystem/usage-context-type"
+        const val CONTEXT_URL: String = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context"
+        const val IS_OWNED_URL: String = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned"
     }
-
-    default Map<String, String> getReferencedLibraries() {
-        return resolveCqfLibraries();
-    }
-
-    default Map<String, ILibraryAdapter> retrieveReferencedLibraries(IRepository repository) {
-        return getReferencedLibraries().values().stream()
-                .map(url -> getAdapterFactory()
-                        .createLibrary(SearchHelper.searchRepositoryByCanonical(
-                                repository, VersionUtilities.canonicalTypeForVersion(fhirVersion(), url))))
-                .collect(toMap(IKnowledgeArtifactAdapter::getName, l -> l));
-    }
-
-    default Map<String, String> resolveCqfLibraries() {
-        return getExtension().stream()
-                .filter(e -> Constants.CQF_LIBRARY.equals(e.getUrl()))
-                .map(IBaseExtension::getValue)
-                .filter(IPrimitiveType.class::isInstance)
-                .map(IPrimitiveType.class::cast)
-                .map(IPrimitiveType::getValueAsString)
-                .filter(l -> StringUtils.isNotBlank(Canonicals.getIdPart(l)))
-                .map(l -> Map.entry(Objects.requireNonNull(Canonicals.getIdPart(l)), l))
-                .filter(e -> e.getKey() != null)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    String VALID_RELATED_ARTIFACT = "Must be a valid RelatedArtifact";
-    String RELEASE_LABEL_URL = "http://hl7.org/fhir/StructureDefinition/artifact-releaseLabel";
-    String RELEASE_DESCRIPTION_URL = "http://hl7.org/fhir/StructureDefinition/artifact-releaseDescription";
-    String US_PH_CONTEXT_TYPE_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type";
-    String CONTEXT_TYPE_URL = "http://terminology.hl7.org/CodeSystem/usage-context-type";
-    String CONTEXT_URL = "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context";
-    String IS_OWNED_URL = "http://hl7.org/fhir/StructureDefinition/artifact-isOwned";
 }

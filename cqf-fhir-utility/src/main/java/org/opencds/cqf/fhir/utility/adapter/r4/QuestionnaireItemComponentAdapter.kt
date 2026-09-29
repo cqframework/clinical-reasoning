@@ -1,196 +1,166 @@
-package org.opencds.cqf.fhir.utility.adapter.r4;
+package org.opencds.cqf.fhir.utility.adapter.r4
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Expression;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemInitialComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
-import org.hl7.fhir.r4.model.Type;
-import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
-import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseCoding
+import org.hl7.fhir.instance.model.api.ICompositeType
+import org.hl7.fhir.r4.model.*
+import org.opencds.cqf.fhir.utility.adapter.*
 
-public class QuestionnaireItemComponentAdapter extends BaseElementAdapter
-        implements IQuestionnaireItemComponentAdapter {
+class QuestionnaireItemComponentAdapter(item: IBase) :
+    BaseElementAdapter(FhirVersionEnum.R4, item), IQuestionnaireItemComponentAdapter {
+    private val _item: Questionnaire.QuestionnaireItemComponent
 
-    private final QuestionnaireItemComponent item;
-
-    public QuestionnaireItemComponentAdapter(IBase item) {
-        super(FhirVersionEnum.R4, item);
-        if (!(item instanceof QuestionnaireItemComponent)) {
-            throw new IllegalArgumentException(
-                    "object passed as item argument is not a QuestionnaireItemComponent data type");
+    init {
+        require(item is Questionnaire.QuestionnaireItemComponent) {
+            "object passed as item argument is not a QuestionnaireItemComponent data type"
         }
-        this.item = (QuestionnaireItemComponent) item;
+        _item = item
     }
 
-    @Override
-    public QuestionnaireItemComponent get() {
-        return item;
+    override fun get(): Questionnaire.QuestionnaireItemComponent {
+        return _item
     }
 
-    @Override
-    public FhirContext fhirContext() {
-        return fhirContext;
+    override fun fhirContext(): FhirContext? {
+        return fhirContext
     }
 
-    @Override
-    public String getLinkId() {
-        return item.getLinkId();
+    override val linkId: String?
+        get() {
+            return _item.linkId
+        }
+
+    override fun setLinkId(linkId: String?): IQuestionnaireItemComponentAdapter {
+        get().setLinkId(linkId)
+        return this
     }
 
-    @Override
-    public IQuestionnaireItemComponentAdapter setLinkId(String linkId) {
-        get().setLinkId(linkId);
-        return this;
+    override fun hasDefinition(): Boolean {
+        return _item.hasDefinition()
     }
 
-    @Override
-    public boolean hasDefinition() {
-        return item.hasDefinition();
+    override val definition: String?
+        get() {
+            return _item.definition
+        }
+
+    override fun setDefinition(definition: String?): IQuestionnaireItemComponentAdapter {
+        _item.setDefinition(definition)
+        return this
     }
 
-    @Override
-    public String getDefinition() {
-        return item.getDefinition();
+    override fun hasItem(): Boolean {
+        return _item.hasItem()
     }
 
-    @Override
-    public IQuestionnaireItemComponentAdapter setDefinition(String definition) {
-        item.setDefinition(definition);
-        return this;
+    override var item: MutableList<out IItemComponentAdapter?>?
+        get() {
+            return _item.item
+                .map { questionnaireItem ->
+                    adapterFactory.createQuestionnaireItem(questionnaireItem)
+                }
+                .toMutableList()
+        }
+        set(items) {
+            _item.setItem(
+                items!!
+                    .map { obj -> obj!!.get() }
+                    .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
+                    .toMutableList()
+            )
+        }
+
+    override fun addItem(item: IItemComponentAdapter?) {
+        this._item.addItem(item!!.get() as Questionnaire.QuestionnaireItemComponent?)
     }
 
-    @Override
-    public boolean hasItem() {
-        return item.hasItem();
+    override fun addItems(items: MutableList<IQuestionnaireItemComponentAdapter?>?) {
+        items!!
+            .map { obj -> obj!!.get() }
+            .map { obj -> Questionnaire.QuestionnaireItemComponent::class.java.cast(obj) }
+            .forEach { t -> this._item.addItem(t) }
     }
 
-    @Override
-    public List<IQuestionnaireItemComponentAdapter> getItem() {
-        return item.getItem().stream()
-                .map(adapterFactory::createQuestionnaireItem)
-                .toList();
+    override val code: MutableList<IBaseCoding?>
+        get() {
+            return _item.code.map { obj -> IBaseCoding::class.java.cast(obj) }.toMutableList()
+        }
+
+    override val text: String?
+        get() {
+            return _item.text
+        }
+
+    override fun setText(text: String?): IQuestionnaireItemComponentAdapter {
+        _item.setText(text)
+        return this
     }
 
-    @Override
-    public void setItem(List<? extends IItemComponentAdapter> items) {
-        item.setItem(items.stream()
-                .map(IAdapter::get)
-                .map(QuestionnaireItemComponent.class::cast)
-                .collect(Collectors.toList()));
+    override val type: String?
+        get() {
+            return _item.type.toCode()
+        }
+
+    override fun setType(type: String?): IQuestionnaireItemComponentAdapter {
+        _item.setType(Questionnaire.QuestionnaireItemType.fromCode(type))
+        return this
     }
 
-    @Override
-    public void addItem(IItemComponentAdapter item) {
-        this.item.addItem((QuestionnaireItemComponent) item.get());
+    override val isGroupItem: Boolean
+        get() {
+            return _item.type == Questionnaire.QuestionnaireItemType.GROUP
+        }
+
+    override val isChoiceItem: Boolean
+        get() {
+            return _item.type == Questionnaire.QuestionnaireItemType.CHOICE
+        }
+
+    override val required: Boolean
+        get() {
+            return _item.required
+        }
+
+    override fun setRequired(required: Boolean): IQuestionnaireItemComponentAdapter {
+        get().setRequired(required)
+        return this
     }
 
-    @Override
-    public void addItems(List<IQuestionnaireItemComponentAdapter> items) {
-        items.stream()
-                .map(IAdapter::get)
-                .map(QuestionnaireItemComponent.class::cast)
-                .forEach(this.item::addItem);
+    override val repeats: Boolean
+        get() {
+            return _item.repeats
+        }
+
+    override fun setRepeats(repeats: Boolean): IQuestionnaireItemComponentAdapter {
+        get().setRepeats(repeats)
+        return this
     }
 
-    @Override
-    public List<IBaseCoding> getCode() {
-        return item.getCode().stream().map(IBaseCoding.class::cast).toList();
+    override fun addAnswerOption(option: ICodingAdapter?) {
+        get().addAnswerOption().setValue(option!!.get() as Coding?)
     }
 
-    @Override
-    public String getText() {
-        return item.getText();
+    override fun hasInitial(): Boolean {
+        return _item.hasInitial()
     }
 
-    @Override
-    public IQuestionnaireItemComponentAdapter setText(String text) {
-        item.setText(text);
-        return this;
+    override val initial: MutableList<Type?>
+        get() {
+            return _item.initial.map { obj -> obj!!.value }.toMutableList()
+        }
+
+    override fun newResponseItem(): IQuestionnaireResponseItemComponentAdapter {
+        return adapterFactory.createQuestionnaireResponseItem(
+            QuestionnaireResponse.QuestionnaireResponseItemComponent()
+                .setLinkId(_item.linkId)
+                .setDefinitionElement(_item.definitionElement)
+                .setTextElement(_item.textElement)
+        )
     }
 
-    @Override
-    public String getType() {
-        return item.getType().toCode();
-    }
-
-    @Override
-    public IQuestionnaireItemComponentAdapter setType(String type) {
-        item.setType(QuestionnaireItemType.fromCode(type));
-        return this;
-    }
-
-    @Override
-    public boolean isGroupItem() {
-        return item.getType().equals(QuestionnaireItemType.GROUP);
-    }
-
-    @Override
-    public boolean isChoiceItem() {
-        return item.getType().equals(QuestionnaireItemType.CHOICE);
-    }
-
-    @Override
-    public boolean getRequired() {
-        return item.getRequired();
-    }
-
-    @Override
-    public IQuestionnaireItemComponentAdapter setRequired(boolean required) {
-        get().setRequired(required);
-        return this;
-    }
-
-    @Override
-    public boolean getRepeats() {
-        return item.getRepeats();
-    }
-
-    @Override
-    public IQuestionnaireItemComponentAdapter setRepeats(boolean repeats) {
-        get().setRepeats(repeats);
-        return this;
-    }
-
-    @Override
-    public void addAnswerOption(ICodingAdapter option) {
-        get().addAnswerOption().setValue((Coding) option.get());
-    }
-
-    @Override
-    public boolean hasInitial() {
-        return item.hasInitial();
-    }
-
-    @Override
-    public List<Type> getInitial() {
-        return item.getInitial().stream()
-                .map(QuestionnaireItemInitialComponent::getValue)
-                .toList();
-    }
-
-    @Override
-    public IQuestionnaireResponseItemComponentAdapter newResponseItem() {
-        return adapterFactory.createQuestionnaireResponseItem(new QuestionnaireResponseItemComponent()
-                .setLinkId(item.getLinkId())
-                .setDefinitionElement(item.getDefinitionElement())
-                .setTextElement(item.getTextElement()));
-    }
-
-    @Override
-    public ICompositeType newExpression(String language, String expression) {
-        return new Expression().setLanguage(language).setExpression(expression);
+    override fun newExpression(language: String?, expression: String?): ICompositeType? {
+        return Expression().setLanguage(language).setExpression(expression)
     }
 }

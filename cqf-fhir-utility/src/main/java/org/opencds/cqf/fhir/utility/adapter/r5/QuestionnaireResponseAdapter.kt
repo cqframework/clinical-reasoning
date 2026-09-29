@@ -1,133 +1,119 @@
-package org.opencds.cqf.fhir.utility.adapter.r5;
+package org.opencds.cqf.fhir.utility.adapter.r5
 
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.CanonicalType;
-import org.hl7.fhir.r5.model.QuestionnaireResponse;
-import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
-import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.r5.model.Reference;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
+import java.util.*
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.instance.model.api.IIdType
+import org.hl7.fhir.r5.model.CanonicalType
+import org.hl7.fhir.r5.model.QuestionnaireResponse
+import org.hl7.fhir.r5.model.Reference
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseAdapter
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter
 
-public class QuestionnaireResponseAdapter extends ResourceAdapter implements IQuestionnaireResponseAdapter {
-
-    public QuestionnaireResponseAdapter(IDomainResource questionnaireResponse) {
-        super(questionnaireResponse);
-        if (!(questionnaireResponse instanceof QuestionnaireResponse)) {
-            throw new IllegalArgumentException(
-                    "resource passed as questionnaire argument is not a QuestionnaireResponse resource");
+class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdapter {
+    constructor(questionnaireResponse: IDomainResource) : super(questionnaireResponse) {
+        require(questionnaireResponse is QuestionnaireResponse) {
+            "resource passed as questionnaire argument is not a QuestionnaireResponse resource"
         }
     }
 
-    public QuestionnaireResponseAdapter(QuestionnaireResponse questionnaireResponse) {
-        super(questionnaireResponse);
+    constructor(questionnaireResponse: QuestionnaireResponse) : super(questionnaireResponse)
+
+    protected val questionnaireResponse: QuestionnaireResponse
+        get() = resource as QuestionnaireResponse
+
+    override fun get(): QuestionnaireResponse {
+        return this.questionnaireResponse
     }
 
-    protected QuestionnaireResponse getQuestionnaireResponse() {
-        return (QuestionnaireResponse) resource;
+    override fun copy(): QuestionnaireResponse? {
+        return get()!!.copy()
     }
 
-    @Override
-    public QuestionnaireResponse get() {
-        return getQuestionnaireResponse();
+    override fun setId(id: String): IQuestionnaireResponseAdapter {
+        get()!!.setId(id)
+        return this
     }
 
-    @Override
-    public QuestionnaireResponse copy() {
-        return get().copy();
+    override fun hasQuestionnaire(): Boolean {
+        return get()!!.hasQuestionnaire()
     }
 
-    @Override
-    public IQuestionnaireResponseAdapter setId(String id) {
-        get().setId(id);
-        return this;
+    override val questionnaire: String?
+        get() {
+            return get()!!.questionnaire
+        }
+
+    override val questionnaireCanonical: CanonicalType?
+        get() {
+            return if (get()!!.hasQuestionnaire()) get()!!.questionnaireElement else null
+        }
+
+    override fun setQuestionnaire(canonical: String?): IQuestionnaireResponseAdapter {
+        get()!!.setQuestionnaire(canonical)
+        return this
     }
 
-    @Override
-    public boolean hasQuestionnaire() {
-        return get().hasQuestionnaire();
+    override fun hasSubject(): Boolean {
+        return get()!!.hasSubject()
     }
 
-    @Override
-    public String getQuestionnaire() {
-        return get().getQuestionnaire();
+    override val subject: IIdType?
+        get() {
+            return if (get()!!.hasSubject()) get()!!.subject.referenceElement else null
+        }
+
+    override fun setSubject(subject: IIdType?): IQuestionnaireResponseAdapter {
+        get()!!.setSubject(Reference(subject))
+        return this
     }
 
-    @Override
-    public CanonicalType getQuestionnaireCanonical() {
-        return get().hasQuestionnaire() ? get().getQuestionnaireElement() : null;
+    override fun setAuthored(date: Date?): IQuestionnaireResponseAdapter {
+        get()!!.setAuthored(date)
+        return this
     }
 
-    @Override
-    public IQuestionnaireResponseAdapter setQuestionnaire(String canonical) {
-        get().setQuestionnaire(canonical);
-        return this;
+    override fun setStatus(status: String?): IQuestionnaireResponseAdapter {
+        get()!!.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.fromCode(status))
+        return this
     }
 
-    @Override
-    public boolean hasSubject() {
-        return get().hasSubject();
+    override fun hasItem(): Boolean {
+        return this.questionnaireResponse.hasItem()
     }
 
-    @Override
-    public IIdType getSubject() {
-        return get().hasSubject() ? get().getSubject().getReferenceElement() : null;
+    override var item: MutableList<IQuestionnaireResponseItemComponentAdapter?>?
+        get() {
+            return this.questionnaireResponse.item
+                .map { questionnaireResponseItem ->
+                    adapterFactory.createQuestionnaireResponseItem(questionnaireResponseItem)
+                }
+                .toMutableList()
+        }
+        set(items) {
+            this.questionnaireResponse.setItem(
+                items!!
+                    .map { obj -> obj!!.get() }
+                    .map { obj ->
+                        QuestionnaireResponse.QuestionnaireResponseItemComponent::class
+                            .java
+                            .cast(obj)
+                    }
+                    .toMutableList()
+            )
+        }
+
+    override fun addItem(item: IQuestionnaireResponseItemComponentAdapter?) {
+        this.questionnaireResponse.addItem(
+            item!!.get() as QuestionnaireResponse.QuestionnaireResponseItemComponent?
+        )
     }
 
-    @Override
-    public IQuestionnaireResponseAdapter setSubject(IIdType subject) {
-        get().setSubject(new Reference(subject));
-        return this;
-    }
-
-    @Override
-    public IQuestionnaireResponseAdapter setAuthored(Date date) {
-        get().setAuthored(date);
-        return this;
-    }
-
-    @Override
-    public IQuestionnaireResponseAdapter setStatus(String status) {
-        get().setStatus(QuestionnaireResponseStatus.fromCode(status));
-        return this;
-    }
-
-    @Override
-    public boolean hasItem() {
-        return getQuestionnaireResponse().hasItem();
-    }
-
-    @Override
-    public List<IQuestionnaireResponseItemComponentAdapter> getItem() {
-        return getQuestionnaireResponse().getItem().stream()
-                .map(adapterFactory::createQuestionnaireResponseItem)
-                .toList();
-    }
-
-    @Override
-    public void setItem(List<IQuestionnaireResponseItemComponentAdapter> items) {
-        getQuestionnaireResponse()
-                .setItem(items.stream()
-                        .map(IAdapter::get)
-                        .map(QuestionnaireResponseItemComponent.class::cast)
-                        .collect(Collectors.toList()));
-    }
-
-    @Override
-    public void addItem(IQuestionnaireResponseItemComponentAdapter item) {
-        getQuestionnaireResponse().addItem((QuestionnaireResponseItemComponent) item.get());
-    }
-
-    @Override
-    public void addItems(List<IQuestionnaireResponseItemComponentAdapter> items) {
-        items.stream()
-                .map(IAdapter::get)
-                .map(QuestionnaireResponseItemComponent.class::cast)
-                .forEach(item -> getQuestionnaireResponse().addItem(item));
+    override fun addItems(items: MutableList<IQuestionnaireResponseItemComponentAdapter?>?) {
+        items!!
+            .map { obj -> obj!!.get() }
+            .map { obj ->
+                QuestionnaireResponse.QuestionnaireResponseItemComponent::class.java.cast(obj)
+            }
+            .forEach { item -> this.questionnaireResponse.addItem(item) }
     }
 }

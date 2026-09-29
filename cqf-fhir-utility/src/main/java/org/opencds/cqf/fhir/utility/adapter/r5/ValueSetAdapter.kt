@@ -72,7 +72,6 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
 
         // underlying ValueSet from this adapter
         val vs = get()
-        if (vs == null) return this
 
         val underlying: Any? = usageContext.get()
         if (underlying !is UsageContext) return this
@@ -101,6 +100,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
     }
 
     override fun <T : IBaseBackboneElement> getExpansion(): T? {
+        @Suppress("UNCHECKED_CAST")
         return this.valueSet.expansion as T?
     }
 
@@ -151,6 +151,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
     override fun <T : IBaseBackboneElement> newExpansion(): T {
         val expansion = ValueSet.ValueSetExpansionComponent(Date.from(Instant.now()))
         expansion.contains
+        @Suppress("UNCHECKED_CAST")
         return expansion as T
     }
 
@@ -234,6 +235,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
     }
 
     override fun <T : IBaseBackboneElement> createNaiveParameter(): T {
+        @Suppress("UNCHECKED_CAST")
         return ValueSet.ValueSetExpansionParameterComponent()
             .setName("naive")
             .setValue(BooleanType(true)) as T

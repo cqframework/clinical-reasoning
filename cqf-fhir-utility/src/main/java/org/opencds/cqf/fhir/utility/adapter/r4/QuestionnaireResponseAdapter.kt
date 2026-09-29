@@ -26,50 +26,50 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
     }
 
     override fun setId(id: String): IQuestionnaireResponseAdapter {
-        get()!!.setId(id)
+        get().setId(id)
         return this
     }
 
     override fun hasQuestionnaire(): Boolean {
-        return get()!!.hasQuestionnaire()
+        return get().hasQuestionnaire()
     }
 
     override val questionnaire: String?
         get() {
-            return get()!!.questionnaire
+            return get().questionnaire
         }
 
     override val questionnaireCanonical: CanonicalType?
         get() {
-            return if (get()!!.hasQuestionnaire()) get()!!.questionnaireElement else null
+            return if (get().hasQuestionnaire()) get().questionnaireElement else null
         }
 
     override fun setQuestionnaire(canonical: String?): IQuestionnaireResponseAdapter {
-        get()!!.setQuestionnaire(canonical)
+        get().setQuestionnaire(canonical)
         return this
     }
 
     override fun hasSubject(): Boolean {
-        return get()!!.hasSubject()
+        return get().hasSubject()
     }
 
     override val subject: IIdType?
         get() {
-            return if (get()!!.hasSubject()) get()!!.subject.referenceElement else null
+            return if (get().hasSubject()) get().subject.referenceElement else null
         }
 
     override fun setSubject(subject: IIdType?): IQuestionnaireResponseAdapter {
-        get()!!.setSubject(Reference(subject))
+        get().setSubject(Reference(subject))
         return this
     }
 
     override fun setAuthored(date: Date?): IQuestionnaireResponseAdapter {
-        get()!!.setAuthored(date)
+        get().setAuthored(date)
         return this
     }
 
     override fun setStatus(status: String?): IQuestionnaireResponseAdapter {
-        get()!!.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.fromCode(status))
+        get().setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.fromCode(status))
         return this
     }
 

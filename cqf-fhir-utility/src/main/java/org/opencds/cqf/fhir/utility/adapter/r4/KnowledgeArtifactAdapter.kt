@@ -67,6 +67,7 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
         }
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.metadataResource.useContext as MutableList<T?>?
     }
 
@@ -83,8 +84,8 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
     T : IBaseHasExtensions {
         val type =
             getRelatedArtifactType<RelatedArtifact.RelatedArtifactType>(codeString, fhirVersion()!!)
+        @Suppress("UNCHECKED_CAST")
         return getRelatedArtifact<RelatedArtifact>()
-            .map { ra -> ra as RelatedArtifact? }
             .filter { ra -> ra!!.type == type }
             .toMutableList() as MutableList<T?>
     }

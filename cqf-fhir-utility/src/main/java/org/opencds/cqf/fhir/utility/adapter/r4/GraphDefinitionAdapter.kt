@@ -30,7 +30,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
     }
 
     override fun copy(): GraphDefinition? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
@@ -52,6 +52,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
         }
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.graphDefinition.useContext as MutableList<T?>?
     }
 
@@ -80,6 +81,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
         //                })
         //                .map(ext -> (T) ext.value)
         //                .toList();
+        @Suppress("UNCHECKED_CAST")
         return getRelatedArtifact<RelatedArtifact>()
             .filter { ra -> (ra as RelatedArtifact).type == type }
             .map { e -> e as T }

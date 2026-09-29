@@ -205,6 +205,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                 setOf(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT),
             )
 
+        @Suppress("UNCHECKED_CAST")
         return extensions
             .filter { e -> e!!.value is RelatedArtifact }
             .map { e -> e!!.value as RelatedArtifact? }

@@ -31,7 +31,7 @@ class UsageContextAdapter(usageContext: IBase) :
 
     override val code: ICodingAdapter?
         get() {
-            if (usageContext == null || usageContext.code == null) return null
+            if (usageContext.code == null) return null
             return CodingAdapter(get().code)
         }
 
@@ -45,9 +45,7 @@ class UsageContextAdapter(usageContext: IBase) :
     }
 
     override fun hasValueCodeableConcept(): Boolean {
-        return usageContext != null &&
-            usageContext.hasValue() &&
-            usageContext.value is CodeableConcept
+        return usageContext.hasValue() && usageContext.value is CodeableConcept
     }
 
     override val valueCodeableConcept: ICodeableConceptAdapter?
@@ -57,6 +55,7 @@ class UsageContextAdapter(usageContext: IBase) :
             return CodeableConceptAdapter(valueCodeableConcept)
         }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun equalsDeep(obj: IUsageContextAdapter?): Boolean {
         if (obj !is UsageContextAdapter) return false
         return get().equalsDeep(obj.get())

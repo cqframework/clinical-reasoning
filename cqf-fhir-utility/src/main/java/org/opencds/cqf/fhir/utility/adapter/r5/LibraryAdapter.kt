@@ -32,7 +32,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
     }
 
     override fun copy(): Library? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     override fun hasContent(): Boolean {
@@ -40,6 +40,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
     }
 
     override fun <T : ICompositeType> getContent(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.library.content as MutableList<T?>?
     }
 
@@ -132,6 +133,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
     }
 
     override fun <T : ICompositeType> getParameter(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.library.parameter as MutableList<T?>?
     }
 
@@ -161,6 +163,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
     }
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.library.useContext as MutableList<T?>?
     }
 

@@ -27,7 +27,7 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
     }
 
     override fun copy(): ActivityDefinition? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
@@ -78,15 +78,15 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
 
     override val description: String?
         get() {
-            return get()!!.description
+            return get().description
         }
 
     override fun hasLibrary(): Boolean {
-        return get()!!.hasLibrary()
+        return get().hasLibrary()
     }
 
     override val library: MutableList<String?>
         get() {
-            return get()!!.library.map { obj -> obj!!.asStringValue() }.toMutableList()
+            return get().library.map { obj -> obj!!.asStringValue() }.toMutableList()
         }
 }

@@ -27,7 +27,8 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
         get() = resource as StructureDefinition
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
-        return get()!!.useContext as MutableList<T?>?
+        @Suppress("UNCHECKED_CAST")
+        return get().useContext as MutableList<T?>?
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
@@ -50,17 +51,17 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                extension[cpg-assertionExpression].reference
                extension[cpg-featureExpression].reference
             */
-            if (get()!!.hasBaseDefinition()) {
+            if (get().hasBaseDefinition()) {
                 references.add(
                     DependencyInfo(
                         referenceSource,
-                        get()!!.baseDefinition,
-                        get()!!.baseDefinitionElement.extension,
-                        { reference -> get()!!.setBaseDefinition(reference) },
+                        get().baseDefinition,
+                        get().baseDefinitionElement.extension,
+                        { reference -> get().setBaseDefinition(reference) },
                     )
                 )
             }
-            get()!!
+            get()
                 .getExtensionsByUrl(Constants.CPG_ASSERTION_EXPRESSION)
                 .filter { e -> e!!.value is Expression }
                 .map { e -> e!!.value as Expression? }
@@ -75,7 +76,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                         )
                     )
                 }
-            get()!!
+            get()
                 .getExtensionsByUrl(Constants.CPG_FEATURE_EXPRESSION)
                 .filter { e -> e!!.value is Expression }
                 .map { e -> e!!.value as Expression? }
@@ -90,7 +91,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                         )
                     )
                 }
-            get()!!
+            get()
                 .getExtensionsByUrl(Constants.CPG_INFERENCE_EXPRESSION)
                 .filter { e -> e!!.value is Expression }
                 .map { e -> e!!.value as Expression? }
@@ -105,7 +106,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
                         )
                     )
                 }
-            get()!!.differential.element.forEach { element ->
+            get().differential.element.forEach { element ->
                 getDependenciesOfDifferential(element!!, references, referenceSource)
             }
 
@@ -156,39 +157,39 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
     }
 
     override fun copy(): StructureDefinition? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     override var url: String?
         get() {
-            return get()!!.url
+            return get().url
         }
         set(url) {
-            get()!!.setUrl(url)
+            get().setUrl(url)
         }
 
     override fun hasUrl(): Boolean {
-        return get()!!.hasUrl()
+        return get().hasUrl()
     }
 
     override var version: String?
         get() {
-            return get()!!.version
+            return get().version
         }
         set(version) {
-            get()!!.setVersion(version)
+            get().setVersion(version)
         }
 
     override fun hasVersion(): Boolean {
-        return get()!!.hasVersion()
+        return get().hasVersion()
     }
 
     override var name: String?
         get() {
-            return get()!!.name
+            return get().name
         }
         set(name) {
-            get()!!.setName(name)
+            get().setName(name)
         }
 
     override var approvalDate: Date?
@@ -201,17 +202,17 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
 
     override var date: Date?
         get() {
-            return get()!!.date
+            return get().date
         }
         set(approvalDate) {
-            get()!!.setDate(approvalDate)
+            get().setDate(approvalDate)
         }
 
     override fun setDateElement(date: IPrimitiveType<Date?>?) {
         if (date != null && date !is DateTimeType) {
             throw UnprocessableEntityException("Date must be " + DateTimeType::class.java.name)
         }
-        get()!!.setDateElement(date)
+        get().setDateElement(date)
     }
 
     override var effectivePeriod: ICompositeType?
@@ -224,7 +225,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
 
     override val purpose: String?
         get() {
-            return get()!!.purpose
+            return get().purpose
         }
 
     override fun <T> hasRelatedArtifact(): Boolean where
@@ -236,6 +237,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
     override fun <T> getRelatedArtifactsOfType(codeString: String?): MutableList<T?> where
     T : ICompositeType,
     T : IBaseHasExtensions {
+        @Suppress("UNCHECKED_CAST")
         return mutableListOf<RelatedArtifact>() as MutableList<T?>
     }
 
@@ -248,7 +250,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
 
     override var status: String?
         get() {
-            return if (get()!!.status == null) null else get()!!.status.toCode()
+            return if (get().status == null) null else get().status.toCode()
         }
         set(statusCodeString) {
             val status: Enumerations.PublicationStatus?
@@ -257,31 +259,31 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
             } catch (e: FHIRException) {
                 throw UnprocessableEntityException("Invalid status code")
             }
-            get()!!.setStatus(status)
+            get().setStatus(status)
         }
 
     override val experimental: Boolean
         get() {
-            return get()!!.experimental
+            return get().experimental
         }
 
     override val derivation: String?
         get() {
-            return if (get()!!.hasDerivation()) get()!!.derivation.toCode() else null
+            return if (get().hasDerivation()) get().derivation.toCode() else null
         }
 
     override val baseDefinition: IPrimitiveType<String?>?
         get() {
-            return get()!!.baseDefinitionElement
+            return get().baseDefinitionElement
         }
 
     override fun hasSnapshot(): Boolean {
-        return get()!!.hasSnapshot()
+        return get().hasSnapshot()
     }
 
     override val snapshotElements: MutableList<IElementDefinitionAdapter?>
         get() {
-            return get()!!
+            return get()
                 .snapshot
                 .element
                 .filter { obj -> obj!!.hasPath() }
@@ -292,7 +294,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
 
     override val allSnapshotElements: MutableList<IElementDefinitionAdapter?>
         get() {
-            return get()!!
+            return get()
                 .snapshot
                 .element
                 .filter { obj -> obj!!.hasPath() }
@@ -302,7 +304,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
 
     override val allDifferentialElements: MutableList<IElementDefinitionAdapter?>
         get() {
-            return get()!!
+            return get()
                 .differential
                 .element
                 .filter { obj -> obj!!.hasPath() }
@@ -312,7 +314,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
 
     override val differentialElements: MutableList<IElementDefinitionAdapter?>
         get() {
-            return get()!!
+            return get()
                 .differential
                 .element
                 .filter { obj -> obj!!.hasPath() }

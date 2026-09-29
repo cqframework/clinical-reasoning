@@ -73,7 +73,6 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
 
         // underlying ValueSet from this adapter
         val vs = get()
-        if (vs == null) return this
 
         val underlying: Any? = usageContext.get()
         if (underlying !is UsageContext) return this
@@ -174,7 +173,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
             .filter { p -> name == p!!.name }
             .map { it.value }
             .filterIsInstance<IPrimitiveType<*>>()
-            .any { primitive -> value == primitive!!.valueAsString }
+            .any { primitive -> value == primitive.valueAsString }
     }
 
     override fun hasCompose(): Boolean {

@@ -16,13 +16,13 @@ class TupleAdapter(tuple: IBase) : BaseElementAdapter(FhirVersionEnum.R5, tuple)
     }
 
     override fun getProperty(name: String?): Any? {
-        return get()!!.children().firstOrNull { c -> c!!.name == name }
+        return get().children().firstOrNull { c -> c!!.name == name }
     }
 
     override val properties: LinkedHashMap<String, Any?>
         get() {
             val properties = LinkedHashMap<String, Any?>()
-            get()!!.children().forEach { c -> properties[c!!.name] = c.values }
+            get().children().forEach { c -> properties[c!!.name] = c.values }
             return properties
         }
 
@@ -30,7 +30,7 @@ class TupleAdapter(tuple: IBase) : BaseElementAdapter(FhirVersionEnum.R5, tuple)
         // A Tuple resolves its named members directly rather than through the FHIR runtime
         // definitions used for structured elements.
         val values =
-            get()!!
+            get()
                 .children()
                 .filter { c -> c!!.name == path }
                 .filter { it.hasValues() }

@@ -26,7 +26,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
     }
 
     override fun copy(): ImplementationGuide? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>

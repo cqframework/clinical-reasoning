@@ -66,6 +66,7 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
         }
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.canonicalResource.useContext as MutableList<T?>?
     }
 
@@ -86,8 +87,8 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
         } catch (e: FHIRException) {
             throw UnprocessableEntityException("Invalid related artifact code")
         }
+        @Suppress("UNCHECKED_CAST")
         return getRelatedArtifact<RelatedArtifact>()
-            .map { ra -> ra as RelatedArtifact? }
             .filter { ra -> ra!!.type == type }
             .toMutableList() as MutableList<T?>
     }

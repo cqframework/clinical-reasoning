@@ -131,6 +131,7 @@ class RequestActionAdapter(requestAction: IBase) :
         return get().condition as MutableList<T?>?
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun addCondition(element: IBaseBackboneElement?) {
         if (element is PlanDefinition.PlanDefinitionActionConditionComponent) {
             get()
@@ -151,6 +152,7 @@ class RequestActionAdapter(requestAction: IBase) :
         return get().relatedAction as MutableList<T?>?
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun addRelatedAction(element: IBaseBackboneElement?) {
         if (element is PlanDefinition.PlanDefinitionActionRelatedActionComponent) {
             get()
@@ -235,6 +237,7 @@ class RequestActionAdapter(requestAction: IBase) :
                 .toMutableList()
         }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun addAction(element: IBaseBackboneElement?) {
         if (element is RequestGroup.RequestGroupActionComponent) {
             get().addAction(element)

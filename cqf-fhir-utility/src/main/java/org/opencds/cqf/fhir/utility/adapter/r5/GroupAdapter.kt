@@ -23,7 +23,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
     }
 
     override fun copy(): Group? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     private var checkedEffectiveDataRequirements = false
@@ -126,7 +126,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
 
             // extension[cqfm-effectiveDataRequirements]
             // extension[crmi-effectiveDataRequirements]
-            get()!!
+            get()
                 .extension
                 .filter { e -> CANONICAL_EXTENSIONS.contains(e!!.url) }
                 .forEach { referenceExt ->
@@ -143,7 +143,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
             // extension[cqfm-inputParameters][]
             // extension[cqfm-expansionParameters][]
             // extension[cqfm-cqlOptions]
-            get()!!
+            get()
                 .extension
                 .filter { e -> REFERENCE_EXTENSIONS.contains(e!!.url) }
                 .forEach { referenceExt ->
@@ -158,7 +158,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
                 }
 
             // extension[cqfm-component][].resource
-            get()!!.getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach { ext ->
+            get().getExtensionsByUrl(Constants.CQFM_COMPONENT).forEach { ext ->
                 val ref = ext!!.value as RelatedArtifact
                 if (ref.hasResource()) {
                     val dep =

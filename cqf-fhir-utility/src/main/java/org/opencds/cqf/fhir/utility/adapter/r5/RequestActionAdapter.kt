@@ -112,6 +112,7 @@ class RequestActionAdapter(requestAction: IBase) :
     override fun <T> getDocumentation(): MutableList<T?>? where
     T : ICompositeType,
     T : IBaseHasExtensions {
+        @Suppress("UNCHECKED_CAST")
         return get().documentation as MutableList<T?>?
     }
 
@@ -130,9 +131,11 @@ class RequestActionAdapter(requestAction: IBase) :
     }
 
     override fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return get().condition as MutableList<T?>?
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun addCondition(element: IBaseBackboneElement?) {
         if (element is PlanDefinition.PlanDefinitionActionConditionComponent) {
             get()
@@ -149,9 +152,11 @@ class RequestActionAdapter(requestAction: IBase) :
     }
 
     override fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return get().relatedAction as MutableList<T?>?
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun addRelatedAction(element: IBaseBackboneElement?) {
         if (element is PlanDefinition.PlanDefinitionActionRelatedActionComponent) {
             get()
@@ -232,6 +237,7 @@ class RequestActionAdapter(requestAction: IBase) :
                 .toMutableList()
         }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun addAction(element: IBaseBackboneElement?) {
         if (element is RequestOrchestrationActionComponent) {
             get().addAction(element)

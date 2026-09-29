@@ -86,6 +86,7 @@ class PlanDefinitionActionAdapter(action: IBase) :
     override fun <T> getDocumentation(): MutableList<T?> where
     T : ICompositeType,
     T : IBaseHasExtensions {
+        @Suppress("UNCHECKED_CAST")
         return get().documentation.map { d -> d as T? }.toMutableList()
     }
 
@@ -111,6 +112,7 @@ class PlanDefinitionActionAdapter(action: IBase) :
     }
 
     override fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return get().condition as MutableList<T?>?
     }
 
@@ -133,6 +135,7 @@ class PlanDefinitionActionAdapter(action: IBase) :
     }
 
     override fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return get().relatedAction as MutableList<T?>?
     }
 
@@ -173,6 +176,7 @@ class PlanDefinitionActionAdapter(action: IBase) :
 
     override val definition: IPrimitiveType<String?>?
         get() {
+            @Suppress("UNCHECKED_CAST")
             return get().definition as IPrimitiveType<String?>?
         }
 

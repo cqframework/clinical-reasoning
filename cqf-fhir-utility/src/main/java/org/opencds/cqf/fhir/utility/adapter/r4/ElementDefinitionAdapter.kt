@@ -106,6 +106,7 @@ class ElementDefinitionAdapter(elementDefinition: IBase) :
     }
 
     override fun <T : IBase?> getType(): MutableList<T?> {
+        @Suppress("UNCHECKED_CAST")
         return get().type.map { t -> t as T? }.toMutableList()
     }
 
@@ -125,6 +126,7 @@ class ElementDefinitionAdapter(elementDefinition: IBase) :
         }
 
     override fun <T : IBaseDatatype?> getDefaultValue(): T? {
+        @Suppress("UNCHECKED_CAST")
         return get().defaultValue as T?
     }
 
@@ -133,6 +135,7 @@ class ElementDefinitionAdapter(elementDefinition: IBase) :
     }
 
     override fun <T : IBaseDatatype?> getFixed(): T? {
+        @Suppress("UNCHECKED_CAST")
         return get().fixed as T?
     }
 
@@ -141,6 +144,7 @@ class ElementDefinitionAdapter(elementDefinition: IBase) :
     }
 
     override fun <T : IBaseDatatype?> getPattern(): T? {
+        @Suppress("UNCHECKED_CAST")
         return get().pattern as T?
     }
 
@@ -149,6 +153,7 @@ class ElementDefinitionAdapter(elementDefinition: IBase) :
     }
 
     override fun <T : IBaseDatatype?> getFixedOrPattern(): T? {
+        @Suppress("UNCHECKED_CAST")
         return get().getFixedOrPattern() as T?
     }
 
@@ -170,6 +175,7 @@ class ElementDefinitionAdapter(elementDefinition: IBase) :
         }
 
     override fun <T : IBaseDatatypeElement?> getBinding(): T? {
+        @Suppress("UNCHECKED_CAST")
         return get().binding as T?
     }
 

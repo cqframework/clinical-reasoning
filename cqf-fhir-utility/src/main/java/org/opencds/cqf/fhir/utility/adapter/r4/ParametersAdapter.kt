@@ -37,6 +37,7 @@ internal class ParametersAdapter(parameters: IBaseResource) :
         }
 
     override fun <T : IBaseDatatype> getParameterValues(name: String?): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.parameters.getParameterValues(name) as MutableList<T?>?
     }
 

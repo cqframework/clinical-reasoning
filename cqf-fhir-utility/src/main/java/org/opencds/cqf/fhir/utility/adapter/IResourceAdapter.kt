@@ -54,7 +54,7 @@ interface IResourceAdapter : IAdapter<IBaseResource> {
 
     fun copy(): IBaseResource?
 
-    fun copyValues(destination: IBaseResource?)
+    fun copyValues(dst: IBaseResource?)
 
     fun equalsDeep(other: IBase?): Boolean
 

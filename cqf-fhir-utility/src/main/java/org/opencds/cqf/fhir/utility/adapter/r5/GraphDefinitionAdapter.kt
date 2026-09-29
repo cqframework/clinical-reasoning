@@ -27,7 +27,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
     }
 
     override fun copy(): GraphDefinition? {
-        return get()!!.copy()
+        return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
@@ -39,7 +39,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
             /*
              *  extension[cpg-relatedArtifact].resource
              */
-            getRelatedArtifactsOfType<RelatedArtifact>(Constants.RELATEDARTIFACT_TYPE_DEPENDSON)!!
+            getRelatedArtifactsOfType<RelatedArtifact>(Constants.RELATEDARTIFACT_TYPE_DEPENDSON)
                 .filter { ra -> ra!!.hasResource() || ra.hasResourceReference() }
                 .map { ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource) }
                 .forEach { e -> references.add(e) }
@@ -48,6 +48,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
         }
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
+        @Suppress("UNCHECKED_CAST")
         return this.graphDefinition.useContext as MutableList<T?>?
     }
 
@@ -64,13 +65,14 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
     T : IBaseHasExtensions {
         val type =
             getRelatedArtifactType<RelatedArtifact.RelatedArtifactType>(codeString, fhirVersion()!!)
+        @Suppress("UNCHECKED_CAST")
         return getExtensionsByUrls<IBaseExtension<*, *>>(
                 get(),
                 mutableSetOf(Constants.CPG_RELATED_ARTIFACT, Constants.ARTIFACT_RELATED_ARTIFACT),
             )
             .filter { ext ->
                 if (ext!!.value is RelatedArtifact) {
-                    return@filter (ext!!.value as RelatedArtifact).type == type
+                    return@filter (ext.value as RelatedArtifact).type == type
                 }
                 false
             }

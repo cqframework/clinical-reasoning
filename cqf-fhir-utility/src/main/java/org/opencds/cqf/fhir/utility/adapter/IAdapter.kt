@@ -159,7 +159,7 @@ interface IAdapter<T : IBase> {
         return resolvePath(base, path) as B?
     }
 
-    fun setValue(base: IBase?, path: String, value: Any?)
+    fun setValue(target: IBase?, path: String, value: Any?)
 
     fun setValue(path: String, value: Any?) {
         setValue(get(), path, value)

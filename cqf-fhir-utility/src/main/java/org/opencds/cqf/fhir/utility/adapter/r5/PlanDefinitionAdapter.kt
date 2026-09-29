@@ -78,7 +78,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
                     references.add(
                         DependencyInfo(
                             referenceSource,
-                            (ext!!.value as CanonicalType).value,
+                            (ext.value as CanonicalType).value,
                             ext.extension,
                             { reference -> ext.setValue(CanonicalType(reference)) },
                         )

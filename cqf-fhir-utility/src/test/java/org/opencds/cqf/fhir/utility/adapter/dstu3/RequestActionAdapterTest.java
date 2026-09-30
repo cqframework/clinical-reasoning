@@ -141,13 +141,21 @@ class RequestActionAdapterTest {
                         .setExpression(conditionExpression));
         var adapter = new RequestActionAdapter(action);
         assertTrue(adapter.hasCondition());
-        assertEquals(conditionExpression, adapter.getCondition().get(0).getExpression());
+        assertEquals(
+                conditionExpression,
+                adapter.<RequestGroupActionConditionComponent>getCondition()
+                        .get(0)
+                        .getExpression());
         var newConditionExpression = "New Test Expression";
         adapter.addCondition(new PlanDefinitionActionConditionComponent()
                 .setKind(PlanDefinition.ActionConditionKind.APPLICABILITY)
                 .setExpression(newConditionExpression));
         assertEquals(2, adapter.getCondition().size());
-        assertEquals(newConditionExpression, adapter.getCondition().get(1).getExpression());
+        assertEquals(
+                newConditionExpression,
+                adapter.<RequestGroupActionConditionComponent>getCondition()
+                        .get(1)
+                        .getExpression());
     }
 
     @Test
@@ -159,13 +167,21 @@ class RequestActionAdapterTest {
                         .setRelationship(RequestGroup.ActionRelationshipType.BEFORE));
         var adapter = new RequestActionAdapter(action);
         assertTrue(adapter.hasRelatedAction());
-        assertEquals(relatedActionId, adapter.getRelatedAction().get(0).getActionId());
+        assertEquals(
+                relatedActionId,
+                adapter.<RequestGroupActionRelatedActionComponent>getRelatedAction()
+                        .get(0)
+                        .getActionId());
         var newRelatedActionId = "new-related-action";
         adapter.addRelatedAction(new PlanDefinitionActionRelatedActionComponent()
                 .setActionId(newRelatedActionId)
                 .setRelationship(PlanDefinition.ActionRelationshipType.AFTER));
         assertEquals(2, adapter.getRelatedAction().size());
-        assertEquals(newRelatedActionId, adapter.getRelatedAction().get(1).getActionId());
+        assertEquals(
+                newRelatedActionId,
+                adapter.<RequestGroupActionRelatedActionComponent>getRelatedAction()
+                        .get(1)
+                        .getActionId());
     }
 
     @Test

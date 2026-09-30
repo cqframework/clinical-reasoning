@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.ArrayList;
 import java.util.List;
+import kotlin.Unit;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.utility.Constants;
@@ -138,7 +139,7 @@ class DependencyInfoExtensionTest {
 
     // Helper methods
     private DependencyInfo createDependency(String reference) {
-        return new DependencyInfo("source", reference, new ArrayList<>(), ref -> {});
+        return new DependencyInfo("source", reference, new ArrayList<>(), ref -> Unit.INSTANCE);
     }
 
     private boolean hasExtensionWithUrl(List<? extends IBaseExtension<?, ?>> extensions, String url) {

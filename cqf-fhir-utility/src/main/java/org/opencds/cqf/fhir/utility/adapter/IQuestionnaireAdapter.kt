@@ -18,7 +18,7 @@ interface IQuestionnaireAdapter : IKnowledgeArtifactAdapter {
         get() = getItemDefs(this.item!!)
 
     fun getItemDefs(items: MutableList<out IItemComponentAdapter?>): MutableSet<String?> {
-        val defs = HashSet<String?>()
+        val defs = mutableSetOf<String?>()
         items.forEach { item ->
             if (item!!.hasDefinition()) {
                 defs.add(item.definition)

@@ -39,7 +39,7 @@ interface ILibraryAdapter : IKnowledgeArtifactAdapter {
         val maybeExpansionParameters = this.expansionParameters
         if (maybeExpansionParameters.isPresent) {
             val expansionParameters = maybeExpansionParameters.get()
-            val resourceType = artifactAdapter.get()!!.fhirType()
+            val resourceType = artifactAdapter.get().fhirType()
             val url = artifactAdapter.url
             val canonical = url + "|" + artifactAdapter.version
             val parameterName = this.getExpansionParameterName(resourceType, crmiVersion)
@@ -100,7 +100,7 @@ interface ILibraryAdapter : IKnowledgeArtifactAdapter {
         @Suppress("UNCHECKED_CAST")
         val canonicalToAdd =
             ctx.getElementDefinition("canonical")!!.newInstance() as IPrimitiveType<String?>
-        canonicalToAdd.setValueAsString(canonical)
+        canonicalToAdd.valueAsString = canonical
 
         if (canonicalToAdd is IBaseHasExtensions) {
             // Helper to add to extension list

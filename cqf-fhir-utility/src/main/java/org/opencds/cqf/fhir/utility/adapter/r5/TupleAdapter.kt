@@ -19,9 +19,9 @@ class TupleAdapter(tuple: IBase) : BaseElementAdapter(FhirVersionEnum.R5, tuple)
         return get().children().firstOrNull { c -> c!!.name == name }
     }
 
-    override val properties: LinkedHashMap<String, Any?>
+    override val properties: MutableMap<String, Any?>
         get() {
-            val properties = LinkedHashMap<String, Any?>()
+            val properties = mutableMapOf<String, Any?>()
             get().children().forEach { c -> properties[c!!.name] = c.values }
             return properties
         }

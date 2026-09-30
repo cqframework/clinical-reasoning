@@ -29,7 +29,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
         return this.graphDefinition
     }
 
-    override fun copy(): GraphDefinition? {
+    override fun copy(): GraphDefinition {
         return get().copy()
     }
 
@@ -61,7 +61,7 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
             return this.graphDefinition.status.toCode()
         }
         set(status) {
-            this.graphDefinition.setStatus(Enumerations.PublicationStatus.fromCode(status))
+            this.graphDefinition.status = Enumerations.PublicationStatus.fromCode(status)
         }
 
     //    @SuppressWarnings("unchecked")

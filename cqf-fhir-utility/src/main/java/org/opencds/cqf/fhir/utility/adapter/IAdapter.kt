@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
  */
 interface IAdapter<T : IBase> {
     /** @return returns the underlying HL7 Structure for this adapter */
-    fun get(): T?
+    fun get(): T
 
     fun fhirContext(): FhirContext?
 
@@ -31,7 +31,7 @@ interface IAdapter<T : IBase> {
             setValue(get(), "extension", extensions)
         } catch (e: Exception) {
             // Do nothing
-            logger.debug(MISSING_EXTENSION, get()!!.fhirType())
+            logger.debug(MISSING_EXTENSION, get().fhirType())
         }
     }
 
@@ -48,7 +48,7 @@ interface IAdapter<T : IBase> {
             setValue(get(), "extension", mutableListOf(extension))
         } catch (e: Exception) {
             // Do nothing
-            logger.debug(MISSING_EXTENSION, get()!!.fhirType())
+            logger.debug(MISSING_EXTENSION, get().fhirType())
         }
     }
 

@@ -28,7 +28,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
         return this.questionnaire
     }
 
-    override fun copy(): Questionnaire? {
+    override fun copy(): Questionnaire {
         return get().copy()
     }
 

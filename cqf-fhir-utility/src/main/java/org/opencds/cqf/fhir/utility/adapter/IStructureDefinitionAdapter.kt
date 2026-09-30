@@ -4,7 +4,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType
 
 interface IStructureDefinitionAdapter : IKnowledgeArtifactAdapter {
     val type: String?
-        get() = resolvePathString(get()!!, "type")
+        get() = resolvePathString(get(), "type")
 
     val derivation: String?
 

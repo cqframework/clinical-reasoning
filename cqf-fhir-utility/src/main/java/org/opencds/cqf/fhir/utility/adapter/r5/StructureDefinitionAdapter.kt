@@ -156,7 +156,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
         return this.structureDefinition
     }
 
-    override fun copy(): StructureDefinition? {
+    override fun copy(): StructureDefinition {
         return get().copy()
     }
 
@@ -165,7 +165,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
             return get().url
         }
         set(url) {
-            get().setUrl(url)
+            get().url = url
         }
 
     override fun hasUrl(): Boolean {
@@ -177,7 +177,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
             return get().version
         }
         set(version) {
-            get().setVersion(version)
+            get().version = version
         }
 
     override fun hasVersion(): Boolean {
@@ -189,7 +189,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
             return get().name
         }
         set(name) {
-            get().setName(name)
+            get().name = name
         }
 
     override var approvalDate: Date?
@@ -205,14 +205,14 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
             return get().date
         }
         set(approvalDate) {
-            get().setDate(approvalDate)
+            get().date = approvalDate
         }
 
     override fun setDateElement(date: IPrimitiveType<Date?>?) {
         if (date != null && date !is DateTimeType) {
             throw UnprocessableEntityException("Date must be " + DateTimeType::class.java.name)
         }
-        get().setDateElement(date)
+        get().dateElement = date
     }
 
     override var effectivePeriod: ICompositeType?
@@ -259,7 +259,7 @@ class StructureDefinitionAdapter : ResourceAdapter, IStructureDefinitionAdapter 
             } catch (e: FHIRException) {
                 throw UnprocessableEntityException("Invalid status code")
             }
-            get().setStatus(status)
+            get().status = status
         }
 
     override val experimental: Boolean

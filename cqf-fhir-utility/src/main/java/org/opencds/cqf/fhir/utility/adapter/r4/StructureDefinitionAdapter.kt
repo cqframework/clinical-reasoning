@@ -146,7 +146,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
         return this.structureDefinition
     }
 
-    override fun copy(): StructureDefinition? {
+    override fun copy(): StructureDefinition {
         return get().copy()
     }
 

@@ -32,7 +32,7 @@ internal class AttachmentAdapter(attachment: IBase) :
             return this.attachment.contentType
         }
         set(contentType) {
-            this.attachment.setContentType(contentType)
+            this.attachment.contentType = contentType
         }
 
     override var data: ByteArray?
@@ -40,6 +40,6 @@ internal class AttachmentAdapter(attachment: IBase) :
             return this.attachment.data
         }
         set(data) {
-            this.attachment.setData(data)
+            this.attachment.data = data
         }
 }

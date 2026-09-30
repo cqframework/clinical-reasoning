@@ -7,7 +7,7 @@ import org.opencds.cqf.fhir.utility.Ids
 import org.opencds.cqf.fhir.utility.Ids.ensureIdType
 
 interface IResourceAdapter : IAdapter<IBaseResource> {
-    override fun get(): IBaseResource?
+    override fun get(): IBaseResource
 
     val id: String?
         /**
@@ -17,7 +17,7 @@ interface IResourceAdapter : IAdapter<IBaseResource> {
          */
         get() =
             if (this.idElement == null) null
-            else String.format("%s/%s", get()!!.fhirType(), this.idElement!!.idPart)
+            else String.format("%s/%s", get().fhirType(), this.idElement!!.idPart)
 
     val idPart: String?
         /**
@@ -31,7 +31,7 @@ interface IResourceAdapter : IAdapter<IBaseResource> {
         get() = resolvePath(get(), "id", IIdType::class.java)
 
     fun setId(id: String): IAdapter<*>? {
-        setId(Ids.newId(fhirContext()!!, ensureIdType(id, get()!!.fhirType())) as IIdType)
+        setId(Ids.newId(fhirContext()!!, ensureIdType(id, get().fhirType())) as IIdType)
         return this
     }
 
@@ -52,7 +52,7 @@ interface IResourceAdapter : IAdapter<IBaseResource> {
 
     @Throws(FHIRException::class) fun getTypesForProperty(name: String): Array<String?>?
 
-    fun copy(): IBaseResource?
+    fun copy(): IBaseResource
 
     fun copyValues(dst: IBaseResource?)
 

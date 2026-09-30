@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r4
 
-import java.util.*
-import java.util.function.Function
 import org.hl7.fhir.instance.model.api.IDomainResource
 import org.hl7.fhir.r4.model.*
 import org.opencds.cqf.fhir.utility.Constants
@@ -24,7 +22,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
         return this.group
     }
 
-    override fun copy(): Group? {
+    override fun copy(): Group {
         return get().copy()
     }
 
@@ -51,22 +49,17 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
                     .filter { obj -> obj!!.hasValue() }
                     .toMutableList()
 
-            val edrExtension = if (edrExtensions.size == 1) edrExtensions.get(0) else null
+            val edrExtension = if (edrExtensions.size == 1) edrExtensions[0] else null
             // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a
             // canonical
             val maybeEdrReference =
-                Optional.ofNullable<Extension?>(edrExtension)
-                    .map<String>(
-                        Function { edrExtension: Extension? ->
-                            this.getEdrReferenceString(edrExtension!!)
-                        }
-                    )
+                edrExtension?.let { edrExtension -> this.getEdrReferenceString(edrExtension) }
             if (edrExtension != null) {
-                val edrReference = maybeEdrReference.get()
+                val edrReference = maybeEdrReference
                 for (c in this.group.contained) {
                     if (
                         c.hasId() &&
-                            (edrReference == c.id || edrReference == "#" + c.id) &&
+                            (edrReference == c.id || edrReference == "#${c.id}") &&
                             c is Library
                     ) {
                         effectiveDataRequirements = c

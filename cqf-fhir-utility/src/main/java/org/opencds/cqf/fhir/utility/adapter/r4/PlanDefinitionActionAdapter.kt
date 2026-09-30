@@ -76,7 +76,7 @@ class PlanDefinitionActionAdapter(action: IBase) :
     override val code: ICodeableConceptAdapter?
         get() {
             if (hasCode()) {
-                return adapterFactory.createCodeableConcept(get().code.get(0))
+                return adapterFactory.createCodeableConcept(get().code[0])
             } else {
                 return null
             }

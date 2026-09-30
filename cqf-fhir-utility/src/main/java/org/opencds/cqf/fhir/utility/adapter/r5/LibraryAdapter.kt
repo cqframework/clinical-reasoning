@@ -31,7 +31,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
         return resource as Library
     }
 
-    override fun copy(): Library? {
+    override fun copy(): Library {
         return get().copy()
     }
 
@@ -46,7 +46,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
 
     override fun setContent(attachments: MutableList<out ICompositeType?>?) {
         val castAttachments = attachments!!.map { x -> x as Attachment? }.toMutableList()
-        this.library.setContent(castAttachments)
+        this.library.content = castAttachments
     }
 
     override fun addContent(): Attachment? {
@@ -97,7 +97,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
 
     override val referencedLibraries: MutableMap<String?, String?>
         get() {
-            val map = HashMap<String?, String?>()
+            val map = mutableMapOf<String?, String?>()
             map[name] = canonical
             return map
         }
@@ -105,7 +105,7 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
     override fun retrieveReferencedLibraries(
         repository: IRepository?
     ): MutableMap<String?, ILibraryAdapter?> {
-        val map = HashMap<String?, ILibraryAdapter?>()
+        val map = mutableMapOf<String?, ILibraryAdapter?>()
         map[name] = this
         return map
     }
@@ -123,9 +123,8 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
 
     override fun setType(type: String?): LibraryAdapter {
         if (LIBRARY_TYPES.contains(type)) {
-            this.library.setType(
+            this.library.type =
                 CodeableConcept(Coding("http://hl7.org/fhir/ValueSet/library-type", type, ""))
-            )
         } else {
             throw UnprocessableEntityException("Invalid type: {}", type)
         }
@@ -156,9 +155,9 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
     override fun <T : ICompositeType> setDataRequirement(
         dataRequirement: MutableList<T?>?
     ): LibraryAdapter {
-        this.library.setDataRequirement(
+        this.library.dataRequirement =
             dataRequirement!!.map { dr -> dr as DataRequirement? }.toMutableList()
-        )
+
         return this
     }
 
@@ -189,12 +188,12 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
             } else {
                 val id = "exp-params"
                 val newExpansionParameters = Parameters()
-                newExpansionParameters.setId(id)
+                newExpansionParameters.id = id
                 this.library.addContained(newExpansionParameters)
                 if (this.library.getExtensionByUrl(Constants.CQF_EXPANSION_PARAMETERS) == null) {
                     val expansionParamsExt = this.library.addExtension()
-                    expansionParamsExt.setUrl(Constants.CQF_EXPANSION_PARAMETERS)
-                    expansionParamsExt.setValue(Reference("#$id"))
+                    expansionParamsExt.url = Constants.CQF_EXPANSION_PARAMETERS
+                    expansionParamsExt.value = Reference("#$id")
                 }
                 setExpansionParameters(newExpansionParameters)
                 return Optional.of(newExpansionParameters)
@@ -206,18 +205,18 @@ class LibraryAdapter : KnowledgeArtifactAdapter, ILibraryAdapter {
             expansionParameters != null &&
                 (expansionParameters as Parameters).parameter.isNotEmpty()
         ) {
-            val newParameters = ArrayList<Parameters.ParametersParameterComponent?>()
+            val newParameters = mutableListOf<Parameters.ParametersParameterComponent?>()
 
             for (parameter in expansionParameters.parameter) {
                 val param = Parameters.ParametersParameterComponent()
-                param.setName(parameter.name)
-                param.setValue(parameter.value)
+                param.name = parameter.name
+                param.value = parameter.value
                 newParameters.add(param)
             }
 
             val existingExpansionParameters = this.expansionParameters
             existingExpansionParameters.ifPresent { parameters ->
-                (parameters as Parameters).setParameter(newParameters)
+                (parameters as Parameters).parameter = newParameters
             }
         }
     }

@@ -35,7 +35,7 @@ class QuestionnaireResponseItemAnswerComponentAdapter internal constructor(answe
         }
 
     override fun setValue(value: IBaseDatatype?) {
-        answer.setValue(value as DataType?)
+        answer.value = value as DataType?
     }
 
     override fun hasItem(): Boolean {

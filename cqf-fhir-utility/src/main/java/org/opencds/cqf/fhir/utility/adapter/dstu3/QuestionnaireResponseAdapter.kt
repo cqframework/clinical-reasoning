@@ -48,7 +48,7 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
         }
 
     override fun setQuestionnaire(canonical: String?): IQuestionnaireResponseAdapter {
-        get().setQuestionnaire(Reference(canonical))
+        get().questionnaire = Reference(canonical)
         return this
     }
 

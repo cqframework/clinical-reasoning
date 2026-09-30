@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.r4
 
-import java.util.*
 import org.hl7.fhir.instance.model.api.IDomainResource
 import org.hl7.fhir.r4.model.ActivityDefinition
 import org.hl7.fhir.r4.model.RelatedArtifact
@@ -26,7 +25,7 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
         return this.activityDefinition
     }
 
-    override fun copy(): ActivityDefinition? {
+    override fun copy(): ActivityDefinition {
         return get().copy()
     }
 

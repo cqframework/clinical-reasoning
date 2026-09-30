@@ -23,13 +23,13 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
         return this.planDefinition
     }
 
-    override fun copy(): PlanDefinition? {
+    override fun copy(): PlanDefinition {
         return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
         get() {
-            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val references = mutableListOf<IDependencyInfo?>()
             val referenceSource = this.referenceSource
             addProfileReferences(references, referenceSource)
 

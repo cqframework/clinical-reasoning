@@ -25,7 +25,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
         return resource as ImplementationGuide
     }
 
-    override fun copy(): ImplementationGuide? {
+    override fun copy(): ImplementationGuide {
         return get().copy()
     }
 

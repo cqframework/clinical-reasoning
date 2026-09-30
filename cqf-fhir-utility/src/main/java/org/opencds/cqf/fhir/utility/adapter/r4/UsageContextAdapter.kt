@@ -55,6 +55,7 @@ class UsageContextAdapter(usageContext: IBase) :
             return CodeableConceptAdapter(valueCodeableConcept)
         }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun equalsDeep(obj: IUsageContextAdapter?): Boolean {
         if (obj !is UsageContextAdapter) return false
         return get().equalsDeep(obj.get())

@@ -25,13 +25,13 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
         return this.activityDefinition
     }
 
-    override fun copy(): ActivityDefinition? {
+    override fun copy(): ActivityDefinition {
         return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
         get() {
-            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val references = mutableListOf<IDependencyInfo?>()
             val referenceSource = this.referenceSource
             addProfileReferences(references, referenceSource)
 
@@ -55,7 +55,7 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
                             referenceSource,
                             reference.reference,
                             reference.extension,
-                            { value: String? -> reference.setReference(value) },
+                            { value -> reference.reference = value },
                         )
                     )
                 }

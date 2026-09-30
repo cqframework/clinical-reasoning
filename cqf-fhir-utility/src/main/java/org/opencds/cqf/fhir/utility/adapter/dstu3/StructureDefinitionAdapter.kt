@@ -75,7 +75,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                         referenceSource,
                         type.profile,
                         type.getProfileElement().extension,
-                        { value -> type.setProfile(value) },
+                        { value -> type.profile = value },
                     )
                 )
             }
@@ -85,7 +85,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                         referenceSource,
                         type.targetProfile,
                         type.getTargetProfileElement().extension,
-                        { value -> type.setTargetProfile(value) },
+                        { value -> type.targetProfile = value },
                     )
                 )
             }
@@ -96,7 +96,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
                     referenceSource,
                     element.binding.valueSet.primitiveValue(),
                     element.binding.extension,
-                    { reference -> element.binding.setValueSet(UriType(reference)) },
+                    { reference -> element.binding.valueSet = UriType(reference) },
                 )
             )
         }
@@ -106,7 +106,7 @@ class StructureDefinitionAdapter : KnowledgeArtifactAdapter, IStructureDefinitio
         return this.structureDefinition
     }
 
-    override fun copy(): StructureDefinition? {
+    override fun copy(): StructureDefinition {
         return get().copy()
     }
 

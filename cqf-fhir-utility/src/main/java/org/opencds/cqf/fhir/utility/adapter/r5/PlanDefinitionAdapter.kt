@@ -23,7 +23,7 @@ class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinitionAdapter {
         return this.planDefinition
     }
 
-    override fun copy(): PlanDefinition? {
+    override fun copy(): PlanDefinition {
         return get().copy()
     }
 

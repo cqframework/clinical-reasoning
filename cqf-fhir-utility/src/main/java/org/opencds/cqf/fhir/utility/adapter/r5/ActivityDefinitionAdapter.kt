@@ -26,7 +26,7 @@ class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionA
         return this.activityDefinition
     }
 
-    override fun copy(): ActivityDefinition? {
+    override fun copy(): ActivityDefinition {
         return get().copy()
     }
 

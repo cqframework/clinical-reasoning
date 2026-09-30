@@ -20,15 +20,15 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
 
     constructor(graphDefinition: GraphDefinition) : super(graphDefinition)
 
-    protected val graphDefinition: GraphDefinition?
-        get() = resource as GraphDefinition?
+    protected val graphDefinition: GraphDefinition
+        get() = resource as GraphDefinition
 
-    override fun get(): GraphDefinition? {
+    override fun get(): GraphDefinition {
         return this.graphDefinition
     }
 
-    override fun copy(): GraphDefinition? {
-        return get()!!.copy()
+    override fun copy(): GraphDefinition {
+        return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
@@ -50,15 +50,15 @@ class GraphDefinitionAdapter : ResourceAdapter, IGraphDefinitionAdapter {
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
         @Suppress("UNCHECKED_CAST")
-        return this.graphDefinition!!.useContext as MutableList<T?>?
+        return this.graphDefinition.useContext as MutableList<T?>?
     }
 
     override var status: String?
         get() {
-            return this.graphDefinition!!.status.toCode()
+            return this.graphDefinition.status.toCode()
         }
         set(status) {
-            this.graphDefinition!!.setStatus(Enumerations.PublicationStatus.fromCode(status))
+            this.graphDefinition.status = Enumerations.PublicationStatus.fromCode(status)
         }
 
     override fun <T> getRelatedArtifactsOfType(codeString: String?): MutableList<T?> where

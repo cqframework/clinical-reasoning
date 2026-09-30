@@ -13,7 +13,7 @@ protected constructor(protected open val resource: IBaseResource) :
     protected val elementDefinition: BaseRuntimeElementDefinition<*>?
         get() = fhirContext()!!.getElementDefinition(this.resource.javaClass)
 
-    override fun get(): IBaseResource? {
+    override fun get(): IBaseResource {
         return resource
     }
 

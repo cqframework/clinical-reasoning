@@ -6,7 +6,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapter.Companion.newUrlType
 
 interface IEndpointAdapter : IResourceAdapter {
     var address: String?
-        get() = resolvePathString(get()!!, "address")
+        get() = resolvePathString(get(), "address")
         set(address) {
             setValue(get(), "address", newUrlType(fhirContext()!!.version.version, address))
         }

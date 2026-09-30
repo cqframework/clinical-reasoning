@@ -5,7 +5,7 @@ import org.hl7.fhir.instance.model.api.ICompositeType
 
 /** This interface exposes common functionality across all FHIR Attachment versions. */
 interface IAttachmentAdapter : IAdapter<IBase> {
-    override fun get(): ICompositeType?
+    override fun get(): ICompositeType
 
     var contentType: String?
 

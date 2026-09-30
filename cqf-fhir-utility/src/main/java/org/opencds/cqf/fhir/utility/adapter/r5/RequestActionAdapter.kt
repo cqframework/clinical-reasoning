@@ -87,7 +87,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setPriority(priority: String?): IRequestActionAdapter {
-        get().setPriority(Enumerations.RequestPriority.fromCode(priority))
+        get().priority = Enumerations.RequestPriority.fromCode(priority)
         return this
     }
 
@@ -97,7 +97,7 @@ class RequestActionAdapter(requestAction: IBase) :
 
     override val code: ICodeableConceptAdapter
         get() {
-            return adapterFactory.createCodeableConcept(get().code.get(0))
+            return adapterFactory.createCodeableConcept(get().code[0])
         }
 
     override fun setCode(code: ICodeableConceptAdapter?): IRequestActionAdapter {
@@ -178,7 +178,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setTiming(timing: IBaseDatatype?): IRequestActionAdapter {
-        get().setTiming(timing as DataType?)
+        get().timing = timing as DataType?
         return this
     }
 
@@ -206,7 +206,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setSelectionBehavior(behavior: String?): IRequestActionAdapter {
-        get().setSelectionBehavior(Enumerations.ActionSelectionBehavior.fromCode(behavior))
+        get().selectionBehavior = Enumerations.ActionSelectionBehavior.fromCode(behavior)
         return this
     }
 
@@ -244,15 +244,14 @@ class RequestActionAdapter(requestAction: IBase) :
     }
 
     override fun setAction(actions: MutableList<IRequestActionAdapter?>?): IRequestActionAdapter {
-        get()
-            .setAction(
-                if (actions == null) null
-                else
-                    actions
-                        .map { obj -> obj!!.get() }
-                        .map { obj -> RequestOrchestrationActionComponent::class.java.cast(obj) }
-                        .toMutableList()
-            )
+        get().action =
+            if (actions == null) null
+            else
+                actions
+                    .map { obj -> obj!!.get() }
+                    .map { obj -> RequestOrchestrationActionComponent::class.java.cast(obj) }
+                    .toMutableList()
+
         return this
     }
 }

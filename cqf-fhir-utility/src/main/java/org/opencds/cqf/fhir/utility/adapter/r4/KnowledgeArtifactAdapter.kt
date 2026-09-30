@@ -44,7 +44,7 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
         }
     }
 
-    override fun copy(): DomainResource? {
+    override fun copy(): DomainResource {
         return get().copy()
     }
 
@@ -52,7 +52,7 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
         if (date != null && date !is DateTimeType) {
             throw UnprocessableEntityException("Date must be " + DateTimeType::class.java.name)
         }
-        super<IKnowledgeArtifactAdapter>.setDateElement(date)
+        super.setDateElement(date)
     }
 
     override var effectivePeriod: ICompositeType?
@@ -63,7 +63,7 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
                     "EffectivePeriod must be a valid ${Period::class.java.name}"
                 )
             }
-            super<IKnowledgeArtifactAdapter>.effectivePeriod = effectivePeriod
+            super.effectivePeriod = effectivePeriod
         }
 
     override fun <T : ICompositeType> getUseContext(): MutableList<T?>? {
@@ -101,14 +101,14 @@ open class KnowledgeArtifactAdapter : ResourceAdapter, IKnowledgeArtifactAdapter
             } catch (e: FHIRException) {
                 throw UnprocessableEntityException("Invalid status code")
             }
-            adaptedResource!!.setStatus(status)
+            adaptedResource!!.status = status
         }
 
     @Throws(UnprocessableEntityException::class)
     override fun <T> setRelatedArtifact(relatedArtifacts: MutableList<T?>) where
     T : ICompositeType,
     T : IBaseHasExtensions {
-        super<IKnowledgeArtifactAdapter>.setRelatedArtifact<RelatedArtifact>(
+        super.setRelatedArtifact(
             relatedArtifacts
                 .map { ra ->
                     try {

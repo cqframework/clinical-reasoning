@@ -31,15 +31,15 @@ internal class AttachmentAdapter(attachment: IBase) :
         get() {
             return this.attachment.contentType
         }
-        set(contentType: String?) {
-            this.attachment.setContentType(contentType)
+        set(contentType) {
+            this.attachment.contentType = contentType
         }
 
     override var data: ByteArray?
         get() {
             return this.attachment.data
         }
-        set(data: ByteArray?) {
-            this.attachment.setData(data)
+        set(data) {
+            this.attachment.data = data
         }
 }

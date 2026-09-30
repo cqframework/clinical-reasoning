@@ -451,12 +451,12 @@ class CqlFhirParametersConverter(
             return instance
         }
 
-        val ibaseClazz = clazz as Class<out IBase?>
+        @Suppress("UNCHECKED_CAST") val ibaseClazz = clazz as Class<out IBase?>
         var definition =
             fhirContext.getElementDefinition(ibaseClazz)
                 as BaseRuntimeElementCompositeDefinition<*>?
         if (definition == null) {
-            val resourceClazz = clazz as Class<out IBaseResource?>
+            @Suppress("UNCHECKED_CAST") val resourceClazz = clazz as Class<out IBaseResource?>
             definition = fhirContext.getResourceDefinition(resourceClazz)
         }
 

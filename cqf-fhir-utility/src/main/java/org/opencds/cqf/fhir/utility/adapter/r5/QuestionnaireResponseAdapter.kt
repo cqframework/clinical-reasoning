@@ -25,7 +25,7 @@ class QuestionnaireResponseAdapter : ResourceAdapter, IQuestionnaireResponseAdap
         return this.questionnaireResponse
     }
 
-    override fun copy(): QuestionnaireResponse? {
+    override fun copy(): QuestionnaireResponse {
         return get().copy()
     }
 

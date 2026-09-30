@@ -93,7 +93,7 @@ class RequestActionAdapter(requestAction: IBase) :
 
     override val code: ICodeableConceptAdapter
         get() {
-            return adapterFactory.createCodeableConcept(get().code.get(0))
+            return adapterFactory.createCodeableConcept(get().code[0])
         }
 
     override fun setCode(code: ICodeableConceptAdapter?): IRequestActionAdapter {
@@ -192,7 +192,7 @@ class RequestActionAdapter(requestAction: IBase) :
         }
 
     override fun setType(type: ICodeableConceptAdapter?): IRequestActionAdapter {
-        get().setType((type!!.get() as CodeableConcept).getCodingFirstRep())
+        get().type = (type!!.get() as CodeableConcept).getCodingFirstRep()
         return this
     }
 

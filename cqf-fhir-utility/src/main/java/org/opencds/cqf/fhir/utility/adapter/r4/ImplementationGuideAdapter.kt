@@ -25,7 +25,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
         return resource as ImplementationGuide
     }
 
-    override fun copy(): ImplementationGuide? {
+    override fun copy(): ImplementationGuide {
         return get().copy()
     }
 
@@ -46,7 +46,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
                             this.implementationGuide!!.url,
                             ref.valueAsString,
                             null,
-                            { theString -> ref.setValue(theString) },
+                            { theString -> ref.value = theString },
                         )
                     references.add(dep)
                 }

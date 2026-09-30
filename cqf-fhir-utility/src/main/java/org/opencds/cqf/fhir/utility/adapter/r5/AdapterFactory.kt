@@ -43,6 +43,7 @@ class AdapterFactory : IAdapterFactory {
         }
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun createKnowledgeArtifactAdapter(
         resource: IDomainResource
     ): IKnowledgeArtifactAdapter {
@@ -95,6 +96,7 @@ class AdapterFactory : IAdapterFactory {
         return ParametersAdapter(parameters)
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun createParametersParameter(
         parametersParametersComponent: IBase
     ): IParametersParameterComponentAdapter {
@@ -151,6 +153,7 @@ class AdapterFactory : IAdapterFactory {
         return QuestionnaireItemComponentAdapter(Questionnaire.QuestionnaireItemComponent())
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun createQuestionnaireItem(item: IBase): IQuestionnaireItemComponentAdapter {
         return QuestionnaireItemComponentAdapter(item)
     }
@@ -161,12 +164,14 @@ class AdapterFactory : IAdapterFactory {
         return QuestionnaireResponseAdapter(questionnaireResponse as IDomainResource)
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun createQuestionnaireResponseItem(
         item: IBase
     ): IQuestionnaireResponseItemComponentAdapter {
         return QuestionnaireResponseItemComponentAdapter(item)
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun createQuestionnaireResponseItemAnswer(
         answer: IBase
     ): IQuestionnaireResponseItemAnswerComponentAdapter {

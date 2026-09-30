@@ -31,7 +31,7 @@ class CodingAdapter(coding: IBase) :
     }
 
     override fun setCode(code: String?): ICodingAdapter {
-        get().setCode(code)
+        get().code = code
         return this
     }
 
@@ -45,7 +45,7 @@ class CodingAdapter(coding: IBase) :
     }
 
     override fun setDisplay(display: String?): ICodingAdapter {
-        get().setDisplay(display)
+        get().display = display
         return this
     }
 

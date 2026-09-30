@@ -178,7 +178,7 @@ class DependencyInfo(
                         source,
                         ra.resource.reference,
                         ra.extension,
-                        { ref -> ra.resource.setReference(ref) },
+                        { ref -> ra.resource.reference = ref },
                     )
 
                 is org.hl7.fhir.r4.model.RelatedArtifact ->

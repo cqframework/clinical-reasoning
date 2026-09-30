@@ -145,7 +145,7 @@ abstract class BaseAdapter(protected val fhirContext: FhirContext) {
             }
 
             if (target is IBaseEnumeration<*> && path == "value") {
-                target.setValueAsString(value as String?)
+                target.valueAsString = value as String?
                 return
             }
 

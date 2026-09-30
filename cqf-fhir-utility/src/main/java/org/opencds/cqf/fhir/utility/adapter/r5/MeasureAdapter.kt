@@ -24,7 +24,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
         return this.measure
     }
 
-    override fun copy(): Measure? {
+    override fun copy(): Measure {
         return get().copy()
     }
 

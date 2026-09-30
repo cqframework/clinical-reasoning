@@ -27,13 +27,13 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
         return this.planDefinition
     }
 
-    override fun copy(): PlanDefinition? {
+    override fun copy(): PlanDefinition {
         return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
         get() {
-            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val references = mutableListOf<IDependencyInfo?>()
             val referenceSource = this.referenceSource
             addProfileReferences(references, referenceSource)
 
@@ -67,7 +67,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                         referenceSource,
                         ref.reference,
                         ref.extension,
-                        { value -> ref.setReference(value) },
+                        { value -> ref.reference = value },
                     )
                 references.add(dependency)
             }
@@ -150,7 +150,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                     referenceSource,
                     definition.reference,
                     definition.extension,
-                    { value -> definition.setReference(value) },
+                    { value -> definition.reference = value },
                 )
             )
         }
@@ -175,7 +175,7 @@ internal class PlanDefinitionAdapter : KnowledgeArtifactAdapter, IPlanDefinition
                 this.planDefinition.url,
                 vs.reference,
                 vs.extension,
-                { value -> vs.setReference(value) },
+                { value -> vs.reference = value },
             )
         }
         return null

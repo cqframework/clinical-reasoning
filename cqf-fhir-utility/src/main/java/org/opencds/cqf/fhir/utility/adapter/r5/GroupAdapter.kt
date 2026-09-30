@@ -22,7 +22,7 @@ class GroupAdapter : KnowledgeArtifactAdapter, IGroupAdapter {
         return this.group
     }
 
-    override fun copy(): Group? {
+    override fun copy(): Group {
         return get().copy()
     }
 

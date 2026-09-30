@@ -30,7 +30,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
 
     override val dependencies: MutableList<IDependencyInfo?>
         get() {
-            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val references = mutableListOf<IDependencyInfo?>()
             val referenceSource = this.referenceSource
             addProfileReferences(references, referenceSource)
 
@@ -95,7 +95,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                     referenceSource,
                     item.getOptions().reference,
                     item.extension,
-                    { reference -> item.setOptions(Reference(reference)) },
+                    { reference -> item.options = Reference(reference) },
                 )
             )
         }
@@ -107,7 +107,7 @@ class QuestionnaireAdapter : KnowledgeArtifactAdapter, IQuestionnaireAdapter {
                         referenceSource,
                         (referenceExt!!.value as UriType).asStringValue(),
                         referenceExt.extension,
-                        { reference -> referenceExt.setValue(UriType(reference)) },
+                        { reference -> referenceExt.value = UriType(reference) },
                     )
                 )
             }

@@ -69,7 +69,7 @@ open class ResourceAdapter(resource: IBaseResource) : BaseResourceAdapter(resour
         return this.resource.getTypesForProperty(name.hashCode(), name)
     }
 
-    override fun copy(): IBaseResource? {
+    override fun copy(): IBaseResource {
         return this.resource.copy()
     }
 

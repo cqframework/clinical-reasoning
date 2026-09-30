@@ -22,16 +22,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface IKnowledgeArtifactAdapter : IResourceAdapter {
-    override fun get(): IDomainResource?
+    override fun get(): IDomainResource
 
-    override fun copy(): IDomainResource?
+    override fun copy(): IDomainResource
 
     fun hasName(): Boolean {
         return StringUtils.isNotBlank(this.name)
     }
 
     var name: String?
-        get() = resolvePathString(get()!!, "name")
+        get() = resolvePathString(get(), "name")
         set(name) {
             setValue(get(), "name", IAdapter.Companion.newStringType(fhirVersion()!!, name))
         }
@@ -41,21 +41,21 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
     }
 
     var title: String?
-        get() = resolvePathString(get()!!, "title")
+        get() = resolvePathString(get(), "title")
         set(title) {
             setValue(get(), "title", IAdapter.Companion.newStringType(fhirVersion()!!, title))
         }
 
     val descriptor: String
         get() =
-            "${this.get()!!.fhirType()} ${if (this.hasTitle()) this.title else this.name}${if (this.hasVersion()) ", " + this.version else ""}"
+            "${this.get().fhirType()} ${if (this.hasTitle()) this.title else this.name}${if (this.hasVersion()) ", " + this.version else ""}"
 
     fun hasUrl(): Boolean {
         return StringUtils.isNotBlank(this.url)
     }
 
     var url: String?
-        get() = resolvePathString(get()!!, "url")
+        get() = resolvePathString(get(), "url")
         set(url) {
             setValue(get(), "url", IAdapter.Companion.newUriType(fhirVersion()!!, url))
         }
@@ -65,7 +65,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
     }
 
     var version: String?
-        get() = resolvePathString(get()!!, "version")
+        get() = resolvePathString(get(), "version")
         set(version) {
             setValue(get(), "version", IAdapter.Companion.newStringType(fhirVersion()!!, version))
         }
@@ -92,7 +92,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
         get() = if (hasVersion()) this.url + "|" + this.version else this.url
 
     fun addProfileReferences(references: MutableList<IDependencyInfo?>, referenceSource: String?) {
-        get()!!.meta.profile.forEach { x ->
+        get().meta.profile.forEach { x ->
             val p = x as IPrimitiveType<String?>
             val e = x as IBaseHasExtensions?
             references.add(
@@ -125,7 +125,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
             // Do nothing
             logger.debug(
                 "Field 'approvalDate' does not exist on Resource type {}",
-                get()!!.fhirType(),
+                get().fhirType(),
             )
         }
     }
@@ -146,7 +146,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
     }
 
     val purpose: String?
-        get() = resolvePathString(get()!!, "purpose")
+        get() = resolvePathString(get(), "purpose")
 
     fun <T : ICompositeType> getUseContext(): MutableList<T?>?
 
@@ -164,7 +164,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
                 // Do nothing
                 logger.debug(
                     "Field 'effectivePeriod' does not exist on Resource type {}",
-                    get()!!.fhirType(),
+                    get().fhirType(),
                 )
             }
         }
@@ -189,7 +189,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
             // Do nothing
             logger.debug(
                 "Field 'relatedArtifact' does not exist on Resource type {}",
-                get()!!.fhirType(),
+                get().fhirType(),
             )
         }
     }
@@ -204,7 +204,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
             // Do nothing
             logger.debug(
                 "Field 'relatedArtifact' does not exist on Resource type {}",
-                get()!!.fhirType(),
+                get().fhirType(),
             )
         }
     }
@@ -241,7 +241,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
     }
 
     val expansionParameters: Optional<IBaseParameters>
-        get() = Optional.empty<IBaseParameters>()
+        get() = Optional.empty()
 
     val referencedLibraries: MutableMap<String?, String?>
         get() = resolveCqfLibraries()
@@ -415,7 +415,7 @@ interface IKnowledgeArtifactAdapter : IResourceAdapter {
                     }
                     .sortedWith { a, b -> versionComparator.compare(a!!.version!!, b!!.version!!) }
             return if (sorted.isNotEmpty()) {
-                Optional.of(sorted[sorted.size - 1]!!.get()!!)
+                Optional.of(sorted[sorted.size - 1]!!.get())
             } else {
                 Optional.empty()
             }

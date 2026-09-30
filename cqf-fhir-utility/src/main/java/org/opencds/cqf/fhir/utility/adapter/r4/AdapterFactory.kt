@@ -11,16 +11,12 @@ import org.opencds.cqf.fhir.utility.adapter.*
 
 class AdapterFactory : IAdapterFactory {
     override fun createResource(resource: IBaseResource): IResourceAdapter {
-        if (resource is MetadataResource) {
-            return createKnowledgeArtifactAdapter(resource)
-        } else if (resource is Endpoint) {
-            return createEndpoint(resource)
-        } else if (resource is Parameters) {
-            return createParameters(resource)
-        } else if (resource is Group) {
-            return createGroup(resource)
-        } else {
-            return ResourceAdapter(resource)
+        return when (resource) {
+            is MetadataResource -> createKnowledgeArtifactAdapter(resource)
+            is Endpoint -> createEndpoint(resource)
+            is Parameters -> createParameters(resource)
+            is Group -> createGroup(resource)
+            else -> ResourceAdapter(resource)
         }
     }
 
@@ -50,37 +46,23 @@ class AdapterFactory : IAdapterFactory {
     override fun createKnowledgeArtifactAdapter(
         resource: IDomainResource
     ): IKnowledgeArtifactAdapter {
-        val adapter: IKnowledgeArtifactAdapter
-        if (resource is Library) {
-            adapter = createLibrary(resource)
-        } else if (resource is Measure) {
-            adapter = MeasureAdapter(resource)
-        } else if (resource is ActivityDefinition) {
-            adapter = ActivityDefinitionAdapter(resource)
-        } else if (resource is ImplementationGuide) {
-            adapter = ImplementationGuideAdapter(resource)
-        } else if (resource is PlanDefinition) {
-            adapter = PlanDefinitionAdapter(resource)
-        } else if (resource is Questionnaire) {
-            adapter = QuestionnaireAdapter(resource)
-        } else if (resource is StructureDefinition) {
-            adapter = StructureDefinitionAdapter(resource)
-        } else if (resource is ValueSet) {
-            adapter = ValueSetAdapter(resource)
-        } else if (resource is GraphDefinition) {
-            adapter = GraphDefinitionAdapter(resource)
-        } else if (resource is Group) {
-            adapter = createGroup(resource)
-        } else {
-            if (resource is MetadataResource) {
-                adapter = KnowledgeArtifactAdapter(resource)
-            } else {
+        return when (resource) {
+            is Library -> createLibrary(resource)
+            is Measure -> MeasureAdapter(resource)
+            is ActivityDefinition -> ActivityDefinitionAdapter(resource)
+            is ImplementationGuide -> ImplementationGuideAdapter(resource)
+            is PlanDefinition -> PlanDefinitionAdapter(resource)
+            is Questionnaire -> QuestionnaireAdapter(resource)
+            is StructureDefinition -> StructureDefinitionAdapter(resource)
+            is ValueSet -> ValueSetAdapter(resource)
+            is GraphDefinition -> GraphDefinitionAdapter(resource)
+            is Group -> createGroup(resource)
+            is MetadataResource -> KnowledgeArtifactAdapter(resource)
+            else ->
                 throw UnprocessableEntityException(
                     "Resource must be instance of ${MetadataResource::class.java.name}"
                 )
-            }
         }
-        return adapter
     }
 
     override fun createLibrary(library: IBaseResource): ILibraryAdapter {

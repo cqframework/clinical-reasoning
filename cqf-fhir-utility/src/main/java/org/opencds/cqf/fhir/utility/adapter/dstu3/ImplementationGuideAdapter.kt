@@ -26,13 +26,13 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
         return resource as ImplementationGuide
     }
 
-    override fun copy(): ImplementationGuide? {
+    override fun copy(): ImplementationGuide {
         return get().copy()
     }
 
     override val dependencies: MutableList<IDependencyInfo?>
         get() {
-            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val references = mutableListOf<IDependencyInfo?>()
             val referenceSource = this.referenceSource
             addProfileReferences(references, referenceSource)
 
@@ -59,7 +59,7 @@ class ImplementationGuideAdapter : KnowledgeArtifactAdapter, IImplementationGuid
         }
 
     override fun getDependencies(repository: IRepository?): MutableList<IDependencyInfo?> {
-        val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+        val references = mutableListOf<IDependencyInfo?>()
         val referenceSource = this.referenceSource
         addProfileReferences(references, referenceSource)
 

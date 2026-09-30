@@ -1,6 +1,6 @@
 package org.opencds.cqf.fhir.utility.adapter
 
-import java.util.*
+import java.util.Date
 import org.hl7.fhir.instance.model.api.IBaseExtension
 import org.hl7.fhir.instance.model.api.IPrimitiveType
 

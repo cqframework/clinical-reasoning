@@ -24,7 +24,7 @@ class ValueSetAdapter : KnowledgeArtifactAdapter, IValueSetAdapter {
         return resource as ValueSet
     }
 
-    override fun copy(): ValueSet? {
+    override fun copy(): ValueSet {
         return get().copy()
     }
 

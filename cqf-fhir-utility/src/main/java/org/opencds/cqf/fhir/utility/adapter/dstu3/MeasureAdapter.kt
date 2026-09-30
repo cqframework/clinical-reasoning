@@ -1,7 +1,5 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3
 
-import java.util.*
-import java.util.function.Function
 import org.hl7.fhir.dstu3.model.*
 import org.hl7.fhir.instance.model.api.IDomainResource
 import org.opencds.cqf.fhir.utility.Constants
@@ -26,7 +24,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
         return this.measure
     }
 
-    override fun copy(): Measure? {
+    override fun copy(): Measure {
         return get().copy()
     }
 
@@ -42,7 +40,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
     private fun getEdrReferenceConsumer(edrExtension: Extension): (String?) -> Unit {
         return if (edrExtension.url.contains("cqfm"))
             { reference -> edrExtension.value = Reference(reference) }
-        else { reference -> edrExtension.setValue(UriType(reference)) }
+        else { reference -> edrExtension.value = UriType(reference) }
     }
 
     private fun findEffectiveDataRequirements() {
@@ -53,22 +51,17 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                     .filter { obj -> obj!!.hasValue() }
                     .toMutableList()
 
-            val edrExtension = if (edrExtensions.size == 1) edrExtensions.get(0) else null
+            val edrExtension = if (edrExtensions.size == 1) edrExtensions[0] else null
             // cqfm-effectiveDataRequirements is a Reference, crmi-effectiveDataRequirements is a
             // canonical
             val maybeEdrReference =
-                Optional.ofNullable<Extension?>(edrExtension)
-                    .map<String>(
-                        Function { edrExtension: Extension? ->
-                            this.getEdrReferenceString(edrExtension!!)
-                        }
-                    )
-            if (maybeEdrReference.isPresent()) {
-                val edrReference = maybeEdrReference.get()
+                edrExtension?.let { edrExtension -> this.getEdrReferenceString(edrExtension) }
+            if (maybeEdrReference != null) {
+                val edrReference = maybeEdrReference
                 for (c in this.measure.contained) {
                     if (
                         c.hasId() &&
-                            (edrReference == c.id || edrReference == "#" + c.id) &&
+                            (edrReference == c.id || edrReference == "#${c.id}") &&
                             c is Library
                     ) {
                         effectiveDataRequirements = c
@@ -83,7 +76,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
 
     override val dependencies: MutableList<IDependencyInfo?>
         get() {
-            val references: MutableList<IDependencyInfo?> = ArrayList<IDependencyInfo?>()
+            val references = mutableListOf<IDependencyInfo?>()
             val referenceSource = this.referenceSource
             addProfileReferences(references, referenceSource)
 
@@ -124,7 +117,7 @@ class MeasureAdapter : KnowledgeArtifactAdapter, IMeasureAdapter {
                         referenceSource,
                         library.reference,
                         library.extension,
-                        { value -> library.setReference(value) },
+                        { value -> library.reference = value },
                     )
                 references.add(dependency)
             }

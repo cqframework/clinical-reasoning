@@ -103,7 +103,7 @@ internal class ParametersParameterComponentAdapter(parametersParameterComponent:
     }
 
     override fun setValue(value: IBaseDatatype?): IParametersParameterComponentAdapter {
-        this.parametersParameterComponent.setValue(value as DataType?)
+        this.parametersParameterComponent.value = value as DataType?
         return this
     }
 

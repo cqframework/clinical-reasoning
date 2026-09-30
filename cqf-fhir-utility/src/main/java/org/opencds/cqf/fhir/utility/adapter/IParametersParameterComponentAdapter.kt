@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype
 import org.hl7.fhir.instance.model.api.IBaseResource
 
 interface IParametersParameterComponentAdapter : IAdapter<IBase> {
-    override fun get(): IBaseBackboneElement?
+    override fun get(): IBaseBackboneElement
 
     val name: String?
 

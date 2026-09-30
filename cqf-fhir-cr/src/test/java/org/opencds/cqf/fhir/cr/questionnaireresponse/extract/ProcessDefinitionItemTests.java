@@ -297,6 +297,9 @@ class ProcessDefinitionItemTests {
         ahvResponse.addItem(new QuestionnaireResponseItemComponent()
                 .setLinkId("ahvn13-value")
                 .addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType(ahvValue))));
+        ahvResponse.addItem(new QuestionnaireResponseItemComponent()
+                .setLinkId("ahvn13-value123")
+                .addAnswer(new QuestionnaireResponseItemAnswerComponent().setValue(new StringType("123"))));
         var zidResponse = new QuestionnaireResponseItemComponent().setLinkId("epr-spid");
         zidResponse.addItem(new QuestionnaireResponseItemComponent()
                 .setLinkId("epr-spid-value")
@@ -313,5 +316,6 @@ class ProcessDefinitionItemTests {
                 .anyMatch(id -> ahvSystem.equals(id.getSystem()) && ahvValue.equals(id.getValue())));
         assertTrue(identifiers.stream()
                 .anyMatch(id -> zidSystem.equals(id.getSystem()) && zidValue.equals(id.getValue())));
+        assertTrue(identifiers.stream().noneMatch(id -> "123".equals(id.getValue())));
     }
 }

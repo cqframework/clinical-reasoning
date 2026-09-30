@@ -338,6 +338,15 @@ public class ProcessDefinitionItem {
             ItemPair itemPair,
             boolean isNestedRepeating,
             String parentPath) {
+        if (itemPair.getResponseItem() == null || itemPair.getItem() == null) {
+            // A response item with no questionnaire match has no definition and must not abort extract.
+            logger.warn(
+                    "Skipping extract item {} with no matching questionnaire item",
+                    itemPair.getResponseItem() == null
+                            ? null
+                            : itemPair.getResponseItem().getLinkId());
+            return;
+        }
         var definition = getDefinition(itemPair);
         var children = itemPair.getResponseItem().getItem();
         var repeats = itemPair.getItem() != null && itemPair.getItem().getRepeats();

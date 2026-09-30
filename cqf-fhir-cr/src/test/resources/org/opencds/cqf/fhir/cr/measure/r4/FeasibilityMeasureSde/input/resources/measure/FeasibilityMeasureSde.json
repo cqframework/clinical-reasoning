@@ -1,0 +1,71 @@
+{
+  "resourceType": "Measure",
+  "id": "FeasibilityMeasureSde",
+  "url": "https://research.balgrist.ch/Measure/FeasibilityMeasureSde",
+  "version": "1.0.0",
+  "name": "FeasibilityMeasureSde",
+  "title": "Patient Feasibility Measure with Initial Population Id SDE",
+  "status": "active",
+  "description": "Counts patients matching demographic inclusion criteria and emits the initial-population patient ids as a supplemental data element.",
+  "library": [
+    "https://research.balgrist.ch/Library/FeasibilityMeasureSde|1.0.0"
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+      "valueCode": "boolean"
+    }
+  ],
+  "scoring": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+        "code": "cohort",
+        "display": "Cohort"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "feasibility-cohort",
+      "population": [
+        {
+          "id": "initial-population",
+          "code": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+                "code": "initial-population",
+                "display": "Initial Population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql-identifier",
+            "expression": "InitialPopulation"
+          }
+        }
+      ]
+    }
+  ],
+  "supplementalData": [
+    {
+      "id": "sde-initial-population-ids",
+      "usage": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-data-usage",
+              "code": "supplemental-data"
+            }
+          ]
+        }
+      ],
+      "description": "Patient ids of the initial population members",
+      "criteria": {
+        "language": "text/cql-identifier",
+        "expression": "InitialPopulationIds"
+      }
+    }
+  ]
+}

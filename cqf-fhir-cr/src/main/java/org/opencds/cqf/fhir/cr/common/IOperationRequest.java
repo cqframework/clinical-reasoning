@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
@@ -48,7 +49,9 @@ public interface IOperationRequest {
     default void resolveOperationOutcome(IResourceAdapter adapter) {
         var issues = adapter.resolvePathList(getOperationOutcome(), "issue");
         if (issues != null && !issues.isEmpty()) {
-            getOperationOutcome().setId("%s-outcome-%s".formatted(getOperationName(), adapter.getIdPart()));
+            getOperationOutcome()
+                    .setId(GeneratedIds.fromComposite(
+                            "%s-outcome-%s".formatted(getOperationName(), adapter.getIdPart())));
             adapter.addContained(getOperationOutcome());
             adapter.addExtension(buildReferenceExt(
                     getFhirVersion(),

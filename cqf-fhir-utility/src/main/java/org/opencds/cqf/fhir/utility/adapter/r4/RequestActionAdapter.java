@@ -3,13 +3,16 @@ package org.opencds.cqf.fhir.utility.adapter.r4;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import java.util.stream.Collectors;
+import kotlin.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionConditionComponent;
 import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.r4.model.Reference;
@@ -22,7 +25,9 @@ import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionConditionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionRelatedActionComponent;
 import org.hl7.fhir.r4.model.RequestGroup.RequestPriority;
 import org.hl7.fhir.r4.model.Type;
+import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter;
 
@@ -172,6 +177,28 @@ public class RequestActionAdapter extends BaseElementAdapter implements IRequest
                     .setKind(ActionConditionKind.fromCode(condition.getKind().toCode()))
                     .setExpression(condition.getExpression()));
         }
+    }
+
+    @Override
+    public void addCondition(Pair<IAdapter<?>, Boolean> conditionResult) {
+        if (conditionResult.getFirst().get() instanceof PlanDefinitionActionConditionComponent condition) {
+            var newCondition = new RequestGroupActionConditionComponent()
+                    .setKind(ActionConditionKind.fromCode(condition.getKind().toCode()))
+                    .setExpression(condition.getExpression());
+            newCondition.addExtension(getConditionResult(conditionResult.getSecond()));
+            get().addCondition(newCondition);
+        }
+    }
+
+    @Override
+    public Extension getConditionResult(Boolean result) {
+        var ext = new Extension(Constants.CPG_ACTION_CONDITION_RESULT);
+        if (result == null) {
+            ext.addExtension(new Extension(Constants.DATA_ABSENT_REASON, new CodeType("asked-unknown")));
+        } else {
+            ext.setValue(IAdapter.newBooleanType(fhirVersion, result));
+        }
+        return ext;
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility
 import ca.uhn.fhir.context.FhirVersionEnum
 import org.hl7.fhir.instance.model.api.IBaseExtension
 import org.hl7.fhir.instance.model.api.ICompositeType
+import org.opencds.cqf.fhir.utility.adapter.IAdapter
 
 /**
  * This class is used to contain the various properties of a CqfExpression with an alternate so that
@@ -143,6 +144,31 @@ class CqfExpression {
     }
 
     companion object {
+        @JvmStatic
+        fun of(
+            expression: IAdapter<*>?,
+            referencedLibraries: MutableMap<String?, String?>?,
+        ): CqfExpression? {
+            if (expression == null) {
+                return null
+            }
+            val altExpressionExt =
+                expression.getExtensionByUrl<IBaseExtension<*, *>?>(Constants.ALT_EXPRESSION_EXT)
+            val altExpression =
+                if (altExpressionExt == null) null
+                else expression.getAdapterFactory().createBase(altExpressionExt.getValue())
+            return CqfExpression(
+                expression.resolvePathString("language"),
+                expression.resolvePathString("expression"),
+                referencedLibraries,
+                expression.resolvePathString("reference"),
+                if (altExpression != null) altExpression.resolvePathString("language") else null,
+                if (altExpression != null) altExpression.resolvePathString("expression") else null,
+                if (altExpression != null) altExpression.resolvePathString("reference") else null,
+                expression.resolvePathString("name"),
+            )
+        }
+
         @JvmStatic
         fun of(
             extension: IBaseExtension<*, *>?,

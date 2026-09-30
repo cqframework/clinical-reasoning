@@ -1,9 +1,12 @@
 package org.opencds.cqf.fhir.utility.adapter;
 
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 
 public interface ICodingAdapter extends IAdapter<IBase> {
     String getCode();
+
+    IBaseDatatype getCodeType();
 
     boolean hasCode();
 

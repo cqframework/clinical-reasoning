@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.cr.questionnaire.generate;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 import static org.opencds.cqf.fhir.cr.questionnaire.TestItemGenerator.given;
+import static org.opencds.cqf.fhir.utility.VersionUtilities.canonicalTypeForVersion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -18,7 +20,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
 import org.opencds.cqf.fhir.cr.helpers.RequestHelpers;
-import org.opencds.cqf.fhir.utility.Ids;
 
 @SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +28,7 @@ class ItemGeneratorTests {
             "http://fhir.org/guides/cdc/opioid-cds/StructureDefinition/RouteOnePatient";
     private static final String SLEEP_STUDY_PROFILE =
             "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order";
+    private final FhirContext fhirContextDstu3 = FhirContext.forDstu3Cached();
     private final FhirContext fhirContextR4 = FhirContext.forR4Cached();
     private final FhirContext fhirContextR5 = FhirContext.forR5Cached();
 
@@ -42,6 +44,8 @@ class ItemGeneratorTests {
 
     @Test
     void testBuildSdcLaunchContextExt() {
+        when(libraryEngine.getRepository()).thenReturn(repository);
+        when(repository.fhirContext()).thenReturn(fhirContextDstu3);
         var dstu3Request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.DSTU3, libraryEngine);
         var dstu3Ext = (org.hl7.fhir.dstu3.model.Extension)
                 fixture.buildSdcLaunchContextExt(dstu3Request, "patient", "Patient");
@@ -52,6 +56,8 @@ class ItemGeneratorTests {
                 org.hl7.fhir.dstu3.model.CodeType.class,
                 dstu3Ext.getExtensionByUrl("type").getValue());
 
+        when(libraryEngine.getRepository()).thenReturn(repository);
+        when(repository.fhirContext()).thenReturn(fhirContextR4);
         var r4Request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         var r4Ext = (org.hl7.fhir.r4.model.Extension)
                 fixture.buildSdcLaunchContextExt(r4Request, "user", "PractitionerRole");
@@ -63,6 +69,8 @@ class ItemGeneratorTests {
                 org.hl7.fhir.r4.model.CodeType.class,
                 r4Ext.getExtensionByUrl("type").getValue());
 
+        when(libraryEngine.getRepository()).thenReturn(repository);
+        when(repository.fhirContext()).thenReturn(fhirContextR5);
         var r5Request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R5, libraryEngine);
         var r5Ext = (org.hl7.fhir.r5.model.Extension) fixture.buildSdcLaunchContextExt(r5Request, "patient", "Patient");
         assertNull(r5Ext.getValue());
@@ -76,6 +84,8 @@ class ItemGeneratorTests {
 
     @Test
     void testGenerateRequest() {
+        when(libraryEngine.getRepository()).thenReturn(repository);
+        when(repository.fhirContext()).thenReturn(fhirContextR4);
         var request = RequestHelpers.newGenerateRequestForVersion(FhirVersionEnum.R4, libraryEngine);
         assertThrows(UnsupportedOperationException.class, request::getSubjectId);
         assertThrows(UnsupportedOperationException.class, request::getData);
@@ -135,7 +145,7 @@ class ItemGeneratorTests {
                 .profileUrl(new CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
                 .hasItemCount(8)
-                .itemHasInitialExpression("1.1.1");
+                .itemHasNoInitialExpression("1.1.1");
     }
 
     @Test
@@ -145,7 +155,7 @@ class ItemGeneratorTests {
                 .profileUrl(new org.hl7.fhir.r5.model.CanonicalType(ROUTE_ONE_PATIENT_PROFILE))
                 .then()
                 .hasItemCount(8)
-                .itemHasInitialExpression("1.1.1");
+                .itemHasNoInitialExpression("1.1.1");
     }
 
     @Test
@@ -177,29 +187,38 @@ class ItemGeneratorTests {
     void generateItemForElementWithChildren() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition"))
+                .profileUrl(
+                        canonicalTypeForVersion(
+                                fhirContextR4.getVersion().getVersion(),
+                                "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition"))
                 .then()
-                .hasItemCount(2);
+                .hasItemCount(1);
     }
 
     @Test
     void generateItemWithDefaults() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "sigmoidoscopy-complication-casefeature-definition2"))
+                .profileUrl(
+                        canonicalTypeForVersion(
+                                fhirContextR4.getVersion().getVersion(),
+                                "http://example.org/sdh/demo/StructureDefinition/sigmoidoscopy-complication-casefeature-definition2"))
                 .then()
-                .hasItemCount(2);
+                .hasItemCount(1);
     }
 
     @Test
     void generateWithLaunchContexts() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "LaunchContexts"))
+                .profileUrl(canonicalTypeForVersion(
+                        fhirContextR4.getVersion().getVersion(),
+                        "http://fhir.org/test/StructureDefinition/LaunchContexts"))
                 .then()
-                .hasItemCount(2)
+                .hasItemCount(1)
                 .hasLaunchContextExtension(5)
-                .itemHasExtractionValueExtension("1");
+                .itemHasExtractionValueExtensions("1", 2)
+                .itemHasDefinitionExtractExtension("1");
     }
 
     @Test
@@ -207,9 +226,11 @@ class ItemGeneratorTests {
     void generateItemForProfileWithExtensionSlices() {
         given().repositoryFor(fhirContextR4, "r4")
                 .when()
-                .profileId(Ids.newId(fhirContextR4, "NzPatient"))
+                .profileUrl(canonicalTypeForVersion(
+                        fhirContextR4.getVersion().getVersion(),
+                        "http://hl7.org.nz/fhir/StructureDefinition/NzPatient"))
                 .then()
                 .hasItemCount(11)
-                .itemHasExtractionValueExtension("1");
+                .itemHasExtractionValueExtensions("1", 2);
     }
 }

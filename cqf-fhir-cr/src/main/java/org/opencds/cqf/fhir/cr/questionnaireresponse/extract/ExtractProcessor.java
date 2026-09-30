@@ -10,6 +10,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Constants;
+import org.opencds.cqf.fhir.utility.GeneratedIds;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,8 @@ public class ExtractProcessor implements IExtractProcessor {
     }
 
     protected IBaseBundle createBundle(ExtractRequest request, List<IBaseResource> resources) {
-        var bundle = BundleHelper.newBundle(request.getFhirVersion(), request.getExtractId(), "transaction");
+        var bundle = BundleHelper.newBundle(
+                request.getFhirVersion(), GeneratedIds.fromComposite(request.getExtractId()), "transaction");
         resources.forEach(r -> {
             var entry = BundleHelper.newEntryWithResource(r);
             BundleHelper.setEntryRequest(

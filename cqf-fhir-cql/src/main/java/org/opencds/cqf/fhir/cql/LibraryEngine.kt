@@ -120,7 +120,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         contextParameter: IBase?,
         resourceParameter: IBase?,
     ): IBaseParameters {
-        val libraryConstructor = LibraryConstructor(fhirContext)
+        val libraryConstructor = LibraryConstructor(fhirContext, settings)
         val cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext)
         val cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters)
         val evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters)

@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -21,15 +22,57 @@ public interface IQuestionnaireResponseAdapter extends IResourceAdapter {
 
     IQuestionnaireResponseAdapter setQuestionnaire(String canonical);
 
+    default List<IBaseReference> getBasedOn() {
+        return resolvePathList(get(), "basedOn", IBaseReference.class);
+    }
+
+    default List<IBaseReference> getPartOf() {
+        return resolvePathList(get(), "partOf", IBaseReference.class);
+    }
+
     boolean hasSubject();
 
     IIdType getSubject();
 
     IQuestionnaireResponseAdapter setSubject(IIdType subject);
 
+    default boolean hasEncounter() {
+        return getEncounter() != null;
+    }
+
+    default IBaseReference getEncounter() {
+        return resolvePath("encounter", IBaseReference.class);
+    }
+
+    default IQuestionnaireResponseAdapter setEncounter(IBaseReference encounter) {
+        setValue("encounter", encounter);
+        return this;
+    }
+
+    default boolean hasAuthored() {
+        return getAuthored() != null;
+    }
+
+    default Date getAuthored() {
+        var authored = resolvePath("authored", IPrimitiveType.class);
+        return authored == null ? null : (Date) authored.getValue();
+    }
+
     IQuestionnaireResponseAdapter setAuthored(Date date);
 
+    default boolean hasAuthor() {
+        return getAuthor() != null;
+    }
+
+    default IBaseReference getAuthor() {
+        return resolvePath("author", IBaseReference.class);
+    }
+
     IQuestionnaireResponseAdapter setStatus(String status);
+
+    default String getStatus() {
+        return resolvePathString("status");
+    }
 
     boolean hasItem();
 

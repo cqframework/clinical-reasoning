@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import java.util.List;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter;
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter;
@@ -45,5 +46,11 @@ public class CodeableConceptAdapter extends BaseElementAdapter implements ICodea
     @Override
     public boolean hasCoding(String code) {
         return get().getCoding().stream().anyMatch(coding -> coding.getCode().equals(code));
+    }
+
+    @Override
+    public ICodeableConceptAdapter addCoding(String system, String code, String display) {
+        get().addCoding(new Coding().setSystem(system).setCode(code).setDisplay(display));
+        return this;
     }
 }

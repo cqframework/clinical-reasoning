@@ -141,6 +141,20 @@ class RequestActionAdapterTest {
     }
 
     @Test
+    void testUnknownConditionResult() {
+        var adapter = new RequestActionAdapter(new RequestOrchestrationActionComponent());
+        var result = adapter.getConditionResult(null);
+        assertEquals("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-action-condition-result", result.getUrl());
+        assertFalse(result.hasValue());
+        assertEquals(1, result.getExtension().size());
+        var reason = result.getExtension().get(0);
+        assertEquals("http://hl7.org/fhir/StructureDefinition/data-absent-reason", reason.getUrl());
+        assertEquals("code", reason.getValue().fhirType());
+        assertEquals("asked-unknown", reason.getValue().primitiveValue());
+        assertFalse(reason.hasExtension());
+    }
+
+    @Test
     void testRelatedAction() {
         var relatedActionId = "related-action";
         var action = new RequestOrchestrationActionComponent()

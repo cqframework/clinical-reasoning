@@ -13,7 +13,6 @@
         "version": "1.2.3-draft",
         "status": "draft",
         "date": "2023-06-30",
-        "approvalDate": "2023-06-30",
         "relatedArtifact": [
           {
             "type": "composed-of",
@@ -34,10 +33,6 @@
                 "valueBoolean": true
               }
             ]
-          },
-          {
-            "type": "composed-of",
-            "resource": "http://notOwnedTest.com/Library/notOwnedRoot|0.1.1"
           },
           {
             "extension": [
@@ -102,11 +97,6 @@
       "resource": {
         "resourceType": "Library",
         "id": "rctc",
-        "meta": {
-          "profile": [
-            "http://hl7.org/fhir/us/ecr/StructureDefinition/us-ph-triggering-valueset-library"
-          ]
-        },
         "url": "http://ersd.aimsplatform.org/fhir/Library/rctc",
         "version": "1.2.3-draft",
         "status": "draft",
@@ -134,10 +124,6 @@
         "resourceType": "ValueSet",
         "id": "dxtc",
         "url": "http://ersd.aimsplatform.org/fhir/ValueSet/dxtc",
-        "extension":[{
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource",
-            "valueUri": "https://www.test.com/fhir/ValueSet/dxtc"
-        }],
         "version": "1.2.3-draft",
         "status": "draft",
         "compose": {
@@ -181,10 +167,6 @@
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113762.1.4.1146.6",
         "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6",
-        "extension" : [{
-            "url": "http://hl7.org/fhir/StructureDefinition/valueset-authoritativeSource",
-            "valueUri": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1146.6"
-          }],
         "identifier": [
           {
             "system": "urn:ietf:rfc:3986",
@@ -319,70 +301,6 @@
       "request": {
         "method": "PUT",
         "url": "ValueSet/2.16.840.1.113762.1.4.1146.6"
-      }
-    },
-    {
-      "fullUrl": "http://localhost:8082/fhir/Basic/approval1428",
-      "resource": {
-        "resourceType": "Basic",
-        "id": "approval1428",
-        "meta": {
-          "versionId": "1",
-          "lastUpdated": "2024-09-17T15:47:39.304+00:00",
-          "source": "#CxIqmz1z5zi7bitc",
-          "profile": [
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessment"
-          ]
-        },
-        "extension": [
-          {
-            "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentArtifact",
-            "valueReference": {
-              "reference": "Library/SpecificationLibrary"
-            }
-          },
-          {
-            "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentContent",
-            "extension": [
-              {
-                "url": "informationType",
-                "valueCode": "comment"
-              },
-              {
-                "url": "summary",
-                "valueMarkdown": "test comment text"
-              },
-              {
-                "url": "relatedArtifact",
-                "valueRelatedArtifact": {
-                  "type": "citation",
-                  "resource": "test program reference text"
-                }
-              },
-              {
-                "url": "author",
-                "valueReference": {
-                  "reference": "test user text"
-                }
-              },
-              {
-                "url": "relatedArtifact",
-                "valueRelatedArtifact": {
-                  "type": "derived-from",
-                  "resource": "http://ersd.aimsplatform.org/fhir/Library/SpecificationLibrary|1.2.3"
-                }
-              }
-            ]
-          },
-          {
-            "url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDate",
-            "valueDateTime": "2023-08-08T01:11:33+00:00"
-          }
-        ]
-      },
-      "request": {
-        "method": "POST",
-        "url": "Basic"
       }
     }
   ]

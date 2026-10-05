@@ -1,6 +1,7 @@
 package org.opencds.cqf.fhir.utility.adapter.dstu3
 
 import ca.uhn.fhir.context.FhirVersionEnum
+import org.hl7.fhir.dstu3.model.CodeType
 import org.hl7.fhir.dstu3.model.Coding
 import org.hl7.fhir.instance.model.api.IBase
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
@@ -20,6 +21,11 @@ class CodingAdapter(coding: IBase) :
     override fun get(): Coding {
         return coding
     }
+
+    override val codeType: CodeType?
+        get() {
+            return get().codeElement
+        }
 
     override val code: String?
         get() {

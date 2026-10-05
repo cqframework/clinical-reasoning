@@ -3,7 +3,9 @@ package org.opencds.cqf.fhir.utility.adapter.dstu3
 import ca.uhn.fhir.context.FhirVersionEnum
 import org.hl7.fhir.dstu3.model.*
 import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Constants
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
+import org.opencds.cqf.fhir.utility.adapter.IAdapter
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter
 import org.opencds.cqf.fhir.utility.adapter.IRequestActionAdapter
 
@@ -140,6 +142,28 @@ class RequestActionAdapter(requestAction: IBase) :
                         .setExpression(element.expression)
                 )
         }
+    }
+
+    override fun addCondition(conditionResult: Pair<IAdapter<*>, Boolean?>) {
+        val condition = conditionResult.first.get()
+        if (condition is PlanDefinition.PlanDefinitionActionConditionComponent) {
+            val newCondition =
+                RequestGroup.RequestGroupActionConditionComponent()
+                    .setKind(RequestGroup.ActionConditionKind.fromCode(condition.kind.toCode()))
+                    .setExpression(condition.expression)
+            newCondition.addExtension(getConditionResult(conditionResult.second))
+            get().addCondition(newCondition)
+        }
+    }
+
+    override fun getConditionResult(result: Boolean?): Extension {
+        val ext = Extension(Constants.CPG_ACTION_CONDITION_RESULT)
+        if (result == null) {
+            ext.addExtension(Extension(Constants.DATA_ABSENT_REASON, CodeType("asked-unknown")))
+        } else {
+            ext.setValue(IAdapter.newBooleanType(fhirVersion, result))
+        }
+        return ext
     }
 
     override fun hasRelatedAction(): Boolean {

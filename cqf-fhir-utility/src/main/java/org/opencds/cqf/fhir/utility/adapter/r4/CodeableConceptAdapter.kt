@@ -3,6 +3,7 @@ package org.opencds.cqf.fhir.utility.adapter.r4
 import ca.uhn.fhir.context.FhirVersionEnum
 import org.hl7.fhir.instance.model.api.IBase
 import org.hl7.fhir.r4.model.CodeableConcept
+import org.hl7.fhir.r4.model.Coding
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
 import org.opencds.cqf.fhir.utility.adapter.ICodeableConceptAdapter
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
@@ -36,5 +37,14 @@ class CodeableConceptAdapter(codeableConcept: IBase) :
 
     override fun hasCoding(code: String?): Boolean {
         return get().coding.any { coding -> coding!!.code == code }
+    }
+
+    override fun addCoding(
+        system: String?,
+        code: String?,
+        display: String?,
+    ): ICodeableConceptAdapter {
+        get().addCoding(Coding().setSystem(system).setCode(code).setDisplay(display))
+        return this
     }
 }

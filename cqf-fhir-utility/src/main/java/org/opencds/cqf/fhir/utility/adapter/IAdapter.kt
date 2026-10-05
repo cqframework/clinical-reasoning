@@ -243,6 +243,21 @@ interface IAdapter<T : IBase> {
                 as T
         }
 
+        @JvmStatic
+        fun <T : IPrimitiveType<Boolean?>> newBooleanType(
+            version: FhirVersionEnum,
+            value: Boolean?,
+        ): T {
+            @Suppress("UNCHECKED_CAST")
+            return when (version) {
+                FhirVersionEnum.DSTU3 -> org.hl7.fhir.dstu3.model.BooleanType(value)
+                FhirVersionEnum.R4 -> org.hl7.fhir.r4.model.BooleanType(value)
+                FhirVersionEnum.R5 -> org.hl7.fhir.r5.model.BooleanType(value)
+                else -> throw UnprocessableEntityException(UNSUPPORTED_VERSION(version))
+            }
+                as T
+        }
+
         val UNSUPPORTED_VERSION = { v: FhirVersionEnum -> "Unsupported version: $v" }
         const val MISSING_EXTENSION: String = "Field 'extension' does not exist on Element type {}"
     }

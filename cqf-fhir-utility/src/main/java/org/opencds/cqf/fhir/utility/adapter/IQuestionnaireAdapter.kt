@@ -21,7 +21,8 @@ interface IQuestionnaireAdapter : IKnowledgeArtifactAdapter {
         val defs = mutableSetOf<String?>()
         items.forEach { item ->
             if (item!!.hasDefinition()) {
-                defs.add(item.definition)
+                val def = item.definition!!.split("#")
+                defs.add(def[0])
             }
             if (item.hasItem()) {
                 defs.addAll(getItemDefs(item.item!!))

@@ -275,6 +275,15 @@ interface IAdapterFactory {
      */
     fun createTuple(tuple: IBase): ITupleAdapter
 
+    /**
+     * Creates an adapter that exposes common Observation operations across multiple versions of
+     * FHIR
+     *
+     * @param observation a HAPI FHIR Observation object
+     * @return an adapter exposing common api calls
+     */
+    fun createObservation(observation: IBaseResource): IObservationAdapter
+
     companion object {
         @JvmStatic
         fun forFhirContext(fhirContext: FhirContext): IAdapterFactory {

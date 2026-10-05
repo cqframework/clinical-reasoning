@@ -18,6 +18,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory
  */
 abstract class BaseFhirLibrarySourceProvider
 protected constructor(protected val adapterFactory: IAdapterFactory) : LibrarySourceProvider {
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun getLibraryContent(
         libraryIdentifier: VersionedIdentifier,
         libraryContentType: LibraryContentType,

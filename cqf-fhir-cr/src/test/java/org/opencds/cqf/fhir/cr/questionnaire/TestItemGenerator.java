@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,6 @@ import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
-import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -48,6 +48,7 @@ public class TestItemGenerator {
         return new Given();
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class Given {
         private IRepository repository;
 
@@ -71,26 +72,27 @@ public class TestItemGenerator {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     public static class When {
         private final IRepository repository;
         private final QuestionnaireProcessor processor;
-        private IIdType profileId;
-        private IPrimitiveType<String> profileUrl;
+        private List<IPrimitiveType<String>> profileUrl;
         private IBaseResource profile;
         private String id;
 
         When(IRepository repository, QuestionnaireProcessor itemGenerator) {
             this.repository = repository;
             this.processor = itemGenerator;
-        }
-
-        public When profileId(IIdType id) {
-            profileId = id;
-            return this;
+            this.profileUrl = new ArrayList<>();
         }
 
         public When profileUrl(IPrimitiveType<String> url) {
-            profileUrl = url;
+            profileUrl.add(url);
+            return this;
+        }
+
+        public When profileUrls(List<IPrimitiveType<String>> urls) {
+            profileUrl = urls;
             return this;
         }
 
@@ -106,8 +108,8 @@ public class TestItemGenerator {
 
         public GeneratedItem then() {
             IBaseResource result;
-            if (profileUrl != null || profileId != null || profile != null) {
-                result = processor.generateQuestionnaire(Eithers.for3(profileUrl, profileId, profile), false, true);
+            if (!profileUrl.isEmpty() || profile != null) {
+                result = processor.generateQuestionnaire(profile, profileUrl, false, true);
             } else {
                 result = processor.generateQuestionnaire(id);
             }
@@ -185,6 +187,14 @@ public class TestItemGenerator {
             return this;
         }
 
+        public GeneratedItem itemHasNoInitialExpression(String linkId) {
+            var item = items.get(linkId);
+            assertNotNull(item);
+            assertTrue(item.getExtension().stream()
+                    .noneMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_INITIAL_EXPRESSION)));
+            return this;
+        }
+
         public GeneratedItem itemHasInitialExpression(String linkId) {
             var item = items.get(linkId);
             assertNotNull(item);
@@ -193,11 +203,24 @@ public class TestItemGenerator {
             return this;
         }
 
-        public GeneratedItem itemHasExtractionValueExtension(String linkId) {
+        public GeneratedItem itemHasExtractionValueExtensions(String linkId, int count) {
+            var item = items.get(linkId);
+            assertNotNull(item);
+            assertEquals(
+                    count,
+                    item.getExtension().stream()
+                            .filter(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT_VALUE))
+                            .toList()
+                            .size());
+            return this;
+        }
+
+        public GeneratedItem itemHasDefinitionExtractExtension(String linkId) {
             var item = items.get(linkId);
             assertNotNull(item);
             assertTrue(item.getExtension().stream()
-                    .anyMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT_VALUE)));
+                    .anyMatch(e -> e.getUrl().equals(Constants.SDC_QUESTIONNAIRE_DEFINITION_EXTRACT)));
+
             return this;
         }
 

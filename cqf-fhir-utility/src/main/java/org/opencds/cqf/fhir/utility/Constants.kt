@@ -79,6 +79,13 @@ object Constants {
     const val CPG_RELATED_SUMMARY_DEFINITION =
         "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-relatedsummarydefinition"
 
+    const val CPG_ACTION_CONDITION_RESULT =
+        "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-action-condition-result"
+    const val CPG_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT =
+        "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-definitionPopulationContext"
+    const val CPG_ADDITIONAL_LAUNCH_CONTEXT_SYSTEM =
+        "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-questionnaire-additionalLaunchContext"
+
     const val CQF_RESOURCETYPE = "http://hl7.org/fhir/StructureDefinition/cqf-resourceType"
 
     // DSTU3 CQF Extensions
@@ -87,6 +94,8 @@ object Constants {
 
     const val CQF_APPLICABILITY_BEHAVIOR =
         "http://hl7.org/fhir/StructureDefinition/cqf-applicabilityBehavior"
+    const val R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR =
+        "http://hl7.org/fhir/6.0/StructureDefinition/extension-PlanDefinition.action.applicabilityBehavior"
 
     const val ARTIFACT_IS_OWNED_EXTENSION_URL =
         "http://hl7.org/fhir/StructureDefinition/artifact-isOwned"
@@ -150,6 +159,8 @@ object Constants {
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionExtractValue"
     const val SDC_QUESTIONNAIRE_ITEM_POPULATION_CONTEXT =
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-itemPopulationContext"
+    const val SDC_QUESTIONNAIRE_DEFINITION_POPULATION_CONTEXT =
+        "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-definitionPopulationContext"
     const val SDC_QUESTIONNAIRE_IS_SUBJECT =
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-isSubject"
     const val SDC_QUESTIONNAIRE_PREPOPULATE_SUBJECT =
@@ -176,11 +187,29 @@ object Constants {
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-launchContext"
     const val SDC_QUESTIONNAIRE_ADAPTIVE =
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-questionnaireAdaptive"
+    const val SDC_LAUNCH_CONTEXT_SYSTEM = "http://hl7.org/fhir/uv/sdc/CodeSystem/launchContext"
 
     const val SDC_QUESTIONNAIRE_SUB_QUESTIONNAIRE =
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-subQuestionnaire"
     const val SDC_QUESTIONNAIRE_CALCULATED_EXPRESSION =
         "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-calculatedExpression"
+
+    const val SDC_POPULATE_BEHAVIOR =
+        "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-populate-behavior"
+
+    enum class SDC_POPULATE_BEHAVIOR_CODE(code: String) {
+        ALWAYS("always"),
+        NEVER("never"),
+        IF_EMPTY("if-empty"),
+        IF_AVAILABLE("if-available"),
+        SUPPLEMENT("supplement");
+
+        val code: String?
+
+        init {
+            this.code = code
+        }
+    }
 
     // $apply parameter names
     const val APPLY_PARAMETER_ACTIVITY_DEFINITION = "activityDefinition"

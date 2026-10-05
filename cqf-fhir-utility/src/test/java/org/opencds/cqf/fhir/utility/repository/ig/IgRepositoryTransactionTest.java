@@ -28,6 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opencds.cqf.fhir.test.Resources;
 import org.opencds.cqf.fhir.utility.Ids;
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.search.Searches.SearchBuilder;
 
 class IgRepositoryTransactionTest {
@@ -70,6 +71,26 @@ class IgRepositoryTransactionTest {
                 case "SearchParameter" -> {
                     var sp = newSearchParameter();
                     sp.setUrl(urlPrefix + urlSuffix);
+                    yield sp;
+                }
+                default -> throw new IllegalArgumentException("Unknown fixture: " + label);
+            };
+        }
+
+        Resource createWithVersion(String id, String urlSuffix, String version) {
+            return switch (label) {
+                case "Library" -> {
+                    var lib = new Library();
+                    lib.setId(id);
+                    lib.setUrl(urlPrefix + urlSuffix);
+                    lib.setVersion(version);
+                    yield lib;
+                }
+                case "SearchParameter" -> {
+                    var sp = newSearchParameter();
+                    sp.setId(id);
+                    sp.setUrl(urlPrefix + urlSuffix);
+                    sp.setVersion(version);
                     yield sp;
                 }
                 default -> throw new IllegalArgumentException("Unknown fixture: " + label);
@@ -330,6 +351,28 @@ class IgRepositoryTransactionTest {
 
         var readRes3 = repository.read(fixture.resourceClass, Ids.newId(fixture.resourceClass, "tx-mixed-3-" + suffix));
         assertNotNull(readRes3);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("resourceFixtures")
+    void transactionGet_searchRetrievesResource(ResourceFixture fixture) {
+        var suffix = fixture.label;
+        var version = "1.0.0";
+        var resource = fixture.createWithVersion("tx-search-" + suffix, "tx-search-" + suffix, version);
+        repository.create(resource, HEADERS_EMPTY);
+
+        var adapter = IAdapterFactory.createAdapterForResource(resource);
+        var txBundle = new Bundle().setType(Bundle.BundleType.TRANSACTION);
+        txBundle.addEntry()
+                .getRequest()
+                .setMethod(Bundle.HTTPVerb.GET)
+                .setUrl(String.format("%s?url=%s&version=%s", suffix, adapter.resolvePathString("url"), version));
+
+        var result = repository.transaction(txBundle, HEADERS_EMPTY);
+        assertEquals(1, result.getEntry().size());
+        var bundle1 = (Bundle) result.getEntryFirstRep().getResource();
+        assertEquals(1, bundle1.getEntry().size());
+        assertEquals(resource, bundle1.getEntryFirstRep().getResource());
     }
 
     @Test

@@ -2,6 +2,7 @@ package org.opencds.cqf.fhir.utility.adapter.r5
 
 import ca.uhn.fhir.context.FhirVersionEnum
 import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.r5.model.CodeType
 import org.hl7.fhir.r5.model.Coding
 import org.opencds.cqf.fhir.utility.adapter.BaseElementAdapter
 import org.opencds.cqf.fhir.utility.adapter.ICodingAdapter
@@ -22,6 +23,11 @@ class CodingAdapter(coding: IBase) :
     override val code: String?
         get() {
             return get().code
+        }
+
+    override val codeType: CodeType?
+        get() {
+            return get().codeElement
         }
 
     override fun hasCode(): Boolean {

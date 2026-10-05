@@ -120,7 +120,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         contextParameter: IBase?,
         resourceParameter: IBase?,
     ): IBaseParameters {
-        val libraryConstructor = LibraryConstructor(fhirContext)
+        val libraryConstructor = LibraryConstructor(fhirContext, settings)
         val cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext)
         val cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters)
         val evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters)
@@ -242,7 +242,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             }
             .mapNotNull { param ->
                 when {
-                    param!!.hasValue() ->
+                    param.hasValue() ->
                         if (
                             (param.value as IBaseHasExtensions).extension.any {
                                 DATA_ABSENT_REASON == it.url

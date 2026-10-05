@@ -52,6 +52,10 @@ interface IRequestActionAdapter : IAdapter<IBase> {
 
     fun addCondition(condition: IBaseBackboneElement?)
 
+    fun addCondition(conditionResult: Pair<IAdapter<*>, Boolean?>)
+
+    fun getConditionResult(result: Boolean?): IBaseExtension<*, *>
+
     fun hasRelatedAction(): Boolean
 
     fun <T : IBaseBackboneElement> getRelatedAction(): MutableList<T?>?

@@ -86,6 +86,12 @@
             ],
             "condition": [
               {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-action-condition-result",
+                    "valueBoolean": true
+                  }
+                ],
                 "kind": "applicability",
                 "expression": {
                   "description": "Patient has not had a urine screening in the past 12 months",

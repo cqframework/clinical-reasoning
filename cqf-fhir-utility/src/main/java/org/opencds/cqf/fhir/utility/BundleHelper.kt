@@ -217,6 +217,35 @@ object BundleHelper {
     }
 
     /**
+     * Checks if an entry has a request type of GET
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return boolean
+     */
+    @JvmStatic
+    fun isEntryRequestGet(fhirVersion: FhirVersionEnum, entry: IBaseBackboneElement): Boolean {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU3 ->
+                (entry as org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent).request.method ==
+                    org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.GET
+
+            FhirVersionEnum.R4 ->
+                (entry as org.hl7.fhir.r4.model.Bundle.BundleEntryComponent).request.method ==
+                    org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET
+
+            FhirVersionEnum.R5 ->
+                (entry as org.hl7.fhir.r5.model.Bundle.BundleEntryComponent).request.method ==
+                    org.hl7.fhir.r5.model.Bundle.HTTPVerb.GET
+
+            else ->
+                throw IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR(fhirVersion.fhirVersionString)
+                )
+        }
+    }
+
+    /**
      * Returns the list of entries from the Bundle
      *
      * @param bundle IBaseBundle type

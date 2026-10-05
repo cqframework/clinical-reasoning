@@ -16,6 +16,7 @@ class AdapterFactory : IAdapterFactory {
             is Endpoint -> createEndpoint(resource)
             is Parameters -> createParameters(resource)
             is Group -> createGroup(resource)
+            is Observation -> createObservation(resource)
             else -> ResourceAdapter(resource)
         }
     }
@@ -189,5 +190,9 @@ class AdapterFactory : IAdapterFactory {
 
     override fun createTuple(tuple: IBase): ITupleAdapter {
         return TupleAdapter(tuple)
+    }
+
+    override fun createObservation(observation: IBaseResource): IObservationAdapter {
+        return ObservationAdapter(observation)
     }
 }

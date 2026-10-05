@@ -43,6 +43,13 @@ interface IPlanDefinitionActionAdapter : IAdapter<IBase> {
 
     fun <T : IBaseBackboneElement> getCondition(): MutableList<T?>?
 
+    fun <T : IBaseBackboneElement> getApplicabilityConditions(): MutableList<IAdapter<*>?> {
+        return getCondition<T>()!!
+            .filter { c -> "applicability" == resolvePathString(c, "kind") }
+            .map { c -> adapterFactory!!.createBase(c!!) }
+            .toMutableList()
+    }
+
     fun hasInput(): Boolean
 
     val inputDataRequirement: MutableList<IDataRequirementAdapter?>?
@@ -62,15 +69,20 @@ interface IPlanDefinitionActionAdapter : IAdapter<IBase> {
     // These will need to be overridden starting with R6 when this is introduced as an element on
     // action
     fun hasApplicabilityBehavior(): Boolean {
-        return hasExtension(Constants.CQF_APPLICABILITY_BEHAVIOR)
+        return hasExtension(Constants.CQF_APPLICABILITY_BEHAVIOR) ||
+            hasExtension(Constants.R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR)
     }
 
     val applicabilityBehavior: Constants.CqfApplicabilityBehavior
         // These will need to be overridden starting with R6 when this is introduced as an element
         // on action
         get() {
-            val extension =
+            var extension =
                 getExtensionByUrl<IBaseExtension<*, *>>(Constants.CQF_APPLICABILITY_BEHAVIOR)
+            if (extension == null) {
+                extension =
+                    getExtensionByUrl(Constants.R6_PLAN_DEFINITION_ACTION_APPLICABILITY_BEHAVIOR)
+            }
             if (extension != null && extension.value is IPrimitiveType<*>) {
                 try {
                     return CqfApplicabilityBehavior.valueOf(

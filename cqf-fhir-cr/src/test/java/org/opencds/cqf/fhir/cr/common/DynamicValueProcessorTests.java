@@ -60,7 +60,7 @@ class DynamicValueProcessorTests {
                                 .setLanguage("text/cql-identifier")));
         var requestAction = new org.hl7.fhir.r4.model.RequestGroup.RequestGroupActionComponent();
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(request, dynamicValue);
-        doReturn(null).when(fixture).getDynamicValueExpressionResult(request, cqfExpression, null, null);
+        doReturn(null).when(fixture).getDynamicValueExpressionResult(request, cqfExpression, null, null, requestAction);
 
         var logger = TestLoggerFactory.getTestLogger(DynamicValueProcessor.class);
         logger.clear();
@@ -90,7 +90,7 @@ class DynamicValueProcessorTests {
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(requestDstu3, dvDstu3);
         doReturn(expressionResultsDstu3)
                 .when(fixture)
-                .getDynamicValueExpressionResult(requestDstu3, cqfExpression, null, null);
+                .getDynamicValueExpressionResult(requestDstu3, cqfExpression, null, null, raDstu3);
 
         fixture.resolveDynamicValue(requestDstu3, dvDstu3, null, null, raDstu3);
 
@@ -108,7 +108,7 @@ class DynamicValueProcessorTests {
         doReturn(cqfExpression).when(fixture).getDynamicValueExpression(requestR4, dvR4);
         doReturn(expressionResultsR4)
                 .when(fixture)
-                .getDynamicValueExpressionResult(requestR4, cqfExpression, null, null);
+                .getDynamicValueExpressionResult(requestR4, cqfExpression, null, null, raR4);
         assertThrows(IllegalArgumentException.class, () -> {
             fixture.resolveDynamicValue(requestR4, dvR4, null, null, raR4);
         });

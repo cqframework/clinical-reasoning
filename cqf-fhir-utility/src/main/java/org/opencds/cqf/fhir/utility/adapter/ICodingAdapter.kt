@@ -1,10 +1,13 @@
 package org.opencds.cqf.fhir.utility.adapter
 
 import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseDatatype
 
 interface ICodingAdapter : IAdapter<IBase> {
 
     val code: String?
+
+    val codeType: IBaseDatatype?
 
     fun hasCode(): Boolean
 

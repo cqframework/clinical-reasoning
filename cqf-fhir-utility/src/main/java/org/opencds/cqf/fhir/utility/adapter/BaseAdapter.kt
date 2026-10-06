@@ -50,7 +50,7 @@ abstract class BaseAdapter(protected val fhirContext: FhirContext) {
 
         if (target is MutableList<*>) {
             var index = 0
-            if (path.contains("[\\d]")) {
+            if (path.contains("\\[\\d+]".toRegex())) {
                 try {
                     index = path.substring(path.indexOf("[")).replace("]", "").toInt()
                 } catch (e: NumberFormatException) {

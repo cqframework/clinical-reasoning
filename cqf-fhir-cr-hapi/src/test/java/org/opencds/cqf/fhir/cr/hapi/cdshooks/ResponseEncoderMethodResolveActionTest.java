@@ -127,4 +127,26 @@ class ResponseEncoderMethodResolveActionTest {
         // then
         assertEquals(expectedBehavior.toCode(), result.getSelectionBehaviour());
     }
+
+    @Test
+    void testResolveAction_shouldAddSuggestionsForNestedActionsWhenSelectionBehaviorIsSet() {
+        // given
+        var firstSuggestion = new RequestGroupActionComponent().setTitle("Suggestion One");
+        var secondSuggestion = new RequestGroupActionComponent().setTitle("Suggestion Two");
+
+        requestGroupActionComponent
+                .setSelectionBehavior(ActionSelectionBehavior.ATMOSTONE)
+                .setAction(List.of(firstSuggestion, secondSuggestion));
+
+        var actionAdapter = adapterFactory.createRequestAction(requestGroupActionComponent);
+
+        // when
+        var result = fixture.resolveAction(actionAdapter, List.of());
+
+        // then
+        assertNotNull(result.getSuggestions());
+        assertEquals(2, result.getSuggestions().size());
+        assertEquals("Suggestion One", result.getSuggestions().get(0).getLabel());
+        assertEquals("Suggestion Two", result.getSuggestions().get(1).getLabel());
+    }
 }

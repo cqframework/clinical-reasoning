@@ -42,8 +42,8 @@ class CqfExpression {
 
     @JvmOverloads
     constructor(
-        language: String,
-        expression: String,
+        language: String?,
+        expression: String?,
         referencedLibraries: MutableMap<String?, String?>?,
         libraryUrl: String? = null,
         altLanguage: String? = null,
@@ -153,10 +153,10 @@ class CqfExpression {
                 return null
             }
             val altExpressionExt =
-                expression.getExtensionByUrl<IBaseExtension<*, *>?>(Constants.ALT_EXPRESSION_EXT)
+                expression.getExtensionByUrl<IBaseExtension<*, *>>(Constants.ALT_EXPRESSION_EXT)
             val altExpression =
                 if (altExpressionExt == null) null
-                else expression.getAdapterFactory().createBase(altExpressionExt.getValue())
+                else expression.adapterFactory!!.createBase(altExpressionExt.getValue())
             return CqfExpression(
                 expression.resolvePathString("language"),
                 expression.resolvePathString("expression"),

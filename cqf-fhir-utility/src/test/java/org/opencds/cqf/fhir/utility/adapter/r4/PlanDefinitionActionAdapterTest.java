@@ -131,7 +131,10 @@ class PlanDefinitionActionAdapterTest {
         assertTrue(adapter.hasCondition());
         assertEquals(
                 conditionExpression,
-                adapter.getCondition().get(0).getExpression().getExpression());
+                adapter.<PlanDefinitionActionConditionComponent>getCondition()
+                        .get(0)
+                        .getExpression()
+                        .getExpression());
     }
 
     @Test
@@ -155,7 +158,11 @@ class PlanDefinitionActionAdapterTest {
                         .setRelationship(ActionRelationshipType.BEFORE));
         var adapter = new PlanDefinitionActionAdapter(action);
         assertTrue(adapter.hasRelatedAction());
-        assertEquals(relatedActionId, adapter.getRelatedAction().get(0).getActionId());
+        assertEquals(
+                relatedActionId,
+                adapter.<PlanDefinitionActionRelatedActionComponent>getRelatedAction()
+                        .get(0)
+                        .getActionId());
     }
 
     @Test

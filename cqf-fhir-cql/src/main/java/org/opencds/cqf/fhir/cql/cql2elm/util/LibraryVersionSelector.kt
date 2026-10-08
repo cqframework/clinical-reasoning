@@ -13,7 +13,7 @@ class LibraryVersionSelector(private val adapterFactory: IAdapterFactory) {
     ): IBaseResource? {
         val targetVersion = libraryIdentifier.version
 
-        val adapters = libraries.map { x -> this.adapterFactory.createLibrary(x) }
+        val adapters = libraries.map { x -> this.adapterFactory.createLibrary(x!!) }
 
         var library: ILibraryAdapter? = null
         var maxLibrary: ILibraryAdapter? = null

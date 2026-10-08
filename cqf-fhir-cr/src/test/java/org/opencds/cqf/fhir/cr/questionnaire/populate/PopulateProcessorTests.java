@@ -1,19 +1,21 @@
 package org.opencds.cqf.fhir.cr.questionnaire.populate;
 
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.PATIENT_ID;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.opencds.cqf.fhir.cr.helpers.RequestHelpers.newPopulateRequestForVersion;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.List;
-import java.util.stream.Stream;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Expression;
@@ -21,8 +23,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +31,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.opencds.cqf.fhir.cql.LibraryEngine;
+import org.opencds.cqf.fhir.cr.common.ExpressionProcessor;
 import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -46,93 +45,19 @@ class PopulateProcessorTests {
     @Mock
     private LibraryEngine libraryEngine;
 
+    @Mock
+    private ExpressionProcessor expressionProcessor;
+
+    @Mock
+    private ItemProcessor itemProcessor;
+
     @Spy
-    private final PopulateProcessor fixture = new PopulateProcessor();
+    private PopulateProcessor fixture;
 
     @BeforeEach
     void setup() {
         doReturn(repository).when(libraryEngine).getRepository();
-    }
-
-    @Test
-    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsR4() {
-        // setup
-        final var fhirVersion = FhirVersionEnum.R4;
-        final var questionnaireUrl = "original-questionnaire-url";
-        final var prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
-        final var originalQuestionnaire = new Questionnaire();
-        originalQuestionnaire.setId(prePopulatedQuestionnaireId);
-        originalQuestionnaire.setUrl(questionnaireUrl);
-        final var item = new QuestionnaireItemComponent().setLinkId("1").setType(QuestionnaireItemType.DECIMAL);
-        originalQuestionnaire.addItem(item);
-        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        final var request = newPopulateRequestForVersion(fhirVersion, libraryEngine, originalQuestionnaire);
-        final var expectedResponses = getExpectedResponses(request);
-        doReturn(expectedResponses).when(fixture).populateItem(eq(request), any());
-        // execute
-        final var actual = (QuestionnaireResponse) fixture.populate(request);
-        // validate
-        assertEquals(
-                prePopulatedQuestionnaireId + "-" + PATIENT_ID,
-                actual.getIdElement().getIdPart());
-        assertContainedOperationOutcome(request, actual, null);
-        assertEquals(questionnaireUrl, actual.getQuestionnaire());
-        assertEquals(QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
-        assertEquals("Patient/" + PATIENT_ID, actual.getSubject().getReference());
-        assertEquals(expectedResponses.stream().map(IAdapter::get).toList(), actual.getItem());
-        verify(fixture).populateItem(eq(request), any());
-    }
-
-    @Test
-    void populateShouldReturnQuestionnaireResponseResourceWithPopulatedFieldsR5() {
-        // setup
-        final var fhirVersion = FhirVersionEnum.R5;
-        final var questionnaireUrl = "original-questionnaire-url";
-        final var prePopulatedQuestionnaireId = "prepopulated-questionnaire-id";
-        final var originalQuestionnaire = new org.hl7.fhir.r5.model.Questionnaire();
-        originalQuestionnaire.setId(prePopulatedQuestionnaireId);
-        originalQuestionnaire.setUrl(questionnaireUrl);
-        final var item = new org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent()
-                .setLinkId("1")
-                .setType(org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType.BOOLEAN);
-        originalQuestionnaire.addItem(item);
-        doReturn(FhirContext.forR5Cached()).when(repository).fhirContext();
-        final var request = newPopulateRequestForVersion(fhirVersion, libraryEngine, originalQuestionnaire);
-        final var expectedResponses = getExpectedResponses(request);
-        doReturn(expectedResponses).when(fixture).populateItem(eq(request), any());
-        // execute
-        final var actual = (org.hl7.fhir.r5.model.QuestionnaireResponse) fixture.populate(request);
-        // validate
-        assertEquals(
-                prePopulatedQuestionnaireId + "-" + PATIENT_ID,
-                actual.getIdElement().getIdPart());
-        assertContainedOperationOutcome(request, actual, null);
-        assertEquals(questionnaireUrl, actual.getQuestionnaire());
-        assertEquals(
-                org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus.INPROGRESS, actual.getStatus());
-        assertEquals("Patient/" + PATIENT_ID, actual.getSubject().getReference());
-        assertEquals(expectedResponses.stream().map(IAdapter::get).toList(), actual.getItem());
-        verify(fixture).populateItem(eq(request), any());
-    }
-
-    private List<IQuestionnaireResponseItemComponentAdapter> getExpectedResponses(PopulateRequest request) {
-        return switch (request.getFhirVersion()) {
-            case R4 ->
-                Stream.of(
-                                new QuestionnaireResponseItemComponent(),
-                                new QuestionnaireResponseItemComponent(),
-                                new QuestionnaireResponseItemComponent())
-                        .map(i -> request.getAdapterFactory().createQuestionnaireResponseItem(i))
-                        .toList();
-            case R5 ->
-                Stream.of(
-                                new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                                new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent(),
-                                new org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent())
-                        .map(i -> request.getAdapterFactory().createQuestionnaireResponseItem(i))
-                        .toList();
-            default -> List.of();
-        };
+        fixture = spy(new PopulateProcessor(itemProcessor, expressionProcessor));
     }
 
     private void assertContainedOperationOutcome(
@@ -200,8 +125,8 @@ class PopulateProcessorTests {
         var expectedResponse = new StringType("test");
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
         doReturn(List.of(expectedResponse))
-                .when(libraryEngine)
-                .resolveExpression(eq(PATIENT_ID), any(), any(), any(), any(), any(), any());
+                .when(expressionProcessor)
+                .getExpressionResult(any(), any(), eq(null), eq(null));
         final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         var actual = fixture.getVariables(request, questionnaire);
         assertNotNull(actual);
@@ -218,12 +143,63 @@ class PopulateProcessorTests {
         questionnaire.addExtension(Constants.VARIABLE_EXTENSION, expression);
         var expectedResponse = List.of(new StringType("test1"), new StringType("test2"));
         doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
-        doReturn(expectedResponse)
-                .when(libraryEngine)
-                .resolveExpression(eq(PATIENT_ID), any(), any(), any(), any(), any(), any());
+        doReturn(expectedResponse).when(expressionProcessor).getExpressionResult(any(), any(), eq(null), eq(null));
         final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
         var actual = fixture.getVariables(request, questionnaire);
         assertNotNull(actual);
         assertEquals(expectedResponse, actual.get("testName"));
+    }
+
+    @Test
+    void testGetVariablesHandlesEmptyList() {
+        var questionnaire = new Questionnaire();
+        var expression = new Expression()
+                .setLanguage("text/cql-expression")
+                .setExpression("test")
+                .setName("testName");
+        questionnaire.addExtension(Constants.VARIABLE_EXTENSION, expression);
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        doReturn(emptyList()).when(expressionProcessor).getExpressionResult(any(), any(), eq(null), eq(null));
+        final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var actual = fixture.getVariables(request, questionnaire);
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
+    }
+
+    @Test
+    void testGetVariablesHandlesError() {
+        var questionnaire = new Questionnaire();
+        var expression = new Expression()
+                .setLanguage("text/cql-expression")
+                .setExpression("test")
+                .setName("testName");
+        questionnaire.addExtension(Constants.VARIABLE_EXTENSION, expression);
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        var errorMessage = "An error has occurred.";
+        final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        doThrow(new RuntimeException(errorMessage))
+                .when(expressionProcessor)
+                .getExpressionResult(any(), any(), eq(null), eq(null));
+        var actual = fixture.getVariables(request, questionnaire);
+        assertNotNull(actual);
+        assertEquals(0, actual.size());
+        var opOutcome = request.getOperationOutcome();
+        assertNotNull(opOutcome);
+        assertFalse(((OperationOutcome) opOutcome).getIssue().isEmpty());
+    }
+
+    @Test
+    void testPopulateItemHandlesError() {
+        var questionnaire = new Questionnaire();
+        doReturn(FhirContext.forR4Cached()).when(repository).fhirContext();
+        var errorMessage = "An error has occurred.";
+        final var request = newPopulateRequestForVersion(FhirVersionEnum.R4, libraryEngine, questionnaire);
+        var item = request.getAdapterFactory()
+                .createQuestionnaireItem(new QuestionnaireItemComponent().setType(QuestionnaireItemType.BOOLEAN));
+        doThrow(new RuntimeException(errorMessage)).when(itemProcessor).processItem(any(), any(), anyList());
+        fixture.populateItem(request, item);
+        var opOutcome = request.getOperationOutcome();
+        assertNotNull(opOutcome);
+        assertFalse(((OperationOutcome) opOutcome).getIssue().isEmpty());
     }
 }

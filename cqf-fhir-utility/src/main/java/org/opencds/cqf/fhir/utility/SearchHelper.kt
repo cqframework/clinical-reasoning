@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package org.opencds.cqf.fhir.utility
 
 import ca.uhn.fhir.context.FhirVersionEnum
@@ -16,7 +18,8 @@ import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
 import org.opencds.cqf.fhir.utility.search.Searches
 
 object SearchHelper {
-    internal fun getBundleClass(repository: IRepository): Class<IBaseBundle> {
+    @JvmStatic
+    fun getBundleClass(repository: IRepository): Class<IBaseBundle> {
         @Suppress("UNCHECKED_CAST")
         return repository.fhirContext().getResourceDefinition("Bundle").implementingClass
             as Class<IBaseBundle>
@@ -142,7 +145,7 @@ object SearchHelper {
     ): Class<out IBaseResource> {
         var resourceType: Class<out IBaseResource>
         try {
-            val resourceTypeString = getResourceType(dependencyInfo.reference)
+            val resourceTypeString = getResourceType(dependencyInfo.reference!!)
             if (resourceTypeString.isNullOrEmpty()) {
                 throw DataFormatException()
             }
@@ -151,7 +154,7 @@ object SearchHelper {
         } catch (e: DataFormatException) {
             // Use the "cqf-resourceType" extension to figure this out, if it's present
             val cqfResourceTypeExt =
-                getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension())
+                getResourceTypeStringFromCqfResourceTypeExtension(dependencyInfo.getExtension()!!)
             if (cqfResourceTypeExt != null) {
                 try {
                     resourceType =

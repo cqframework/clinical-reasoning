@@ -217,13 +217,42 @@ object BundleHelper {
     }
 
     /**
+     * Checks if an entry has a request type of GET
+     *
+     * @param fhirVersion FhirVersionEnum
+     * @param entry IBaseBackboneElement type
+     * @return boolean
+     */
+    @JvmStatic
+    fun isEntryRequestGet(fhirVersion: FhirVersionEnum, entry: IBaseBackboneElement): Boolean {
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU3 ->
+                (entry as org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent).request.method ==
+                    org.hl7.fhir.dstu3.model.Bundle.HTTPVerb.GET
+
+            FhirVersionEnum.R4 ->
+                (entry as org.hl7.fhir.r4.model.Bundle.BundleEntryComponent).request.method ==
+                    org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET
+
+            FhirVersionEnum.R5 ->
+                (entry as org.hl7.fhir.r5.model.Bundle.BundleEntryComponent).request.method ==
+                    org.hl7.fhir.r5.model.Bundle.HTTPVerb.GET
+
+            else ->
+                throw IllegalArgumentException(
+                    UNSUPPORTED_VERSION_OF_FHIR(fhirVersion.fhirVersionString)
+                )
+        }
+    }
+
+    /**
      * Returns the list of entries from the Bundle
      *
      * @param bundle IBaseBundle type
      * @return IBaseBackboneElement
      */
     @JvmStatic
-    fun <T : IBaseBackboneElement> getEntry(bundle: IBaseBundle): MutableList<T> {
+    fun <T : IBaseBackboneElement> getEntry(bundle: IBaseBundle): MutableList<T?> {
         @Suppress("UNCHECKED_CAST")
         return when (val fhirVersion = bundle.structureFhirVersionEnum) {
             FhirVersionEnum.DSTU3 -> (bundle as org.hl7.fhir.dstu3.model.Bundle).entry
@@ -234,7 +263,7 @@ object BundleHelper {
                     BundleHelper.UNSUPPORTED_VERSION_OF_FHIR(fhirVersion.fhirVersionString)
                 )
         }
-            as MutableList<T>
+            as MutableList<T?>
     }
 
     /**
@@ -291,7 +320,7 @@ object BundleHelper {
         val entry = getEntry<IBaseBackboneElement>(bundle)
 
         return entry
-            .map { BundleHelper.getEntryResource(fhirVersion, it)!!.idElement }
+            .map { BundleHelper.getEntryResource(fhirVersion, it!!)!!.idElement }
             .toMutableList()
     }
 

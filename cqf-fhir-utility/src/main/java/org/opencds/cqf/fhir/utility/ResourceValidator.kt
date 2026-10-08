@@ -98,11 +98,7 @@ class ResourceValidator : IResourceValidator {
                 for (resourceComponent in ig.definition.resource) {
                     if (
                         listOf("CodeSystem", "StructureDefinition", "ValueSet")
-                            .contains(
-                                resourceComponent.reference.reference
-                                    .split("/")
-                                    .dropLastWhile { it.isEmpty() }[0]
-                            )
+                            .contains(resourceComponent.reference.reference.split("/")[0])
                     ) {
                         try {
                             val resource =
@@ -133,6 +129,7 @@ class ResourceValidator : IResourceValidator {
         return this.validate(resource, false)
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun validate(resource: IBaseResource?, error: Boolean?): IBaseResource? {
         val validationResult = this.validator!!.validateWithResult(resource)
         val errors =

@@ -87,7 +87,7 @@ class CqlFhirParametersConverter(
         name: kotlin.String,
     ): IParametersParameterComponentAdapter {
         val ppca = pa.addParameter()
-        ppca.setName(name)
+        ppca!!.setName(name)
 
         return ppca
     }
@@ -156,7 +156,7 @@ class CqlFhirParametersConverter(
         name: kotlin.String,
     ): IParametersParameterComponentAdapter {
         val ppca = ppcAdapter.addPart()
-        ppca.setName(name)
+        ppca!!.setName(name)
 
         return ppca
     }
@@ -211,17 +211,16 @@ class CqlFhirParametersConverter(
         val parametersAdapter = this.adapterFactory.createParameters(parameters)
 
         val children =
-            parametersAdapter
-                .getParameter()
-                .filter { x -> x!!.getName() != null }
-                .groupBy { obj -> obj.name }
+            parametersAdapter.parameter!!
+                .filter { x -> x!!.name != null }
+                .groupBy { obj -> obj!!.name }
 
         for (entry in children.entries) {
             // Meta data extension, if present
             val ext =
                 entry.value
                     .filter { obj -> obj!!.hasExtension() }
-                    .flatMap { x -> x!!.getExtension<IBaseExtension<*, *>?>() }
+                    .flatMap { x -> x!!.getExtension<IBaseExtension<*, *>>() }
                     .firstOrNull { x ->
                         x!!.url != null &&
                             (x.url ==
@@ -277,7 +276,7 @@ class CqlFhirParametersConverter(
                 value = values[0]
             }
 
-            cqlParameterDefinitions.add(CqlParameterDefinition(name, type, isList, value))
+            cqlParameterDefinitions.add(CqlParameterDefinition(name!!, type, isList, value))
         }
 
         return cqlParameterDefinitions
@@ -308,7 +307,7 @@ class CqlFhirParametersConverter(
                 val elements =
                     adapterFactory
                         .createTuple(v as IBase)
-                        .getProperties()
+                        .properties
                         .mapValues { entry ->
                             val listValue =
                                 (entry.value as kotlin.collections.List<*>).map { e ->
@@ -452,12 +451,12 @@ class CqlFhirParametersConverter(
             return instance
         }
 
-        val ibaseClazz = clazz as Class<out IBase?>
+        @Suppress("UNCHECKED_CAST") val ibaseClazz = clazz as Class<out IBase?>
         var definition =
             fhirContext.getElementDefinition(ibaseClazz)
                 as BaseRuntimeElementCompositeDefinition<*>?
         if (definition == null) {
-            val resourceClazz = clazz as Class<out IBaseResource?>
+            @Suppress("UNCHECKED_CAST") val resourceClazz = clazz as Class<out IBaseResource?>
             definition = fhirContext.getResourceDefinition(resourceClazz)
         }
 
@@ -485,11 +484,11 @@ class CqlFhirParametersConverter(
 
     private fun convertToCql(ppca: IParametersParameterComponentAdapter): Value? {
         if (ppca.hasValue()) {
-            return this.fhirTypeConverter.toCqlType(ppca.getValue()) as Value?
+            return this.fhirTypeConverter.toCqlType(ppca.value) as Value?
         } else if (ppca.hasResource()) {
-            return modelResolver.toCqlValue(ppca.getResource(), false)
+            return modelResolver.toCqlValue(ppca.resource, false)
         } else if (ppca.hasPart()) {
-            logger.debug("Ignored {} parameter sub-parts", ppca.getPart().size)
+            logger.debug("Ignored {} parameter sub-parts", ppca.part!!.size)
         }
 
         return null

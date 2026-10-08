@@ -95,13 +95,13 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         if (fhirType == "Tuple") {
             val properties = ArrayList<String?>()
             val tuple = adapterFactory.createTuple(base)
-            tuple.getProperties().forEach { (propertyName: String?, value: Any?) ->
+            tuple.properties.forEach { (propertyName: String?, value: Any?) ->
                 properties.add("$propertyName ${getModelName(value!!)}")
             }
             return "Tuple { ${properties.joinToString(", ")} }"
         }
         if (fhirType.contains(".")) {
-            val split = fhirType.split(".").dropLastWhile { it.isEmpty() }
+            val split = fhirType.split(".")
             fhirType =
                 split.joinToString(".") { str ->
                     str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
@@ -120,7 +120,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         contextParameter: IBase?,
         resourceParameter: IBase?,
     ): IBaseParameters {
-        val libraryConstructor = LibraryConstructor(fhirContext)
+        val libraryConstructor = LibraryConstructor(fhirContext, settings)
         val cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext)
         val cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters)
         val evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters)
@@ -238,21 +238,21 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
 
         return values
             .map { parametersParameterComponent ->
-                adapterFactory.createParametersParameter(parametersParameterComponent)
+                adapterFactory.createParametersParameter(parametersParameterComponent!!)
             }
             .mapNotNull { param ->
                 when {
-                    param!!.hasValue() ->
+                    param.hasValue() ->
                         if (
-                            (param.getValue() as IBaseHasExtensions).extension.any {
+                            (param.value as IBaseHasExtensions).extension.any {
                                 DATA_ABSENT_REASON == it.url
                             }
                         ) {
                             null
                         } else {
-                            param.getValue()
+                            param.value
                         }
-                    param.hasResource() -> param.getResource()
+                    param.hasResource() -> param.resource
                     param.hasPart() -> param.newTupleWithParts()
                     else -> null
                 }

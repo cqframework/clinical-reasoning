@@ -1,0 +1,91 @@
+package org.opencds.cqf.fhir.utility.adapter.dstu3
+
+import org.hl7.fhir.dstu3.model.ActivityDefinition
+import org.hl7.fhir.dstu3.model.RelatedArtifact
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.opencds.cqf.fhir.utility.Canonicals.getIdPart
+import org.opencds.cqf.fhir.utility.adapter.DependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IActivityDefinitionAdapter
+import org.opencds.cqf.fhir.utility.adapter.IDependencyInfo
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter
+
+class ActivityDefinitionAdapter : KnowledgeArtifactAdapter, IActivityDefinitionAdapter {
+    constructor(activityDefinition: IDomainResource) : super(activityDefinition) {
+        require(activityDefinition is ActivityDefinition) {
+            "resource passed as activityDefinition argument is not an ActivityDefinition resource"
+        }
+    }
+
+    constructor(activityDefinition: ActivityDefinition) : super(activityDefinition)
+
+    protected val activityDefinition: ActivityDefinition
+        get() = resource as ActivityDefinition
+
+    override fun get(): ActivityDefinition {
+        return this.activityDefinition
+    }
+
+    override fun copy(): ActivityDefinition {
+        return get().copy()
+    }
+
+    override val dependencies: MutableList<IDependencyInfo?>
+        get() {
+            val references = mutableListOf<IDependencyInfo?>()
+            val referenceSource = this.referenceSource
+            addProfileReferences(references, referenceSource)
+
+            /*
+            relatedArtifact[].resource
+            library[]
+
+            */
+
+            // relatedArtifact[].resource
+            getRelatedArtifactsOfType<RelatedArtifact>(IKnowledgeArtifactAdapter.DEPENDSON)
+                .filter { obj -> obj!!.hasResource() }
+                .map { ra -> DependencyInfo.convertRelatedArtifact(ra, referenceSource) }
+                .forEach { e -> references.add(e) }
+
+            // library[]
+            if (hasLibrary()) {
+                for (reference in this.activityDefinition.library) {
+                    references.add(
+                        DependencyInfo(
+                            referenceSource,
+                            reference.reference,
+                            reference.extension,
+                            { value -> reference.reference = value },
+                        )
+                    )
+                }
+            }
+
+            return references
+        }
+
+    override val referencedLibraries: MutableMap<String?, String?>
+        get() {
+            val libraries =
+                this.activityDefinition.library
+                    .associate { l -> getIdPart(l.reference) to l.reference }
+                    .toMutableMap()
+
+            libraries.putAll(resolveCqfLibraries())
+            return libraries
+        }
+
+    override val description: String?
+        get() {
+            return get().description
+        }
+
+    override fun hasLibrary(): Boolean {
+        return get().hasLibrary()
+    }
+
+    override val library: MutableList<String?>
+        get() {
+            return get().library.map { obj -> obj!!.reference }.toMutableList()
+        }
+}

@@ -27,8 +27,8 @@ object Versions {
             return handleInvalids(version1, version2, v1Valid, v2Valid)
         }
 
-        val string1Vals = version1.split(".").dropLastWhile { it.isEmpty() }
-        val string2Vals = version2.split(".").dropLastWhile { it.isEmpty() }
+        val string1Vals = version1.split(".")
+        val string2Vals = version2.split(".")
 
         val length = max(string1Vals.size, string2Vals.size)
 
@@ -132,7 +132,7 @@ object Versions {
         if (check.length > 1 && !check.contains(".")) {
             return false
         }
-        val stringVals = check.split(".").dropLastWhile { it.isEmpty() }
+        val stringVals = check.split(".")
         for (i in 0..<stringVals.size - 1) {
             try {
                 stringVals[i].toInt()
@@ -153,7 +153,7 @@ object Versions {
             return tail.toInt() to ""
         } catch (e: NumberFormatException) {
             if (tail.contains("-")) {
-                val splitDash = tail.split("-").dropLastWhile { it.isEmpty() }
+                val splitDash = tail.split("-")
                 val afterDash = splitDash.slice(1..<splitDash.size).joinToString("-")
                 return splitDash[0].toInt() to afterDash
             } else {

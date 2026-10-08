@@ -13,7 +13,7 @@ class LibraryVersionSelector(private val adapterFactory: IAdapterFactory) {
     ): IBaseResource? {
         val targetVersion = libraryIdentifier.version
 
-        val adapters = libraries.map { x -> this.adapterFactory.createLibrary(x) }
+        val adapters = libraries.map { x -> this.adapterFactory.createLibrary(x!!) }
 
         var library: ILibraryAdapter? = null
         var maxLibrary: ILibraryAdapter? = null
@@ -64,8 +64,8 @@ class LibraryVersionSelector(private val adapterFactory: IAdapterFactory) {
                 return 1
             }
 
-            val string1Values = version1.split(".").dropLastWhile { it.isEmpty() }
-            val string2Values = version2!!.split(".").dropLastWhile { it.isEmpty() }
+            val string1Values = version1.split(".")
+            val string2Values = version2!!.split(".")
 
             val length = max(string1Values.size, string2Values.size)
 

@@ -137,8 +137,8 @@ class VersionComparator : Comparator<String> {
         val pre2 = if (preSplit2.size > 1) preSplit2[1] else null
 
         // Compare core (major.minor.patch)
-        val parts1 = core1.split(".").dropLastWhile { it.isEmpty() }
-        val parts2 = core2.split(".").dropLastWhile { it.isEmpty() }
+        val parts1 = core1.split(".")
+        val parts2 = core2.split(".")
         for (i in 0..2) {
             val n1 = parts1[i].toInt()
             val n2 = parts2[i].toInt()
@@ -156,8 +156,8 @@ class VersionComparator : Comparator<String> {
 
     // compare identifiers left-to-right; numeric < non-numeric; if all equal, shorter is lower.
     private fun comparePreRelease(p1: String, p2: String): Int {
-        val parts1 = p1.split(".").dropLastWhile { it.isEmpty() }
-        val parts2 = p2.split(".").dropLastWhile { it.isEmpty() }
+        val parts1 = p1.split(".")
+        val parts2 = p2.split(".")
 
         val common = min(parts1.size, parts2.size)
         for (i in 0..<common) {

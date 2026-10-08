@@ -10,7 +10,7 @@ object EndpointHelper {
     @JvmStatic
     fun getEndpoint(param: IParametersParameterComponentAdapter): IBaseResource? {
         return if (param.hasResource()) param.resource
-        else newEndpointResource(param.fhirContext().version.version, param.primitiveValue)
+        else newEndpointResource(param.fhirContext()!!.version.version, param.primitiveValue)
     }
 
     @JvmStatic

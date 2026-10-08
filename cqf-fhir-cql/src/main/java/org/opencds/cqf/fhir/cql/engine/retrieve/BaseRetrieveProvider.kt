@@ -129,7 +129,7 @@ protected constructor(
                 }
 
                 if (reference.contains("/")) {
-                    reference = reference.split("/").dropLastWhile { it.isEmpty() }[1]
+                    reference = reference.split("/")[1]
                 }
 
                 if (reference != contextValue) {

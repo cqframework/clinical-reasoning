@@ -18,6 +18,7 @@ import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory
  */
 abstract class BaseFhirLibrarySourceProvider
 protected constructor(protected val adapterFactory: IAdapterFactory) : LibrarySourceProvider {
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun getLibraryContent(
         libraryIdentifier: VersionedIdentifier,
         libraryContentType: LibraryContentType,
@@ -29,14 +30,14 @@ protected constructor(protected val adapterFactory: IAdapterFactory) : LibrarySo
     }
 
     protected fun getContentStream(library: IBaseResource?, contentType: String?): InputStream? {
-        val libraryAdapter = this.adapterFactory.createLibrary(library)
+        val libraryAdapter = this.adapterFactory.createLibrary(library!!)
 
         if (libraryAdapter.hasContent()) {
-            for (attachment in libraryAdapter.getContent<ICompositeType?>()) {
-                val attachmentAdapter = this.adapterFactory.createAttachment(attachment)
-                if (attachmentAdapter.getContentType() == contentType) {
+            for (attachment in libraryAdapter.getContent<ICompositeType>()!!) {
+                val attachmentAdapter = this.adapterFactory.createAttachment(attachment!!)
+                if (attachmentAdapter.contentType == contentType) {
                     // get externalized extension if present and add custom load data
-                    return ByteArrayInputStream(attachmentAdapter.getData())
+                    return ByteArrayInputStream(attachmentAdapter.data)
                 }
             }
         }

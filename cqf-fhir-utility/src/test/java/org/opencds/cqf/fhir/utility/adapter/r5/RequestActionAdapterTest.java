@@ -129,15 +129,38 @@ class RequestActionAdapterTest {
         assertTrue(adapter.hasCondition());
         assertEquals(
                 conditionExpression,
-                adapter.getCondition().get(0).getExpression().getExpression());
+                adapter.<RequestOrchestrationActionConditionComponent>getCondition()
+                        .get(0)
+                        .getExpression()
+                        .getExpression());
         var newConditionExpression = "New Test Expression";
         adapter.addCondition(new PlanDefinitionActionConditionComponent(ActionConditionKind.APPLICABILITY)
                 .setExpression(
                         new Expression().setLanguage("text/cql-identifier").setExpression(newConditionExpression)));
-        assertEquals(2, adapter.getCondition().size());
+        assertEquals(
+                2,
+                adapter.<RequestOrchestrationActionConditionComponent>getCondition()
+                        .size());
         assertEquals(
                 newConditionExpression,
-                adapter.getCondition().get(1).getExpression().getExpression());
+                adapter.<RequestOrchestrationActionConditionComponent>getCondition()
+                        .get(1)
+                        .getExpression()
+                        .getExpression());
+    }
+
+    @Test
+    void testUnknownConditionResult() {
+        var adapter = new RequestActionAdapter(new RequestOrchestrationActionComponent());
+        var result = adapter.getConditionResult(null);
+        assertEquals("http://hl7.org/fhir/uv/cpg/StructureDefinition/cpg-action-condition-result", result.getUrl());
+        assertFalse(result.hasValue());
+        assertEquals(1, result.getExtension().size());
+        var reason = result.getExtension().get(0);
+        assertEquals("http://hl7.org/fhir/StructureDefinition/data-absent-reason", reason.getUrl());
+        assertEquals("code", reason.getValue().fhirType());
+        assertEquals("asked-unknown", reason.getValue().primitiveValue());
+        assertFalse(reason.hasExtension());
     }
 
     @Test
@@ -149,13 +172,21 @@ class RequestActionAdapterTest {
                         .setRelationship(ActionRelationshipType.BEFORE));
         var adapter = new RequestActionAdapter(action);
         assertTrue(adapter.hasRelatedAction());
-        assertEquals(relatedActionId, adapter.getRelatedAction().get(0).getTargetId());
+        assertEquals(
+                relatedActionId,
+                adapter.<RequestOrchestrationActionRelatedActionComponent>getRelatedAction()
+                        .get(0)
+                        .getTargetId());
         var newRelatedActionId = "new-related-action";
         adapter.addRelatedAction(new PlanDefinitionActionRelatedActionComponent()
                 .setTargetId(newRelatedActionId)
                 .setRelationship(ActionRelationshipType.AFTER));
         assertEquals(2, adapter.getRelatedAction().size());
-        assertEquals(newRelatedActionId, adapter.getRelatedAction().get(1).getTargetId());
+        assertEquals(
+                newRelatedActionId,
+                adapter.<RequestOrchestrationActionRelatedActionComponent>getRelatedAction()
+                        .get(1)
+                        .getTargetId());
     }
 
     @Test

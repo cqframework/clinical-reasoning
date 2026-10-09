@@ -42,7 +42,6 @@ import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache;
-import org.opencds.cqf.fhir.cr.common.ArtifactDiffProcessor.DiffCache.DiffCacheResource;
 import org.opencds.cqf.fhir.cr.common.ICreateChangelogProcessor;
 import org.opencds.cqf.fhir.cr.common.PackageProcessor;
 import org.opencds.cqf.fhir.cr.crmi.KnowledgeArtifactProcessor;
@@ -112,14 +111,9 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         var sourceResource = cache.getSourceResourceForUrl(((MetadataResource) source).getUrl());
         if (targetResource.isPresent() && sourceResource.isPresent()) {
             var targetAdapter = IAdapterFactory.forFhirVersion(FhirVersionEnum.R4)
-                    .createKnowledgeArtifactAdapter(targetResource.get().resource);
+                    .createKnowledgeArtifactAdapter(targetResource.get());
             var diffParameters = hapiArtifactDiffProcessor.getArtifactDiff(
-                    sourceResource.get().resource,
-                    targetResource.get().resource,
-                    true,
-                    true,
-                    cache,
-                    terminologyEndpoint);
+                    sourceResource.get(), targetResource.get(), true, true, cache, terminologyEndpoint);
             var manifestUrl = targetAdapter.getUrl();
             var changelog = new ChangeLog(manifestUrl);
             processChanges(((Parameters) diffParameters).getParameter(), changelog, cache, manifestUrl);
@@ -183,15 +177,11 @@ public class HapiCreateChangelogProcessor implements ICreateChangelogProcessor {
         if (!wasPageAlreadyProcessed
                 && (cache.getSourceResourceForUrl(url).isPresent()
                         || cache.getTargetResourceForUrl(url).isPresent())) {
-            final Optional<DiffCacheResource> sourceCacheResource = cache.getSourceResourceForUrl(url);
-            final Optional<DiffCacheResource> targetCacheResource = cache.getTargetResourceForUrl(url);
+            final Optional<MetadataResource> sourceCacheResource = cache.getSourceResourceForUrl(url);
+            final Optional<MetadataResource> targetCacheResource = cache.getTargetResourceForUrl(url);
             if (resourceType != null) {
-                MetadataResource sourceResource = sourceCacheResource
-                        .map(diffCacheResource -> diffCacheResource.resource)
-                        .orElse(null);
-                MetadataResource targetResource = targetCacheResource
-                        .map(diffCacheResource -> diffCacheResource.resource)
-                        .orElse(null);
+                MetadataResource sourceResource = sourceCacheResource.orElse(null);
+                MetadataResource targetResource = targetCacheResource.orElse(null);
                 // don't generate changeLog pages for non-grouper ValueSets
                 if (resourceType.equals("ValueSet")
                         && ((sourceResource != null && !KnowledgeArtifactProcessor.isGrouper(sourceResource))

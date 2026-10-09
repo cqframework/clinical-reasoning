@@ -3,7 +3,7 @@ plugins {
     java
 }
 
-jacoco { toolVersion = BuildConfig.JACOCO }
+jacoco { toolVersion = libs.versions.jacoco.get() }
 
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.named("test"))

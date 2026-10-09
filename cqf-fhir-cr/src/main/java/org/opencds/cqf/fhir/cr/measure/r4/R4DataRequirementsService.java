@@ -170,10 +170,8 @@ public class R4DataRequirementsService {
     }
 
     private CqlTranslator translateLibrary(Library library, LibraryManager libraryManager) {
-        CqlTranslator translator = getTranslator(
-                new ByteArrayInputStream(
-                        Libraries.getContent(library, "text/cql").get()),
-                libraryManager);
+        CqlTranslator translator =
+                getTranslator(new ByteArrayInputStream(Libraries.getContent(library, "text/cql")), libraryManager);
         if (!translator.getErrors().isEmpty()) {
             throw new RuntimeException(translator.getErrors().get(0).getMessage());
         }

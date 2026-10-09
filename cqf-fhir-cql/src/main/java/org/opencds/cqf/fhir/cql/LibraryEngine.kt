@@ -4,8 +4,6 @@ import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.util.ParametersUtil
 import java.time.ZonedDateTime
-import kotlin.IllegalArgumentException
-import org.apache.commons.lang3.StringUtils
 import org.cqframework.cql.cql2elm.StringLibrarySourceProvider
 import org.hl7.elm.r1.VersionedIdentifier
 import org.hl7.fhir.instance.model.api.IBase
@@ -97,14 +95,17 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         if (fhirType == "Tuple") {
             val properties = ArrayList<String?>()
             val tuple = adapterFactory.createTuple(base)
-            tuple.getProperties().forEach { (propertyName: String?, value: Any?) ->
+            tuple.properties.forEach { (propertyName: String?, value: Any?) ->
                 properties.add("$propertyName ${getModelName(value!!)}")
             }
             return "Tuple { ${properties.joinToString(", ")} }"
         }
         if (fhirType.contains(".")) {
-            val split = fhirType.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }
-            fhirType = split.joinToString(".") { str -> StringUtils.capitalize(str) }
+            val split = fhirType.split(".")
+            fhirType =
+                split.joinToString(".") { str ->
+                    str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                }
         }
         return "FHIR.$fhirType"
     }
@@ -119,7 +120,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         contextParameter: IBase?,
         resourceParameter: IBase?,
     ): IBaseParameters {
-        val libraryConstructor = LibraryConstructor(fhirContext)
+        val libraryConstructor = LibraryConstructor(fhirContext, settings)
         val cqlFhirParametersConverter = Engines.getCqlFhirParametersConverter(fhirContext)
         val cqlParameters = cqlFhirParametersConverter.toCqlParameterDefinitions(parameters)
         val evaluationParameters = cqlFhirParametersConverter.toCqlParameters(parameters)
@@ -172,7 +173,7 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
     fun getExpressionResult(
         subjectId: String?,
         expression: String,
-        language: String?,
+        language: String,
         libraryToBeEvaluated: String?,
         referencedLibraries: MutableMap<String?, String?>?,
         parameters: IBaseParameters?,
@@ -181,7 +182,6 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         contextParameter: IBase?,
         resourceParameter: IBase?,
     ): MutableList<IBase?>? {
-        validateExpression(language, expression)
         var results: MutableList<IBase?>?
         val parametersResult: IBaseParameters
         if (libraryToBeEvaluated == null) {
@@ -224,16 +224,6 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         return results
     }
 
-    fun validateExpression(language: String?, expression: String?) {
-        if (language == null) {
-            logger.error("Missing language type for the Expression")
-            throw IllegalArgumentException("Missing language type for the Expression")
-        } else if (expression == null) {
-            logger.error("Missing expression for the Expression")
-            throw IllegalArgumentException("Missing expression for the Expression")
-        }
-    }
-
     fun validateLibrary(libraryUrl: String?) {
         if (libraryUrl == null) {
             logger.error("Missing library for the Expression")
@@ -248,21 +238,21 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
 
         return values
             .map { parametersParameterComponent ->
-                adapterFactory.createParametersParameter(parametersParameterComponent)
+                adapterFactory.createParametersParameter(parametersParameterComponent!!)
             }
             .mapNotNull { param ->
                 when {
-                    param!!.hasValue() ->
+                    param.hasValue() ->
                         if (
-                            (param.getValue() as IBaseHasExtensions).extension.any {
+                            (param.value as IBaseHasExtensions).extension.any {
                                 DATA_ABSENT_REASON == it.url
                             }
                         ) {
                             null
                         } else {
-                            param.getValue()
+                            param.value
                         }
-                    param.hasResource() -> param.getResource()
+                    param.hasResource() -> param.resource
                     param.hasPart() -> param.newTupleWithParts()
                     else -> null
                 }
@@ -282,8 +272,8 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
         var result =
             getExpressionResult(
                 patientId,
-                expression.expression,
-                expression.language,
+                expression.expression!!,
+                expression.language!!,
                 expression.libraryUrl,
                 expression.referencedLibraries,
                 params,
@@ -296,8 +286,8 @@ class LibraryEngine(val repository: IRepository, val settings: EvaluationSetting
             result =
                 getExpressionResult(
                     patientId,
-                    expression.altExpression,
-                    expression.altLanguage,
+                    expression.altExpression!!,
+                    expression.altLanguage!!,
                     expression.altLibraryUrl,
                     expression.referencedLibraries,
                     params,

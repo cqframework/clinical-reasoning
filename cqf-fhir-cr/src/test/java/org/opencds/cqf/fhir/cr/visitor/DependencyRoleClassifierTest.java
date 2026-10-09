@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.Set;
+import kotlin.Unit;
 import org.hl7.fhir.r4.model.Enumerations.BindingStrength;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
@@ -47,7 +48,7 @@ class DependencyRoleClassifierTest {
 
     // Helper method to create DependencyInfo with required updateReferenceConsumer
     private DependencyInfo createDependency(String reference) {
-        return new DependencyInfo("source", reference, new ArrayList<>(), ref -> {});
+        return new DependencyInfo("source", reference, new ArrayList<>(), ref -> Unit.INSTANCE);
     }
 
     @Test

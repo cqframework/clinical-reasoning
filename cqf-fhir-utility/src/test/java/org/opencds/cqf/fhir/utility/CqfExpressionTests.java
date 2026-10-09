@@ -7,16 +7,16 @@ import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.r4.model.Expression;
 import org.junit.jupiter.api.Test;
+import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 
 class CqfExpressionTests {
     @Test
     void testInvalidExtension() {
-        var cqfExpression = CqfExpression.of((IBaseExtension<?, ?>) null, null);
-        assertNull(cqfExpression);
-        var dstu2Expression = CqfExpression.of(new org.hl7.fhir.dstu2.model.Extension(), null);
-        assertNull(dstu2Expression);
+        assertNull(CqfExpression.of((IBaseExtension<?, ?>) null, null));
+        assertNull(CqfExpression.of(new org.hl7.fhir.dstu2.model.Extension(), null));
         assertNull(CqfExpression.of(new org.hl7.fhir.r4.model.Extension(), null));
         assertNull(CqfExpression.of(new org.hl7.fhir.r5.model.Extension(), null));
+        assertNull(CqfExpression.of((IAdapter<?>) null, null));
     }
 
     @Test

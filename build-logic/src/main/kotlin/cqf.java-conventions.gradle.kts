@@ -2,13 +2,9 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     `java-library`
-    id("net.ltgt.errorprone")
+    alias(libs.plugins.errorprone)
     checkstyle
 }
-
-val catalog: VersionCatalog = versionCatalogs.named("libs")
-
-fun lib(name: String) = catalog.findLibrary(name).get()
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
 
@@ -25,20 +21,20 @@ repositories {
 }
 
 dependencies {
-    api(platform(lib("hapi-fhir-bom")))
-    api(platform(lib("cql-bom")))
-    testImplementation(platform(lib("junit-bom")))
+    api(platform(libs.hapi.fhir.bom))
+    api(platform(libs.cql.bom))
+    testImplementation(platform(libs.junit.bom))
 
-    compileOnly(lib("jakarta-annotation-api"))
-    implementation(lib("slf4j-api"))
+    compileOnly(libs.jakarta.annotation.api)
+    implementation(libs.slf4j.api)
 
-    testImplementation(lib("junit-jupiter"))
-    testRuntimeOnly(lib("junit-platform-launcher"))
-    testImplementation(lib("hamcrest"))
-    testImplementation(lib("mockito-core"))
-    testImplementation(lib("equalsverifier"))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.equalsverifier)
 
-    errorprone("com.google.errorprone:error_prone_core:${BuildConfig.ERROR_PRONE}")
+    errorprone("com.google.errorprone:error_prone_core:${libs.versions.error.prone.core.get()}")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -74,7 +70,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 checkstyle {
-    toolVersion = BuildConfig.CHECKSTYLE
+    toolVersion = libs.versions.checkstyle.get()
     configFile = rootProject.file("config/checkstyle.xml")
     isIgnoreFailures = false
 }

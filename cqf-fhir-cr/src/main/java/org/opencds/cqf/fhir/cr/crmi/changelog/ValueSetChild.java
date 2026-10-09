@@ -3,7 +3,10 @@ package org.opencds.cqf.fhir.cr.crmi.changelog;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -44,6 +47,9 @@ public class ValueSetChild extends PageBase {
         private final String codeValue;
         private final String version;
         private final String display;
+        // Null means the code's status was never established, not that it is active. Only
+        // expansion.contains carries inactive; compose.include has no equivalent element.
+        private final Boolean inactive;
         private final String memberOid;
         private String codeSystemOid;
         private String codeSystemName;
@@ -70,6 +76,10 @@ public class ValueSetChild extends PageBase {
 
         public String getDisplay() {
             return display;
+        }
+
+        public Boolean getInactive() {
+            return inactive;
         }
 
         public String getMemberOid() {
@@ -103,6 +113,7 @@ public class ValueSetChild extends PageBase {
                 String code,
                 String version,
                 String display,
+                Boolean inactive,
                 String memberOid,
                 String parentValueSetName,
                 String parentValueSetTitle,
@@ -117,6 +128,7 @@ public class ValueSetChild extends PageBase {
             this.codeValue = code;
             this.version = version;
             this.display = display;
+            this.inactive = inactive;
             this.memberOid = memberOid;
             this.operation = operation;
             this.parentValueSetName = parentValueSetName;
@@ -131,6 +143,7 @@ public class ValueSetChild extends PageBase {
                     this.codeValue,
                     this.version,
                     this.display,
+                    this.inactive,
                     this.memberOid,
                     this.parentValueSetName,
                     this.parentValueSetTitle,
@@ -138,32 +151,33 @@ public class ValueSetChild extends PageBase {
                     this.operation);
         }
 
-        public static String getCodeSystemOid(String systemUrl) {
-            if (systemUrl.contains("snomed")) {
-                return "2.16.840.1.113883.6.96";
-            } else if (systemUrl.contains("icd-10")) {
-                return "2.16.840.1.113883.6.90";
-            } else if (systemUrl.contains("icd-9")) {
-                return "2.16.840.1.113883.6.103, 2.16.840.1.113883.6.104";
-            } else if (systemUrl.contains("loinc")) {
-                return "2.16.840.1.113883.6.1";
-            } else {
-                return null;
+        // Name and OID for each code system used in eRSD, matched on a fragment of the system URL
+        private record CodeSystemIdentity(String urlFragment, String name, String oid) {}
+
+        private static final List<CodeSystemIdentity> CODE_SYSTEM_IDENTITIES = List.of(
+                new CodeSystemIdentity("snomed", "SNOMEDCT", "2.16.840.1.113883.6.96"),
+                new CodeSystemIdentity("loinc", "LOINC", "2.16.840.1.113883.6.1"),
+                new CodeSystemIdentity("icd-10", "ICD10CM", "2.16.840.1.113883.6.90"),
+                new CodeSystemIdentity("icd-9", "ICD9CM", "2.16.840.1.113883.6.103, 2.16.840.1.113883.6.104"),
+                new CodeSystemIdentity("rxnorm", "RXNORM", "2.16.840.1.113883.6.88"),
+                new CodeSystemIdentity("cvx", "CVX", "2.16.840.1.113883.12.292"));
+
+        private static Optional<CodeSystemIdentity> identify(String systemUrl) {
+            if (systemUrl == null) {
+                return Optional.empty();
             }
+            var lowered = systemUrl.toLowerCase(Locale.ROOT);
+            return CODE_SYSTEM_IDENTITIES.stream()
+                    .filter(identity -> lowered.contains(identity.urlFragment()))
+                    .findFirst();
+        }
+
+        public static String getCodeSystemOid(String systemUrl) {
+            return identify(systemUrl).map(CodeSystemIdentity::oid).orElse(null);
         }
 
         public static String getCodeSystemName(String systemUrl) {
-            if (systemUrl.contains("snomed")) {
-                return "SNOMEDCT";
-            } else if (systemUrl.contains("icd-10")) {
-                return "ICD10CM";
-            } else if (systemUrl.contains("icd-9")) {
-                return "ICD9CM";
-            } else if (systemUrl.contains("loinc")) {
-                return "LOINC";
-            } else {
-                return null;
-            }
+            return identify(systemUrl).map(CodeSystemIdentity::name).orElse(null);
         }
 
         public Operation getOperation() {
@@ -171,15 +185,19 @@ public class ValueSetChild extends PageBase {
         }
 
         public void setOperation(Operation operation) {
-            if (operation != null) {
-                if (this.operation != null
-                        && this.operation.getType().equals(operation.getType())
-                        && this.operation.getPath().equals(operation.getPath())
-                        && this.operation.getNewValue() != operation.getNewValue()) {
-                    throw new UnprocessableEntityException("Multiple changes to the same element");
-                }
-                this.operation = operation;
+            if (operation == null) {
+                return;
             }
+            // Each side has its own Code, keyed by leaf, system and code, and ChangeLog.setCodeOperations
+            // visits each key once - so reaching here twice means two genuinely conflicting claims.
+            if (this.operation != null
+                    && this.operation.getType().equals(operation.getType())
+                    && this.operation.getPath().equals(operation.getPath())
+                    && !Objects.equals(this.operation.getNewValue(), operation.getNewValue())) {
+                throw new UnprocessableEntityException(
+                        "Multiple changes to the same code element: path=%s".formatted(operation.getPath()));
+            }
+            this.operation = operation;
         }
     }
 
@@ -277,7 +295,10 @@ public class ValueSetChild extends PageBase {
             return copy;
         }
 
-        public Code tryAddCondition(CodeableConcept condition) {
+        /**
+         * operation describes how this condition differs from the other side, or null when it does not
+         */
+        public Code tryAddCondition(CodeableConcept condition, Operation operation) {
             var coding = condition.getCodingFirstRep();
             var conditionName =
                     (coding.getDisplay() == null || coding.getDisplay().isBlank())
@@ -297,7 +318,8 @@ public class ValueSetChild extends PageBase {
                         null,
                         null,
                         null,
-                        null);
+                        null,
+                        operation);
                 this.conditions.add(newCondition);
                 return newCondition;
             } else {
@@ -314,18 +336,12 @@ public class ValueSetChild extends PageBase {
             String name,
             String url,
             List<ValueSet.ConceptSetComponent> compose,
-            List<ValueSet.ValueSetExpansionContainsComponent> contains,
             Map<String, Code> codeMap,
             Map<String, Map<String, Leaf>> leafMetadataMap,
             String priority) {
         super(title, id, version, name, url, "ValueSet");
-        if (contains != null) {
-            contains.forEach(contained -> {
-                if (contained.getCode() != null && codeMap.containsKey(contained.getCode())) {
-                    this.codes.add(codeMap.get(contained.getCode()));
-                }
-            });
-        }
+        // Every code this side contributes, one entry per referenced value set that carries it.
+        this.codes.addAll(codeMap.values());
         if (compose != null) {
             compose.stream()
                     .filter(ValueSet.ConceptSetComponent::hasValueSet)
@@ -333,24 +349,18 @@ public class ValueSetChild extends PageBase {
                     .filter(PrimitiveType::hasValue)
                     .map(PrimitiveType::getValue)
                     .forEach(vs -> {
-                        // sometimes the value set reference is unversioned - implying that the latest version
-                        // should be used
-                        // we need to make sure the diff operation only has the latest version in it, thereby we
-                        // can get away with just having one url in the map and taking it
                         var urlPart = Canonicals.getUrl(vs);
-                        if (Canonicals.getVersion(vs) == null) {
-                            // assume there is only the latest version
-                            var latest = leafMetadataMap
-                                    .get(urlPart)
-                                    .entrySet()
-                                    .iterator()
-                                    .next()
-                                    .getValue();
-                            // creating a new object because modifying it causes weirdness later
-                            leafValueSets.add(latest.copy());
-                        } else {
-                            var versionPart = Canonicals.getVersion(vs);
-                            var leaf = leafMetadataMap.get(urlPart).get(versionPart);
+                        var leavesByVersion = leafMetadataMap.get(urlPart);
+                        if (leavesByVersion == null) {
+                            return;
+                        }
+                        var versionPart = Canonicals.getVersion(vs);
+                        // The map holds one side only, and that side resolved each URL once, so there is
+                        // a single entry to take.
+                        var leaf = versionPart == null
+                                ? leavesByVersion.values().iterator().next()
+                                : leavesByVersion.get(versionPart);
+                        if (leaf != null) {
                             // creating a new object because modifying it causes weirdness later
                             leafValueSets.add(leaf.copy());
                         }
@@ -368,11 +378,11 @@ public class ValueSetChild extends PageBase {
             var operation = new Operation(type, path, newValue, originalValue);
             if (path.contains("compose")) {
                 addOperationHandleCompose(type, path, newValue, originalValue, operation);
-            } else if (path.contains("expansion")) {
-                addOperationHandleExpansion(type, path, newValue, originalValue, operation);
             } else if (path.contains("useContext")) {
                 addOperationHandleUseContext(newValue, originalValue, operation);
-            } else {
+            } else if (!path.contains("expansion")) {
+                // Code changes are derived by comparing the two sides in ChangeLog.setCodeOperations, so
+                // the diff's account of the grouper's expansion is dropped rather than recorded.
                 this.operations.add(operation);
             }
         }
@@ -428,42 +438,6 @@ public class ValueSetChild extends PageBase {
         }
     }
 
-    private void addOperationHandleExpansion(
-            String type, String path, Object newValue, Object originalValue, Operation operation) {
-        if (path.contains("expansion.contains[")) {
-            // if the codes themselves changed
-            String codeToCheck = getCodeToCheck(newValue, originalValue);
-            updateCodeOperation(codeToCheck, operation);
-        } else if (newValue instanceof ValueSet.ValueSetExpansionComponent
-                || originalValue instanceof ValueSet.ValueSetExpansionComponent) {
-            var contains = newValue instanceof ValueSet.ValueSetExpansionComponent newVSEC
-                    ? newVSEC
-                    : (ValueSet.ValueSetExpansionComponent) originalValue;
-            contains.getContains().forEach(c -> {
-                Operation updatedOperation;
-                if (newValue instanceof ValueSet.ValueSetExpansionComponent) {
-                    updatedOperation = new Operation(type, path, c.getCode(), null);
-                } else {
-                    updatedOperation = new Operation(type, path, null, c.getCode());
-                }
-                updateCodeOperation(c.getCode(), updatedOperation);
-            });
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static String getCodeToCheck(Object newValue, Object originalValue) {
-        String codeToCheck = null;
-        if (newValue instanceof IPrimitiveType || originalValue instanceof IPrimitiveType) {
-            codeToCheck = newValue instanceof IPrimitiveType
-                    ? ((IPrimitiveType<String>) newValue).getValue()
-                    : ((IPrimitiveType<String>) originalValue).getValue();
-        } else if (originalValue instanceof ValueSet.ValueSetExpansionContainsComponent originalVSECC) {
-            codeToCheck = originalVSECC.getCode();
-        }
-        return codeToCheck;
-    }
-
     private void addOperationHandleUseContext(Object newValue, Object originalValue, Operation operation) {
         String priorityToCheck = null;
         if (newValue instanceof UsageContext newUseContext
@@ -481,21 +455,6 @@ public class ValueSetChild extends PageBase {
         }
         if (priorityToCheck != null) {
             this.priority.setOperation(operation);
-        }
-    }
-
-    private void updateCodeOperation(String codeToCheck, Operation operation) {
-        if (codeToCheck != null) {
-            final String codeNotNull = codeToCheck;
-            this.codes.stream()
-                    .filter(code -> code.codeValue != null)
-                    .filter(code -> code.codeValue.equals(codeNotNull))
-                    .findAny()
-                    .ifPresentOrElse(
-                            code -> code.setOperation(operation),
-                            () ->
-                                    // drop unmatched operations in the base operations list
-                                    this.operations.add(operation));
         }
     }
 }

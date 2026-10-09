@@ -280,6 +280,23 @@ class StructureDefinitionAdapterTest implements IStructureDefinitionAdapterTest<
     }
 
     @Test
+    void testGetSliceElementsMatchesSliceNameBoundaries() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier:id.system");
+        sd.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier:idType.system");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        var idSlice = adapter.getSliceElements("identifier:id");
+        assertEquals(1, idSlice.size());
+        assertEquals("Patient.identifier:id.system", idSlice.get(0).getId());
+
+        var idTypeSlice = adapter.getSliceElements("identifier:idType");
+        assertEquals(1, idTypeSlice.size());
+        assertEquals("Patient.identifier:idType.system", idTypeSlice.get(0).getId());
+    }
+
+    @Test
     void testGetElementByPath() {
         var sd = new StructureDefinition();
         sd.getDifferential().addElement().setPath("Patient.name").setId("Patient.name");

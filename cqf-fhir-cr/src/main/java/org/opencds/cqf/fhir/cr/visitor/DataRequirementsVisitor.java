@@ -550,11 +550,12 @@ public class DataRequirementsVisitor extends BaseKnowledgeArtifactVisitor {
     }
 
     protected CqlTranslator translateLibrary(IBaseResource library, LibraryManager libraryManager) {
-        CqlTranslator translator = getTranslator(
-                new ByteArrayInputStream(Libraries.getContent(library, "text/cql")
-                        .orElseThrow(() -> new UnprocessableEntityException(
-                                "No CQL content found for Library: %s".formatted(Libraries.getName(library))))),
-                libraryManager);
+        byte[] content = Libraries.getContent(library, "text/cql");
+        if (content == null) {
+            throw new UnprocessableEntityException(
+                    "No CQL content found for Library: %s".formatted(Libraries.getName(library)));
+        }
+        CqlTranslator translator = getTranslator(new ByteArrayInputStream(content), libraryManager);
         if (!translator.getErrors().isEmpty()) {
             throw new UnprocessableEntityException(translator.getErrors().get(0).getMessage());
         }

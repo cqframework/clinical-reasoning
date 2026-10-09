@@ -54,7 +54,7 @@ class ExtensionResolver(
         val result =
             libraryEngine.resolveExpression(
                 subjectId.idPart,
-                CqfExpression.of(expressionExtension, referencedLibraries),
+                CqfExpression.of(expressionExtension, referencedLibraries)!!,
                 parameters,
                 null,
                 bundle,

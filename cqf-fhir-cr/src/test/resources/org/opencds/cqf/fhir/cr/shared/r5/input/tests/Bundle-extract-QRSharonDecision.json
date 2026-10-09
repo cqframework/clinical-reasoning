@@ -43,7 +43,7 @@
           "display": "Sharon Decision"
         },
         "effectiveDateTime": "2021-12-28T18:10:32Z",
-        "issued": "2021-12-28T18:10:32.000+00:00",
+        "issued": "2021-12-28T18:10:32Z",
         "valueCodeableConcept": {
           "coding": [
             {
@@ -103,7 +103,7 @@
           "display": "Sharon Decision"
         },
         "effectiveDateTime": "2021-12-28T18:10:32Z",
-        "issued": "2021-12-28T18:10:32.000+00:00",
+        "issued": "2021-12-28T18:10:32Z",
         "valueCodeableConcept": {
           "coding": [
             {
@@ -163,7 +163,7 @@
           "display": "Sharon Decision"
         },
         "effectiveDateTime": "2021-12-28T18:10:32Z",
-        "issued": "2021-12-28T18:10:32.000+00:00",
+        "issued": "2021-12-28T18:10:32Z",
         "valueCodeableConcept": {
           "coding": [
             {
@@ -223,7 +223,7 @@
           "display": "Sharon Decision"
         },
         "effectiveDateTime": "2021-12-28T18:10:32Z",
-        "issued": "2021-12-28T18:10:32.000+00:00",
+        "issued": "2021-12-28T18:10:32Z",
         "valueCodeableConcept": {
           "coding": [
             {
@@ -283,7 +283,7 @@
           "display": "Sharon Decision"
         },
         "effectiveDateTime": "2021-12-28T18:10:32Z",
-        "issued": "2021-12-28T18:10:32.000+00:00",
+        "issued": "2021-12-28T18:10:32Z",
         "valueCodeableConcept": {
           "coding": [
             {

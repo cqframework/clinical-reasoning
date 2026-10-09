@@ -1,6 +1,6 @@
 plugins {
     id("cqf.java-conventions")
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 kotlin {
@@ -17,3 +17,5 @@ kotlin {
         test { kotlin.srcDir("src/test/java") }
     }
 }
+
+dependencies { testImplementation(kotlin("test")) }

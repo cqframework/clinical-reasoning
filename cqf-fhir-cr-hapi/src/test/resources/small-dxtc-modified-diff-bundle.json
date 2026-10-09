@@ -79,26 +79,38 @@
 					{
 						"extension": [
 							{
-								"url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority",
-								"valueCodeableConcept": {
-									"coding": [
-										{
-											"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
-											"code": "emergent"
-										}
-									],
-									"text": "Emergent"
+								"url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext",
+								"valueUsageContext": {
+									"code": {
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+										"code": "priority"
+									},
+									"valueCodeableConcept": {
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+												"code": "emergent"
+											}
+										],
+										"text": "Emergent"
+									}
 								}
 							},
 							{
-								"url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition",
-								"valueCodeableConcept": {
-									"coding": [
-										{
-											"system": "http://snomed.info/sct",
-											"code": "123123123"
-										}
-									]
+								"url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext",
+								"valueUsageContext": {
+									"code": {
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+										"code": "focus"
+									},
+									"valueCodeableConcept": {
+										"coding": [
+											{
+												"system": "http://snomed.info/sct",
+												"code": "123123123"
+											}
+										]
+									}
 								}
 							}
 						],
@@ -108,39 +120,57 @@
 					{
 						"extension": [
 							{
-								"url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-priority",
-								"valueCodeableConcept": {
-									"coding": [
-										{
-											"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
-											"code": "emergent"
-										}
-									],
-									"text": "Emergent"
+								"url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext",
+								"valueUsageContext": {
+									"code": {
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+										"code": "priority"
+									},
+									"valueCodeableConcept": {
+										"coding": [
+											{
+												"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context",
+												"code": "emergent"
+											}
+										],
+										"text": "Emergent"
+									}
 								}
 							},
 							{
-								"url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition",
-								"valueCodeableConcept": {
-									"coding": [
-										{
-											"system": "http://snomed.info/sct",
-											"code": "767146004"
-										}
-									],
-									"text": "Toxic effect of arsenic and its compounds (disorder)"
+								"url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext",
+								"valueUsageContext": {
+									"code": {
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+										"code": "focus"
+									},
+									"valueCodeableConcept": {
+										"coding": [
+											{
+												"system": "http://snomed.info/sct",
+												"code": "767146004"
+											}
+										],
+										"text": "Toxic effect of arsenic and its compounds (disorder)"
+									}
 								}
 							},
 							{
-								"url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition",
-								"valueCodeableConcept": {
-									"coding": [
-										{
-											"system": "http://snomed.info/sct",
-											"code": "49649001"
-										}
-									],
-									"text": "Infection caused by Acanthamoeba (disorder)"
+								"url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext",
+								"valueUsageContext": {
+									"code": {
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+										"code": "focus"
+									},
+									"valueCodeableConcept": {
+										"coding": [
+											{
+												"system": "http://snomed.info/sct",
+												"code": "49649001"
+											}
+										],
+										"text": "Infection caused by Acanthamoeba (disorder)"
+									}
 								}
 							}
 						],
@@ -150,15 +180,21 @@
 					{
 						"extension": [
 							{
-								"url": "http://aphl.org/fhir/vsm/StructureDefinition/vsm-valueset-condition",
-								"valueCodeableConcept": {
-									"coding": [
-										{
-											"system": "http://snomed.info/sct",
-											"code": "49649001"
-										}
-									],
-									"text": "Infection caused by Acanthamoeba (disorder)"
+								"url": "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-intendedUsageContext",
+								"valueUsageContext": {
+									"code": {
+										"system": "http://hl7.org/fhir/us/ecr/CodeSystem/us-ph-usage-context-type",
+										"code": "focus"
+									},
+									"valueCodeableConcept": {
+										"coding": [
+											{
+												"system": "http://snomed.info/sct",
+												"code": "49649001"
+											}
+										],
+										"text": "Infection caused by Acanthamoeba (disorder)"
+									}
 								}
 							}
 						],

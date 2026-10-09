@@ -14,7 +14,7 @@ class EndpointHelperTest {
 
     @Test
     void test() {
-        assertNull(getEndpoint(null, null));
+        assertNull(getEndpoint(FhirVersionEnum.R4, null));
         assertInstanceOf(
                 org.hl7.fhir.dstu3.model.Endpoint.class,
                 getEndpoint(

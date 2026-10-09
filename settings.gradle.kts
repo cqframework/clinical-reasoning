@@ -1,5 +1,7 @@
+includeBuild("build-logic")
+
 pluginManagement {
-    includeBuild("build-logic")
+    includeBuild("linked-builds")
     repositories {
         gradlePluginPortal()
         mavenCentral()

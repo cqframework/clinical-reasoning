@@ -31,14 +31,14 @@ protected constructor(protected val adapterFactory: IAdapterFactory) : ModelInfo
     }
 
     protected fun getContentStream(library: IBaseResource?, contentType: String?): InputStream? {
-        val libraryAdapter = this.adapterFactory.createLibrary(library)
+        val libraryAdapter = this.adapterFactory.createLibrary(library!!)
 
         if (libraryAdapter.hasContent()) {
-            for (attachment in libraryAdapter.getContent<ICompositeType?>()) {
-                val attachmentAdapter = this.adapterFactory.createAttachment(attachment)
-                if (attachmentAdapter.getContentType() == contentType) {
+            for (attachment in libraryAdapter.getContent<ICompositeType>()!!) {
+                val attachmentAdapter = this.adapterFactory.createAttachment(attachment!!)
+                if (attachmentAdapter.contentType == contentType) {
                     // get externalized extension if present and add custom load data
-                    return ByteArrayInputStream(attachmentAdapter.getData())
+                    return ByteArrayInputStream(attachmentAdapter.data)
                 }
             }
         }

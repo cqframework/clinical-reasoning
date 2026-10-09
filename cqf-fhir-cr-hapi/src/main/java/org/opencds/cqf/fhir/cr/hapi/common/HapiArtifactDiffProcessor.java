@@ -347,13 +347,14 @@ public class HapiArtifactDiffProcessor extends ArtifactDiffProcessor {
             Endpoint terminologyEndpoint,
             boolean needsExpandedValueSets)
             throws UnprocessableEntityException {
-        var resource = cache.getResource(url).orElse(null);
+        var resource = cache.getResource(url, isSource).orElse(null);
         if (resource == null) {
             try {
                 resource = retrieveResourcesByCanonical(url, repository);
             } catch (ResourceNotFoundException e) {
                 // ignore
             }
+            // TODO:: explore short-circuiting re-expansion by comparing on VS.expansion.identifier NOSONAR
             if (resource instanceof ValueSet valueSet && needsExpandedValueSets) {
                 try {
                     tryExpandValueSet(valueSet, context, terminologyEndpoint, repository);

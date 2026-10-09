@@ -18,7 +18,7 @@
 //
 // Canonical source: home/shared/gradle/conventions/cqf.spotless-conventions.gradle.kts.
 
-plugins { id("com.diffplug.spotless") }
+plugins { alias(libs.plugins.spotless) }
 
 spotless {
     java {
@@ -30,7 +30,7 @@ spotless {
             "**/bin/**",
             "**/.gradle/**",
         )
-        palantirJavaFormat("2.89.0")
+        palantirJavaFormat(libs.versions.palantir.format.get())
     }
     kotlin {
         target("**/*.kt")
@@ -41,7 +41,7 @@ spotless {
             "**/bin/**",
             "**/.gradle/**",
         )
-        ktfmt("0.56").kotlinlangStyle()
+        ktfmt(libs.versions.ktfmt.get()).kotlinlangStyle()
     }
     kotlinGradle {
         target("**/*.gradle.kts")
@@ -52,6 +52,6 @@ spotless {
             "**/bin/**",
             "**/.gradle/**",
         )
-        ktfmt("0.56").kotlinlangStyle()
+        ktfmt(libs.versions.ktfmt.get()).kotlinlangStyle()
     }
 }

@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
@@ -38,7 +39,9 @@ import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IElementDefinitionAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IItemComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemAnswerComponentAdapter;
+import org.opencds.cqf.fhir.utility.adapter.IQuestionnaireResponseItemComponentAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IResourceAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IStructureDefinitionAdapter;
 import org.slf4j.Logger;
@@ -657,8 +660,8 @@ public class ProcessDefinitionItem {
     }
 
     /**
-     * A group such as Patient.identifier:AHVN13 is not a resolvable element. Keep processing its children
-     * against the same parent so leaf slices can still be appended, and never fail extract.
+     * A group such as Patient.identifier:AHVN13 is not a resolvable element. Build one slice
+     * instance, copy child answers (system, value, …) onto it, then append it once.
      */
     private boolean delegateSliceGroup(
             ExtractRequest request,
@@ -673,22 +676,210 @@ public class ProcessDefinitionItem {
         if (StringUtils.isBlank(definition) || !definition.contains("#") || children == null || children.isEmpty()) {
             return false;
         }
-        var path = getPathAdapter(request, profile, definition).getLeft();
+        var pathAdapter = getPathAdapter(request, profile, definition);
+        var path = pathAdapter.getLeft();
         if (path == null || !path.contains(":")) {
             return false;
         }
-        var repeats = itemPair.getItem() != null && Boolean.TRUE.equals(itemPair.getItem().getRepeats());
-        List<? extends IItemComponentAdapter> questionnaireItems =
-                itemPair.getItem() == null ? Collections.emptyList() : itemPair.getItem().getItem();
-        processItems(
+        extractSliceGroup(
                 request,
                 resourceDefinition,
-                profile,
+                pathAdapter.getRight() != null ? pathAdapter.getRight() : profile.orElse(null),
                 parent,
-                new ImmutablePair<>(children, questionnaireItems),
-                repeats || isNestedRepeating,
-                parentPath);
+                itemPair,
+                children,
+                path);
         return true;
+    }
+
+    private void extractSliceGroup(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IStructureDefinitionAdapter structure,
+            IAdapter<?> parent,
+            ItemPair itemPair,
+            List<? extends IItemComponentAdapter> children,
+            String path) {
+        var identifiers = path.split("\\.");
+        var sliceIndex = -1;
+        for (int i = 0; i < identifiers.length; i++) {
+            if (identifiers[i].contains(":")) {
+                sliceIndex = i;
+            }
+        }
+        if (sliceIndex < 0) {
+            return;
+        }
+        var sliceName = identifiers[sliceIndex];
+        var slicePath = sliceName.split(":")[0];
+        var propertyDefs = sliceGroupPropertyDefs(request, resourceDefinition, structure, slicePath);
+        var slicePropertyDef = propertyDefs.get(slicePath);
+        var sliceClass = slicePropertyDef instanceof BaseRuntimeChildDatatypeDefinition def
+                ? def.getDatatype()
+                : getClassForTypeAndVersion("Extension", request.getFhirVersion());
+        var sliceValue = request.getAdapterFactory().createBase(newBase(sliceClass));
+        if (structure != null) {
+            var sliceRoot = structure.getElement(structure.getType() + "." + sliceName);
+            if (sliceRoot != null) {
+                applyPatternIdentifier(request, sliceValue, sliceRoot.getDefaultOrFixedOrPattern());
+            }
+            for (var slice : structure.getSliceElements(sliceName)) {
+                var sliceElementPath = slice.getId().replace("%s.%s.".formatted(structure.getType(), sliceName), "");
+                var sliceElementValue = slice.getDefaultOrFixedOrPattern();
+                if (sliceElementPath.contains(":")
+                        || (sliceElementValue != null && "Identifier".equals(sliceElementValue.fhirType()))) {
+                    applyPatternIdentifier(request, sliceValue, sliceElementValue);
+                    continue;
+                }
+                setAnswerValue(
+                        request,
+                        sliceValue,
+                        propertyDefs.get(sliceElementPath),
+                        sliceElementPath,
+                        sliceElementValue,
+                        structure);
+            }
+        }
+        List<? extends IItemComponentAdapter> questionnaireItems =
+                itemPair.getItem() == null ? Collections.emptyList() : itemPair.getItem().getItem();
+        for (var child : children) {
+            applySliceGroupChild(request, structure, sliceValue, propertyDefs, path, questionnaireItems, child);
+        }
+        applySliceGroupInitials(request, structure, sliceValue, propertyDefs, path, questionnaireItems, children);
+        if ("extension".equals(slicePath) && structure != null) {
+            setAnswerValue(
+                    request, sliceValue, propertyDefs.get("url"), "url", getExtensionUrl(structure, sliceName), structure);
+        }
+        appendSliceValue(request, parent, propertyDefs.get(slicePath), slicePath, sliceValue.get(), structure);
+    }
+
+    private HashMap<String, BaseRuntimeChildDefinition> sliceGroupPropertyDefs(
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IStructureDefinitionAdapter structure,
+            String slicePath) {
+        var propertyDefs = new HashMap<String, BaseRuntimeChildDefinition>();
+        mergePropertyDefs(propertyDefs, request, resourceDefinition, structure, new String[] {slicePath});
+        mergePropertyDefs(propertyDefs, request, resourceDefinition, structure, new String[] {slicePath, "system"});
+        mergePropertyDefs(propertyDefs, request, resourceDefinition, structure, new String[] {slicePath, VALUE_PATH});
+        return propertyDefs;
+    }
+
+    private void mergePropertyDefs(
+            HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
+            ExtractRequest request,
+            BaseRuntimeElementDefinition<?> resourceDefinition,
+            IStructureDefinitionAdapter structure,
+            String[] identifiers) {
+        try {
+            propertyDefs.putAll(getPropertyDefinitions(request, resourceDefinition, structure, identifiers));
+        } catch (RuntimeException ex) {
+            if (!isUnresolvablePath(ex)) {
+                throw ex;
+            }
+            logger.warn("Skipping optional extract path: {}", ex.getMessage());
+        }
+    }
+
+    private void applySliceGroupChild(
+            ExtractRequest request,
+            IStructureDefinitionAdapter structure,
+            IAdapter<?> sliceValue,
+            HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
+            String slicePath,
+            List<? extends IItemComponentAdapter> questionnaireItems,
+            IItemComponentAdapter child) {
+        var questionnaireItem = request.getQuestionnaireItem(child, questionnaireItems);
+        if (questionnaireItem == null) {
+            logger.warn(
+                    "Skipping extract item {} with no matching questionnaire item",
+                    child == null ? null : child.getLinkId());
+            return;
+        }
+        var childDefinition = getDefinition(new ItemPair(questionnaireItem, child));
+        if (StringUtils.isBlank(childDefinition) || !childDefinition.contains("#")) {
+            return;
+        }
+        var childPath = getPathAdapter(request, Optional.ofNullable(structure), childDefinition).getLeft();
+        var relativePath = relativeSliceChildPath(slicePath, childPath);
+        if (relativePath == null
+                || !(child instanceof IQuestionnaireResponseItemComponentAdapter responseItem)
+                || !responseItem.hasAnswer()) {
+            return;
+        }
+        var answerValue = responseItem.getAnswer().get(0).getValue();
+        if (answerValue == null) {
+            return;
+        }
+        setAnswerValue(request, sliceValue, propertyDefs.get(relativePath), relativePath, answerValue, structure);
+    }
+
+    /**
+     * Hidden slice children such as identifier:AHVN13.system often only have Questionnaire.initial.
+     * Copy that value when the response does not answer the item.
+     */
+    private void applySliceGroupInitials(
+            ExtractRequest request,
+            IStructureDefinitionAdapter structure,
+            IAdapter<?> sliceValue,
+            HashMap<String, BaseRuntimeChildDefinition> propertyDefs,
+            String slicePath,
+            List<? extends IItemComponentAdapter> questionnaireItems,
+            List<? extends IItemComponentAdapter> responseChildren) {
+        for (var questionnaireItem : questionnaireItems) {
+            if (!(questionnaireItem instanceof IQuestionnaireItemComponentAdapter item) || !item.hasInitial()) {
+                continue;
+            }
+            if (hasAnsweredChild(responseChildren, item.getLinkId())) {
+                continue;
+            }
+            List<? extends IBaseDatatype> initials = item.getInitial();
+            if (initials == null || initials.isEmpty() || initials.get(0) == null) {
+                continue;
+            }
+            var childDefinition = getDefinition(new ItemPair(questionnaireItem, null));
+            if (StringUtils.isBlank(childDefinition) || !childDefinition.contains("#")) {
+                continue;
+            }
+            var childPath = getPathAdapter(request, Optional.ofNullable(structure), childDefinition).getLeft();
+            var relativePath = relativeSliceChildPath(slicePath, childPath);
+            if (relativePath == null) {
+                continue;
+            }
+            setAnswerValue(
+                    request, sliceValue, propertyDefs.get(relativePath), relativePath, initials.get(0), structure);
+        }
+    }
+
+    private static boolean hasAnsweredChild(List<? extends IItemComponentAdapter> children, String linkId) {
+        if (StringUtils.isBlank(linkId) || children == null) {
+            return false;
+        }
+        for (var child : children) {
+            if (linkId.equals(child.getLinkId())
+                    && child instanceof IQuestionnaireResponseItemComponentAdapter responseItem
+                    && responseItem.hasAnswer()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String relativeSliceChildPath(String slicePath, String childPath) {
+        if (StringUtils.isBlank(childPath)) {
+            return null;
+        }
+        if (childPath.equals(slicePath)) {
+            return VALUE_PATH;
+        }
+        if (!childPath.startsWith(slicePath + ".")) {
+            return null;
+        }
+        var relativePath = childPath.substring(slicePath.length() + 1);
+        if (relativePath.contains(".") || relativePath.contains(":")) {
+            return null;
+        }
+        return relativePath;
     }
 
     private void applyPatternIdentifier(ExtractRequest request, IAdapter<?> sliceValue, IBase pattern) {

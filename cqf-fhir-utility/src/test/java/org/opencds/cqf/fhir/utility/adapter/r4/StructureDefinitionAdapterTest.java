@@ -280,6 +280,23 @@ class StructureDefinitionAdapterTest implements IStructureDefinitionAdapterTest<
     }
 
     @Test
+    void testGetSliceElementsMatchesSliceNameBoundaries() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier:id.system");
+        sd.getDifferential().addElement().setPath("Patient.identifier").setId("Patient.identifier:idType.system");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        var idSlice = adapter.getSliceElements("identifier:id");
+        assertEquals(1, idSlice.size());
+        assertEquals("Patient.identifier:id.system", idSlice.get(0).getId());
+
+        var idTypeSlice = adapter.getSliceElements("identifier:idType");
+        assertEquals(1, idTypeSlice.size());
+        assertEquals("Patient.identifier:idType.system", idTypeSlice.get(0).getId());
+    }
+
+    @Test
     void testGetElementByPath() {
         var sd = new StructureDefinition();
         sd.getDifferential().addElement().setPath("Patient.name").setId("Patient.name");
@@ -304,6 +321,37 @@ class StructureDefinitionAdapterTest implements IStructureDefinitionAdapterTest<
         // getSliceElements returns elements whose ID contains the sliceName but have no sliceName themselves
         var sliceElements = adapter.getSliceElements("ssn");
         assertEquals(1, sliceElements.size());
+    }
+
+    @Test
+    void testGetSliceElementsDoesNotMatchPrefixOverlappingSliceName() {
+        var sd = new StructureDefinition();
+        sd.getDifferential().addElement().setPath("Patient.identifier.system").setId("Patient.identifier:id.system");
+        sd.getDifferential()
+                .addElement()
+                .setPath("Patient.identifier.system")
+                .setId("Patient.identifier:idType.system");
+        sd.getDifferential().addElement().setPath("Patient.identifier.value").setId("Patient.identifier:id.value");
+        sd.getDifferential()
+                .addElement()
+                .setPath("Patient.identifier.value")
+                .setId("Patient.identifier:idType.value");
+
+        var adapter = (IStructureDefinitionAdapter) adapterFactory.createKnowledgeArtifactAdapter(sd);
+
+        var idSliceElements = adapter.getSliceElements("identifier:id");
+        assertEquals(2, idSliceElements.size());
+        assertTrue(idSliceElements.stream().allMatch(e -> e.getId().contains("identifier:id.")
+                && !e.getId().contains("identifier:idType")));
+
+        var idTypeSliceElements = adapter.getSliceElements("identifier:idType");
+        assertEquals(2, idTypeSliceElements.size());
+        assertTrue(idTypeSliceElements.stream().allMatch(e -> e.getId().contains("identifier:idType")));
+
+        var shortNameElements = adapter.getSliceElements("id");
+        assertEquals(2, shortNameElements.size());
+        assertTrue(shortNameElements.stream().allMatch(e -> e.getId().contains("identifier:id.")
+                && !e.getId().contains("identifier:idType")));
     }
 
     @Override

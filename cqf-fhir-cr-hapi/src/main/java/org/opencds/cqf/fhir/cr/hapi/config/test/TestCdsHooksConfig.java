@@ -17,12 +17,12 @@ import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchDaoSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchFhirClientSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsPrefetchSvc;
 import ca.uhn.hapi.fhir.cdshooks.svc.prefetch.CdsResolutionStrategySvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.json.JsonMapper;
 
 // This is all copied into jpaserver-starter so that plain ole cds-hooks still works.
 // Then we deprecate all the cr-specific stuff in hapi
@@ -49,15 +49,15 @@ public class TestCdsHooksConfig {
     }
 
     @Bean(name = CDS_HOOKS_OBJECT_MAPPER_FACTORY)
-    public ObjectMapper objectMapper(FhirContext fhirContext) {
-        return new CdsHooksObjectMapperFactory(fhirContext).newMapper();
+    public JsonMapper objectMapper(FhirContext fhirContext) {
+        return (JsonMapper) new CdsHooksObjectMapperFactory(fhirContext).newMapper();
     }
 
     @Bean
     public ICdsServiceRegistry cdsServiceRegistry(
             CdsHooksContextBooter cdsHooksContextBooter,
             CdsPrefetchSvc cdsPrefetchSvc,
-            @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper objectMapper,
+            @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) JsonMapper objectMapper,
             FhirContext fhirContext) {
         final CdsServiceRequestJsonDeserializer cdsServiceRequestJsonDeserializer =
                 new CdsServiceRequestJsonDeserializer(fhirContext, objectMapper);
@@ -67,7 +67,7 @@ public class TestCdsHooksConfig {
 
     @Bean
     public ICdsConfigService cdsConfigService(
-            FhirContext fhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) ObjectMapper objectMapper) {
+            FhirContext fhirContext, @Qualifier(CDS_HOOKS_OBJECT_MAPPER_FACTORY) JsonMapper objectMapper) {
         return new CdsConfigServiceImpl(fhirContext, objectMapper, daoRegistry, restfulServer);
     }
 

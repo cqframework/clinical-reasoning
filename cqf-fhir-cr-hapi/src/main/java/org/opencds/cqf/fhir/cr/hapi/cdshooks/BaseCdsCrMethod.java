@@ -4,7 +4,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 abstract class BaseCdsCrMethod implements ICdsMethod {
     private final ICdsCrServiceFactory cdsCrServiceFactory;
@@ -18,7 +18,7 @@ abstract class BaseCdsCrMethod implements ICdsMethod {
     }
 
     @Override
-    public Object invoke(ObjectMapper objectMapper, IModelJson json, String serviceId) {
+    public Object invoke(JsonMapper jsonMapper, IModelJson json, String serviceId) {
         try {
             return createCdsCrService(serviceId).invoke(json);
         } catch (Exception e) {

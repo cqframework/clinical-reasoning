@@ -129,6 +129,7 @@ class ResourceValidator : IResourceValidator {
         return this.validate(resource, false)
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun validate(resource: IBaseResource?, error: Boolean?): IBaseResource? {
         val validationResult = this.validator!!.validateWithResult(resource)
         val errors =

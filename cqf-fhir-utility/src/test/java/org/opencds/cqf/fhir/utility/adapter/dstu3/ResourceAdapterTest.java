@@ -50,7 +50,7 @@ class ResourceAdapterTest {
         resource.setId(id);
         var adapter = adapterFactory.createResource(resource);
         assertTrue(((ResourceAdapter) adapter).isDomainResource());
-        assertEquals(resource, ((ResourceAdapter) adapter).getDomainResource().get());
+        assertEquals(resource, ((ResourceAdapter) adapter).getDomainResource());
         assertEquals(id.getValue(), ((IIdType) adapter.getSingleProperty("id")).getValue());
         var newId = new IdType("patient-2");
         adapter.setProperty("id", newId);

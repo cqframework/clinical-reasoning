@@ -223,7 +223,7 @@ class LibraryAdapterTest {
         assertEquals(contentList, adapter.getContent());
         adapter.addContent().setContentType("text/xml").setData(new byte[20]);
         assertEquals(2, adapter.getContent().size());
-        assertEquals("text/xml", adapter.getContent().get(1).getContentType());
+        assertEquals("text/xml", adapter.<Attachment>getContent().get(1).getContentType());
     }
 
     @Test

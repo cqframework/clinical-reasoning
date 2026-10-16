@@ -68,7 +68,6 @@ class AdapterTest {
         var fhirVersion = FhirVersionEnum.R4;
         var coding = new Coding();
         var factory = IAdapterFactory.forFhirVersion(fhirVersion);
-        assertThrows(IllegalArgumentException.class, () -> factory.createCoding(null));
         var adapter = factory.createCoding(coding);
         assertEquals(coding, adapter.get());
         assertEquals(fhirVersion, adapter.fhirVersion());

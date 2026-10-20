@@ -1,49 +1,57 @@
-package org.opencds.cqf.fhir.utility.client.terminology;
+package org.opencds.cqf.fhir.utility.client.terminology
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import org.opencds.cqf.fhir.utility.Constants;
-import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
-import org.opencds.cqf.fhir.utility.client.Clients;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.rest.client.api.IGenericClient
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException
+import org.hl7.fhir.instance.model.api.IBaseExtension
+import org.opencds.cqf.fhir.utility.Constants
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter
+import org.opencds.cqf.fhir.utility.client.Clients
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings
 
-public class VsacTerminologyServerClient extends GenericTerminologyServerClient {
+class VsacTerminologyServerClient : GenericTerminologyServerClient {
+    constructor(fhirContext: FhirContext) : super(fhirContext)
 
-    public VsacTerminologyServerClient(FhirContext fhirContext) {
-        super(fhirContext);
-    }
+    constructor(
+        fhirContext: FhirContext,
+        terminologyServerClientSettings: TerminologyServerClientSettings?,
+    ) : super(fhirContext, terminologyServerClientSettings)
 
-    public VsacTerminologyServerClient(
-            FhirContext fhirContext, TerminologyServerClientSettings terminologyServerClientSettings) {
-        super(fhirContext, terminologyServerClientSettings);
-    }
+    override fun initializeClientWithAuth(endpoint: IEndpointAdapter?): IGenericClient {
+        val fhirClient = super.initializeClientWithAuth(endpoint)
 
-    @Override
-    public IGenericClient initializeClientWithAuth(IEndpointAdapter endpoint) {
-        var fhirClient = super.initializeClientWithAuth(endpoint);
-
-        // This smacks of reinventing the wheel... Should be passed in with the Endpoint resource (Endpoint.header
+        // This smacks of reinventing the wheel... Should be passed in with the Endpoint resource
+        // (Endpoint.header
         // element)... e.g. Basic {username:password (base64 encoded)}
-        if (endpoint.hasExtension(Constants.VSAC_USERNAME) && endpoint.hasExtension(Constants.APIKEY)) {
-            var username = endpoint.getExtensionsByUrl(Constants.VSAC_USERNAME).stream()
-                    .findFirst()
-                    .map(ext -> ext.getValue().toString())
-                    .orElseThrow(() -> new UnprocessableEntityException(
-                            String.format("Found a %s extension with no value", Constants.VSAC_USERNAME)));
-            var apiKey = endpoint.getExtensionsByUrl(Constants.APIKEY).stream()
-                    .findFirst()
-                    .map(ext -> ext.getValue().toString())
-                    .orElseThrow(() -> new UnprocessableEntityException(
-                            String.format("Found a %s extension with no value", Constants.APIKEY)));
-            Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey);
+        if (
+            endpoint!!.hasExtension(Constants.VSAC_USERNAME) &&
+                endpoint.hasExtension(Constants.APIKEY)
+        ) {
+            val username =
+                endpoint
+                    .getExtensionsByUrl<IBaseExtension<*, *>>(Constants.VSAC_USERNAME)
+                    .firstOrNull()
+                    ?.value
+                    ?.toString()
+                    ?: throw UnprocessableEntityException(
+                        "Found a ${Constants.VSAC_USERNAME} extension with no value"
+                    )
+            val apiKey =
+                endpoint
+                    .getExtensionsByUrl<IBaseExtension<*, *>>(Constants.APIKEY)
+                    .firstOrNull()
+                    ?.value
+                    ?.toString()
+                    ?: throw UnprocessableEntityException(
+                        "Found a ${Constants.APIKEY} extension with no value"
+                    )
+            Clients.registerAdditionalRequestHeadersAuth(fhirClient, username, apiKey)
         }
 
-        return fhirClient;
+        return fhirClient
     }
 
-    @Override
-    public boolean isCanonicalMatch(String address) {
-        return address.matches("https*://cts.nlm.nih.gov/fhir.*");
+    override fun isCanonicalMatch(address: String?): Boolean {
+        return address!!.matches("https*://cts.nlm.nih.gov/fhir.*".toRegex())
     }
 }

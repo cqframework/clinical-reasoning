@@ -1,39 +1,55 @@
-package org.opencds.cqf.fhir.utility.client.terminology;
+package org.opencds.cqf.fhir.utility.client.terminology
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import java.util.Optional;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.client.api.IGenericClient
+import java.util.Optional
+import org.hl7.fhir.instance.model.api.IBaseParameters
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.r4.model.TerminologyCapabilities
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter
 
-public interface ITerminologyProvider {
+interface ITerminologyProvider {
+    fun expand(
+        valueSet: IValueSetAdapter?,
+        endpoint: IEndpointAdapter?,
+        parameters: IParametersAdapter?,
+    ): IBaseResource?
 
-    IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters);
+    fun expand(
+        endpoint: IEndpointAdapter?,
+        parameters: IParametersAdapter?,
+        fhirVersion: FhirVersionEnum?,
+    ): IBaseResource?
 
-    IBaseResource expand(IEndpointAdapter endpoint, IParametersAdapter parameters, FhirVersionEnum fhirVersion);
+    fun expand(
+        endpoint: IEndpointAdapter?,
+        parameters: IParametersAdapter?,
+        url: String?,
+        valueSetVersion: String?,
+        fhirVersion: FhirVersionEnum?,
+    ): IBaseResource?
 
-    IBaseResource expand(
-            IEndpointAdapter endpoint,
-            IParametersAdapter parameters,
-            String url,
-            String valueSetVersion,
-            FhirVersionEnum fhirVersion);
+    fun expand(
+        fhirClient: IGenericClient?,
+        url: String?,
+        parameters: IBaseParameters?,
+    ): IBaseResource?
 
-    IBaseResource expand(IGenericClient fhirClient, String url, IBaseParameters parameters);
+    val codeSystemClass: Class<out IBaseResource>?
 
-    Class<? extends IBaseResource> getCodeSystemClass();
+    fun getCodeSystemResource(endpoint: IEndpointAdapter?, url: String?): Optional<IDomainResource>
 
-    Optional<IDomainResource> getCodeSystemResource(IEndpointAdapter endpoint, String url);
+    fun getLatestValueSetResource(
+        endpoint: IEndpointAdapter?,
+        url: String?,
+    ): Optional<IDomainResource>
 
-    Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url);
+    fun getR4TerminologyCapabilities(endpoint: IEndpointAdapter?): TerminologyCapabilities?
 
-    org.hl7.fhir.r4.model.TerminologyCapabilities getR4TerminologyCapabilities(IEndpointAdapter endpoint);
+    val valueSetClass: Class<out IBaseResource>?
 
-    Class<? extends IBaseResource> getValueSetClass();
-
-    Optional<IDomainResource> getValueSetResource(IEndpointAdapter endpoint, String url);
+    fun getValueSetResource(endpoint: IEndpointAdapter?, url: String?): Optional<IDomainResource>
 }

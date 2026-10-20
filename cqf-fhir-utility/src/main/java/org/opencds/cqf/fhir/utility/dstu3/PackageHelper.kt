@@ -1,58 +1,73 @@
-package org.opencds.cqf.fhir.utility.dstu3;
+package org.opencds.cqf.fhir.utility.dstu3
 
-import ca.uhn.fhir.repository.IRepository;
-import java.util.Arrays;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.repository.IRepository
+import org.hl7.fhir.dstu3.model.Enumerations
+import org.hl7.fhir.dstu3.model.RelatedArtifact
+import org.hl7.fhir.dstu3.model.StringType
+import org.hl7.fhir.instance.model.api.IBaseBundle
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.opencds.cqf.fhir.utility.BundleHelper.addEntry
+import org.opencds.cqf.fhir.utility.BundleHelper.getEntryResources
+import org.opencds.cqf.fhir.utility.Canonicals.getResourceType
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory.Companion.forFhirVersion
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
-/**
- * This class consists exclusively of static methods that assist with packaging FHIR Resources.
- */
-public class PackageHelper extends org.opencds.cqf.fhir.utility.PackageHelper {
+/** This class consists exclusively of static methods that assist with packaging FHIR Resources. */
+object PackageHelper : org.opencds.cqf.fhir.utility.PackageHelper() {
+    internal val logger: Logger = LoggerFactory.getLogger(PackageHelper::class.java)
 
-    private PackageHelper() {}
+    internal val PACKABLE_RESOURCES =
+        mutableListOf(
+            Enumerations.FHIRAllTypes.LIBRARY.toCode(),
+            Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(),
+            Enumerations.FHIRAllTypes.ACTIVITYDEFINITION.toCode(),
+            Enumerations.FHIRAllTypes.STRUCTUREDEFINITION.toCode(),
+            Enumerations.FHIRAllTypes.CODESYSTEM.toCode(),
+            Enumerations.FHIRAllTypes.VALUESET.toCode(),
+        )
 
-    protected static final Logger logger = LoggerFactory.getLogger(PackageHelper.class);
-
-    protected static final List<String> PACKABLE_RESOURCES = Arrays.asList(
-            FHIRAllTypes.LIBRARY.toCode(),
-            FHIRAllTypes.PLANDEFINITION.toCode(),
-            FHIRAllTypes.ACTIVITYDEFINITION.toCode(),
-            FHIRAllTypes.STRUCTUREDEFINITION.toCode(),
-            FHIRAllTypes.CODESYSTEM.toCode(),
-            FHIRAllTypes.VALUESET.toCode());
-
-    public static void addRelatedArtifacts(
-            IBaseBundle bundle, List<RelatedArtifact> artifacts, IRepository repository, boolean isPut) {
-        for (var artifact : artifacts) {
-            if (artifact.getType().equals(RelatedArtifactType.DEPENDSON) && artifact.hasResource()) {
+    fun addRelatedArtifacts(
+        bundle: IBaseBundle,
+        artifacts: MutableList<RelatedArtifact?>,
+        repository: IRepository?,
+        isPut: Boolean,
+    ) {
+        for (artifact in artifacts) {
+            if (
+                artifact!!.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON &&
+                    artifact.hasResource()
+            ) {
                 try {
-                    var canonical = artifact.getResource().getReference();
-                    if (PACKABLE_RESOURCES.contains(Canonicals.getResourceType(canonical))) {
-                        var resource = SearchHelper.searchRepositoryByCanonical(repository, new StringType(canonical));
-                        if (resource != null
-                                && BundleHelper.getEntryResources(bundle).stream()
-                                        .noneMatch(r -> r.getIdElement().equals(resource.getIdElement()))) {
-                            BundleHelper.addEntry(bundle, createEntry(resource, isPut));
-                            final var adapter = IAdapterFactory.forFhirVersion(resource.getStructureFhirVersionEnum())
-                                    .createKnowledgeArtifactAdapter((IDomainResource) resource);
-                            if (adapter.hasRelatedArtifact()) {
-                                addRelatedArtifacts(bundle, adapter.getRelatedArtifact(), repository, isPut);
+                    val canonical = artifact.resource.reference
+                    if (PACKABLE_RESOURCES.contains(getResourceType(canonical))) {
+                        val resource =
+                            SearchHelper.searchRepositoryByCanonical(
+                                repository!!,
+                                StringType(canonical),
+                            )
+                        if (
+                            resource != null &&
+                                getEntryResources(bundle).none { r ->
+                                    r.idElement == resource.getIdElement()
+                                }
+                        ) {
+                            addEntry(bundle, createEntry(resource, isPut))
+                            val adapter =
+                                forFhirVersion(resource.structureFhirVersionEnum)
+                                    .createKnowledgeArtifactAdapter(resource as IDomainResource)
+                            if (adapter.hasRelatedArtifact<RelatedArtifact>()) {
+                                PackageHelper.addRelatedArtifacts(
+                                    bundle,
+                                    adapter.getRelatedArtifact(),
+                                    repository,
+                                    isPut,
+                                )
                             }
                         }
                     }
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+                } catch (e: Exception) {
+                    logger.error(e.message, e)
                 }
             }
         }

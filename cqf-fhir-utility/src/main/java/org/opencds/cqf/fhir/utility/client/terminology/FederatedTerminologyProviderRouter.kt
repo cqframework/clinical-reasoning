@@ -1,287 +1,301 @@
-package org.opencds.cqf.fhir.utility.client.terminology;
+package org.opencds.cqf.fhir.utility.client.terminology
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
-import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings;
-import org.opencds.cqf.fhir.utility.search.Searches;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.client.api.IGenericClient
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.util.Optional
+import java.util.function.Supplier
+import kotlin.math.max
+import org.hl7.fhir.instance.model.api.IBaseBundle
+import org.hl7.fhir.instance.model.api.IBaseParameters
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.instance.model.api.IDomainResource
+import org.hl7.fhir.r4.model.TerminologyCapabilities
+import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter
+import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter
+import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter
+import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter
+import org.opencds.cqf.fhir.utility.client.TerminologyServerClientSettings
+import org.opencds.cqf.fhir.utility.search.Searches
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
- * This class is a router that links ValueSets + Endpoints to actual Terminology Servers.
- * Routing rules are derived from the CRMI IG,
+ * This class is a router that links ValueSets + Endpoints to actual Terminology Servers. Routing
+ * rules are derived from the CRMI IG,
  * https://hl7.org/fhir/uv/crmi/StructureDefinition-crmi-artifact-endpoint-configurable-operation.html
  */
-public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider implements ITerminologyProviderRouter {
+open class FederatedTerminologyProviderRouter
+@JvmOverloads
+constructor(
+    fhirContext: FhirContext,
+    terminologyServerClientSettings: TerminologyServerClientSettings? = null,
+) : BaseTerminologyProvider(fhirContext), ITerminologyProviderRouter {
+    private val defaultClient =
+        GenericTerminologyServerClient(fhirContext, terminologyServerClientSettings)
+    private val clients: MutableList<ITerminologyServerClient> =
+        mutableListOf<ITerminologyServerClient>(
+            defaultClient,
+            VsacTerminologyServerClient(fhirContext, terminologyServerClientSettings),
+        )
 
-    private static final org.slf4j.Logger logger =
-            org.slf4j.LoggerFactory.getLogger(FederatedTerminologyProviderRouter.class);
-
-    private final List<ITerminologyServerClient> clients;
-    private final ITerminologyServerClient defaultClient;
-
-    public FederatedTerminologyProviderRouter(FhirContext fhirContext) {
-        this(fhirContext, null);
-    }
-
-    public FederatedTerminologyProviderRouter(
-            FhirContext fhirContext, TerminologyServerClientSettings terminologyServerClientSettings) {
-        super(fhirContext);
-
-        defaultClient = new GenericTerminologyServerClient(fhirContext, terminologyServerClientSettings);
-        clients = new ArrayList<>();
-        clients.add(defaultClient);
-        clients.add(new VsacTerminologyServerClient(fhirContext, terminologyServerClientSettings));
-    }
-
-    private ITerminologyServerClient getClient(String address) {
-        return clients.stream()
-                .filter(client -> client.isCanonicalMatch(address))
-                .findFirst()
-                .orElse(defaultClient);
+    private fun getClient(address: String?): ITerminologyServerClient {
+        return clients.firstOrNull { client -> client.isCanonicalMatch(address) } ?: defaultClient
     }
 
     /**
-     * Returns a list of endpoints sorted such that the endpoint that matches the ValueSet's canonical URL is first
-     * @param endpoints List of terminology server endpoints that can be used to lookup ValueSet resources
-     * @param url       ValueSet's Canonical URL
-     * @return          Sorted endpoints
+     * Returns a list of endpoints sorted such that the endpoint that matches the ValueSet's
+     * canonical URL is first
+     *
+     * @param endpoints List of terminology server endpoints that can be used to lookup ValueSet
+     *   resources
+     * @param url ValueSet's Canonical URL
+     * @return Sorted endpoints
      */
-    private List<IEndpointAdapter> prioritizeEndpoints(List<IEndpointAdapter> endpoints, String url) {
-        if (endpoints == null || endpoints.isEmpty()) {
-            return List.of();
+    private fun prioritizeEndpoints(
+        endpoints: MutableList<IEndpointAdapter?>?,
+        url: String?,
+    ): MutableList<IEndpointAdapter?> {
+        if (endpoints.isNullOrEmpty()) {
+            return mutableListOf()
         }
 
-        Comparator<IEndpointAdapter> byUrlMatch = Comparator.comparing((IEndpointAdapter endpoint) -> {
-            var address = endpoint.getAddress();
-            return url == null || address == null || !url.startsWith(address);
-        });
+        val byUrlMatch =
+            Comparator.comparing<IEndpointAdapter?, Boolean> { endpoint ->
+                val address = endpoint!!.address
+                url == null || address == null || !url.startsWith(address)
+            }
 
-        Comparator<IEndpointAdapter> byAddress =
-                Comparator.comparing(IEndpointAdapter::getAddress, Comparator.nullsLast(Comparator.naturalOrder()));
+        val byAddress =
+            Comparator.comparing<IEndpointAdapter?, String?>(
+                IEndpointAdapter::address,
+                Comparator.nullsLast<String>(Comparator.naturalOrder<String>()),
+            )
 
-        return endpoints.stream().sorted(byUrlMatch.thenComparing(byAddress)).toList();
+        return endpoints.sortedWith(byUrlMatch.thenComparing(byAddress)).toMutableList()
     }
 
-    @Override
-    public IBaseResource expand(IValueSetAdapter valueSet, IEndpointAdapter endpoint, IParametersAdapter parameters) {
-        return this.getClient(valueSet.getUrl()).expand(valueSet, endpoint, parameters);
+    override fun expand(
+        valueSet: IValueSetAdapter?,
+        endpoint: IEndpointAdapter?,
+        parameters: IParametersAdapter?,
+    ): IBaseResource? {
+        return this.getClient(valueSet!!.url).expand(valueSet, endpoint, parameters)
     }
 
-    @Override
-    public IBaseResource expand(IEndpointAdapter endpoint, IParametersAdapter parameters, FhirVersionEnum fhirVersion) {
-        return this.getClient(endpoint.getAddress()).expand(endpoint, parameters, fhirVersion);
+    override fun expand(
+        endpoint: IEndpointAdapter?,
+        parameters: IParametersAdapter?,
+        fhirVersion: FhirVersionEnum?,
+    ): IBaseResource? {
+        return this.getClient(endpoint!!.address).expand(endpoint, parameters, fhirVersion)
     }
 
-    @Override
-    public IBaseResource expand(
-            IEndpointAdapter endpoint,
-            IParametersAdapter parameters,
-            String url,
-            String valueSetVersion,
-            FhirVersionEnum fhirVersion) {
-        return this.getClient(url).expand(endpoint, parameters, url, valueSetVersion, fhirVersion);
+    override fun expand(
+        endpoint: IEndpointAdapter?,
+        parameters: IParametersAdapter?,
+        url: String?,
+        valueSetVersion: String?,
+        fhirVersion: FhirVersionEnum?,
+    ): IBaseResource? {
+        return this.getClient(url).expand(endpoint, parameters, url, valueSetVersion, fhirVersion)
     }
 
-    @Override
-    public IBaseResource expand(IGenericClient fhirClient, String url, IBaseParameters parameters) {
-        return this.getClient(url).expand(fhirClient, url, parameters);
+    override fun expand(
+        fhirClient: IGenericClient?,
+        url: String?,
+        parameters: IBaseParameters?,
+    ): IBaseResource? {
+        return this.getClient(url).expand(fhirClient, url, parameters)
     }
 
-    @Override
-    public IBaseResource expand(
-            IValueSetAdapter valueSet, List<IEndpointAdapter> endpoints, IParametersAdapter parameters) {
-        return prioritizeEndpoints(endpoints, valueSet.getUrl()).stream()
-                .map(endpoint -> expand(valueSet, endpoint, parameters))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+    override fun expand(
+        valueSet: IValueSetAdapter?,
+        endpoints: MutableList<IEndpointAdapter?>?,
+        parameters: IParametersAdapter?,
+    ): IBaseResource? {
+        return prioritizeEndpoints(endpoints, valueSet!!.url).firstNotNullOfOrNull { endpoint ->
+            expand(valueSet, endpoint, parameters)
+        }
     }
 
-    @Override
-    public IBaseResource expand(
-            List<IEndpointAdapter> endpoints, IParametersAdapter parameters, FhirVersionEnum fhirVersion) {
-        return endpoints.stream()
-                .map(endpoint -> expand(endpoint, parameters, fhirVersion))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+    override fun expand(
+        endpoints: MutableList<IEndpointAdapter?>?,
+        parameters: IParametersAdapter?,
+        fhirVersion: FhirVersionEnum?,
+    ): IBaseResource? {
+        return endpoints!!.firstNotNullOfOrNull { endpoint ->
+            expand(endpoint!!, parameters, fhirVersion)
+        }
     }
 
-    @Override
-    public IBaseResource expand(
-            List<IEndpointAdapter> endpoints,
-            IParametersAdapter parameters,
-            String url,
-            String valueSetVersion,
-            FhirVersionEnum fhirVersion) {
-        return prioritizeEndpoints(endpoints, url).stream()
-                .map(endpoint -> expand(endpoint, parameters, url, valueSetVersion, fhirVersion))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+    override fun expand(
+        endpoints: MutableList<IEndpointAdapter?>?,
+        parameters: IParametersAdapter?,
+        url: String?,
+        valueSetVersion: String?,
+        fhirVersion: FhirVersionEnum?,
+    ): IBaseResource? {
+        return prioritizeEndpoints(endpoints, url).firstNotNullOfOrNull { endpoint ->
+            expand(endpoint, parameters, url, valueSetVersion, fhirVersion)
+        }
     }
 
-    @Override
-    public Optional<IDomainResource> getCodeSystemResource(IEndpointAdapter endpoint, String url) {
-        var client = this.getClient(endpoint.getAddress());
-        return executeWithRetry(
-                client,
-                url,
-                () -> IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
-                        .search()
-                        .forResource(client.getCodeSystemClass())
-                        .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
-                        .execute()));
+    override fun getCodeSystemResource(
+        endpoint: IEndpointAdapter?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        val client = this.getClient(endpoint!!.address)
+        return executeWithRetry(client, url) {
+            IKnowledgeArtifactAdapter.findLatestVersion(
+                client
+                    .initializeClientWithAuth(endpoint)
+                    .search<IBaseBundle>()
+                    .forResource(client.codeSystemClass)
+                    .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                    .execute()
+            )
+        }!!
     }
 
-    @Override
-    public Optional<IDomainResource> getCodeSystemResource(List<IEndpointAdapter> endpoints, String url) {
-        return prioritizeEndpoints(endpoints, url).stream()
-                .map(endpoint -> getCodeSystemResource(endpoint, url))
-                .flatMap(Optional::stream)
-                .findFirst();
+    override fun getCodeSystemResource(
+        endpoints: MutableList<IEndpointAdapter?>?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        return prioritizeEndpoints(endpoints, url)
+            .stream()
+            .map { endpoint -> getCodeSystemResource(endpoint!!, url) }
+            .flatMap { obj -> obj.stream() }
+            .findFirst()
     }
 
-    @Override
-    public Optional<IDomainResource> getLatestValueSetResource(IEndpointAdapter endpoint, String url) {
-        var client = this.getClient(endpoint.getAddress());
-        return executeWithRetry(
-                client,
-                url,
-                () -> IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
-                        .search()
-                        .forResource(client.getValueSetClass())
-                        .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
-                        .execute()));
+    override fun getLatestValueSetResource(
+        endpoint: IEndpointAdapter?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        val client = this.getClient(endpoint!!.address)
+        return executeWithRetry(client, url) {
+            IKnowledgeArtifactAdapter.findLatestVersion(
+                client
+                    .initializeClientWithAuth(endpoint)
+                    .search<IBaseBundle>()
+                    .forResource(client.valueSetClass)
+                    .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                    .execute()
+            )
+        }!!
     }
 
-    @Override
-    public Optional<IDomainResource> getLatestValueSetResource(List<IEndpointAdapter> endpoints, String url) {
-        return prioritizeEndpoints(endpoints, url).stream()
-                .map(endpoint -> getLatestValueSetResource(endpoint, url))
-                .flatMap(Optional::stream)
-                .findFirst();
+    override fun getLatestValueSetResource(
+        endpoints: MutableList<IEndpointAdapter?>?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        return prioritizeEndpoints(endpoints, url)
+            .stream()
+            .map { endpoint -> getLatestValueSetResource(endpoint!!, url) }
+            .flatMap { obj -> obj.stream() }
+            .findFirst()
     }
 
-    public org.hl7.fhir.r4.model.TerminologyCapabilities getR4TerminologyCapabilities(IEndpointAdapter endpoint) {
-        return getClient(endpoint.getAddress()).getR4TerminologyCapabilities(endpoint);
+    override fun getR4TerminologyCapabilities(
+        endpoint: IEndpointAdapter?
+    ): TerminologyCapabilities? {
+        return getClient(endpoint!!.address).getR4TerminologyCapabilities(endpoint)
     }
 
-    @Override
-    public TerminologyServerClientSettings getTerminologyServerClientSettings(IEndpointAdapter endpoint) {
-        return getClient(endpoint.getAddress()).getTerminologyServerClientSettings();
+    override fun getTerminologyServerClientSettings(
+        endpoint: IEndpointAdapter?
+    ): TerminologyServerClientSettings? {
+        return getClient(endpoint!!.address).terminologyServerClientSettings
     }
 
-    @Override
-    public Optional<IDomainResource> getValueSetResource(IEndpointAdapter endpoint, String url) {
-        var client = this.getClient(url);
-        return executeWithRetry(
-                client,
-                url,
-                () -> IKnowledgeArtifactAdapter.findLatestVersion(client.initializeClientWithAuth(endpoint)
-                        .search()
-                        .forResource(client.getValueSetClass())
-                        .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
-                        .execute()));
+    override fun getValueSetResource(
+        endpoint: IEndpointAdapter?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        val client = this.getClient(url)
+        return executeWithRetry(client, url) {
+            IKnowledgeArtifactAdapter.findLatestVersion(
+                client
+                    .initializeClientWithAuth(endpoint)
+                    .search<IBaseBundle>()
+                    .forResource(client.valueSetClass)
+                    .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                    .execute()
+            )
+        }!!
     }
 
     /**
      * Executes a terminology-server read, retrying transient failures (connection/read timeouts and
-     * retryable HTTP statuses) up to {@code maxRetryCount} times with a linear back-off, mirroring the
-     * resilience of the expansion path ({@code ExpandRunner}). A single transient tx-server hiccup during
-     * dependency resolution should not abort an entire {@code $package} run. Non-transient errors and the
+     * retryable HTTP statuses) up to `maxRetryCount` times with a linear back-off, mirroring the
+     * resilience of the expansion path (`ExpandRunner`). A single transient tx-server hiccup during
+     * dependency resolution should not abort an entire `$package` run. Non-transient errors and the
      * final failure after exhausting retries propagate unchanged.
      *
-     * <p><strong>Performance note:</strong> against a flaky terminology server this trades speed for
-     * resilience — each transient failure takes up to {@code maxRetryCount}× longer (dominated by the
-     * per-attempt connect timeout). Operations that make many resolution calls (e.g. {@code $data-requirements}
-     * over many un-cached ValueSets) can be noticeably slower as a result. Performance-sensitive environments
-     * that prefer fail-fast can disable retries by setting
-     * {@link TerminologyServerClientSettings#setMaxRetryCount(int) maxRetryCount} to {@code 1}.
+     * **Performance note:** against a flaky terminology server this trades speed for resilience —
+     * each transient failure takes up to `maxRetryCount`× longer (dominated by the per-attempt
+     * connect timeout). Operations that make many resolution calls (e.g. `$data-requirements` over
+     * many un-cached ValueSets) can be noticeably slower as a result. Performance-sensitive
+     * environments that prefer fail-fast can disable retries by setting
+     * [maxRetryCount][TerminologyServerClientSettings.setMaxRetryCount] to `1`.
      */
-    <T> T executeWithRetry(ITerminologyServerClient client, String url, Supplier<T> operation) {
-        var settings = client.getTerminologyServerClientSettings();
-        int maxAttempts = settings != null ? Math.max(1, settings.getMaxRetryCount()) : 1;
-        long retryIntervalMillis = settings != null ? settings.getRetryIntervalMillis() : 0L;
+    fun <T> executeWithRetry(
+        client: ITerminologyServerClient,
+        url: String?,
+        operation: Supplier<T?>,
+    ): T? {
+        val settings = client.terminologyServerClientSettings
+        val maxAttempts = if (settings != null) max(1, settings.maxRetryCount) else 1
+        val retryIntervalMillis = if (settings != null) settings.retryIntervalMillis else 0L
 
-        RuntimeException lastError = null;
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+        var lastError: RuntimeException? = null
+        for (attempt in 1..maxAttempts) {
             try {
-                return operation.get();
-            } catch (RuntimeException e) {
-                lastError = e;
+                return operation.get()
+            } catch (e: RuntimeException) {
+                lastError = e
                 if (attempt >= maxAttempts || !isTransient(e)) {
-                    throw e;
+                    throw e
                 }
                 logger.warn(
-                        "Transient error resolving {} from terminology server (attempt {} of {}): {}. Retrying...",
-                        url,
-                        attempt,
-                        maxAttempts,
-                        e.getMessage());
+                    "Transient error resolving {} from terminology server (attempt {} of {}): {}. Retrying...",
+                    url,
+                    attempt,
+                    maxAttempts,
+                    e.message,
+                )
                 try {
-                    Thread.sleep(retryIntervalMillis * attempt);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw e;
+                    Thread.sleep(retryIntervalMillis * attempt)
+                } catch (ie: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    throw e
                 }
             }
         }
-        throw lastError; // unreachable: the loop either returns or throws
+        throw lastError!! // unreachable: the loop either returns or throws
     }
 
-    static boolean isTransient(Throwable error) {
-        for (Throwable t = error; t != null; t = t.getCause()) {
-            // Connection-level failures (connect/read timeouts, connection refused) — the reported symptom.
-            if (t instanceof FhirClientConnectionException
-                    || t instanceof SocketTimeoutException
-                    || t instanceof ConnectException) {
-                return true;
-            }
-            if (t instanceof BaseServerResponseException bsre
-                    && switch (bsre.getStatusCode()) {
-                        case 408, 429, 500, 502, 503, 504 -> true;
-                        default -> false;
-                    }) {
-                return true;
-            }
-            if (t.getCause() == t) {
-                break;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public Optional<IDomainResource> getValueSetResource(List<IEndpointAdapter> endpoints, String url) {
-        return prioritizeEndpoints(endpoints, url).stream()
-                .map(endpoint -> getValueSetResource(endpoint, url))
-                .flatMap(Optional::stream)
-                .findFirst();
+    override fun getValueSetResource(
+        endpoints: MutableList<IEndpointAdapter?>?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        return prioritizeEndpoints(endpoints, url)
+            .stream()
+            .map { endpoint -> getValueSetResource(endpoint, url) }
+            .flatMap { obj -> obj.stream() }
+            .findFirst()
     }
 
     // CRMI ArtifactEndpointConfiguration-based routing methods
-
     /**
      * Prioritizes artifact endpoint configurations based on CRMI routing rules:
-     * 1. Configurations where artifactRoute matches the start of canonicalUrl are ranked by match length
+     * 1. Configurations where artifactRoute matches the start of canonicalUrl are ranked by match
+     *    length
      * 2. Configurations without artifactRoute are included but ranked lower (score = 0)
      * 3. For equal scores, original order is preserved
      *
@@ -289,109 +303,159 @@ public class FederatedTerminologyProviderRouter extends BaseTerminologyProvider 
      * @param canonicalUrl the canonical URL to match against
      * @return prioritized list of configurations (excludes non-matching configurations)
      */
-    private List<ArtifactEndpointConfiguration> prioritizeConfigurations(
-            List<ArtifactEndpointConfiguration> configurations, String canonicalUrl) {
-        if (configurations == null || configurations.isEmpty()) {
-            return List.of();
+    private fun prioritizeConfigurations(
+        configurations: MutableList<ArtifactEndpointConfiguration?>?,
+        canonicalUrl: String?,
+    ): MutableList<ArtifactEndpointConfiguration?> {
+        if (configurations.isNullOrEmpty()) {
+            return mutableListOf()
         }
 
         // Create scored configurations, preserving original index for stable sorting
-        record ScoredConfig(ArtifactEndpointConfiguration config, int score, int originalIndex) {}
+        data class ScoredConfig(
+            val config: ArtifactEndpointConfiguration?,
+            val score: Int,
+            val originalIndex: Int,
+        )
 
-        var scored = new ArrayList<ScoredConfig>();
-        for (int i = 0; i < configurations.size(); i++) {
-            var config = configurations.get(i);
-            int score = config.getMatchScore(canonicalUrl);
+        val scored = mutableListOf<ScoredConfig>()
+        for (i in configurations.indices) {
+            val config = configurations[i]
+            val score = config!!.getMatchScore(canonicalUrl)
             if (score >= 0) { // -1 means no match, exclude those
-                scored.add(new ScoredConfig(config, score, i));
+                scored.add(ScoredConfig(config, score, i))
             }
         }
 
         // Sort by score descending, then by original index for stability
-        return scored.stream()
-                .sorted(Comparator.comparingInt((ScoredConfig s) -> s.score)
-                        .reversed()
-                        .thenComparingInt(s -> s.originalIndex))
-                .map(ScoredConfig::config)
-                .toList();
+        return scored
+            .sortedWith(
+                Comparator.comparingInt<ScoredConfig> { s -> s.score }
+                    .reversed()
+                    .thenComparingInt { s -> s.originalIndex }
+            )
+            .map(ScoredConfig::config)
+            .toMutableList()
     }
 
-    @Override
-    public IBaseResource expandWithConfigurations(
-            IValueSetAdapter valueSet,
-            List<ArtifactEndpointConfiguration> configurations,
-            IParametersAdapter parameters) {
-        if (configurations == null || configurations.isEmpty()) {
-            return null;
+    override fun expandWithConfigurations(
+        valueSet: IValueSetAdapter?,
+        configurations: MutableList<ArtifactEndpointConfiguration?>?,
+        parameters: IParametersAdapter?,
+    ): IBaseResource? {
+        if (configurations.isNullOrEmpty()) {
+            return null
         }
 
-        String valueSetUrl = valueSet.getUrl();
-        var prioritized = prioritizeConfigurations(configurations, valueSetUrl);
+        val valueSetUrl = valueSet!!.url
+        val prioritized = prioritizeConfigurations(configurations, valueSetUrl)
 
-        for (var config : prioritized) {
+        for (config in prioritized) {
             try {
-                IEndpointAdapter endpoint = config.getEffectiveEndpoint(fhirContext);
+                val endpoint = config!!.getEffectiveEndpoint(fhirContext)
                 if (endpoint != null) {
-                    var result = expand(valueSet, endpoint, parameters);
+                    val result = expand(valueSet, endpoint, parameters)
                     if (result != null) {
-                        return result;
+                        return result
                     }
                 }
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 // Log and try next configuration
                 // Swallow exception to try next endpoint in priority order
             }
         }
-        return null;
+        return null
     }
 
-    @Override
-    public Optional<IDomainResource> getValueSetResourceWithConfigurations(
-            List<ArtifactEndpointConfiguration> configurations, String url) {
-        if (configurations == null || configurations.isEmpty()) {
-            return Optional.empty();
+    override fun getValueSetResourceWithConfigurations(
+        configurations: MutableList<ArtifactEndpointConfiguration?>?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        if (configurations.isNullOrEmpty()) {
+            return Optional.empty<IDomainResource>()
         }
 
-        var prioritized = prioritizeConfigurations(configurations, url);
+        val prioritized = prioritizeConfigurations(configurations, url)
 
-        for (var config : prioritized) {
+        for (config in prioritized) {
             try {
-                IEndpointAdapter endpoint = config.getEffectiveEndpoint(fhirContext);
+                val endpoint = config!!.getEffectiveEndpoint(fhirContext)
                 if (endpoint != null) {
-                    var result = getValueSetResource(endpoint, url);
-                    if (result.isPresent()) {
-                        return result;
+                    val result = getValueSetResource(endpoint, url)
+                    if (result.isPresent) {
+                        return result
                     }
                 }
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 // Try next configuration
             }
         }
-        return Optional.empty();
+        return Optional.empty<IDomainResource>()
     }
 
-    @Override
-    public Optional<IDomainResource> getCodeSystemResourceWithConfigurations(
-            List<ArtifactEndpointConfiguration> configurations, String url) {
-        if (configurations == null || configurations.isEmpty()) {
-            return Optional.empty();
+    override fun getCodeSystemResourceWithConfigurations(
+        configurations: MutableList<ArtifactEndpointConfiguration?>?,
+        url: String?,
+    ): Optional<IDomainResource> {
+        if (configurations.isNullOrEmpty()) {
+            return Optional.empty<IDomainResource>()
         }
 
-        var prioritized = prioritizeConfigurations(configurations, url);
+        val prioritized = prioritizeConfigurations(configurations, url)
 
-        for (var config : prioritized) {
+        for (config in prioritized) {
             try {
-                IEndpointAdapter endpoint = config.getEffectiveEndpoint(fhirContext);
+                val endpoint = config!!.getEffectiveEndpoint(fhirContext)
                 if (endpoint != null) {
-                    var result = getCodeSystemResource(endpoint, url);
-                    if (result.isPresent()) {
-                        return result;
+                    val result = getCodeSystemResource(endpoint, url)
+                    if (result.isPresent) {
+                        return result
                     }
                 }
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 // Try next configuration
             }
         }
-        return Optional.empty();
+        return Optional.empty<IDomainResource>()
+    }
+
+    companion object {
+        private val logger: Logger =
+            LoggerFactory.getLogger(FederatedTerminologyProviderRouter::class.java)
+
+        @JvmStatic
+        fun isTransient(error: Throwable?): Boolean {
+            var t = error
+            while (t != null) {
+                // Connection-level failures (connect/read timeouts, connection refused) — the
+                // reported symptom.
+                if (
+                    t is FhirClientConnectionException ||
+                        t is SocketTimeoutException ||
+                        t is ConnectException
+                ) {
+                    return true
+                }
+                if (
+                    t is BaseServerResponseException &&
+                        when (t.statusCode) {
+                            408,
+                            429,
+                            500,
+                            502,
+                            503,
+                            504 -> true
+                            else -> false
+                        }
+                ) {
+                    return true
+                }
+                if (t.cause === t) {
+                    break
+                }
+                t = t.cause
+            }
+            return false
+        }
     }
 }

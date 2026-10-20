@@ -1,33 +1,12 @@
-package org.opencds.cqf.fhir.utility.dstu3;
+package org.opencds.cqf.fhir.utility.dstu3
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.hl7.fhir.dstu3.model.*
+import org.hl7.fhir.dstu3.model.Parameters
+import org.hl7.fhir.instance.model.api.IIdType
+import org.opencds.cqf.fhir.utility.Ids
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Base64BinaryType;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.InstantType;
-import org.hl7.fhir.dstu3.model.IntegerType;
-import org.hl7.fhir.dstu3.model.OidType;
-import org.hl7.fhir.dstu3.model.PositiveIntType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.TimeType;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.opencds.cqf.fhir.utility.Ids;
-
-/**
- * Utility class for getting or creating DSTU3 model parameters
- */
-public class Parameters {
-
-    private Parameters() {}
-
+/** Utility class for getting or creating DSTU3 model parameters */
+object Parameters {
     /**
      * Method to create parameters for fhir Dstu3
      *
@@ -35,12 +14,10 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameters
      */
-    public static org.hl7.fhir.dstu3.model.Parameters parameters(
-            IdType id, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(id);
-        org.hl7.fhir.dstu3.model.Parameters p = parameters(parts);
-        p.setId(id);
-        return p;
+    fun parameters(id: IdType, vararg parts: Parameters.ParametersParameterComponent?): Parameters {
+        val p = parameters(*parts)
+        p.setId(id)
+        return p
     }
 
     /**
@@ -50,10 +27,14 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameters
      */
-    public static org.hl7.fhir.dstu3.model.Parameters parameters(
-            String idPart, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(idPart);
-        return parameters((IdType) Ids.newId(org.hl7.fhir.dstu3.model.Parameters.class, idPart), parts);
+    fun parameters(
+        idPart: String,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters {
+        return parameters(
+            Ids.newId<Parameters, IIdType>(Parameters::class.java, idPart) as IdType,
+            *parts,
+        )
     }
 
     /**
@@ -62,13 +43,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameters
      */
-    public static org.hl7.fhir.dstu3.model.Parameters parameters(
-            org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        org.hl7.fhir.dstu3.model.Parameters p = new org.hl7.fhir.dstu3.model.Parameters();
-        for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent c : parts) {
-            p.addParameter(c);
+    @JvmStatic
+    fun parameters(vararg parts: Parameters.ParametersParameterComponent?): Parameters {
+        val p = Parameters()
+        for (c in parts) {
+            p.addParameter(c)
         }
-        return p;
+        return p
     }
 
     /**
@@ -79,13 +60,15 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(name);
-        checkNotNull(value);
-        org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent c = part(name, parts);
-        c.setValue(new StringType(value));
-        return c;
+    @JvmStatic
+    fun part(
+        name: String,
+        value: String,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        val c = part(name, *parts)
+        c.setValue(StringType(value))
+        return c
     }
 
     /**
@@ -95,16 +78,17 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part(
-            String name, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(name);
-        org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent c =
-                new org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent();
-        c.setName(name);
-        for (org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent p : parts) {
-            c.addPart(p);
+    @JvmStatic
+    fun part(
+        name: String,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        val c = Parameters.ParametersParameterComponent()
+        c.setName(name)
+        for (p in parts) {
+            c.addPart(p)
         }
-        return c;
+        return c
     }
 
     /**
@@ -115,15 +99,15 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part(
-            String name,
-            org.hl7.fhir.dstu3.model.Type value,
-            org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(name);
-        checkNotNull(value);
-        org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent c = part(name, parts);
-        c.setValue(value);
-        return c;
+    @JvmStatic
+    fun part(
+        name: String,
+        value: Type,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        val c = part(name, *parts)
+        c.setValue(value)
+        return c
     }
 
     /**
@@ -134,15 +118,15 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent part(
-            String name,
-            org.hl7.fhir.dstu3.model.Resource resource,
-            org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        checkNotNull(name);
-        checkNotNull(resource);
-        org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent c = part(name, parts);
-        c.setResource(resource);
-        return c;
+    @JvmStatic
+    fun part(
+        name: String,
+        resource: Resource,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        val c = part(name, *parts)
+        c.setResource(resource)
+        return c
     }
 
     /**
@@ -152,13 +136,12 @@ public class Parameters {
      * @param parameters dstu3 model resource parameters
      * @return parameter
      */
-    public static List<org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent> getPartsByName(
-            org.hl7.fhir.dstu3.model.Parameters parameters, String name) {
-        checkNotNull(parameters);
-        checkNotNull(name);
-        return parameters.getParameter().stream()
-                .filter(x -> name.equals(x.getName()))
-                .collect(Collectors.toList());
+    @JvmStatic
+    fun getPartsByName(
+        parameters: Parameters,
+        name: String,
+    ): MutableList<Parameters.ParametersParameterComponent?> {
+        return parameters.getParameter().filter { x -> name == x!!.getName() }.toMutableList()
     }
 
     /**
@@ -169,9 +152,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent base64BinaryPart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new Base64BinaryType(value), parts);
+    @JvmStatic
+    fun base64BinaryPart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, Base64BinaryType(value), *parts)
     }
 
     /**
@@ -182,9 +169,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent booleanPart(
-            String name, boolean value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new BooleanType(value), parts);
+    @JvmStatic
+    fun booleanPart(
+        name: String,
+        value: Boolean,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, BooleanType(value), *parts)
     }
 
     /**
@@ -195,9 +186,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent codePart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new CodeType(value), parts);
+    @JvmStatic
+    fun codePart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, CodeType(value), *parts)
     }
 
     /**
@@ -208,9 +203,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent datePart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new DateType(value), parts);
+    @JvmStatic
+    fun datePart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, DateType(value), *parts)
     }
 
     /**
@@ -221,9 +220,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent dateTimePart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new DateTimeType(value), parts);
+    @JvmStatic
+    fun dateTimePart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, DateTimeType(value), *parts)
     }
 
     /**
@@ -234,9 +237,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent decimalPart(
-            String name, double value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new DecimalType(value), parts);
+    @JvmStatic
+    fun decimalPart(
+        name: String,
+        value: Double,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, DecimalType(value), *parts)
     }
 
     /**
@@ -247,9 +254,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent idPart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new IdType(value), parts);
+    @JvmStatic
+    fun idPart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, IdType(value), *parts)
     }
 
     /**
@@ -260,9 +271,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent instantPart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new InstantType(value), parts);
+    @JvmStatic
+    fun instantPart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, InstantType(value), *parts)
     }
 
     /**
@@ -273,9 +288,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent integerPart(
-            String name, int value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new IntegerType(value), parts);
+    @JvmStatic
+    fun integerPart(
+        name: String,
+        value: Int,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, IntegerType(value), *parts)
     }
 
     /**
@@ -286,9 +305,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent oidPart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new OidType(value), parts);
+    @JvmStatic
+    fun oidPart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, OidType(value), *parts)
     }
 
     /**
@@ -299,9 +322,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent positiveIntPart(
-            String name, int value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new PositiveIntType(value), parts);
+    @JvmStatic
+    fun positiveIntPart(
+        name: String,
+        value: Int,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, PositiveIntType(value), *parts)
     }
 
     /**
@@ -312,9 +339,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent stringPart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new StringType(value), parts);
+    @JvmStatic
+    fun stringPart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, StringType(value), *parts)
     }
 
     /**
@@ -325,9 +356,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent timePart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new TimeType(value), parts);
+    @JvmStatic
+    fun timePart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, TimeType(value), *parts)
     }
 
     /**
@@ -338,9 +373,13 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent unsignedIntPart(
-            String name, int value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new UnsignedIntType(value), parts);
+    @JvmStatic
+    fun unsignedIntPart(
+        name: String,
+        value: Int,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, UnsignedIntType(value), *parts)
     }
 
     /**
@@ -351,8 +390,12 @@ public class Parameters {
      * @param parts Parameter dstu3 components
      * @return parameter
      */
-    public static org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent uriPart(
-            String name, String value, org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent... parts) {
-        return part(name, new UriType(value), parts);
+    @JvmStatic
+    fun uriPart(
+        name: String,
+        value: String?,
+        vararg parts: Parameters.ParametersParameterComponent?,
+    ): Parameters.ParametersParameterComponent {
+        return part(name, UriType(value), *parts)
     }
 }

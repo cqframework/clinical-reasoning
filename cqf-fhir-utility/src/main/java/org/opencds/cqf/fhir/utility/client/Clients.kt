@@ -1,31 +1,25 @@
-package org.opencds.cqf.fhir.utility.client;
+package org.opencds.cqf.fhir.utility.client
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.client.api.IClientInterceptor
+import ca.uhn.fhir.rest.client.api.IGenericClient
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor
+import ca.uhn.fhir.rest.client.interceptor.BearerTokenAuthInterceptor
+import com.google.common.base.Preconditions
+import java.nio.charset.StandardCharsets
+import java.util.*
+import java.util.stream.Collectors
+import org.apache.commons.lang3.StringUtils
+import org.hl7.fhir.dstu3.model.Endpoint
+import org.hl7.fhir.dstu3.model.StringType
 
 /**
  * This class provides utility functions for creating IGenericClients and setting up authentication
  */
-public class Clients {
-
-    private Clients() {}
-
+object Clients {
     /**
      * Creates an IGenericClient for the given url. Defaults to NEVER ServerValidationMode
      *
@@ -33,11 +27,10 @@ public class Clients {
      * @param url the server base url to connect to
      * @return IGenericClient for the given url
      */
-    public static IGenericClient forUrl(FhirVersionEnum fhirVersionEnum, String url) {
-        checkNotNull(fhirVersionEnum);
-        checkNotNull(url);
+    @JvmStatic
+    fun forUrl(fhirVersionEnum: FhirVersionEnum, url: String): IGenericClient {
 
-        return forUrl(FhirContext.forCached(fhirVersionEnum), url);
+        return forUrl(FhirContext.forCached(fhirVersionEnum), url)
     }
 
     /**
@@ -47,11 +40,10 @@ public class Clients {
      * @param url the server base url to connect to
      * @return IGenericClient for the given url
      */
-    public static IGenericClient forUrl(FhirContext fhirContext, String url) {
-        checkNotNull(fhirContext);
-        checkNotNull(url);
+    @JvmStatic
+    fun forUrl(fhirContext: FhirContext, url: String): IGenericClient {
 
-        return forUrl(fhirContext, url, ServerValidationModeEnum.NEVER);
+        return forUrl(fhirContext, url, ServerValidationModeEnum.NEVER)
     }
 
     /**
@@ -62,13 +54,14 @@ public class Clients {
      * @param serverValidationModeEnum the ServerValidationMode to use
      * @return IGenericClient for the given url, with the server validation mode set
      */
-    public static IGenericClient forUrl(
-            FhirVersionEnum fhirVersionEnum, String url, ServerValidationModeEnum serverValidationModeEnum) {
-        checkNotNull(fhirVersionEnum, "fhirVersionEnum is required");
-        checkNotNull(url, "url is required");
-        checkNotNull(serverValidationModeEnum, "serverValidationModeEnum is required");
+    @JvmStatic
+    fun forUrl(
+        fhirVersionEnum: FhirVersionEnum,
+        url: String,
+        serverValidationModeEnum: ServerValidationModeEnum,
+    ): IGenericClient {
 
-        return forUrl(FhirContext.forCached(fhirVersionEnum), url, serverValidationModeEnum);
+        return forUrl(FhirContext.forCached(fhirVersionEnum), url, serverValidationModeEnum)
     }
 
     /**
@@ -79,14 +72,15 @@ public class Clients {
      * @param serverValidationModeEnum the ServerValidationMode to use
      * @return IGenericClient for the given url, with the server validation mode set
      */
-    public static IGenericClient forUrl(
-            FhirContext fhirContext, String url, ServerValidationModeEnum serverValidationModeEnum) {
-        checkNotNull(fhirContext);
-        checkNotNull(url);
-        checkNotNull(serverValidationModeEnum, "serverValidationModeEnum is required");
+    @JvmStatic
+    fun forUrl(
+        fhirContext: FhirContext,
+        url: String,
+        serverValidationModeEnum: ServerValidationModeEnum,
+    ): IGenericClient {
 
-        fhirContext.getRestfulClientFactory().setServerValidationMode(serverValidationModeEnum);
-        return fhirContext.newRestfulGenericClient(url);
+        fhirContext.restfulClientFactory.serverValidationMode = serverValidationModeEnum
+        return fhirContext.newRestfulGenericClient(url)
     }
 
     /**
@@ -95,43 +89,10 @@ public class Clients {
      * @param endpoint the Endpoint to connect to
      * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
      */
-    public static IGenericClient forEndpoint(org.hl7.fhir.dstu3.model.Endpoint endpoint) {
-        checkNotNull(endpoint);
+    @JvmStatic
+    fun forEndpoint(endpoint: Endpoint): IGenericClient {
 
-        return forEndpoint(FhirContext.forDstu3Cached(), endpoint);
-    }
-
-    /**
-     * Creates an IGenericClient for the given Endpoint.
-     *
-     * @param fhirContext the FhirContext to use to create the client
-     * @param endpoint the Endpoint to connect to
-     * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
-     */
-    public static IGenericClient forEndpoint(FhirContext fhirContext, org.hl7.fhir.dstu3.model.Endpoint endpoint) {
-        checkNotNull(fhirContext);
-        checkNotNull(endpoint);
-
-        IGenericClient client = forUrl(fhirContext, endpoint.getAddress());
-        if (endpoint.hasHeader()) {
-            List<String> headerList = endpoint.getHeader().stream()
-                    .map(headerString -> headerString.asStringValue())
-                    .collect(Collectors.toList());
-            registerHeaders(client, headerList);
-        }
-        return client;
-    }
-
-    /**
-     * Creates an IGenericClient for the given Endpoint.
-     *
-     * @param endpoint the Endpoint to connect to
-     * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
-     */
-    public static IGenericClient forEndpoint(org.hl7.fhir.r4.model.Endpoint endpoint) {
-        checkNotNull(endpoint);
-
-        return forEndpoint(FhirContext.forR4Cached(), endpoint);
+        return forEndpoint(FhirContext.forDstu3Cached(), endpoint)
     }
 
     /**
@@ -141,18 +102,20 @@ public class Clients {
      * @param endpoint the Endpoint to connect to
      * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
      */
-    public static IGenericClient forEndpoint(FhirContext fhirContext, org.hl7.fhir.r4.model.Endpoint endpoint) {
-        checkNotNull(fhirContext);
-        checkNotNull(endpoint);
+    @JvmStatic
+    fun forEndpoint(fhirContext: FhirContext, endpoint: Endpoint): IGenericClient {
 
-        IGenericClient client = forUrl(fhirContext, endpoint.getAddress());
+        val client = forUrl(fhirContext, endpoint.getAddress())
         if (endpoint.hasHeader()) {
-            List<String> headerList = endpoint.getHeader().stream()
-                    .map(headerString -> headerString.asStringValue())
-                    .collect(Collectors.toList());
-            registerHeaders(client, headerList);
+            val headerList =
+                endpoint
+                    .getHeader()
+                    .stream()
+                    .map<String?> { headerString: StringType? -> headerString!!.asStringValue() }
+                    .collect(Collectors.toList())
+            registerHeaders(client, headerList)
         }
-        return client;
+        return client
     }
 
     /**
@@ -161,10 +124,10 @@ public class Clients {
      * @param endpoint the Endpoint to connect to
      * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
      */
-    public static IGenericClient forEndpoint(org.hl7.fhir.r5.model.Endpoint endpoint) {
-        checkNotNull(endpoint, "endpoint is required");
+    @JvmStatic
+    fun forEndpoint(endpoint: org.hl7.fhir.r4.model.Endpoint): IGenericClient {
 
-        return forEndpoint(FhirContext.forR4Cached(), endpoint);
+        return forEndpoint(FhirContext.forR4Cached(), endpoint)
     }
 
     /**
@@ -174,18 +137,58 @@ public class Clients {
      * @param endpoint the Endpoint to connect to
      * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
      */
-    public static IGenericClient forEndpoint(FhirContext fhirContext, org.hl7.fhir.r5.model.Endpoint endpoint) {
-        checkNotNull(fhirContext);
-        checkNotNull(endpoint);
+    @JvmStatic
+    fun forEndpoint(
+        fhirContext: FhirContext,
+        endpoint: org.hl7.fhir.r4.model.Endpoint,
+    ): IGenericClient {
 
-        IGenericClient client = forUrl(fhirContext, endpoint.getAddress());
+        val client = forUrl(fhirContext, endpoint.getAddress())
         if (endpoint.hasHeader()) {
-            List<String> headerList = endpoint.getHeader().stream()
-                    .map(headerString -> headerString.asStringValue())
-                    .collect(Collectors.toList());
-            registerHeaders(client, headerList);
+            val headerList =
+                endpoint
+                    .getHeader()
+                    .map { headerString -> headerString!!.asStringValue() }
+                    .toMutableList()
+            registerHeaders(client, headerList)
         }
-        return client;
+        return client
+    }
+
+    /**
+     * Creates an IGenericClient for the given Endpoint.
+     *
+     * @param endpoint the Endpoint to connect to
+     * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
+     */
+    @JvmStatic
+    fun forEndpoint(endpoint: org.hl7.fhir.r5.model.Endpoint): IGenericClient {
+        return forEndpoint(FhirContext.forR4Cached(), endpoint)
+    }
+
+    /**
+     * Creates an IGenericClient for the given Endpoint.
+     *
+     * @param fhirContext the FhirContext to use to create the client
+     * @param endpoint the Endpoint to connect to
+     * @return IGenericClient for the given Endpoint, with appropriate header interceptors set up
+     */
+    @JvmStatic
+    fun forEndpoint(
+        fhirContext: FhirContext,
+        endpoint: org.hl7.fhir.r5.model.Endpoint,
+    ): IGenericClient {
+
+        val client = forUrl(fhirContext, endpoint.getAddress())
+        if (endpoint.hasHeader()) {
+            val headerList =
+                endpoint
+                    .getHeader()
+                    .map { headerString -> headerString!!.asStringValue() }
+                    .toMutableList()
+            registerHeaders(client, headerList)
+        }
+        return client
     }
 
     /**
@@ -194,10 +197,10 @@ public class Clients {
      * @param client the client to add headers to
      * @param headers an Array of Strings representing headers to add
      */
-    public static void registerHeaders(IGenericClient client, String... headers) {
-        checkNotNull(client);
+    @JvmStatic
+    fun registerHeaders(client: IGenericClient, vararg headers: String?) {
 
-        registerHeaders(client, Arrays.asList(headers));
+        registerHeaders(client, mutableListOf(*headers))
     }
 
     /**
@@ -206,14 +209,13 @@ public class Clients {
      * @param client the client to add headers to
      * @param headerList a List of Strings representing headers to add
      */
-    public static void registerHeaders(IGenericClient client, List<String> headerList) {
-        checkNotNull(client);
-        checkNotNull(headerList);
+    fun registerHeaders(client: IGenericClient, headerList: MutableList<String?>) {
 
-        Map<String, String> headerMap = setupHeaderMap(headerList);
-        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-            IClientInterceptor headInterceptor = new HeaderInjectionInterceptor(entry.getKey(), entry.getValue());
-            client.registerInterceptor(headInterceptor);
+        val headerMap = setupHeaderMap(headerList)
+        for (entry in headerMap.entries) {
+            val headInterceptor: IClientInterceptor =
+                HeaderInjectionInterceptor(entry.key, entry.value)
+            client.registerInterceptor(headInterceptor)
         }
     }
 
@@ -225,12 +227,13 @@ public class Clients {
      * @param username the username
      * @param password the password
      */
-    public static void registerBasicAuth(IGenericClient client, String username, String password) {
-        checkNotNull(client, "client is required");
+    @JvmStatic
+    fun registerBasicAuth(client: IGenericClient?, username: String?, password: String?) {
+        Preconditions.checkNotNull<IGenericClient?>(client, "client is required")
 
         if (username != null) {
-            BasicAuthInterceptor authInterceptor = new BasicAuthInterceptor(username, password);
-            client.registerInterceptor(authInterceptor);
+            val authInterceptor = BasicAuthInterceptor(username, password)
+            client!!.registerInterceptor(authInterceptor)
         }
     }
 
@@ -240,27 +243,36 @@ public class Clients {
      * @param client the client to register BearerToken authentication on
      * @param token the bearer token to register
      */
-    public static void registerBearerTokenAuth(IGenericClient client, String token) {
-        checkNotNull(client, "client is required");
+    fun registerBearerTokenAuth(client: IGenericClient?, token: String?) {
+        Preconditions.checkNotNull<IGenericClient?>(client, "client is required")
 
         if (token != null) {
-            BearerTokenAuthInterceptor authInterceptor = new BearerTokenAuthInterceptor(token);
-            client.registerInterceptor(authInterceptor);
+            val authInterceptor = BearerTokenAuthInterceptor(token)
+            client!!.registerInterceptor(authInterceptor)
         }
     }
 
-    public static void registerAdditionalRequestHeadersAuth(IGenericClient client, String username, String apiKey) {
-        checkNotNull(client, "client is required");
+    @JvmStatic
+    fun registerAdditionalRequestHeadersAuth(
+        client: IGenericClient?,
+        username: String?,
+        apiKey: String?,
+    ) {
+        Preconditions.checkNotNull<IGenericClient?>(client, "client is required")
 
         if (username != null && apiKey != null) {
-            String authString = StringUtils.join(
+            val authString =
+                StringUtils.join<String?>(
                     "Basic ",
                     Base64.getEncoder()
-                            .encodeToString(
-                                    StringUtils.join(username, ":", apiKey).getBytes(StandardCharsets.UTF_8)));
-            AdditionalRequestHeadersInterceptor authInterceptor = new AdditionalRequestHeadersInterceptor();
-            authInterceptor.addHeaderValue("Authorization", authString);
-            client.registerInterceptor(authInterceptor);
+                        .encodeToString(
+                            StringUtils.join<String?>(username, ":", apiKey)
+                                .toByteArray(StandardCharsets.UTF_8)
+                        ),
+                )
+            val authInterceptor = AdditionalRequestHeadersInterceptor()
+            authInterceptor.addHeaderValue("Authorization", authString)
+            client!!.registerInterceptor(authInterceptor)
         }
     }
 
@@ -271,27 +283,24 @@ public class Clients {
      * @param headerList a List of Strings representing headers to create
      * @return key-value pairs of headers
      */
-    static Map<String, String> setupHeaderMap(List<String> headerList) {
-        checkNotNull(headerList, "headerList is required");
+    fun setupHeaderMap(headerList: MutableList<String?>): MutableMap<String?, String?> {
 
-        Map<String, String> headerMap = new HashMap<String, String>();
-        String leftAuth = null;
-        String rightAuth = null;
-        if (headerList.size() < 1 || headerList.isEmpty()) {
-            leftAuth = null;
-            rightAuth = null;
-            headerMap.put(leftAuth, rightAuth);
+        val headerMap = mutableMapOf<String?, String?>()
+        var leftAuth: String? = null
+        var rightAuth: String? = null
+        if (headerList.isEmpty()) {
+            leftAuth = null
+            rightAuth = null
+            headerMap[leftAuth] = rightAuth
         } else {
-            for (String header : headerList) {
-                if (!header.contains(":")) {
-                    throw new IllegalArgumentException("Endpoint header must contain \":\" .");
-                }
-                String[] authSplit = header.split(":");
-                leftAuth = authSplit[0];
-                rightAuth = authSplit[1];
-                headerMap.put(leftAuth, rightAuth);
+            for (header in headerList) {
+                require(header!!.contains(":")) { "Endpoint header must contain \":\" ." }
+                val authSplit = header.split(":")
+                leftAuth = authSplit[0]
+                rightAuth = authSplit[1]
+                headerMap[leftAuth] = rightAuth
             }
         }
-        return headerMap;
+        return headerMap
     }
 }

@@ -1,146 +1,124 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
+class CompositionSectionComponentBuilder<T : IBaseBackboneElement> :
+    BaseBackboneElementBuilder<CompositionSectionComponentBuilder<T>, T> {
+    private var title: String? = null
+    private var focus: String? = null
+    private var entries: MutableList<String?>? = null
+    private var text: NarrativeSettings? = null
 
-public class CompositionSectionComponentBuilder<T extends IBaseBackboneElement>
-        extends BaseBackboneElementBuilder<CompositionSectionComponentBuilder<T>, T> {
+    constructor(resourceClass: Class<T>) : super(resourceClass)
 
-    private String title;
-    private String focus;
-    private List<String> entries;
-    private NarrativeSettings text;
+    constructor(resourceClass: Class<T>, id: String) : super(resourceClass, id)
 
-    public CompositionSectionComponentBuilder(Class<T> resourceClass) {
-        super(resourceClass);
+    constructor(
+        resourceClass: Class<T>,
+        id: String,
+        focus: String,
+        entry: String,
+    ) : this(resourceClass, id) {
+
+        this.focus = focus
+        addEntry(entry)
     }
 
-    public CompositionSectionComponentBuilder(Class<T> resourceClass, String id) {
-        super(resourceClass, id);
-    }
-
-    public CompositionSectionComponentBuilder(Class<T> resourceClass, String id, String focus, String entry) {
-        this(resourceClass, id);
-        checkNotNull(focus);
-        checkNotNull(entry);
-
-        this.focus = focus;
-        addEntry(entry);
-    }
-
-    private void addEntry(String entry) {
+    private fun addEntry(entry: String?) {
         if (this.entries == null) {
-            this.entries = new ArrayList<>();
+            this.entries = mutableListOf()
         }
 
-        this.entries.add(entry);
+        this.entries!!.add(entry)
     }
 
-    private List<String> getEntries() {
+    private fun getEntries(): MutableList<String?> {
         if (entries == null) {
-            return Collections.emptyList();
+            return mutableListOf()
         }
 
-        return entries;
+        return entries!!
     }
 
-    public CompositionSectionComponentBuilder<T> withTitle(String title) {
-        checkNotNull(title);
+    fun withTitle(title: String): CompositionSectionComponentBuilder<T> {
 
-        this.title = title;
+        this.title = title
 
-        return this;
+        return this
     }
 
-    public CompositionSectionComponentBuilder<T> withFocus(String focus) {
-        checkNotNull(focus);
+    fun withFocus(focus: String): CompositionSectionComponentBuilder<T> {
 
-        this.focus = focus;
+        this.focus = focus
 
-        return this;
+        return this
     }
 
-    public CompositionSectionComponentBuilder<T> withEntry(String entry) {
-        checkNotNull(entry);
+    fun withEntry(entry: String): CompositionSectionComponentBuilder<T> {
 
-        addEntry(entry);
+        addEntry(entry)
 
-        return this;
+        return this
     }
 
-    public CompositionSectionComponentBuilder<T> withText(NarrativeSettings text) {
-        checkNotNull(text);
+    fun withText(text: NarrativeSettings): CompositionSectionComponentBuilder<T> {
 
-        this.text = text;
+        this.text = text
 
-        return this;
+        return this
     }
 
-    @Override
-    public T build() {
-        checkNotNull(focus);
-        checkNotNull(entries);
-        checkArgument(!entries.isEmpty());
+    override fun build(): T {
+        requireNotNull(focus)
+        requireNotNull(entries)
+        require(entries!!.isNotEmpty())
 
-        return super.build();
+        return super.build()
     }
 
-    @Override
-    protected void initializeDstu3(T resource) {
-        super.initializeDstu3(resource);
+    override fun initializeDstu3(resource: T?) {
+        super.initializeDstu3(resource)
 
-        org.hl7.fhir.dstu3.model.Composition.SectionComponent section =
-                (org.hl7.fhir.dstu3.model.Composition.SectionComponent) resource;
+        val section = resource as org.hl7.fhir.dstu3.model.Composition.SectionComponent
 
-        section.setTitle(title).setId(getId());
-        getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.dstu3.model.Reference(entry)));
+        section.setTitle(title).setId(this.id)
+        getEntries().forEach { entry ->
+            section.addEntry(org.hl7.fhir.dstu3.model.Reference(entry))
+        }
         if (text != null) {
-            org.hl7.fhir.dstu3.model.Narrative narrative = new org.hl7.fhir.dstu3.model.Narrative();
-            narrative.setStatusAsString(text.getStatus());
-            narrative.setDivAsString(text.getText());
-            section.setText(narrative);
+            val narrative = org.hl7.fhir.dstu3.model.Narrative()
+            narrative.setStatusAsString(text!!.status)
+            narrative.setDivAsString(text!!.text)
+            section.setText(narrative)
         }
         // no focus
     }
 
-    @Override
-    protected void initializeR4(T resource) {
-        super.initializeR4(resource);
-        org.hl7.fhir.r4.model.Composition.SectionComponent section =
-                (org.hl7.fhir.r4.model.Composition.SectionComponent) resource;
+    override fun initializeR4(resource: T?) {
+        super.initializeR4(resource)
+        val section = resource as org.hl7.fhir.r4.model.Composition.SectionComponent
 
-        section.setFocus(new org.hl7.fhir.r4.model.Reference(focus))
-                .setTitle(title)
-                .setId(getId());
-        getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.r4.model.Reference(entry)));
+        section.setFocus(org.hl7.fhir.r4.model.Reference(focus)).setTitle(title).setId(this.id)
+        getEntries().forEach { entry -> section.addEntry(org.hl7.fhir.r4.model.Reference(entry)) }
         if (text != null) {
-            org.hl7.fhir.r4.model.Narrative narrative = new org.hl7.fhir.r4.model.Narrative();
-            narrative.setStatusAsString(text.getStatus());
-            narrative.setDivAsString(text.getText());
-            section.setText(narrative);
+            val narrative = org.hl7.fhir.r4.model.Narrative()
+            narrative.setStatusAsString(text!!.status)
+            narrative.setDivAsString(text!!.text)
+            section.setText(narrative)
         }
     }
 
-    @Override
-    protected void initializeR5(T resource) {
-        super.initializeR5(resource);
-        org.hl7.fhir.r5.model.Composition.SectionComponent section =
-                (org.hl7.fhir.r5.model.Composition.SectionComponent) resource;
+    override fun initializeR5(resource: T?) {
+        super.initializeR5(resource)
+        val section = resource as org.hl7.fhir.r5.model.Composition.SectionComponent
 
-        section.setFocus(new org.hl7.fhir.r5.model.Reference(focus))
-                .setTitle(title)
-                .setId(getId());
-        getEntries().forEach(entry -> section.addEntry(new org.hl7.fhir.r5.model.Reference(entry)));
+        section.setFocus(org.hl7.fhir.r5.model.Reference(focus)).setTitle(title).setId(this.id)
+        getEntries().forEach { entry -> section.addEntry(org.hl7.fhir.r5.model.Reference(entry)) }
         if (text != null) {
-            org.hl7.fhir.r5.model.Narrative narrative = new org.hl7.fhir.r5.model.Narrative();
-            narrative.setStatusAsString(text.getStatus());
-            narrative.setDivAsString(text.getText());
-            section.setText(narrative);
+            val narrative = org.hl7.fhir.r5.model.Narrative()
+            narrative.setStatusAsString(text!!.status)
+            narrative.setDivAsString(text!!.text)
+            section.setText(narrative)
         }
     }
 }

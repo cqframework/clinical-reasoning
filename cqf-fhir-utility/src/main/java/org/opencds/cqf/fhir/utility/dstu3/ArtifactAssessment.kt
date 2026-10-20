@@ -1,1537 +1,1486 @@
-package org.opencds.cqf.fhir.utility.dstu3;
+package org.opencds.cqf.fhir.utility.dstu3
 
-import ca.uhn.fhir.model.api.annotation.DatatypeDef;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.Basic;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Configuration;
-import org.hl7.fhir.dstu3.model.DateTimeType;
-import org.hl7.fhir.dstu3.model.DateType;
-import org.hl7.fhir.dstu3.model.EnumFactory;
-import org.hl7.fhir.dstu3.model.Enumeration;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.MarkdownType;
-import org.hl7.fhir.dstu3.model.PrimitiveType;
-import org.hl7.fhir.dstu3.model.Quantity;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.Type;
-import org.hl7.fhir.dstu3.model.UriType;
-import org.hl7.fhir.exceptions.FHIRException;
+import ca.uhn.fhir.model.api.annotation.Binding
+import ca.uhn.fhir.model.api.annotation.DatatypeDef
+import ca.uhn.fhir.model.api.annotation.ResourceDef
+import java.util.*
+import java.util.stream.Collectors
+import org.apache.commons.lang3.StringUtils
+import org.hl7.fhir.dstu3.model.*
+import org.hl7.fhir.dstu3.model.Enumeration
+import org.hl7.fhir.exceptions.FHIRException
 
-@SuppressWarnings({"squid:S110", "squid:S1192"})
 @ResourceDef(
-        id = "ArtifactAssessment",
-        profile = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessment")
-public class ArtifactAssessment extends Basic {
-    public enum ArtifactAssessmentContentInformationType {
-        /**
-         * A comment on the artifact
-         */
+    id = "ArtifactAssessment",
+    profile = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessment",
+)
+class ArtifactAssessment : Basic {
+    enum class ArtifactAssessmentContentInformationType {
+        /** A comment on the artifact */
         COMMENT,
-        /**
-         * A classifier of the artifact
-         */
+
+        /** A classifier of the artifact */
         CLASSIFIER,
-        /**
-         * A rating of the artifact
-         */
+
+        /** A rating of the artifact */
         RATING,
-        /**
-         * A container for multiple components
-         */
+
+        /** A container for multiple components */
         CONTAINER,
-        /**
-         * A response to a comment
-         */
+
+        /** A response to a comment */
         RESPONSE,
-        /**
-         * A change request for the artifact
-         */
+
+        /** A change request for the artifact */
         CHANGEREQUEST,
-        /**
-         * added to help the parsers with the generic types
-         */
+
+        /** added to help the parsers with the generic types */
         NULL;
 
-        public static ArtifactAssessmentContentInformationType fromCode(String codeString) throws FHIRException {
-            if (StringUtils.isBlank(codeString)) {
-                return null;
-            }
-            switch (codeString) {
-                case "comment":
-                    return COMMENT;
-                case "classifier":
-                    return CLASSIFIER;
-                case "rating":
-                    return RATING;
-                case "container":
-                    return CONTAINER;
-                case "response":
-                    return RESPONSE;
-                case "change-request":
-                    return CHANGEREQUEST;
-
-                default:
-                    if (Configuration.isAcceptInvalidEnums()) {
-                        return null;
-                    } else {
-                        throw new FHIRException("Unknown ArtifactAssessment '" + codeString + "'");
-                    }
+        fun toCode(): String? {
+            when (this) {
+                COMMENT -> return "comment"
+                CLASSIFIER -> return "classifier"
+                RATING -> return "rating"
+                CONTAINER -> return "container"
+                RESPONSE -> return "response"
+                CHANGEREQUEST -> return "change-request"
+                NULL -> return null
+                else -> return "?"
             }
         }
 
-        public String toCode() {
-            switch (this) {
-                case COMMENT:
-                    return "comment";
-                case CLASSIFIER:
-                    return "classifier";
-                case RATING:
-                    return "rating";
-                case CONTAINER:
-                    return "container";
-                case RESPONSE:
-                    return "response";
-                case CHANGEREQUEST:
-                    return "change-request";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        val system: String?
+            get() {
+                when (this) {
+                    COMMENT,
+                    CLASSIFIER,
+                    RATING,
+                    CONTAINER,
+                    RESPONSE,
+                    CHANGEREQUEST ->
+                        return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type"
+                    NULL -> return null
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getSystem() {
-            switch (this) {
-                case COMMENT, CLASSIFIER, RATING, CONTAINER, RESPONSE, CHANGEREQUEST:
-                    return "http://hl7.org/fhir/ValueSet/artifactassessment-information-type";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        val definition: String?
+            get() {
+                when (this) {
+                    COMMENT -> return "A comment on the artifact."
+                    CLASSIFIER -> return "A classifier of the artifact."
+                    RATING -> return "A rating  of the artifact."
+                    CONTAINER -> return "A container for multiple components."
+                    RESPONSE -> return "A response to a comment."
+                    CHANGEREQUEST -> return "A change request for the artifact."
+                    NULL -> return null
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDefinition() {
-            switch (this) {
-                case COMMENT:
-                    return "A comment on the artifact.";
-                case CLASSIFIER:
-                    return "A classifier of the artifact.";
-                case RATING:
-                    return "A rating  of the artifact.";
-                case CONTAINER:
-                    return "A container for multiple components.";
-                case RESPONSE:
-                    return "A response to a comment.";
-                case CHANGEREQUEST:
-                    return "A change request for the artifact.";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        val display: String?
+            get() {
+                when (this) {
+                    COMMENT -> return "Comment"
+                    CLASSIFIER -> return "Classifier"
+                    RATING -> return "Rating"
+                    CONTAINER -> return "Container"
+                    RESPONSE -> return "Response"
+                    CHANGEREQUEST -> return "Change Request"
+                    NULL -> return null
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDisplay() {
-            switch (this) {
-                case COMMENT:
-                    return "Comment";
-                case CLASSIFIER:
-                    return "Classifier";
-                case RATING:
-                    return "Rating";
-                case CONTAINER:
-                    return "Container";
-                case RESPONSE:
-                    return "Response";
-                case CHANGEREQUEST:
-                    return "Change Request";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        companion object {
+            @JvmStatic
+            @Throws(FHIRException::class)
+            fun fromCode(codeString: String?): ArtifactAssessmentContentInformationType? {
+                if (StringUtils.isBlank(codeString)) {
+                    return null
+                }
+                when (codeString) {
+                    "comment" -> return COMMENT
+                    "classifier" -> return CLASSIFIER
+                    "rating" -> return RATING
+                    "container" -> return CONTAINER
+                    "response" -> return RESPONSE
+                    "change-request" -> return CHANGEREQUEST
+
+                    else ->
+                        if (Configuration.isAcceptInvalidEnums()) {
+                            return null
+                        } else {
+                            throw FHIRException("Unknown ArtifactAssessment '" + codeString + "'")
+                        }
+                }
             }
         }
     }
 
-    public static class ArtifactAssessmentContentInformationTypeEnumFactory
-            implements EnumFactory<ArtifactAssessmentContentInformationType> {
-        public ArtifactAssessmentContentInformationType fromCode(String codeString) throws IllegalArgumentException {
-            return ArtifactAssessmentContentInformationType.fromCode(codeString);
+    class ArtifactAssessmentContentInformationTypeEnumFactory :
+        EnumFactory<ArtifactAssessmentContentInformationType> {
+        @Throws(IllegalArgumentException::class)
+        override fun fromCode(codeString: String?): ArtifactAssessmentContentInformationType? {
+            return ArtifactAssessmentContentInformationType.Companion.fromCode(codeString)
         }
 
-        public Enumeration<ArtifactAssessmentContentInformationType> fromType(Base code) throws FHIRException {
-            if (code == null) return null;
-            if (code.isEmpty()) return new Enumeration<>(this);
-            return new Enumeration<>(
-                    this, ArtifactAssessmentContentInformationType.fromCode(((PrimitiveType<?>) code).asStringValue()));
+        @Throws(FHIRException::class)
+        fun fromType(code: Base?): Enumeration<ArtifactAssessmentContentInformationType?>? {
+            if (code == null) return null
+            if (code.isEmpty()) return Enumeration<ArtifactAssessmentContentInformationType?>(this)
+            return Enumeration<ArtifactAssessmentContentInformationType?>(
+                this,
+                ArtifactAssessmentContentInformationType.Companion.fromCode(
+                    (code as PrimitiveType<*>).asStringValue()
+                ),
+            )
         }
 
-        public String toCode(ArtifactAssessmentContentInformationType code) {
-            return code.toCode();
+        override fun toCode(code: ArtifactAssessmentContentInformationType): String? {
+            return code.toCode()
         }
 
-        public String toSystem(ArtifactAssessmentContentInformationType code) {
-            return code.getSystem();
+        override fun toSystem(code: ArtifactAssessmentContentInformationType): String? {
+            return code.system
         }
     }
 
-    public enum ArtifactAssessmentContentClassifier {
-        /**
-         * High quality evidence.
-         */
+    enum class ArtifactAssessmentContentClassifier {
+        /** High quality evidence. */
         HIGH,
-        /**
-         * Moderate quality evidence.
-         */
+
+        /** Moderate quality evidence. */
         MODERATE,
-        /**
-         * Low quality evidence.
-         */
+
+        /** Low quality evidence. */
         LOW,
-        /**
-         * Very low quality evidence
-         */
+
+        /** Very low quality evidence */
         VERY_LOW,
-        /**
-         * No serious concern.
-         */
+
+        /** No serious concern. */
         NO_CONCERN,
-        /**
-         * Serious concern.
-         */
+
+        /** Serious concern. */
         SERIOUS_CONCERN,
-        /**
-         * Very serious concern.
-         */
+
+        /** Very serious concern. */
         VERY_SERIOUS_CONCERN,
-        /**
-         * Extremely serious concern.
-         */
+
+        /** Extremely serious concern. */
         EXTREMELY_SERIOUS_CONCERN,
-        /**
-         * Possible reason for increasing quality rating was checked and found to be present.
-         */
+
+        /** Possible reason for increasing quality rating was checked and found to be present. */
         PRESENT,
-        /**
-         * Possible reason for increasing quality rating was checked and found to be absent.
-         */
+
+        /** Possible reason for increasing quality rating was checked and found to be absent. */
         ABSENT,
-        /**
-         * No change to quality rating.
-         */
+
+        /** No change to quality rating. */
         NO_CHANGE,
-        /**
-         * Reduce quality rating by 1.
-         */
+
+        /** Reduce quality rating by 1. */
         DOWNCODE1,
-        /**
-         * Reduce quality rating by 2.
-         */
+
+        /** Reduce quality rating by 2. */
         DOWNCODE2,
-        /**
-         * Reduce quality rating by 3.
-         */
+
+        /** Reduce quality rating by 3. */
         DOWNCODE3,
-        /**
-         * Increase quality rating by 1.
-         */
+
+        /** Increase quality rating by 1. */
         UPCODE1,
-        /**
-         * Increase quality rating by 2
-         */
+
+        /** Increase quality rating by 2 */
         UPCODE2,
-        /**
-         * added to help the parsers with the generic types
-         */
+
+        /** added to help the parsers with the generic types */
         NULL;
 
-        public static ArtifactAssessmentContentClassifier fromCode(String codeString) throws FHIRException {
-            if (StringUtils.isBlank(codeString)) {
-                return null;
-            }
-            switch (codeString) {
-                case "high":
-                    return HIGH;
-                case "moderate":
-                    return MODERATE;
-                case "low":
-                    return LOW;
-                case "very-low":
-                    return VERY_LOW;
-                case "no-concern":
-                    return NO_CONCERN;
-                case "serious-concern":
-                    return SERIOUS_CONCERN;
-                case "very-serious-concern":
-                    return VERY_SERIOUS_CONCERN;
-                case "extremely-serious-concern":
-                    return EXTREMELY_SERIOUS_CONCERN;
-                case "present":
-                    return PRESENT;
-                case "absent":
-                    return ABSENT;
-                case "no-change":
-                    return NO_CHANGE;
-                case "downcode1":
-                    return DOWNCODE1;
-                case "downcode2":
-                    return DOWNCODE2;
-                case "downcode3":
-                    return DOWNCODE3;
-                case "upcode1":
-                    return UPCODE1;
-                case "upcode2":
-                    return UPCODE2;
-                default:
-                    if (Configuration.isAcceptInvalidEnums()) {
-                        return null;
-                    } else {
-                        throw new FHIRException("Unknown ArtifactAssessment '" + codeString + "'");
-                    }
+        fun toCode(): String? {
+            when (this) {
+                HIGH -> return "high"
+                MODERATE -> return "moderate"
+                LOW -> return "low"
+                VERY_LOW -> return "very-low"
+                NO_CONCERN -> return "no-concern"
+                SERIOUS_CONCERN -> return "serious-concern"
+                VERY_SERIOUS_CONCERN -> return "very-serious-concern"
+                EXTREMELY_SERIOUS_CONCERN -> return "extremely-serious-concern"
+                PRESENT -> return "present"
+                ABSENT -> return "absent"
+                NO_CHANGE -> return "no-change"
+                DOWNCODE1 -> return "downcode1"
+                DOWNCODE2 -> return "downcode2"
+                DOWNCODE3 -> return "downcode3"
+                UPCODE1 -> return "upcode1"
+                UPCODE2 -> return "upcode2"
+                NULL -> return null
+                else -> return "?"
             }
         }
 
-        public String toCode() {
-            switch (this) {
-                case HIGH:
-                    return "high";
-                case MODERATE:
-                    return "moderate";
-                case LOW:
-                    return "low";
-                case VERY_LOW:
-                    return "very-low";
-                case NO_CONCERN:
-                    return "no-concern";
-                case SERIOUS_CONCERN:
-                    return "serious-concern";
-                case VERY_SERIOUS_CONCERN:
-                    return "very-serious-concern";
-                case EXTREMELY_SERIOUS_CONCERN:
-                    return "extremely-serious-concern";
-                case PRESENT:
-                    return "present";
-                case ABSENT:
-                    return "absent";
-                case NO_CHANGE:
-                    return "no-change";
-                case DOWNCODE1:
-                    return "downcode1";
-                case DOWNCODE2:
-                    return "downcode2";
-                case DOWNCODE3:
-                    return "downcode3";
-                case UPCODE1:
-                    return "upcode1";
-                case UPCODE2:
-                    return "upcode2";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        val system: String?
+            get() {
+                when (this) {
+                    HIGH,
+                    MODERATE,
+                    LOW,
+                    VERY_LOW,
+                    NO_CONCERN,
+                    SERIOUS_CONCERN,
+                    VERY_SERIOUS_CONCERN,
+                    EXTREMELY_SERIOUS_CONCERN,
+                    PRESENT,
+                    ABSENT,
+                    NO_CHANGE,
+                    DOWNCODE1,
+                    DOWNCODE2,
+                    DOWNCODE3,
+                    UPCODE1,
+                    UPCODE2 -> return "http://terminology.hl7.org/CodeSystem/certainty-rating"
+                    NULL -> return null
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getSystem() {
-            switch (this) {
-                case HIGH,
-                        MODERATE,
-                        LOW,
-                        VERY_LOW,
-                        NO_CONCERN,
-                        SERIOUS_CONCERN,
-                        VERY_SERIOUS_CONCERN,
-                        EXTREMELY_SERIOUS_CONCERN,
-                        PRESENT,
-                        ABSENT,
-                        NO_CHANGE,
-                        DOWNCODE1,
-                        DOWNCODE2,
-                        DOWNCODE3,
-                        UPCODE1,
-                        UPCODE2:
-                    return "http://terminology.hl7.org/CodeSystem/certainty-rating";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        val definition: String?
+            get() {
+                when (this) {
+                    HIGH -> return "High quality evidence."
+                    MODERATE -> return "Moderate quality evidence."
+                    LOW -> return "Low quality evidence."
+                    VERY_LOW -> return "Very low quality evidence."
+                    NO_CONCERN -> return "No serious concern."
+                    SERIOUS_CONCERN -> return "Serious concern."
+                    VERY_SERIOUS_CONCERN -> return "Very serious concern."
+                    EXTREMELY_SERIOUS_CONCERN -> return "Extremely serious concern."
+                    PRESENT ->
+                        return "Possible reason for increasing quality rating was checked and found to be present."
+                    ABSENT ->
+                        return "Possible reason for increasing quality rating was checked and found to be absent."
+                    NO_CHANGE -> return "No change to quality rating."
+                    DOWNCODE1 -> return "Reduce quality rating by 1."
+                    DOWNCODE2 -> return "Reduce quality rating by 2."
+                    DOWNCODE3 -> return "Reduce quality rating by 3."
+                    UPCODE1 -> return "Increase quality rating by 1."
+                    UPCODE2 -> return "Increase quality rating by 2."
+                    NULL -> return null
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDefinition() {
-            switch (this) {
-                case HIGH:
-                    return "High quality evidence.";
-                case MODERATE:
-                    return "Moderate quality evidence.";
-                case LOW:
-                    return "Low quality evidence.";
-                case VERY_LOW:
-                    return "Very low quality evidence.";
-                case NO_CONCERN:
-                    return "No serious concern.";
-                case SERIOUS_CONCERN:
-                    return "Serious concern.";
-                case VERY_SERIOUS_CONCERN:
-                    return "Very serious concern.";
-                case EXTREMELY_SERIOUS_CONCERN:
-                    return "Extremely serious concern.";
-                case PRESENT:
-                    return "Possible reason for increasing quality rating was checked and found to be present.";
-                case ABSENT:
-                    return "Possible reason for increasing quality rating was checked and found to be absent.";
-                case NO_CHANGE:
-                    return "No change to quality rating.";
-                case DOWNCODE1:
-                    return "Reduce quality rating by 1.";
-                case DOWNCODE2:
-                    return "Reduce quality rating by 2.";
-                case DOWNCODE3:
-                    return "Reduce quality rating by 3.";
-                case UPCODE1:
-                    return "Increase quality rating by 1.";
-                case UPCODE2:
-                    return "Increase quality rating by 2.";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        val display: String?
+            get() {
+                when (this) {
+                    HIGH -> return "High quality"
+                    MODERATE -> return "Moderate quality"
+                    LOW -> return "Low quality"
+                    VERY_LOW -> return "Very low quality"
+                    NO_CONCERN -> return "No serious concern"
+                    SERIOUS_CONCERN -> return "Serious concern"
+                    VERY_SERIOUS_CONCERN -> return "Very serious concern"
+                    EXTREMELY_SERIOUS_CONCERN -> return "Extremely serious concern"
+                    PRESENT -> return "Present"
+                    ABSENT -> return "Absent"
+                    NO_CHANGE -> return "No change to rating"
+                    DOWNCODE1 -> return "Reduce rating: -1"
+                    DOWNCODE2 -> return "Reduce rating: -2"
+                    DOWNCODE3 -> return "Reduce rating: -3"
+                    UPCODE1 -> return "Increase rating: +1"
+                    UPCODE2 -> return "Increase rating: +2"
+                    NULL -> return null
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDisplay() {
-            switch (this) {
-                case HIGH:
-                    return "High quality";
-                case MODERATE:
-                    return "Moderate quality";
-                case LOW:
-                    return "Low quality";
-                case VERY_LOW:
-                    return "Very low quality";
-                case NO_CONCERN:
-                    return "No serious concern";
-                case SERIOUS_CONCERN:
-                    return "Serious concern";
-                case VERY_SERIOUS_CONCERN:
-                    return "Very serious concern";
-                case EXTREMELY_SERIOUS_CONCERN:
-                    return "Extremely serious concern";
-                case PRESENT:
-                    return "Present";
-                case ABSENT:
-                    return "Absent";
-                case NO_CHANGE:
-                    return "No change to rating";
-                case DOWNCODE1:
-                    return "Reduce rating: -1";
-                case DOWNCODE2:
-                    return "Reduce rating: -2";
-                case DOWNCODE3:
-                    return "Reduce rating: -3";
-                case UPCODE1:
-                    return "Increase rating: +1";
-                case UPCODE2:
-                    return "Increase rating: +2";
-                case NULL:
-                    return null;
-                default:
-                    return "?";
+        companion object {
+            @JvmStatic
+            @Throws(FHIRException::class)
+            fun fromCode(codeString: String?): ArtifactAssessmentContentClassifier? {
+                if (StringUtils.isBlank(codeString)) {
+                    return null
+                }
+                when (codeString) {
+                    "high" -> return HIGH
+                    "moderate" -> return MODERATE
+                    "low" -> return LOW
+                    "very-low" -> return VERY_LOW
+                    "no-concern" -> return NO_CONCERN
+                    "serious-concern" -> return SERIOUS_CONCERN
+                    "very-serious-concern" -> return VERY_SERIOUS_CONCERN
+                    "extremely-serious-concern" -> return EXTREMELY_SERIOUS_CONCERN
+                    "present" -> return PRESENT
+                    "absent" -> return ABSENT
+                    "no-change" -> return NO_CHANGE
+                    "downcode1" -> return DOWNCODE1
+                    "downcode2" -> return DOWNCODE2
+                    "downcode3" -> return DOWNCODE3
+                    "upcode1" -> return UPCODE1
+                    "upcode2" -> return UPCODE2
+                    else ->
+                        if (Configuration.isAcceptInvalidEnums()) {
+                            return null
+                        } else {
+                            throw FHIRException("Unknown ArtifactAssessment '" + codeString + "'")
+                        }
+                }
             }
         }
     }
 
-    public static class ArtifactAssessmentContentClassifierEnumFactory
-            implements EnumFactory<ArtifactAssessmentContentClassifier> {
-        public ArtifactAssessmentContentClassifier fromCode(String codeString) throws IllegalArgumentException {
-            return ArtifactAssessmentContentClassifier.fromCode(codeString);
+    class ArtifactAssessmentContentClassifierEnumFactory :
+        EnumFactory<ArtifactAssessmentContentClassifier> {
+        @Throws(IllegalArgumentException::class)
+        override fun fromCode(codeString: String?): ArtifactAssessmentContentClassifier? {
+            return ArtifactAssessmentContentClassifier.Companion.fromCode(codeString)
         }
 
-        public Enumeration<ArtifactAssessmentContentClassifier> fromType(Base code) throws FHIRException {
+        @Throws(FHIRException::class)
+        fun fromType(code: Base?): Enumeration<ArtifactAssessmentContentClassifier?>? {
             if (code == null) {
-                return null;
+                return null
             }
             if (code.isEmpty()) {
-                return new Enumeration<>(this);
+                return Enumeration<ArtifactAssessmentContentClassifier?>(this)
             }
-            return new Enumeration<>(
-                    this, ArtifactAssessmentContentClassifier.fromCode(((PrimitiveType<?>) code).asStringValue()));
+            return Enumeration<ArtifactAssessmentContentClassifier?>(
+                this,
+                ArtifactAssessmentContentClassifier.Companion.fromCode(
+                    (code as PrimitiveType<*>).asStringValue()
+                ),
+            )
         }
 
-        public String toCode(ArtifactAssessmentContentClassifier code) {
-            return code.toCode();
+        override fun toCode(code: ArtifactAssessmentContentClassifier): String? {
+            return code.toCode()
         }
 
-        public String toSystem(ArtifactAssessmentContentClassifier code) {
-            return code.getSystem();
+        override fun toSystem(code: ArtifactAssessmentContentClassifier): String? {
+            return code.system
         }
     }
 
-    public enum ArtifactAssessmentContentType {}
+    enum class ArtifactAssessmentContentType
 
-    public enum ArtifactAssessmentWorkflowStatus {
+    enum class ArtifactAssessmentWorkflowStatus {
         /**
-         * The comment has been submitted, but the responsible party has not yet been determined, or the responsible party has not yet determined the next steps to be taken.
+         * The comment has been submitted, but the responsible party has not yet been determined, or
+         * the responsible party has not yet determined the next steps to be taken.
          */
         SUBMITTED,
+
         /**
-         * The comment has been triaged, meaning the responsible party has been determined and next steps have been identified to address the comment.
+         * The comment has been triaged, meaning the responsible party has been determined and next
+         * steps have been identified to address the comment.
          */
         TRIAGED,
+
         /**
          * The comment is waiting for input from a specific party before next steps can be taken.
          */
         WAITINGFORINPUT,
-        /**
-         * The comment has been resolved and no changes resulted from the resolution
-         */
+
+        /** The comment has been resolved and no changes resulted from the resolution */
         RESOLVEDNOCHANGE,
-        /**
-         * The comment has been resolved and changes are required to address the comment
-         */
+
+        /** The comment has been resolved and changes are required to address the comment */
         RESOLVEDCHANGEREQUIRED,
+
         /**
-         * The comment is acceptable, but resolution of the comment and application of any associated changes have been deferred
+         * The comment is acceptable, but resolution of the comment and application of any
+         * associated changes have been deferred
          */
         DEFERRED,
-        /**
-         * The comment is a duplicate of another comment already received
-         */
+
+        /** The comment is a duplicate of another comment already received */
         DUPLICATE,
-        /**
-         * The comment is resolved and any necessary changes have been applied
-         */
+
+        /** The comment is resolved and any necessary changes have been applied */
         APPLIED,
+
         /**
-         * The necessary changes to the artifact have been published in a new version of the artifact
+         * The necessary changes to the artifact have been published in a new version of the
+         * artifact
          */
         PUBLISHED,
-        /**
-         * added to help the parsers with the generic types
-         */
+
+        /** added to help the parsers with the generic types */
         NULL;
 
-        public static ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws FHIRException {
-            if (StringUtils.isBlank(codeString)) {
-                return null;
-            }
-            switch (codeString) {
-                case "submitted":
-                    return SUBMITTED;
-                case "triaged":
-                    return TRIAGED;
-                case "waiting-for-input":
-                    return WAITINGFORINPUT;
-                case "resolved-no-change":
-                    return RESOLVEDNOCHANGE;
-                case "resolved-change-required":
-                    return RESOLVEDCHANGEREQUIRED;
-                case "deferred":
-                    return DEFERRED;
-                case "duplicate":
-                    return DUPLICATE;
-                case "applied":
-                    return APPLIED;
-                case "published":
-                    return PUBLISHED;
-
-                default:
-                    if (Configuration.isAcceptInvalidEnums()) {
-                        return null;
-                    } else {
-                        throw new FHIRException("Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'");
-                    }
+        fun toCode(): String {
+            when (this) {
+                SUBMITTED -> return "submitted"
+                TRIAGED -> return "triaged"
+                WAITINGFORINPUT -> return "waiting-for-input"
+                RESOLVEDNOCHANGE -> return "resolved-no-change"
+                RESOLVEDCHANGEREQUIRED -> return "resolved-change-required"
+                DEFERRED -> return "deferred"
+                DUPLICATE -> return "duplicate"
+                APPLIED -> return "applied"
+                PUBLISHED -> return "published"
+                else -> return "?"
             }
         }
 
-        public String toCode() {
-            switch (this) {
-                case SUBMITTED:
-                    return "submitted";
-                case TRIAGED:
-                    return "triaged";
-                case WAITINGFORINPUT:
-                    return "waiting-for-input";
-                case RESOLVEDNOCHANGE:
-                    return "resolved-no-change";
-                case RESOLVEDCHANGEREQUIRED:
-                    return "resolved-change-required";
-                case DEFERRED:
-                    return "deferred";
-                case DUPLICATE:
-                    return "duplicate";
-                case APPLIED:
-                    return "applied";
-                case PUBLISHED:
-                    return "published";
-                default:
-                    return "?";
+        val system: String
+            get() {
+                if (this == NULL) {
+                    return "?"
+                } else {
+                    return "http://hl7.org/fhir/artifactassessment-workflow-status"
+                }
             }
-        }
 
-        public String getSystem() {
-            if (this.equals(NULL)) {
-                return "?";
-            } else {
-                return "http://hl7.org/fhir/artifactassessment-workflow-status";
+        val definition: String
+            get() {
+                when (this) {
+                    SUBMITTED ->
+                        return "The comment has been submitted, but the responsible party has not yet been determined, or the responsible party has not yet determined the next steps to be taken."
+                    TRIAGED ->
+                        return "The comment has been triaged, meaning the responsible party has been determined and next steps have been identified to address the comment."
+                    WAITINGFORINPUT ->
+                        return "The comment is waiting for input from a specific party before next steps can be taken."
+                    RESOLVEDNOCHANGE ->
+                        return "The comment has been resolved and no changes resulted from the resolution"
+                    RESOLVEDCHANGEREQUIRED ->
+                        return "The comment has been resolved and changes are required to address the comment"
+                    DEFERRED ->
+                        return "The comment is acceptable, but resolution of the comment and application of any associated changes have been deferred"
+                    DUPLICATE ->
+                        return "The comment is a duplicate of another comment already received"
+                    APPLIED ->
+                        return "The comment is resolved and any necessary changes have been applied"
+                    PUBLISHED ->
+                        return "The necessary changes to the artifact have been published in a new version of the artifact"
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDefinition() {
-            switch (this) {
-                case SUBMITTED:
-                    return "The comment has been submitted, but the responsible party has not yet been determined, or the responsible party has not yet determined the next steps to be taken.";
-                case TRIAGED:
-                    return "The comment has been triaged, meaning the responsible party has been determined and next steps have been identified to address the comment.";
-                case WAITINGFORINPUT:
-                    return "The comment is waiting for input from a specific party before next steps can be taken.";
-                case RESOLVEDNOCHANGE:
-                    return "The comment has been resolved and no changes resulted from the resolution";
-                case RESOLVEDCHANGEREQUIRED:
-                    return "The comment has been resolved and changes are required to address the comment";
-                case DEFERRED:
-                    return "The comment is acceptable, but resolution of the comment and application of any associated changes have been deferred";
-                case DUPLICATE:
-                    return "The comment is a duplicate of another comment already received";
-                case APPLIED:
-                    return "The comment is resolved and any necessary changes have been applied";
-                case PUBLISHED:
-                    return "The necessary changes to the artifact have been published in a new version of the artifact";
-                default:
-                    return "?";
+        val display: String
+            get() {
+                when (this) {
+                    SUBMITTED -> return "Submitted"
+                    TRIAGED -> return "Triaged"
+                    WAITINGFORINPUT -> return "Waiting for Input"
+                    RESOLVEDNOCHANGE -> return "Resolved - No Change"
+                    RESOLVEDCHANGEREQUIRED -> return "Resolved - Change Required"
+                    DEFERRED -> return "Deferred"
+                    DUPLICATE -> return "Duplicate"
+                    APPLIED -> return "Applied"
+                    PUBLISHED -> return "Published"
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDisplay() {
-            switch (this) {
-                case SUBMITTED:
-                    return "Submitted";
-                case TRIAGED:
-                    return "Triaged";
-                case WAITINGFORINPUT:
-                    return "Waiting for Input";
-                case RESOLVEDNOCHANGE:
-                    return "Resolved - No Change";
-                case RESOLVEDCHANGEREQUIRED:
-                    return "Resolved - Change Required";
-                case DEFERRED:
-                    return "Deferred";
-                case DUPLICATE:
-                    return "Duplicate";
-                case APPLIED:
-                    return "Applied";
-                case PUBLISHED:
-                    return "Published";
-                default:
-                    return "?";
+        companion object {
+            @JvmStatic
+            @Throws(FHIRException::class)
+            fun fromCode(codeString: String?): ArtifactAssessmentWorkflowStatus? {
+                if (StringUtils.isBlank(codeString)) {
+                    return null
+                }
+                when (codeString) {
+                    "submitted" -> return SUBMITTED
+                    "triaged" -> return TRIAGED
+                    "waiting-for-input" -> return WAITINGFORINPUT
+                    "resolved-no-change" -> return RESOLVEDNOCHANGE
+                    "resolved-change-required" -> return RESOLVEDCHANGEREQUIRED
+                    "deferred" -> return DEFERRED
+                    "duplicate" -> return DUPLICATE
+                    "applied" -> return APPLIED
+                    "published" -> return PUBLISHED
+
+                    else ->
+                        if (Configuration.isAcceptInvalidEnums()) {
+                            return null
+                        } else {
+                            throw FHIRException(
+                                "Unknown ArtifactAssessmentWorkflowStatus code '" + codeString + "'"
+                            )
+                        }
+                }
             }
         }
     }
 
-    public static class ArtifactAssessmentWorkflowStatusEnumFactory
-            implements EnumFactory<ArtifactAssessmentWorkflowStatus> {
-        public ArtifactAssessmentWorkflowStatus fromCode(String codeString) throws IllegalArgumentException {
-            return ArtifactAssessmentWorkflowStatus.fromCode(codeString);
+    class ArtifactAssessmentWorkflowStatusEnumFactory :
+        EnumFactory<ArtifactAssessmentWorkflowStatus> {
+        @Throws(IllegalArgumentException::class)
+        override fun fromCode(codeString: String?): ArtifactAssessmentWorkflowStatus? {
+            return ArtifactAssessmentWorkflowStatus.Companion.fromCode(codeString)
         }
 
-        public Enumeration<ArtifactAssessmentWorkflowStatus> fromType(Base code) throws FHIRException {
+        @Throws(FHIRException::class)
+        fun fromType(code: Base?): Enumeration<ArtifactAssessmentWorkflowStatus?>? {
             if (code == null) {
-                return null;
+                return null
             }
             if (code.isEmpty()) {
-                return new Enumeration<>(this);
+                return Enumeration<ArtifactAssessmentWorkflowStatus?>(this)
             }
-            return new Enumeration<>(
-                    this, ArtifactAssessmentWorkflowStatus.fromCode(((PrimitiveType<?>) code).asStringValue()));
+            return Enumeration<ArtifactAssessmentWorkflowStatus?>(
+                this,
+                ArtifactAssessmentWorkflowStatus.Companion.fromCode(
+                    (code as PrimitiveType<*>).asStringValue()
+                ),
+            )
         }
 
-        public String toCode(ArtifactAssessmentWorkflowStatus code) {
-            return code.toCode();
+        override fun toCode(code: ArtifactAssessmentWorkflowStatus): String {
+            return code.toCode()
         }
 
-        public String toSystem(ArtifactAssessmentWorkflowStatus code) {
-            return code.getSystem();
+        override fun toSystem(code: ArtifactAssessmentWorkflowStatus): String {
+            return code.system
         }
     }
 
-    public enum ArtifactAssessmentDisposition {
-        /**
-         * The comment is unresolved
-         */
+    enum class ArtifactAssessmentDisposition {
+        /** The comment is unresolved */
         UNRESOLVED,
-        /**
-         * The comment is not persuasive (rejected in full)
-         */
+
+        /** The comment is not persuasive (rejected in full) */
         NOTPERSUASIVE,
-        /**
-         * The comment is persuasive (accepted in full)
-         */
+
+        /** The comment is persuasive (accepted in full) */
         PERSUASIVE,
-        /**
-         * The comment is persuasive with modification (partially accepted)
-         */
+
+        /** The comment is persuasive with modification (partially accepted) */
         PERSUASIVEWITHMODIFICATION,
-        /**
-         * The comment is not persuasive with modification (partially rejected)
-         */
+
+        /** The comment is not persuasive with modification (partially rejected) */
         NOTPERSUASIVEWITHMODIFICATION,
-        /**
-         * added to help the parsers with the generic types
-         */
+
+        /** added to help the parsers with the generic types */
         NULL;
 
-        public static ArtifactAssessmentDisposition fromCode(String codeString) throws FHIRException {
-            if (StringUtils.isBlank(codeString)) {
-                return null;
-            }
-            switch (codeString) {
-                case "unresolved":
-                    return UNRESOLVED;
-                case "not-persuasive":
-                    return NOTPERSUASIVE;
-                case "persuasive":
-                    return PERSUASIVE;
-                case "persuasive-with-modification":
-                    return PERSUASIVEWITHMODIFICATION;
-                case "not-persuasive-with-modification":
-                    return NOTPERSUASIVEWITHMODIFICATION;
-
-                default:
-                    if (Configuration.isAcceptInvalidEnums()) {
-                        return null;
-                    } else {
-                        throw new FHIRException("Unknown ArtifactAssessmentDisposition code '" + codeString + "'");
-                    }
+        fun toCode(): String {
+            when (this) {
+                UNRESOLVED -> return "unresolved"
+                NOTPERSUASIVE -> return "not-persuasive"
+                PERSUASIVE -> return "persuasive"
+                PERSUASIVEWITHMODIFICATION -> return "persuasive-with-modification"
+                NOTPERSUASIVEWITHMODIFICATION -> return "not-persuasive-with-modification"
+                else -> return "?"
             }
         }
 
-        public String toCode() {
-            switch (this) {
-                case UNRESOLVED:
-                    return "unresolved";
-                case NOTPERSUASIVE:
-                    return "not-persuasive";
-                case PERSUASIVE:
-                    return "persuasive";
-                case PERSUASIVEWITHMODIFICATION:
-                    return "persuasive-with-modification";
-                case NOTPERSUASIVEWITHMODIFICATION:
-                    return "not-persuasive-with-modification";
-                default:
-                    return "?";
+        val system: String
+            get() {
+                if (this == NULL) {
+                    return "?"
+                } else {
+                    return "http://hl7.org/fhir/artifactassessment-disposition"
+                }
             }
-        }
 
-        public String getSystem() {
-            if (this.equals(NULL)) {
-                return "?";
-            } else {
-                return "http://hl7.org/fhir/artifactassessment-disposition";
+        val definition: String
+            get() {
+                when (this) {
+                    UNRESOLVED -> return "The comment is unresolved"
+                    NOTPERSUASIVE -> return "The comment is not persuasive (rejected in full)"
+                    PERSUASIVE -> return "The comment is persuasive (accepted in full)"
+                    PERSUASIVEWITHMODIFICATION ->
+                        return "The comment is persuasive with modification (partially accepted)"
+                    NOTPERSUASIVEWITHMODIFICATION ->
+                        return "The comment is not persuasive with modification (partially rejected)"
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDefinition() {
-            switch (this) {
-                case UNRESOLVED:
-                    return "The comment is unresolved";
-                case NOTPERSUASIVE:
-                    return "The comment is not persuasive (rejected in full)";
-                case PERSUASIVE:
-                    return "The comment is persuasive (accepted in full)";
-                case PERSUASIVEWITHMODIFICATION:
-                    return "The comment is persuasive with modification (partially accepted)";
-                case NOTPERSUASIVEWITHMODIFICATION:
-                    return "The comment is not persuasive with modification (partially rejected)";
-                default:
-                    return "?";
+        val display: String
+            get() {
+                when (this) {
+                    UNRESOLVED -> return "Unresolved"
+                    NOTPERSUASIVE -> return "Not Persuasive"
+                    PERSUASIVE -> return "Persuasive"
+                    PERSUASIVEWITHMODIFICATION -> return "Persuasive with Modification"
+                    NOTPERSUASIVEWITHMODIFICATION -> return "Not Persuasive with Modification"
+                    else -> return "?"
+                }
             }
-        }
 
-        public String getDisplay() {
-            switch (this) {
-                case UNRESOLVED:
-                    return "Unresolved";
-                case NOTPERSUASIVE:
-                    return "Not Persuasive";
-                case PERSUASIVE:
-                    return "Persuasive";
-                case PERSUASIVEWITHMODIFICATION:
-                    return "Persuasive with Modification";
-                case NOTPERSUASIVEWITHMODIFICATION:
-                    return "Not Persuasive with Modification";
-                default:
-                    return "?";
+        companion object {
+            @JvmStatic
+            @Throws(FHIRException::class)
+            fun fromCode(codeString: String?): ArtifactAssessmentDisposition? {
+                if (StringUtils.isBlank(codeString)) {
+                    return null
+                }
+                when (codeString) {
+                    "unresolved" -> return UNRESOLVED
+                    "not-persuasive" -> return NOTPERSUASIVE
+                    "persuasive" -> return PERSUASIVE
+                    "persuasive-with-modification" -> return PERSUASIVEWITHMODIFICATION
+                    "not-persuasive-with-modification" -> return NOTPERSUASIVEWITHMODIFICATION
+
+                    else ->
+                        if (Configuration.isAcceptInvalidEnums()) {
+                            return null
+                        } else {
+                            throw FHIRException(
+                                "Unknown ArtifactAssessmentDisposition code '" + codeString + "'"
+                            )
+                        }
+                }
             }
         }
     }
 
-    public static class ArtifactAssessmentDispositionEnumFactory implements EnumFactory<ArtifactAssessmentDisposition> {
-        public ArtifactAssessmentDisposition fromCode(String codeString) throws IllegalArgumentException {
-            return ArtifactAssessmentDisposition.fromCode(codeString);
+    class ArtifactAssessmentDispositionEnumFactory : EnumFactory<ArtifactAssessmentDisposition> {
+        @Throws(IllegalArgumentException::class)
+        override fun fromCode(codeString: String?): ArtifactAssessmentDisposition? {
+            return ArtifactAssessmentDisposition.Companion.fromCode(codeString)
         }
 
-        public Enumeration<ArtifactAssessmentDisposition> fromType(Base code) throws FHIRException {
+        @Throws(FHIRException::class)
+        fun fromType(code: Base?): Enumeration<ArtifactAssessmentDisposition?>? {
             if (code == null) {
-                return null;
+                return null
             }
             if (code.isEmpty()) {
-                return new Enumeration<>(this);
+                return Enumeration<ArtifactAssessmentDisposition?>(this)
             }
-            return new Enumeration<>(
-                    this, ArtifactAssessmentDisposition.fromCode(((PrimitiveType<?>) code).asStringValue()));
+            return Enumeration<ArtifactAssessmentDisposition?>(
+                this,
+                ArtifactAssessmentDisposition.Companion.fromCode(
+                    (code as PrimitiveType<*>).asStringValue()
+                ),
+            )
         }
 
-        public String toCode(ArtifactAssessmentDisposition code) {
-            return code.toCode();
+        override fun toCode(code: ArtifactAssessmentDisposition): String {
+            return code.toCode()
         }
 
-        public String toSystem(ArtifactAssessmentDisposition code) {
-            return code.getSystem();
+        override fun toSystem(code: ArtifactAssessmentDisposition): String {
+            return code.system
         }
     }
 
-    public static final String ARTIFACT_COMMENT_EXTENSION_URL =
-            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-artifactComment";
-    public static final String CONTENT =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentContent";
-    public static final String ARTIFACT =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentArtifact";
-    public static final String CITEAS = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCiteAs";
-    public static final String TITLE = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentTitle";
-    public static final String DATE = "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDate";
-    public static final String COPYRIGHT =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCopyright";
-    public static final String APPROVAL_DATE =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentApprovalDate";
-    public static final String LAST_REVIEW_DATE =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentLastReviewDate";
-    public static final String WORKFLOW_STATUS =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentWorkflowStatus";
-    public static final String DISPOSITION =
-            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDisposition";
+    constructor() : super()
 
-    public ArtifactAssessment() {
-        super();
+    constructor(artifact: Reference?) : super() {
+        this.setArtifactExtension(artifact)
     }
 
-    public ArtifactAssessment(Reference artifact) {
-        super();
-        this.setArtifactExtension(artifact);
+    constructor(artifact: UriType?) : super() {
+        this.setArtifactExtension(artifact)
     }
 
-    public ArtifactAssessment(UriType artifact) {
-        super();
-        this.setArtifactExtension(artifact);
-    }
-
-    public ArtifactAssessment createArtifactComment(
-            CodeType type,
-            Reference targetReference,
-            Optional<UriType> derivedFromUri,
-            Optional<MarkdownType> text,
-            Optional<UriType> reference,
-            Optional<Reference> user)
-            throws FHIRException {
-        ArtifactAssessmentContentExtension content = new ArtifactAssessmentContentExtension();
+    @Throws(FHIRException::class)
+    fun createArtifactComment(
+        type: CodeType?,
+        targetReference: Reference?,
+        derivedFromUri: Optional<UriType>,
+        text: Optional<MarkdownType>,
+        reference: Optional<UriType>,
+        user: Optional<Reference>,
+    ): ArtifactAssessment {
+        val content = ArtifactAssessmentContentExtension()
         if (type != null) {
-            content.setInfoType(type);
+            content.setInfoType(type)
         }
         if (text.isPresent() && !StringUtils.isBlank(text.get().getValue())) {
-            content.setSummary(text.get());
+            content.setSummary(text.get())
         }
         if (reference.isPresent() && !StringUtils.isBlank(reference.get().getValue())) {
-            content.addRelatedArtifact(reference.get(), RelatedArtifactType.CITATION);
+            content.addRelatedArtifact(
+                reference.get(),
+                RelatedArtifact.RelatedArtifactType.CITATION,
+            )
         }
         if (user.isPresent() && !StringUtils.isBlank(user.get().getReference())) {
-            content.setAuthorExtension(user.get());
+            content.setAuthorExtension(user.get())
         }
-        if (derivedFromUri.isPresent()
-                && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
-            content.addRelatedArtifact(derivedFromUri.get(), RelatedArtifactType.DERIVEDFROM);
+        if (derivedFromUri.isPresent() && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+            content.addRelatedArtifact(
+                derivedFromUri.get(),
+                RelatedArtifact.RelatedArtifactType.DERIVEDFROM,
+            )
         }
-        this.addExtension(content);
-        setDateExtension(new DateTimeType(new Date()));
+        this.addExtension(content)
+        setDateExtension(DateTimeType(Date()))
         if (targetReference != null && !StringUtils.isBlank(targetReference.getReference())) {
-            this.setArtifactExtension(targetReference);
+            this.setArtifactExtension(targetReference)
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment createArtifactComment(
-            CodeType type,
-            UriType targetReference,
-            Optional<UriType> derivedFromUri,
-            Optional<MarkdownType> text,
-            Optional<UriType> reference,
-            Optional<Reference> user)
-            throws FHIRException {
-        ArtifactAssessmentContentExtension content = new ArtifactAssessmentContentExtension();
+    @Throws(FHIRException::class)
+    fun createArtifactComment(
+        type: CodeType?,
+        targetReference: UriType?,
+        derivedFromUri: Optional<UriType>,
+        text: Optional<MarkdownType>,
+        reference: Optional<UriType>,
+        user: Optional<Reference>,
+    ): ArtifactAssessment {
+        val content: ArtifactAssessmentContentExtension = ArtifactAssessmentContentExtension()
         if (type != null) {
-            content.setInfoType(type);
+            content.setInfoType(type)
         }
         if (text.isPresent() && !StringUtils.isBlank(text.get().getValue())) {
-            content.setSummary(text.get());
+            content.setSummary(text.get())
         }
         if (reference.isPresent() && !StringUtils.isBlank(reference.get().getValue())) {
-            content.addRelatedArtifact(reference.get(), RelatedArtifactType.CITATION);
+            content.addRelatedArtifact(
+                reference.get(),
+                RelatedArtifact.RelatedArtifactType.CITATION,
+            )
         }
         if (user.isPresent() && !StringUtils.isBlank(user.get().getReference())) {
-            content.setAuthorExtension(user.get());
+            content.setAuthorExtension(user.get())
         }
-        if (derivedFromUri.isPresent()
-                && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
-            content.addRelatedArtifact(derivedFromUri.get(), RelatedArtifactType.DERIVEDFROM);
+        if (derivedFromUri.isPresent() && !StringUtils.isBlank(derivedFromUri.get().getValue())) {
+            content.addRelatedArtifact(
+                derivedFromUri.get(),
+                RelatedArtifact.RelatedArtifactType.DERIVEDFROM,
+            )
         }
-        this.addExtension(content);
-        setDateExtension(new DateTimeType(new Date()));
+        this.addExtension(content)
+        setDateExtension(DateTimeType(Date()))
         if (targetReference != null && !StringUtils.isBlank(targetReference.getValue())) {
-            this.setArtifactExtension(targetReference);
+            this.setArtifactExtension(targetReference)
         }
-        return this;
+        return this
     }
 
-    public Optional<RelatedArtifact> getDerivedFromContentRelatedArtifact() {
-        Optional<RelatedArtifact> returnedRelatedArtifact = Optional.empty();
-        Optional<Extension> content = Optional.ofNullable(this.getExtensionByUrl(CONTENT));
-        if (content.isPresent()) {
-            Optional<Extension> maybeRelatedArtifact = content.get().getExtension().stream()
-                    .filter(extension -> extension.getUrl().equals(ArtifactAssessmentContentExtension.RELATEDARTIFACT)
-                            && ((RelatedArtifact) extension.getValue())
-                                    .getType()
-                                    .equals(RelatedArtifactType.DERIVEDFROM))
-                    .findFirst();
-            if (maybeRelatedArtifact.isPresent()) {
-                RelatedArtifact derivedFromArtifact =
-                        (RelatedArtifact) maybeRelatedArtifact.get().getValue();
-                returnedRelatedArtifact = Optional.of(derivedFromArtifact);
+    val derivedFromContentRelatedArtifact: Optional<RelatedArtifact>
+        get() {
+            var returnedRelatedArtifact = Optional.empty<RelatedArtifact>()
+            val content = Optional.ofNullable<Extension>(this.getExtensionByUrl(CONTENT))
+            if (content.isPresent()) {
+                val maybeRelatedArtifact =
+                    content
+                        .get()
+                        .getExtension()
+                        .stream()
+                        .filter { extension: Extension? ->
+                            extension!!.getUrl() ==
+                                ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT &&
+                                ((extension.getValue() as RelatedArtifact).getType() ==
+                                    RelatedArtifact.RelatedArtifactType.DERIVEDFROM)
+                        }
+                        .findFirst()
+                if (maybeRelatedArtifact.isPresent()) {
+                    val derivedFromArtifact =
+                        maybeRelatedArtifact.get().getValue() as RelatedArtifact
+                    returnedRelatedArtifact = Optional.of(derivedFromArtifact)
+                }
             }
+            return returnedRelatedArtifact
         }
-        return returnedRelatedArtifact;
-    }
 
-    public ArtifactAssessment setDerivedFromContentRelatedArtifact(UriType targetUri) {
-        Optional<RelatedArtifact> existingRelatedArtifact = this.getDerivedFromContentRelatedArtifact();
+    fun setDerivedFromContentRelatedArtifact(targetUri: UriType): ArtifactAssessment {
+        val existingRelatedArtifact = this.derivedFromContentRelatedArtifact
         if (existingRelatedArtifact.isPresent()) {
-            RelatedArtifact derivedFromArtifact = existingRelatedArtifact.get();
-            derivedFromArtifact.setResource(new Reference(targetUri.getValue()));
+            val derivedFromArtifact = existingRelatedArtifact.get()
+            derivedFromArtifact.setResource(Reference(targetUri.getValue()))
         } else {
-            Extension content = this.getExtensionByUrl(CONTENT);
+            var content = this.getExtensionByUrl(CONTENT)
             if (content == null) {
-                content = new Extension(CONTENT);
-                this.addExtension(content);
+                content = Extension(CONTENT)
+                this.addExtension(content)
             }
             // this is duplicated from the addRelatedArtifact method
             // since otherwise we get ClassCastExceptions when trying
             // to Cast from Basic to ArtifactAssessment or its Extension subclasses
-            RelatedArtifact newRelatedArtifact = new RelatedArtifact();
-            newRelatedArtifact.setType(RelatedArtifactType.DERIVEDFROM);
-            newRelatedArtifact.setResource(new Reference(targetUri.getValue()));
-            content.addExtension(ArtifactAssessmentContentExtension.RELATEDARTIFACT, newRelatedArtifact);
+            val newRelatedArtifact = RelatedArtifact()
+            newRelatedArtifact.setType(RelatedArtifact.RelatedArtifactType.DERIVEDFROM)
+            newRelatedArtifact.setResource(Reference(targetUri.getValue()))
+            content.addExtension(
+                ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT,
+                newRelatedArtifact,
+            )
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setDerivedFromContentRelatedArtifact(String targetUri) {
-        return setDerivedFromContentRelatedArtifact(new UriType(targetUri));
+    fun setDerivedFromContentRelatedArtifact(targetUri: String?): ArtifactAssessment {
+        return setDerivedFromContentRelatedArtifact(UriType(targetUri))
     }
 
-    public boolean checkArtifactCommentParams(
-            String artifactAssessmentType,
-            String artifactAssessmentSummary,
-            String artifactAssessmentTargetReference,
-            String artifactAssessmentRelatedArtifact,
-            String derivedFromRelatedArtifactUrl,
-            String artifactAssessmentAuthor) {
-        var contentCorrect = false;
-        var artifactCorrect = false;
-        var contentIndex = findIndex(CONTENT, null, this.getExtension());
+    fun checkArtifactCommentParams(
+        artifactAssessmentType: String?,
+        artifactAssessmentSummary: String?,
+        artifactAssessmentTargetReference: String?,
+        artifactAssessmentRelatedArtifact: String?,
+        derivedFromRelatedArtifactUrl: String?,
+        artifactAssessmentAuthor: String?,
+    ): Boolean {
+        var contentCorrect = false
+        var artifactCorrect = false
+        val contentIndex = findIndex(CONTENT, null, this.getExtension())
         if (contentIndex != -1) {
-            contentCorrect = checkContent(
+            contentCorrect =
+                checkContent(
                     contentIndex,
                     artifactAssessmentType,
                     artifactAssessmentSummary,
                     artifactAssessmentRelatedArtifact,
                     derivedFromRelatedArtifactUrl,
-                    artifactAssessmentAuthor);
+                    artifactAssessmentAuthor,
+                )
         }
-        var artifactIndex = findIndex(ARTIFACT, null, this.getExtension());
+        val artifactIndex = findIndex(ARTIFACT, null, this.getExtension())
         if (artifactIndex != -1) {
-            var artifactExt = this.getExtension().get(artifactIndex);
+            val artifactExt = this.getExtension().get(artifactIndex)
             artifactCorrect =
-                    ((Reference) artifactExt.getValue()).getReference().equals(artifactAssessmentTargetReference);
+                (artifactExt.getValue() as Reference).getReference() ==
+                    artifactAssessmentTargetReference
         }
-        return contentCorrect && artifactCorrect;
+        return contentCorrect && artifactCorrect
     }
 
-    private boolean checkContent(
-            int contentIndex,
-            String artifactAssessmentType,
-            String artifactAssessmentSummary,
-            String artifactAssessmentRelatedArtifact,
-            String derivedFromRelatedArtifactUrl,
-            String artifactAssessmentAuthor) {
-        var infoTypeCorrect = false;
-        var summaryCorrect = false;
-        var citationRelatedArtifactCorrect = false;
-        var derivedFromRelatedArtifactCorrect = false;
-        var authorCorrect = false;
-        var contentExt = this.getExtension().get(contentIndex);
-        var infoTypeIndex = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, contentExt.getExtension());
+    private fun checkContent(
+        contentIndex: Int,
+        artifactAssessmentType: String?,
+        artifactAssessmentSummary: String?,
+        artifactAssessmentRelatedArtifact: String?,
+        derivedFromRelatedArtifactUrl: String?,
+        artifactAssessmentAuthor: String?,
+    ): Boolean {
+        var infoTypeCorrect = false
+        var summaryCorrect = false
+        var citationRelatedArtifactCorrect = false
+        var derivedFromRelatedArtifactCorrect = false
+        var authorCorrect = false
+        val contentExt = this.getExtension().get(contentIndex)
+        val infoTypeIndex =
+            findIndex(
+                ArtifactAssessmentContentExtension.Companion.INFOTYPE,
+                null,
+                contentExt.getExtension(),
+            )
         if (infoTypeIndex != -1) {
-            var infoTypeExt = contentExt.getExtension().get(infoTypeIndex);
+            val infoTypeExt = contentExt.getExtension().get(infoTypeIndex)
             infoTypeCorrect =
-                    ((CodeType) infoTypeExt.getValue()).getValueAsString().equals(artifactAssessmentType);
+                (infoTypeExt.getValue() as CodeType).getValueAsString() == artifactAssessmentType
         }
-        var summaryIndex = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, contentExt.getExtension());
+        val summaryIndex =
+            findIndex(
+                ArtifactAssessmentContentExtension.Companion.SUMMARY,
+                null,
+                contentExt.getExtension(),
+            )
         if (summaryIndex != -1) {
-            var summaryExt = contentExt.getExtension().get(summaryIndex);
-            summaryCorrect = ((StringType) summaryExt.getValue()).getValue().equals(artifactAssessmentSummary);
+            val summaryExt = contentExt.getExtension().get(summaryIndex)
+            summaryCorrect =
+                (summaryExt.getValue() as StringType).getValue() == artifactAssessmentSummary
         }
-        var relatedArtifactList = contentExt.getExtension().stream()
-                .filter(e -> e.getUrl().equals(ArtifactAssessmentContentExtension.RELATEDARTIFACT))
-                .collect(Collectors.toList());
+        val relatedArtifactList =
+            contentExt
+                .getExtension()
+                .stream()
+                .filter { e: Extension? ->
+                    e!!.getUrl() == ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT
+                }
+                .collect(Collectors.toList())
         if (!relatedArtifactList.isEmpty()) {
-            var maybeCitation = relatedArtifactList.stream()
-                    .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.CITATION))
-                    .findAny();
-            var maybeDerivedFrom = relatedArtifactList.stream()
-                    .filter(ext -> ((RelatedArtifact) ext.getValue()).getType().equals(RelatedArtifactType.DERIVEDFROM))
-                    .findAny();
+            val maybeCitation =
+                relatedArtifactList
+                    .stream()
+                    .filter { ext: Extension? ->
+                        (ext!!.getValue() as RelatedArtifact).getType() ==
+                            RelatedArtifact.RelatedArtifactType.CITATION
+                    }
+                    .findAny()
+            val maybeDerivedFrom =
+                relatedArtifactList
+                    .stream()
+                    .filter { ext: Extension? ->
+                        (ext!!.getValue() as RelatedArtifact).getType() ==
+                            RelatedArtifact.RelatedArtifactType.DERIVEDFROM
+                    }
+                    .findAny()
             if (maybeCitation.isPresent()) {
-                var citation = maybeCitation.get();
-                citationRelatedArtifactCorrect = ((RelatedArtifact) citation.getValue())
-                        .getResource()
-                        .getReference()
-                        .equals(artifactAssessmentRelatedArtifact);
+                val citation = maybeCitation.get()
+                citationRelatedArtifactCorrect =
+                    ((citation.getValue() as RelatedArtifact).getResource().getReference() ==
+                        artifactAssessmentRelatedArtifact)
             }
             if (maybeDerivedFrom.isPresent()) {
-                var derivedFrom = maybeDerivedFrom.get();
-                derivedFromRelatedArtifactCorrect = ((RelatedArtifact) derivedFrom.getValue())
-                        .getResource()
-                        .getReference()
-                        .equals(derivedFromRelatedArtifactUrl);
+                val derivedFrom = maybeDerivedFrom.get()
+                derivedFromRelatedArtifactCorrect =
+                    ((derivedFrom.getValue() as RelatedArtifact).getResource().getReference() ==
+                        derivedFromRelatedArtifactUrl)
             }
         }
-        var authorIndex = findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, contentExt.getExtension());
+        val authorIndex =
+            findIndex(
+                ArtifactAssessmentContentExtension.Companion.AUTHOR,
+                null,
+                contentExt.getExtension(),
+            )
         if (authorIndex != -1) {
-            var authorExt = contentExt.getExtension().get(authorIndex);
-            authorCorrect = ((Reference) authorExt.getValue()).getReference().equals(artifactAssessmentAuthor);
+            val authorExt = contentExt.getExtension().get(authorIndex)
+            authorCorrect =
+                (authorExt.getValue() as Reference).getReference() == artifactAssessmentAuthor
         }
 
-        return infoTypeCorrect
-                && summaryCorrect
-                && citationRelatedArtifactCorrect
-                && derivedFromRelatedArtifactCorrect
-                && authorCorrect;
+        return infoTypeCorrect &&
+            summaryCorrect &&
+            citationRelatedArtifactCorrect &&
+            derivedFromRelatedArtifactCorrect &&
+            authorCorrect
     }
 
-    public boolean isValidArtifactComment() {
-        var infoTypeExists = false;
-        var summaryExists = false;
-        var relatedArtifactExists = false;
-        var authorExists = false;
-        var dateExists = findIndex(DATE, null, this.getExtension()) != -1;
-        var artifactExists = findIndex(ARTIFACT, null, this.getExtension()) != -1;
-        var contentIndex = findIndex(CONTENT, null, this.getExtension());
-        if (contentIndex != -1) {
-            var content = this.getExtension().get(contentIndex);
-            infoTypeExists = findIndex(ArtifactAssessmentContentExtension.INFOTYPE, null, content.getExtension()) != -1;
-            summaryExists = findIndex(ArtifactAssessmentContentExtension.SUMMARY, null, content.getExtension()) != -1;
-            relatedArtifactExists =
-                    findIndex(ArtifactAssessmentContentExtension.RELATEDARTIFACT, null, content.getExtension()) != -1;
-            authorExists = findIndex(ArtifactAssessmentContentExtension.AUTHOR, null, content.getExtension()) != -1;
+    val isValidArtifactComment: Boolean
+        get() {
+            var infoTypeExists = false
+            var summaryExists = false
+            var relatedArtifactExists = false
+            var authorExists = false
+            val dateExists = findIndex(DATE, null, this.getExtension()) != -1
+            val artifactExists = findIndex(ARTIFACT, null, this.getExtension()) != -1
+            val contentIndex = findIndex(CONTENT, null, this.getExtension())
+            if (contentIndex != -1) {
+                val content = this.getExtension().get(contentIndex)
+                infoTypeExists =
+                    findIndex(
+                        ArtifactAssessmentContentExtension.Companion.INFOTYPE,
+                        null,
+                        content.getExtension(),
+                    ) != -1
+                summaryExists =
+                    findIndex(
+                        ArtifactAssessmentContentExtension.Companion.SUMMARY,
+                        null,
+                        content.getExtension(),
+                    ) != -1
+                relatedArtifactExists =
+                    findIndex(
+                        ArtifactAssessmentContentExtension.Companion.RELATEDARTIFACT,
+                        null,
+                        content.getExtension(),
+                    ) != -1
+                authorExists =
+                    findIndex(
+                        ArtifactAssessmentContentExtension.Companion.AUTHOR,
+                        null,
+                        content.getExtension(),
+                    ) != -1
+            }
+            return (infoTypeExists || summaryExists || relatedArtifactExists || authorExists) &&
+                dateExists &&
+                artifactExists
         }
-        return (infoTypeExists || summaryExists || relatedArtifactExists || authorExists)
-                && dateExists
-                && artifactExists;
-    }
 
-    List<ArtifactAssessmentContentExtension> getContent() {
-        return this.getExtension().stream()
-                .filter(ext -> ext.getUrl().equals(CONTENT))
-                .map(ArtifactAssessmentContentExtension.class::cast)
-                .collect(Collectors.toList());
-    }
+    val content: MutableList<ArtifactAssessmentContentExtension?>
+        get() =
+            this.getExtension()
+                .stream()
+                .filter { ext: Extension? -> ext!!.getUrl() == CONTENT }
+                .map<ArtifactAssessmentContentExtension?> { obj: Extension? ->
+                    ArtifactAssessmentContentExtension::class.java.cast(obj)
+                }
+                .collect(Collectors.toList())
 
-    public ArtifactAssessment setArtifactExtension(Reference target) {
+    fun setArtifactExtension(target: Reference?): ArtifactAssessment {
         if (target != null && target.getReference() != null) {
-            int index = findIndex(ARTIFACT, null, this.getExtension());
+            val index = findIndex(ARTIFACT, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentArtifactExtension(target));
+                this.extension.set(index, ArtifactAssessmentArtifactExtension(target))
             } else {
-                this.addExtension(new ArtifactAssessmentArtifactExtension(target));
+                this.addExtension(ArtifactAssessmentArtifactExtension(target))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setArtifactExtension(UriType target) {
+    fun setArtifactExtension(target: UriType?): ArtifactAssessment {
         if (target != null && target.getValue() != null) {
-            int index = findIndex(ARTIFACT, null, this.getExtension());
+            val index = findIndex(ARTIFACT, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentArtifactExtension(target));
+                this.extension.set(index, ArtifactAssessmentArtifactExtension(target))
             } else {
-                this.addExtension(new ArtifactAssessmentArtifactExtension(target));
+                this.addExtension(ArtifactAssessmentArtifactExtension(target))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setDateExtension(DateTimeType date) {
+    fun setDateExtension(date: DateTimeType?): ArtifactAssessment {
         if (date != null) {
-            int index = findIndex(DATE, null, this.getExtension());
+            val index = findIndex(DATE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentDateExtension(date));
+                this.extension.set(index, ArtifactAssessmentDateExtension(date))
             } else {
-                this.addExtension(new ArtifactAssessmentDateExtension(date));
+                this.addExtension(ArtifactAssessmentDateExtension(date))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setLastReviewDateExtension(DateType reviewDate) {
+    fun setLastReviewDateExtension(reviewDate: DateType?): ArtifactAssessment {
         if (reviewDate != null) {
-            int index = findIndex(LAST_REVIEW_DATE, null, this.getExtension());
+            val index = findIndex(LAST_REVIEW_DATE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentLastReviewDateExtension(reviewDate));
+                this.extension.set(index, ArtifactAssessmentLastReviewDateExtension(reviewDate))
             } else {
-                this.addExtension(new ArtifactAssessmentLastReviewDateExtension(reviewDate));
+                this.addExtension(ArtifactAssessmentLastReviewDateExtension(reviewDate))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setApprovalDateExtension(DateType approvalDate) {
+    fun setApprovalDateExtension(approvalDate: DateType?): ArtifactAssessment {
         if (approvalDate != null) {
-            int index = findIndex(APPROVAL_DATE, null, this.getExtension());
+            val index = findIndex(APPROVAL_DATE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentApprovalDateExtension(approvalDate));
+                this.extension.set(index, ArtifactAssessmentApprovalDateExtension(approvalDate))
             } else {
-                this.addExtension(new ArtifactAssessmentApprovalDateExtension(approvalDate));
+                this.addExtension(ArtifactAssessmentApprovalDateExtension(approvalDate))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setTitleExtension(MarkdownType title) {
+    fun setTitleExtension(title: MarkdownType?): ArtifactAssessment {
         if (title != null) {
-            int index = findIndex(TITLE, null, this.getExtension());
+            val index = findIndex(TITLE, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentTitleExtension(title));
+                this.extension.set(index, ArtifactAssessmentTitleExtension(title))
             } else {
-                this.addExtension(new ArtifactAssessmentTitleExtension(title));
+                this.addExtension(ArtifactAssessmentTitleExtension(title))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setCopyrightExtension(MarkdownType copyright) {
+    fun setCopyrightExtension(copyright: MarkdownType?): ArtifactAssessment {
         if (copyright != null) {
-            int index = findIndex(COPYRIGHT, null, this.getExtension());
+            val index = findIndex(COPYRIGHT, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentCopyrightExtension(copyright));
+                this.extension.set(index, ArtifactAssessmentCopyrightExtension(copyright))
             } else {
-                this.addExtension(new ArtifactAssessmentCopyrightExtension(copyright));
+                this.addExtension(ArtifactAssessmentCopyrightExtension(copyright))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setCiteAsExtension(MarkdownType citeAs) {
+    fun setCiteAsExtension(citeAs: MarkdownType?): ArtifactAssessment {
         if (citeAs != null) {
-            int index = findIndex(CITEAS, null, this.getExtension());
+            val index = findIndex(CITEAS, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentCiteAsExtension(citeAs));
+                this.extension.set(index, ArtifactAssessmentCiteAsExtension(citeAs))
             } else {
-                this.addExtension(new ArtifactAssessmentCiteAsExtension(citeAs));
+                this.addExtension(ArtifactAssessmentCiteAsExtension(citeAs))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setCiteAsExtension(Reference citeAs) {
+    fun setCiteAsExtension(citeAs: Reference?): ArtifactAssessment {
         if (citeAs != null) {
-            int index = findIndex(CITEAS, null, this.getExtension());
+            val index = findIndex(CITEAS, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentCiteAsExtension(citeAs));
+                this.extension.set(index, ArtifactAssessmentCiteAsExtension(citeAs))
             } else {
-                this.addExtension(new ArtifactAssessmentCiteAsExtension(citeAs));
+                this.addExtension(ArtifactAssessmentCiteAsExtension(citeAs))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setArtifactAssessmentWorkflowStatusExtension(
-            Enumeration<ArtifactAssessmentWorkflowStatus> status) {
+    fun setArtifactAssessmentWorkflowStatusExtension(
+        status: Enumeration<ArtifactAssessmentWorkflowStatus?>?
+    ): ArtifactAssessment {
         if (status != null) {
-            int index = findIndex(WORKFLOW_STATUS, null, this.getExtension());
+            val index = findIndex(WORKFLOW_STATUS, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentWorkflowStatusExtension(status));
+                this.extension.set(index, ArtifactAssessmentWorkflowStatusExtension(status))
             } else {
-                this.addExtension(new ArtifactAssessmentWorkflowStatusExtension(status));
+                this.addExtension(ArtifactAssessmentWorkflowStatusExtension(status))
             }
         }
-        return this;
+        return this
     }
 
-    public ArtifactAssessment setArtifactAssessmentDispositionExtension(
-            Enumeration<ArtifactAssessmentDisposition> status) {
+    fun setArtifactAssessmentDispositionExtension(
+        status: Enumeration<ArtifactAssessmentDisposition?>?
+    ): ArtifactAssessment {
         if (status != null) {
-            int index = findIndex(DISPOSITION, null, this.getExtension());
+            val index = findIndex(DISPOSITION, null, this.getExtension())
             if (index != -1) {
-                this.extension.set(index, new ArtifactAssessmentDispositionExtension(status));
+                this.extension.set(index, ArtifactAssessmentDispositionExtension(status))
             } else {
-                this.addExtension(new ArtifactAssessmentDispositionExtension(status));
+                this.addExtension(ArtifactAssessmentDispositionExtension(status))
             }
         }
-        return this;
+        return this
     }
 
-    private int findIndex(String url, Type value, List<Extension> extensions) {
-        Optional<Extension> existingExtension;
-        if (value != null) {
-            existingExtension = extensions.stream()
-                    .filter(e -> e.getUrl().equals(url) && e.getValue().equals(value))
-                    .findAny();
-        } else {
-            existingExtension =
-                    extensions.stream().filter(e -> e.getUrl().equals(url)).findAny();
-        }
-        if (existingExtension.isPresent()) {
-            return extensions.indexOf(existingExtension.get());
-        } else {
-            return -1;
-        }
-    }
-
-    @DatatypeDef(name = "ArtifactAssessmentContentExtension", isSpecialization = true, profileOf = Extension.class)
-    public class ArtifactAssessmentContentExtension extends Extension {
-        public static final String INFOTYPE = "informationType";
-        public static final String SUMMARY = "summary";
-        public static final String TYPE = "type";
-        public static final String CLASSIFIER = "classifier";
-        public static final String QUANTITY = "quantity";
-        public static final String AUTHOR = "author";
-        public static final String PATH = "path";
-        public static final String RELATEDARTIFACT = "relatedArtifact";
-        public static final String FREETOSHARE = "freeToShare";
-        public static final String COMPONENT = "component";
-
-        public ArtifactAssessmentContentExtension() throws FHIRException {
-            super(CONTENT);
-        }
-
-        ArtifactAssessmentContentExtension setInfoType(CodeType infoType) throws FHIRException {
+    @DatatypeDef(
+        name = "ArtifactAssessmentContentExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    class ArtifactAssessmentContentExtension : Extension(CONTENT) {
+        @Throws(FHIRException::class)
+        fun setInfoType(infoType: CodeType?): ArtifactAssessmentContentExtension {
             if (infoType != null) {
-                int index = findIndex(INFOTYPE, null, this.getExtension());
+                val index = findIndex(INFOTYPE, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessmentContentInformationTypeExtension(infoType));
+                    this.extension.set(
+                        index,
+                        ArtifactAssessmentContentInformationTypeExtension(infoType),
+                    )
                 } else {
-                    this.addExtension(new ArtifactAssessmentContentInformationTypeExtension(infoType));
+                    this.addExtension(ArtifactAssessmentContentInformationTypeExtension(infoType))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension setSummary(MarkdownType summary) {
+        fun setSummary(summary: MarkdownType?): ArtifactAssessmentContentExtension {
             if (summary != null) {
-                int index = findIndex(SUMMARY, null, this.getExtension());
+                val index = findIndex(SUMMARY, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessmentContentSummaryExtension(summary));
+                    this.extension.set(index, ArtifactAssessmentContentSummaryExtension(summary))
                 } else {
-                    this.addExtension(new ArtifactAssessmentContentSummaryExtension(summary));
+                    this.addExtension(ArtifactAssessmentContentSummaryExtension(summary))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension addRelatedArtifact(UriType reference, RelatedArtifactType type) {
+        fun addRelatedArtifact(
+            reference: UriType?,
+            type: RelatedArtifact.RelatedArtifactType?,
+        ): ArtifactAssessmentContentExtension {
             if (reference != null) {
-                RelatedArtifact newRelatedArtifact = new RelatedArtifact();
-                newRelatedArtifact.setType(type);
-                newRelatedArtifact.setResource(new Reference(reference.getValue()));
-                int index = findIndex(RELATEDARTIFACT, newRelatedArtifact, this.getExtension());
+                val newRelatedArtifact = RelatedArtifact()
+                newRelatedArtifact.setType(type)
+                newRelatedArtifact.setResource(Reference(reference.getValue()))
+                val index = findIndex(RELATEDARTIFACT, newRelatedArtifact, this.getExtension())
                 if (index == -1) {
-                    this.addExtension(new ArtifactAssessmentContentRelatedArtifactExtension(newRelatedArtifact));
+                    this.addExtension(
+                        ArtifactAssessmentContentRelatedArtifactExtension(newRelatedArtifact)
+                    )
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension addComponent(ArtifactAssessmentContentExtension component) {
+        fun addComponent(
+            component: ArtifactAssessmentContentExtension?
+        ): ArtifactAssessmentContentExtension {
             if (component != null) {
-                this.addExtension(new ArtifactAssessmentContentComponentExtension(component));
+                this.addExtension(ArtifactAssessmentContentComponentExtension(component))
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension setAuthorExtension(Reference author) {
+        fun setAuthorExtension(author: Reference?): ArtifactAssessmentContentExtension {
             if (author != null) {
-                int index = findIndex(AUTHOR, null, this.getExtension());
+                val index = findIndex(AUTHOR, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessmentContentAuthorExtension(author));
+                    this.extension.set(index, ArtifactAssessmentContentAuthorExtension(author))
                 } else {
-                    this.addExtension(new ArtifactAssessmentContentAuthorExtension(author));
+                    this.addExtension(ArtifactAssessmentContentAuthorExtension(author))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension setQuantityExtension(Quantity quantity) {
+        fun setQuantityExtension(quantity: Quantity?): ArtifactAssessmentContentExtension {
             if (quantity != null) {
-                int index = findIndex(QUANTITY, null, this.getExtension());
+                val index = findIndex(QUANTITY, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessmentContentQuantityExtension(quantity));
+                    this.extension.set(index, ArtifactAssessmentContentQuantityExtension(quantity))
                 } else {
-                    this.addExtension(new ArtifactAssessmentContentQuantityExtension(quantity));
+                    this.addExtension(ArtifactAssessmentContentQuantityExtension(quantity))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension setTypeExtension(CodeableConcept type) {
+        fun setTypeExtension(type: CodeableConcept?): ArtifactAssessmentContentExtension {
             if (type != null) {
-                int index = findIndex(TYPE, null, this.getExtension());
+                val index = findIndex(TYPE, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessmentContentTypeExtension(type));
+                    this.extension.set(index, ArtifactAssessmentContentTypeExtension(type))
                 } else {
-                    this.addExtension(new ArtifactAssessmentContentTypeExtension(type));
+                    this.addExtension(ArtifactAssessmentContentTypeExtension(type))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension setFreeToShareExtension(BooleanType freeToShare) {
+        fun setFreeToShareExtension(freeToShare: BooleanType?): ArtifactAssessmentContentExtension {
             if (freeToShare != null) {
-                int index = findIndex(FREETOSHARE, null, this.getExtension());
+                val index = findIndex(FREETOSHARE, null, this.getExtension())
                 if (index != -1) {
-                    this.extension.set(index, new ArtifactAssessmentContentFreeToShareExtension(freeToShare));
+                    this.extension.set(
+                        index,
+                        ArtifactAssessmentContentFreeToShareExtension(freeToShare),
+                    )
                 } else {
-                    this.addExtension(new ArtifactAssessmentContentFreeToShareExtension(freeToShare));
+                    this.addExtension(ArtifactAssessmentContentFreeToShareExtension(freeToShare))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension addClassifierExtension(CodeableConcept classifier) {
+        fun addClassifierExtension(
+            classifier: CodeableConcept?
+        ): ArtifactAssessmentContentExtension {
             if (classifier != null) {
-                int index = findIndex(CLASSIFIER, classifier, this.getExtension());
+                val index = findIndex(CLASSIFIER, classifier, this.getExtension())
                 if (index == -1) {
-                    this.addExtension(new ArtifactAssessmentContentClassifierExtension(classifier));
+                    this.addExtension(ArtifactAssessmentContentClassifierExtension(classifier))
                 }
             }
-            return this;
+            return this
         }
 
-        ArtifactAssessmentContentExtension addPathExtension(UriType path) {
+        fun addPathExtension(path: UriType?): ArtifactAssessmentContentExtension {
             if (path != null) {
-                int index = findIndex(PATH, path, this.getExtension());
+                val index = findIndex(PATH, path, this.getExtension())
                 if (index == -1) {
-                    this.addExtension(new ArtifactAssessmentContentPathExtension(path));
+                    this.addExtension(ArtifactAssessmentContentPathExtension(path))
                 }
             }
-            return this;
+            return this
         }
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentInformationTypeExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentInformationTypeExtension extends Extension {
-            public ArtifactAssessmentContentInformationTypeExtension(CodeType informationTypeCode) {
-                super(INFOTYPE);
+            name = "ArtifactAssessmentContentInformationTypeExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentInformationTypeExtension(
+            informationTypeCode: CodeType
+        ) : Extension(INFOTYPE) {
+            init {
                 // validate code
-                ArtifactAssessmentContentInformationType.fromCode(informationTypeCode.getValue());
-                this.setValue(informationTypeCode);
+                ArtifactAssessmentContentInformationType.Companion.fromCode(
+                    informationTypeCode.getValue()
+                )
+                this.setValue(informationTypeCode)
             }
         }
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentSummaryExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentSummaryExtension extends Extension {
-            public ArtifactAssessmentContentSummaryExtension(MarkdownType summary) {
-                super(SUMMARY, summary);
-            }
-        }
+            name = "ArtifactAssessmentContentSummaryExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentSummaryExtension(summary: MarkdownType?) :
+            Extension(SUMMARY, summary)
 
-        @SuppressWarnings("squid:S2387")
         @DatatypeDef(
-                name = "ArtifactAssessmentContentTypeExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentTypeExtension extends Extension {
-            @ca.uhn.fhir.model.api.annotation.Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-type")
-            protected CodeableConcept value;
-
-            public ArtifactAssessmentContentTypeExtension(CodeableConcept typeConcept) {
-                super(TYPE, typeConcept);
-            }
-        }
-
-        @SuppressWarnings("squid:S2387")
-        @DatatypeDef(
-                name = "ArtifactAssessmentContentClassifierExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentClassifierExtension extends Extension {
-            @ca.uhn.fhir.model.api.annotation.Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-rating")
-            protected CodeableConcept value;
-
-            public ArtifactAssessmentContentClassifierExtension(CodeableConcept classifierConcept) {
-                super(CLASSIFIER, classifierConcept);
-            }
+            name = "ArtifactAssessmentContentTypeExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentTypeExtension(typeConcept: CodeableConcept?) :
+            Extension(TYPE, typeConcept) {
+            @Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-type")
+            protected var value: CodeableConcept? = null
         }
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentQuantityExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentQuantityExtension extends Extension {
-            public ArtifactAssessmentContentQuantityExtension(Quantity quantity) {
-                super(QUANTITY, quantity);
-            }
+            name = "ArtifactAssessmentContentClassifierExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentClassifierExtension(
+            classifierConcept: CodeableConcept?
+        ) : Extension(CLASSIFIER, classifierConcept) {
+            @Binding(valueSet = "http://hl7.org/fhir/ValueSet/certainty-rating")
+            protected var value: CodeableConcept? = null
         }
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentAuthorExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentAuthorExtension extends Extension {
-            public ArtifactAssessmentContentAuthorExtension(Reference author) {
-                super(AUTHOR, author);
-            }
-        }
+            name = "ArtifactAssessmentContentQuantityExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentQuantityExtension(quantity: Quantity?) :
+            Extension(QUANTITY, quantity)
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentPathExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentPathExtension extends Extension {
-            public ArtifactAssessmentContentPathExtension(UriType path) {
-                super(PATH, path);
-            }
-        }
+            name = "ArtifactAssessmentContentAuthorExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentAuthorExtension(author: Reference?) :
+            Extension(AUTHOR, author)
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentRelatedArtifactExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentRelatedArtifactExtension extends Extension {
-            public ArtifactAssessmentContentRelatedArtifactExtension(RelatedArtifact relatedArtifact) {
-                super(RELATEDARTIFACT, relatedArtifact);
-            }
-        }
+            name = "ArtifactAssessmentContentPathExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentPathExtension(path: UriType?) :
+            Extension(PATH, path)
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentFreeToShareExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentFreeToShareExtension extends Extension {
-            public ArtifactAssessmentContentFreeToShareExtension(BooleanType freeToShare) {
-                super(FREETOSHARE, freeToShare);
-            }
-        }
+            name = "ArtifactAssessmentContentRelatedArtifactExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentRelatedArtifactExtension(
+            relatedArtifact: RelatedArtifact?
+        ) : Extension(RELATEDARTIFACT, relatedArtifact)
 
         @DatatypeDef(
-                name = "ArtifactAssessmentContentComponentExtension",
-                isSpecialization = true,
-                profileOf = Extension.class)
-        private class ArtifactAssessmentContentComponentExtension extends Extension {
-            public ArtifactAssessmentContentComponentExtension(ArtifactAssessmentContentExtension contentExtension) {
-                super(COMPONENT, contentExtension);
-            }
-        }
-    }
+            name = "ArtifactAssessmentContentFreeToShareExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentFreeToShareExtension(freeToShare: BooleanType?) :
+            Extension(FREETOSHARE, freeToShare)
 
-    @DatatypeDef(name = "ArtifactAssessmentArtifactExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentArtifactExtension extends Extension {
-        public ArtifactAssessmentArtifactExtension(Reference target) {
-            super(ARTIFACT, target);
-        }
+        @DatatypeDef(
+            name = "ArtifactAssessmentContentComponentExtension",
+            isSpecialization = true,
+            profileOf = Extension::class,
+        )
+        private class ArtifactAssessmentContentComponentExtension(
+            contentExtension: ArtifactAssessmentContentExtension?
+        ) : Extension(COMPONENT, contentExtension)
 
-        public ArtifactAssessmentArtifactExtension(UriType target) {
-            super(ARTIFACT, target);
+        companion object {
+            const val INFOTYPE: String = "informationType"
+            const val SUMMARY: String = "summary"
+            const val TYPE: String = "type"
+            const val CLASSIFIER: String = "classifier"
+            const val QUANTITY: String = "quantity"
+            const val AUTHOR: String = "author"
+            const val PATH: String = "path"
+            const val RELATEDARTIFACT: String = "relatedArtifact"
+            const val FREETOSHARE: String = "freeToShare"
+            const val COMPONENT: String = "component"
         }
     }
 
     @DatatypeDef(
-            name = "ArtifactAssessmentWorkflowStatusExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
-    private class ArtifactAssessmentWorkflowStatusExtension extends Extension {
-        public ArtifactAssessmentWorkflowStatusExtension(Enumeration<ArtifactAssessmentWorkflowStatus> status) {
-            super(WORKFLOW_STATUS, status);
-        }
-    }
+        name = "ArtifactAssessmentArtifactExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentArtifactExtension : Extension {
+        constructor(target: Reference?) : super(ARTIFACT, target)
 
-    @DatatypeDef(name = "ArtifactAssessmentDispositionExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentDispositionExtension extends Extension {
-        public ArtifactAssessmentDispositionExtension(Enumeration<ArtifactAssessmentDisposition> disposition) {
-            super(DISPOSITION, disposition);
-        }
+        constructor(target: UriType?) : super(ARTIFACT, target)
     }
 
     @DatatypeDef(
-            name = "ArtifactAssessmentLastReviewDateExtension",
-            isSpecialization = true,
-            profileOf = Extension.class)
-    private class ArtifactAssessmentLastReviewDateExtension extends Extension {
-        public ArtifactAssessmentLastReviewDateExtension(DateType lastReviewDate) {
-            super(LAST_REVIEW_DATE, lastReviewDate);
-        }
+        name = "ArtifactAssessmentWorkflowStatusExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentWorkflowStatusExtension(
+        status: Enumeration<ArtifactAssessmentWorkflowStatus?>?
+    ) : Extension(WORKFLOW_STATUS, status)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentDispositionExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentDispositionExtension(
+        disposition: Enumeration<ArtifactAssessmentDisposition?>?
+    ) : Extension(DISPOSITION, disposition)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentLastReviewDateExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentLastReviewDateExtension(lastReviewDate: DateType?) :
+        Extension(LAST_REVIEW_DATE, lastReviewDate)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentApprovalDateExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentApprovalDateExtension(approvalDate: DateType?) :
+        Extension(APPROVAL_DATE, approvalDate)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentCopyrightExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentCopyrightExtension(copyright: MarkdownType?) :
+        Extension(COPYRIGHT, copyright)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentDateExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentDateExtension(date: DateTimeType?) : Extension(DATE, date)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentTitleExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentTitleExtension(title: StringType?) : Extension(TITLE, title)
+
+    @DatatypeDef(
+        name = "ArtifactAssessmentCiteAsExtension",
+        isSpecialization = true,
+        profileOf = Extension::class,
+    )
+    private class ArtifactAssessmentCiteAsExtension : Extension {
+        constructor(citation: Reference?) : super(CITEAS, citation)
+
+        constructor(citation: MarkdownType?) : super(CITEAS, citation)
     }
 
-    @DatatypeDef(name = "ArtifactAssessmentApprovalDateExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentApprovalDateExtension extends Extension {
-        public ArtifactAssessmentApprovalDateExtension(DateType approvalDate) {
-            super(APPROVAL_DATE, approvalDate);
-        }
-    }
-
-    @DatatypeDef(name = "ArtifactAssessmentCopyrightExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentCopyrightExtension extends Extension {
-        public ArtifactAssessmentCopyrightExtension(MarkdownType copyright) {
-            super(COPYRIGHT, copyright);
-        }
-    }
-
-    @DatatypeDef(name = "ArtifactAssessmentDateExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentDateExtension extends Extension {
-        public ArtifactAssessmentDateExtension(DateTimeType date) {
-            super(DATE, date);
-        }
-    }
-
-    @DatatypeDef(name = "ArtifactAssessmentTitleExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentTitleExtension extends Extension {
-        public ArtifactAssessmentTitleExtension(StringType title) {
-            super(TITLE, title);
-        }
-    }
-
-    @DatatypeDef(name = "ArtifactAssessmentCiteAsExtension", isSpecialization = true, profileOf = Extension.class)
-    private class ArtifactAssessmentCiteAsExtension extends Extension {
-        public ArtifactAssessmentCiteAsExtension(Reference citation) {
-            super(CITEAS, citation);
+    companion object {
+        private fun findIndex(url: String?, value: Type?, extensions: MutableList<Extension>): Int {
+            val existingExtension: Optional<Extension>
+            if (value != null) {
+                existingExtension =
+                    extensions
+                        .stream()
+                        .filter { e: Extension? -> e!!.getUrl() == url && e.getValue() == value }
+                        .findAny()
+            } else {
+                existingExtension =
+                    extensions.stream().filter { e: Extension? -> e!!.getUrl() == url }.findAny()
+            }
+            if (existingExtension.isPresent()) {
+                return extensions.indexOf(existingExtension.get())
+            } else {
+                return -1
+            }
         }
 
-        public ArtifactAssessmentCiteAsExtension(MarkdownType citation) {
-            super(CITEAS, citation);
-        }
+        const val ARTIFACT_COMMENT_EXTENSION_URL: String =
+            "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-artifactComment"
+        const val CONTENT: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentContent"
+        const val ARTIFACT: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentArtifact"
+        const val CITEAS: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCiteAs"
+        const val TITLE: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentTitle"
+        const val DATE: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDate"
+        const val COPYRIGHT: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentCopyright"
+        const val APPROVAL_DATE: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentApprovalDate"
+        const val LAST_REVIEW_DATE: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentLastReviewDate"
+        const val WORKFLOW_STATUS: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentWorkflowStatus"
+        const val DISPOSITION: String =
+            "http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-artifactAssessmentDisposition"
     }
 }

@@ -1,220 +1,205 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import ca.uhn.fhir.context.FhirVersionEnum
+import java.util.UUID
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement
+import org.opencds.cqf.fhir.utility.FhirVersions.forClass
+import org.opencds.cqf.fhir.utility.Resources
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.opencds.cqf.fhir.utility.FhirVersions;
-import org.opencds.cqf.fhir.utility.Resources;
+abstract class BaseBackboneElementBuilder<
+    SELF : BaseBackboneElementBuilder<SELF, T>,
+    T : IBaseBackboneElement,
+> protected constructor(private val resourceClass: Class<T>) {
 
-public abstract class BaseBackboneElementBuilder<
-        SELF extends BaseBackboneElementBuilder<SELF, T>, T extends IBaseBackboneElement> {
+    protected var id: String? = UUID.randomUUID().toString()
+        private set
 
-    private final Class<T> resourceClass;
+    private var extensions: MutableList<Pair<String?, CodeableConceptSettings?>?>? = null
+    private var modifierExtensions: MutableList<Pair<String?, CodeableConceptSettings?>?>? = null
 
-    private String id = UUID.randomUUID().toString();
-
-    private List<Pair<String, CodeableConceptSettings>> extensions;
-    private List<Pair<String, CodeableConceptSettings>> modifierExtensions;
-
-    protected BaseBackboneElementBuilder(Class<T> resourceClass) {
-        checkNotNull(resourceClass);
-        this.resourceClass = resourceClass;
+    protected constructor(resourceClass: Class<T>, id: String) : this(resourceClass) {
+        this.id = id
     }
 
-    protected BaseBackboneElementBuilder(Class<T> resourceClass, String id) {
-        this(resourceClass);
-        checkNotNull(id);
+    open fun build(): T {
+        val backboneElement: T = Resources.newBackboneElement(resourceClass)
 
-        this.id = id;
-    }
-
-    public T build() {
-        T backboneElement = Resources.newBackboneElement(resourceClass);
-
-        switch (FhirVersions.forClass(resourceClass)) {
-            case DSTU3:
-                initializeDstu3(backboneElement);
-                break;
-            case R4:
-                initializeR4(backboneElement);
-                break;
-            case R5:
-                initializeR5(backboneElement);
-                break;
-            default:
-                throw new IllegalArgumentException("ResourceBuilder.initializeResource does not support FHIR version %s"
-                        .formatted(FhirVersions.forClass(resourceClass).getFhirVersionString()));
+        when (forClass<T?>(resourceClass)) {
+            FhirVersionEnum.DSTU3 -> initializeDstu3(backboneElement)
+            FhirVersionEnum.R4 -> initializeR4(backboneElement)
+            FhirVersionEnum.R5 -> initializeR5(backboneElement)
+            else ->
+                throw IllegalArgumentException(
+                    "ResourceBuilder.initializeResource does not support FHIR version ${forClass(resourceClass).fhirVersionString}"
+                )
         }
 
-        return backboneElement;
+        return backboneElement
     }
 
-    private void addExtension(Pair<String, CodeableConceptSettings> extension) {
+    private fun addExtension(extension: Pair<String?, CodeableConceptSettings?>?) {
         if (this.extensions == null) {
-            this.extensions = new ArrayList<>();
+            this.extensions = mutableListOf()
         }
-        this.extensions.add(extension);
+        this.extensions!!.add(extension)
     }
 
-    private List<Pair<String, CodeableConceptSettings>> getExtensions() {
+    private fun getExtensions(): MutableList<Pair<String?, CodeableConceptSettings?>?> {
         if (extensions == null) {
-            return Collections.emptyList();
+            return mutableListOf()
         }
-        return extensions;
+        return extensions!!
     }
 
-    protected String getId() {
-        return id;
-    }
-
-    private void addModifierExtension(Pair<String, CodeableConceptSettings> modifierExtension) {
+    private fun addModifierExtension(modifierExtension: Pair<String?, CodeableConceptSettings?>?) {
         if (this.modifierExtensions == null) {
-            this.modifierExtensions = new ArrayList<>();
+            this.modifierExtensions = mutableListOf()
         }
-        this.modifierExtensions.add(modifierExtension);
+        this.modifierExtensions!!.add(modifierExtension)
     }
 
-    private List<Pair<String, CodeableConceptSettings>> getModifierExtensions() {
+    private fun getModifierExtensions(): MutableList<Pair<String?, CodeableConceptSettings?>?> {
         if (modifierExtensions == null) {
-            return Collections.emptyList();
+            return mutableListOf()
         }
-        return modifierExtensions;
+        return modifierExtensions!!
     }
 
-    public SELF withId(String id) {
-        checkNotNull(id);
+    fun withId(id: String): SELF {
+        this.id = id
 
-        this.id = id;
-
-        return self();
+        return self()
     }
 
-    public SELF withExtension(Pair<String, CodeableConceptSettings> extension) {
-        checkNotNull(extension);
+    fun withExtension(extension: Pair<String?, CodeableConceptSettings?>): SELF {
 
-        addExtension(extension);
+        addExtension(extension)
 
-        return self();
+        return self()
     }
 
-    public SELF withModifierExtension(Pair<String, CodeableConceptSettings> modifierExtension) {
-        checkNotNull(modifierExtension);
+    fun withModifierExtension(modifierExtension: Pair<String?, CodeableConceptSettings?>): SELF {
 
-        addModifierExtension(modifierExtension);
+        addModifierExtension(modifierExtension)
 
-        return self();
+        return self()
     }
 
-    @SuppressWarnings("unchecked")
-    protected SELF self() {
-        return (SELF) this;
+    protected fun self(): SELF {
+        return this as SELF
     }
 
-    protected void initializeDstu3(T resource) {
-        getExtensions()
-                .forEach(extensionSetting -> extensionSetting
-                        .getValue()
-                        .getCodingSettings()
-                        .forEach(coding -> {
-                            org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept =
-                                    new org.hl7.fhir.dstu3.model.CodeableConcept()
-                                            .addCoding(new org.hl7.fhir.dstu3.model.Coding()
-                                                    .setSystem(coding.getSystem())
-                                                    .setCode(coding.getCode())
-                                                    .setDisplay(coding.getDisplay()));
-                            IBaseExtension<?, ?> extension = resource.addExtension();
-                            extension.setUrl(extensionSetting.getKey());
-                            extension.setValue(codeableConcept);
-                        }));
+    protected open fun initializeDstu3(resource: T?) {
+        getExtensions().forEach { extensionSetting ->
+            extensionSetting!!.second!!.codingSettings.forEach { coding ->
+                val codeableConcept =
+                    org.hl7.fhir.dstu3.model
+                        .CodeableConcept()
+                        .addCoding(
+                            org.hl7.fhir.dstu3.model
+                                .Coding()
+                                .setSystem(coding!!.system)
+                                .setCode(coding.code)
+                                .setDisplay(coding.display)
+                        )
+                val extension = resource!!.addExtension()
+                extension.url = extensionSetting.first
+                extension.value = codeableConcept
+            }
+        }
 
-        getModifierExtensions()
-                .forEach(extensionSetting -> extensionSetting
-                        .getValue()
-                        .getCodingSettings()
-                        .forEach(coding -> {
-                            org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept =
-                                    new org.hl7.fhir.dstu3.model.CodeableConcept()
-                                            .addCoding(new org.hl7.fhir.dstu3.model.Coding()
-                                                    .setSystem(coding.getSystem())
-                                                    .setCode(coding.getCode())
-                                                    .setDisplay(coding.getDisplay()));
-                            IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
-                            modifierExtension.setUrl(extensionSetting.getKey());
-                            modifierExtension.setValue(codeableConcept);
-                        }));
+        getModifierExtensions().forEach { extensionSetting ->
+            extensionSetting!!.second!!.codingSettings.forEach { coding ->
+                val codeableConcept =
+                    org.hl7.fhir.dstu3.model
+                        .CodeableConcept()
+                        .addCoding(
+                            org.hl7.fhir.dstu3.model
+                                .Coding()
+                                .setSystem(coding!!.system)
+                                .setCode(coding.code)
+                                .setDisplay(coding.display)
+                        )
+                val modifierExtension = resource!!.addModifierExtension()
+                modifierExtension.url = extensionSetting.first
+                modifierExtension.value = codeableConcept
+            }
+        }
     }
 
-    protected void initializeR4(T resource) {
-        getExtensions()
-                .forEach(extensionSetting -> extensionSetting
-                        .getValue()
-                        .getCodingSettings()
-                        .forEach(coding -> {
-                            org.hl7.fhir.r4.model.CodeableConcept codeableConcept =
-                                    new org.hl7.fhir.r4.model.CodeableConcept()
-                                            .addCoding(new org.hl7.fhir.r4.model.Coding()
-                                                    .setSystem(coding.getSystem())
-                                                    .setCode(coding.getCode())
-                                                    .setDisplay(coding.getDisplay()));
-                            IBaseExtension<?, ?> extension = resource.addExtension();
-                            extension.setUrl(extensionSetting.getKey());
-                            extension.setValue(codeableConcept);
-                        }));
+    protected open fun initializeR4(resource: T?) {
+        getExtensions().forEach { extensionSetting ->
+            extensionSetting!!.second!!.codingSettings.forEach { coding ->
+                val codeableConcept =
+                    org.hl7.fhir.r4.model
+                        .CodeableConcept()
+                        .addCoding(
+                            org.hl7.fhir.r4.model
+                                .Coding()
+                                .setSystem(coding!!.system)
+                                .setCode(coding.code)
+                                .setDisplay(coding.display)
+                        )
+                val extension = resource!!.addExtension()
+                extension.url = extensionSetting.first
+                extension.value = codeableConcept
+            }
+        }
 
-        getModifierExtensions()
-                .forEach(extensionSetting -> extensionSetting
-                        .getValue()
-                        .getCodingSettings()
-                        .forEach(coding -> {
-                            org.hl7.fhir.r4.model.CodeableConcept codeableConcept =
-                                    new org.hl7.fhir.r4.model.CodeableConcept()
-                                            .addCoding(new org.hl7.fhir.r4.model.Coding()
-                                                    .setSystem(coding.getSystem())
-                                                    .setCode(coding.getCode())
-                                                    .setDisplay(coding.getDisplay()));
-                            IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
-                            modifierExtension.setUrl(extensionSetting.getKey());
-                            modifierExtension.setValue(codeableConcept);
-                        }));
+        getModifierExtensions().forEach { extensionSetting ->
+            extensionSetting!!.second!!.codingSettings.forEach { coding: CodingSettings? ->
+                val codeableConcept =
+                    org.hl7.fhir.r4.model
+                        .CodeableConcept()
+                        .addCoding(
+                            org.hl7.fhir.r4.model
+                                .Coding()
+                                .setSystem(coding!!.system)
+                                .setCode(coding.code)
+                                .setDisplay(coding.display)
+                        )
+                val modifierExtension = resource!!.addModifierExtension()
+                modifierExtension.url = extensionSetting.first
+                modifierExtension.value = codeableConcept
+            }
+        }
     }
 
-    protected void initializeR5(T resource) {
-        getExtensions()
-                .forEach(extensionSetting -> extensionSetting
-                        .getValue()
-                        .getCodingSettings()
-                        .forEach(coding -> {
-                            org.hl7.fhir.r5.model.CodeableConcept codeableConcept =
-                                    new org.hl7.fhir.r5.model.CodeableConcept()
-                                            .addCoding(new org.hl7.fhir.r5.model.Coding()
-                                                    .setSystem(coding.getSystem())
-                                                    .setCode(coding.getCode())
-                                                    .setDisplay(coding.getDisplay()));
-                            IBaseExtension<?, ?> extension = resource.addExtension();
-                            extension.setUrl(extensionSetting.getKey());
-                            extension.setValue(codeableConcept);
-                        }));
+    protected open fun initializeR5(resource: T?) {
+        getExtensions().forEach { extensionSetting ->
+            extensionSetting!!.second!!.codingSettings.forEach { coding ->
+                val codeableConcept =
+                    org.hl7.fhir.r5.model
+                        .CodeableConcept()
+                        .addCoding(
+                            org.hl7.fhir.r5.model
+                                .Coding()
+                                .setSystem(coding!!.system)
+                                .setCode(coding.code)
+                                .setDisplay(coding.display)
+                        )
+                val extension = resource!!.addExtension()
+                extension.url = extensionSetting.first
+                extension.value = codeableConcept
+            }
+        }
 
-        getModifierExtensions()
-                .forEach(extensionSetting -> extensionSetting
-                        .getValue()
-                        .getCodingSettings()
-                        .forEach(coding -> {
-                            org.hl7.fhir.r5.model.CodeableConcept codeableConcept =
-                                    new org.hl7.fhir.r5.model.CodeableConcept()
-                                            .addCoding(new org.hl7.fhir.r5.model.Coding()
-                                                    .setSystem(coding.getSystem())
-                                                    .setCode(coding.getCode())
-                                                    .setDisplay(coding.getDisplay()));
-                            IBaseExtension<?, ?> modifierExtension = resource.addModifierExtension();
-                            modifierExtension.setUrl(extensionSetting.getKey());
-                            modifierExtension.setValue(codeableConcept);
-                        }));
+        getModifierExtensions().forEach { extensionSetting ->
+            extensionSetting!!.second!!.codingSettings.forEach { coding ->
+                val codeableConcept =
+                    org.hl7.fhir.r5.model
+                        .CodeableConcept()
+                        .addCoding(
+                            org.hl7.fhir.r5.model
+                                .Coding()
+                                .setSystem(coding!!.system)
+                                .setCode(coding.code)
+                                .setDisplay(coding.display)
+                        )
+                val modifierExtension = resource!!.addModifierExtension()
+                modifierExtension.url = extensionSetting.first
+                modifierExtension.value = codeableConcept
+            }
+        }
     }
 }

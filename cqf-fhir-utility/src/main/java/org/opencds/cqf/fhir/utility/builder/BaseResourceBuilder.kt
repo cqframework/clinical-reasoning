@@ -1,142 +1,121 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import ca.uhn.fhir.context.FhirVersionEnum
+import java.util.UUID
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.instance.model.api.IIdType
+import org.opencds.cqf.fhir.utility.Resources
 
-import com.google.common.base.Strings;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.Resources;
+abstract class BaseResourceBuilder<SELF, T : IBaseResource>
+protected constructor(private val resourceClass: Class<T>) {
 
-public abstract class BaseResourceBuilder<SELF, T extends IBaseResource> {
+    private var profile: MutableList<String?>? = null
 
-    public static final String DEFAULT_IDENTIFIER_SYSTEM = "urn:ietf:rfc:3986";
-    public static final String DEFAULT_IDENTIFIER_VALUE_PREFIX = "urn:uuid:";
+    protected var id = UUID.randomUUID().toString()
+        private set
 
-    private final Class<T> resourceClass;
-
-    private List<String> profile;
-
-    private String id = UUID.randomUUID().toString();
-    private Pair<String, String> identifier = new ImmutablePair<>(
+    protected var identifier: Pair<String?, String?>? =
+        Pair<String?, String?>(
             DEFAULT_IDENTIFIER_SYSTEM,
-            DEFAULT_IDENTIFIER_VALUE_PREFIX + UUID.randomUUID().toString());
+            DEFAULT_IDENTIFIER_VALUE_PREFIX + UUID.randomUUID().toString(),
+        )
+        private set
 
-    protected BaseResourceBuilder(Class<T> resourceClass) {
-        checkNotNull(resourceClass);
-        this.resourceClass = resourceClass;
+    protected constructor(resourceClass: Class<T>, id: String) : this(resourceClass) {
+        this.id = id
     }
 
-    protected BaseResourceBuilder(Class<T> resourceClass, String id) {
-        this(resourceClass);
-        checkNotNull(id);
-
-        this.id = id;
+    protected open fun self(): SELF {
+        @Suppress("UNCHECKED_CAST")
+        return this as SELF
     }
 
-    @SuppressWarnings("unchecked")
-    protected SELF self() {
-        return (SELF) this;
-    }
-
-    public static String ensurePatientReference(String patientId) {
-        if (Strings.isNullOrEmpty(patientId) || patientId.startsWith("Patient/")) {
-            return patientId;
-        }
-        return "Patient/" + patientId;
-    }
-
-    public static String ensureOrganizationReference(String organizationId) {
-        if (Strings.isNullOrEmpty(organizationId) || organizationId.startsWith("Organization/")) {
-            return organizationId;
-        }
-        return "Organization/" + organizationId;
-    }
-
-    private void addProfile(String profile) {
+    private fun addProfile(profile: String?) {
         if (this.profile == null) {
-            this.profile = new ArrayList<>();
+            this.profile = ArrayList<String?>()
         }
 
-        this.profile.add(profile);
+        this.profile!!.add(profile)
     }
 
-    protected List<String> getProfiles() {
-        if (profile == null) {
-            return Collections.emptyList();
+    protected val profiles: MutableList<String?>
+        get() {
+            if (profile == null) {
+                return mutableListOf()
+            }
+
+            return profile!!
         }
 
-        return profile;
+    fun withId(id: String): SELF {
+        this.id = id
+
+        return self()
     }
 
-    protected String getId() {
-        return id;
+    fun withProfile(profile: String): SELF {
+
+        addProfile(profile)
+
+        return self()
     }
 
-    protected Pair<String, String> getIdentifier() {
-        return identifier;
+    fun withIdentifier(identifier: Pair<String?, String?>?): SELF {
+        this.identifier = identifier
+
+        return self()
     }
 
-    public SELF withId(String id) {
-        checkNotNull(id);
+    open fun build(): T {
+        val resource = Resources.newResource<T, IIdType>(resourceClass, id)
 
-        this.id = id;
-
-        return self();
-    }
-
-    public SELF withProfile(String profile) {
-        checkNotNull(profile);
-
-        addProfile(profile);
-
-        return self();
-    }
-
-    public SELF withIdentifier(Pair<String, String> identifier) {
-        this.identifier = identifier;
-
-        return self();
-    }
-
-    public T build() {
-        T resource = Resources.newResource(resourceClass, id);
-
-        switch (resource.getStructureFhirVersionEnum()) {
-            case DSTU3:
-                initializeDstu3(resource);
-                break;
-            case R4:
-                initializeR4(resource);
-                break;
-            case R5:
-                initializeR5(resource);
-                break;
-            default:
-                throw new IllegalArgumentException("ResourceBuilder.initializeResource does not support FHIR version %s"
-                        .formatted(resource.getStructureFhirVersionEnum().getFhirVersionString()));
+        when (resource.structureFhirVersionEnum) {
+            FhirVersionEnum.DSTU3 -> initializeDstu3(resource)
+            FhirVersionEnum.R4 -> initializeR4(resource)
+            FhirVersionEnum.R5 -> initializeR5(resource)
+            else ->
+                throw IllegalArgumentException(
+                    "ResourceBuilder.initializeResource does not support FHIR version ${resource.structureFhirVersionEnum.fhirVersionString}"
+                )
         }
 
-        return resource;
+        return resource
     }
 
-    private void addProfiles(T resource) {
-        getProfiles().forEach(p -> resource.getMeta().addProfile(p));
+    private fun addProfiles(resource: T?) {
+        this.profiles.forEach { p -> resource!!.meta.addProfile(p) }
     }
 
-    protected void initializeDstu3(T resource) {
-        addProfiles(resource);
+    protected open fun initializeDstu3(resource: T?) {
+        addProfiles(resource)
     }
 
-    protected void initializeR4(T resource) {
-        addProfiles(resource);
+    protected open fun initializeR4(resource: T?) {
+        addProfiles(resource)
     }
 
-    protected void initializeR5(T resource) {
-        addProfiles(resource);
+    protected open fun initializeR5(resource: T?) {
+        addProfiles(resource)
+    }
+
+    companion object {
+        const val DEFAULT_IDENTIFIER_SYSTEM: String = "urn:ietf:rfc:3986"
+        const val DEFAULT_IDENTIFIER_VALUE_PREFIX: String = "urn:uuid:"
+
+        @JvmStatic
+        fun ensurePatientReference(patientId: String?): String? {
+            if (patientId.isNullOrEmpty() || patientId.startsWith("Patient/")) {
+                return patientId
+            }
+            return "Patient/$patientId"
+        }
+
+        @JvmStatic
+        fun ensureOrganizationReference(organizationId: String?): String? {
+            if (organizationId.isNullOrEmpty() || organizationId.startsWith("Organization/")) {
+                return organizationId
+            }
+            return "Organization/$organizationId"
+        }
     }
 }

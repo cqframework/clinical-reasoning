@@ -1,13 +1,8 @@
-package org.opencds.cqf.fhir.utility.client;
+package org.opencds.cqf.fhir.utility.client
 
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import ca.uhn.fhir.interceptor.api.Hook
+import ca.uhn.fhir.interceptor.api.Pointcut
+import ca.uhn.fhir.rest.client.api.IHttpRequest
 
 /**
  * This file is a copy of AdditionalRequestHeadersInterceptor from the HAPI-FHIR-Client package. It
@@ -18,69 +13,56 @@ import java.util.Objects;
  * This interceptor adds arbitrary header values to requests made by the client.
  *
  * This is now also possible directly on the Fluent Client API by calling
- * {@link ca.uhn.fhir.rest.gclient.IClientExecutable#withAdditionalHeader(String, String)}
+ * [ca.uhn.fhir.rest.gclient.IClientExecutable.withAdditionalHeader]
  */
-public class AdditionalRequestHeadersInterceptor {
-    private final Map<String, List<String>> additionalHttpHeaders;
-
-    /**
-     * Constructor
-     */
-    public AdditionalRequestHeadersInterceptor() {
-        additionalHttpHeaders = new HashMap<>();
-    }
+class AdditionalRequestHeadersInterceptor() {
+    private val additionalHttpHeaders = mutableMapOf<String?, MutableList<String?>?>()
 
     /**
      * Constructor
      *
      * @param headers The additional headers to add to every request
      */
-    public AdditionalRequestHeadersInterceptor(Map<String, List<String>> headers) {
-        this();
+    constructor(headers: MutableMap<String?, MutableList<String?>?>?) : this() {
         if (headers != null) {
-            additionalHttpHeaders.putAll(headers);
+            additionalHttpHeaders.putAll(headers)
         }
     }
 
     /**
-     * Adds the given header value. Note that {@code headerName} and {@code headerValue} cannot be
-     * null.
+     * Adds the given header value. Note that `headerName` and `headerValue` cannot be null.
      *
      * @param headerName the name of the header
      * @param headerValue the value to add for the header
-     * @throws NullPointerException if either parameter is {@code null}
+     * @throws NullPointerException if either parameter is `null`
      */
-    public void addHeaderValue(String headerName, String headerValue) {
-        Objects.requireNonNull(headerName, "headerName cannot be null");
-        Objects.requireNonNull(headerValue, "headerValue cannot be null");
+    fun addHeaderValue(headerName: String, headerValue: String) {
 
-        getHeaderValues(headerName).add(headerValue);
+        getHeaderValues(headerName)!!.add(headerValue)
     }
 
     /**
-     * Adds the list of header values for the given header. Note that {@code headerName} and
-     * {@code headerValues} cannot be null.
+     * Adds the list of header values for the given header. Note that `headerName` and
+     * `headerValues` cannot be null.
      *
      * @param headerName the name of the header
      * @param headerValues the list of values to add for the header
-     * @throws NullPointerException if either parameter is {@code null}
+     * @throws NullPointerException if either parameter is `null`
      */
-    public void addAllHeaderValues(String headerName, List<String> headerValues) {
-        Objects.requireNonNull(headerName, "headerName cannot be null");
-        Objects.requireNonNull(headerValues, "headerValues cannot be null");
+    fun addAllHeaderValues(headerName: String, headerValues: MutableList<String?>) {
 
-        getHeaderValues(headerName).addAll(headerValues);
+        getHeaderValues(headerName)!!.addAll(headerValues)
     }
 
     /**
-     * Gets the header values list for a given header. If the header doesn't have any values, an empty
-     * list will be returned.
+     * Gets the header values list for a given header. If the header doesn't have any values, an
+     * empty list will be returned.
      *
      * @param headerName the name of the header
      * @return the list of values for the header
      */
-    private List<String> getHeaderValues(String headerName) {
-        return additionalHttpHeaders.computeIfAbsent(headerName, x -> new ArrayList<>());
+    private fun getHeaderValues(headerName: String?): MutableList<String?>? {
+        return additionalHttpHeaders.computeIfAbsent(headerName) { mutableListOf() }
     }
 
     /**
@@ -89,11 +71,11 @@ public class AdditionalRequestHeadersInterceptor {
      * @param request the HTTP request
      */
     @Hook(Pointcut.CLIENT_REQUEST)
-    public void interceptRequest(IHttpRequest request) {
-        for (Map.Entry<String, List<String>> header : additionalHttpHeaders.entrySet()) {
-            for (String headerValue : header.getValue()) {
+    fun interceptRequest(request: IHttpRequest) {
+        for (header in additionalHttpHeaders.entries) {
+            for (headerValue in header.value!!) {
                 if (headerValue != null) {
-                    request.addHeader(header.getKey(), headerValue);
+                    request.addHeader(header.key, headerValue)
                 }
             }
         }

@@ -1,31 +1,23 @@
-package org.opencds.cqf.fhir.utility.client.terminology;
+package org.opencds.cqf.fhir.utility.client.terminology
 
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirContext
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.opencds.cqf.fhir.utility.Resources.getClassForTypeAndVersion
 
-import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.Resources;
+abstract class BaseTerminologyProvider(protected val fhirContext: FhirContext) :
+    ITerminologyProvider {
 
-public abstract class BaseTerminologyProvider implements ITerminologyProvider {
-    protected final FhirContext fhirContext;
-
-    public BaseTerminologyProvider(FhirContext fhirContext) {
-        this.fhirContext = requireNonNull(fhirContext);
+    protected fun getAddressBase(address: String): String {
+        return ITerminologyServerClient.getAddressBase(address, this.fhirContext)
     }
 
-    protected String getAddressBase(String address) {
-        return ITerminologyServerClient.getAddressBase(address, this.fhirContext);
-    }
+    override val codeSystemClass: Class<out IBaseResource>
+        get() {
+            return getClassForTypeAndVersion("CodeSystem", fhirContext.version.version)
+        }
 
-    @Override
-    public Class<? extends IBaseResource> getCodeSystemClass() {
-        return Resources.getClassForTypeAndVersion(
-                "CodeSystem", fhirContext.getVersion().getVersion());
-    }
-
-    @Override
-    public Class<? extends IBaseResource> getValueSetClass() {
-        return Resources.getClassForTypeAndVersion(
-                "ValueSet", fhirContext.getVersion().getVersion());
-    }
+    override val valueSetClass: Class<out IBaseResource>
+        get() {
+            return getClassForTypeAndVersion("ValueSet", fhirContext.version.version)
+        }
 }

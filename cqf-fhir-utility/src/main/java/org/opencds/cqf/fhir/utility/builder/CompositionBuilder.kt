@@ -1,195 +1,193 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Date
+import org.hl7.fhir.instance.model.api.IDomainResource
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r5.model.Enumerations.CompositionStatus;
+class CompositionBuilder<T : IDomainResource> :
+    BaseDomainResourceBuilder<CompositionBuilder<T>, T> {
+    private var status: String? = null
+    private var title: String? = null
+    private var type: CodeableConceptSettings? = null
+    private var subject: String? = null
+    private var author: String? = null
+    private var custodian: String? = null
 
-public class CompositionBuilder<T extends IDomainResource> extends BaseDomainResourceBuilder<CompositionBuilder<T>, T> {
+    private var date = Date()
 
-    private String status;
-    private String title;
-    private CodeableConceptSettings type;
-    private String subject;
-    private String author;
-    private String custodian;
+    constructor(resourceClass: Class<T>) : super(resourceClass)
 
-    private Date date = new Date();
+    constructor(resourceClass: Class<T>, id: String) : super(resourceClass, id)
 
-    public CompositionBuilder(Class<T> resourceClass) {
-        super(resourceClass);
+    constructor(
+        resourceClass: Class<T>,
+        id: String,
+        type: CodeableConceptSettings,
+        status: String,
+        author: String,
+        title: String,
+    ) : this(resourceClass, id) {
+        this.type = type
+        this.status = status
+        this.author = author
+        this.title = title
     }
 
-    public CompositionBuilder(Class<T> resourceClass, String id) {
-        super(resourceClass, id);
+    fun withStatus(status: String): CompositionBuilder<T> {
+
+        this.status = status
+
+        return this
     }
 
-    public CompositionBuilder(
-            Class<T> resourceClass,
-            String id,
-            CodeableConceptSettings type,
-            String status,
-            String author,
-            String title) {
-        this(resourceClass, id);
-        checkNotNull(type);
-        checkNotNull(status);
-        checkNotNull(author);
-        checkNotNull(title);
+    fun withTitle(title: String): CompositionBuilder<T> {
 
-        this.type = type;
-        this.status = status;
-        this.author = author;
-        this.title = title;
+        this.title = title
+
+        return this
     }
 
-    public CompositionBuilder<T> withStatus(String status) {
-        checkNotNull(status);
+    fun withType(type: CodeableConceptSettings): CompositionBuilder<T> {
 
-        this.status = status;
+        this.type = type
 
-        return this;
+        return this
     }
 
-    public CompositionBuilder<T> withTitle(String title) {
-        checkNotNull(title);
+    fun withDate(date: Date): CompositionBuilder<T> {
 
-        this.title = title;
+        this.date = date
 
-        return this;
+        return this
     }
 
-    public CompositionBuilder<T> withType(CodeableConceptSettings type) {
-        checkNotNull(type);
+    fun withSubject(subject: String?): CompositionBuilder<T> {
+        this.subject = BaseResourceBuilder.ensurePatientReference(subject)
 
-        this.type = type;
-
-        return this;
+        return this
     }
 
-    public CompositionBuilder<T> withDate(Date date) {
-        checkNotNull(date);
+    fun withAuthor(author: String): CompositionBuilder<T> {
+        require(
+            author.startsWith("Practitioner") ||
+                author.startsWith("PractitionerRole") ||
+                author.startsWith("Device") ||
+                author.startsWith("Patient") ||
+                author.startsWith("RelatedPerson") ||
+                author.startsWith("Organization")
+        )
+        this.author = author
 
-        this.date = date;
-
-        return this;
+        return this
     }
 
-    public CompositionBuilder<T> withSubject(String subject) {
-        this.subject = ensurePatientReference(subject);
+    fun withCustodian(custodian: String?): CompositionBuilder<T> {
+        this.custodian = BaseResourceBuilder.ensureOrganizationReference(custodian)
 
-        return this;
+        return this
     }
 
-    public CompositionBuilder<T> withAuthor(String author) {
-        checkNotNull(author);
-        checkArgument(author.startsWith("Practitioner")
-                || author.startsWith("PractitionerRole")
-                || author.startsWith("Device")
-                || author.startsWith("Patient")
-                || author.startsWith("RelatedPerson")
-                || author.startsWith("Organization"));
-        this.author = author;
+    override fun build(): T {
+        requireNotNull(type)
+        requireNotNull(status)
+        requireNotNull(author)
+        requireNotNull(title)
 
-        return this;
+        require(type!!.codingSettings.isNotEmpty() && type!!.codingSettings.size == 1)
+
+        return super.build()
     }
 
-    public CompositionBuilder<T> withCustodian(String custodian) {
-        this.custodian = ensureOrganizationReference(custodian);
+    private val typeSetting: CodingSettings?
+        get() = type!!.codingSettingsArray[0]
 
-        return this;
-    }
-
-    @Override
-    public T build() {
-        checkNotNull(type);
-        checkNotNull(status);
-        checkNotNull(author);
-        checkNotNull(title);
-
-        checkArgument(
-                !type.getCodingSettings().isEmpty() && type.getCodingSettings().size() == 1);
-
-        return super.build();
-    }
-
-    private CodingSettings getTypeSetting() {
-        return type.getCodingSettingsArray()[0];
-    }
-
-    @Override
-    protected void initializeDstu3(T resource) {
-        super.initializeDstu3(resource);
-        org.hl7.fhir.dstu3.model.Composition composition = (org.hl7.fhir.dstu3.model.Composition) resource;
+    override fun initializeDstu3(resource: T?) {
+        super.initializeDstu3(resource)
+        val composition = resource as org.hl7.fhir.dstu3.model.Composition
 
         composition
-                .setDate(date)
-                .setIdentifier(new org.hl7.fhir.dstu3.model.Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setStatus(org.hl7.fhir.dstu3.model.Composition.CompositionStatus.valueOf(status))
-                .setSubject(new org.hl7.fhir.dstu3.model.Reference(subject))
-                .setTitle(title)
-                .setType(new org.hl7.fhir.dstu3.model.CodeableConcept()
-                        .addCoding(new org.hl7.fhir.dstu3.model.Coding()
-                                .setSystem(getTypeSetting().getSystem())
-                                .setCode(getTypeSetting().getCode())
-                                .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.dstu3.model.Reference(author))
-                .setCustodian(new org.hl7.fhir.dstu3.model.Reference(custodian));
+            .setDate(date)
+            .setIdentifier(
+                org.hl7.fhir.dstu3.model
+                    .Identifier()
+                    .setSystem(this.identifier!!.first)
+                    .setValue(this.identifier!!.second)
+            )
+            .setStatus(org.hl7.fhir.dstu3.model.Composition.CompositionStatus.valueOf(status!!))
+            .setSubject(org.hl7.fhir.dstu3.model.Reference(subject))
+            .setTitle(title)
+            .setType(
+                org.hl7.fhir.dstu3.model
+                    .CodeableConcept()
+                    .addCoding(
+                        org.hl7.fhir.dstu3.model
+                            .Coding()
+                            .setSystem(this.typeSetting!!.system)
+                            .setCode(this.typeSetting!!.code)
+                            .setDisplay(this.typeSetting!!.display)
+                    )
+            )
+            .addAuthor(org.hl7.fhir.dstu3.model.Reference(author))
+            .setCustodian(org.hl7.fhir.dstu3.model.Reference(custodian))
     }
 
-    @Override
-    protected void initializeR4(T resource) {
-        super.initializeR4(resource);
-        org.hl7.fhir.r4.model.Composition composition = (org.hl7.fhir.r4.model.Composition) resource;
+    override fun initializeR4(resource: T?) {
+        super.initializeR4(resource)
+        val composition = resource as org.hl7.fhir.r4.model.Composition
 
         composition
-                .setDate(date)
-                .setIdentifier(new org.hl7.fhir.r4.model.Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setStatus(org.hl7.fhir.r4.model.Composition.CompositionStatus.valueOf(status))
-                .setSubject(new org.hl7.fhir.r4.model.Reference(subject))
-                .setTitle(title)
-                .setType(new org.hl7.fhir.r4.model.CodeableConcept()
-                        .addCoding(new org.hl7.fhir.r4.model.Coding()
-                                .setSystem(getTypeSetting().getSystem())
-                                .setCode(getTypeSetting().getCode())
-                                .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.r4.model.Reference(author))
-                .setCustodian(new org.hl7.fhir.r4.model.Reference(custodian));
+            .setDate(date)
+            .setIdentifier(
+                org.hl7.fhir.r4.model
+                    .Identifier()
+                    .setSystem(this.identifier!!.first)
+                    .setValue(this.identifier!!.second)
+            )
+            .setStatus(org.hl7.fhir.r4.model.Composition.CompositionStatus.valueOf(status!!))
+            .setSubject(org.hl7.fhir.r4.model.Reference(subject))
+            .setTitle(title)
+            .setType(
+                org.hl7.fhir.r4.model
+                    .CodeableConcept()
+                    .addCoding(
+                        org.hl7.fhir.r4.model
+                            .Coding()
+                            .setSystem(this.typeSetting!!.system)
+                            .setCode(this.typeSetting!!.code)
+                            .setDisplay(this.typeSetting!!.display)
+                    )
+            )
+            .addAuthor(org.hl7.fhir.r4.model.Reference(author))
+            .setCustodian(org.hl7.fhir.r4.model.Reference(custodian))
     }
 
-    @Override
-    protected void initializeR5(T resource) {
-        super.initializeR5(resource);
-        org.hl7.fhir.r5.model.Composition composition = (org.hl7.fhir.r5.model.Composition) resource;
-        List<org.hl7.fhir.r5.model.Identifier> r5Identifiers = new ArrayList<>();
-        org.hl7.fhir.r5.model.Identifier r5Identifier = new org.hl7.fhir.r5.model.Identifier();
-        r5Identifier
-                .setSystem(getIdentifier().getKey())
-                .setValue(getIdentifier().getValue());
-        r5Identifiers.add(r5Identifier);
-        List<org.hl7.fhir.r5.model.Reference> r5References = new ArrayList<>();
-        org.hl7.fhir.r5.model.Reference r5Reference = new org.hl7.fhir.r5.model.Reference(subject);
-        r5References.add(r5Reference);
+    override fun initializeR5(resource: T?) {
+        super.initializeR5(resource)
+        val composition = resource as org.hl7.fhir.r5.model.Composition
+        val r5Identifiers = mutableListOf<org.hl7.fhir.r5.model.Identifier?>()
+        val r5Identifier = org.hl7.fhir.r5.model.Identifier()
+        r5Identifier.setSystem(this.identifier!!.first).setValue(this.identifier!!.second)
+        r5Identifiers.add(r5Identifier)
+        val r5References = mutableListOf<org.hl7.fhir.r5.model.Reference?>()
+        val r5Reference = org.hl7.fhir.r5.model.Reference(subject)
+        r5References.add(r5Reference)
         composition
-                .setDate(date)
-                .setIdentifier(r5Identifiers)
-                .setStatus(CompositionStatus.valueOf(status))
-                .setSubject(r5References)
-                .setTitle(title)
-                .setType(new org.hl7.fhir.r5.model.CodeableConcept()
-                        .addCoding(new org.hl7.fhir.r5.model.Coding()
-                                .setSystem(getTypeSetting().getSystem())
-                                .setCode(getTypeSetting().getCode())
-                                .setDisplay(getTypeSetting().getDisplay())))
-                .addAuthor(new org.hl7.fhir.r5.model.Reference(author))
-                .setCustodian(new org.hl7.fhir.r5.model.Reference(custodian));
+            .setDate(date)
+            .setIdentifier(r5Identifiers)
+            .setStatus(org.hl7.fhir.r5.model.Enumerations.CompositionStatus.valueOf(status!!))
+            .setSubject(r5References)
+            .setTitle(title)
+            .setType(
+                org.hl7.fhir.r5.model
+                    .CodeableConcept()
+                    .addCoding(
+                        org.hl7.fhir.r5.model
+                            .Coding()
+                            .setSystem(this.typeSetting!!.system)
+                            .setCode(this.typeSetting!!.code)
+                            .setDisplay(this.typeSetting!!.display)
+                    )
+            )
+            .addAuthor(org.hl7.fhir.r5.model.Reference(author))
+            .setCustodian(org.hl7.fhir.r5.model.Reference(custodian))
     }
 }

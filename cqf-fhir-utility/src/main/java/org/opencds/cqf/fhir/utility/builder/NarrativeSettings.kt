@@ -1,24 +1,16 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-public class NarrativeSettings {
+class NarrativeSettings {
+    val text: String?
+    var status: String? = "generated"
+        private set
 
-    private String text;
-    private String status = "generated";
-
-    public NarrativeSettings(String text) {
-        this.text = text;
+    constructor(text: String?) {
+        this.text = text
     }
 
-    public NarrativeSettings(String text, String status) {
-        this.text = text;
-        this.status = status;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public String getStatus() {
-        return this.status;
+    constructor(text: String?, status: String?) {
+        this.text = text
+        this.status = status
     }
 }

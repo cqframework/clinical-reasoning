@@ -1,89 +1,84 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Date
+import org.hl7.fhir.instance.model.api.IBaseBundle
 
-import java.util.Date;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+class BundleBuilder<T : IBaseBundle> : BaseResourceBuilder<BundleBuilder<T>, T> {
+    private var type: String? = null
 
-public class BundleBuilder<T extends IBaseBundle> extends BaseResourceBuilder<BundleBuilder<T>, T> {
+    private var timestamp: Date? = Date()
 
-    private String type;
+    constructor(resourceClass: Class<T>) : super(resourceClass)
 
-    private Date timestamp = new Date();
+    constructor(resourceClass: Class<T>, id: String) : super(resourceClass, id)
 
-    public BundleBuilder(Class<T> resourceClass) {
-        super(resourceClass);
+    constructor(resourceClass: Class<T>, id: String, type: String) : this(resourceClass, id) {
+
+        this.type = type
     }
 
-    public BundleBuilder(Class<T> resourceClass, String id) {
-        super(resourceClass, id);
+    fun withType(type: String): BundleBuilder<T> {
+
+        this.type = type
+
+        return this
     }
 
-    public BundleBuilder(Class<T> resourceClass, String id, String type) {
-        this(resourceClass, id);
-        checkNotNull(type);
+    fun withTimestamp(timestamp: Date?): BundleBuilder<T> {
+        this.timestamp = timestamp
 
-        this.type = type;
+        return this
     }
 
-    public BundleBuilder<T> withType(String type) {
-        checkNotNull(type);
+    override fun build(): T {
+        requireNotNull(type)
 
-        this.type = type;
-
-        return this;
+        return super.build()
     }
 
-    public BundleBuilder<T> withTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
+    override fun initializeDstu3(resource: T?) {
+        super.initializeDstu3(resource)
+        val bundle = resource as org.hl7.fhir.dstu3.model.Bundle
 
-        return this;
+        bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.valueOf(type!!))
+
+        bundle.setIdentifier(
+            org.hl7.fhir.dstu3.model
+                .Identifier()
+                .setSystem(this.identifier!!.first)
+                .setValue(this.identifier!!.second)
+        )
     }
 
-    @Override
-    public T build() {
-        checkNotNull(type);
+    override fun initializeR4(resource: T?) {
+        super.initializeR4(resource)
+        val bundle = resource as org.hl7.fhir.r4.model.Bundle
 
-        return super.build();
+        bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.valueOf(type!!))
+
+        bundle.setIdentifier(
+            org.hl7.fhir.r4.model
+                .Identifier()
+                .setSystem(this.identifier!!.first)
+                .setValue(this.identifier!!.second)
+        )
+
+        bundle.setTimestamp(timestamp)
     }
 
-    @Override
-    protected void initializeDstu3(T resource) {
-        super.initializeDstu3(resource);
-        org.hl7.fhir.dstu3.model.Bundle bundle = (org.hl7.fhir.dstu3.model.Bundle) resource;
+    override fun initializeR5(resource: T?) {
+        super.initializeR5(resource)
+        val bundle = resource as org.hl7.fhir.r5.model.Bundle
 
-        bundle.setType(org.hl7.fhir.dstu3.model.Bundle.BundleType.valueOf(type));
+        bundle.setType(org.hl7.fhir.r5.model.Bundle.BundleType.valueOf(type!!))
 
-        bundle.setIdentifier(new org.hl7.fhir.dstu3.model.Identifier()
-                .setSystem(getIdentifier().getKey())
-                .setValue(getIdentifier().getValue()));
-    }
+        bundle.setIdentifier(
+            org.hl7.fhir.r5.model
+                .Identifier()
+                .setSystem(this.identifier!!.first)
+                .setValue(this.identifier!!.second)
+        )
 
-    @Override
-    protected void initializeR4(T resource) {
-        super.initializeR4(resource);
-        org.hl7.fhir.r4.model.Bundle bundle = (org.hl7.fhir.r4.model.Bundle) resource;
-
-        bundle.setType(org.hl7.fhir.r4.model.Bundle.BundleType.valueOf(type));
-
-        bundle.setIdentifier(new org.hl7.fhir.r4.model.Identifier()
-                .setSystem(getIdentifier().getKey())
-                .setValue(getIdentifier().getValue()));
-
-        bundle.setTimestamp(timestamp);
-    }
-
-    @Override
-    protected void initializeR5(T resource) {
-        super.initializeR5(resource);
-        org.hl7.fhir.r5.model.Bundle bundle = (org.hl7.fhir.r5.model.Bundle) resource;
-
-        bundle.setType(org.hl7.fhir.r5.model.Bundle.BundleType.valueOf(type));
-
-        bundle.setIdentifier(new org.hl7.fhir.r5.model.Identifier()
-                .setSystem(getIdentifier().getKey())
-                .setValue(getIdentifier().getValue()));
-
-        bundle.setTimestamp(timestamp);
+        bundle.setTimestamp(timestamp)
     }
 }

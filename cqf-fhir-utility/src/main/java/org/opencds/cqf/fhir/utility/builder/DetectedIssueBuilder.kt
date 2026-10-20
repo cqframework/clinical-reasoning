@@ -1,159 +1,163 @@
-package org.opencds.cqf.fhir.utility.builder;
+package org.opencds.cqf.fhir.utility.builder
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.hl7.fhir.instance.model.api.IDomainResource
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.hl7.fhir.dstu3.model.DetectedIssue.DetectedIssueStatus;
-import org.hl7.fhir.instance.model.api.IDomainResource;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueEvidenceComponent;
-import org.hl7.fhir.r5.model.DetectedIssue;
+class DetectedIssueBuilder<T : IDomainResource> :
+    BaseDomainResourceBuilder<DetectedIssueBuilder<T>, T> {
+    private var status: String? = null
+    private var c: CodeableConceptSettings? = null
+    private var patient: String? = null
+    private var evidenceDetails: MutableList<String?>? = null
 
-public class DetectedIssueBuilder<T extends IDomainResource>
-        extends BaseDomainResourceBuilder<DetectedIssueBuilder<T>, T> {
+    constructor(resourceClass: Class<T>) : super(resourceClass)
 
-    private String status;
-    private CodeableConceptSettings c;
-    private String patient;
-    private List<String> evidenceDetails;
+    constructor(resourceClass: Class<T>, id: String) : super(resourceClass, id)
 
-    public DetectedIssueBuilder(Class<T> resourceClass) {
-        super(resourceClass);
+    constructor(
+        resourceClass: Class<T>,
+        id: String,
+        status: String,
+        evidenceDetail: String,
+    ) : super(resourceClass, id) {
+        this.status = status
+        addEvidenceDetail(evidenceDetail)
     }
 
-    public DetectedIssueBuilder(Class<T> resourceClass, String id) {
-        super(resourceClass, id);
-    }
-
-    public DetectedIssueBuilder(Class<T> resourceClass, String id, String status, String evidenceDetail) {
-        super(resourceClass, id);
-        checkNotNull(status);
-        checkNotNull(evidenceDetail);
-
-        this.status = status;
-        addEvidenceDetail(evidenceDetail);
-    }
-
-    private void addEvidenceDetail(String evidenceDetail) {
+    private fun addEvidenceDetail(evidenceDetail: String?) {
         if (evidenceDetails == null) {
-            evidenceDetails = new ArrayList<>();
+            evidenceDetails = mutableListOf()
         }
 
-        evidenceDetails.add(evidenceDetail);
+        evidenceDetails!!.add(evidenceDetail)
     }
 
-    private List<String> getEvidenceDetails() {
+    private fun getEvidenceDetails(): MutableList<String?> {
         if (evidenceDetails == null) {
-            return Collections.emptyList();
+            return mutableListOf()
         }
 
-        return evidenceDetails;
+        return evidenceDetails!!
     }
 
-    public DetectedIssueBuilder<T> withStatus(String status) {
-        this.status = status;
+    fun withStatus(status: String?): DetectedIssueBuilder<T> {
+        this.status = status
 
-        return this;
+        return this
     }
 
-    public DetectedIssueBuilder<T> withCode(CodeableConceptSettings code) {
-        checkNotNull(code);
+    fun withCode(code: CodeableConceptSettings): DetectedIssueBuilder<T> {
 
-        c = code;
+        c = code
 
-        return this;
+        return this
     }
 
-    public DetectedIssueBuilder<T> withPatient(String patient) {
-        this.patient = ensurePatientReference(patient);
+    fun withPatient(patient: String?): DetectedIssueBuilder<T> {
+        this.patient = BaseResourceBuilder.ensurePatientReference(patient)
 
-        return this;
+        return this
     }
 
-    public DetectedIssueBuilder<T> withEvidenceDetail(String evidenceDetail) {
-        checkNotNull(evidenceDetail);
+    fun withEvidenceDetail(evidenceDetail: String): DetectedIssueBuilder<T> {
 
-        addEvidenceDetail(evidenceDetail);
+        addEvidenceDetail(evidenceDetail)
 
-        return this;
+        return this
     }
 
-    @Override
-    public T build() {
-        checkNotNull(status);
-        checkNotNull(evidenceDetails);
-        checkArgument(!evidenceDetails.isEmpty());
+    override fun build(): T {
+        requireNotNull(status)
+        requireNotNull(evidenceDetails)
+        require(evidenceDetails!!.isNotEmpty())
 
-        return super.build();
+        return super.build()
     }
 
-    private CodingSettings getCodeSetting() {
-        return c.getCodingSettingsArray()[0];
-    }
+    private val codeSetting: CodingSettings?
+        get() = c!!.codingSettingsArray[0]
 
-    @Override
-    protected void initializeDstu3(T resource) {
-        super.initializeDstu3(resource);
-        org.hl7.fhir.dstu3.model.DetectedIssue detectedIssue = (org.hl7.fhir.dstu3.model.DetectedIssue) resource;
+    override fun initializeDstu3(resource: T?) {
+        super.initializeDstu3(resource)
+        val detectedIssue = resource as org.hl7.fhir.dstu3.model.DetectedIssue
 
         detectedIssue
-                .setIdentifier(new org.hl7.fhir.dstu3.model.Identifier()
-                        .setSystem(getIdentifier().getKey())
-                        .setValue(getIdentifier().getValue()))
-                .setPatient(new org.hl7.fhir.dstu3.model.Reference(patient))
-                .setStatus(DetectedIssueStatus.valueOf(status));
-        getEvidenceDetails().forEach(detectedIssue::setReference);
+            .setIdentifier(
+                org.hl7.fhir.dstu3.model
+                    .Identifier()
+                    .setSystem(this.identifier!!.first)
+                    .setValue(this.identifier!!.second)
+            )
+            .setPatient(org.hl7.fhir.dstu3.model.Reference(patient))
+            .setStatus(org.hl7.fhir.dstu3.model.DetectedIssue.DetectedIssueStatus.valueOf(status!!))
+        getEvidenceDetails().forEach { value -> detectedIssue.setReference(value) }
     }
 
-    @Override
-    protected void initializeR4(T resource) {
-        super.initializeR4(resource);
-        org.hl7.fhir.r4.model.DetectedIssue detectedIssue = (org.hl7.fhir.r4.model.DetectedIssue) resource;
+    override fun initializeR4(resource: T?) {
+        super.initializeR4(resource)
+        val detectedIssue = resource as org.hl7.fhir.r4.model.DetectedIssue
 
-        List<org.hl7.fhir.r4.model.Identifier> identifier = new ArrayList<>();
-        identifier.add(new org.hl7.fhir.r4.model.Identifier()
-                .setSystem(getIdentifier().getKey())
-                .setValue(getIdentifier().getValue()));
+        val identifier = mutableListOf<org.hl7.fhir.r4.model.Identifier?>()
+        identifier.add(
+            org.hl7.fhir.r4.model
+                .Identifier()
+                .setSystem(this.identifier!!.first)
+                .setValue(this.identifier!!.second)
+        )
 
         detectedIssue
-                .setIdentifier(identifier)
-                .setPatient(new org.hl7.fhir.r4.model.Reference(patient))
-                .setStatus(org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueStatus.valueOf(status))
-                .setCode(new CodeableConcept()
-                        .addCoding(new Coding()
-                                .setSystem(getCodeSetting().getSystem())
-                                .setCode(getCodeSetting().getCode())
-                                .setDisplay(getCodeSetting().getDisplay())));
-        getEvidenceDetails()
-                .forEach(evidence -> detectedIssue.addEvidence(
-                        new DetectedIssueEvidenceComponent().addDetail(new org.hl7.fhir.r4.model.Reference(evidence))));
+            .setIdentifier(identifier)
+            .setPatient(org.hl7.fhir.r4.model.Reference(patient))
+            .setStatus(org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueStatus.valueOf(status!!))
+            .setCode(
+                org.hl7.fhir.r4.model
+                    .CodeableConcept()
+                    .addCoding(
+                        org.hl7.fhir.r4.model
+                            .Coding()
+                            .setSystem(this.codeSetting!!.system)
+                            .setCode(this.codeSetting!!.code)
+                            .setDisplay(this.codeSetting!!.display)
+                    )
+            )
+        getEvidenceDetails().forEach { evidence ->
+            detectedIssue.addEvidence(
+                org.hl7.fhir.r4.model.DetectedIssue.DetectedIssueEvidenceComponent()
+                    .addDetail(org.hl7.fhir.r4.model.Reference(evidence))
+            )
+        }
     }
 
-    @Override
-    protected void initializeR5(T resource) {
-        super.initializeR5(resource);
-        org.hl7.fhir.r5.model.DetectedIssue detectedIssue = (org.hl7.fhir.r5.model.DetectedIssue) resource;
+    override fun initializeR5(resource: T?) {
+        super.initializeR5(resource)
+        val detectedIssue = resource as org.hl7.fhir.r5.model.DetectedIssue
 
-        List<org.hl7.fhir.r5.model.Identifier> identifier = new ArrayList<>();
-        identifier.add(new org.hl7.fhir.r5.model.Identifier()
-                .setSystem(getIdentifier().getKey())
-                .setValue(getIdentifier().getValue()));
+        val identifier = mutableListOf<org.hl7.fhir.r5.model.Identifier?>()
+        identifier.add(
+            org.hl7.fhir.r5.model
+                .Identifier()
+                .setSystem(this.identifier!!.first)
+                .setValue(this.identifier!!.second)
+        )
 
         detectedIssue
-                .setIdentifier(identifier)
-                .setStatus(DetectedIssue.DetectedIssueStatus.valueOf(status))
-                .setCode(new org.hl7.fhir.r5.model.CodeableConcept()
-                        .addCoding(new org.hl7.fhir.r5.model.Coding()
-                                .setSystem(getCodeSetting().getSystem())
-                                .setCode(getCodeSetting().getCode())
-                                .setDisplay(getCodeSetting().getDisplay())));
-        getEvidenceDetails()
-                .forEach(evidence -> detectedIssue.addEvidence(
-                        new org.hl7.fhir.r5.model.DetectedIssue.DetectedIssueEvidenceComponent()
-                                .addDetail(new org.hl7.fhir.r5.model.Reference(evidence))));
+            .setIdentifier(identifier)
+            .setStatus(org.hl7.fhir.r5.model.DetectedIssue.DetectedIssueStatus.valueOf(status!!))
+            .setCode(
+                org.hl7.fhir.r5.model
+                    .CodeableConcept()
+                    .addCoding(
+                        org.hl7.fhir.r5.model
+                            .Coding()
+                            .setSystem(this.codeSetting!!.system)
+                            .setCode(this.codeSetting!!.code)
+                            .setDisplay(this.codeSetting!!.display)
+                    )
+            )
+        getEvidenceDetails().forEach { evidence ->
+            detectedIssue.addEvidence(
+                org.hl7.fhir.r5.model.DetectedIssue.DetectedIssueEvidenceComponent()
+                    .addDetail(org.hl7.fhir.r5.model.Reference(evidence))
+            )
+        }
     }
 }

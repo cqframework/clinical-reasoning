@@ -1,30 +1,29 @@
-package org.opencds.cqf.fhir.utility.monad;
+package org.opencds.cqf.fhir.utility.monad
 
-import java.util.function.Supplier;
+import java.util.function.Supplier
 
-public class Tries {
-
-    private Tries() {
-        // intentionally empty
+object Tries {
+    @JvmStatic
+    fun <T : Any> of(error: Exception?, value: T?): Try<T> {
+        return if (error != null) ofException(error) else of(value!!)
     }
 
-    public static <T> Try<T> of(Exception error, T value) {
-        return error != null ? ofException(error) : of(value);
+    @JvmStatic
+    fun <T : Any> ofException(error: Exception): Try<T> {
+        return Try(error, null)
     }
 
-    public static <T> Try<T> ofException(Exception error) {
-        return new Try<>(error, null);
+    @JvmStatic
+    fun <T : Any> of(value: T): Try<T> {
+        return Try(null, value)
     }
 
-    public static <T> Try<T> of(T value) {
-        return new Try<>(null, value);
-    }
-
-    public static <T> Try<T> of(Supplier<T> valueSupplier) {
+    @JvmStatic
+    fun <T : Any> of(valueSupplier: Supplier<T>): Try<T> {
         try {
-            return of(valueSupplier.get());
-        } catch (Exception e) {
-            return ofException(e);
+            return of(valueSupplier.get())
+        } catch (e: Exception) {
+            return ofException(e)
         }
     }
 }

@@ -1,82 +1,71 @@
-package org.opencds.cqf.fhir.utility.matcher;
+package org.opencds.cqf.fhir.utility.matcher
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.r5.model.CodeType;
-import org.hl7.fhir.r5.model.CodeableConcept;
-import org.hl7.fhir.r5.model.Coding;
-import org.hl7.fhir.r5.model.Period;
-import org.hl7.fhir.r5.model.Timing;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.context.RuntimeSearchParam
+import ca.uhn.fhir.fhirpath.IFhirPath
+import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression
+import ca.uhn.fhir.rest.param.DateRangeParam
+import ca.uhn.fhir.rest.param.TokenParam
+import java.util.concurrent.ConcurrentHashMap
+import org.apache.commons.lang3.NotImplementedException
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.ICompositeType
+import org.hl7.fhir.r5.model.*
+import org.opencds.cqf.fhir.utility.FhirPathCache.cachedForVersion
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher.SPPathKey
 
-public class ResourceMatcherR5 implements ResourceMatcher {
+class ResourceMatcherR5 : ResourceMatcher {
+    override val pathCache: MutableMap<SPPathKey?, IParsedExpression?> =
+        ConcurrentHashMap<SPPathKey?, IParsedExpression?>()
+    private val searchParams: MutableMap<String?, RuntimeSearchParam?> =
+        ConcurrentHashMap<String?, RuntimeSearchParam?>()
 
-    private Map<SPPathKey, IParsedExpression> pathCache = new ConcurrentHashMap<>();
-    private Map<String, RuntimeSearchParam> searchParams = new ConcurrentHashMap<>();
+    override val engine: IFhirPath
+        get() {
+            return cachedForVersion(FhirVersionEnum.R5)
+        }
 
-    @Override
-    public IFhirPath getEngine() {
-        return FhirPathCache.cachedForVersion(FhirVersionEnum.R5);
-    }
+    override val context: FhirContext
+        get() {
+            return FhirContext.forR5Cached()
+        }
 
-    @Override
-    public FhirContext getContext() {
-        return FhirContext.forR5Cached();
-    }
-
-    @Override
-    public DateRangeParam getDateRange(ICompositeType type) {
-        if (type instanceof Period period) {
-            return new DateRangeParam(period.getStart(), period.getEnd());
-        } else if (type instanceof Timing) {
-            throw new NotImplementedException("Timing resolution has not yet been implemented");
+    override fun getDateRange(type: ICompositeType?): DateRangeParam {
+        if (type is Period) {
+            return DateRangeParam(type.start, type.end)
+        } else if (type is Timing) {
+            throw NotImplementedException("Timing resolution has not yet been implemented")
         } else {
-            throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
-                    + type.getClass().getSimpleName());
+            throw UnsupportedOperationException(
+                "Expected element of type Period or Timing, found " + type!!.javaClass.simpleName
+            )
         }
     }
 
-    @Override
-    public List<TokenParam> getCodes(IBase codeElement) {
-        List<TokenParam> resolvedCodes = new ArrayList<>();
-        if (codeElement instanceof Coding c) {
-            resolvedCodes.add(new TokenParam(c.getSystem(), c.getCode()));
-        } else if (codeElement instanceof CodeType c) {
-            resolvedCodes.add(new TokenParam(c.getValue()));
-        } else if (codeElement instanceof CodeableConcept concept) {
-            resolvedCodes = concept.getCoding().stream()
-                    .map(code -> new TokenParam(code.getSystem(), code.getCode()))
-                    .collect(Collectors.toList());
+    override fun getCodes(codeElement: IBase?): MutableList<TokenParam?> {
+        var resolvedCodes = mutableListOf<TokenParam?>()
+        if (codeElement is Coding) {
+            resolvedCodes.add(TokenParam(codeElement.system, codeElement.code))
+        } else if (codeElement is CodeType) {
+            resolvedCodes.add(TokenParam(codeElement.value))
+        } else if (codeElement is CodeableConcept) {
+            resolvedCodes =
+                codeElement
+                    .getCoding()
+                    .map { code -> TokenParam(code!!.system, code.code) }
+                    .toMutableList()
         }
 
-        return resolvedCodes;
+        return resolvedCodes
     }
 
-    @Override
-    public Map<SPPathKey, IParsedExpression> getPathCache() {
-        return pathCache;
+    override fun addCustomParameter(searchParam: RuntimeSearchParam?) {
+        this.searchParams[searchParam!!.name] = searchParam
     }
 
-    @Override
-    public void addCustomParameter(RuntimeSearchParam searchParam) {
-        this.searchParams.put(searchParam.getName(), searchParam);
-    }
-
-    @Override
-    public Map<String, RuntimeSearchParam> getCustomParameters() {
-        return this.searchParams;
-    }
+    override val customParameters: MutableMap<String?, RuntimeSearchParam?>
+        get() {
+            return this.searchParams
+        }
 }

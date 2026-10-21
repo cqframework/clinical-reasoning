@@ -1,43 +1,41 @@
-package org.opencds.cqf.fhir.utility.monad;
+package org.opencds.cqf.fhir.utility.monad
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.Optional
+import java.util.function.Consumer
+import java.util.function.Function
+import java.util.function.Supplier
+import java.util.stream.Stream
 
 /**
- * Represents a value of one of two possible types (a disjoint union). An instance of Either is either an instance of
- * Left or Right, only one of which can be present at a time.
+ * Represents a value of one of two possible types (a disjoint union). An instance of Either is
+ * either an instance of Left or Right, only one of which can be present at a time.
  *
- * This type is right-biased, meaning that operations like map and flatMap will apply to the right value if it is present.
- * By convention, the preferred type for a given context should be the right value.
+ * This type is right-biased, meaning that operations like map and flatMap will apply to the right
+ * value if it is present. By convention, the preferred type for a given context should be the right
+ * value.
  *
- * By convention, the left value is used for error handling, when used in a context where one of the values is an error or exception.
+ * By convention, the left value is used for error handling, when used in a context where one of the
+ * values is an error or exception.
  *
- * While this class does provide methods for accessing the left and right values, it is generally recommended to use
- * the map, flatMap, and fold methods to work with the values. These methods are more idiomatic and less error-prone, and they
- * are less likely to result in IllegalStateExceptions.
+ * While this class does provide methods for accessing the left and right values, it is generally
+ * recommended to use the map, flatMap, and fold methods to work with the values. These methods are
+ * more idiomatic and less error-prone, and they are less likely to result in
+ * IllegalStateExceptions.
  *
  * @param <L> the left type
- * @param <R> the right type
+ * @param <R> the right type </R></L>
  */
-public class Either<L, R> {
-
-    private final L left;
-    private final R right;
+open class Either<L : Any, R : Any> internal constructor(left: L?, right: R?) {
+    private val left: L?
+    private val right: R?
 
     /*
      * Private constructor. Use static factory methods for instantiation. See {@link Eithers}.
      */
-    Either(L left, R right) {
-        checkArgument(left == null ^ right == null, "left and right are mutually exclusive");
-        this.left = left;
-        this.right = right;
+    init {
+        require((left == null) xor (right == null)) { "left and right are mutually exclusive" }
+        this.left = left
+        this.right = right
     }
 
     /**
@@ -45,12 +43,12 @@ public class Either<L, R> {
      *
      * @return a new Either instance with the left and right types swapped
      */
-    public Either<R, L> swap() {
+    fun swap(): Either<R, L> {
         if (isRight()) {
-            return Eithers.forLeft(right);
+            return Eithers.forLeft(right!!)
         }
 
-        return Eithers.forRight(left);
+        return Eithers.forRight(left!!)
     }
 
     /**
@@ -58,8 +56,8 @@ public class Either<L, R> {
      *
      * @return true if left is present
      */
-    public boolean isLeft() {
-        return left != null;
+    fun isLeft(): Boolean {
+        return left != null
     }
 
     /**
@@ -67,49 +65,48 @@ public class Either<L, R> {
      *
      * @return true is right is present
      */
-    public boolean isRight() {
-        return right != null;
+    fun isRight(): Boolean {
+        return right != null
     }
 
     /**
      * Returns the left value if it is present, otherwise throws an IllegalStateException.
      *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function)}
+     * It's generally preferred to pass functions to the Either using [.fold]
      *
-     * @throws IllegalStateException if the left value is not present
      * @return the left value
+     * @throws IllegalStateException if the left value is not present
      */
-    public L leftOrThrow() {
-        checkState(isLeft());
-        return left;
+    fun leftOrThrow(): L {
+        check(isLeft())
+        return left!!
     }
 
     /**
      * Returns the right value if it is present, otherwise throws an IllegalStateException.
      *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function)}
-     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
+     * It's generally preferred to pass functions to the Either using [.fold] Alternatively, use
+     * [.orElse] or [.orElseGet]
      *
-     * @throws IllegalStateException if the right value is not present
      * @return the right value
+     * @throws IllegalStateException if the right value is not present
      */
-    public R rightOrThrow() {
-        checkState(isRight());
-        return right;
+    fun rightOrThrow(): R {
+        check(isRight())
+        return right!!
     }
 
-    /**
-     * Alias for {@link #rightOrThrow()}.
-     *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function)}
-     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
-     *
-     * @throws IllegalStateException if the right value is not present
-     * @return the right value
-     */
-    public R getOrThrow() {
-        return rightOrThrow();
-    }
+    val orThrow: R
+        /**
+         * Alias for [.rightOrThrow].
+         *
+         * It's generally preferred to pass functions to the Either using [.fold] Alternatively, use
+         * [.orElse] or [.orElseGet]
+         *
+         * @return the right value
+         * @throws IllegalStateException if the right value is not present
+         */
+        get() = rightOrThrow()
 
     /**
      * Returns the right value if it is present, otherwise returns the provided default value.
@@ -117,35 +114,38 @@ public class Either<L, R> {
      * @param defaultValue the value to return if the right value is not present
      * @return the right value if it is present, otherwise the default value
      */
-    public R orElse(R defaultValue) {
+    fun orElse(defaultValue: R?): R? {
         if (isRight()) {
-            return right;
+            return right
         } else {
-            return defaultValue;
+            return defaultValue
         }
     }
 
     /**
-     * Returns the right value if it is present, otherwise returns the result of the provided supplier.
-     * @param defaultSupplier the supplier to provide a default value if the right value is not present
+     * Returns the right value if it is present, otherwise returns the result of the provided
+     * supplier.
+     *
+     * @param defaultSupplier the supplier to provide a default value if the right value is not
+     *   present
      * @return the right value if it is present, otherwise the result of the supplier
      */
-    public R orElseGet(Supplier<R> defaultSupplier) {
+    fun orElseGet(defaultSupplier: Supplier<R?>): R? {
         if (isRight()) {
-            return right;
+            return right
         } else {
-            return defaultSupplier.get();
+            return defaultSupplier.get()
         }
     }
 
     /**
      * Executes the provided consumer if the right value is present
+     *
      * @param forRight the consumer to execute if the right value is present
      */
-    public void forEach(Consumer<? super R> forRight) {
-        checkNotNull(forRight);
+    fun forEach(forRight: Consumer<in R>) {
         if (isRight()) {
-            forRight.accept(right);
+            forRight.accept(right!!)
         }
     }
 
@@ -155,13 +155,12 @@ public class Either<L, R> {
      * @param forRight the consumer to execute if the right value is present
      * @return the Either unchanged
      */
-    public Either<L, R> peek(Consumer<? super R> forRight) {
-        checkNotNull(forRight);
+    fun peek(forRight: Consumer<in R>): Either<L, R> {
         if (isRight()) {
-            forRight.accept(right);
+            forRight.accept(right!!)
         }
 
-        return this;
+        return this
     }
 
     /**
@@ -172,15 +171,14 @@ public class Either<L, R> {
      * @param <T> the new right type
      * @param mapRight the function to map the right value to a new value
      * @return the Either with the right value mapped to a new value, or the left value unchanged
+     *   </T>
      */
-    @SuppressWarnings("unchecked")
-    public <T> Either<L, T> map(Function<? super R, ? extends T> mapRight) {
-        checkNotNull(mapRight);
+    open fun <T : Any> map(mapRight: Function<in R, out T>): Either<L, T> {
         if (isLeft()) {
-            return (Either<L, T>) this;
+            return this as Either<L, T>
         }
 
-        return Eithers.forRight(mapRight.apply(right));
+        return Eithers.forRight(mapRight.apply(right!!))
     }
 
     /**
@@ -190,16 +188,15 @@ public class Either<L, R> {
      *
      * @param <T> the new right type
      * @param flatMapRight the function to map the right value to a new Either
-     * @return a new Either instance with the right value mapped to a new Either, or the left value unchanged
+     * @return a new Either instance with the right value mapped to a new Either, or the left value
+     *   unchanged </T>
      */
-    @SuppressWarnings("unchecked")
-    public <T> Either<L, T> flatMap(Function<? super R, ? extends Either<L, ? extends T>> flatMapRight) {
-        checkNotNull(flatMapRight);
+    open fun <T : Any> flatMap(flatMapRight: Function<in R, out Either<L, out T>>): Either<L, T> {
         if (isLeft()) {
-            return (Either<L, T>) this;
+            return this as Either<L, T>
         }
 
-        return (Either<L, T>) flatMapRight.apply(right);
+        return flatMapRight.apply(right!!) as Either<L, T>
     }
 
     /**
@@ -207,84 +204,80 @@ public class Either<L, R> {
      *
      * The function is sometimes known as "reduce".
      *
-     * If the right value is present, the foldRight function is applied to the right value.
-     * If the left value is present, the foldLeft function is applied to the left value.
+     * If the right value is present, the foldRight function is applied to the right value. If the
+     * left value is present, the foldLeft function is applied to the left value.
      *
      * @param <T> the type of the new value
      * @param foldLeft the function to map the left value to a new value, if present
      * @param foldRight the function to map the right value to a new value, if present
-     * @return the new value
+     * @return the new value </T>
      */
-    public <T> T fold(Function<? super L, ? extends T> foldLeft, Function<? super R, ? extends T> foldRight) {
-        checkNotNull(foldLeft);
-        checkNotNull(foldRight);
+    fun <T> fold(foldLeft: Function<in L, out T>, foldRight: Function<in R, out T>): T {
         if (isRight()) {
-            return foldRight.apply(right);
+            return foldRight.apply(right!!)
         } else {
-            return foldLeft.apply(left);
+            return foldLeft.apply(left!!)
         }
     }
 
     /**
-     * Transforms the Either to a new value using the provided function. The function is applied to the entire Either,
-     * regardless of which value is present. This is in contrast to the map, flatMap, and fold functions, which only apply
-     * when the right value is present.
+     * Transforms the Either to a new value using the provided function. The function is applied to
+     * the entire Either, regardless of which value is present. This is in contrast to the map,
+     * flatMap, and fold functions, which only apply when the right value is present.
      *
      * @param <U> the type of the new value
      * @param transform the function to transform the Either to a new value
-     * @return the new value
+     * @return the new value </U>
      */
-    public <U> U transform(Function<? super Either<? super L, ? super R>, ? extends U> transform) {
-        return transform.apply(this);
+    fun <U> transform(transform: Function<in Either<in L, in R>, out U>): U {
+        return transform.apply(this)
     }
 
     /**
-     * Returns a stream of the right value if present, otherwise an empty stream.
-     * Mainly useful for converting to a stream for further processing with standard Java
-     * APIs like Stream.map, Stream.filter, etc.
+     * Returns a stream of the right value if present, otherwise an empty stream. Mainly useful for
+     * converting to a stream for further processing with standard Java APIs like Stream.map,
+     * Stream.filter, etc.
      *
      * @return the stream of the right value if present
      */
-    public Stream<R> stream() {
+    fun stream(): Stream<R> {
         if (isRight()) {
-            return Stream.of(right);
+            return Stream.of(right)
         } else {
-            return Stream.of();
+            return Stream.of()
         }
     }
 
     /**
      * Returns an Optional containing the right value if present, otherwise an empty Optional.
-     * Mainly useful for converting to an Optional for further processing with standard Java
-     * APIs, like Optional.map, Optional.filter, etc.
+     * Mainly useful for converting to an Optional for further processing with standard Java APIs,
+     * like Optional.map, Optional.filter, etc.
      *
      * @return an Optional containing the right value if present
      */
-    public Optional<R> optional() {
+    fun optional(): Optional<R> {
         if (isRight()) {
-            return Optional.of(right);
+            return Optional.of(right!!)
         }
 
-        return Optional.empty();
+        return Optional.empty()
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Either<?, ?> other) {
-            return (this.left == other.left && this.right == other.right)
-                    || (this.left != null && other.left != null && this.left.equals(other.left))
-                    || (this.right != null && other.right != null && this.right.equals(other.right));
+    override fun equals(obj: Any?): Boolean {
+        if (obj is Either<*, *>) {
+            return (this.left === obj.left && this.right === obj.right) ||
+                (this.left != null && obj.left != null && this.left == obj.left) ||
+                (this.right != null && obj.right != null && this.right == obj.right)
         }
 
-        return false;
+        return false
     }
 
-    @Override
-    public int hashCode() {
+    override fun hashCode(): Int {
         if (this.left != null) {
-            return this.left.hashCode();
+            return this.left.hashCode()
         }
 
-        return this.right.hashCode();
+        return this.right.hashCode()
     }
 }

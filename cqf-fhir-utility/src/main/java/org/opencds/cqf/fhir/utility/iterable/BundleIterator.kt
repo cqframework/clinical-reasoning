@@ -1,76 +1,70 @@
-package org.opencds.cqf.fhir.utility.iterable;
+package org.opencds.cqf.fhir.utility.iterable
 
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.util.BundleUtil
+import ca.uhn.fhir.util.bundle.BundleEntryParts
+import org.hl7.fhir.instance.model.api.IBaseBundle
 
-public class BundleIterator<B extends IBaseBundle> implements Iterator<BundleEntryParts> {
+class BundleIterator<B : IBaseBundle>(
+    protected val repository: IRepository,
+    protected var bundle: B?,
+) : Iterator<BundleEntryParts?> {
+    protected var index: Int = 0
+    protected var parts: MutableList<BundleEntryParts?> =
+        BundleUtil.toListOfEntries(repository.fhirContext(), bundle)
 
-    protected final IRepository repository;
-    protected B bundle;
-    protected int index = 0;
-    protected List<BundleEntryParts> parts;
-
-    public BundleIterator(IRepository repository, B bundle) {
-        this.repository = repository;
-        this.bundle = bundle;
-        this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);
+    override fun hasNext(): Boolean {
+        return parts.size > index
     }
 
-    @Override
-    public boolean hasNext() {
-        return parts.size() > index;
-    }
-
-    @Override
-    public BundleEntryParts next() {
+    override fun next(): BundleEntryParts? {
         if (!hasNext()) {
-            throw new NoSuchElementException();
+            throw NoSuchElementException()
         }
 
-        var next = parts.get(index);
-        index++;
+        val next = parts.get(index)
+        index++
 
-        if (index >= parts.size()) {
-            getNextBundle();
+        if (index >= parts.size) {
+            this.nextBundle
         }
 
-        return next;
+        return next
     }
 
-    protected void getNextBundle() {
-        // Reset internal counter
-        index = 0;
+    protected val nextBundle: Unit
+        get() {
+            // Reset internal counter
+            index = 0
 
-        var nextLink = BundleUtil.getLinkUrlOfType(this.repository.fhirContext(), bundle, IBaseBundle.LINK_NEXT);
+            val nextLink =
+                BundleUtil.getLinkUrlOfType(
+                    this.repository.fhirContext(),
+                    bundle,
+                    IBaseBundle.LINK_NEXT,
+                )
 
-        // No next Bundle, no parts.
-        if (nextLink == null) {
-            this.parts = Collections.emptyList();
-            return;
+            // No next Bundle, no parts.
+            if (nextLink == null) {
+                this.parts = mutableListOf<BundleEntryParts?>()
+                return
+            }
+
+            val clazz = bundle!!.javaClass
+
+            this.bundle = this.repository.link(clazz, nextLink)
+
+            // No Bundle returned, no parts
+            if (bundle == null) {
+                this.parts = mutableListOf<BundleEntryParts?>()
+                return
+            }
+
+            this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle)
+
+            // Bundle returned an empty set, try the next one.
+            if (this.parts.isEmpty()) {
+                this.nextBundle
+            }
         }
-
-        @SuppressWarnings("unchecked")
-        var clazz = (Class<B>) bundle.getClass();
-
-        this.bundle = this.repository.link(clazz, nextLink);
-
-        // No Bundle returned, no parts
-        if (bundle == null) {
-            this.parts = Collections.emptyList();
-            return;
-        }
-
-        this.parts = BundleUtil.toListOfEntries(repository.fhirContext(), bundle);
-
-        // Bundle returned an empty set, try the next one.
-        if (this.parts.isEmpty()) {
-            getNextBundle();
-        }
-    }
 }

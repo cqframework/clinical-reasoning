@@ -1,132 +1,132 @@
-package org.opencds.cqf.fhir.utility.monad;
+package org.opencds.cqf.fhir.utility.monad
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.*
+import java.util.function.Consumer
+import java.util.function.Function
+import java.util.function.Supplier
+import java.util.stream.Stream
 
 /**
- * Represents a value of one of three possible types (a disjoint union). An instance of Either3 is either an instance of
- * Left, Middle, or Right, only one of which can be present at a time.
+ * Represents a value of one of three possible types (a disjoint union). An instance of Either3 is
+ * either an instance of Left, Middle, or Right, only one of which can be present at a time.
  *
- * This type is right-biased, meaning that operations like map and flatMap will apply to the right value if it is present.
- * By convention, the preferred type for a given context should be the right value.
+ * This type is right-biased, meaning that operations like map and flatMap will apply to the right
+ * value if it is present. By convention, the preferred type for a given context should be the right
+ * value.
  *
- * By convention, the left value is used for error handling, when used in a context where one of the values is an error or exception.
+ * By convention, the left value is used for error handling, when used in a context where one of the
+ * values is an error or exception.
  *
- * While this class does provide methods for accessing the left, middle, and right values, it is generally recommended to use
- * the map, flatMap, and fold methods to work with the values. These methods are more idiomatic and less error-prone, and they
- * are less likely to result in IllegalStateExceptions.
+ * While this class does provide methods for accessing the left, middle, and right values, it is
+ * generally recommended to use the map, flatMap, and fold methods to work with the values. These
+ * methods are more idiomatic and less error-prone, and they are less likely to result in
+ * IllegalStateExceptions.
  *
  * @param <L> the left value type
  * @param <M> the middle value type
- * @param <R> the right value type
+ * @param <R> the right value type </R></M></L>
  */
-public class Either3<L, M, R> {
-
-    private final L left;
-    private final M middle;
-    private final R right;
+class Either3<L : Any, M : Any, R : Any> internal constructor(left: L?, middle: M?, right: R?) {
+    private val left: L?
+    private val middle: M?
+    private val right: R?
 
     /*
      * Private constructor. Use static factory methods for instantiation. See {@link Eithers}.
      */
-    Either3(L left, M middle, R right) {
-        checkArgument(left != null ^ middle != null ^ right != null, "left, middle, and right are mutually exclusive");
-        this.left = left;
-        this.middle = middle;
-        this.right = right;
+    init {
+        require((left != null) xor (middle != null) xor (right != null)) {
+            "left, middle, and right are mutually exclusive"
+        }
+        this.left = left
+        this.middle = middle
+        this.right = right
     }
 
     /**
-     * Swaps the position of the left and right types The middle type is unchanged.
-     * The value is unchanged.
+     * Swaps the position of the left and right types The middle type is unchanged. The value is
+     * unchanged.
      *
      * @return a new Either3 with the left and right types swapped
      */
-    public Either3<R, M, L> swap() {
+    fun swap(): Either3<R, M, L> {
         if (isRight()) {
-            return Eithers.forLeft3(right);
+            return Eithers.forLeft3<R, M, L>(right!!)
         } else if (isMiddle()) {
-            return Eithers.forMiddle3(middle);
+            return Eithers.forMiddle3<R, M, L>(middle!!)
         } else {
-            return Eithers.forRight3(left);
+            return Eithers.forRight3<R, M, L>(left!!)
         }
     }
 
     /**
-     * Rotates the types of the Either3 to the right. The right type becomes the left type, the left type becomes the middle type,
-     * and the middle type becomes the right type. The values are unchanged.
+     * Rotates the types of the Either3 to the right. The right type becomes the left type, the left
+     * type becomes the middle type, and the middle type becomes the right type. The values are
+     * unchanged.
      *
      * @return new Either3 with the types rotated
      */
-    public Either3<R, L, M> rotate() {
+    fun rotate(): Either3<R, L, M> {
         if (isRight()) {
-            return Eithers.forLeft3(right);
+            return Eithers.forLeft3<R, L, M>(right!!)
         } else if (isMiddle()) {
-            return Eithers.forRight3(middle);
+            return Eithers.forRight3<R, L, M>(middle!!)
         } else {
-            return Eithers.forMiddle3(left);
+            return Eithers.forMiddle3<R, L, M>(left!!)
         }
     }
 
     /**
      * Returns the left value. Throws an exception if the left value is not present.
      *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
+     * It's generally preferred to pass functions to the Either using [.fold]
      *
-     * @throws IllegalStateException if the left value is not present
      * @return the left value
+     * @throws IllegalStateException if the left value is not present
      */
-    public L leftOrThrow() {
-        checkState(isLeft());
-        return left;
+    fun leftOrThrow(): L {
+        check(isLeft())
+        return left!!
     }
 
     /**
      * Returns the middle value. Throws an exception if the middle value is not present.
      *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
+     * It's generally preferred to pass functions to the Either using [.fold]
      *
-     * @throws IllegalStateException if the middle value is not present
      * @return the middle value
+     * @throws IllegalStateException if the middle value is not present
      */
-    public M middleOrThrow() {
-        checkState(isMiddle());
-        return middle;
+    fun middleOrThrow(): M {
+        check(isMiddle())
+        return middle!!
     }
 
     /**
      * Returns the right value. Throws an exception if the right value is not present.
      *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
-     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
+     * It's generally preferred to pass functions to the Either using [.fold] Alternatively, use
+     * [.orElse] or [.orElseGet]
      *
-     * @throws IllegalStateException if the right value is not present
      * @return the right value
+     * @throws IllegalStateException if the right value is not present
      */
-    public R rightOrThrow() {
-        checkState(isRight());
-        return right;
+    fun rightOrThrow(): R {
+        check(isRight())
+        return right!!
     }
 
-    /**
-     * Alias for {@link #rightOrThrow()}.
-     *
-     * It's generally preferred to pass functions to the Either using {@link #fold(Function, Function, Function)}
-     * Alternatively, use {@link #orElse(Object)} or {@link #orElseGet(Supplier)}
-     *
-     * @throws IllegalStateException if the right value is not present
-     * @return the right value
-     */
-    public R getOrThrow() {
-        return rightOrThrow();
-    }
+    val orThrow: R
+        /**
+         * Alias for [.rightOrThrow].
+         *
+         * It's generally preferred to pass functions to the Either using [.fold] Alternatively, use
+         * [.orElse] or [.orElseGet]
+         *
+         * @return the right value
+         * @throws IllegalStateException if the right value is not present
+         */
+        get() = rightOrThrow()
 
     /**
      * Returns the right value if present, otherwise return the provided default value.
@@ -134,25 +134,26 @@ public class Either3<L, M, R> {
      * @param defaultValue the value to return if the right value is not present
      * @return the right value if present, otherwise the default value
      */
-    public R orElse(R defaultValue) {
+    fun orElse(defaultValue: R?): R? {
         if (isRight()) {
-            return right;
+            return right!!
         } else {
-            return defaultValue;
+            return defaultValue
         }
     }
 
     /**
      * Returns the right value if present, otherwise return the result of the provided supplier.
      *
-     * @param defaultSupplier the supplier to provide a default value if the right value is not present
+     * @param defaultSupplier the supplier to provide a default value if the right value is not
+     *   present
      * @return the right value if present, otherwise the result of the supplier
      */
-    public R orElseGet(Supplier<R> defaultSupplier) {
+    fun orElseGet(defaultSupplier: Supplier<R?>): R? {
         if (isRight()) {
-            return right;
+            return right
         } else {
-            return defaultSupplier.get();
+            return defaultSupplier.get()
         }
     }
 
@@ -161,8 +162,8 @@ public class Either3<L, M, R> {
      *
      * @return true if left is present
      */
-    public boolean isLeft() {
-        return left != null;
+    fun isLeft(): Boolean {
+        return left != null
     }
 
     /**
@@ -170,8 +171,8 @@ public class Either3<L, M, R> {
      *
      * @return true if middle is present
      */
-    public boolean isMiddle() {
-        return middle != null;
+    fun isMiddle(): Boolean {
+        return middle != null
     }
 
     /**
@@ -179,8 +180,8 @@ public class Either3<L, M, R> {
      *
      * @return true if right is present
      */
-    public boolean isRight() {
-        return right != null;
+    fun isRight(): Boolean {
+        return right != null
     }
 
     /**
@@ -188,26 +189,25 @@ public class Either3<L, M, R> {
      *
      * @param forRight the consumer to execute if the right value is present
      */
-    public void forEach(Consumer<? super R> forRight) {
-        checkNotNull(forRight);
+    fun forEach(forRight: Consumer<in R>) {
         if (isRight()) {
-            forRight.accept(right);
+            forRight.accept(right!!)
         }
     }
 
     /**
-     * Executes the provided consumer if the right value is present, returning the Either3 unchanged.
+     * Executes the provided consumer if the right value is present, returning the Either3
+     * unchanged.
      *
      * @param forRight the consumer to execute if the right value is present
      * @return the Either3 unchanged
      */
-    public Either3<L, M, R> peek(Consumer<? super R> forRight) {
-        checkNotNull(forRight);
+    fun peek(forRight: Consumer<in R>): Either3<L, M, R> {
         if (isRight()) {
-            forRight.accept(right);
+            forRight.accept(right!!)
         }
 
-        return this;
+        return this
     }
 
     /**
@@ -218,14 +218,14 @@ public class Either3<L, M, R> {
      * @param <T> the type of the new value
      * @param mapRight the function to map the right value to a new value
      * @return a new Either3 with the right value mapped to a new value, or the left or middle value
+     *   </T>
      */
-    public <T> Either3<L, M, T> map(Function<? super R, ? extends T> mapRight) {
-        checkNotNull(mapRight);
+    fun <T : Any> map(mapRight: Function<in R, out T>): Either3<L, M, T> {
         if (isRight()) {
-            return Eithers.forRight3(mapRight.apply(right));
+            return Eithers.forRight3(mapRight.apply(right!!))
         }
 
-        return propagate();
+        return propagate()
     }
 
     /**
@@ -237,15 +237,17 @@ public class Either3<L, M, R> {
      *
      * @param <T> the type of the new right value
      * @param flatMapRight the function to map the Either to a new Either
-     * @return a new Either3 with the right value mapped to a new Either, or the left or middle value
+     * @return a new Either3 with the right value mapped to a new Either, or the left or middle
+     *   value </T>
      */
-    public <T> Either3<L, M, T> flatMap(Function<? super R, ? extends Either3<L, M, ? extends T>> flatMapRight) {
-        checkNotNull(flatMapRight);
+    fun <T : Any> flatMap(
+        flatMapRight: Function<in R, out Either3<L, M, out T>>
+    ): Either3<L, M, T> {
         if (isRight()) {
-            return narrow(flatMapRight.apply(right));
+            return narrow(flatMapRight.apply(right!!))
         }
 
-        return propagate();
+        return propagate()
     }
 
     /**
@@ -253,107 +255,103 @@ public class Either3<L, M, R> {
      *
      * The function is sometimes known as "reduce".
      *
-     * If the right value is present, the foldRight function is applied to the right value.
-     * If the middle value is present, the foldMiddle function is applied to the middle value.
-     * If the left value is present, the foldLeft function is applied to the left value.
+     * If the right value is present, the foldRight function is applied to the right value. If the
+     * middle value is present, the foldMiddle function is applied to the middle value. If the left
+     * value is present, the foldLeft function is applied to the left value.
      *
      * @param <T> the type of the new value
      * @param foldLeft the function to map the left value to a new value, if present
      * @param foldMiddle the function to map the middle value to a new value, if present
      * @param foldRight the function to map the right value to a new value, if present
-     * @return the new value
+     * @return the new value </T>
      */
-    public <T> T fold(
-            Function<? super L, ? extends T> foldLeft,
-            Function<? super M, ? extends T> foldMiddle,
-            Function<? super R, ? extends T> foldRight) {
-        checkNotNull(foldLeft);
-        checkNotNull(foldMiddle);
-        checkNotNull(foldRight);
+    fun <T> fold(
+        foldLeft: Function<in L, out T>,
+        foldMiddle: Function<in M, out T>,
+        foldRight: Function<in R, out T>,
+    ): T? {
         if (isRight()) {
-            return foldRight.apply(right);
+            return foldRight.apply(right!!)
         } else if (isMiddle()) {
-            return foldMiddle.apply(middle);
+            return foldMiddle.apply(middle!!)
         } else {
-            return foldLeft.apply(left);
+            return foldLeft.apply(left!!)
         }
     }
 
     /**
-     * Transforms the Either to a new value using the provided function. The function is applied to the entire Either,
-     * regardless of which value is present. This is in contrast to the map, flatMap, and fold functions, which only apply
-     * when the right value is present.
+     * Transforms the Either to a new value using the provided function. The function is applied to
+     * the entire Either, regardless of which value is present. This is in contrast to the map,
+     * flatMap, and fold functions, which only apply when the right value is present.
      *
      * @param <U> the type of the new value
      * @param transform the function to transform the Either to a new value
-     * @return the new value
+     * @return the new value </U>
      */
-    public <U> U transform(Function<? super Either3<? super L, ? super M, ? super R>, ? extends U> transform) {
-        return transform.apply(this);
+    fun <U> transform(transform: Function<in Either3<in L, in M, in R>, out U>): U {
+        return transform.apply(this)
     }
 
     /**
-     * Returns a stream of the right value if present, otherwise an empty stream.
-     * Mainly useful for converting to a stream for further processing with standard Java
-     * APIs like Stream.map, Stream.filter, etc.
+     * Returns a stream of the right value if present, otherwise an empty stream. Mainly useful for
+     * converting to a stream for further processing with standard Java APIs like Stream.map,
+     * Stream.filter, etc.
      *
      * @return the stream of the right value if present
      */
-    public Stream<R> stream() {
+    fun stream(): Stream<R> {
         if (isRight()) {
-            return Stream.of(right);
+            return Stream.of(right)
         } else {
-            return Stream.of();
+            return Stream.of()
         }
     }
 
     /**
      * Returns an Optional containing the right value if present, otherwise an empty Optional.
-     * Mainly useful for converting to an Optional for further processing with standard Java
-     * APIs, like Optional.map, Optional.filter, etc.
+     * Mainly useful for converting to an Optional for further processing with standard Java APIs,
+     * like Optional.map, Optional.filter, etc.
      *
      * @return an Optional containing the right value if present
      */
-    public Optional<R> optional() {
+    fun optional(): Optional<R> {
         if (isRight()) {
-            return Optional.of(right);
+            return Optional.of(right!!)
         }
 
-        return Optional.empty();
+        return Optional.empty()
     }
 
-    @SuppressWarnings("unchecked")
-    protected <T> Either3<L, M, T> narrow(Either3<L, M, ? extends T> wide) {
-        return (Either3<L, M, T>) wide;
+    protected fun <T : Any> narrow(wide: Either3<L, M, out T>): Either3<L, M, T> {
+        return wide as Either3<L, M, T>
     }
 
-    @SuppressWarnings("unchecked")
-    protected <T> Either3<L, M, T> propagate() {
-        return (Either3<L, M, T>) this;
+    protected fun <T : Any> propagate(): Either3<L, M, T> {
+        return this as Either3<L, M, T>
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Either3<?, ?, ?> other) {
-            return (this.left == other.left && this.right == other.right && this.middle == other.middle)
-                    || (this.left != null && other.left != null && this.left.equals(other.left))
-                    || (this.middle != null && other.middle != null && this.middle.equals(other.middle))
-                    || (this.right != null && other.right != null && this.right.equals(other.right));
+    override fun equals(obj: Any?): Boolean {
+        if (obj is Either3<*, *, *>) {
+            return (this.left === obj.left &&
+                this.right === obj.right &&
+                this.middle === obj.middle) ||
+                (this.left != null && obj.left != null && this.left == obj.left) ||
+                (this.middle != null && obj.middle != null && this.middle == obj.middle) ||
+                (this.right != null && obj.right != null && this.right == obj.right)
         }
 
-        return false;
+        return false
     }
 
-    @Override
-    public int hashCode() {
+    override fun hashCode(): Int {
         if (this.left != null) {
-            return this.left.hashCode();
+            return this.left.hashCode()
         }
 
         if (this.middle != null) {
-            return this.middle.hashCode();
+            return this.middle.hashCode()
         }
 
-        return this.right.hashCode();
+        return this.right.hashCode()
     }
 }

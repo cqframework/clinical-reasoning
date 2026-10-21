@@ -1,134 +1,122 @@
-package org.opencds.cqf.fhir.utility.matcher;
+package org.opencds.cqf.fhir.utility.matcher
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Timing;
-import org.opencds.cqf.fhir.utility.FhirPathCache;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.context.RuntimeSearchParam
+import ca.uhn.fhir.fhirpath.IFhirPath
+import ca.uhn.fhir.fhirpath.IFhirPath.IParsedExpression
+import ca.uhn.fhir.rest.param.DateRangeParam
+import ca.uhn.fhir.rest.param.TokenParam
+import java.util.concurrent.ConcurrentHashMap
+import org.apache.commons.lang3.NotImplementedException
+import org.hl7.fhir.instance.model.api.*
+import org.hl7.fhir.r4.model.*
+import org.opencds.cqf.fhir.utility.FhirPathCache.cachedForVersion
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher.SPPathKey
 
-public class ResourceMatcherR4 implements ResourceMatcher {
+class ResourceMatcherR4 : ResourceMatcher {
+    override val pathCache: MutableMap<SPPathKey?, IParsedExpression?> =
+        ConcurrentHashMap<SPPathKey?, IParsedExpression?>()
+    private val searchParams: MutableMap<String?, RuntimeSearchParam?> =
+        ConcurrentHashMap<String?, RuntimeSearchParam?>()
 
-    private Map<SPPathKey, IParsedExpression> pathCache = new ConcurrentHashMap<>();
-    private Map<String, RuntimeSearchParam> searchParams = new ConcurrentHashMap<>();
+    override val engine: IFhirPath
+        get() {
+            return cachedForVersion(FhirVersionEnum.R4)
+        }
 
-    @Override
-    public IFhirPath getEngine() {
-        return FhirPathCache.cachedForVersion(FhirVersionEnum.R4);
-    }
+    override val context: FhirContext
+        get() {
+            return FhirContext.forR4Cached()
+        }
 
-    @Override
-    public FhirContext getContext() {
-        return FhirContext.forR4Cached();
-    }
-
-    @Override
-    public DateRangeParam getDateRange(ICompositeType type) {
-        if (type instanceof Period period) {
-            return new DateRangeParam(period.getStart(), period.getEnd());
-        } else if (type instanceof Timing) {
-            throw new NotImplementedException("Timing resolution has not yet been implemented");
+    override fun getDateRange(type: ICompositeType?): DateRangeParam {
+        if (type is Period) {
+            return DateRangeParam(type.start, type.end)
+        } else if (type is Timing) {
+            throw NotImplementedException("Timing resolution has not yet been implemented")
         } else {
-            throw new UnsupportedOperationException("Expected element of type Period or Timing, found "
-                    + type.getClass().getSimpleName());
+            throw UnsupportedOperationException(
+                "Expected element of type Period or Timing, found " + type!!.javaClass.simpleName
+            )
         }
     }
 
-    @Override
-    public List<TokenParam> getCodes(IBase codeElement) {
-        List<TokenParam> resolvedCodes = new ArrayList<>();
-        if (codeElement instanceof Coding c) {
-            resolvedCodes.add(new TokenParam(c.getSystem(), c.getCode()));
-        } else if (codeElement instanceof CodeType c) {
-            resolvedCodes.add(new TokenParam(c.getValue()));
-        } else if (codeElement instanceof CodeableConcept concept) {
-            resolvedCodes = concept.getCoding().stream()
-                    .map(code -> new TokenParam(code.getSystem(), code.getCode()))
-                    .collect(Collectors.toList());
+    override fun getCodes(codeElement: IBase?): MutableList<TokenParam?> {
+        var resolvedCodes = mutableListOf<TokenParam?>()
+        if (codeElement is Coding) {
+            resolvedCodes.add(TokenParam(codeElement.system, codeElement.code))
+        } else if (codeElement is CodeType) {
+            resolvedCodes.add(TokenParam(codeElement.value))
+        } else if (codeElement is CodeableConcept) {
+            resolvedCodes =
+                codeElement
+                    .getCoding()
+                    .map { code -> TokenParam(code!!.system, code.code) }
+                    .toMutableList()
         }
 
-        return resolvedCodes;
+        return resolvedCodes
     }
 
-    @Override
-    public Map<SPPathKey, IParsedExpression> getPathCache() {
-        return pathCache;
-    }
-
-    @Override
-    public boolean isMatchToken(TokenParam param, IBase pathResult) {
-        if (param.getValue() == null) {
+    override fun isMatchToken(param: TokenParam, pathResult: IBase?): Boolean {
+        if (param.value == null) {
             // TODO - should this be false?
-            return true;
+            return true
         }
 
-        if (pathResult instanceof IIdType id) {
-            return param.getValue().equals(id.getIdPart());
+        if (pathResult is IIdType) {
+            return param.value == pathResult.idPart
         }
 
-        // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value irrespective of the
+        // [parameter]=[code]: the value of [code] matches a Coding.code or Identifier.value
+        // irrespective of the
         // value of the system property
-        // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or Identifier.value, and the value
+        // [parameter]=[system]|[code]: the value of [code] matches a Coding.code or
+        // Identifier.value, and the value
         // of [system] matches the system property of the Identifier or Coding
-        // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and the
+        // [parameter]=|[code]: the value of [code] matches a Coding.code or Identifier.value, and
+        // the
         // Coding/Identifier has no system property
         // [parameter]=[system]|: any
-        if (pathResult instanceof Identifier identifier) {
-            var system = identifier.getSystem();
-            var value = identifier.getValue();
+        if (pathResult is Identifier) {
+            val system = pathResult.system
+            val value = pathResult.value
 
-            if (param.getSystem() != null
-                    && param.getSystem().equals(system)
-                    && param.getValue() != null
-                    && param.getValue().equals(value)) {
-                return true;
-            } else if (param.getValue() != null && param.getValue().equals(value)) {
-                return true;
-            } else if (param.getSystem() != null && param.getSystem().equals(system)) {
-                return true;
+            if (
+                param.system != null &&
+                    param.system == system &&
+                    param.value != null &&
+                    param.value == value
+            ) {
+                return true
+            } else if (param.value != null && param.value == value) {
+                return true
+            } else if (param.system != null && param.system == system) {
+                return true
             } else {
                 // this will never be reached because of the top null check
-                return false;
+                return false
             }
         }
 
-        if (pathResult instanceof IBaseEnumeration<?> enumeration) {
-            return param.getValue().equals(enumeration.getValueAsString());
+        if (pathResult is IBaseEnumeration<*>) {
+            return param.value == pathResult.valueAsString
         }
 
-        if (pathResult instanceof IPrimitiveType<?> type) {
-            return param.getValue().equals(type.getValue());
+        if (pathResult is IPrimitiveType<*>) {
+            return param.value == pathResult.value
         }
 
-        return false;
+        return false
     }
 
-    @Override
-    public void addCustomParameter(RuntimeSearchParam searchParam) {
-        this.searchParams.put(searchParam.getName(), searchParam);
+    override fun addCustomParameter(searchParam: RuntimeSearchParam?) {
+        this.searchParams[searchParam!!.name] = searchParam
     }
 
-    @Override
-    public Map<String, RuntimeSearchParam> getCustomParameters() {
-        return this.searchParams;
-    }
+    override val customParameters: MutableMap<String?, RuntimeSearchParam?>
+        get() {
+            return this.searchParams
+        }
 }

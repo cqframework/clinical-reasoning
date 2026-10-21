@@ -1,18 +1,9 @@
-package org.opencds.cqf.fhir.utility.iterable;
+package org.opencds.cqf.fhir.utility.iterable
 
-import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.stream.Stream
 
-public class StreamIterable<T> implements Iterable<T> {
-
-    private final Stream<T> stream;
-
-    public StreamIterable(Stream<T> stream) {
-        this.stream = stream;
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        return stream.iterator();
+class StreamIterable<T>(private val stream: Stream<T?>) : Iterable<T?> {
+    override fun iterator(): Iterator<T?> {
+        return stream.iterator()
     }
 }

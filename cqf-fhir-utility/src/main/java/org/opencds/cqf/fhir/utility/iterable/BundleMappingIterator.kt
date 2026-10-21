@@ -1,34 +1,27 @@
-package org.opencds.cqf.fhir.utility.iterable;
+package org.opencds.cqf.fhir.utility.iterable
 
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.function.Function;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.util.bundle.BundleEntryParts
+import java.util.function.Function
+import org.hl7.fhir.instance.model.api.IBaseBundle
 
-public class BundleMappingIterator<B extends IBaseBundle, T> implements Iterator<T> {
+class BundleMappingIterator<B : IBaseBundle, T>(
+    repository: IRepository,
+    bundle: B?,
+    private val mapper: Function<BundleEntryParts?, T?>,
+) : Iterator<T?> {
+    private val inner = BundleIterator(repository, bundle)
 
-    private final Function<BundleEntryParts, T> mapper;
-    private final BundleIterator<B> inner;
-
-    public BundleMappingIterator(IRepository repository, B bundle, Function<BundleEntryParts, T> mapper) {
-        this.inner = new BundleIterator<>(repository, bundle);
-        this.mapper = mapper;
+    override fun hasNext(): Boolean {
+        return inner.hasNext()
     }
 
-    @Override
-    public boolean hasNext() {
-        return inner.hasNext();
-    }
-
-    @Override
-    public T next() {
+    override fun next(): T? {
         if (!hasNext()) {
-            throw new NoSuchElementException();
+            throw NoSuchElementException()
         }
 
-        var next = inner.next();
-        return this.mapper.apply(next);
+        val next = inner.next()
+        return this.mapper.apply(next)
     }
 }

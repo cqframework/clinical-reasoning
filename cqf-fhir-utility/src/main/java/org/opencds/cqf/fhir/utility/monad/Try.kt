@@ -1,64 +1,56 @@
-package org.opencds.cqf.fhir.utility.monad;
+package org.opencds.cqf.fhir.utility.monad
 
-import java.util.function.Function;
+import java.util.function.Function
 
-public class Try<T> extends Either<Exception, T> {
-
-    Try(Exception left, T right) {
-        super(left, right);
+class Try<T : Any> internal constructor(left: Exception?, right: T?) :
+    Either<Exception, T>(left, right) {
+    fun hasException(): Boolean {
+        return isLeft()
     }
 
-    public boolean hasException() {
-        return isLeft();
+    fun hasResult(): Boolean {
+        return isRight()
     }
 
-    public boolean hasResult() {
-        return isRight();
+    fun exception(): Exception {
+        return leftOrThrow()
     }
 
-    public Exception exception() {
-        return leftOrThrow();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <X> Try<X> map(Function<? super T, ? extends X> map) {
+    override fun <X : Any> map(map: Function<in T, out X>): Try<X> {
         if (hasException()) {
-            return (Try<X>) this;
+            return this as Try<X>
         }
 
         try {
-            return Tries.of(map.apply(rightOrThrow()));
-        } catch (Exception e) {
-            return Tries.ofException(e);
+            return Tries.of(map.apply(rightOrThrow()))
+        } catch (e: Exception) {
+            return Tries.ofException(e)
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <X> Try<X> flatMap(Function<? super T, ? extends Either<Exception, ? extends X>> flatMapRight) {
+    override fun <X : Any> flatMap(
+        flatMapRight: Function<in T, out Either<Exception, out X>>
+    ): Try<X> {
         if (hasException()) {
-            return (Try<X>) this;
+            return this as Try<X>
         }
 
         try {
-            return flatMapRight.apply(rightOrThrow()).fold(Tries::ofException, Tries::of);
-        } catch (Exception e) {
-            return Tries.ofException(e);
+            return flatMapRight.apply(rightOrThrow()).fold(Tries::ofException, Tries::of)
+        } catch (e: Exception) {
+            return Tries.ofException(e)
         }
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Try<?> other) {
-            return super.equals(other);
+    override fun equals(obj: Any?): Boolean {
+        if (obj is Try<*>) {
+            return super.equals(obj)
         }
 
-        return false;
+        return false
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
+    override fun hashCode(): Int {
+        return super.hashCode()
     }
 }

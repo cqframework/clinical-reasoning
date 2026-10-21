@@ -40,13 +40,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.opencds.cqf.fhir.utility.Constants;
 import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
 import org.opencds.cqf.fhir.utility.adapter.IEndpointAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IKnowledgeArtifactAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
 import org.opencds.cqf.fhir.utility.adapter.IValueSetAdapter;
 import org.opencds.cqf.fhir.utility.client.ExpandRunner.TerminologyServerExpansionException;
@@ -383,26 +380,16 @@ public class GenericTerminologyServerClientClientTest {
 
         when(query.execute()).thenReturn(bundle);
 
-        try (MockedStatic<IKnowledgeArtifactAdapter> mockedStatic =
-                Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
+        Optional<IDomainResource> result = txServerClient.getValueSetResource(endpoint, "http://example.org/vs/123");
 
-            mockedStatic
-                    .when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
-                    .thenReturn(Optional.of((IDomainResource) vs));
+        assertTrue(result.isPresent());
+        assertEquals("123", result.get().getIdElement().getIdPart());
 
-            Optional<IDomainResource> result =
-                    txServerClient.getValueSetResource(endpoint, "http://example.org/vs/123");
-
-            assertTrue(result.isPresent());
-            assertEquals("123", result.get().getIdElement().getIdPart());
-
-            // Verify calls
-            verify(client).search();
-            verify(untyped).forResource(org.hl7.fhir.r4.model.ValueSet.class);
-            verify(query).where(anyMap());
-            verify(query).execute();
-            mockedStatic.verify(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle));
-        }
+        // Verify calls
+        verify(client).search();
+        verify(untyped).forResource(org.hl7.fhir.r4.model.ValueSet.class);
+        verify(query).where(anyMap());
+        verify(query).execute();
     }
 
     @Test
@@ -461,26 +448,16 @@ public class GenericTerminologyServerClientClientTest {
 
         when(query.execute()).thenReturn(bundle);
 
-        try (MockedStatic<IKnowledgeArtifactAdapter> mockedStatic =
-                Mockito.mockStatic(IKnowledgeArtifactAdapter.class)) {
+        Optional<IDomainResource> result = txServerClient.getCodeSystemResource(endpoint, "http://example.org/cs/123");
 
-            mockedStatic
-                    .when(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle))
-                    .thenReturn(Optional.of((IDomainResource) cs));
+        assertTrue(result.isPresent());
+        assertEquals("123", result.get().getIdElement().getIdPart());
 
-            Optional<IDomainResource> result =
-                    txServerClient.getCodeSystemResource(endpoint, "http://example.org/cs/123");
-
-            assertTrue(result.isPresent());
-            assertEquals("123", result.get().getIdElement().getIdPart());
-
-            // Verify calls
-            verify(client).search();
-            verify(untyped).forResource(org.hl7.fhir.r4.model.CodeSystem.class);
-            verify(query).where(anyMap());
-            verify(query).execute();
-            mockedStatic.verify(() -> IKnowledgeArtifactAdapter.findLatestVersion(bundle));
-        }
+        // Verify calls
+        verify(client).search();
+        verify(untyped).forResource(org.hl7.fhir.r4.model.CodeSystem.class);
+        verify(query).where(anyMap());
+        verify(query).execute();
     }
 
     @Test

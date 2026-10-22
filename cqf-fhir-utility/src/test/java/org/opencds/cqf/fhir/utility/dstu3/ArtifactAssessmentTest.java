@@ -378,7 +378,7 @@ class ArtifactAssessmentTest {
                         artifactAssessmentDispositionExtension.getValue())
                 .getValue();
         assertEquals(dispositionValue, dispositionCode);
-        var contentExtension = artifactAssessment.new ArtifactAssessmentContentExtension();
+        var contentExtension = new ArtifactAssessmentContentExtension();
         artifactAssessment.addExtension(contentExtension);
         var authorReference = new Reference("Practitioner/author");
         contentExtension.setAuthorExtension(authorReference);

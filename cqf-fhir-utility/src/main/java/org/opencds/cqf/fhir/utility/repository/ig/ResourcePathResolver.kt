@@ -7,8 +7,6 @@ import com.google.common.collect.ImmutableTable
 import com.google.common.collect.Table
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
-import java.util.List
 import java.util.function.Predicate
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.*
@@ -17,12 +15,10 @@ import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.*
 class ResourcePathResolver(private val root: Path, private val conventions: IgConventions) {
 
     fun preferredDirectory(
-        resourceType: Class<out IBaseResource?>?,
-        assignment: CompartmentAssignment?,
+        resourceType: Class<out IBaseResource?>,
+        assignment: CompartmentAssignment,
     ): Path {
-        Objects.requireNonNull(resourceType, "resourceType cannot be null")
-        Objects.requireNonNull<CompartmentAssignment?>(assignment, "assignment cannot be null")
-        validateAssignment(resourceType!!, assignment!!)
+        validateAssignment(resourceType, assignment)
 
         // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
         val effectiveAssignment: CompartmentAssignment =
@@ -31,14 +27,11 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     }
 
     fun preferredPath(
-        resourceType: Class<out IBaseResource?>?,
-        idPart: String?,
-        assignment: CompartmentAssignment?,
+        resourceType: Class<out IBaseResource?>,
+        idPart: String,
+        assignment: CompartmentAssignment,
     ): Path {
-        Objects.requireNonNull(resourceType, "resourceType cannot be null")
-        Objects.requireNonNull<String?>(idPart, "idPart cannot be null")
-        Objects.requireNonNull<CompartmentAssignment?>(assignment, "assignment cannot be null")
-        validateAssignment(resourceType!!, assignment!!)
+        validateAssignment(resourceType, assignment)
 
         return preferredDirectory(resourceType, assignment)
             .resolve(preferredFilename(resourceType, idPart))
@@ -81,7 +74,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
             else null
 
         // LinkedHashSet to preserve order while ensuring uniqueness
-        val paths = LinkedHashSet<Path?>()
+        val paths = LinkedHashSet<Path>()
         for (base in bases!!) {
             val basePath = root.resolve(base)
             val expanded = applyCompartmentAssignment(basePath, assignment)
@@ -91,7 +84,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
                 if (category == ResourceCategory.TERMINOLOGY) {
                     if (
                         conventions.categoryLayout == CategoryLayout.DEFINITIONAL_AND_DATA &&
-                            base == bases!!.get(0)
+                            base == bases!![0]
                     ) {
                         paths.add(basePath.resolve(EXTERNAL_DIRECTORY))
                     } else if (conventions.categoryLayout != CategoryLayout.DEFINITIONAL_AND_DATA) {
@@ -101,7 +94,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
             }
         }
 
-        return List.copyOf<Path?>(paths)
+        return paths.toMutableList()
     }
 
     private fun validateAssignment(
@@ -115,7 +108,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
             "CompartmentAssignment must be 'none' when conventions specify no compartments"
         }
 
-        val category = ResourceCategory.Companion.forType(resourceType.getSimpleName())
+        val category = ResourceCategory.forType(resourceType.simpleName)
         require(
             !(category == ResourceCategory.DATA &&
                 (assignment.isShared) &&
@@ -126,14 +119,11 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     }
 
     fun candidates(
-        resourceType: Class<out IBaseResource>?,
-        idPart: String?,
-        assignment: CompartmentAssignment?,
+        resourceType: Class<out IBaseResource>,
+        idPart: String,
+        assignment: CompartmentAssignment,
     ): MutableList<Path?> {
-        Objects.requireNonNull(resourceType, "resourceType cannot be null")
-        Objects.requireNonNull<String?>(idPart, "idPart cannot be null")
-        Objects.requireNonNull<CompartmentAssignment?>(assignment, "assignment cannot be null")
-        validateAssignment(resourceType!!, assignment!!)
+        validateAssignment(resourceType, assignment)
 
         val directories = directories(resourceType, assignment)
         return combine(directories, candidateFilenames(resourceType, idPart))
@@ -175,7 +165,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
 
     fun isExternalPath(path: Path): Boolean {
         return isExternalDirectory(path) ||
-            (path.parent != null && isExternalDirectory(path.getParent()))
+            (path.parent != null && isExternalDirectory(path.parent))
     }
 
     private fun isExternalDirectory(path: Path): Boolean {
@@ -194,7 +184,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
                 " with layout " +
                 conventions.categoryLayout)
         }
-        return map.get(category)
+        return map[category]
     }
 
     private fun combine(
@@ -216,9 +206,9 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     }
 
     private fun fileExtension(path: Path): String {
-        val name = path.getFileName().toString()
+        val name = path.fileName.toString()
         val dot = name.lastIndexOf('.')
-        return if (dot >= 0) name.substring(dot + 1).lowercase(Locale.getDefault()) else ""
+        return if (dot >= 0) name.substring(dot + 1).lowercase() else ""
     }
 
     private fun buildFilename(
@@ -226,22 +216,20 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
         resourceId: String?,
         encoding: EncodingEnum?,
     ): String {
-        val extension: String? = FILE_EXTENSIONS.get(encoding)
-        val idComponent = resourceId + "." + extension
+        val extension: String? = FILE_EXTENSIONS[encoding]
+        val idComponent = "$resourceId.$extension"
         return when (conventions.filenameMode!!) {
             FilenameMode.ID_ONLY -> idComponent
-            FilenameMode.TYPE_AND_ID -> resourceTypeName + "-" + idComponent
+            FilenameMode.TYPE_AND_ID -> "$resourceTypeName-$idComponent"
         }
     }
 
     private fun applyCompartmentAssignment(
-        base: Path?,
-        assignment: CompartmentAssignment?,
+        base: Path,
+        assignment: CompartmentAssignment,
     ): MutableList<Path> {
-        Objects.requireNonNull<Path?>(base, "base cannot be null")
-        Objects.requireNonNull<CompartmentAssignment?>(assignment, "assignment cannot be null")
 
-        if (!supportsCompartments(base!!) || assignment!!.isNone) {
+        if (!supportsCompartments(base) || assignment.isNone) {
             return mutableListOf(base)
         }
 
@@ -264,7 +252,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
 
     private fun supportsCompartments(base: Path): Boolean {
         // Swapping backslashes to handle Windows paths
-        val normalized = base.toString().lowercase(Locale.getDefault()).replace('\\', '/')
+        val normalized = base.toString().lowercase().replace('\\', '/')
         return normalized.contains("tests/data/fhir") || normalized.contains("input/tests")
     }
 

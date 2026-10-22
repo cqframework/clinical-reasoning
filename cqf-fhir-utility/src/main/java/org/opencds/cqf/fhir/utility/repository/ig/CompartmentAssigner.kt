@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam
 import ca.uhn.fhir.model.api.IQueryParameterType
 import com.google.common.collect.Multimap
 import org.hl7.fhir.instance.model.api.*
-import org.opencds.cqf.fhir.utility.Ids
 import org.opencds.cqf.fhir.utility.Ids.ensureIdType
 import org.opencds.cqf.fhir.utility.Ids.newId
 import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation
@@ -22,16 +21,16 @@ class CompartmentAssigner(
 
     fun fromHeaders(headers: MutableMap<String?, String?>?): CompartmentAssignment {
         if (this.compartmentMode == CompartmentMode.NONE) {
-            return CompartmentAssignment.Companion.none()
+            return CompartmentAssignment.none()
         }
 
         if (headers == null) {
-            return CompartmentAssignment.Companion.none()
+            return CompartmentAssignment.none()
         }
 
-        val headerValue = headers.get(IgRepository.Companion.FHIR_COMPARTMENT_HEADER)
+        val headerValue = headers[IgRepository.FHIR_COMPARTMENT_HEADER]
         if (headerValue.isNullOrBlank()) {
-            return CompartmentAssignment.Companion.none()
+            return CompartmentAssignment.none()
         }
 
         val segments = headerValue.split("/")
@@ -41,7 +40,7 @@ class CompartmentAssigner(
 
         val compartmentType = segments[0].trim { it <= ' ' }
         val compartmentId = segments[1].trim { it <= ' ' }
-        return CompartmentAssignment.Companion.of(compartmentType, compartmentId)
+        return CompartmentAssignment.of(compartmentType, compartmentId)
     }
 
     /**
@@ -65,10 +64,7 @@ class CompartmentAssigner(
         }
         // If the resource is of the compartment type, assign it to its own compartment.
         if (compartmentMode.type().equals(resourceType, ignoreCase = true)) {
-            return CompartmentAssignment.Companion.of(
-                compartmentMode.type(),
-                resource.idElement.idPart,
-            )
+            return CompartmentAssignment.of(compartmentMode.type(), resource.idElement.idPart)
         }
 
         return resolveFrom(resource)
@@ -94,17 +90,17 @@ class CompartmentAssigner(
 
         // If the resource is of the compartment type, assign it to its own compartment.
         if (compartmentMode.type().equals(resourceType, ignoreCase = true)) {
-            return CompartmentAssignment.Companion.of(compartmentMode.type(), id!!.getIdPart())
+            return CompartmentAssignment.of(compartmentMode.type(), id.idPart)
         }
 
-        return CompartmentAssignment.Companion.unknown(compartmentMode.type())
+        return CompartmentAssignment.unknown(compartmentMode.type())
     }
 
     private fun resolveFrom(resource: IBaseResource): CompartmentAssignment {
         val resourceType = resource.fhirType()
         val searchParams = compartmentMode.compartmentSearchParams(fhirContext, resourceType)
         if (searchParams!!.isEmpty()) {
-            return CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
+            return CompartmentAssignment.unknown(this.compartmentMode.type())
         }
 
         val terser = fhirContext.newTerser()
@@ -132,16 +128,16 @@ class CompartmentAssigner(
 
                 if (ids.isNotEmpty()) {
                     val id = ids[0]
-                    return CompartmentAssignment.Companion.of(compartmentType, id.idPart)
+                    return CompartmentAssignment.of(compartmentType, id.idPart)
                 }
             }
         }
 
-        return CompartmentAssignment.Companion.shared()
+        return CompartmentAssignment.shared()
     }
 
     private fun referencedIds(values: MutableList<IBase?>): MutableList<IIdType> {
-        val ids = ArrayList<IIdType>()
+        val ids = mutableListOf<IIdType>()
         for (value in values) {
             val reference = extractReference(value)
             if (reference != null && reference.hasResourceType() && reference.hasIdPart()) {
@@ -184,12 +180,12 @@ class CompartmentAssigner(
 
             // If no _id or multiple _id parameters, cannot determine assignment
             if (ids.size != 1) {
-                return CompartmentAssignment.Companion.unknown(compartmentMode.type())
+                return CompartmentAssignment.unknown(compartmentMode.type())
             }
 
-            val ensured = Ids.ensureIdType(ids[0]!!, resourceType)
+            val ensured = ensureIdType(ids[0]!!, resourceType)
             val id = newId<IIdType>(fhirContext, ensured)
-            return CompartmentAssignment.Companion.of(compartmentMode.type(), id.idPart)
+            return CompartmentAssignment.of(compartmentMode.type(), id.idPart)
         }
 
         val membershipParams =
@@ -222,28 +218,28 @@ class CompartmentAssigner(
         }
 
         // Did our best, couldn't determine the assignment.
-        return CompartmentAssignment.Companion.unknown(compartmentMode.type())
+        return CompartmentAssignment.unknown(compartmentMode.type())
     }
 
     private fun typeBasedAssignment(resourceType: String?): CompartmentAssignment {
         if (compartmentMode == CompartmentMode.NONE) {
-            return CompartmentAssignment.Companion.none()
+            return CompartmentAssignment.none()
         }
 
-        val resourceCategory = ResourceCategory.Companion.forType(resourceType)
+        val resourceCategory = ResourceCategory.forType(resourceType)
         if (resourceCategory != ResourceCategory.DATA) {
             return if (compartmentIsolation == CompartmentIsolation.FULL)
-                CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
-            else CompartmentAssignment.Companion.shared()
+                CompartmentAssignment.unknown(this.compartmentMode.type())
+            else CompartmentAssignment.shared()
         }
 
         if (!this.compartmentMode.resourceBelongsToCompartment(fhirContext, resourceType)) {
             return if (compartmentIsolation == CompartmentIsolation.FULL)
-                CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
-            else CompartmentAssignment.Companion.shared()
+                CompartmentAssignment.unknown(this.compartmentMode.type())
+            else CompartmentAssignment.shared()
         }
 
-        return CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
+        return CompartmentAssignment.unknown(this.compartmentMode.type())
     }
 
     private fun sanitizeSearchPath(path: String?): String? {
@@ -340,11 +336,11 @@ class CompartmentAssigner(
             val token = queryValue!!.valueAsQueryToken
             val id = idFromToken(targetIfUnspecified, token)
             if (id != null && compartmentType.equals(id.resourceType, ignoreCase = true)) {
-                return CompartmentAssignment.Companion.of(compartmentType, id.idPart)
+                return CompartmentAssignment.of(compartmentType, id.idPart)
             }
         }
 
-        return CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
+        return CompartmentAssignment.unknown(this.compartmentMode.type())
     }
 
     private fun idFromToken(target: String?, token: String?): IIdType? {

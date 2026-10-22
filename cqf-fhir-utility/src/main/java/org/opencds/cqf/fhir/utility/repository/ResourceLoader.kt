@@ -14,11 +14,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource
 interface ResourceLoader {
     val relativeClass: Class<*>?
 
-    fun loadBundle(context: FhirContext, location: String): IBaseBundle? {
-        return readResource(context, location) as IBaseBundle?
+    fun loadBundle(context: FhirContext, location: String): IBaseBundle {
+        return readResource(context, location) as IBaseBundle
     }
 
-    fun readResource(context: FhirContext, location: String): IBaseResource? {
+    fun readResource(context: FhirContext, location: String): IBaseResource {
         val resourceString = stringFromResource(location)
         if (location.endsWith("json")) {
             return parseResource(context, "json", resourceString)
@@ -30,10 +30,10 @@ interface ResourceLoader {
     fun parseResource(
         context: FhirContext,
         encoding: String,
-        resourceString: String?,
-    ): IBaseResource? {
+        resourceString: String,
+    ): IBaseResource {
         val parser: IParser
-        when (encoding.lowercase(Locale.getDefault())) {
+        when (encoding.lowercase()) {
             "json" -> parser = context.newJsonParser()
             "xml" -> parser = context.newXmlParser()
             else ->
@@ -45,7 +45,7 @@ interface ResourceLoader {
         return parser.parseResource(resourceString)
     }
 
-    fun loadResource(context: FhirContext, location: String): IBaseResource? {
+    fun loadResource(context: FhirContext, location: String): IBaseResource {
         val resourceString = stringFromResource(location)
         if (location.endsWith("json")) {
             return loadResource(context, "json", resourceString)
@@ -57,12 +57,12 @@ interface ResourceLoader {
     fun loadResource(
         context: FhirContext,
         encoding: String,
-        resourceString: String?,
-    ): IBaseResource? {
+        resourceString: String,
+    ): IBaseResource {
         return parseResource(context, encoding, resourceString)
     }
 
-    fun stringFromResource(location: String): String? {
+    fun stringFromResource(location: String): String {
         var `is`: InputStream? = null
         try {
             val f = File(location)

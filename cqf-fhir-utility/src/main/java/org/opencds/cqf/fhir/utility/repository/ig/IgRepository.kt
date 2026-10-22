@@ -332,7 +332,7 @@ constructor(
             this.compartmentAssigner.fromHeaders(headers).or {
                 this.compartmentAssigner.fromId(resourceType.simpleName, id)
             }
-        val paths = this.pathResolver.candidates(resourceType, id.idPart, assignment)
+        val paths = this.pathResolver.candidates(resourceType, id.idPart, assignment!!)
         val resource =
             paths
                 .map { path -> this.cachedReadResource(path!!) }
@@ -376,7 +376,7 @@ constructor(
             this.pathResolver.preferredPath(
                 resource.javaClass,
                 resource.idElement.idPart,
-                assignment,
+                assignment!!,
             )
         writeResource(resource, path)
 
@@ -451,7 +451,7 @@ constructor(
         val resourceType = resource.javaClass
         val idPart = resource.idElement.idPart
 
-        var targetPath = this.pathResolver.preferredPath(resourceType, idPart, assignment)
+        var targetPath = this.pathResolver.preferredPath(resourceType, idPart, assignment!!)
         if (
             existingPath != null &&
                 (this.conventions.encodingBehavior!!.preserveEncoding ==
@@ -509,7 +509,7 @@ constructor(
                 this.compartmentAssigner.fromId(resourceType.simpleName, id)
             }
 
-        val paths = this.pathResolver.candidates(resourceType, id!!.idPart, assignment)
+        val paths = this.pathResolver.candidates(resourceType, id!!.idPart, assignment!!)
         var deleted = false
         for (path in paths) {
             try {

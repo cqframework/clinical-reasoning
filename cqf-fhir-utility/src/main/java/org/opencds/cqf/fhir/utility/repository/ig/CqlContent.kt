@@ -17,11 +17,9 @@ import org.opencds.cqf.fhir.utility.dstu3.AttachmentUtil
 
 object CqlContent {
     @JvmStatic
-    fun loadCqlContent(resource: IBaseResource?, resourcePath: Path?) {
-        Objects.requireNonNull<IBaseResource?>(resource, "resource can not be null")
-        Objects.requireNonNull<Path?>(resourcePath, "resourcePath can not be null")
+    fun loadCqlContent(resource: IBaseResource, resourcePath: Path) {
 
-        if ("Library" != resource!!.fhirType()) {
+        if ("Library" != resource.fhirType()) {
             return
         }
 
@@ -61,12 +59,7 @@ object CqlContent {
                 )
         }
 
-        CqlContent.readAndAttachCqlContent(
-            resource,
-            resourcePath!!,
-            cqlPathExtractor,
-            cqlContentAttacher,
-        )
+        readAndAttachCqlContent(resource, resourcePath!!, cqlPathExtractor, cqlContentAttacher)
     }
 
     private fun readAndAttachCqlContent(

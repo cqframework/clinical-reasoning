@@ -1,6 +1,5 @@
 package org.opencds.cqf.fhir.utility.repository.ig
 
-import java.util.*
 import java.util.function.Supplier
 
 /**
@@ -52,7 +51,7 @@ data class CompartmentAssignment(val compartmentType: String?, val compartmentId
 
         @JvmStatic
         fun of(compartmentType: String, compartmentId: String?): CompartmentAssignment {
-            val normalizedType = compartmentType.lowercase(Locale.getDefault())
+            val normalizedType = compartmentType.lowercase()
             val normalizedId =
                 if (!compartmentId.isNullOrBlank()) compartmentId.trim { it <= ' ' } else null
             return CompartmentAssignment(normalizedType, normalizedId)

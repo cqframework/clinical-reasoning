@@ -53,7 +53,7 @@ interface ResourceMatcher {
 
     // The list here is an OR list. Meaning, if any element matches it's a match
     fun matches(
-        name: String,
+        name: String?,
         params: MutableList<IQueryParameterType?>?,
         resource: IBaseResource,
     ): Boolean {
@@ -73,7 +73,7 @@ interface ResourceMatcher {
         var path = s.getPath()
 
         // System search parameters...
-        if (path.isEmpty() && name.startsWith("_")) {
+        if (path.isEmpty() && name!!.startsWith("_")) {
             path = name.substring(1)
         }
 

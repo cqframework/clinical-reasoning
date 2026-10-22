@@ -1,75 +1,79 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.parser.IParser
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.nio.charset.StandardCharsets
+import java.util.*
+import org.apache.commons.io.IOUtils
+import org.hl7.fhir.instance.model.api.IBaseBundle
+import org.hl7.fhir.instance.model.api.IBaseResource
 
-public interface ResourceLoader {
+interface ResourceLoader {
+    val relativeClass: Class<*>?
 
-    Class<?> getRelativeClass();
-
-    default IBaseBundle loadBundle(FhirContext context, String location) {
-        return (IBaseBundle) readResource(context, location);
+    fun loadBundle(context: FhirContext, location: String): IBaseBundle? {
+        return readResource(context, location) as IBaseBundle?
     }
 
-    default IBaseResource readResource(FhirContext context, String location) {
-        String resourceString = stringFromResource(location);
+    fun readResource(context: FhirContext, location: String): IBaseResource? {
+        val resourceString = stringFromResource(location)
         if (location.endsWith("json")) {
-            return parseResource(context, "json", resourceString);
+            return parseResource(context, "json", resourceString)
         } else {
-            return parseResource(context, "xml", resourceString);
+            return parseResource(context, "xml", resourceString)
         }
     }
 
-    public default IBaseResource parseResource(FhirContext context, String encoding, String resourceString) {
-        IParser parser;
-        switch (encoding.toLowerCase()) {
-            case "json":
-                parser = context.newJsonParser();
-                break;
-            case "xml":
-                parser = context.newXmlParser();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Expected encoding xml, or json.  %s is not a valid encoding".formatted(encoding));
+    fun parseResource(
+        context: FhirContext,
+        encoding: String,
+        resourceString: String?,
+    ): IBaseResource? {
+        val parser: IParser
+        when (encoding.lowercase(Locale.getDefault())) {
+            "json" -> parser = context.newJsonParser()
+            "xml" -> parser = context.newXmlParser()
+            else ->
+                throw IllegalArgumentException(
+                    "Expected encoding xml, or json.  $encoding is not a valid encoding"
+                )
         }
 
-        return parser.parseResource(resourceString);
+        return parser.parseResource(resourceString)
     }
 
-    default IBaseResource loadResource(FhirContext context, String location) {
-        String resourceString = stringFromResource(location);
+    fun loadResource(context: FhirContext, location: String): IBaseResource? {
+        val resourceString = stringFromResource(location)
         if (location.endsWith("json")) {
-            return loadResource(context, "json", resourceString);
+            return loadResource(context, "json", resourceString)
         } else {
-            return loadResource(context, "xml", resourceString);
+            return loadResource(context, "xml", resourceString)
         }
     }
 
-    default IBaseResource loadResource(FhirContext context, String encoding, String resourceString) {
-        return parseResource(context, encoding, resourceString);
+    fun loadResource(
+        context: FhirContext,
+        encoding: String,
+        resourceString: String?,
+    ): IBaseResource? {
+        return parseResource(context, encoding, resourceString)
     }
 
-    @SuppressWarnings("java:S112")
-    default String stringFromResource(String location) {
-        InputStream is = null;
+    fun stringFromResource(location: String): String? {
+        var `is`: InputStream? = null
         try {
-            File f = new File(location);
+            val f = File(location)
             if (f.isFile()) {
-                is = new FileInputStream(location);
+                `is` = FileInputStream(location)
             } else {
-                is = getRelativeClass().getResourceAsStream(location);
+                `is` = this.relativeClass!!.getResourceAsStream(location)
             }
-            return IOUtils.toString(is, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("Error loading resource from %s".formatted(location), e);
+            return IOUtils.toString(`is`, StandardCharsets.UTF_8)
+        } catch (e: Exception) {
+            throw RuntimeException("Error loading resource from $location", e)
         }
     }
 }

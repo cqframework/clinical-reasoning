@@ -1,82 +1,102 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.apache.commons.lang3.NotImplementedException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.client.Clients;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR5;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.rest.client.api.IGenericClient
+import kotlin.IllegalArgumentException
+import org.apache.commons.lang3.NotImplementedException
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.opencds.cqf.fhir.utility.client.Clients
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherDSTU3
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR4
+import org.opencds.cqf.fhir.utility.matcher.ResourceMatcherR5
 
-public class Repositories {
-
-    private Repositories() {
-        // intentionally empty
+object Repositories {
+    fun proxy(
+        data: IRepository,
+        content: IRepository?,
+        terminology: IRepository?,
+    ): ProxyRepository {
+        return ProxyRepository(data, content, terminology)
     }
 
-    public static ProxyRepository proxy(IRepository data, IRepository content, IRepository terminology) {
-        return new ProxyRepository(data, content, terminology);
-    }
+    private fun createClient(fhirContext: FhirContext, endpoint: IBaseResource?): IGenericClient {
+        val fhirVersion = fhirContext.getVersion().getVersion()
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU3 ->
+                Clients.forEndpoint(fhirContext, (endpoint as org.hl7.fhir.dstu3.model.Endpoint?)!!)
 
-    private static IGenericClient createClient(FhirContext fhirContext, IBaseResource endpoint) {
-        var fhirVersion = fhirContext.getVersion().getVersion();
-        return switch (fhirVersion) {
-            case DSTU3 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.dstu3.model.Endpoint) endpoint);
-            case R4 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r4.model.Endpoint) endpoint);
-            case R5 -> Clients.forEndpoint(fhirContext, (org.hl7.fhir.r5.model.Endpoint) endpoint);
-            default ->
-                throw new IllegalArgumentException(
-                        "unsupported FHIR version: %s".formatted(fhirVersion.getFhirVersionString()));
-        };
-    }
-
-    public static IRepository createRestRepository(FhirContext fhirContext, IBaseResource endpoint) {
-        return endpoint == null ? null : new RestRepository(createClient(fhirContext, endpoint));
-    }
-
-    public static IRepository proxy(
-            IRepository localRepository,
-            Boolean useLocalData,
-            IBaseResource dataEndpoint,
-            IBaseResource contentEndpoint,
-            IBaseResource terminologyEndpoint) {
-        return proxy(
-                localRepository,
-                useLocalData,
-                createRestRepository(localRepository.fhirContext(), dataEndpoint),
-                createRestRepository(localRepository.fhirContext(), contentEndpoint),
-                createRestRepository(localRepository.fhirContext(), terminologyEndpoint));
-    }
-
-    public static IRepository proxy(
-            IRepository localRepository,
-            Boolean useServerData,
-            IRepository dataRepository,
-            IRepository contentRepository,
-            IRepository terminologyRepository) {
-        var useLocalData = useServerData == null ? Boolean.TRUE : useServerData;
-        if (dataRepository == null
-                && contentRepository == null
-                && terminologyRepository == null
-                && Boolean.TRUE.equals(useLocalData)) {
-            return localRepository;
+            FhirVersionEnum.R4 ->
+                Clients.forEndpoint(fhirContext, (endpoint as org.hl7.fhir.r4.model.Endpoint?)!!)
+            FhirVersionEnum.R5 ->
+                Clients.forEndpoint(fhirContext, (endpoint as org.hl7.fhir.r5.model.Endpoint?)!!)
+            else ->
+                throw IllegalArgumentException(
+                    "unsupported FHIR version: ${fhirVersion!!.getFhirVersionString()}"
+                )
         }
-        return new ProxyRepository(
-                localRepository, useLocalData, dataRepository, contentRepository, terminologyRepository);
     }
 
-    public static ResourceMatcher getResourceMatcher(FhirContext context) {
-        var fhirVersion = context.getVersion().getVersion();
-        return switch (fhirVersion) {
-            case DSTU3 -> new ResourceMatcherDSTU3();
-            case R4 -> new ResourceMatcherR4();
-            case R5 -> new ResourceMatcherR5();
-            default ->
-                throw new NotImplementedException("Resource matching is not implemented for FHIR version: %s"
-                        .formatted(fhirVersion.getFhirVersionString()));
-        };
+    @JvmStatic
+    fun createRestRepository(fhirContext: FhirContext, endpoint: IBaseResource?): IRepository? {
+        return if (endpoint == null) null else RestRepository(createClient(fhirContext, endpoint))
+    }
+
+    @JvmStatic
+    fun proxy(
+        localRepository: IRepository,
+        useLocalData: Boolean?,
+        dataEndpoint: IBaseResource?,
+        contentEndpoint: IBaseResource?,
+        terminologyEndpoint: IBaseResource?,
+    ): IRepository? {
+        return proxy(
+            localRepository,
+            useLocalData,
+            createRestRepository(localRepository.fhirContext(), dataEndpoint),
+            createRestRepository(localRepository.fhirContext(), contentEndpoint),
+            createRestRepository(localRepository.fhirContext(), terminologyEndpoint),
+        )
+    }
+
+    @JvmStatic
+    fun proxy(
+        localRepository: IRepository,
+        useServerData: Boolean?,
+        dataRepository: IRepository?,
+        contentRepository: IRepository?,
+        terminologyRepository: IRepository?,
+    ): IRepository? {
+        val useLocalData = if (useServerData == null) true else useServerData
+        if (
+            dataRepository == null &&
+                contentRepository == null &&
+                terminologyRepository == null &&
+                true == useLocalData
+        ) {
+            return localRepository
+        }
+        return ProxyRepository(
+            localRepository,
+            useLocalData,
+            dataRepository,
+            contentRepository,
+            terminologyRepository,
+        )
+    }
+
+    fun getResourceMatcher(context: FhirContext): ResourceMatcher {
+        val fhirVersion = context.getVersion().getVersion()
+        return when (fhirVersion) {
+            FhirVersionEnum.DSTU3 -> ResourceMatcherDSTU3()
+            FhirVersionEnum.R4 -> ResourceMatcherR4()
+            FhirVersionEnum.R5 -> ResourceMatcherR5()
+            else ->
+                throw NotImplementedException(
+                    "Resource matching is not implemented for FHIR version: ${fhirVersion!!.getFhirVersionString()}"
+                )
+        }
     }
 }

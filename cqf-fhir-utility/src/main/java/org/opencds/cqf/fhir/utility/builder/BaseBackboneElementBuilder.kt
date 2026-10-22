@@ -24,7 +24,7 @@ abstract class BaseBackboneElementBuilder<
     open fun build(): T {
         val backboneElement: T = Resources.newBackboneElement(resourceClass)
 
-        when (forClass<T?>(resourceClass)) {
+        when (forClass(resourceClass)) {
             FhirVersionEnum.DSTU3 -> initializeDstu3(backboneElement)
             FhirVersionEnum.R4 -> initializeR4(backboneElement)
             FhirVersionEnum.R5 -> initializeR5(backboneElement)

@@ -97,7 +97,7 @@ class OperationRegistry {
      * @param clazz The class to register
      * @param factory A factory function that will create an instance of the class </T>
      */
-    fun <T> register(clazz: Class<T?>, factory: Function<IRepository?, T?>) {
+    fun <T> register(clazz: Class<T>, factory: Function<IRepository?, T?>) {
         val methodBinders =
             clazz.methods
                 .filter { m -> m.isAnnotationPresent(Operation::class.java) }

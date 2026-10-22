@@ -632,7 +632,7 @@ constructor(
         id: I?,
         name: String?,
         parameters: P?,
-        returnType: Class<R?>?,
+        returnType: Class<R>?,
         headers: MutableMap<String?, String?>?,
     ): R? {
         return invokeOperation(id, id!!.resourceType, name, parameters)

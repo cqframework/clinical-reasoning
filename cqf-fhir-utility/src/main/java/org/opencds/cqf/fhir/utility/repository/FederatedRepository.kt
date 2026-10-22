@@ -1,233 +1,291 @@
-package org.opencds.cqf.fhir.utility.repository;
+package org.opencds.cqf.fhir.utility.repository
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.BundleBuilder;
-import com.google.common.collect.Multimap;
-import jakarta.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.iterable.BundleIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.model.api.IQueryParameterType
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.rest.api.MethodOutcome
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
+import ca.uhn.fhir.util.BundleBuilder
+import ca.uhn.fhir.util.bundle.BundleEntryParts
+import com.google.common.collect.Multimap
+import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.function.Consumer
+import java.util.function.Supplier
+import java.util.stream.Stream
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.iterable.BundleIterator
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 // wip
-@SuppressWarnings("UnstableApiUsage")
-public class FederatedRepository implements IRepository {
-    public static final Logger logger = LoggerFactory.getLogger(FederatedRepository.class);
+class FederatedRepository(private val local: IRepository, vararg repositories: IRepository?) :
+    IRepository {
+    private val repositoryList: MutableList<IRepository>
 
-    private final IRepository local;
-    private final List<IRepository> repositoryList;
-
-    public FederatedRepository(IRepository local, IRepository... repositories) {
-        this.local = local;
-        repositoryList = Arrays.asList(repositories);
+    init {
+        repositoryList = Arrays.asList<IRepository?>(*repositories)
     }
 
-    @Override
-    public <T extends IBaseResource, I extends IIdType> T read(
-            Class<T> resourceType, I id, Map<String, String> headers) {
-
+    override fun <T : IBaseResource, I : IIdType> read(
+        resourceType: Class<T>?,
+        id: I?,
+        headers: MutableMap<String?, String?>?,
+    ): T? {
         // Check local first, then go through the list if nothing is found
-        T result = null;
-        try {
-            result = local.read(resourceType, id, headers);
 
-        } catch (Exception e) {
+        var result: T? = null
+        try {
+            result = local.read<T?, I?>(resourceType, id, headers)
+        } catch (e: Exception) {
             // TODO: handle exception
         }
 
         if (result == null) {
-            for (var repository : repositoryList) {
+            for (repository in repositoryList) {
                 try {
-                    result = repository.read(resourceType, id, headers);
+                    result = repository.read<T?, I?>(resourceType, id, headers)
                     if (result != null) {
-                        break;
+                        break
                     }
-                } catch (Exception e) {
+                } catch (e: Exception) {
                     // TODO: handle exception
                 }
             }
         }
 
         if (result == null) {
-            throw new ResourceNotFoundException("No resource found with id: %s".formatted(id.getValue()));
+            throw ResourceNotFoundException("No resource found with id: ${id!!.value}")
         }
 
-        return result;
+        return result
     }
 
-    @Override
-    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        return null;
+    override fun <T : IBaseResource> create(
+        resource: T?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @Override
-    public <I extends IIdType, P extends IBaseParameters> MethodOutcome patch(
-            I id, P patchParameters, Map<String, String> headers) {
-        return null;
+    override fun <I : IIdType, P : IBaseParameters> patch(
+        id: I?,
+        patchParameters: P?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @Override
-    public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        return null;
+    override fun <T : IBaseResource> update(
+        resource: T?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @Override
-    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-            Class<T> resourceType, I id, Map<String, String> headers) {
-        return null;
+    override fun <T : IBaseResource, I : IIdType> delete(
+        resourceType: Class<T>?,
+        id: I?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @SuppressWarnings("unchecked")
-    private <B extends IBaseBundle, T extends IBaseResource> List<T> conductSearch(
-            IRepository repository,
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        List<T> results = new ArrayList<>();
-        var bundle = repository.search(bundleType, resourceType, searchParameters, headers);
-        var iterator = new BundleIterator<>(repository, bundle);
-        iterator.forEachRemaining(b -> results.add((T) b.getResource()));
-        return results;
+    private fun <B : IBaseBundle, T : IBaseResource> conductSearch(
+        repository: IRepository,
+        bundleType: Class<B>?,
+        resourceType: Class<T>?,
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+        headers: MutableMap<String?, String?>?,
+    ): MutableList<T?> {
+        val results = mutableListOf<T?>()
+        val bundle = repository.search(bundleType, resourceType, searchParameters, headers)
+        val iterator = BundleIterator(repository, bundle)
+        iterator.forEachRemaining(
+            Consumer { b: BundleEntryParts? -> results.add(b!!.getResource() as T?) }
+        )
+        return results
     }
 
-    @Override
-    public <B extends IBaseBundle, T extends IBaseResource> B search(
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
+    override fun <B : IBaseBundle, T : IBaseResource> search(
+        bundleType: Class<B>?,
+        resourceType: Class<T>?,
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
         // Search all repositories and return combined results.
-        var builder = new BundleBuilder(fhirContext());
+        val builder = BundleBuilder(fhirContext())
 
-        List<CompletableFuture<List<T>>> futureList = new ArrayList<>();
-        futureList.add(CompletableFuture.supplyAsync(
-                () -> conductSearch(local, bundleType, resourceType, searchParameters, headers)));
-        this.repositoryList.forEach(r -> futureList.add(CompletableFuture.supplyAsync(
-                () -> conductSearch(r, bundleType, resourceType, searchParameters, headers))));
+        val futureList: MutableList<CompletableFuture<MutableList<T?>?>?> =
+            ArrayList<CompletableFuture<MutableList<T?>?>?>()
+        futureList.add(
+            CompletableFuture.supplyAsync<MutableList<T?>?>(
+                Supplier {
+                    conductSearch(local, bundleType, resourceType, searchParameters, headers)
+                }
+            )
+        )
+        this.repositoryList.forEach(
+            Consumer { r: IRepository? ->
+                futureList.add(
+                    CompletableFuture.supplyAsync<MutableList<T?>?>(
+                        Supplier {
+                            conductSearch(r!!, bundleType, resourceType, searchParameters, headers)
+                        }
+                    )
+                )
+            }
+        )
 
-        futureList.stream()
-                .map(CompletableFuture::join)
-                .flatMap(Collection::stream)
-                .forEach(builder::addCollectionEntry);
-        builder.setType("searchset");
+        futureList
+            .stream()
+            .map<MutableList<T?>?> { obj: CompletableFuture<MutableList<T?>?>? -> obj!!.join() }
+            .flatMap<T?> { obj: MutableList<T?>? -> obj!!.stream() }
+            .forEach { theResource: T? -> builder.addCollectionEntry(theResource) }
+        builder.setType("searchset")
 
-        return builder.getBundleTyped();
+        return builder.getBundleTyped<B?>()
     }
 
-    @Override
-    public <B extends IBaseBundle> B link(Class<B> bundleType, String url, Map<String, String> headers) {
-        return Stream.concat(Stream.of(local), repositoryList.stream())
-                .map(repo -> tryLink(repo, bundleType, url, headers))
-                .flatMap(Optional::stream)
-                .filter(this::hasResourceEntries)
-                .findFirst()
-                .orElse(null);
+    override fun <B : IBaseBundle> link(
+        bundleType: Class<B>?,
+        url: String?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
+        return Stream.concat<IRepository?>(Stream.of<IRepository?>(local), repositoryList.stream())
+            .map<Optional<B>?> { repo -> tryLink(repo!!, bundleType, url, headers) }
+            .flatMap<B?> { obj: Optional<B>? -> obj!!.stream() }
+            .filter { bundle: B? -> this.hasResourceEntries(bundle!!) }
+            .findFirst()
+            .orElse(null)
     }
 
-    private <B extends IBaseBundle> Optional<B> tryLink(
-            IRepository repo, Class<B> type, String url, Map<String, String> headers) {
+    private fun <B : IBaseBundle> tryLink(
+        repo: IRepository,
+        type: Class<B>?,
+        url: String?,
+        headers: MutableMap<String?, String?>?,
+    ): Optional<B> {
         try {
-            return Optional.ofNullable(repo.link(type, url, headers));
-        } catch (Exception e) {
+            return Optional.ofNullable(repo.link(type, url, headers))
+        } catch (e: Exception) {
             // swallow and try next
             logger.debug(
-                    "Encountered error attempting to fetch link from repository of type {}: {}",
-                    repo.getClass().getName(),
-                    e.getMessage());
-            return Optional.empty();
+                "Encountered error attempting to fetch link from repository of type {}: {}",
+                repo.javaClass.getName(),
+                e.message,
+            )
+            return Optional.empty()
         }
     }
 
-    private Boolean hasResourceEntries(IBaseBundle bundle) {
-        var bundleFactory =
-                FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory();
-        bundleFactory.initializeWithBundleResource(bundle);
-        return !bundleFactory.toListOfResources().isEmpty();
+    private fun hasResourceEntries(bundle: IBaseBundle): Boolean {
+        val bundleFactory =
+            FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory()
+        bundleFactory.initializeWithBundleResource(bundle)
+        return !bundleFactory.toListOfResources().isEmpty()
     }
 
-    @Override
-    public <C extends IBaseConformance> C capabilities(Class<C> resourceType, Map<String, String> headers) {
-        return null;
+    override fun <C : IBaseConformance> capabilities(
+        resourceType: Class<C>?,
+        headers: MutableMap<String?, String?>?,
+    ): C? {
+        return null
     }
 
-    @Override
-    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        return null;
+    override fun <B : IBaseBundle> transaction(
+        transaction: B?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
+        return null
     }
 
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters> R invoke(
-            String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return null;
+    override fun <R : IBaseResource, P : IBaseParameters> invoke(
+        name: String?,
+        parameters: P?,
+        returnType: Class<R>?,
+        headers: MutableMap<String?, String?>?,
+    ): R? {
+        return null
     }
 
-    @Override
-    public <P extends IBaseParameters> MethodOutcome invoke(String name, P parameters, Map<String, String> headers) {
-        return null;
+    override fun <P : IBaseParameters> invoke(
+        name: String?,
+        parameters: P?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-            Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return null;
+    override fun <R : IBaseResource, P : IBaseParameters, T : IBaseResource> invoke(
+        resourceType: Class<T>?,
+        name: String?,
+        parameters: P?,
+        returnType: Class<R>?,
+        headers: MutableMap<String?, String?>?,
+    ): R? {
+        return null
     }
 
-    @Override
-    public <P extends IBaseParameters, T extends IBaseResource> MethodOutcome invoke(
-            Class<T> resourceType, String name, P parameters, Map<String, String> headers) {
-        return null;
+    override fun <P : IBaseParameters, T : IBaseResource> invoke(
+        resourceType: Class<T>?,
+        name: String?,
+        parameters: P?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-            I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return null;
+    override fun <R : IBaseResource, P : IBaseParameters, I : IIdType> invoke(
+        id: I?,
+        name: String?,
+        parameters: P?,
+        returnType: Class<R>?,
+        headers: MutableMap<String?, String?>?,
+    ): R? {
+        return null
     }
 
-    @Override
-    public <P extends IBaseParameters, I extends IIdType> MethodOutcome invoke(
-            I id, String name, P parameters, Map<String, String> headers) {
-        return null;
+    override fun <P : IBaseParameters, I : IIdType> invoke(
+        id: I?,
+        name: String?,
+        parameters: P?,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome? {
+        return null
     }
 
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters> B history(
-            P parameters, Class<B> returnType, Map<String, String> headers) {
-        return null;
+    override fun <B : IBaseBundle, P : IBaseParameters> history(
+        parameters: P?,
+        returnType: Class<B>?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
+        return null
     }
 
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, T extends IBaseResource> B history(
-            Class<T> resourceType, P parameters, Class<B> returnType, Map<String, String> headers) {
-        return null;
+    override fun <B : IBaseBundle, P : IBaseParameters, T : IBaseResource> history(
+        resourceType: Class<T>?,
+        parameters: P?,
+        returnType: Class<B>?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
+        return null
     }
 
-    @Override
-    public <B extends IBaseBundle, P extends IBaseParameters, I extends IIdType> B history(
-            I id, P parameters, Class<B> returnType, Map<String, String> headers) {
-        return null;
+    override fun <B : IBaseBundle, P : IBaseParameters, I : IIdType> history(
+        id: I?,
+        parameters: P?,
+        returnType: Class<B>?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
+        return null
     }
 
-    @Override
-    @Nonnull
-    public FhirContext fhirContext() {
-        return local.fhirContext();
+    override fun fhirContext(): FhirContext {
+        return local.fhirContext()
+    }
+
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(FederatedRepository::class.java)
     }
 }

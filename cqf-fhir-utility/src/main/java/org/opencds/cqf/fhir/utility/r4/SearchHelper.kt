@@ -40,12 +40,12 @@ object SearchHelper {
     @JvmStatic
     fun <T : IBaseResource?> searchRepositoryWithPaging(
         repository: IRepository,
-        resourceType: Class<T?>?,
+        resourceType: Class<T>?,
         searchParameters: MutableMap<String?, MutableList<IQueryParameterType?>?>?,
         headers: MutableMap<String?, String?>?,
     ): Bundle {
         val result =
-            repository.search<Bundle, T?>(
+            repository.search<Bundle, T>(
                 Bundle::class.java,
                 resourceType,
                 searchParameters,

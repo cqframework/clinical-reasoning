@@ -1,37 +1,36 @@
-package org.opencds.cqf.fhir.utility.r4;
+package org.opencds.cqf.fhir.utility.r4
 
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.hl7.fhir.r4.model.Library
 
-public class AttachmentUtil {
-
-    private AttachmentUtil() {}
-
-    public static String getCqlLocation(IBaseResource resource) {
-        Library library = (Library) resource;
-        for (Attachment attachment : library.getContent()) {
-            if (attachment.hasContentType()
-                    && attachment.getContentType().equals("text/cql")
-                    && StringUtils.isNotBlank(attachment.getUrl())) {
-                return attachment.getUrl();
+object AttachmentUtil {
+    @JvmStatic
+    fun getCqlLocation(resource: IBaseResource?): String? {
+        val library = resource as Library
+        for (attachment in library.content) {
+            if (
+                attachment.hasContentType() &&
+                    attachment.contentType == "text/cql" &&
+                    !attachment.url.isNullOrBlank()
+            ) {
+                return attachment.url
             }
         }
-        return null;
+        return null
     }
 
-    public static IBaseResource addData(IBaseResource resource, String text) {
-        if (StringUtils.isNotBlank(text)) {
-            Library library = (Library) resource;
-            for (Attachment attachment : library.getContent()) {
-                if (attachment.hasContentType() && attachment.getContentType().equals("text/cql")) {
-                    attachment.setData(text.getBytes());
+    @JvmStatic
+    fun addData(resource: IBaseResource?, text: String?): IBaseResource? {
+        if (!text.isNullOrBlank()) {
+            val library = resource as Library
+            for (attachment in library.content) {
+                if (attachment.hasContentType() && attachment.contentType == "text/cql") {
+                    attachment.setData(text.toByteArray())
                     // library.addContent(attachment);
-                    return (IBaseResource) library;
+                    return library as IBaseResource
                 }
             }
         }
-        return null;
+        return null
     }
 }

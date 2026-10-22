@@ -1,337 +1,343 @@
-package org.opencds.cqf.fhir.utility.operation;
+package org.opencds.cqf.fhir.utility.operation
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.util.ParametersUtil;
-import jakarta.annotation.Nonnull;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.Parameters;
-import org.opencds.cqf.fhir.utility.Resources;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.rest.annotation.IdParam
+import ca.uhn.fhir.rest.annotation.OperationParam
+import ca.uhn.fhir.util.ParametersUtil
+import com.google.common.base.Preconditions
+import java.lang.reflect.Parameter
+import java.util.*
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Parameters.removeParameter
+import org.opencds.cqf.fhir.utility.Resources.clone
 
 interface ParameterBinder {
-    enum Type {
+    enum class Type {
         ID,
         OPERATION,
-        EXTRA
+        EXTRA,
     }
 
-    // Extract the value from the parameters resource that matches the external name of the parameter.
-    // And removes the value from the parameters resource. This is to ensure that all parameters get consumed
-    Object bind(IBaseParameters parameters);
+    // Extract the value from the parameters resource that matches the external name of the
+    // parameter.
+    // And removes the value from the parameters resource. This is to ensure that all parameters get
+    // consumed
+    fun bind(parameters: IBaseParameters?): Any?
 
-    @Nonnull
-    Type type();
+    fun type(): Type
 
-    @Nonnull
-    String name();
+    fun name(): String
 
-    @Nonnull
-    Parameter parameter();
+    fun parameter(): Parameter
 
-    // Ensures that the parameter annotations are valid for the operation
-    // Requirements specific to a given parameter are checked in the ParameterBinder
-    // This method checks for cross-parameter requirements
-    static List<ParameterBinder> validate(List<ParameterBinder> parameterBinders) {
-        var idParamCount =
-                parameterBinders.stream().filter(x -> x.type() == Type.ID).count();
-        if (idParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @IdParam");
+    class IdParameterBinder(parameter: Parameter?) : ParameterBinder {
+        private val parameter: Parameter
+
+        init {
+            this.parameter =
+                Objects.requireNonNull<Parameter>(parameter, "parameter can not be null")
+            Preconditions.checkArgument(
+                IIdType::class.java.isAssignableFrom(parameter!!.getType()),
+                "Parameter annotated with @IdParam must be of type IIdType",
+            )
         }
 
-        if (idParamCount > 0 && parameterBinders.get(0).type() != Type.ID) {
-            throw new IllegalArgumentException("If @IdParam is present, it must be the first parameter");
+        override fun type(): Type {
+            return Type.ID
         }
 
-        var extraParamCount =
-                parameterBinders.stream().filter(x -> x.type() == Type.EXTRA).count();
-        if (extraParamCount > 1) {
-            throw new IllegalArgumentException("Method cannot have more than one @ExtraParams");
+        override fun name(): String {
+            return "_id"
         }
 
-        if (extraParamCount > 0
-                && parameterBinders.get(parameterBinders.size() - 1).type() != Type.EXTRA) {
-            throw new IllegalArgumentException("If @ExtraParams is present, it must be the last parameter");
+        override fun bind(parameters: IBaseParameters?): Any? {
+            throw UnsupportedOperationException("bind is not supported for @IdParam")
         }
 
-        return parameterBinders;
-    }
-
-    static ParameterBinder from(Parameter parameter) {
-        requireNonNull(parameter, "parameter can not be null");
-
-        var idParam = parameter.getAnnotation(IdParam.class);
-        var operationParam = parameter.getAnnotation(OperationParam.class);
-        var extraParam = parameter.getAnnotation(ExtraParams.class);
-
-        ensureExactlyOneOf(idParam, operationParam, extraParam);
-
-        if (idParam != null) {
-            return new IdParameterBinder(parameter);
-        } else if (operationParam != null) {
-            return new OperationParameterBinder(parameter, operationParam);
-        } else {
-            return new ExtraParamBinder(parameter);
+        override fun parameter(): Parameter {
+            return parameter
         }
     }
 
-    static void ensureExactlyOneOf(IdParam idParam, OperationParam operationParam, ExtraParams extraParams) {
-
-        var count = Arrays.asList(idParam, operationParam, extraParams).stream()
-                .filter(Objects::nonNull)
-                .count();
-
-        if (count == 0) {
-            throw new IllegalArgumentException(
-                    "Method Parameter must be annotated with @IdParam, @OperationParam, or @ExtraParams");
-        } else if (count > 1) {
-            throw new IllegalArgumentException(
-                    "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @ExtraParams");
-        }
-    }
-
-    static class IdParameterBinder implements ParameterBinder {
-        private final Parameter parameter;
-
-        public IdParameterBinder(Parameter parameter) {
-            this.parameter = requireNonNull(parameter, "parameter can not be null");
-            checkArgument(
-                    IIdType.class.isAssignableFrom(parameter.getType()),
-                    "Parameter annotated with @IdParam must be of type IIdType");
-        }
-
-        @Override
-        public Type type() {
-            return Type.ID;
-        }
-
-        @Override
-        public String name() {
-            return "_id";
-        }
-
-        @Override
-        public Object bind(IBaseParameters parameters) {
-            throw new UnsupportedOperationException("bind is not supported for @IdParam");
-        }
-
-        @Override
-        public Parameter parameter() {
-            return parameter;
-        }
-    }
-
-    static class OperationParameterBinder implements ParameterBinder {
-
-        private enum ParameterClass {
+    class OperationParameterBinder(parameter: Parameter?, operationParam: OperationParam?) :
+        ParameterBinder {
+        private enum class ParameterClass {
             RESOURCE,
             VALUE,
-            LIST
+            LIST,
         }
 
-        private final Parameter parameter;
-        private final OperationParam operationParam;
-        private final ParameterClass parameterClass;
+        private val parameter: Parameter
+        private val operationParam: OperationParam
+        private val parameterClass: ParameterClass
 
-        public OperationParameterBinder(Parameter parameter, OperationParam operationParam) {
-            this.parameter = requireNonNull(parameter, "parameter can not be null");
-            this.operationParam = requireNonNull(operationParam, "operationParam can not be null");
-            requireNonNull(operationParam.name(), "@OperationParam must have a name defined");
-            this.parameterClass = determineParameterClass(parameter);
+        init {
+            this.parameter =
+                Objects.requireNonNull<Parameter>(parameter, "parameter can not be null")
+            this.operationParam =
+                Objects.requireNonNull<OperationParam>(
+                    operationParam,
+                    "operationParam can not be null",
+                )
+            Objects.requireNonNull<String?>(
+                operationParam!!.name,
+                "@OperationParam must have a name defined",
+            )
+            this.parameterClass = Companion.determineParameterClass(parameter!!)
         }
 
-        private static ParameterClass determineParameterClass(Parameter parameter) {
-            var type = parameter.getType();
-            if (IBaseResource.class.isAssignableFrom(type)) {
-                return ParameterClass.RESOURCE;
-            } else if (IBaseDatatype.class.isAssignableFrom(type)) {
-                return ParameterClass.VALUE;
-            } else if (List.class.isAssignableFrom(type)) {
-                return ParameterClass.LIST;
-            } else {
-                throw new IllegalArgumentException("Parameter annotated with @Operation must be a FHIR type or a List");
-            }
+        override fun type(): Type {
+            return Type.OPERATION
         }
 
-        @Override
-        public Type type() {
-            return Type.OPERATION;
+        override fun name(): String {
+            return operationParam.name
         }
 
-        @Override
-        public String name() {
-            return operationParam.name();
-        }
+        override fun bind(parameters: IBaseParameters?): Any? {
+            if (parameters == null && operationParam.min <= 0) {
+                return null
+            } else
+                requireNotNull(parameters) {
+                    "Parameter " + this.name() + " is required but was not provided"
+                }
 
-        @Override
-        public Object bind(IBaseParameters parameters) {
-            if (parameters == null && operationParam.min() <= 0) {
-                return null;
-            } else if (parameters == null) {
-                throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
-            }
+            val context = FhirContext.forCached(parameters.getStructureFhirVersionEnum())
+            val terser = context.newTerser()
+            val params = ParametersUtil.getNamedParameters(context, parameters, this.name())
+            removeParameter(parameters, this.name())
 
-            var context = FhirContext.forCached(parameters.getStructureFhirVersionEnum());
-            var terser = context.newTerser();
-            var params = ParametersUtil.getNamedParameters(context, parameters, this.name());
-            Parameters.removeParameter(parameters, this.name());
-
-            if (params.isEmpty() && operationParam.min() > 0) {
-                throw new IllegalArgumentException("Parameter " + this.name() + " is required but was not provided");
+            require(!(params.isEmpty() && operationParam.min > 0)) {
+                "Parameter " + this.name() + " is required but was not provided"
             }
 
-            if (params.size() > 1) {
-                throw new IllegalArgumentException("Parameter " + this.name()
-                        + " has more than one value. Use parameter parts for multiple values");
+            require(params.size <= 1) {
+                ("Parameter " +
+                    this.name() +
+                    " has more than one value. Use parameter parts for multiple values")
             }
 
             // Not required and not present so we can return null
             if (params.isEmpty()) {
-                return null;
+                return null
             }
 
-            // Here, we need to get either the part, the resource, or the value[x] from the parameter
+            // Here, we need to get either the part, the resource, or the value[x] from the
+            // parameter
             // For list-valued parameters, we need to the value/resource from each part
 
             // First, let's check for parts. For lists this is correct.
             // For single-valued parameters, this is incorrect
-            var parts = terser.getValues(params.get(0), "part");
-            if (parameterClass != ParameterClass.LIST && !parts.isEmpty()) {
-                throw new IllegalArgumentException(
-                        "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+            val parts = terser.getValues(params.get(0), "part")
+            require(!(parameterClass != ParameterClass.LIST && !parts.isEmpty())) {
+                "Parameter " + this.name() + " is not the expected type " + parameter.getType()
             }
 
             if (parameterClass == ParameterClass.LIST) {
-                var size = parts.size();
-                if (operationParam.min() > size) {
-                    throw new IllegalArgumentException("Parameter " + this.name()
-                            + " has fewer values than the minimum of " + operationParam.min());
+                val size = parts.size
+                require(operationParam.min <= size) {
+                    ("Parameter " +
+                        this.name() +
+                        " has fewer values than the minimum of " +
+                        operationParam.min)
                 }
 
-                if (operationParam.max() > 0 && size > operationParam.max()) {
-                    throw new IllegalArgumentException("Parameter " + this.name()
-                            + " has more values than the maximum of " + operationParam.max());
+                require(!(operationParam.max > 0 && size > operationParam.max)) {
+                    ("Parameter " +
+                        this.name() +
+                        " has more values than the maximum of " +
+                        operationParam.max)
                 }
             }
 
             if (parameterClass == ParameterClass.LIST) {
-                var values = new ArrayList<IBase>();
-                for (var part : parts) {
-                    var r = terser.getSingleValueOrNull(part, "resource", IBaseResource.class);
-                    var v = terser.getSingleValueOrNull(part, "value[x]", IBase.class);
+                val values = ArrayList<IBase?>()
+                for (part in parts) {
+                    val r =
+                        terser.getSingleValueOrNull<IBaseResource?>(
+                            part,
+                            "resource",
+                            IBaseResource::class.java,
+                        )
+                    val v = terser.getSingleValueOrNull<IBase?>(part, "value[x]", IBase::class.java)
 
                     if (v != null) {
-                        values.add(v);
+                        values.add(v)
                     } else if (r != null) {
-                        values.add(r);
+                        values.add(r)
                     } else {
-                        throw new IllegalArgumentException(
-                                "Parameter " + this.name() + " has an empty part. Expected a resource or value[x]");
+                        throw IllegalArgumentException(
+                            "Parameter " +
+                                this.name() +
+                                " has an empty part. Expected a resource or value[x]"
+                        )
                     }
                 }
 
-                return values;
+                return values
             }
 
-            var param = params.get(0);
-            IBaseResource valueResource = terser.getSingleValueOrNull(param, "resource", IBaseResource.class);
-            IBase value = terser.getSingleValueOrNull(param, "value[x]", IBase.class);
-            if (valueResource != null && value != null) {
-                throw new IllegalArgumentException(
-                        "Parameter " + this.name() + " has both a resource and a value. Only one is allowed");
+            val param = params.get(0)
+            val valueResource =
+                terser.getSingleValueOrNull<IBaseResource?>(
+                    param,
+                    "resource",
+                    IBaseResource::class.java,
+                )
+            val value = terser.getSingleValueOrNull<IBase?>(param, "value[x]", IBase::class.java)
+            require(!(valueResource != null && value != null)) {
+                "Parameter " + this.name() + " has both a resource and a value. Only one is allowed"
             }
 
             if (parameterClass == ParameterClass.RESOURCE) {
-                if (value != null) {
-                    throw new IllegalArgumentException(
-                            "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                require(value == null) {
+                    "Parameter " + this.name() + " is not the expected type " + parameter.getType()
                 }
 
-                if (valueResource == null && operationParam.min() > 0) {
-                    throw new IllegalArgumentException(
-                            "Parameter " + this.name() + " is required but was not provided");
+                require(!(valueResource == null && operationParam.min > 0)) {
+                    "Parameter " + this.name() + " is required but was not provided"
                 }
             }
 
             if (parameterClass == ParameterClass.VALUE) {
-                if (valueResource != null) {
-                    throw new IllegalArgumentException(
-                            "Parameter " + this.name() + " is not the expected type " + parameter.getType());
+                require(valueResource == null) {
+                    "Parameter " + this.name() + " is not the expected type " + parameter.getType()
                 }
 
-                if (value == null && operationParam.min() > 0) {
-                    throw new IllegalArgumentException(
-                            "Parameter " + this.name() + " is required but was not provided");
+                require(!(value == null && operationParam.min > 0)) {
+                    "Parameter " + this.name() + " is required but was not provided"
                 }
             }
 
-            var returnValue = valueResource != null ? valueResource : value;
+            val returnValue = if (valueResource != null) valueResource else value
             if (returnValue == null) {
-                return null;
+                return null
             }
 
             try {
-                return this.parameter.getType().cast(returnValue);
-            } catch (ClassCastException e) {
-                throw new IllegalArgumentException(
-                        "Parameter value '" + this.name() + "'' is not of the expected type " + parameter.getType());
+                return this.parameter.getType().cast(returnValue)
+            } catch (e: ClassCastException) {
+                throw IllegalArgumentException(
+                    "Parameter value '" +
+                        this.name() +
+                        "'' is not of the expected type " +
+                        parameter.getType()
+                )
             }
         }
 
-        @Override
-        public Parameter parameter() {
-            return parameter;
+        override fun parameter(): Parameter {
+            return parameter
+        }
+
+        companion object {
+            private fun determineParameterClass(parameter: Parameter): ParameterClass {
+                val type = parameter.getType()
+                if (IBaseResource::class.java.isAssignableFrom(type)) {
+                    return ParameterClass.RESOURCE
+                } else if (IBaseDatatype::class.java.isAssignableFrom(type)) {
+                    return ParameterClass.VALUE
+                } else if (MutableList::class.java.isAssignableFrom(type)) {
+                    return ParameterClass.LIST
+                } else {
+                    throw IllegalArgumentException(
+                        "Parameter annotated with @Operation must be a FHIR type or a List"
+                    )
+                }
+            }
         }
     }
 
-    static class ExtraParamBinder implements ParameterBinder {
-        private final Parameter parameter;
+    class ExtraParamBinder(parameter: Parameter?) : ParameterBinder {
+        private val parameter: Parameter
 
-        public ExtraParamBinder(Parameter parameter) {
-            this.parameter = requireNonNull(parameter, "parameter can not be null");
-            checkArgument(
-                    IBaseParameters.class.isAssignableFrom(parameter.getType()),
-                    "Parameter annotated with @ExtraParams must be of type IBaseParameters");
+        init {
+            this.parameter =
+                Objects.requireNonNull<Parameter>(parameter, "parameter can not be null")
+            Preconditions.checkArgument(
+                IBaseParameters::class.java.isAssignableFrom(parameter!!.getType()),
+                "Parameter annotated with @ExtraParams must be of type IBaseParameters",
+            )
         }
 
-        @Override
-        public Type type() {
-            return Type.EXTRA;
+        override fun type(): Type {
+            return Type.EXTRA
         }
 
-        @Override
-        public String name() {
-            return "<extra>";
+        override fun name(): String {
+            return "<extra>"
         }
 
-        @Override
-        public Object bind(IBaseParameters parameters) {
+        override fun bind(parameters: IBaseParameters?): Any? {
             if (parameters == null) {
-                return null;
+                return null
             }
 
-            var value = Resources.clone(parameters);
+            val value = clone<IBaseParameters>(parameters)
 
             // Remove all values from the parameters resource
-
-            return value;
+            return value
         }
 
-        @Override
-        public Parameter parameter() {
-            return this.parameter;
+        override fun parameter(): Parameter {
+            return this.parameter
+        }
+    }
+
+    companion object {
+        // Ensures that the parameter annotations are valid for the operation
+        // Requirements specific to a given parameter are checked in the ParameterBinder
+        // This method checks for cross-parameter requirements
+        fun validate(parameterBinders: MutableList<ParameterBinder>): MutableList<ParameterBinder> {
+            val idParamCount = parameterBinders.count { x -> x.type() == Type.ID }
+            require(idParamCount <= 1) { "Method cannot have more than one @IdParam" }
+
+            require(!(idParamCount > 0 && parameterBinders[0].type() != Type.ID)) {
+                "If @IdParam is present, it must be the first parameter"
+            }
+
+            val extraParamCount = parameterBinders.count { x -> x.type() == Type.EXTRA }
+            require(extraParamCount <= 1) { "Method cannot have more than one @ExtraParams" }
+
+            require(
+                !(extraParamCount > 0 &&
+                    parameterBinders[parameterBinders.size - 1].type() != Type.EXTRA)
+            ) {
+                "If @ExtraParams is present, it must be the last parameter"
+            }
+
+            return parameterBinders
+        }
+
+        fun from(parameter: Parameter): ParameterBinder {
+            val idParam = parameter.getAnnotation(IdParam::class.java)
+            val operationParam = parameter.getAnnotation(OperationParam::class.java)
+            val extraParam = parameter.getAnnotation(ExtraParams::class.java)
+
+            Companion.ensureExactlyOneOf(idParam, operationParam, extraParam)
+
+            if (idParam != null) {
+                return IdParameterBinder(parameter)
+            } else if (operationParam != null) {
+                return OperationParameterBinder(parameter, operationParam)
+            } else {
+                return ExtraParamBinder(parameter)
+            }
+        }
+
+        fun ensureExactlyOneOf(
+            idParam: IdParam?,
+            operationParam: OperationParam?,
+            extraParams: ExtraParams?,
+        ) {
+            val count = listOfNotNull(idParam, operationParam, extraParams).size
+
+            require(count != 0) {
+                "Method Parameter must be annotated with @IdParam, @OperationParam, or @ExtraParams"
+            }
+            require(count <= 1) {
+                "Method Parameter can only be annotated with one of @IdParam, @OperationParam, or @ExtraParams"
+            }
         }
     }
 }

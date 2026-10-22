@@ -1,11 +1,10 @@
-package org.opencds.cqf.fhir.utility.r4;
+package org.opencds.cqf.fhir.utility.r4
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.hl7.fhir.r4.model.DomainResource;
-import org.hl7.fhir.r4.model.Resource;
+import java.util.stream.Collectors
+import java.util.stream.Stream
+import org.hl7.fhir.r4.model.DomainResource
+import org.hl7.fhir.r4.model.Resource
+import org.opencds.cqf.fhir.utility.r4.ContainedHelper.getContainedResourcesInContainedResources
 
 /**
  * This class consists exclusively of static methods that assist with managing contained FHIR
@@ -20,21 +19,21 @@ import org.hl7.fhir.r4.model.Resource;
  * class will move all contained resources to the parent so they are present in responses to
  * clients.
  */
-public class ContainedHelper {
-
-    private ContainedHelper() {}
-
+object ContainedHelper {
     /**
      * Adds all contained resources in resources contained on the parent to the parent.
      *
      * @param resource the parent resource where contained resources should be
      * @return the modified parent resource
      */
-    public static DomainResource liftContainedResourcesToParent(DomainResource resource) {
+    @JvmStatic
+    fun liftContainedResourcesToParent(resource: DomainResource): DomainResource {
         // add them to the parent
-        getContainedResourcesInContainedResources(resource).forEach(resource::addContained);
+        getContainedResourcesInContainedResources(resource).forEach { t ->
+            resource.addContained(t)
+        }
 
-        return resource; // Return the resource to allow for method chaining
+        return resource // Return the resource to allow for method chaining
     }
 
     /**
@@ -43,11 +42,13 @@ public class ContainedHelper {
      * @param resource the parent resource
      * @return list of the contained resources
      */
-    private static List<Resource> getContainedResourcesInContainedResources(Resource resource) {
-        if (!(resource instanceof DomainResource)) {
-            return new ArrayList<>();
+    private fun getContainedResourcesInContainedResources(
+        resource: Resource?
+    ): MutableList<Resource?> {
+        if (resource !is DomainResource) {
+            return mutableListOf()
         }
-        return streamContainedResourcesInContainedResources(resource).collect(Collectors.toList());
+        return streamContainedResourcesInContainedResources(resource).collect(Collectors.toList())
     }
 
     /**
@@ -57,39 +58,40 @@ public class ContainedHelper {
      * @param resource the parent resource
      * @return list of all contained resources
      */
-    public static List<Resource> getAllContainedResources(Resource resource) {
-        if (!(resource instanceof DomainResource)) {
-            return new ArrayList<>();
+    @JvmStatic
+    fun getAllContainedResources(resource: Resource?): MutableList<Resource?> {
+        if (resource !is DomainResource) {
+            return mutableListOf()
         }
-        return streamAllContainedResources(resource).collect(Collectors.toList());
+        return streamAllContainedResources(resource).collect(Collectors.toList())
     }
 
-    /**
-     * @see ContainedHelper#getContainedResourcesInContainedResources(Resource)
-     */
-    private static Stream<Resource> streamContainedResourcesInContainedResources(Resource resource) {
-        if (!(resource instanceof DomainResource)) {
-            return Stream.empty();
+    /** @see getContainedResourcesInContainedResources */
+    private fun streamContainedResourcesInContainedResources(
+        resource: Resource?
+    ): Stream<Resource?> {
+        if (resource !is DomainResource) {
+            return Stream.empty()
         }
-        return ((DomainResource) resource)
-                        .getContained() // We don't need to re-add any resources
-                        // that are already on the parent.
-                        .stream()
-                        .flatMap(ContainedHelper::streamAllContainedResources); // Get the
+        return resource
+            .getContained() // We don't need to re-add any resources
+            // that are already on the parent.
+            .stream()
+            .flatMap(ContainedHelper::streamAllContainedResources) // Get the
         // resources
         // contained
     }
 
-    /**
-     * @see ContainedHelper#getAllContainedResources(Resource)
-     */
-    private static Stream<Resource> streamAllContainedResources(Resource resource) {
-        if (!(resource instanceof DomainResource)) {
-            return Stream.empty();
+    /** @see getAllContainedResources */
+    private fun streamAllContainedResources(resource: Resource?): Stream<Resource?> {
+        if (resource !is DomainResource) {
+            return Stream.empty()
         }
-        List<Resource> contained = ((DomainResource) resource).getContained();
+        val contained = resource.contained
 
         return Stream.concat(
-                contained.stream(), contained.stream().flatMap(ContainedHelper::streamAllContainedResources));
+            contained.stream(),
+            contained.stream().flatMap(ContainedHelper::streamAllContainedResources),
+        )
     }
 }

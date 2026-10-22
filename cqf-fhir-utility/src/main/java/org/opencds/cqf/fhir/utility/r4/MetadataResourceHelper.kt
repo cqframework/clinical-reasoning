@@ -1,41 +1,32 @@
-package org.opencds.cqf.fhir.utility.r4;
+package org.opencds.cqf.fhir.utility.r4
 
-import ca.uhn.fhir.repository.IRepository;
-import java.util.List;
-import java.util.function.Consumer;
-import org.hl7.fhir.r4.model.ActivityDefinition;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
-import org.hl7.fhir.r4.model.PlanDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
+import ca.uhn.fhir.repository.IRepository
+import java.util.function.Consumer
+import org.hl7.fhir.r4.model.*
 
-public class MetadataResourceHelper {
-    private MetadataResourceHelper() {}
+object MetadataResourceHelper {
+    @JvmStatic
+    fun forEachMetadataResource(
+        entries: MutableList<Bundle.BundleEntryComponent?>,
+        callback: Consumer<MetadataResource?>?,
+        repository: IRepository,
+    ) {
+        entries
+            .map { entry -> entry!!.response.location }
+            .map { location ->
+                when (location!!.split("/")[0]) {
+                    "ActivityDefinition" ->
+                        return@map repository.read(ActivityDefinition::class.java, IdType(location))
 
-    public static void forEachMetadataResource(
-            List<BundleEntryComponent> entries,
-            Consumer<org.hl7.fhir.r4.model.MetadataResource> callback,
-            IRepository repository) {
-        entries.stream()
-                .map(entry -> entry.getResponse().getLocation())
-                .map(location -> {
-                    switch (location.split("/")[0]) {
-                        case "ActivityDefinition":
-                            return repository.read(ActivityDefinition.class, new IdType(location));
-                        case "Library":
-                            return repository.read(Library.class, new IdType(location));
-                        case "Measure":
-                            return repository.read(Measure.class, new IdType(location));
-                        case "PlanDefinition":
-                            return repository.read(PlanDefinition.class, new IdType(location));
-                        case "ValueSet":
-                            return repository.read(ValueSet.class, new IdType(location));
-                        default:
-                            return null;
-                    }
-                })
-                .forEach(callback);
+                    "Library" -> return@map repository.read(Library::class.java, IdType(location))
+                    "Measure" -> return@map repository.read(Measure::class.java, IdType(location))
+                    "PlanDefinition" ->
+                        return@map repository.read(PlanDefinition::class.java, IdType(location))
+
+                    "ValueSet" -> return@map repository.read(ValueSet::class.java, IdType(location))
+                    else -> return@map null
+                }
+            }
+            .forEach(callback)
     }
 }

@@ -1,143 +1,147 @@
-package org.opencds.cqf.fhir.utility.repository.operations;
+package org.opencds.cqf.fhir.utility.repository.operations
 
-import static java.util.Objects.requireNonNull;
+import java.util.*
+import java.util.stream.Collectors
+import org.hl7.fhir.instance.model.api.IBase
+import org.hl7.fhir.instance.model.api.IBaseDatatype
+import org.hl7.fhir.instance.model.api.IBaseParameters
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory
+import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.adapter.IAdapterFactory;
-import org.opencds.cqf.fhir.utility.adapter.IParametersAdapter;
-import org.opencds.cqf.fhir.utility.adapter.IParametersParameterComponentAdapter;
+/** This class maps the standard input parameters of an Operation to key, value pairs. */
+class OperationParametersParser(adapterFactory: IAdapterFactory) {
+    protected var adapterFactory: IAdapterFactory
 
-/**
- * This class maps the standard input parameters of an Operation to key, value pairs.
- */
-public class OperationParametersParser {
-
-    protected IAdapterFactory adapterFactory;
     // protected FhirTypeConverter fhirTypeConverter;
-
-    public OperationParametersParser(IAdapterFactory adapterFactory) {
-        requireNonNull(adapterFactory, "adapterFactory must not be null");
+    init {
+        Objects.requireNonNull<IAdapterFactory?>(adapterFactory, "adapterFactory must not be null")
         // requireNonNull(fhirTypeConverter, "fhirTypeConverter must not be null");
-        this.adapterFactory = adapterFactory;
+        this.adapterFactory = adapterFactory
         // this.fhirTypeConverter = fhirTypeConverter;
     }
 
-    public void addResourceChild(IBaseParameters parameters, String name, IBaseResource resource) {
-        requireNonNull(parameters, "parameters must not be null");
-        requireNonNull(name, "name must not be null");
-        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        var parts = parametersAdapter.getParameter();
+    fun addResourceChild(parameters: IBaseParameters?, name: String?, resource: IBaseResource?) {
+        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
+        Objects.requireNonNull<String?>(name, "name must not be null")
+        val parametersAdapter = this.adapterFactory.createParameters(parameters!!)
+        val parts = parametersAdapter.parameter
 
-        IParametersParameterComponentAdapter part =
-                parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
-        if (part == null) {
-            part = parametersAdapter.addParameter();
-        }
-
-        part.setName(name);
-        part.setResource(resource);
-        part.setValue(null);
-    }
-
-    public void addValueChild(IBaseParameters parameters, String name, IBaseDatatype value) {
-        requireNonNull(parameters, "parameters must not be null");
-        requireNonNull(name, "name must not be null");
-        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        var parts = parametersAdapter.getParameter();
-
-        IParametersParameterComponentAdapter part =
-                parts.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
-        if (part == null) {
-            part = parametersAdapter.addParameter();
-        }
-
-        part.setName(name);
-        part.setResource(null);
-        part.setValue(value);
-    }
-
-    public IBaseResource getResourceChild(IBaseParameters parameters, String name) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(name, "name must not be null");
-        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        return parametersAdapter.getParameter().stream()
-                .filter(x -> x.getName().equals(name))
-                .map(IParametersParameterComponentAdapter::getResource)
+        var part =
+            parts!!
+                .stream()
+                .filter { x: IParametersParameterComponentAdapter? -> x!!.name == name }
                 .findFirst()
-                .orElse(null);
+                .orElse(null)
+        if (part == null) {
+            part = parametersAdapter.addParameter()
+        }
+
+        part!!.setName(name)
+        part.setResource(resource)
+        part.setValue(null)
     }
 
-    public Map<String, IBaseResource> getResourceChildren(IBaseParameters parameters) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(parameters, "parameters must not be null");
-        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        return parametersAdapter.getParameter().stream()
-                .collect(Collectors.toMap(
-                        IParametersParameterComponentAdapter::getName,
-                        IParametersParameterComponentAdapter::getResource));
-    }
+    fun addValueChild(parameters: IBaseParameters?, name: String?, value: IBaseDatatype?) {
+        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
+        Objects.requireNonNull<String?>(name, "name must not be null")
+        val parametersAdapter = this.adapterFactory.createParameters(parameters!!)
+        val parts = parametersAdapter.parameter
 
-    public IBaseDatatype getValueChild(IBaseParameters parameters, String name) {
-        if (parameters == null) {
-            return null;
-        }
-        requireNonNull(parameters, "parameters must not be null");
-        requireNonNull(name, "name must not be null");
-        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        return parametersAdapter.getParameter().stream()
-                .filter(x -> x.getName().equals(name))
-                .map(IParametersParameterComponentAdapter::getValue)
+        var part =
+            parts!!
+                .stream()
+                .filter { x: IParametersParameterComponentAdapter? -> x!!.name == name }
                 .findFirst()
-                .orElse(null);
-    }
-
-    public Map<String, IBaseDatatype> getValueChildren(IBaseParameters parameters) {
-        if (parameters == null) {
-            return null;
+                .orElse(null)
+        if (part == null) {
+            part = parametersAdapter.addParameter()
         }
-        requireNonNull(parameters, "parameters must not be null");
-        IParametersAdapter parametersAdapter = this.adapterFactory.createParameters(parameters);
-        return parametersAdapter.getParameter().stream()
-                .collect(Collectors.toMap(
-                        IParametersParameterComponentAdapter::getName, IParametersParameterComponentAdapter::getValue));
+
+        part!!.setName(name)
+        part.setResource(null)
+        part.setValue(value)
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getParameterParts(IBaseParameters parameters) {
-        requireNonNull(parameters, "parameters must not be null");
-        var parametersAdapter = adapterFactory.createParameters(parameters);
-        var parts = parametersAdapter.getParameter();
+    fun getResourceChild(parameters: IBaseParameters?, name: String): IBaseResource? {
+        if (parameters == null) {
+            return null
+        }
+        val parametersAdapter = this.adapterFactory.createParameters(parameters)
+        return parametersAdapter.parameter!!
+            .filter { x -> x!!.name == name }
+            .map { x -> x!!.resource }
+            .firstOrNull()
+    }
 
-        Map<String, Object> parameterParts = new HashMap<>();
-        for (var part : parts) {
-            IBase value = part.hasValue() ? part.getValue() : part.hasResource() ? part.getResource() : null;
+    fun getResourceChildren(parameters: IBaseParameters?): MutableMap<String?, IBaseResource?>? {
+        if (parameters == null) {
+            return null
+        }
+        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
+        val parametersAdapter = this.adapterFactory.createParameters(parameters)
+        return parametersAdapter.parameter!!
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    IParametersParameterComponentAdapter::name,
+                    IParametersParameterComponentAdapter::resource,
+                )
+            )
+    }
+
+    fun getValueChild(parameters: IBaseParameters?, name: String): IBaseDatatype? {
+        if (parameters == null) {
+            return null
+        }
+        val parametersAdapter = this.adapterFactory.createParameters(parameters)
+        return parametersAdapter.parameter!!
+            .filter { x -> x!!.name == name }
+            .map { x -> x!!.value }
+            .firstOrNull()
+    }
+
+    fun getValueChildren(parameters: IBaseParameters?): MutableMap<String?, IBaseDatatype?>? {
+        if (parameters == null) {
+            return null
+        }
+        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
+        val parametersAdapter = this.adapterFactory.createParameters(parameters)
+        return parametersAdapter.parameter!!
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    IParametersParameterComponentAdapter::name,
+                    IParametersParameterComponentAdapter::value,
+                )
+            )
+    }
+
+    fun getParameterParts(parameters: IBaseParameters?): MutableMap<String?, Any?> {
+        Objects.requireNonNull<IBaseParameters?>(parameters, "parameters must not be null")
+        val parametersAdapter = adapterFactory.createParameters(parameters!!)
+        val parts = parametersAdapter.parameter
+
+        val parameterParts = mutableMapOf<String?, Any?>()
+        for (part in parts!!) {
+            val value: IBase? =
+                if (part!!.hasValue()) part.value
+                else if (part.hasResource()) part.resource else null
             if (value != null) {
-                if (!parameterParts.containsKey(part.getName())) {
-                    parameterParts.put(part.getName(), value);
+                if (!parameterParts.containsKey(part.name)) {
+                    parameterParts[part.name] = value
                 } else {
-                    var existingValue = parameterParts.get(part.getName());
-                    if (existingValue instanceof List) {
-                        ((List<IBase>) existingValue).add(value);
-                        parameterParts.put(part.getName(), existingValue);
+                    val existingValue: Any = parameterParts.get(part.name)!!
+                    if (existingValue is MutableList<*>) {
+                        (existingValue as MutableList<IBase?>).add(value)
+                        parameterParts[part.name] = existingValue
                     } else {
-                        var newListValue = Arrays.asList(existingValue, value);
-                        parameterParts.put(part.getName(), newListValue);
+                        val newListValue = mutableListOf(existingValue, value)
+                        parameterParts[part.name] = newListValue
                     }
                 }
             }
         }
-        return parameterParts;
+        return parameterParts
     }
 }

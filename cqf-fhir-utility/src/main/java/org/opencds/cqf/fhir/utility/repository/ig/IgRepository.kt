@@ -730,7 +730,7 @@ constructor(
         requireNotNull(operationProvider) {
             "No operation provider found. Unable to invoke operations."
         }
-        return operationProvider!!.invokeOperation<IPrimitiveType<String?>?, R?>(
+        return operationProvider!!.invokeOperation<IPrimitiveType<String?>, R>(
             this,
             id,
             resourceType,

@@ -1,7 +1,7 @@
-package org.opencds.cqf.fhir.utility.repository.operations;
+package org.opencds.cqf.fhir.utility.repository.operations
 
-import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepository
 
-public interface IPlanDefinitionProcessorFactory {
-    IPlanDefinitionProcessor create(IRepository repository);
+interface IPlanDefinitionProcessorFactory {
+    fun create(repository: IRepository?): IPlanDefinitionProcessor?
 }

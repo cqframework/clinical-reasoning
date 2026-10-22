@@ -1,3 +1,3 @@
-package org.opencds.cqf.fhir.utility.repository.operations;
+package org.opencds.cqf.fhir.utility.repository.operations
 
-public interface IQuestionnaireResponseProcessor {}
+interface IQuestionnaireResponseProcessor

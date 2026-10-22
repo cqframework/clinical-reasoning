@@ -1,7 +1,7 @@
-package org.opencds.cqf.fhir.utility.repository.operations;
+package org.opencds.cqf.fhir.utility.repository.operations
 
-import ca.uhn.fhir.repository.IRepository;
+import ca.uhn.fhir.repository.IRepository
 
-public interface IQuestionnaireProcessorFactory {
-    IQuestionnaireProcessor create(IRepository repository);
+interface IQuestionnaireProcessorFactory {
+    fun create(repository: IRepository?): IQuestionnaireProcessor?
 }

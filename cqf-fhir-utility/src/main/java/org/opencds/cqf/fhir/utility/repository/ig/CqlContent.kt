@@ -1,109 +1,141 @@
-package org.opencds.cqf.fhir.utility.repository.ig;
+package org.opencds.cqf.fhir.utility.repository.ig
 
-import static java.util.Objects.requireNonNull;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
+import java.io.IOException
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.*
+import java.util.function.BiConsumer
+import java.util.function.Function
+import java.util.regex.Pattern
+import org.hl7.fhir.instance.model.api.IBaseResource
+import org.opencds.cqf.fhir.utility.Libraries.getName
+import org.opencds.cqf.fhir.utility.Libraries.getVersion
+import org.opencds.cqf.fhir.utility.dstu3.AttachmentUtil
 
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.fhir.utility.Libraries;
+object CqlContent {
+    @JvmStatic
+    fun loadCqlContent(resource: IBaseResource?, resourcePath: Path?) {
+        Objects.requireNonNull<IBaseResource?>(resource, "resource can not be null")
+        Objects.requireNonNull<Path?>(resourcePath, "resourcePath can not be null")
 
-public class CqlContent {
-
-    private CqlContent() {
-        // intentionally empty
-    }
-
-    public static void loadCqlContent(IBaseResource resource, Path resourcePath) {
-        requireNonNull(resource, "resource can not be null");
-        requireNonNull(resourcePath, "resourcePath can not be null");
-
-        if (!"Library".equals(resource.fhirType())) {
-            return;
+        if ("Library" != resource!!.fhirType()) {
+            return
         }
 
-        Function<IBaseResource, String> cqlPathExtractor = null;
-        BiConsumer<IBaseResource, String> cqlContentAttacher = null;
-        switch (resource.getStructureFhirVersionEnum()) {
-            case DSTU3:
-                cqlPathExtractor = org.opencds.cqf.fhir.utility.dstu3.AttachmentUtil::getCqlLocation;
-                cqlContentAttacher = org.opencds.cqf.fhir.utility.dstu3.AttachmentUtil::addData;
-                break;
-            case R4:
-                cqlPathExtractor = org.opencds.cqf.fhir.utility.r4.AttachmentUtil::getCqlLocation;
-                cqlContentAttacher = org.opencds.cqf.fhir.utility.r4.AttachmentUtil::addData;
-                break;
-            case R5:
-                cqlPathExtractor = org.opencds.cqf.fhir.utility.r5.AttachmentUtil::getCqlLocation;
-                cqlContentAttacher = org.opencds.cqf.fhir.utility.r5.AttachmentUtil::addData;
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Unsupported FHIR version: %s".formatted(resource.getStructureFhirVersionEnum()));
+        var cqlPathExtractor: Function<IBaseResource?, String?>? = null
+        var cqlContentAttacher: BiConsumer<IBaseResource?, String?>? = null
+        when (resource.structureFhirVersionEnum) {
+            FhirVersionEnum.DSTU3 -> {
+                cqlPathExtractor = Function { resource: IBaseResource? ->
+                    AttachmentUtil.getCqlLocation(resource)
+                }
+                cqlContentAttacher = BiConsumer { resource: IBaseResource?, text: String? ->
+                    AttachmentUtil.addData(resource, text)
+                }
+            }
+
+            FhirVersionEnum.R4 -> {
+                cqlPathExtractor = Function { resource: IBaseResource? ->
+                    org.opencds.cqf.fhir.utility.r4.AttachmentUtil.getCqlLocation(resource)
+                }
+                cqlContentAttacher = BiConsumer { resource: IBaseResource?, text: String? ->
+                    org.opencds.cqf.fhir.utility.r4.AttachmentUtil.addData(resource, text)
+                }
+            }
+
+            FhirVersionEnum.R5 -> {
+                cqlPathExtractor = Function { resource: IBaseResource? ->
+                    org.opencds.cqf.fhir.utility.r5.AttachmentUtil.getCqlLocation(resource)
+                }
+                cqlContentAttacher = BiConsumer { resource: IBaseResource?, text: String? ->
+                    org.opencds.cqf.fhir.utility.r5.AttachmentUtil.addData(resource, text)
+                }
+            }
+
+            else ->
+                throw IllegalArgumentException(
+                    "Unsupported FHIR version: ${resource.structureFhirVersionEnum}"
+                )
         }
 
-        readAndAttachCqlContent(resource, resourcePath, cqlPathExtractor, cqlContentAttacher);
+        CqlContent.readAndAttachCqlContent(
+            resource,
+            resourcePath!!,
+            cqlPathExtractor,
+            cqlContentAttacher,
+        )
     }
 
-    private static void readAndAttachCqlContent(
-            IBaseResource resource,
-            Path resourcePath,
-            Function<IBaseResource, String> cqlPathExtractor,
-            BiConsumer<IBaseResource, String> cqlContentAttacher) {
-        String cqlPath = cqlPathExtractor.apply(resource);
+    private fun readAndAttachCqlContent(
+        resource: IBaseResource,
+        resourcePath: Path,
+        cqlPathExtractor: Function<IBaseResource?, String?>,
+        cqlContentAttacher: BiConsumer<IBaseResource?, String?>,
+    ) {
+        val cqlPath = cqlPathExtractor.apply(resource)
         if (cqlPath == null) {
-            return;
+            return
         }
 
-        String expectedVersion = Libraries.getVersion(resource);
-        String expectedName = Libraries.getName(resource);
-        String cqlContent = getCqlContent(resourcePath, cqlPath);
+        val expectedVersion = getVersion(resource)
+        val expectedName = getName(resource)
+        val cqlContent = getCqlContent(resourcePath, cqlPath)
         // validateContentMatchesLibrary(cqlContent, expectedVersion, expectedName);
-        cqlContentAttacher.accept(resource, cqlContent);
+        cqlContentAttacher.accept(resource, cqlContent)
     }
 
-    static void validateContentMatchesLibrary(String cqlContent, String expectedVersion, String expectedName) {
-        String nameInContent = getNameFromContent(cqlContent);
-        if (expectedName != null && nameInContent != null && !expectedName.equals(nameInContent)) {
-            throw new ResourceNotFoundException(
-                    "Expected CQL content with library name %s but found %s".formatted(expectedName, nameInContent));
+    @JvmStatic
+    fun validateContentMatchesLibrary(
+        cqlContent: String?,
+        expectedVersion: String?,
+        expectedName: String?,
+    ) {
+        val nameInContent = getNameFromContent(cqlContent)
+        if (expectedName != null && nameInContent != null && (expectedName != nameInContent)) {
+            throw ResourceNotFoundException(
+                "Expected CQL content with library name $expectedName but found $nameInContent"
+            )
         }
 
-        String versionInContent = getVersionFromContent(cqlContent);
-        if (expectedVersion != null && versionInContent != null && !expectedVersion.equals(versionInContent)) {
-            throw new ResourceNotFoundException("Expected CQL content with library version %s but found %s"
-                    .formatted(expectedVersion, versionInContent));
+        val versionInContent = getVersionFromContent(cqlContent)
+        if (
+            expectedVersion != null &&
+                versionInContent != null &&
+                (expectedVersion != versionInContent)
+        ) {
+            throw ResourceNotFoundException(
+                "Expected CQL content with library version $expectedVersion but found $versionInContent"
+            )
         }
     }
 
-    static String getCqlContent(Path rootPath, String relativePath) {
-        var path = rootPath.resolve(relativePath).normalize();
+    fun getCqlContent(rootPath: Path, relativePath: String): String {
+        val path = rootPath.resolve(relativePath).normalize()
         try {
-            return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new ResourceNotFoundException("Unable to read CQL content from path: %s".formatted(path));
+            return String(Files.readAllBytes(path), StandardCharsets.UTF_8)
+        } catch (e: IOException) {
+            throw ResourceNotFoundException("Unable to read CQL content from path: $path")
         }
     }
 
-    static String getNameFromContent(String cqlContent) {
+    fun getNameFromContent(cqlContent: String?): String? {
         // Extract library name from CQL content (e.g., "library ExampleLibrary version '1.0.0'")
-        if (cqlContent == null || cqlContent.isBlank()) {
-            return null;
+        if (cqlContent.isNullOrBlank()) {
+            return null
         }
-        var matcher = java.util.regex.Pattern.compile("library\\s+([\\w.]+)").matcher(cqlContent);
-        return matcher.find() ? matcher.group(1) : null;
+        val matcher = Pattern.compile("library\\s+([\\w.]+)").matcher(cqlContent)
+        return if (matcher.find()) matcher.group(1) else null
     }
 
-    static String getVersionFromContent(String cqlContent) {
+    fun getVersionFromContent(cqlContent: String?): String? {
         // Extract version from CQL content (e.g., "library ExampleLibrary version '1.0.0'")
-        if (cqlContent == null || cqlContent.isBlank()) {
-            return null;
+        if (cqlContent.isNullOrBlank()) {
+            return null
         }
-        var matcher = java.util.regex.Pattern.compile("version\\s+'([^']+)'").matcher(cqlContent);
-        return matcher.find() ? matcher.group(1) : null;
+        val matcher = Pattern.compile("version\\s+'([^']+)'").matcher(cqlContent)
+        return if (matcher.find()) matcher.group(1) else null
     }
 }

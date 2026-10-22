@@ -156,7 +156,7 @@ constructor(
                     .initializeClientWithAuth(endpoint)
                     .search<IBaseBundle>()
                     .forResource(client.codeSystemClass)
-                    .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                    .where(Searches.toFlattenedMap(Searches.byCanonical(url!!)!!))
                     .execute()
             )
         }!!
@@ -184,7 +184,7 @@ constructor(
                     .initializeClientWithAuth(endpoint)
                     .search<IBaseBundle>()
                     .forResource(client.valueSetClass)
-                    .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                    .where(Searches.toFlattenedMap(Searches.byCanonical(url!!)!!))
                     .execute()
             )
         }!!
@@ -224,7 +224,7 @@ constructor(
                     .initializeClientWithAuth(endpoint)
                     .search<IBaseBundle>()
                     .forResource(client.valueSetClass)
-                    .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                    .where(Searches.toFlattenedMap(Searches.byCanonical(url!!)!!))
                     .execute()
             )
         }!!

@@ -54,7 +54,7 @@ interface ResourceMatcher {
     // The list here is an OR list. Meaning, if any element matches it's a match
     fun matches(
         name: String,
-        params: MutableList<IQueryParameterType>,
+        params: MutableList<IQueryParameterType?>?,
         resource: IBaseResource,
     ): Boolean {
         var match = true
@@ -103,7 +103,7 @@ interface ResourceMatcher {
             return false
         }
 
-        for (param in params) {
+        for (param in params!!) {
             for (r in pathResult) {
                 match = isParamMatchAtPath(param, r)
 
@@ -116,7 +116,7 @@ interface ResourceMatcher {
         return false
     }
 
-    private fun isParamMatchAtPath(param: IQueryParameterType, r: IBase): Boolean {
+    private fun isParamMatchAtPath(param: IQueryParameterType?, r: IBase): Boolean {
         var match: Boolean
         if (param is ReferenceParam) {
             match = isMatchReference(param, r)
@@ -149,7 +149,7 @@ interface ResourceMatcher {
         } else {
             throw NotImplementedException(
                 "Resource matching not implemented for search params of type " +
-                    param.javaClass.getSimpleName()
+                    param!!.javaClass.getSimpleName()
             )
         }
         return match

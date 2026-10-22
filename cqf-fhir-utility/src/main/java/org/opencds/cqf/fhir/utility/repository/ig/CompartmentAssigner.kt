@@ -1,136 +1,116 @@
-package org.opencds.cqf.fhir.utility.repository.ig;
+package org.opencds.cqf.fhir.utility.repository.ig
 
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.opencds.cqf.fhir.utility.Ids;
-import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.context.RuntimeSearchParam
+import ca.uhn.fhir.model.api.IQueryParameterType
+import com.google.common.collect.Multimap
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.Ids
+import org.opencds.cqf.fhir.utility.Ids.ensureIdType
+import org.opencds.cqf.fhir.utility.Ids.newId
+import org.opencds.cqf.fhir.utility.repository.ig.IgConventions.CompartmentIsolation
 
 /**
- * Determines the compartment assignment for a resource based on repository conventions
- * and resource references.
+ * Determines the compartment assignment for a resource based on repository conventions and resource
+ * references.
  */
-public class CompartmentAssigner {
+class CompartmentAssigner(
+    private val fhirContext: FhirContext,
+    private val compartmentMode: CompartmentMode,
+    private val compartmentIsolation: CompartmentIsolation,
+) {
 
-    // Search parameters that likely reference compartments,
-    // in order of priority to use to determine compartment membership
-    private static final List<String> COMPARTMENT_REFERENCE_PRIORITY =
-            List.of("patient", "subject", "beneficiary", "member", "individual", "encounter", "episodeofcare");
-
-    private final FhirContext fhirContext;
-    private final CompartmentMode compartmentMode;
-    private final CompartmentIsolation compartmentIsolation;
-
-    public CompartmentAssigner(
-            FhirContext fhirContext, CompartmentMode compartmentMode, CompartmentIsolation compartmentIsolation) {
-        this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext cannot be null");
-        this.compartmentMode = Objects.requireNonNull(compartmentMode, "compartmentMode cannot be null");
-        this.compartmentIsolation = Objects.requireNonNull(compartmentIsolation, "compartmentIsolation cannot be null");
-    }
-
-    CompartmentAssignment fromHeaders(Map<String, String> headers) {
+    fun fromHeaders(headers: MutableMap<String?, String?>?): CompartmentAssignment {
         if (this.compartmentMode == CompartmentMode.NONE) {
-            return CompartmentAssignment.none();
+            return CompartmentAssignment.Companion.none()
         }
 
         if (headers == null) {
-            return CompartmentAssignment.none();
+            return CompartmentAssignment.Companion.none()
         }
 
-        var headerValue = headers.get(IgRepository.FHIR_COMPARTMENT_HEADER);
-        if (headerValue == null || headerValue.isBlank()) {
-            return CompartmentAssignment.none();
+        val headerValue = headers.get(IgRepository.Companion.FHIR_COMPARTMENT_HEADER)
+        if (headerValue.isNullOrBlank()) {
+            return CompartmentAssignment.Companion.none()
         }
 
-        var segments = headerValue.split("/");
-        if (segments.length != 2) {
-            throw new IllegalArgumentException(
-                    "Invalid compartment header value. Expected format: <CompartmentType>/<CompartmentId>");
+        val segments = headerValue.split("/")
+        require(segments.size == 2) {
+            "Invalid compartment header value. Expected format: <CompartmentType>/<CompartmentId>"
         }
 
-        var compartmentType = segments[0].trim();
-        var compartmentId = segments[1].trim();
-        return CompartmentAssignment.of(compartmentType, compartmentId);
+        val compartmentType = segments[0].trim { it <= ' ' }
+        val compartmentId = segments[1].trim { it <= ' ' }
+        return CompartmentAssignment.Companion.of(compartmentType, compartmentId)
     }
 
     /**
-     * Determines the compartment assignment for the supplied resource based on repository conventions.
-     * Possible outcomes:
+     * Determines the compartment assignment for the supplied resource based on repository
+     * conventions. Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
      * - Specific compartment: Resource is assigned to a specific compartment (e.g. Patient/123)
-     * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
+     * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment
+     *   cannot be determined
+     *
      * @return The compartment assignment for the resource
      */
-    CompartmentAssignment fromResource(IBaseResource resource) {
-        requireNonNull(resource, "resource cannot be null");
-        requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
+    fun fromResource(resource: IBaseResource): CompartmentAssignment {
+        requireNotNull(resource.idElement.idPart) { "resource id cannot be null" }
 
-        var resourceType = resource.fhirType();
-        var assignment = typeBasedAssignment(resourceType);
-        if (!assignment.isUnknown()) {
-            return assignment;
+        val resourceType = resource.fhirType()
+        val assignment = typeBasedAssignment(resourceType)
+        if (!assignment.isUnknown) {
+            return assignment
         }
         // If the resource is of the compartment type, assign it to its own compartment.
-        if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
-            return CompartmentAssignment.of(
-                    compartmentMode.type(), resource.getIdElement().getIdPart());
+        if (compartmentMode.type().equals(resourceType, ignoreCase = true)) {
+            return CompartmentAssignment.Companion.of(
+                compartmentMode.type(),
+                resource.idElement.idPart,
+            )
         }
 
-        return resolveFrom(resource);
+        return resolveFrom(resource)
     }
 
     /**
-     * Determines the compartment assignment for the supplied resource type and id
-     * Possible outcomes:
+     * Determines the compartment assignment for the supplied resource type and id Possible
+     * outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
      * - Specific compartment: Resource is assigned to a specific compartment (e.g. Patient/123)
-     * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
+     * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment
+     *   cannot be determined
+     *
      * @return The compartment assignment for the resource
      */
-    public CompartmentAssignment fromId(String resourceType, IIdType id) {
-        requireNonNull(resourceType, "resourceType cannot be null");
-        requireNonNull(id, "id cannot be null");
+    fun fromId(resourceType: String, id: IIdType): CompartmentAssignment {
 
-        var assignment = typeBasedAssignment(resourceType);
-        if (!assignment.isUnknown()) {
-            return assignment;
+        val assignment = typeBasedAssignment(resourceType)
+        if (!assignment.isUnknown) {
+            return assignment
         }
 
         // If the resource is of the compartment type, assign it to its own compartment.
-        if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
-            return CompartmentAssignment.of(compartmentMode.type(), id.getIdPart());
+        if (compartmentMode.type().equals(resourceType, ignoreCase = true)) {
+            return CompartmentAssignment.Companion.of(compartmentMode.type(), id!!.getIdPart())
         }
 
-        return CompartmentAssignment.unknown(compartmentMode.type());
+        return CompartmentAssignment.Companion.unknown(compartmentMode.type())
     }
 
-    private CompartmentAssignment resolveFrom(IBaseResource resource) {
-        var resourceType = resource.fhirType();
-        var searchParams = compartmentMode.compartmentSearchParams(fhirContext, resourceType);
-        if (searchParams.isEmpty()) {
-            return CompartmentAssignment.unknown(this.compartmentMode.type());
+    private fun resolveFrom(resource: IBaseResource): CompartmentAssignment {
+        val resourceType = resource.fhirType()
+        val searchParams = compartmentMode.compartmentSearchParams(fhirContext, resourceType)
+        if (searchParams!!.isEmpty()) {
+            return CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
         }
 
-        var terser = fhirContext.newTerser();
-        var compartmentType = compartmentMode.type();
+        val terser = fhirContext.newTerser()
+        val compartmentType = compartmentMode.type()
 
-        var orderedParams = orderCompartmentParams(searchParams);
+        val orderedParams = orderCompartmentParams(searchParams)
 
         // Here we're looking at all the attributes on a FHIR resource that
         // potentially provide compartment membership, by matching those up
@@ -140,83 +120,87 @@ public class CompartmentAssigner {
         // so search attributes that "patient" indexes on first) looking for
         // references to our current compartment type. The first one we find
         // is the compartment assignment.
-        for (var param : orderedParams) {
-            for (var originalPath : param.getPathsSplit()) {
-                var path = sanitizeSearchPath(originalPath);
-                if (path == null || path.isBlank()) {
-                    continue;
+        for (param in orderedParams) {
+            for (originalPath in param!!.pathsSplit) {
+                val path = sanitizeSearchPath(originalPath)
+                if (path.isNullOrBlank()) {
+                    continue
                 }
 
-                var values = terser.getValues(resource, path);
-                var ids = referencedIds(values).stream()
-                        .filter(i -> compartmentType.equals(i.getResourceType()))
-                        .toList();
+                val values = terser.getValues(resource, path)
+                val ids = referencedIds(values).filter { i -> compartmentType == i.resourceType }
 
-                if (!ids.isEmpty()) {
-                    var id = ids.get(0);
-                    return CompartmentAssignment.of(compartmentType, id.getIdPart());
+                if (ids.isNotEmpty()) {
+                    val id = ids[0]
+                    return CompartmentAssignment.Companion.of(compartmentType, id.idPart)
                 }
             }
         }
 
-        return CompartmentAssignment.shared();
+        return CompartmentAssignment.Companion.shared()
     }
 
-    private List<IIdType> referencedIds(List<IBase> values) {
-        var ids = new ArrayList<IIdType>();
-        for (var value : values) {
-            var reference = extractReference(value);
+    private fun referencedIds(values: MutableList<IBase?>): MutableList<IIdType> {
+        val ids = ArrayList<IIdType>()
+        for (value in values) {
+            val reference = extractReference(value)
             if (reference != null && reference.hasResourceType() && reference.hasIdPart()) {
-                ids.add(reference);
+                ids.add(reference)
             }
         }
-        return ids;
+        return ids
     }
 
     /**
-     * Determines the compartment assignments based on search parameters. If there are multiple possible
-     * compartment assignments, only the first is returned.
-     * Possible outcomes:
+     * Determines the compartment assignments based on search parameters. If there are multiple
+     * possible compartment assignments, only the first is returned. Possible outcomes:
      * - NONE: No compartment assignment (repository is not compartmentalized)
      * - SHARED: Resource is shared across all compartments
      * - Specific compartment: Resource is assigned to a specific compartment (e.g. Patient/123)
-     * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment cannot be determined
+     * - UNKNOWN: Resource belongs to the current compartment type, but the specific compartment
+     *   cannot be determined
+     *
      * @return The compartment assignment for the search
      */
-    public CompartmentAssignment fromSearchParameters(
-            String resourceType, Multimap<String, List<IQueryParameterType>> searchParameters) {
-        requireNonNull(resourceType, "resourceType cannot be null");
+    fun fromSearchParameters(
+        resourceType: String,
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+    ): CompartmentAssignment {
 
-        var assignment = typeBasedAssignment(resourceType);
-        if (!assignment.isUnknown()) {
-            return assignment;
+        var assignment = typeBasedAssignment(resourceType)
+        if (!assignment.isUnknown) {
+            return assignment
         }
 
         // Try to assign based on id search parameter
-        if (compartmentMode.type().equalsIgnoreCase(resourceType)) {
-            var ids = searchParameters.get("_id").stream()
-                    .filter(Objects::nonNull)
-                    .flatMap(List::stream)
-                    .map(IQueryParameterType::getValueAsQueryToken)
-                    .toList();
+        if (compartmentMode.type().equals(resourceType, ignoreCase = true)) {
+            val ids =
+                searchParameters!!
+                    .get("_id")
+                    .filterNotNull()
+                    .flatten()
+                    .map { obj -> obj!!.valueAsQueryToken }
+                    .toList()
 
             // If no _id or multiple _id parameters, cannot determine assignment
-            if (ids.size() != 1) {
-                return CompartmentAssignment.unknown(compartmentMode.type());
+            if (ids.size != 1) {
+                return CompartmentAssignment.Companion.unknown(compartmentMode.type())
             }
 
-            var ensured = Ids.ensureIdType(ids.get(0), resourceType);
-            var id = Ids.newId(fhirContext, ensured);
-            return CompartmentAssignment.of(compartmentMode.type(), id.getIdPart());
+            val ensured = Ids.ensureIdType(ids[0]!!, resourceType)
+            val id = newId<IIdType>(fhirContext, ensured)
+            return CompartmentAssignment.Companion.of(compartmentMode.type(), id.idPart)
         }
 
-        var membershipParams =
-                orderCompartmentParams(compartmentMode.compartmentSearchParams(fhirContext, resourceType));
+        val membershipParams =
+            orderCompartmentParams(
+                compartmentMode.compartmentSearchParams(fhirContext, resourceType)
+            )
 
-        for (var param : membershipParams) {
-            var values = collectQueryParameters(searchParameters, param.getName());
+        for (param in membershipParams) {
+            val values = collectQueryParameters(searchParameters, param!!.name)
             if (values.isEmpty()) {
-                continue;
+                continue
             }
 
             // Certain search parameters that target only one type can be abbreviated
@@ -226,147 +210,169 @@ public class CompartmentAssigner {
             // Others are ambiguous if unspecified:
             // Observation?subject=ABC (Bad! A Patient or Device?)
             // Observation?subject=Patient/123 (Good! We can work with this)
-            var target = param.hasTargets() && param.getTargets().size() == 1
-                    ? param.getTargets().iterator().next()
-                    : null;
-            assignment = resolveFromQuery(target, values);
+            val target =
+                if (param.hasTargets() && param.targets.size == 1) param.targets.iterator().next()
+                else null
+            assignment = resolveFromQuery(target, values)
 
             // We found and assignment, bail out.
-            if (!assignment.isUnknown()) {
-                return assignment;
+            if (!assignment.isUnknown) {
+                return assignment
             }
         }
 
         // Did our best, couldn't determine the assignment.
-        return CompartmentAssignment.unknown(compartmentMode.type());
+        return CompartmentAssignment.Companion.unknown(compartmentMode.type())
     }
 
-    private CompartmentAssignment typeBasedAssignment(String resourceType) {
+    private fun typeBasedAssignment(resourceType: String?): CompartmentAssignment {
         if (compartmentMode == CompartmentMode.NONE) {
-            return CompartmentAssignment.none();
+            return CompartmentAssignment.Companion.none()
         }
 
-        var resourceCategory = ResourceCategory.forType(resourceType);
+        val resourceCategory = ResourceCategory.Companion.forType(resourceType)
         if (resourceCategory != ResourceCategory.DATA) {
-            return compartmentIsolation == CompartmentIsolation.FULL
-                    ? CompartmentAssignment.unknown(this.compartmentMode.type())
-                    : CompartmentAssignment.shared();
+            return if (compartmentIsolation == CompartmentIsolation.FULL)
+                CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
+            else CompartmentAssignment.Companion.shared()
         }
 
         if (!this.compartmentMode.resourceBelongsToCompartment(fhirContext, resourceType)) {
-            return compartmentIsolation == CompartmentIsolation.FULL
-                    ? CompartmentAssignment.unknown(this.compartmentMode.type())
-                    : CompartmentAssignment.shared();
+            return if (compartmentIsolation == CompartmentIsolation.FULL)
+                CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
+            else CompartmentAssignment.Companion.shared()
         }
 
-        return CompartmentAssignment.unknown(this.compartmentMode.type());
+        return CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
     }
 
-    private String sanitizeSearchPath(String path) {
+    private fun sanitizeSearchPath(path: String?): String? {
         if (path == null) {
-            return null;
+            return null
         }
 
-        var sanitized = path;
-        var whereIndex = sanitized.indexOf(".where(");
+        var sanitized: String? = path
+        val whereIndex = sanitized.indexOf(".where(")
         if (whereIndex >= 0) {
-            sanitized = sanitized.substring(0, whereIndex);
+            sanitized = sanitized.substring(0, whereIndex)
         }
 
         // The terser expects paths relative to the resource and does not understand resolve()
-        return sanitized.replace(".resolve()", "");
+        return sanitized.replace(".resolve()", "")
     }
 
-    private IIdType extractReference(Object value) {
-        if (value instanceof IIdType idType) {
-            return idType;
+    private fun extractReference(value: Any?): IIdType? {
+        if (value is IIdType) {
+            return value
         }
 
-        if (value instanceof IPrimitiveType<?> primitive) {
-            var asString = primitive.getValueAsString();
-            if (asString == null || asString.isBlank()) {
-                return null;
+        if (value is IPrimitiveType<*>) {
+            val asString = value.valueAsString
+            if (asString.isNullOrBlank()) {
+                return null
             }
 
-            return Ids.newId(fhirContext, asString);
+            return newId(fhirContext, asString)
         }
 
-        if (value instanceof IBaseReference reference) {
-            return reference.getReferenceElement();
+        if (value is IBaseReference) {
+            return value.referenceElement
         }
 
-        return null;
+        return null
     }
 
-    private List<RuntimeSearchParam> orderCompartmentParams(Set<RuntimeSearchParam> params) {
-        return params.stream()
-                .sorted(Comparator.comparingInt((RuntimeSearchParam param) -> priorityIndex(param.getName()))
-                        .thenComparing(RuntimeSearchParam::getName))
-                .toList();
+    private fun orderCompartmentParams(
+        params: MutableSet<RuntimeSearchParam?>?
+    ): MutableList<RuntimeSearchParam?> {
+        return params!!
+            .sortedWith(
+                Comparator.comparingInt<RuntimeSearchParam?> { param ->
+                        priorityIndex(param!!.name)
+                    }
+                    .thenComparing { obj -> obj!!.name }
+            )
+            .toMutableList()
     }
 
-    private int priorityIndex(String name) {
+    private fun priorityIndex(name: String?): Int {
         if (name == null) {
-            return COMPARTMENT_REFERENCE_PRIORITY.size();
+            return COMPARTMENT_REFERENCE_PRIORITY.size
         }
-        var normalized = name.toLowerCase();
-        var index = COMPARTMENT_REFERENCE_PRIORITY.indexOf(normalized);
-        return index >= 0 ? index : COMPARTMENT_REFERENCE_PRIORITY.size();
+        val normalized = name.lowercase()
+        val index = COMPARTMENT_REFERENCE_PRIORITY.indexOf(normalized)
+        return if (index >= 0) index else COMPARTMENT_REFERENCE_PRIORITY.size
     }
 
-    private List<IQueryParameterType> collectQueryParameters(
-            Multimap<String, List<IQueryParameterType>> searchParameters, String expectedName) {
-        var matches = new ArrayList<IQueryParameterType>();
+    private fun collectQueryParameters(
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+        expectedName: String?,
+    ): MutableList<IQueryParameterType?> {
+        val matches = mutableListOf<IQueryParameterType?>()
         if (searchParameters == null || expectedName == null) {
-            return matches;
+            return matches
         }
 
-        var normalized = expectedName.toLowerCase();
-        var searchParamKeys = searchParameters.keySet().stream()
-                .filter(Objects::nonNull)
-                .map(String::toLowerCase)
-                .toList();
+        val normalized = expectedName.lowercase()
+        val searchParamKeys =
+            searchParameters.keySet().filterNotNull().map { obj -> obj.lowercase() }.toList()
 
-        for (var key : searchParamKeys) {
+        for (key in searchParamKeys) {
             if (!key.startsWith(normalized)) {
-                continue;
+                continue
             }
 
-            var searchGroups = searchParameters.get(key);
-            for (var group : searchGroups) {
-                matches.addAll(group);
-            }
-        }
-
-        return matches;
-    }
-
-    private CompartmentAssignment resolveFromQuery(String targetIfUnspecified, List<IQueryParameterType> values) {
-        requireNonNull(values, "values cannot be null");
-
-        var compartmentType = compartmentMode.type();
-        for (var queryValue : values) {
-            var token = queryValue.getValueAsQueryToken();
-            var id = idFromToken(targetIfUnspecified, token);
-            if (id != null && compartmentType.equalsIgnoreCase(id.getResourceType())) {
-                return CompartmentAssignment.of(compartmentType, id.getIdPart());
+            val searchGroups = searchParameters.get(key)
+            for (group in searchGroups) {
+                matches.addAll(group!!)
             }
         }
 
-        return CompartmentAssignment.unknown(this.compartmentMode.type());
+        return matches
     }
 
-    private IIdType idFromToken(String target, String token) {
-        if (token == null || token.isBlank()) {
-            return null;
+    private fun resolveFromQuery(
+        targetIfUnspecified: String?,
+        values: MutableList<IQueryParameterType?>,
+    ): CompartmentAssignment {
+        val compartmentType = compartmentMode.type()
+        for (queryValue in values) {
+            val token = queryValue!!.valueAsQueryToken
+            val id = idFromToken(targetIfUnspecified, token)
+            if (id != null && compartmentType.equals(id.resourceType, ignoreCase = true)) {
+                return CompartmentAssignment.Companion.of(compartmentType, id.idPart)
+            }
+        }
+
+        return CompartmentAssignment.Companion.unknown(this.compartmentMode.type())
+    }
+
+    private fun idFromToken(target: String?, token: String?): IIdType? {
+        if (token.isNullOrBlank()) {
+            return null
         }
 
         // If no target is specified, assume the token is of the target compartment type
-        if (target == null || target.isBlank()) {
-            return Ids.newId(fhirContext, token);
+        if (target.isNullOrBlank()) {
+            return newId(fhirContext, token)
         } else {
-            var ensured = Ids.ensureIdType(token, target);
-            return Ids.newId(fhirContext, ensured);
+            val ensured = ensureIdType(token, target)
+            return newId(fhirContext, ensured)
         }
+    }
+
+    companion object {
+        // Search parameters that likely reference compartments,
+        // in order of priority to use to determine compartment membership
+        private val COMPARTMENT_REFERENCE_PRIORITY =
+            mutableListOf<String?>(
+                "patient",
+                "subject",
+                "beneficiary",
+                "member",
+                "individual",
+                "encounter",
+                "episodeofcare",
+            )
     }
 }

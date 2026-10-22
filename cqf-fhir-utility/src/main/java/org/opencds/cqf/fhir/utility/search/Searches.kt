@@ -1,349 +1,356 @@
-package org.opencds.cqf.fhir.utility.search;
+package org.opencds.cqf.fhir.utility.search
 
-import static java.util.stream.Collectors.toList;
-
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.model.api.IQueryParameterAnd;
-import ca.uhn.fhir.model.api.IQueryParameterOr;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.param.UriParam;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import org.opencds.cqf.fhir.utility.Canonicals;
+import ca.uhn.fhir.context.FhirVersionEnum
+import ca.uhn.fhir.model.api.IQueryParameterAnd
+import ca.uhn.fhir.model.api.IQueryParameterOr
+import ca.uhn.fhir.model.api.IQueryParameterType
+import ca.uhn.fhir.rest.param.*
+import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.Multimap
+import java.util.*
+import org.opencds.cqf.fhir.utility.Canonicals.getParts
 
 /*
  * This is a utility class to help construct search maps, which are then passed into the Repository
  * to perform a search. If you find that you have a certain type of search that you are repeating
  * frequently consider adding it to this class.
  */
-public class Searches {
+object Searches {
+    @JvmField val ALL = mutableMapOf<String?, MutableList<IQueryParameterType?>?>()
+    private const val PATIENT = "patient"
+    private const val ACTOR = "actor"
+    private const val SUBJECT = "subject"
+    private const val MEDICATION_STATEMENT = "MedicationStatement"
+    private const val MEDICATION_REQUEST = "MedicationRequest"
+    private const val MEDICATION_DISPENSE = "MedicationDispense"
+    private const val MEDICATION_ADMINISTRATION = "MedicationAdministration"
+    private const val PROCEDURE_REQUEST = "ProcedureRequest"
 
-    public static final Map<String, List<IQueryParameterType>> ALL = Collections.emptyMap();
-    private static final String PATIENT = "patient";
-    private static final String ACTOR = "actor";
-    private static final String SUBJECT = "subject";
-    private static final String MEDICATION_STATEMENT = "MedicationStatement";
-    private static final String MEDICATION_REQUEST = "MedicationRequest";
-    private static final String MEDICATION_DISPENSE = "MedicationDispense";
-    private static final String MEDICATION_ADMINISTRATION = "MedicationAdministration";
-    private static final String PROCEDURE_REQUEST = "ProcedureRequest";
-
-    private Searches() {}
-
-    public static SearchBuilder builder() {
-        return new SearchBuilder();
+    @JvmStatic
+    fun builder(): SearchBuilder {
+        return SearchBuilder()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byId(String... ids) {
-        return builder().withTokenParam("_id", ids).build();
+    @JvmStatic
+    fun byId(vararg ids: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withTokenParam("_id", *ids).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byId(String id) {
-        return builder().withTokenParam("_id", id).build();
+    @JvmStatic
+    fun byId(id: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withTokenParam("_id", id).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byProfile(String profile) {
-        return builder().withProfile(profile).build();
+    @JvmStatic
+    fun byProfile(profile: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withProfile(profile).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byCanonical(String canonical) {
-        var parts = Canonicals.getParts(canonical);
+    @JvmStatic
+    fun byCanonical(canonical: String): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        val parts = getParts(canonical)
         if (parts.version() != null) {
-            return byUrlAndVersion(parts.url(), parts.version());
+            return byUrlAndVersion(parts.url(), parts.version())
         } else {
-            return byUrl(parts.url());
+            return byUrl(parts.url())
         }
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byCodeAndSystem(String code, String system) {
-        return builder().withTokenParam("code", code, system).build();
+    @JvmStatic
+    fun byCodeAndSystem(
+        code: String?,
+        system: String?,
+    ): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withTokenParam("code", code, system).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byUrl(String url) {
-        return builder().withUriParam("url", url).build();
+    @JvmStatic
+    fun byUrl(url: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withUriParam("url", url).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byUrlAndVersion(String url, String version) {
-        return builder()
-                .withUriParam("url", url)
-                .withTokenParam("version", version)
-                .build();
+    @JvmStatic
+    fun byUrlAndVersion(
+        url: String?,
+        version: String?,
+    ): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withUriParam("url", url).withTokenParam("version", version).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byName(String name) {
-        return builder().withStringParam("name", name).build();
+    @JvmStatic
+    fun byName(name: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withStringParam("name", name).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byStatus(String status) {
-        return builder().withTokenParam("status", status).build();
+    @JvmStatic
+    fun byStatus(status: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withTokenParam("status", status).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> exceptStatus(String status) {
-        return builder()
-                .withModifiedTokenParam("status", TokenParamModifier.NOT, status)
-                .build();
+    @JvmStatic
+    fun exceptStatus(status: String?): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        return builder().withModifiedTokenParam("status", TokenParamModifier.NOT, status).build()
     }
 
-    public static Multimap<String, List<IQueryParameterType>> byNameAndVersion(String name, String version) {
-        Multimap<String, List<IQueryParameterType>> multimap;
+    @JvmStatic
+    fun byNameAndVersion(
+        name: String?,
+        version: String?,
+    ): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+        val multimap: Multimap<String?, MutableList<IQueryParameterType?>?>?
 
-        if (version == null || version.isEmpty()) {
-            multimap = builder().withStringParam("name", name).build();
+        if (version.isNullOrEmpty()) {
+            multimap = builder().withStringParam("name", name).build()
         } else {
-            multimap = builder()
-                    .withStringParam("name", name)
-                    .withTokenParam("version", version)
-                    .build();
+            multimap =
+                builder().withStringParam("name", name).withTokenParam("version", version).build()
         }
 
-        return multimap;
+        return multimap
     }
 
-    public static Map<String, List<IQueryParameterType>> toFlattenedMap(
-            Multimap<String, List<IQueryParameterType>> mm) {
-        Map<String, List<IQueryParameterType>> result = new HashMap<>();
+    @JvmStatic
+    fun toFlattenedMap(
+        mm: Multimap<String?, MutableList<IQueryParameterType?>?>
+    ): MutableMap<String?, MutableList<IQueryParameterType?>?> {
+        val result = mutableMapOf<String?, MutableList<IQueryParameterType?>?>()
 
-        mm.asMap().forEach((key, listOfLists) -> {
-            List<IQueryParameterType> merged = listOfLists.stream()
-                    .filter(Objects::nonNull)
-                    .flatMap(List::stream)
-                    .collect(toList());
-            result.put(key, merged);
-        });
-
-        return result;
-    }
-
-    public static class SearchBuilder {
-        private Multimap<String, List<IQueryParameterType>> values;
-
-        public Multimap<String, List<IQueryParameterType>> build() {
-            return this.values;
+        mm.asMap().forEach { (key, listOfLists) ->
+            val merged = listOfLists!!.filterNotNull().flatten().toMutableList()
+            result[key] = merged
         }
 
-        public Multimap<String, List<IQueryParameterType>> getValues() {
+        return result
+    }
+
+    @JvmStatic
+    fun getPatientSearchParam(fhirVersion: FhirVersionEnum, dataType: String?): String? {
+        if (fhirVersion == FhirVersionEnum.DSTU3) {
+            return when (dataType) {
+                "Group" -> "member"
+                "Patient" -> "_id"
+                "ResearchSubject" -> "individual"
+                "Appointment",
+                "AppointmentResponse",
+                "Schedule" -> ACTOR
+                "Account",
+                "AdverseEvent",
+                "ChargeItem",
+                "ClinicalImpression",
+                "Communication",
+                "CommunicationRequest",
+                "Composition",
+                "DeviceUseStatement",
+                "DiagnosticReport",
+                "DocumentManifest",
+                "DocumentReference",
+                "DeviceRequest",
+                "EnrollmentRequest",
+                "SupplyRequest",
+                "Specimen",
+                "RiskAssessment",
+                "RequestGroup",
+                "QuestionnaireResponse",
+                "Observation",
+                MEDICATION_STATEMENT,
+                MEDICATION_REQUEST,
+                "Media",
+                "List" -> SUBJECT
+                "AllergyIntolerance",
+                "AuditEvent",
+                "Basic",
+                "BodySite",
+                "CarePlan",
+                "CareTeam",
+                "Claim",
+                "ClaimResponse",
+                "Condition",
+                "Consent",
+                "Coverage",
+                "DetectedIssue",
+                "EligibilityRequest",
+                "Encounter",
+                "EpisodeOfCare",
+                "ExplanationOfBenefit",
+                "FamilyMemberHistory",
+                "Flag",
+                "Goal",
+                "ImagingManifest",
+                "ImagingStudy",
+                "Immunization",
+                "ImmunizationRecommendation",
+                "VisionPrescription",
+                "SupplyDelivery",
+                "RelatedPerson",
+                "ReferralRequest",
+                "Provenance",
+                PROCEDURE_REQUEST,
+                "Procedure",
+                "Person",
+                "NutritionOrder",
+                MEDICATION_DISPENSE,
+                MEDICATION_ADMINISTRATION,
+                "MeasureReport" -> PATIENT
+
+                else -> null
+            }
+        }
+        return when (dataType) {
+            "Coverage" -> "policy-holder"
+            "Group" -> "member"
+            "Patient" -> "_id"
+            "ResearchSubject" -> "individual"
+            "Appointment",
+            "AppointmentResponse",
+            "Schedule" -> ACTOR
+            "Account",
+            "AdverseEvent",
+            "ChargeItem",
+            "ClinicalImpression",
+            "Communication",
+            "CommunicationRequest",
+            "Composition",
+            "DeviceRequest",
+            "DeviceUseStatement",
+            "DiagnosticReport",
+            "DocumentManifest",
+            "DocumentReference",
+            "EnrollmentRequest",
+            "Invoice",
+            "List",
+            "Media",
+            MEDICATION_REQUEST,
+            MEDICATION_STATEMENT,
+            "QuestionnaireResponse",
+            "Observation",
+            "RequestGroup",
+            "RiskAssessment",
+            "SupplyRequest",
+            "Specimen",
+            "RequestOrchestration" -> SUBJECT
+            "AllergyIntolerance",
+            "AuditEvent",
+            "Basic",
+            "BodyStructure",
+            "CarePlan",
+            "CareTeam",
+            "Claim",
+            "ClaimResponse",
+            "Condition",
+            "Consent",
+            "DetectedIssue",
+            "Encounter",
+            "EpisodeOfCare",
+            "ExplanationOfBenefit",
+            "FamilyMemberHistory",
+            "Flag",
+            "Goal",
+            "ImagingStudy",
+            "Immunization",
+            "ImmunizationRecommendation",
+            "MeasureReport",
+            MEDICATION_ADMINISTRATION,
+            MEDICATION_DISPENSE,
+            "MolecularSequence",
+            "NutritionOrder",
+            "Person",
+            "Procedure",
+            "Provenance",
+            "RelatedPerson",
+            "ServiceRequest",
+            "SupplyDelivery",
+            "VisionPrescription" -> PATIENT
+            else -> null
+        }
+    }
+
+    class SearchBuilder {
+        private var values: Multimap<String?, MutableList<IQueryParameterType?>?>? = null
+
+        fun build(): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+            return this.values
+        }
+
+        fun getValues(): Multimap<String?, MutableList<IQueryParameterType?>?> {
             if (values == null) {
-                values = ArrayListMultimap.create();
+                values = ArrayListMultimap.create<String?, MutableList<IQueryParameterType?>?>()
             }
 
-            return values;
+            return values!!
         }
 
-        public SearchBuilder withStringParam(String name, String value) {
-            getValues().put(name, Collections.singletonList(new StringParam(value)));
+        fun withStringParam(name: String?, value: String?): SearchBuilder {
+            getValues().put(name, mutableListOf(StringParam(value)))
 
-            return this;
+            return this
         }
 
-        public SearchBuilder withTokenParam(String name, String value) {
-            getValues().put(name, Collections.singletonList(new TokenParam(value)));
+        fun withTokenParam(name: String?, value: String?): SearchBuilder {
+            getValues().put(name, mutableListOf(TokenParam(value)))
 
-            return this;
+            return this
         }
 
-        public SearchBuilder withModifiedTokenParam(String name, TokenParamModifier modifier, String value) {
-            var token = new TokenParam(value);
-            token.setModifier(modifier);
-            getValues().put(name, Collections.singletonList(token));
+        fun withModifiedTokenParam(
+            name: String?,
+            modifier: TokenParamModifier?,
+            value: String?,
+        ): SearchBuilder {
+            val token = TokenParam(value)
+            token.setModifier(modifier)
+            getValues().put(name, mutableListOf(token))
 
-            return this;
+            return this
         }
 
-        public SearchBuilder withTokenParam(String name, String value, String system) {
-            getValues().put(name, Collections.singletonList(new TokenParam(system, value)));
+        fun withTokenParam(name: String?, value: String?, system: String?): SearchBuilder {
+            getValues().put(name, mutableListOf(TokenParam(system, value)))
 
-            return this;
+            return this
         }
 
-        public SearchBuilder withUriParam(String name, String value) {
-            getValues().put(name, Collections.singletonList(new UriParam(value)));
+        fun withUriParam(name: String?, value: String?): SearchBuilder {
+            getValues().put(name, mutableListOf(UriParam(value)))
 
-            return this;
+            return this
         }
 
-        SearchBuilder withTokenParam(String name, String... values) {
-            var params = new ArrayList<IQueryParameterType>(1 + values.length);
-            for (var v : values) {
-                params.add(new TokenParam(v));
+        fun withTokenParam(name: String?, vararg values: String?): SearchBuilder {
+            val params = ArrayList<IQueryParameterType?>(1 + values.size)
+            for (v in values) {
+                params.add(TokenParam(v))
             }
 
-            getValues().put(name, params);
+            getValues().put(name, params)
 
-            return this;
+            return this
         }
 
-        public SearchBuilder withReferenceParam(String spName, String referenceValue) {
-            getValues().put(spName, Collections.singletonList(new ReferenceParam(referenceValue)));
-            return this;
+        fun withReferenceParam(spName: String?, referenceValue: String?): SearchBuilder {
+            getValues().put(spName, mutableListOf(ReferenceParam(referenceValue)))
+            return this
         }
 
-        public SearchBuilder withProfile(String profile) {
-            return withUriParam("_profile", profile);
+        fun withProfile(profile: String?): SearchBuilder {
+            return withUriParam("_profile", profile)
         }
 
-        public SearchBuilder withAndListParam(String spName, IQueryParameterAnd<?> andListParam) {
-            Collection<List<IQueryParameterType>> lists = getValues().get(spName);
-            andListParam.getValuesAsQueryTokens().forEach(dateOrListParam -> {
-                @SuppressWarnings("unchecked")
-                List<IQueryParameterType> list = (List<IQueryParameterType>) dateOrListParam.getValuesAsQueryTokens();
-                lists.add((list));
-            });
+        fun withAndListParam(spName: String?, andListParam: IQueryParameterAnd<*>): SearchBuilder {
+            val lists = getValues().get(spName)
+            andListParam.getValuesAsQueryTokens().forEach { dateOrListParam ->
+                val list =
+                    dateOrListParam.getValuesAsQueryTokens() as MutableList<IQueryParameterType?>?
+                lists.add((list))
+            }
 
-            return this;
+            return this
         }
 
-        public SearchBuilder withOrListParam(String spName, IQueryParameterOr<?> orListParam) {
-            @SuppressWarnings("unchecked")
-            List<IQueryParameterType> qpList = (List<IQueryParameterType>) orListParam.getValuesAsQueryTokens();
+        fun withOrListParam(spName: String?, orListParam: IQueryParameterOr<*>): SearchBuilder {
+            val qpList = orListParam.getValuesAsQueryTokens() as MutableList<IQueryParameterType?>?
 
-            getValues().get(spName).add(qpList);
-            return this;
+            getValues().get(spName).add(qpList)
+            return this
         }
-    }
-
-    public static String getPatientSearchParam(FhirVersionEnum fhirVersion, String dataType) {
-        if (fhirVersion.equals(FhirVersionEnum.DSTU3)) {
-            return switch (dataType) {
-                case "Group" -> "member";
-                case "Patient" -> "_id";
-                case "ResearchSubject" -> "individual";
-                case "Appointment", "AppointmentResponse", "Schedule" -> ACTOR;
-                case "Account",
-                        "AdverseEvent",
-                        "ChargeItem",
-                        "ClinicalImpression",
-                        "Communication",
-                        "CommunicationRequest",
-                        "Composition",
-                        "DeviceUseStatement",
-                        "DiagnosticReport",
-                        "DocumentManifest",
-                        "DocumentReference",
-                        "DeviceRequest",
-                        "EnrollmentRequest",
-                        "SupplyRequest",
-                        "Specimen",
-                        "RiskAssessment",
-                        "RequestGroup",
-                        "QuestionnaireResponse",
-                        "Observation",
-                        MEDICATION_STATEMENT,
-                        MEDICATION_REQUEST,
-                        "Media",
-                        "List" -> SUBJECT;
-                case "AllergyIntolerance",
-                        "AuditEvent",
-                        "Basic",
-                        "BodySite",
-                        "CarePlan",
-                        "CareTeam",
-                        "Claim",
-                        "ClaimResponse",
-                        "Condition",
-                        "Consent",
-                        "Coverage",
-                        "DetectedIssue",
-                        "EligibilityRequest",
-                        "Encounter",
-                        "EpisodeOfCare",
-                        "ExplanationOfBenefit",
-                        "FamilyMemberHistory",
-                        "Flag",
-                        "Goal",
-                        "ImagingManifest",
-                        "ImagingStudy",
-                        "Immunization",
-                        "ImmunizationRecommendation",
-                        "VisionPrescription",
-                        "SupplyDelivery",
-                        "RelatedPerson",
-                        "ReferralRequest",
-                        "Provenance",
-                        PROCEDURE_REQUEST,
-                        "Procedure",
-                        "Person",
-                        "NutritionOrder",
-                        MEDICATION_DISPENSE,
-                        MEDICATION_ADMINISTRATION,
-                        "MeasureReport" -> PATIENT;
-                default -> null;
-            };
-        }
-        return switch (dataType) {
-            case "Coverage" -> "policy-holder";
-            case "Group" -> "member";
-            case "Patient" -> "_id";
-            case "ResearchSubject" -> "individual";
-            case "Appointment", "AppointmentResponse", "Schedule" -> ACTOR;
-            case "Account",
-                    "AdverseEvent",
-                    "ChargeItem",
-                    "ClinicalImpression",
-                    "Communication",
-                    "CommunicationRequest",
-                    "Composition",
-                    "DeviceRequest",
-                    "DeviceUseStatement",
-                    "DiagnosticReport",
-                    "DocumentManifest",
-                    "DocumentReference",
-                    "EnrollmentRequest",
-                    "Invoice",
-                    "List",
-                    "Media",
-                    MEDICATION_REQUEST,
-                    MEDICATION_STATEMENT,
-                    "QuestionnaireResponse",
-                    "Observation",
-                    "RequestGroup",
-                    "RiskAssessment",
-                    "SupplyRequest",
-                    "Specimen",
-                    "RequestOrchestration" -> SUBJECT;
-            case "AllergyIntolerance",
-                    "AuditEvent",
-                    "Basic",
-                    "BodyStructure",
-                    "CarePlan",
-                    "CareTeam",
-                    "Claim",
-                    "ClaimResponse",
-                    "Condition",
-                    "Consent",
-                    "DetectedIssue",
-                    "Encounter",
-                    "EpisodeOfCare",
-                    "ExplanationOfBenefit",
-                    "FamilyMemberHistory",
-                    "Flag",
-                    "Goal",
-                    "ImagingStudy",
-                    "Immunization",
-                    "ImmunizationRecommendation",
-                    "MeasureReport",
-                    MEDICATION_ADMINISTRATION,
-                    MEDICATION_DISPENSE,
-                    "MolecularSequence",
-                    "NutritionOrder",
-                    "Person",
-                    "Procedure",
-                    "Provenance",
-                    "RelatedPerson",
-                    "ServiceRequest",
-                    "SupplyDelivery",
-                    "VisionPrescription" -> PATIENT;
-            default -> null;
-        };
     }
 }

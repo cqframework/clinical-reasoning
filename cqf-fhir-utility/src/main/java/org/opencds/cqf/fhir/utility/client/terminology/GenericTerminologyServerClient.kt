@@ -141,7 +141,7 @@ constructor(
             initializeClientWithAuth(endpoint)
                 .search<IBaseBundle>()
                 .forResource(this.codeSystemClass)
-                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url!!)!!))
                 .execute()
         )
     }
@@ -150,7 +150,7 @@ constructor(
         endpoint: IEndpointAdapter?,
         url: String?,
     ): Optional<IDomainResource> {
-        val urlParams = Searches.toFlattenedMap(Searches.byCanonical(url))
+        val urlParams = Searches.toFlattenedMap(Searches.byCanonical(url!!)!!)
         return findLatestVersion(
             initializeClientWithAuth(endpoint)
                 .search<IBaseBundle>()
@@ -168,7 +168,7 @@ constructor(
             initializeClientWithAuth(endpoint)
                 .search<IBaseBundle>()
                 .forResource(this.valueSetClass)
-                .where(Searches.toFlattenedMap(Searches.byCanonical(url)))
+                .where(Searches.toFlattenedMap(Searches.byCanonical(url!!)!!))
                 .execute()
         )
     }

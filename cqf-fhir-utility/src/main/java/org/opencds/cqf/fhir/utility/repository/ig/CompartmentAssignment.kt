@@ -1,59 +1,61 @@
-package org.opencds.cqf.fhir.utility.repository.ig;
+package org.opencds.cqf.fhir.utility.repository.ig
 
-import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.*
+import java.util.function.Supplier
 
 /**
- * Represents the compartment directory segments that should be applied when
- * resolving a filesystem location for a resource.
+ * Represents the compartment directory segments that should be applied when resolving a filesystem
+ * location for a resource.
  */
-public record CompartmentAssignment(String compartmentType, String compartmentId) {
-
-    static final String SHARED_COMPARTMENT = "shared";
-
-    static CompartmentAssignment none() {
-        return new CompartmentAssignment(null, null);
+@JvmRecord
+data class CompartmentAssignment(val compartmentType: String?, val compartmentId: String?) {
+    fun hasCompartmentId(): Boolean {
+        return !compartmentId.isNullOrBlank()
     }
 
-    static CompartmentAssignment shared() {
-        return new CompartmentAssignment(SHARED_COMPARTMENT, null);
-    }
-    // Returns an "unknown" compartment assignment of the specified type.
-    static CompartmentAssignment unknown(String compartmentType) {
-        return of(compartmentType, null);
-    }
+    val isNone: Boolean
+        get() = compartmentType.isNullOrBlank()
 
-    static CompartmentAssignment of(String compartmentType, String compartmentId) {
-        Objects.requireNonNull(compartmentType, "compartmentType cannot be null");
-        var normalizedType = compartmentType.toLowerCase();
-        var normalizedId = compartmentId != null && !compartmentId.isBlank() ? compartmentId.trim() : null;
-        return new CompartmentAssignment(normalizedType, normalizedId);
-    }
+    val isUnknown: Boolean
+        // Returns an "unknown" compartment assignment of the specified type.
+        get() = !this.isNone && !this.isShared && !hasCompartmentId()
 
-    boolean hasCompartmentId() {
-        return compartmentId != null && !compartmentId.isBlank();
-    }
+    val isShared: Boolean
+        get() = compartmentType != null && compartmentType == SHARED_COMPARTMENT
 
-    boolean isNone() {
-        return compartmentType == null || compartmentType.isBlank();
-    }
-
-    // Returns an "unknown" compartment assignment of the specified type.
-    // An unknown compartment assignment has a type but no id, meaning that multiple
-    // compartments of that type may need to be searched.
-    boolean isUnknown() {
-        return !isNone() && !isShared() && !hasCompartmentId();
-    }
-
-    boolean isShared() {
-        return compartmentType != null && compartmentType.equals(SHARED_COMPARTMENT);
-    }
-
-    CompartmentAssignment or(Supplier<CompartmentAssignment> other) {
-        if (this.isNone()) {
-            return other.get();
+    fun or(other: Supplier<CompartmentAssignment?>): CompartmentAssignment? {
+        if (this.isNone) {
+            return other.get()
         }
 
-        return this;
+        return this
+    }
+
+    companion object {
+        const val SHARED_COMPARTMENT: String = "shared"
+
+        @JvmStatic
+        fun none(): CompartmentAssignment {
+            return CompartmentAssignment(null, null)
+        }
+
+        @JvmStatic
+        fun shared(): CompartmentAssignment {
+            return CompartmentAssignment(SHARED_COMPARTMENT, null)
+        }
+
+        // Returns an "unknown" compartment assignment of the specified type.
+        @JvmStatic
+        fun unknown(compartmentType: String): CompartmentAssignment {
+            return of(compartmentType, null)
+        }
+
+        @JvmStatic
+        fun of(compartmentType: String, compartmentId: String?): CompartmentAssignment {
+            val normalizedType = compartmentType.lowercase(Locale.getDefault())
+            val normalizedId =
+                if (!compartmentId.isNullOrBlank()) compartmentId.trim { it <= ' ' } else null
+            return CompartmentAssignment(normalizedType, normalizedId)
+        }
     }
 }

@@ -1,24 +1,33 @@
-package org.opencds.cqf.fhir.utility.repository.ig;
+package org.opencds.cqf.fhir.utility.repository.ig
 
-import com.google.common.collect.Sets;
-import java.util.Set;
+import com.google.common.collect.Sets
 
-enum ResourceCategory {
+internal enum class ResourceCategory {
     DATA,
     TERMINOLOGY,
     CONTENT;
 
-    private static final Set<String> TERMINOLOGY_RESOURCES = Sets.newHashSet("ValueSet", "CodeSystem");
-    private static final Set<String> CONTENT_RESOURCES = Sets.newHashSet(
-            "Library", "Questionnaire", "Measure", "PlanDefinition", "StructureDefinition", "ActivityDefinition");
+    companion object {
+        private val TERMINOLOGY_RESOURCES: MutableSet<String?> =
+            Sets.newHashSet<String?>("ValueSet", "CodeSystem")
+        private val CONTENT_RESOURCES: MutableSet<String?> =
+            Sets.newHashSet<String?>(
+                "Library",
+                "Questionnaire",
+                "Measure",
+                "PlanDefinition",
+                "StructureDefinition",
+                "ActivityDefinition",
+            )
 
-    static ResourceCategory forType(String resourceType) {
-        if (TERMINOLOGY_RESOURCES.contains(resourceType)) {
-            return TERMINOLOGY;
-        } else if (CONTENT_RESOURCES.contains(resourceType)) {
-            return CONTENT;
+        fun forType(resourceType: String?): ResourceCategory {
+            if (TERMINOLOGY_RESOURCES.contains(resourceType)) {
+                return TERMINOLOGY
+            } else if (CONTENT_RESOURCES.contains(resourceType)) {
+                return CONTENT
+            }
+
+            return DATA
         }
-
-        return DATA;
     }
 }

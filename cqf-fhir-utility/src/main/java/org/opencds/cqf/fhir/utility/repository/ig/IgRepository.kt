@@ -1,55 +1,49 @@
-package org.opencds.cqf.fhir.utility.repository.ig;
+package org.opencds.cqf.fhir.utility.repository.ig
 
-import static java.util.Objects.requireNonNull;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.repository.IRepository;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import ca.uhn.fhir.util.BundleBuilder;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Multimap;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.opencds.cqf.fhir.utility.BundleHelper;
-import org.opencds.cqf.fhir.utility.Canonicals;
-import org.opencds.cqf.fhir.utility.matcher.ResourceMatcher;
-import org.opencds.cqf.fhir.utility.repository.Repositories;
-import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding;
-import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider;
-import org.opencds.cqf.fhir.utility.search.Searches;
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.model.api.IQueryParameterType
+import ca.uhn.fhir.parser.DataFormatException
+import ca.uhn.fhir.parser.IParser
+import ca.uhn.fhir.repository.IRepository
+import ca.uhn.fhir.rest.api.EncodingEnum
+import ca.uhn.fhir.rest.api.MethodOutcome
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException
+import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException
+import ca.uhn.fhir.util.BundleBuilder
+import com.google.common.cache.Cache
+import com.google.common.cache.CacheBuilder
+import com.google.common.collect.Multimap
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.Optional
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Consumer
+import org.hl7.fhir.instance.model.api.*
+import org.opencds.cqf.fhir.utility.BundleHelper
+import org.opencds.cqf.fhir.utility.BundleHelper.newBundle
+import org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResource
+import org.opencds.cqf.fhir.utility.BundleHelper.newEntryWithResponse
+import org.opencds.cqf.fhir.utility.BundleHelper.newResponseWithLocation
+import org.opencds.cqf.fhir.utility.Canonicals
+import org.opencds.cqf.fhir.utility.repository.Repositories
+import org.opencds.cqf.fhir.utility.repository.ig.EncodingBehavior.PreserveEncoding
+import org.opencds.cqf.fhir.utility.repository.operations.IRepositoryOperationProvider
+import org.opencds.cqf.fhir.utility.search.Searches.builder
 
 /**
- * Provides access to FHIR resources stored in a directory structure following
- * Implementation Guide (IG) conventions or KALM (Knowledge Artifact Lifecycle Management) conventions.
- * Supports CRUD operations and resource management based on configurable directory and
- * file naming conventions.
+ * Provides access to FHIR resources stored in a directory structure following Implementation Guide
+ * (IG) conventions or KALM (Knowledge Artifact Lifecycle Management) conventions. Supports CRUD
+ * operations and resource management based on configurable directory and file naming conventions.
  *
- * <p>
- * <strong>Directory Structure Overview (based on conventions):</strong>
- * </p>
- *
+ * **Directory Structure Overview (based on conventions):**
  * <pre>
  * Standard IG Layout:
  * /path/to/ig/root/          (CategoryLayout.FLAT)
@@ -78,120 +72,82 @@ import org.opencds.cqf.fhir.utility.search.Searches;
  * │   └── fhir/              (Definitional Resources)
  * │       └── ...
  * └── tests/
- *     └── data/
- *         └── fhir/          (Test Data Resources)
- *           ├── shared/        (Non-compartmental data and overrides)
- *           │   └── valueset/Example.json
- *           ├── [patient/]     (CompartmentMode.PATIENT)
- *           │   └── Patient/123/
- *           │       └── Observation-456.json
- *           └── ...
- * </pre>
+ * └── data/
+ * └── fhir/          (Test Data Resources)
+ * ├── shared/        (Non-compartmental data and overrides)
+ * │   └── valueset/Example.json
+ * ├── [patient/]     (CompartmentMode.PATIENT)
+ * │   └── Patient/123/
+ * │       └── Observation-456.json
+ * └── ...
+ * </pre> *
  *
- * <p>
- * <strong>Compartment Support:</strong>
- * </p>
- * <p>
- * The repository supports FHIR compartment contexts using directory conventions.
- * When using a {@code CompartmentMode} other than {@code CompartmentMode.NONE}, resources are organized by
- * compartment type and ID (e.g., {@code Patient/123/}).
- * </p>
+ * **Compartment Support:**
  *
- * <p>
- * <strong>Key Features:</strong>
- * </p>
- * <ul>
- * <li>Supports CRUD operations on FHIR resources.</li>
- * <li>Handles multiple directory layouts: standard IG conventions and KALM project conventions.</li>
- * <li>Supports compartment-based resource organization for patient-centric data management.</li>
- * <li>Handles different filename conventions (TYPE_AND_ID vs ID_ONLY).</li>
- * <li>Annotates resources with metadata like source path and external designation.</li>
- * <li>Supports invoking FHIR operations through an {@link IRepositoryOperationProvider}.</li>
- * <li>Utilizes caching for efficient resource access.</li>
- * <li>Auto-detects project conventions based on directory structure.</li>
- * </ul>
+ * The repository supports FHIR compartment contexts using directory conventions. When using a
+ * `CompartmentMode` other than `CompartmentMode.NONE`, resources are organized by compartment type
+ * and ID (e.g., `Patient/123/`).
+ *
+ * **Key Features:**
+ * * Supports CRUD operations on FHIR resources.
+ * * Handles multiple directory layouts: standard IG conventions and KALM project conventions.
+ * * Supports compartment-based resource organization for patient-centric data management.
+ * * Handles different filename conventions (TYPE_AND_ID vs ID_ONLY).
+ * * Annotates resources with metadata like source path and external designation.
+ * * Supports invoking FHIR operations through an [IRepositoryOperationProvider].
+ * * Utilizes caching for efficient resource access.
+ * * Auto-detects project conventions based on directory structure.
  */
-@SuppressWarnings("UnstableApiUsage")
-public class IgRepository implements IRepository {
-    private final FhirContext fhirContext;
-    private final Path root;
-    private final IgConventions conventions;
-    private final ResourceMatcher resourceMatcher;
-    private IRepositoryOperationProvider operationProvider;
+open class IgRepository
+@JvmOverloads
+constructor(
+    private val fhirContext: FhirContext,
+    private val root: Path,
+    private val conventions: IgConventions = IgConventions.Companion.autoDetect(root),
+    private var operationProvider: IRepositoryOperationProvider? = null,
+) : IRepository {
+    private val resourceMatcher = Repositories.getResourceMatcher(this.fhirContext)
 
-    private final Cache<Path, Optional<IBaseResource>> resourceCache =
-            CacheBuilder.newBuilder().maximumSize(5000).build();
-    private final ResourcePathResolver pathResolver;
-    private final CompartmentAssigner compartmentAssigner;
-
-    // Metadata fields attached to resources that are read from the repository
-    // This fields are used to determine if a resource is external, and to
-    // maintain the original encoding of the resource.
-    static final String SOURCE_PATH_TAG = "sourcePath"; // Path
-    public static final String FHIR_COMPARTMENT_HEADER = "X-FHIR-Compartment";
-
-    private static IParser parserForEncoding(FhirContext fhirContext, EncodingEnum encodingEnum) {
-        return switch (encodingEnum) {
-            case JSON -> fhirContext.newJsonParser();
-            case XML -> fhirContext.newXmlParser();
-            case RDF -> fhirContext.newRDFParser();
-            case NDJSON -> fhirContext.newNDJsonParser();
-        };
-    }
+    private val resourceCache: Cache<Path?, Optional<IBaseResource>> =
+        CacheBuilder.newBuilder().maximumSize(5000).build<Path?, Optional<IBaseResource>>()
+    private val pathResolver = ResourcePathResolver(this.root, this.conventions)
+    private val compartmentAssigner =
+        CompartmentAssigner(
+            this.fhirContext,
+            this.conventions.compartmentMode!!,
+            this.conventions.compartmentIsolation!!,
+        )
 
     /**
-     * Creates a new {@code IgRepository} with auto-detected conventions and default
-     * encoding behavior.
-     * The repository configuration is determined based on the directory structure.
+     * Creates a new `IgRepository` with specified conventions and encoding behavior.
      *
-     * @param fhirContext The FHIR context to use for parsing and encoding
-     *                    resources.
-     * @param root        The root directory of the IG.
-     * @see IgConventions#autoDetect(Path)
-     */
-    public IgRepository(FhirContext fhirContext, Path root) {
-        this(fhirContext, root, IgConventions.autoDetect(root), null);
-    }
-
-    /**
-     * Creates a new {@code IgRepository} with specified conventions and encoding
-     * behavior.
-     *
-     * @param fhirContext       The FHIR context to use.
-     * @param root              The root directory of the IG.
-     * @param conventions       The conventions defining directory and filename
-     *                          structures.
+     * @param fhirContext The FHIR context to use.
+     * @param root The root directory of the IG.
+     * @param conventions The conventions defining directory and filename structures.
      * @param operationProvider The operation provider for invoking FHIR operations.
      */
-    public IgRepository(
-            FhirContext fhirContext,
-            Path root,
-            IgConventions conventions,
-            IRepositoryOperationProvider operationProvider) {
-        this.fhirContext = requireNonNull(fhirContext, "fhirContext cannot be null");
-        this.root = requireNonNull(root, "root cannot be null");
-        this.conventions = requireNonNull(conventions, "conventions cannot be null");
-        this.resourceMatcher = Repositories.getResourceMatcher(this.fhirContext);
-        this.operationProvider = operationProvider;
-        this.pathResolver = new ResourcePathResolver(this.root, this.conventions);
-        this.compartmentAssigner = new CompartmentAssigner(
-                this.fhirContext, this.conventions.compartmentMode(), this.conventions.compartmentIsolation());
-    }
+    /**
+     * Creates a new `IgRepository` with auto-detected conventions and default encoding behavior.
+     * The repository configuration is determined based on the directory structure.
+     *
+     * @param fhirContext The FHIR context to use for parsing and encoding resources.
+     * @param root The root directory of the IG.
+     * @see IgConventions.autoDetect
+     */
 
     /**
-     * Assigns the operation provider used to execute custom FHIR operations against this repository.
+     * Assigns the operation provider used to execute custom FHIR operations against this
+     * repository.
      *
      * @param operationProvider the provider responsible for handling operation invocations
      */
-    public void setOperationProvider(IRepositoryOperationProvider operationProvider) {
-        this.operationProvider = operationProvider;
+    fun setOperationProvider(operationProvider: IRepositoryOperationProvider) {
+        this.operationProvider = operationProvider
     }
 
-    /**
-     * Clears all cached resources and path indexes maintained by the repository.
-     */
-    public void clearCache() {
-        this.resourceCache.invalidateAll();
+    /** Clears all cached resources and path indexes maintained by the repository. */
+    fun clearCache() {
+        this.resourceCache.invalidateAll()
     }
 
     /**
@@ -200,602 +156,649 @@ public class IgRepository implements IRepository {
      *
      * @param paths the set of paths to evict from the cache
      */
-    public void clearCache(Iterable<Path> paths) {
-        this.resourceCache.invalidate(paths);
+    fun clearCache(paths: Iterable<Path?>) {
+        this.resourceCache.invalidate(paths)
     }
 
     /**
      * Reads a resource from the given file path.
      *
      * @param path The path to the resource file.
-     * @return An {@code Optional} containing the resource if found; otherwise,
-     *         empty.
+     * @return An `Optional` containing the resource if found; otherwise, empty.
      */
-    protected Optional<IBaseResource> readResource(Path path) {
-        var file = path.toFile();
+    protected fun readResource(path: Path): Optional<IBaseResource> {
+        val file = path.toFile()
         if (!file.exists()) {
-            return Optional.empty();
+            return Optional.empty()
         }
 
-        var encoding = this.pathResolver.encodingForPath(path);
+        val encoding = this.pathResolver.encodingForPath(path)
 
-        String content;
+        val content: String
         try {
-            content = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-        } catch (FileNotFoundException e) {
-            return Optional.empty();
-        } catch (IOException e) {
-            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
+            content = String(Files.readAllBytes(path), StandardCharsets.UTF_8)
+        } catch (e: FileNotFoundException) {
+            return Optional.empty()
+        } catch (e: IOException) {
+            throw UnclassifiedServerFailureException(500, "Unable to read resource from path $path")
         }
 
         try {
-            var resource = parserForEncoding(fhirContext, encoding).parseResource(content);
+            val resource = parserForEncoding(fhirContext, encoding!!)!!.parseResource(content)
 
-            resource.setUserData(SOURCE_PATH_TAG, path);
-            CqlContent.loadCqlContent(resource, path.getParent());
+            resource.setUserData(SOURCE_PATH_TAG, path)
+            CqlContent.loadCqlContent(resource, path.parent)
 
-            return Optional.of(resource);
-        } catch (DataFormatException e) {
-            throw new ResourceNotFoundException("Found empty or invalid content at path %s".formatted(path));
+            return Optional.of(resource)
+        } catch (e: DataFormatException) {
+            throw ResourceNotFoundException("Found empty or invalid content at path $path")
         }
     }
 
-    protected Optional<IBaseResource> cachedReadResource(Path path) {
+    protected fun cachedReadResource(path: Path): Optional<IBaseResource> {
         try {
-            return this.resourceCache.get(path, () -> this.readResource(path));
-        } catch (Exception e) {
-            if (e.getCause() instanceof RuntimeException re) {
-                throw re;
+            return this.resourceCache.get(path) { this.readResource(path) }
+        } catch (e: Exception) {
+            if (e.cause is RuntimeException) {
+                throw e.cause as RuntimeException
             }
 
-            throw new UnclassifiedServerFailureException(500, "Unable to read resource from path %s".formatted(path));
+            throw UnclassifiedServerFailureException(500, "Unable to read resource from path $path")
         }
     }
 
     /**
      * Writes a resource to the specified file path.
      *
-     * @param <T>      The type of the FHIR resource.
+     * @param <T> The type of the FHIR resource.
      * @param resource The resource to write.
-     * @param path     The file path to write the resource to.
+     * @param path The file path to write the resource to. </T>
      */
-    protected <T extends IBaseResource> void writeResource(T resource, Path path) {
+    protected fun <T : IBaseResource> writeResource(resource: T?, path: Path) {
         try {
-            if (path.getParent() != null) {
-                path.getParent().toFile().mkdirs();
+            if (path.parent != null) {
+                path.parent.toFile().mkdirs()
             }
 
-            try (var stream = new FileOutputStream(path.toFile())) {
-                var encoding = this.pathResolver.encodingForPath(path);
-                String result = parserForEncoding(fhirContext, encoding)
+            FileOutputStream(path.toFile()).use { stream ->
+                val encoding = this.pathResolver.encodingForPath(path)
+                val result: String =
+                    parserForEncoding(fhirContext, encoding!!)!!
                         .setPrettyPrint(true)
-                        .encodeResourceToString(resource);
-                stream.write(result.getBytes());
-                resource.setUserData(SOURCE_PATH_TAG, path);
-                this.resourceCache.put(path, Optional.of(resource));
+                        .encodeResourceToString(resource)
+                stream.write(result.toByteArray())
+                resource!!.setUserData(SOURCE_PATH_TAG, path)
+                this.resourceCache.put(path, Optional.of(resource))
             }
-        } catch (IOException | SecurityException e) {
-            throw new UnclassifiedServerFailureException(500, "Unable to write resource to path %s".formatted(path));
+        } catch (e: IOException) {
+            throw UnclassifiedServerFailureException(500, "Unable to write resource to path $path")
+        } catch (e: SecurityException) {
+            throw UnclassifiedServerFailureException(500, "Unable to write resource to path $path")
         }
     }
 
     /**
-     * Reads all resources of a given type from the appropriate directories based on
-     * repository conventions and compartment context.
+     * Reads all resources of a given type from the appropriate directories based on repository
+     * conventions and compartment context.
      *
-     * <p>Directory scanning behavior:</p>
-     * <ul>
-     * <li>Flat layout: Scans root/category directory for resources</li>
-     * <li>Type-specific directories: Scans type-specific subdirectories</li>
-     * <li>Compartment-aware: Includes compartment-specific paths when applicable</li>
-     * </ul>
+     * Directory scanning behavior:
+     * * Flat layout: Scans root/category directory for resources
+     * * Type-specific directories: Scans type-specific subdirectories
+     * * Compartment-aware: Includes compartment-specific paths when applicable
      *
-     * <p>File filtering based on filename conventions:</p>
-     * <ul>
-     * <li>{@code FilenameMode.ID_ONLY}: Accepts any file with supported extension</li>
-     * <li>{@code FilenameMode.TYPE_AND_ID}: Accepts files matching pattern "ResourceType-*"</li>
-     * </ul>
+     * File filtering based on filename conventions:
+     * * `FilenameMode.ID_ONLY`: Accepts any file with supported extension
+     * * `FilenameMode.TYPE_AND_ID`: Accepts files matching pattern "ResourceType-*"
      *
-     * @param <T>                     The type of the FHIR resource.
-     * @param resourceClass           The class representing the FHIR resource type.
-     * @param directories             The list of directories to scan for resources.
-     * @return Map of resource IDs to resources found in the directories.
+     * @param <T> The type of the FHIR resource.
+     * @param resourceClass The class representing the FHIR resource type.
+     * @param directories The list of directories to scan for resources.
+     * @return Map of resource IDs to resources found in the directories. </T>
      */
-    protected <T extends IBaseResource> Map<IIdType, T> readDirectoriesForResource(
-            Class<T> resourceClass, List<Path> directories) {
-        var resources = new ConcurrentHashMap<IIdType, T>();
-        Predicate<Path> resourceFileFilter = this.pathResolver.fileMatcher(resourceClass);
+    protected fun <T : IBaseResource> readDirectoriesForResource(
+        resourceClass: Class<T>,
+        directories: MutableList<Path>,
+    ): MutableMap<IIdType?, T?> {
+        val resources = ConcurrentHashMap<IIdType?, T?>()
+        val resourceFileFilter = this.pathResolver.fileMatcher(resourceClass)
 
-        for (var dir : directories) {
+        for (dir in directories) {
             if (!Files.exists(dir)) {
-                continue;
+                continue
             }
 
             // Walk the directory and read all files that match the resource type
             // and file extension
-            try (var pathsStream = Files.list(dir)) {
-                pathsStream
+            try {
+                Files.list(dir).use { pathsStream ->
+                    pathsStream
                         .filter(resourceFileFilter)
                         .parallel()
-                        .map(this::cachedReadResource)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .forEach(r -> {
-                            if (!r.fhirType().equals(resourceClass.getSimpleName())) {
-                                return;
+                        .map { path -> this.cachedReadResource(path) }
+                        .filter { obj -> obj!!.isPresent }
+                        .map { obj -> obj!!.get() }
+                        .forEach { r ->
+                            if (r!!.fhirType() != resourceClass.simpleName) {
+                                return@forEach
                             }
-
-                            T validatedResource = validateResource(resourceClass, r, r.getIdElement());
-                            resources.put(r.getIdElement().toUnqualifiedVersionless(), validatedResource);
-                        });
-            } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(
-                        500, "Unable to read resources from path: %s".formatted(dir));
+                            val validatedResource = validateResource(resourceClass, r, r.idElement)
+                            resources[r.idElement.toUnqualifiedVersionless()] = validatedResource
+                        }
+                }
+            } catch (e: IOException) {
+                throw UnclassifiedServerFailureException(
+                    500,
+                    "Unable to read resources from path: $dir",
+                )
             }
         }
 
-        return resources;
+        return resources
     }
 
-    @Override
-    public FhirContext fhirContext() {
-        return this.fhirContext;
+    override fun fhirContext(): FhirContext {
+        return this.fhirContext
     }
 
     /**
      * Reads a resource from the repository, considering compartment context.
      *
-     * <p>File location resolution:</p>
-     * <ul>
-     * <li>ID_ONLY: "123.json" (in the appropriate directory based on layout and compartment)</li>
-     * <li>TYPE_AND_ID: "Patient-123.json"</li>
-     * </ul>
+     * File location resolution:
+     * * ID_ONLY: "123.json" (in the appropriate directory based on layout and compartment)
+     * * TYPE_AND_ID: "Patient-123.json"
      *
-     * <p>Compartment context is determined by repository conventions and resource references.</p>
+     * Compartment context is determined by repository conventions and resource references.
      *
      * Utilizes cache to improve performance.
      *
-     * <p>
-     * <strong>Example Usage:</strong>
-     * </p>
+     * **Example Usage:**
+     * <pre>`IIdType resourceId = new IdType("Observation", "obs-123"); Map<String, String> headers = new HashMap<>(); headers.put(FHIR_COMPARTMENT_HEADER, "Patient/patient-456"); Observation observation = repository.read(Observation.class, resourceId, headers); `</pre>
      *
-     * <pre>{@code
-     * IIdType resourceId = new IdType("Observation", "obs-123");
-     * Map<String, String> headers = new HashMap<>();
-     * headers.put(FHIR_COMPARTMENT_HEADER, "Patient/patient-456");
-     * Observation observation = repository.read(Observation.class, resourceId, headers);
-     * }</pre>
-     *
-     * @param <T>          The type of the FHIR resource.
-     * @param <I>          The type of the resource identifier.
+     * @param <T> The type of the FHIR resource.
+     * @param <I> The type of the resource identifier.
      * @param resourceType The class representing the FHIR resource type.
-     * @param id           The identifier of the resource.
-     * @param headers      Request headers
+     * @param id The identifier of the resource.
+     * @param headers Request headers
      * @return The resource if found.
-     * @throws ResourceNotFoundException if the resource is not found.
+     * @throws ResourceNotFoundException if the resource is not found. </I></T>
      */
-    @Override
-    public <T extends IBaseResource, I extends IIdType> T read(
-            Class<T> resourceType, I id, Map<String, String> headers) {
-        requireNonNull(resourceType, "resourceType cannot be null");
-        requireNonNull(id, "id cannot be null");
+    override fun <T : IBaseResource, I : IIdType> read(
+        resourceType: Class<T>,
+        id: I,
+        headers: MutableMap<String?, String?>?,
+    ): T? {
 
-        var assignment = this.compartmentAssigner
-                .fromHeaders(headers)
-                .or(() -> this.compartmentAssigner.fromId(resourceType.getSimpleName(), id));
-        var paths = this.pathResolver.candidates(resourceType, id.getIdPart(), assignment);
-        var resource = paths.stream()
-                .map(this::cachedReadResource)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
+        val assignment =
+            this.compartmentAssigner.fromHeaders(headers).or {
+                this.compartmentAssigner.fromId(resourceType.simpleName, id)
+            }
+        val paths = this.pathResolver.candidates(resourceType, id.idPart, assignment)
+        val resource =
+            paths
+                .map { path -> this.cachedReadResource(path!!) }
+                .filter { obj -> obj!!.isPresent }
+                .map { obj -> obj!!.get() }
+                .firstOrNull()
 
-        if (resource.isPresent()) {
-            return validateResource(resourceType, resource.get(), id);
+        if (resource != null) {
+            return validateResource(resourceType, resource, id)
         }
 
-        throw new ResourceNotFoundException(id);
+        throw ResourceNotFoundException(id)
     }
 
     /**
      * Creates a new resource in the repository, considering compartment context for file placement.
      *
-     * <p>The resource will be written to the appropriate directory based on repository conventions
-     * and any compartment context provided in headers.</p>
+     * The resource will be written to the appropriate directory based on repository conventions and
+     * any compartment context provided in headers.
      *
-     * <p>
-     * <strong>Example Usage:</strong>
-     * </p>
+     * **Example Usage:**
+     * <pre>`Observation newObservation = new Observation(); newObservation.setId("obs-789"); newObservation.setSubject(new Reference("Patient/patient-123")); MethodOutcome outcome = repository.create(newObservation, null); `</pre>
      *
-     * <pre>{@code
-     * Observation newObservation = new Observation();
-     * newObservation.setId("obs-789");
-     * newObservation.setSubject(new Reference("Patient/patient-123"));
-     * MethodOutcome outcome = repository.create(newObservation, null);
-     * }</pre>
-     *
-     * @param <T>      The type of the FHIR resource.
+     * @param <T> The type of the FHIR resource.
      * @param resource The resource to create.
-     * @param headers  Request headers, may include compartment context via {@code X-FHIR-Compartment}.
-     * @return A {@link MethodOutcome} containing the outcome of the create
-     *         operation.
+     * @param headers Request headers, may include compartment context via `X-FHIR-Compartment`.
+     * @return A [MethodOutcome] containing the outcome of the create operation. </T>
      */
-    @Override
-    public <T extends IBaseResource> MethodOutcome create(T resource, Map<String, String> headers) {
-        requireNonNull(resource, "resource cannot be null");
-        requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
+    override fun <T : IBaseResource> create(
+        resource: T,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome {
+        requireNotNull(resource.idElement.idPart) { "resource id cannot be null" }
 
-        var assignment =
-                this.compartmentAssigner.fromHeaders(headers).or(() -> this.compartmentAssigner.fromResource(resource));
+        val assignment =
+            this.compartmentAssigner.fromHeaders(headers).or {
+                this.compartmentAssigner.fromResource(resource)
+            }
 
-        var path = this.pathResolver.preferredPath(
-                resource.getClass(), resource.getIdElement().getIdPart(), assignment);
-        writeResource(resource, path);
+        val path =
+            this.pathResolver.preferredPath(
+                resource.javaClass,
+                resource.idElement.idPart,
+                assignment,
+            )
+        writeResource(resource, path)
 
-        return new MethodOutcome(resource.getIdElement(), true);
+        return MethodOutcome(resource.idElement, true)
     }
 
-    private <T extends IBaseResource> T validateResource(Class<T> resourceType, IBaseResource resource, IIdType id) {
+    private fun <T : IBaseResource> validateResource(
+        resourceType: Class<T>,
+        resource: IBaseResource,
+        id: IIdType,
+    ): T? {
         // All freshly read resources are tagged with their source path
-        var path = (Path) resource.getUserData(SOURCE_PATH_TAG);
+        val path = resource.getUserData(SOURCE_PATH_TAG) as Path?
 
-        if (!resourceType.getSimpleName().equals(resource.fhirType())) {
-            throw new ResourceNotFoundException(
-                    "Expected to find a resource with type: %s at path: %s. Found resource with type %s instead."
-                            .formatted(resourceType.getSimpleName(), path, resource.fhirType()));
+        if (resourceType.simpleName != resource.fhirType()) {
+            throw ResourceNotFoundException(
+                "Expected to find a resource with type: ${resourceType.simpleName} at path: $path. Found resource with type ${resource.fhirType()} instead."
+            )
         }
 
-        if (!resource.getIdElement().hasIdPart()) {
-            throw new ResourceNotFoundException(
-                    "Expected to find a resource with id: %s at path: %s. Found resource without an id instead."
-                            .formatted(id.toUnqualifiedVersionless(), path));
+        if (!resource.idElement.hasIdPart()) {
+            throw ResourceNotFoundException(
+                "Expected to find a resource with id: ${id.toUnqualifiedVersionless()} at path: $path. Found resource without an id instead."
+            )
         }
 
-        if (!id.getIdPart().equals(resource.getIdElement().getIdPart())) {
-            throw new ResourceNotFoundException(
-                    "Expected to find a resource with id: %s at path: %s. Found resource with an id %s instead."
-                            .formatted(
-                                    id.getIdPart(),
-                                    path,
-                                    resource.getIdElement().getIdPart()));
+        if (id.idPart != resource.idElement.idPart) {
+            throw ResourceNotFoundException(
+                "Expected to find a resource with id: ${id.idPart} at path: $path. Found resource with an id ${resource.idElement.idPart} instead."
+            )
         }
 
-        if (id.hasVersionIdPart()
-                && !id.getVersionIdPart().equals(resource.getIdElement().getVersionIdPart())) {
-            throw new ResourceNotFoundException(
-                    "Expected to find a resource with version: %s at path: %s. Found resource with version %s instead."
-                            .formatted(
-                                    id.getVersionIdPart(),
-                                    path,
-                                    resource.getIdElement().getVersionIdPart()));
+        if (id.hasVersionIdPart() && id.versionIdPart != resource.idElement.versionIdPart) {
+            throw ResourceNotFoundException(
+                "Expected to find a resource with version: ${id.versionIdPart} at path: $path. Found resource with version ${ resource.idElement.versionIdPart} instead."
+            )
         }
 
-        return resourceType.cast(resource);
+        return resourceType.cast(resource)
     }
 
     /**
      * Updates an existing resource in the repository.
      *
-     * <p>
-     * <strong>Example Usage:</strong>
-     * </p>
+     * **Example Usage:**
+     * <pre>`Map<String, String> headers = new HashMap<>(); Patient existingPatient = repository.read(Patient.class, new IdType("Patient", "12345"), headers); existingPatient.addAddress().setCity("New City"); MethodOutcome updateOutcome = repository.update(existingPatient, headers); `</pre>
      *
-     * <pre>{@code
-     * Map<String, String> headers = new HashMap<>();
-     * Patient existingPatient = repository.read(Patient.class, new IdType("Patient", "12345"), headers);
-     * existingPatient.addAddress().setCity("New City");
-     * MethodOutcome updateOutcome = repository.update(existingPatient, headers);
-     * }</pre>
-     *
-     * @param <T>      The type of the FHIR resource.
+     * @param <T> The type of the FHIR resource.
      * @param resource The resource to update.
-     * @param headers  Additional headers (not used in this implementation).
-     * @return A {@link MethodOutcome} containing the outcome of the update
-     *         operation.
+     * @param headers Additional headers (not used in this implementation).
+     * @return A [MethodOutcome] containing the outcome of the update operation. </T>
      */
-    @Override
-    public <T extends IBaseResource> MethodOutcome update(T resource, Map<String, String> headers) {
-        requireNonNull(resource, "resource cannot be null");
-        requireNonNull(resource.getIdElement().getIdPart(), "resource id cannot be null");
+    override fun <T : IBaseResource> update(
+        resource: T,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome {
+        requireNotNull(resource.idElement.idPart) { "resource id cannot be null" }
 
-        var existingPath = (Path) resource.getUserData(SOURCE_PATH_TAG);
+        val existingPath = resource.getUserData(SOURCE_PATH_TAG) as Path?
 
         if (existingPath != null && this.pathResolver.isExternalPath(existingPath)) {
-            throw new ForbiddenOperationException(
-                    "Unable to create or update: %s. Resource is marked as external, and external resources are read-only."
-                            .formatted(resource.getIdElement().toUnqualifiedVersionless()));
+            throw ForbiddenOperationException(
+                "Unable to create or update: ${resource.idElement.toUnqualifiedVersionless()}. Resource is marked as external, and external resources are read-only."
+            )
         }
 
-        var assignment =
-                this.compartmentAssigner.fromHeaders(headers).or(() -> this.compartmentAssigner.fromResource(resource));
+        val assignment =
+            this.compartmentAssigner.fromHeaders(headers).or {
+                this.compartmentAssigner.fromResource(resource)
+            }
 
-        var resourceType = resource.getClass();
-        var idPart = resource.getIdElement().getIdPart();
+        val resourceType = resource.javaClass
+        val idPart = resource.idElement.idPart
 
-        var targetPath = this.pathResolver.preferredPath(resourceType, idPart, assignment);
-        if (existingPath != null
-                && this.conventions.encodingBehavior().preserveEncoding()
-                        == PreserveEncoding.PRESERVE_ORIGINAL_ENCODING) {
-            var existingEncoding = this.pathResolver.encodingForPath(existingPath);
+        var targetPath = this.pathResolver.preferredPath(resourceType, idPart, assignment)
+        if (
+            existingPath != null &&
+                (this.conventions.encodingBehavior!!.preserveEncoding ==
+                    PreserveEncoding.PRESERVE_ORIGINAL_ENCODING)
+        ) {
+            val existingEncoding = this.pathResolver.encodingForPath(existingPath)
             if (existingEncoding != null) {
-                var targetFilename = this.pathResolver.filenameForEncoding(resourceType, idPart, existingEncoding);
-                targetPath = this.pathResolver
+                val targetFilename =
+                    this.pathResolver.filenameForEncoding(resourceType, idPart, existingEncoding)
+                targetPath =
+                    this.pathResolver
                         .preferredDirectory(resourceType, assignment)
-                        .resolve(targetFilename);
+                        .resolve(targetFilename)
             }
         }
 
-        if (existingPath != null && !existingPath.equals(targetPath)) {
+        if (existingPath != null && existingPath != targetPath) {
             try {
-                this.resourceCache.invalidate(existingPath);
-                Files.deleteIfExists(existingPath);
-            } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(
-                        500, "Couldn't relocate resource from %s to %s".formatted(existingPath, targetPath));
+                this.resourceCache.invalidate(existingPath)
+                Files.deleteIfExists(existingPath)
+            } catch (e: IOException) {
+                throw UnclassifiedServerFailureException(
+                    500,
+                    "Couldn't relocate resource from $existingPath to $targetPath",
+                )
             }
         }
 
-        writeResource(resource, targetPath);
+        writeResource(resource, targetPath)
 
-        return new MethodOutcome(resource.getIdElement(), false);
+        return MethodOutcome(resource.idElement, false)
     }
 
     /**
      * Deletes a resource from the repository.
      *
-     * <p>
-     * <strong>Example Usage:</strong>
-     * </p>
+     * **Example Usage:**
+     * <pre>`IIdType deleteId = new IdType("Patient", "67890"); Map<String, String> headers = new HashMap<>(); MethodOutcome deleteOutcome = repository.delete(Patient.class, deleteId, headers); `</pre>
      *
-     * <pre>{@code
-     * IIdType deleteId = new IdType("Patient", "67890");
-     * Map<String, String> headers = new HashMap<>();
-     * MethodOutcome deleteOutcome = repository.delete(Patient.class, deleteId, headers);
-     * }</pre>
-     *
-     * @param <T>          The type of the FHIR resource.
-     * @param <I>          The type of the resource identifier.
+     * @param <T> The type of the FHIR resource.
+     * @param <I> The type of the resource identifier.
      * @param resourceType The class representing the FHIR resource type.
-     * @param id           The identifier of the resource to delete.
-     * @param headers      Additional headers (not used in this implementation).
-     * @return A {@link MethodOutcome} containing the outcome of the delete
-     *         operation.
+     * @param id The identifier of the resource to delete.
+     * @param headers Additional headers (not used in this implementation).
+     * @return A [MethodOutcome] containing the outcome of the delete operation. </I></T>
      */
-    @Override
-    public <T extends IBaseResource, I extends IIdType> MethodOutcome delete(
-            Class<T> resourceType, I id, Map<String, String> headers) {
-        requireNonNull(resourceType, "resourceType cannot be null");
-        requireNonNull(id, "id cannot be null");
+    override fun <T : IBaseResource, I : IIdType> delete(
+        resourceType: Class<T>,
+        id: I,
+        headers: MutableMap<String?, String?>?,
+    ): MethodOutcome {
 
-        var assignment = this.compartmentAssigner
-                .fromHeaders(headers)
-                .or(() -> this.compartmentAssigner.fromId(resourceType.getSimpleName(), id));
+        val assignment =
+            this.compartmentAssigner.fromHeaders(headers).or {
+                this.compartmentAssigner.fromId(resourceType.simpleName, id)
+            }
 
-        var paths = this.pathResolver.candidates(resourceType, id.getIdPart(), assignment);
-        var deleted = false;
-        for (var path : paths) {
+        val paths = this.pathResolver.candidates(resourceType, id!!.idPart, assignment)
+        var deleted = false
+        for (path in paths) {
             try {
-                deleted = Files.deleteIfExists(path);
+                deleted = Files.deleteIfExists(path)
                 if (deleted) {
-                    this.resourceCache.invalidate(path);
-                    break;
+                    this.resourceCache.invalidate(path)
+                    break
                 }
-            } catch (IOException e) {
-                throw new UnclassifiedServerFailureException(500, "Couldn't delete %s".formatted(path));
+            } catch (e: IOException) {
+                throw UnclassifiedServerFailureException(500, "Couldn't delete $path")
             }
         }
 
         if (!deleted) {
-            throw new ResourceNotFoundException(id);
+            throw ResourceNotFoundException(id)
         }
 
-        return new MethodOutcome(id);
+        return MethodOutcome(id)
     }
 
     /**
      * Searches for resources matching the given search parameters.
      *
-     * <p>
-     * <strong>Example Usage:</strong>
-     * </p>
+     * **Example Usage:**
+     * <pre>`Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>(); searchParameters.put("family", Arrays.asList(new StringParam("Doe"))); Map<String, String> headers = new HashMap<>(); IBaseBundle bundle = repository.search(Bundle.class, Patient.class, searchParameters, headers); `</pre>
      *
-     * <pre>{@code
-     * Map<String, List<IQueryParameterType>> searchParameters = new HashMap<>();
-     * searchParameters.put("family", Arrays.asList(new StringParam("Doe")));
-     * Map<String, String> headers = new HashMap<>();
-     * IBaseBundle bundle = repository.search(Bundle.class, Patient.class, searchParameters, headers);
-     * }</pre>
-     *
-     * @param <B>              The type of the bundle to return.
-     * @param <T>              The type of the FHIR resource.
-     * @param bundleType       The class representing the bundle type.
-     * @param resourceType     The class representing the FHIR resource type.
+     * @param <B> The type of the bundle to return.
+     * @param <T> The type of the FHIR resource.
+     * @param bundleType The class representing the bundle type.
+     * @param resourceType The class representing the FHIR resource type.
      * @param searchParameters The search parameters.
-     * @param headers          Additional headers (not used in this implementation).
-     * @return A bundle containing the matching resources.
+     * @param headers Additional headers (not used in this implementation).
+     * @return A bundle containing the matching resources. </T></B>
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <B extends IBaseBundle, T extends IBaseResource> B search(
-            Class<B> bundleType,
-            Class<T> resourceType,
-            Multimap<String, List<IQueryParameterType>> searchParameters,
-            Map<String, String> headers) {
-        requireNonNull(bundleType, "bundleType cannot be null");
-        requireNonNull(resourceType, "resourceType cannot be null");
+    override fun <B : IBaseBundle, T : IBaseResource> search(
+        bundleType: Class<B>,
+        resourceType: Class<T>,
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
 
-        var assignment = this.compartmentAssigner
-                .fromHeaders(headers)
-                .or(() ->
-                        this.compartmentAssigner.fromSearchParameters(resourceType.getSimpleName(), searchParameters));
+        val assignment =
+            this.compartmentAssigner.fromHeaders(headers).or {
+                this.compartmentAssigner.fromSearchParameters(
+                    resourceType.simpleName,
+                    searchParameters,
+                )
+            }
 
-        var directories = this.pathResolver.directories(resourceType, assignment);
-        var resourceIdMap = this.readDirectoriesForResource(resourceType, directories);
+        val directories = this.pathResolver.directories(resourceType, assignment!!)
+        val resourceIdMap = this.readDirectoriesForResource(resourceType, directories)
 
-        var builder = new BundleBuilder(this.fhirContext);
-        builder.setType("searchset");
-        if (searchParameters == null || searchParameters.isEmpty()) {
-            resourceIdMap.values().forEach(builder::addCollectionEntry);
-            return (B) builder.getBundle();
+        val builder = BundleBuilder(this.fhirContext)
+        builder.setType("searchset")
+        if (searchParameters == null || searchParameters.isEmpty) {
+            resourceIdMap.values.forEach { theResource -> builder.addCollectionEntry(theResource) }
+            return builder.bundle as B?
         }
 
-        for (var resource : resourceIdMap.values()) {
-            if (allParametersMatch(searchParameters, resource)) {
-                builder.addCollectionEntry(resource);
+        for (resource in resourceIdMap.values) {
+            if (allParametersMatch(searchParameters, resource!!)) {
+                builder.addCollectionEntry(resource)
             }
         }
 
-        return (B) builder.getBundle();
+        return builder.bundle as B?
     }
 
-    private boolean allParametersMatch(
-            Multimap<String, List<IQueryParameterType>> searchParameters, IBaseResource resource) {
-        for (var nextEntry : searchParameters.entries()) {
-            var paramName = nextEntry.getKey();
-            if (!resourceMatcher.matches(paramName, nextEntry.getValue(), resource)) {
-                return false;
+    private fun allParametersMatch(
+        searchParameters: Multimap<String?, MutableList<IQueryParameterType?>?>,
+        resource: IBaseResource,
+    ): Boolean {
+        for (nextEntry in searchParameters.entries()) {
+            val paramName = nextEntry.key
+            if (!resourceMatcher.matches(paramName!!, nextEntry.value, resource)) {
+                return false
             }
         }
 
-        return true;
+        return true
     }
 
     /**
      * Invokes a FHIR operation on a resource type.
      *
-     * @param <R>          The type of the resource returned by the operation.
-     * @param <P>          The type of the parameters for the operation.
-     * @param <T>          The type of the resource on which the operation is
-     *                     invoked.
+     * @param <R> The type of the resource returned by the operation.
+     * @param <P> The type of the parameters for the operation.
+     * @param <T> The type of the resource on which the operation is invoked.
      * @param resourceType The class representing the FHIR resource type.
-     * @param name         The name of the operation.
-     * @param parameters   The operation parameters.
-     * @param returnType   The expected return type.
-     * @param headers      Additional headers (not used in this implementation).
-     * @return The result of the operation.
+     * @param name The name of the operation.
+     * @param parameters The operation parameters.
+     * @param returnType The expected return type.
+     * @param headers Additional headers (not used in this implementation).
+     * @return The result of the operation. </T></P></R>
      */
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters, T extends IBaseResource> R invoke(
-            Class<T> resourceType, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(null, resourceType.getSimpleName(), name, parameters);
+    override fun <R : IBaseResource, P : IBaseParameters, T : IBaseResource> invoke(
+        resourceType: Class<T>,
+        name: String?,
+        parameters: P?,
+        returnType: Class<R>?,
+        headers: MutableMap<String?, String?>?,
+    ): R? {
+        return invokeOperation(null, resourceType.simpleName, name, parameters)
     }
 
     /**
      * Invokes a FHIR operation on a specific resource instance.
      *
-     * @param <R>        The type of the resource returned by the operation.
-     * @param <P>        The type of the parameters for the operation.
-     * @param <I>        The type of the resource identifier.
-     * @param id         The identifier of the resource.
-     * @param name       The name of the operation.
+     * @param <R> The type of the resource returned by the operation.
+     * @param <P> The type of the parameters for the operation.
+     * @param <I> The type of the resource identifier.
+     * @param id The identifier of the resource.
+     * @param name The name of the operation.
      * @param parameters The operation parameters.
      * @param returnType The expected return type.
-     * @param headers    Additional headers (not used in this implementation).
-     * @return The result of the operation.
+     * @param headers Additional headers (not used in this implementation).
+     * @return The result of the operation. </I></P></R>
      */
-    @Override
-    public <R extends IBaseResource, P extends IBaseParameters, I extends IIdType> R invoke(
-            I id, String name, P parameters, Class<R> returnType, Map<String, String> headers) {
-        return invokeOperation(id, id.getResourceType(), name, parameters);
+    override fun <R : IBaseResource, P : IBaseParameters, I : IIdType> invoke(
+        id: I?,
+        name: String?,
+        parameters: P?,
+        returnType: Class<R?>?,
+        headers: MutableMap<String?, String?>?,
+    ): R? {
+        return invokeOperation(id, id!!.resourceType, name, parameters)
     }
 
     /**
-     * Processes a transaction bundle, supporting PUT, POST, and DELETE entries.
-     * Resources are written to the filesystem via the standard {@link #create}, {@link #update},
-     * and {@link #delete} methods.
+     * Processes a transaction bundle, supporting PUT, POST, and DELETE entries. Resources are
+     * written to the filesystem via the standard [.create], [.update], and [.delete] methods.
      *
      * @param <B> the bundle type
      * @param transaction the transaction bundle to process
      * @param headers request headers
      * @return a response bundle with entry responses for each processed entry
      * @throws NotImplementedOperationException if the transaction contains unsupported entry types
+     *   </B>
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <B extends IBaseBundle> B transaction(B transaction, Map<String, String> headers) {
-        var version = transaction.getStructureFhirVersionEnum();
-        var returnBundle = (B) BundleHelper.newBundle(version, "transaction-response");
-        BundleHelper.getEntry(transaction).forEach(e -> {
-            if (BundleHelper.isEntryRequestPut(version, e)) {
-                var resource = BundleHelper.getEntryResource(version, e);
-                this.update(resource, headers);
-                var location = resource.getIdElement().getValue();
-                BundleHelper.addEntry(
-                        returnBundle,
-                        BundleHelper.newEntryWithResponse(
-                                version, BundleHelper.newResponseWithLocation(version, location)));
-            } else if (BundleHelper.isEntryRequestPost(version, e)) {
-                var resource = BundleHelper.getEntryResource(version, e);
-                if (!resource.getIdElement().hasIdPart()) {
-                    resource.setId(java.util.UUID.randomUUID().toString());
+    override fun <B : IBaseBundle> transaction(
+        transaction: B?,
+        headers: MutableMap<String?, String?>?,
+    ): B? {
+        val version = transaction!!.structureFhirVersionEnum
+        val returnBundle = newBundle(version, "transaction-response") as B?
+        BundleHelper.getEntry<IBaseBackboneElement>(transaction)
+            .forEach(
+                Consumer { e: IBaseBackboneElement? ->
+                    if (BundleHelper.isEntryRequestPut(version, e!!)) {
+                        val resource = BundleHelper.getEntryResource(version, e)
+                        this.update(resource!!, headers)
+                        val location = resource.idElement.value
+                        BundleHelper.addEntry(
+                            returnBundle!!,
+                            newEntryWithResponse(
+                                version,
+                                newResponseWithLocation(version, location),
+                            ),
+                        )
+                    } else if (BundleHelper.isEntryRequestPost(version, e)) {
+                        val resource = BundleHelper.getEntryResource(version, e)
+                        if (!resource!!.idElement.hasIdPart()) {
+                            resource.setId(UUID.randomUUID().toString())
+                        }
+                        this.create(resource, headers)
+                        val location = resource.idElement.value
+                        BundleHelper.addEntry(
+                            returnBundle!!,
+                            newEntryWithResponse(
+                                version,
+                                newResponseWithLocation(version, location),
+                            ),
+                        )
+                    } else if (BundleHelper.isEntryRequestDelete(version, e)) {
+                        val requestId = BundleHelper.getEntryRequestId(version, e)
+                        if (requestId == null) {
+                            throw ResourceNotFoundException("Trying to delete an entry without id")
+                        }
+                        val requestUrl = BundleHelper.getEntryRequestUrl(version, e)
+                        val resourceType = Canonicals.getResourceType(requestUrl!!)
+                        val resourceClass =
+                            fhirContext.getResourceDefinition(resourceType).implementingClass
+                        this.delete(
+                            resourceClass,
+                            requestId.withResourceType(resourceType),
+                            headers,
+                        )
+                        BundleHelper.addEntry(
+                            returnBundle!!,
+                            newEntryWithResponse(
+                                version,
+                                newResponseWithLocation(version, requestUrl),
+                            ),
+                        )
+                    } else if (
+                        BundleHelper.isEntryRequestGet(version, e) &&
+                            BundleHelper.getEntryRequestUrl(version, e)!!.contains("?")
+                    ) {
+                        val searchResult =
+                            executeSearchUrl(BundleHelper.getEntryRequestUrl(version, e)!!, headers)
+                        BundleHelper.addEntry(returnBundle!!, newEntryWithResource(searchResult))
+                    } else {
+                        throw NotImplementedOperationException(
+                            "Transaction only supports PUT, POST, DELETE, or search-style GET"
+                        )
+                    }
                 }
-                this.create(resource, headers);
-                var location = resource.getIdElement().getValue();
-                BundleHelper.addEntry(
-                        returnBundle,
-                        BundleHelper.newEntryWithResponse(
-                                version, BundleHelper.newResponseWithLocation(version, location)));
-            } else if (BundleHelper.isEntryRequestDelete(version, e)) {
-                var requestId = BundleHelper.getEntryRequestId(version, e);
-                if (requestId == null) {
-                    throw new ResourceNotFoundException("Trying to delete an entry without id");
+            )
+        return returnBundle
+    }
+
+    protected fun <R : IBaseResource> invokeOperation(
+        id: IIdType?,
+        resourceType: String?,
+        operationName: String?,
+        parameters: IBaseParameters?,
+    ): R? {
+        requireNotNull(operationProvider) {
+            "No operation provider found. Unable to invoke operations."
+        }
+        return operationProvider!!.invokeOperation<IPrimitiveType<String?>?, R?>(
+            this,
+            id,
+            resourceType,
+            operationName,
+            parameters,
+        )
+    }
+
+    private fun executeSearchUrl(
+        requestUrl: String,
+        headers: MutableMap<String?, String?>?,
+    ): IBaseBundle {
+        val queryIdx = requestUrl.indexOf('?')
+        val resourceType = if (queryIdx < 0) requestUrl else requestUrl.substring(0, queryIdx)
+        val queryString = if (queryIdx < 0) "" else requestUrl.substring(queryIdx + 1)
+        val resourceClass =
+            fhirContext.getResourceDefinition(resourceType).implementingClass
+                as Class<IBaseResource>
+        val bundleClass =
+            fhirContext.getResourceDefinition("Bundle").implementingClass as Class<IBaseBundle>
+        return this.search(
+            bundleClass,
+            resourceClass,
+            IgRepository.Companion.parseSearchQuery(queryString),
+            headers,
+        )!!
+    }
+
+    companion object {
+        // Metadata fields attached to resources that are read from the repository
+        // This fields are used to determine if a resource is external, and to
+        // maintain the original encoding of the resource.
+        const val SOURCE_PATH_TAG: String = "sourcePath" // Path
+        const val FHIR_COMPARTMENT_HEADER: String = "X-FHIR-Compartment"
+
+        private fun parserForEncoding(
+            fhirContext: FhirContext,
+            encodingEnum: EncodingEnum,
+        ): IParser? {
+            return when (encodingEnum) {
+                EncodingEnum.JSON -> fhirContext.newJsonParser()
+                EncodingEnum.XML -> fhirContext.newXmlParser()
+                EncodingEnum.RDF -> fhirContext.newRDFParser()
+                EncodingEnum.NDJSON -> fhirContext.newNDJsonParser()
+            }
+        }
+
+        private fun parseSearchQuery(
+            queryString: String
+        ): Multimap<String?, MutableList<IQueryParameterType?>?>? {
+            val builder = builder()
+            if (queryString.isEmpty()) {
+                return builder.build()
+            }
+            for (pair in
+                queryString.split("&".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
+                val eq = pair.indexOf('=')
+                val key = if (eq < 0) pair else pair.substring(0, eq)
+                val value =
+                    if (eq < 0) ""
+                    else URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8)
+                when (key) {
+                    "url" -> builder.withUriParam("url", value)
+                    "version" -> builder.withTokenParam("version", value)
+                    else -> builder.withStringParam(key, value)
                 }
-                var requestUrl = BundleHelper.getEntryRequestUrl(version, e);
-                var resourceType = Canonicals.getResourceType(requestUrl);
-                var resourceClass =
-                        fhirContext.getResourceDefinition(resourceType).getImplementingClass();
-                this.delete(resourceClass, requestId.withResourceType(resourceType), headers);
-                BundleHelper.addEntry(
-                        returnBundle,
-                        BundleHelper.newEntryWithResponse(
-                                version, BundleHelper.newResponseWithLocation(version, requestUrl)));
-            } else if (BundleHelper.isEntryRequestGet(version, e)
-                    && BundleHelper.getEntryRequestUrl(version, e).contains("?")) {
-                var searchResult = executeSearchUrl(BundleHelper.getEntryRequestUrl(version, e), headers);
-                BundleHelper.addEntry(returnBundle, BundleHelper.newEntryWithResource(searchResult));
-            } else {
-                throw new NotImplementedOperationException(
-                        "Transaction only supports PUT, POST, DELETE, or search-style GET");
             }
-        });
-        return returnBundle;
-    }
-
-    protected <R extends IBaseResource> R invokeOperation(
-            IIdType id, String resourceType, String operationName, IBaseParameters parameters) {
-        if (operationProvider == null) {
-            throw new IllegalArgumentException("No operation provider found. Unable to invoke operations.");
+            return builder.build()
         }
-        return operationProvider.invokeOperation(this, id, resourceType, operationName, parameters);
-    }
-
-    @SuppressWarnings("unchecked")
-    private IBaseBundle executeSearchUrl(String requestUrl, Map<String, String> headers) {
-        var queryIdx = requestUrl.indexOf('?');
-        var resourceType = queryIdx < 0 ? requestUrl : requestUrl.substring(0, queryIdx);
-        var queryString = queryIdx < 0 ? "" : requestUrl.substring(queryIdx + 1);
-        var resourceClass = (Class<IBaseResource>)
-                fhirContext.getResourceDefinition(resourceType).getImplementingClass();
-        var bundleClass =
-                (Class<IBaseBundle>) fhirContext.getResourceDefinition("Bundle").getImplementingClass();
-        return this.search(bundleClass, resourceClass, parseSearchQuery(queryString), headers);
-    }
-
-    private static Multimap<String, List<IQueryParameterType>> parseSearchQuery(String queryString) {
-        var builder = Searches.builder();
-        if (queryString.isEmpty()) {
-            return builder.build();
-        }
-        for (var pair : queryString.split("&")) {
-            var eq = pair.indexOf('=');
-            var key = eq < 0 ? pair : pair.substring(0, eq);
-            var value = eq < 0 ? "" : java.net.URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8);
-            switch (key) {
-                case "url" -> builder.withUriParam("url", value);
-                case "version" -> builder.withTokenParam("version", value);
-                default -> builder.withStringParam(key, value);
-            }
-        }
-        return builder.build();
     }
 }

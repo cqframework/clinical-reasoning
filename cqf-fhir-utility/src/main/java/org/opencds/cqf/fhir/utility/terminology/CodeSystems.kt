@@ -1,38 +1,33 @@
-package org.opencds.cqf.fhir.utility.terminology;
-
-import java.util.Set;
+package org.opencds.cqf.fhir.utility.terminology
 
 /**
  * Canonical URLs of well-known external code systems.
  *
- * <p>This set is the union of every {@code uniqueId} URI extracted from NamingSystem resources
- * with {@code kind: "codesystem"} across all published versions of the HL7 Terminology (THO)
- * package ({@code hl7.terminology.*}), plus a small number of legacy/alternate URLs that IGs
- * reference but that do not appear in any THO NamingSystem.
+ * This set is the union of every `uniqueId` URI extracted from NamingSystem resources with `kind:
+ * "codesystem"` across all published versions of the HL7 Terminology (THO) package
+ * (`hl7.terminology.*`), plus a small number of legacy/alternate URLs that IGs reference but that
+ * do not appear in any THO NamingSystem.
  *
- * <p>The set is intentionally static and checked into the source tree so that it works
- * regardless of what (if anything) is in the local FHIR package cache at runtime.
+ * The set is intentionally static and checked into the source tree so that it works regardless of
+ * what (if anything) is in the local FHIR package cache at runtime.
  *
- * <p>To regenerate, scan all cached THO versions for NamingSystem resources:
+ * To regenerate, scan all cached THO versions for NamingSystem resources:
  * <pre>
  * for each hl7.terminology* package in ~/.fhir/packages/
- *   for each NamingSystem-*.json with kind == "codesystem"
- *     collect uniqueId entries where type == "uri"
- * </pre>
+ * for each NamingSystem-*.json with kind == "codesystem"
+ * collect uniqueId entries where type == "uri"
+ * </pre> *
  */
-public final class CodeSystems {
-
-    private CodeSystems() {}
-
-    /**
-     * Returns {@code true} if the given URL is a known external CodeSystem canonical.
-     */
-    public static boolean isKnownCodeSystem(String url) {
-        return url != null && URLS.contains(url);
+object CodeSystems {
+    /** Returns `true` if the given URL is a known external CodeSystem canonical. */
+    @JvmStatic
+    fun isKnownCodeSystem(url: String?): Boolean {
+        return url != null && URLS.contains(url)
     }
 
     // @formatter:off
-    private static final Set<String> URLS = Set.of(
+    private val URLS =
+        mutableSetOf<String?>(
             // ── External / non-HL7 code systems ──────────────────────────────────
             "http://canadapost.ca/CodeSystem/ProvinceCodes",
             "http://cap.org/eCC",
@@ -410,6 +405,7 @@ public final class CodeSystems {
             "urn:iso:std:iso:3166:-2",
             "urn:iso:std:iso:3166:-3",
             "urn:iso:std:iso:4217",
-            "urn:oid:2.16.840.1.113883.6.238");
+            "urn:oid:2.16.840.1.113883.6.238",
+        )
     // @formatter:on
 }

@@ -13,13 +13,22 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import java.nio.file.Path;
 import java.util.List;
+import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.fhir.cr.CrSettings;
@@ -30,6 +39,7 @@ import org.opencds.cqf.fhir.cr.plandefinition.apply.ApplyProcessor;
 import org.opencds.cqf.fhir.utility.BundleHelper;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
+import org.opencds.cqf.fhir.utility.repository.InMemoryFhirRepository;
 import org.opencds.cqf.fhir.utility.repository.ig.IgRepository;
 
 @SuppressWarnings({"squid:S2699", "UnstableApiUsage"})
@@ -583,5 +593,57 @@ class PlanDefinitionProcessorTests {
                 .planDefinitionId("route-one")
                 .thenDataRequirements()
                 .hasDataRequirements(19);
+    }
+
+    @Test
+    void applyContainsARequestForEachActionThatUsesTheSameActivityDefinition() {
+        var activityDefinition = new ActivityDefinition()
+                .setUrl("http://test.fhir.org/fhir/ActivityDefinition/send-message")
+                .setStatus(PublicationStatus.ACTIVE)
+                .setKind(ActivityDefinition.ActivityDefinitionKind.COMMUNICATIONREQUEST);
+        activityDefinition.setId("send-message");
+        var planDefinition = new PlanDefinition()
+                .setUrl("http://test.fhir.org/fhir/PlanDefinition/two-messages")
+                .setStatus(PublicationStatus.ACTIVE);
+        planDefinition.setId("two-messages");
+        for (var text : List.of("first", "second")) {
+            var action = planDefinition.addAction().setTitle(text);
+            action.setDefinition(new CanonicalType(activityDefinition.getUrl()));
+            action.addDynamicValue()
+                    .setPath("payload.contentString")
+                    .setExpression(new Expression().setLanguage("text/fhirpath").setExpression("'%s'".formatted(text)));
+        }
+        var patient = new Patient();
+        patient.setId("p1");
+        var bundle = new Bundle().setType(Bundle.BundleType.COLLECTION);
+        bundle.addEntry().setResource(patient);
+        bundle.addEntry().setResource(activityDefinition);
+        bundle.addEntry().setResource(planDefinition);
+        var processor = new PlanDefinitionProcessor(new InMemoryFhirRepository(fhirContextR4, bundle));
+
+        var carePlan = (CarePlan) processor.apply(
+                Eithers.forRight3(planDefinition), "Patient/p1", null, null, null, null, null, null, null, null);
+
+        var requestGroup = carePlan.getContained().stream()
+                .filter(RequestGroup.class::isInstance)
+                .map(RequestGroup.class::cast)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(
+                List.of("#send-message", "#send-message2"),
+                requestGroup.getAction().stream()
+                        .map(a -> a.getResource().getReference())
+                        .toList());
+        var parser = fhirContextR4.newJsonParser();
+        var served = parser.parseResource(CarePlan.class, parser.encodeResourceToString(carePlan));
+        var payloads = served.getContained().stream()
+                .filter(CommunicationRequest.class::isInstance)
+                .map(r -> ((CommunicationRequest) r)
+                        .getPayloadFirstRep()
+                        .getContentStringType()
+                        .getValue())
+                .sorted()
+                .toList();
+        assertEquals(List.of("first", "second"), payloads);
     }
 }

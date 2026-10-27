@@ -21,9 +21,12 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.repository.IRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.opencds.cqf.fhir.utility.Ids;
 import org.opencds.cqf.fhir.utility.adapter.IPlanDefinitionActionAdapter;
@@ -75,6 +78,9 @@ public class ProcessDefinition {
                             "%s-%s".formatted(actionId, resource.getIdElement().getIdPart()));
                 }
                 actionResolver.resolveAction(request, requestOrchestration, resource, action);
+                if (Boolean.TRUE.equals(request.getContainResources())) {
+                    setUniqueContainedId(request, requestOrchestration, resource);
+                }
                 var reference = Boolean.TRUE.equals(request.getContainResources())
                         ? "#%s".formatted(resource.getIdElement().getIdPart())
                         : resource.getIdElement().getValue();
@@ -182,6 +188,35 @@ public class ProcessDefinition {
             }
         }
         return matches;
+    }
+
+    /**
+     * Appends a count to the id of a resource about to be contained when the request orchestration already contains a
+     * resource with that id, as when an ActivityDefinition is used in multiple actions.
+     */
+    protected void setUniqueContainedId(
+            ApplyRequest request, IResourceAdapter requestOrchestration, IBaseResource resource) {
+        var idPart = resource.getIdElement().getIdPart();
+        if (idPart == null) {
+            return;
+        }
+        var containedIds = requestOrchestration.<IBaseResource>getContained().stream()
+                .filter(Objects::nonNull)
+                .map(r -> r.getIdElement().getIdPart())
+                .filter(Objects::nonNull)
+                .map(id -> id.replaceFirst("#", ""))
+                .collect(Collectors.toSet());
+        var baseId = idPart.replaceFirst("#", "");
+        var uniqueId = baseId;
+        int counter = 1;
+        while (containedIds.contains(uniqueId)) {
+            counter++;
+            uniqueId = baseId + counter;
+        }
+        if (!uniqueId.equals(baseId)) {
+            IIdType id = Ids.newId(request.getFhirVersion(), resource.fhirType(), uniqueId);
+            resource.setId(id);
+        }
     }
 
     protected Boolean isDefinitionCanonical(ApplyRequest request, IBase definition) {

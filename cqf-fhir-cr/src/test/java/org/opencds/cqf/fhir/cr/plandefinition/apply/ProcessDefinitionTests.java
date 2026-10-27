@@ -22,10 +22,12 @@ import org.hl7.fhir.r4.model.ActivityDefinition;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.RequestGroup;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.BeforeEach;
@@ -296,5 +298,26 @@ class ProcessDefinitionTests {
         var result = fixture.applyActivityDefinition(request, activityDef);
         assertInstanceOf(Task.class, result);
         assertEquals("test2", result.getIdElement().getIdPart());
+    }
+
+    @Test
+    void setUniqueContainedIdAppendsCountWhenIdIsAlreadyContained() {
+        var request = newPDApplyRequestForVersion(FhirVersionEnum.R4, libraryEngine, null, null);
+        var requestGroup = new RequestGroup();
+        var first = new CommunicationRequest();
+        first.setId("CommunicationRequest/test");
+        requestGroup.addContained(first);
+        var second = new CommunicationRequest();
+        second.setId("CommunicationRequest/test2");
+        requestGroup.addContained(second);
+        var requestOrchestration = request.getAdapterFactory().createResource(requestGroup);
+        var third = new CommunicationRequest();
+        third.setId("CommunicationRequest/test");
+        fixture.setUniqueContainedId(request, requestOrchestration, third);
+        assertEquals("test3", third.getIdElement().getIdPart());
+        var other = new CommunicationRequest();
+        other.setId("CommunicationRequest/other");
+        fixture.setUniqueContainedId(request, requestOrchestration, other);
+        assertEquals("other", other.getIdElement().getIdPart());
     }
 }

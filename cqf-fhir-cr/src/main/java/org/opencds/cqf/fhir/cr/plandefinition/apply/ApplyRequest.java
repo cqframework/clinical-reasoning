@@ -201,10 +201,10 @@ public class ApplyRequest implements ICpgRequest {
                             value = subjectId.getValue();
                             break;
                         case ENCOUNTER:
-                            value = encounterId.getValue();
+                            value = encounterId == null ? null : encounterId.getValue();
                             break;
                         case USER:
-                            value = practitionerId.getValue();
+                            value = practitionerId == null ? null : practitionerId.getValue();
                             break;
                         default:
                             break;

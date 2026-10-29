@@ -60,7 +60,7 @@ class RepositoryFhirModelInfoProvider(
                 Searches.byNameAndVersion(libraryIdentifier.id, libraryIdentifier.version),
             )
 
-        val iter = BundleIterable<IBaseBundle?>(repository, libs).iterator()
+        val iter = BundleIterable(repository, libs).iterator()
 
         if (!iter.hasNext()) {
             return null

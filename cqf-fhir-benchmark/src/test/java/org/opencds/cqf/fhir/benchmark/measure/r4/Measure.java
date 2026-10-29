@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.repository.IRepository;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -14,6 +15,7 @@ import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.SEARCH_FILTER_M
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings.TERMINOLOGY_FILTER_MODE;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings.VALUESET_EXPANSION_MODE;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
+import org.opencds.cqf.fhir.cr.measure.common.MeasureEnvironment;
 import org.opencds.cqf.fhir.cr.measure.common.MeasurePeriodValidator;
 import org.opencds.cqf.fhir.cr.measure.common.MeasureReference;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MultiMeasureService;
@@ -84,20 +86,22 @@ public class Measure {
             return this;
         }
 
-        private R4MultiMeasureService buildMultiMeasureService() {
+        private R4MultiMeasureService buildMultiMeasureService(IRepository repository) {
             return new R4MultiMeasureService(repository, evaluationOptions, serverBase, measurePeriodValidator);
         }
 
         public When when() {
-            return new When(buildMultiMeasureService());
+            return new When(repository, this::buildMultiMeasureService);
         }
     }
 
     public static class When {
-        private final R4MultiMeasureService service;
+        private final IRepository repository;
+        private final Function<IRepository, R4MultiMeasureService> serviceFactory;
 
-        When(R4MultiMeasureService service) {
-            this.service = service;
+        When(IRepository repository, Function<IRepository, R4MultiMeasureService> serviceFactory) {
+            this.repository = repository;
+            this.serviceFactory = serviceFactory;
         }
 
         private String measureId;
@@ -140,6 +144,9 @@ public class Measure {
         }
 
         public When evaluate() {
+            // Federate any additional data with the base repository, as $evaluate-measure does
+            var service =
+                    serviceFactory.apply(new MeasureEnvironment(null, null, null, additionalData).resolve(repository));
             this.operation = () -> service.evaluate(
                     new MeasureReference.ById(new IdType("Measure", measureId)),
                     periodStart,

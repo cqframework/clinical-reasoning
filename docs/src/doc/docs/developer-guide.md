@@ -392,6 +392,51 @@ Results of Javadoc can be found in the output of the build.
 
 Most of the components and operations in this repository are built around an interface representing a conceptual FHIR API, the idea being that any given Java-based FHIR platform or toolkit can provide an implementation of this API to enabled the use of CQL or Clinical Reasoning on that platform. The `cqf-fhir-test` project provides a set of utilities (specifically an implementation of that API that can read test `resource` files) to facilitate easier unit testing.
 
+### Benchmarks
+
+The `cqf-fhir-benchmark` module contains [JMH](https://github.com/openjdk/jmh) benchmarks for the clinical reasoning operations. The benchmarks are compiled and linted as part of `./gradlew build`, but they never run as part of `build`, `test`, or `integrationTest`. They only run when the `jmh` task is requested explicitly:
+
+```bash
+# Run all benchmarks
+./gradlew :cqf-fhir-benchmark:jmh
+
+# List the available benchmarks
+./gradlew :cqf-fhir-benchmark:jmh -PjmhArgs="-l"
+
+# Run a subset (a regex matched against benchmark names) with custom JMH options
+./gradlew :cqf-fhir-benchmark:jmh -PjmhArgs="Measures\.testEvaluate|Questionnaires -f 2 -wi 3 -i 5 -w 2s -r 2s"
+```
+
+`-PjmhArgs` is passed straight to the JMH command line; run with `-PjmhArgs="-h"` for the full list of options. Commonly used ones:
+
+| Option | Meaning |
+|--------|---------|
+| `-f <n>` | Number of forked JVMs per benchmark |
+| `-wf <n>` | Number of warmup forks (discarded) |
+| `-wi <n>` / `-i <n>` | Warmup / measurement iterations per fork |
+| `-w <time>` / `-r <time>` | Duration of each warmup / measurement iteration, e.g. `2s` |
+| `-prof gc` | Also report allocation rates |
+| `-jvmArgsAppend <args>` | Extra JVM arguments for the forked benchmark JVMs |
+
+Results are printed to the console and written as JSON to `cqf-fhir-benchmark/build/reports/jmh/results.json`. The file is overwritten on each run, so copy it elsewhere if you want to keep it.
+
+| Benchmark | What it measures |
+|-----------|------------------|
+| `Measures.testEvaluate` | R4 `$evaluate-measure` for a single subject |
+| `MeasuresAdditionalData.testEvaluateAdditionalData` | R4 `$evaluate-measure` with a large additional data bundle (~6,300 resources); slow |
+| `PlanDefinitions.testApply` | R4 PlanDefinition `$apply` |
+| `PlanDefinitionsWithGenerate.testApplyWithGenerate` | R4 PlanDefinition `$apply` that generates a Questionnaire |
+| `Questionnaires.testPopulate` | R4 Questionnaire `$populate` |
+| `TerminologyProviders.testSmall` / `testLarge` | ValueSet membership lookups against a small / large ValueSet |
+
+The benchmarks load their FHIR content from the test resources of `cqf-fhir-cr`, which the module consumes through the `testResourcesElements` configuration, so Gradle builds those resources first.
+
+The defaults in the `@Fork`/`@Measurement` annotations are minimal. For comparisons you intend to act on, use at least two forks and several warmup and measurement iterations, and look at the reported error, not just the score. Scores depend heavily on hardware, so only compare runs made on the same machine, ideally back to back.
+
+#### Comparing dependency versions
+
+To measure the impact of a dependency change (for example a new CQL engine version), run the benchmarks once on the current version and save `results.json`. Then switch the version (change `cql` in `gradle/libs.versions.toml`, or point at a local checkout via `local.properties`; see `local.properties.example`), run the same benchmarks with the same options, and compare the two result files.
+
 ### Naming Conventions
 
 #### Package names

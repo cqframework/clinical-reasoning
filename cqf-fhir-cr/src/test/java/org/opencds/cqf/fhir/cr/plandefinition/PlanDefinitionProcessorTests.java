@@ -19,6 +19,8 @@ import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.Test;
@@ -462,6 +464,23 @@ class PlanDefinitionProcessorTests {
                             .getCode()));
             assertTrue(responseItem.getItem().get(1).hasAnswer());
         });
+    }
+
+    @Test
+    void generateQuestionnaireWithGroupedItem() {
+        var planDefinitionId = "generate-questionnaire-group";
+        var patientId = "OPA-Patient1";
+        var questionnaire = (Questionnaire) given().repositoryFor(fhirContextR4, "r4")
+            .when()
+            .planDefinitionId(planDefinitionId)
+            .subjectId(patientId)
+            .thenApplyR5()
+            .hasQuestionnaire(true)
+            .questionnaire.get();
+        var groupItem = questionnaire.getItemFirstRep();
+        assertEquals(QuestionnaireItemType.GROUP, groupItem.getType());
+        assertEquals("Grouped Items", groupItem.getText());
+        assertEquals(2, groupItem.getItem().size());
     }
 
     @Test

@@ -113,8 +113,7 @@ public class ProcessAction {
     @SuppressWarnings("unchecked")
     protected void addQuestionnaireItemForInput(ApplyRequest request, IPlanDefinitionActionAdapter action) {
         var newItems = new ArrayList<
-            org.apache.commons.lang3.tuple.Pair<
-                IQuestionnaireItemComponentAdapter, List<IBaseExtension<?, ?>>>>();
+                org.apache.commons.lang3.tuple.Pair<IQuestionnaireItemComponentAdapter, List<IBaseExtension<?, ?>>>>();
         try {
             for (var input : action.getInputDataRequirement().stream()
                     .filter(Objects::nonNull)
@@ -153,9 +152,9 @@ public class ProcessAction {
                 request.addLaunchContextExtensions(item.getRight());
             } else {
                 var groupItem = request.getAdapterFactory()
-                    .createQuestionnaireItem()
-                    .setType("group")
-                    .setText(action.hasTitle() ? action.getTitle() : action.getDescription());
+                        .createQuestionnaireItem()
+                        .setType("group")
+                        .setText(action.hasTitle() ? action.getTitle() : action.getDescription());
                 newItems.forEach(item -> {
                     groupItem.addItem(item.getLeft());
                     request.addLaunchContextExtensions(item.getRight());

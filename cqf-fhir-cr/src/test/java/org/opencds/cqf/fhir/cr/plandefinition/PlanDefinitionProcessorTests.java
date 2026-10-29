@@ -471,12 +471,13 @@ class PlanDefinitionProcessorTests {
         var planDefinitionId = "generate-questionnaire-group";
         var patientId = "OPA-Patient1";
         var questionnaire = (Questionnaire) given().repositoryFor(fhirContextR4, "r4")
-            .when()
-            .planDefinitionId(planDefinitionId)
-            .subjectId(patientId)
-            .thenApplyR5()
-            .hasQuestionnaire(true)
-            .questionnaire.get();
+                .when()
+                .planDefinitionId(planDefinitionId)
+                .subjectId(patientId)
+                .thenApplyR5()
+                .hasQuestionnaire(true)
+                .questionnaire
+                .get();
         var groupItem = questionnaire.getItemFirstRep();
         assertEquals(QuestionnaireItemType.GROUP, groupItem.getType());
         assertEquals("Grouped Items", groupItem.getText());

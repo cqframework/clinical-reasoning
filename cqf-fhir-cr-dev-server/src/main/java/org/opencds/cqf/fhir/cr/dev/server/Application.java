@@ -3,11 +3,6 @@ package org.opencds.cqf.fhir.cr.dev.server;
 import org.opencds.cqf.fhir.cr.dev.server.config.ServerR4Config;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -21,12 +16,12 @@ import org.springframework.context.annotation.Import;
  * exclusions, no Hibernate code initializes during startup.
  */
 @SpringBootApplication(
-        exclude = {
-            DataSourceAutoConfiguration.class,
-            DataSourceTransactionManagerAutoConfiguration.class,
-            HibernateJpaAutoConfiguration.class,
-            JdbcTemplateAutoConfiguration.class,
-            QuartzAutoConfiguration.class
+        excludeName = {
+            "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration",
+            "org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration",
+            "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration",
+            "org.springframework.boot.jdbc.autoconfigure.JdbcTemplateAutoConfiguration",
+            "org.springframework.boot.quartz.autoconfigure.QuartzAutoConfiguration"
         })
 @Import(ServerR4Config.class)
 public class Application {

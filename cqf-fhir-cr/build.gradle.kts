@@ -33,6 +33,21 @@ configurations { create("testArtifacts") { extendsFrom(configurations.testImplem
 
 artifacts { add("testArtifacts", testJar) }
 
+// Processed test resources as an on-disk directory for downstream modules that load
+// IG fixtures from the filesystem (e.g. cqf-fhir-benchmark). Consumers get a task
+// dependency on processTestResources, so build ordering is handled by Gradle.
+val testResourcesElements by
+    configurations.creating {
+        isCanBeConsumed = true
+        isCanBeResolved = false
+    }
+
+artifacts {
+    add(testResourcesElements.name, layout.buildDirectory.dir("resources/test")) {
+        builtBy(tasks.processTestResources)
+    }
+}
+
 // Add test JAR to publishing
 afterEvaluate {
     publishing { publications { named<MavenPublication>("maven") { artifact(testJar) } } }

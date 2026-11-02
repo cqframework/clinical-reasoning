@@ -75,6 +75,20 @@ Available linked builds are listed in `local.properties.example`. The registry i
 
 In CI, the `resolveLinkedBuilds` task parses `Depends-On: org/repo#branch` directives from PR descriptions to automatically clone and link upstream repos.
 
+### Running Benchmarks
+
+JMH benchmarks in `cqf-fhir-benchmark` never run as part of `build`/`test`/`integrationTest`; they run only on request:
+
+```bash
+# Run all benchmarks (results: cqf-fhir-benchmark/build/reports/jmh/results.json)
+./gradlew :cqf-fhir-benchmark:jmh
+
+# Run a subset with custom JMH options (-PjmhArgs is passed to the JMH command line)
+./gradlew :cqf-fhir-benchmark:jmh -PjmhArgs="Measures -f 2 -wi 3 -i 5"
+```
+
+See the Benchmarks section of `docs/src/doc/docs/developer-guide.md` for details.
+
 ### Other Useful Commands
 ```bash
 # Generate Javadocs

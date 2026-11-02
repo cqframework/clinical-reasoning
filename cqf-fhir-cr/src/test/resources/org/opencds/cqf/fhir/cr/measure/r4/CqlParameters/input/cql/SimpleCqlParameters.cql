@@ -157,5 +157,5 @@ define "Matching General Practitioner":
 define "Matching Patient By Encounter":
     [Patient] p
         with [Encounter] e
-            such that Last(Split(e.id,'')) = encounterParam
+            such that Last(Split(e.id,'/')) = encounterParam
                 and Last(Split(e.subject.reference, '/')) = Last(Split(p.id,'/'))

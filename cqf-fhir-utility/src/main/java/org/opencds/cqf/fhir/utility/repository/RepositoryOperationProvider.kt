@@ -57,7 +57,7 @@ class RepositoryOperationProvider(private val fhirContext: FhirContext) :
                             paramMap[APPLY_PARAMETER_ACTIVITY_DEFINITION] as R?,
                         )
                     val subject =
-                        (paramMap[APPLY_PARAMETER_SUBJECT] as IPrimitiveType<String?>).getValue()
+                        (paramMap[APPLY_PARAMETER_SUBJECT] as IPrimitiveType<String?>).value
                     val encounter = paramMap[APPLY_PARAMETER_ENCOUNTER] as IPrimitiveType<String?>?
                     val practitioner =
                         paramMap[APPLY_PARAMETER_PRACTITIONER] as IPrimitiveType<String?>?
@@ -66,9 +66,9 @@ class RepositoryOperationProvider(private val fhirContext: FhirContext) :
                     return processor!!.apply(
                         activityDefinition,
                         subject,
-                        if (encounter == null) null else encounter.getValue(),
-                        if (practitioner == null) null else practitioner.getValue(),
-                        if (organization == null) null else organization.getValue(),
+                        if (encounter == null) null else encounter.value,
+                        if (practitioner == null) null else practitioner.value,
+                        if (organization == null) null else organization.value,
                         paramMap[APPLY_PARAMETER_USER_TYPE] as IBaseDatatype?,
                         paramMap[APPLY_PARAMETER_USER_LANGUAGE] as IBaseDatatype?,
                         paramMap[APPLY_PARAMETER_USER_TASK_CONTEXT] as IBaseDatatype?,

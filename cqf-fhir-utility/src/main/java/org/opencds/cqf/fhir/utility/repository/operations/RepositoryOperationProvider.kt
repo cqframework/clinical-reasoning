@@ -2,7 +2,7 @@ package org.opencds.cqf.fhir.utility.repository.operations
 
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.repository.IRepository
-import java.util.*
+import java.util.Optional
 import org.hl7.fhir.instance.model.api.*
 import org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_ACTIVITY_DEFINITION
 import org.opencds.cqf.fhir.utility.Constants.APPLY_PARAMETER_CANONICAL
@@ -53,16 +53,16 @@ class RepositoryOperationProvider(
         parameters: IBaseParameters?,
     ): R? {
         val paramMap = operationParametersParser.getParameterParts(parameters!!)
-        when (resourceType) {
+        return when (resourceType) {
             activityDef ->
-                return invokeActivityDefinition<IPrimitiveType<String?>, R>(
+                invokeActivityDefinition<IPrimitiveType<String?>, R>(
                     repository,
                     id,
                     operationName,
                     paramMap,
                 )
 
-            else -> return null
+            else -> null
         }
     }
 
@@ -85,26 +85,25 @@ class RepositoryOperationProvider(
                         id,
                         paramMap[APPLY_PARAMETER_ACTIVITY_DEFINITION] as R?,
                     )
-                val subject =
-                    (paramMap[APPLY_PARAMETER_SUBJECT] as IPrimitiveType<String?>).getValue()
+                val subject = (paramMap[APPLY_PARAMETER_SUBJECT] as IPrimitiveType<String?>).value
                 val encounter = paramMap[APPLY_PARAMETER_ENCOUNTER] as IPrimitiveType<String?>?
                 val practitioner =
                     paramMap[APPLY_PARAMETER_PRACTITIONER] as IPrimitiveType<String?>?
                 val organization =
-                    paramMap.get(APPLY_PARAMETER_ORGANIZATION) as IPrimitiveType<String?>?
+                    paramMap[APPLY_PARAMETER_ORGANIZATION] as IPrimitiveType<String?>?
                 return processor!!.apply(
                     activityDefinition,
                     subject,
-                    if (encounter == null) null else encounter.getValue(),
-                    if (practitioner == null) null else practitioner.getValue(),
-                    if (organization == null) null else organization.getValue(),
+                    if (encounter == null) null else encounter.value,
+                    if (practitioner == null) null else practitioner.value,
+                    if (organization == null) null else organization.value,
                     paramMap[APPLY_PARAMETER_USER_TYPE] as IBaseDatatype?,
                     paramMap[APPLY_PARAMETER_USER_LANGUAGE] as IBaseDatatype?,
                     paramMap[APPLY_PARAMETER_USER_TASK_CONTEXT] as IBaseDatatype?,
                     paramMap[APPLY_PARAMETER_SETTING] as IBaseDatatype?,
                     paramMap[APPLY_PARAMETER_SETTING_CONTEXT] as IBaseDatatype?,
                     paramMap[APPLY_PARAMETER_PARAMETERS] as IBaseParameters?,
-                    (paramMap[APPLY_PARAMETER_USE_SERVER_DATA] as kotlin.Boolean?)!!,
+                    (paramMap[APPLY_PARAMETER_USE_SERVER_DATA] as Boolean?)!!,
                     paramMap[APPLY_PARAMETER_DATA] as IBaseBundle?,
                     paramMap[APPLY_PARAMETER_DATA_ENDPOINT] as IBaseResource?,
                     paramMap[APPLY_PARAMETER_CONTENT_ENDPOINT] as IBaseResource?,
@@ -134,29 +133,22 @@ class RepositoryOperationProvider(
                         id,
                         paramMap[APPLY_PARAMETER_PLAN_DEFINITION] as R?,
                     )
-                val subject =
-                    (paramMap[APPLY_PARAMETER_SUBJECT] as IPrimitiveType<String?>).getValue()
+                val subject = (paramMap[APPLY_PARAMETER_SUBJECT] as IPrimitiveType<String?>).value
                 val encounterParam =
-                    Optional.of(
-                        (paramMap.get(APPLY_PARAMETER_ENCOUNTER)
-                            as IPrimitiveType<kotlin.String?>?)!!
-                    )
-                val encounter =
-                    if (encounterParam.isPresent) encounterParam.get().getValue() else null
+                    Optional.of((paramMap[APPLY_PARAMETER_ENCOUNTER] as IPrimitiveType<String?>?)!!)
+                val encounter = if (encounterParam.isPresent) encounterParam.get().value else null
                 val practitionerParam =
                     Optional.of(
-                        (paramMap[APPLY_PARAMETER_PRACTITIONER]
-                            as IPrimitiveType<kotlin.String?>?)!!
+                        (paramMap[APPLY_PARAMETER_PRACTITIONER] as IPrimitiveType<String?>?)!!
                     )
                 val practitioner =
-                    if (practitionerParam.isPresent) practitionerParam.get().getValue() else null
+                    if (practitionerParam.isPresent) practitionerParam.get().value else null
                 val organizationParam =
                     Optional.of(
-                        (paramMap.get(APPLY_PARAMETER_ORGANIZATION)
-                            as IPrimitiveType<kotlin.String?>?)!!
+                        (paramMap[APPLY_PARAMETER_ORGANIZATION] as IPrimitiveType<String?>?)!!
                     )
                 val organization =
-                    if (organizationParam.isPresent) organizationParam.get().getValue() else null
+                    if (organizationParam.isPresent) organizationParam.get().value else null
                 val userType = paramMap[APPLY_PARAMETER_USER_TYPE] as IBaseDatatype?
                 val userLanguage = paramMap[APPLY_PARAMETER_USER_LANGUAGE] as IBaseDatatype?
                 val userTaskContext = paramMap[APPLY_PARAMETER_USER_TASK_CONTEXT] as IBaseDatatype?

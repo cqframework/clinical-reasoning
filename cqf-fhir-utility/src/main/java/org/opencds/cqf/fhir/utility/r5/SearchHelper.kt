@@ -54,7 +54,7 @@ object SearchHelper {
 
     private fun getNextPage(repository: IRepository, bundle: Bundle, nextUrl: String?) {
         val nextBundle = repository.link(Bundle::class.java, nextUrl)
-        nextBundle.getEntry().forEach { t -> bundle.addEntry(t) }
+        nextBundle.entry.forEach { t -> bundle.addEntry(t) }
         val next = nextBundle.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {
             getNextPage(repository, bundle, next.url)

@@ -12,7 +12,7 @@ object MetadataResourceHelper {
         repository: IRepository,
     ) {
         entries
-            .map { entry -> entry!!.getResponse().getLocation() }
+            .map { entry -> entry!!.response.location }
             .map { location ->
                 when (location!!.split("/")[0]) {
                     "ActivityDefinition" ->

@@ -2,7 +2,6 @@ package org.opencds.cqf.fhir.utility.dstu3
 
 import ca.uhn.fhir.model.api.IQueryParameterType
 import ca.uhn.fhir.repository.IRepository
-import java.util.function.Consumer
 import org.hl7.fhir.dstu3.model.Bundle
 import org.hl7.fhir.dstu3.model.Resource
 import org.hl7.fhir.exceptions.FHIRException
@@ -38,7 +37,7 @@ object SearchHelper {
             )
         }
 
-        return searchResult.getEntryFirstRep().getResource()
+        return searchResult.entryFirstRep.resource
     }
 
     fun <T : IBaseResource?> searchRepositoryWithPaging(
@@ -57,7 +56,7 @@ object SearchHelper {
             )
         val next = result.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {
-            getNextPage(repository, result, next.getUrl())
+            getNextPage(repository, result, next.url)
         }
 
         return result
@@ -65,12 +64,10 @@ object SearchHelper {
 
     private fun getNextPage(repository: IRepository, bundle: Bundle, nextUrl: String?) {
         val nextBundle = repository.link(Bundle::class.java, nextUrl)
-        nextBundle
-            .getEntry()
-            .forEach(Consumer { t: Bundle.BundleEntryComponent? -> bundle.addEntry(t) })
+        nextBundle.entry.forEach { t -> bundle.addEntry(t) }
         val next = nextBundle.getLink(IBaseBundle.LINK_NEXT)
         if (next != null) {
-            getNextPage(repository, bundle, next.getUrl())
+            getNextPage(repository, bundle, next.url)
         }
     }
 }

@@ -5,8 +5,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType
 import ca.uhn.fhir.repository.IRepository
 import ca.uhn.fhir.rest.api.MethodOutcome
 import com.google.common.collect.Multimap
-import java.util.Optional
-import java.util.stream.Stream
 import org.hl7.fhir.instance.model.api.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -115,12 +113,9 @@ class ProxyRepository : IRepository {
         url: String?,
         headers: MutableMap<String?, String?>?,
     ): B? {
-        return Stream.of<IRepository?>(this.data, this.content, this.terminology)
-            .map<Optional<B>?> { repo: IRepository? -> tryLink(repo!!, bundleType, url, headers) }
-            .flatMap<B?> { obj: Optional<B>? -> obj!!.stream() }
-            .filter { bundle: B? -> this.hasResourceEntries(bundle!!) }
-            .findFirst()
-            .orElse(null)
+        return listOf(this.data, this.content, this.terminology)
+            .mapNotNull { repo -> tryLink(repo!!, bundleType, url, headers) }
+            .firstOrNull { bundle -> this.hasResourceEntries(bundle) }
     }
 
     private fun <B : IBaseBundle> tryLink(
@@ -128,9 +123,9 @@ class ProxyRepository : IRepository {
         type: Class<B>?,
         url: String?,
         headers: MutableMap<String?, String?>?,
-    ): Optional<B> {
+    ): B? {
         try {
-            return Optional.ofNullable(repo.link(type, url, headers))
+            return repo.link(type, url, headers)
         } catch (e: Exception) {
             // swallow and try next
             logger.debug(
@@ -138,7 +133,7 @@ class ProxyRepository : IRepository {
                 repo.javaClass.name,
                 e.message,
             )
-            return Optional.empty()
+            return null
         }
     }
 
@@ -271,19 +266,16 @@ class ProxyRepository : IRepository {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(ProxyRepository::class.java)
 
-        private val terminologyResourceSet: MutableSet<String?> =
-            HashSet<String?>(mutableListOf<String?>("ValueSet", "CodeSystem", "ConceptMap"))
+        private val terminologyResourceSet = setOf("ValueSet", "CodeSystem", "ConceptMap")
 
-        private val contentResourceSet: MutableSet<String?> =
-            HashSet<String?>(
-                mutableListOf<String?>(
-                    "Library",
-                    "Measure",
-                    "PlanDefinition",
-                    "StructureDefinition",
-                    "ActivityDefinition",
-                    "Questionnaire",
-                )
+        private val contentResourceSet =
+            setOf(
+                "Library",
+                "Measure",
+                "PlanDefinition",
+                "StructureDefinition",
+                "ActivityDefinition",
+                "Questionnaire",
             )
     }
 }

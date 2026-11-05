@@ -1,7 +1,6 @@
 package org.opencds.cqf.fhir.utility.r4
 
 import ca.uhn.fhir.repository.IRepository
-import java.util.*
 import org.hl7.fhir.instance.model.api.IBaseBundle
 import org.hl7.fhir.instance.model.api.IDomainResource
 import org.hl7.fhir.r4.model.Enumerations
@@ -39,14 +38,14 @@ object PackageHelper : org.opencds.cqf.fhir.utility.PackageHelper() {
                     artifact.hasResourceElement()
             ) {
                 try {
-                    val canonical = artifact.getResourceElement()
+                    val canonical = artifact.resourceElement
                     if (PACKABLE_RESOURCES.contains(getResourceType(canonical))) {
                         val resource =
                             SearchHelper.searchRepositoryByCanonical(repository, canonical)
                         if (
                             resource != null &&
                                 getEntryResources(bundle).none { r ->
-                                    r.idElement == resource.getIdElement()
+                                    r.idElement == resource.idElement
                                 }
                         ) {
                             addEntry(bundle, createEntry(resource, isPut))

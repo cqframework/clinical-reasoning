@@ -64,7 +64,7 @@ open class InMemoryFhirRepository : IRepository {
         headers: MutableMap<String?, String?>?,
     ): T? {
         val resources =
-            this.resourceMap.computeIfAbsent(resourceType.simpleName) { x ->
+            this.resourceMap.computeIfAbsent(resourceType.simpleName) {
                 HashMap<String?, IBaseResource?>()
             }
 

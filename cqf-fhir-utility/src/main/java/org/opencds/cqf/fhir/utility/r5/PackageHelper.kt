@@ -35,11 +35,11 @@ object PackageHelper : org.opencds.cqf.fhir.utility.PackageHelper() {
     ) {
         for (artifact in artifacts) {
             if (
-                artifact!!.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON &&
+                artifact!!.type == RelatedArtifact.RelatedArtifactType.DEPENDSON &&
                     artifact.hasResourceElement()
             ) {
                 try {
-                    val canonical = artifact.getResourceElement()
+                    val canonical = artifact.resourceElement
                     if (PACKABLE_RESOURCES.contains(getResourceType(canonical))) {
                         val resource =
                             SearchHelper.searchRepositoryByCanonical(repository, canonical)

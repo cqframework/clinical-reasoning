@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory
  */
 class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<String?>?>?) :
     InMemoryFhirRepository(context) {
-    private val dependsOnPackages: MutableList<Array<String?>?>
+    private val dependsOnPackages: MutableList<Array<String?>?> =
+        if (dependsOnPackages != null) dependsOnPackages else mutableListOf()
     private var loadedPackages: MutableList<NpmPackage>? = null // null until first miss
     private var resourceTypeIndex: MutableMap<String?, String?>? =
         null // canonical URL → FHIR resource type
@@ -47,11 +48,6 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
     /** Package provenance information for a resource. */
     @JvmRecord
     data class PackageInfo(val packageId: String?, val version: String?, val canonical: String?)
-
-    init {
-        this.dependsOnPackages =
-            if (dependsOnPackages != null) dependsOnPackages else mutableListOf<Array<String?>?>()
-    }
 
     override fun <T : IBaseResource, I : IIdType> read(
         resourceType: Class<T>,
@@ -67,11 +63,11 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
 
             ensurePackagesLoaded()
 
-            val filename = id!!.getResourceType() + "-" + id.getIdPart() + ".json"
+            val filename = id!!.resourceType + "-" + id.idPart + ".json"
             logger.debug(
                 "NpmRepository cache miss for {}/{}, searching {} loaded package(s) for {}",
-                id.getResourceType(),
-                id.getIdPart(),
+                id.resourceType,
+                id.idPart,
                 loadedPackages!!.size,
                 filename,
             )
@@ -80,12 +76,12 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
                     pkg.load("package", filename).use { `is` ->
                         if (`is` != null) {
                             val resource = fhirContext().newJsonParser().parseResource(`is`)
-                            resource.setId(id.getResourceType() + "/" + id.getIdPart())
-                            update<IBaseResource?>(resource)
+                            resource.setId(id.resourceType + "/" + id.idPart)
+                            update(resource)
                             logger.debug(
                                 "Resolved {}/{} from NPM package {}",
-                                id.getResourceType(),
-                                id.getIdPart(),
+                                id.resourceType,
+                                id.idPart,
                                 pkg.id(),
                             )
                             return resourceType.cast(resource)
@@ -104,8 +100,8 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
             }
             logger.debug(
                 "Resource {}/{} not found in any loaded NPM package",
-                id.getResourceType(),
-                id.getIdPart(),
+                id.resourceType,
+                id.idPart,
             )
             throw e
         }
@@ -142,12 +138,12 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
 
         ensurePackagesLoaded()
 
-        val indexedType = resourceTypeIndex!!.get(url)
-        if (indexedType == null || indexedType != resourceType.getSimpleName()) {
+        val indexedType = resourceTypeIndex!![url]
+        if (indexedType == null || indexedType != resourceType.simpleName) {
             return result
         }
 
-        val indexedId = idIndex!!.get(url)
+        val indexedId = idIndex!![url]
         if (indexedId == null) {
             return result
         }
@@ -178,7 +174,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
         if (canonicalUrl == null || resourceTypeIndex == null) {
             return null
         }
-        return resourceTypeIndex!!.get(getUrl(canonicalUrl))
+        return resourceTypeIndex!![getUrl(canonicalUrl)]
     }
 
     /**
@@ -190,7 +186,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
         if (canonicalUrl == null || versionIndex == null) {
             return null
         }
-        return versionIndex!!.get(getUrl(canonicalUrl))
+        return versionIndex!![getUrl(canonicalUrl)]
     }
 
     /**
@@ -202,7 +198,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
         if (canonicalUrl == null || packageIndex == null) {
             return null
         }
-        return packageIndex!!.get(getUrl(canonicalUrl))
+        return packageIndex!![getUrl(canonicalUrl)]
     }
 
     @Synchronized
@@ -236,7 +232,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
         val cacheDir = File(System.getProperty("user.home"), ".fhir" + File.separator + "packages")
         cacheDir.mkdirs()
         return FilesystemPackageCacheManager.Builder()
-            .withCacheFolder(cacheDir.getAbsolutePath())
+            .withCacheFolder(cacheDir.absolutePath)
             .build()
     }
 
@@ -298,7 +294,7 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
             for (dep in npmPkg.dependencies()) {
                 val parts: Array<String?> = dep.split("#".toRegex(), limit = 2).toTypedArray()
                 if (parts.size == 2) {
-                    toLoad.add(arrayOf<String?>(parts[0], parts[1]))
+                    toLoad.add(arrayOf(parts[0], parts[1]))
                 }
             }
         } catch (e: Exception) {
@@ -317,24 +313,23 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
         try {
             val owningPackage = PackageInfo(npmPkg.id(), npmPkg.version(), npmPkg.canonical())
             for (info in npmPkg.listIndexedResources()) {
-                if (info.getUrl() == null) {
+                if (info.url == null) {
                     continue
                 }
-                if (info.getResourceType() != null) {
-                    typeIndex.putIfAbsent(info.getUrl(), info.getResourceType())
+                if (info.resourceType != null) {
+                    typeIndex.putIfAbsent(info.url, info.resourceType)
                 }
-                if (info.getId() != null) {
-                    idMap.putIfAbsent(info.getUrl(), info.getId())
+                if (info.id != null) {
+                    idMap.putIfAbsent(info.url, info.id)
                 }
                 // Stub CodeSystems (content: not-present) are placeholders —
                 // their version and package provenance are not meaningful.
-                val isStub =
-                    "CodeSystem" == info.getResourceType() && "not-present" == info.getContent()
+                val isStub = "CodeSystem" == info.resourceType && "not-present" == info.content
                 if (!isStub) {
-                    if (info.getVersion() != null) {
-                        verIndex.putIfAbsent(info.getUrl(), info.getVersion())
+                    if (info.version != null) {
+                        verIndex.putIfAbsent(info.url, info.version)
                     }
-                    pkgIndex.putIfAbsent(info.getUrl(), owningPackage)
+                    pkgIndex.putIfAbsent(info.url, owningPackage)
                 }
             }
         } catch (ex: Exception) {
@@ -353,16 +348,9 @@ class NpmRepository(context: FhirContext, dependsOnPackages: MutableList<Array<S
             }
             return searchParameters
                 .get("url")
-                .stream()
-                .flatMap<IQueryParameterType?> { obj: MutableList<IQueryParameterType?>? ->
-                    obj!!.stream()
-                }
-                .filter { o: IQueryParameterType? -> UriParam::class.java.isInstance(o) }
-                .map<UriParam?> { obj: IQueryParameterType? -> UriParam::class.java.cast(obj) }
-                .map<String?> { obj: UriParam? -> obj!!.getValue() }
-                .filter { obj: String? -> Objects.nonNull(obj) }
-                .findFirst()
-                .orElse(null)
+                .flatMap { obj -> obj!! }
+                .filterIsInstance<UriParam>()
+                .firstNotNullOfOrNull { obj -> obj.value }
         }
     }
 }

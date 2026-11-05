@@ -110,7 +110,7 @@ class OperationParametersParser(protected var adapterFactory: IAdapterFactory) {
                 if (!parameterParts.containsKey(part.name)) {
                     parameterParts[part.name] = value
                 } else {
-                    val existingValue: Any = parameterParts.get(part.name)!!
+                    val existingValue: Any = parameterParts[part.name]!!
                     if (existingValue is MutableList<*>) {
                         @Suppress("UNCHECKED_CAST")
                         (existingValue as MutableList<IBase?>).add(value)

@@ -22,7 +22,7 @@ class BundleIterator<B : IBaseBundle>(
             throw NoSuchElementException()
         }
 
-        val next = parts.get(index)
+        val next = parts[index]
         index++
 
         if (index >= parts.size) {

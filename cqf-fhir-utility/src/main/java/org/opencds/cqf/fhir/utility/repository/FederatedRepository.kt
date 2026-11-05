@@ -9,9 +9,6 @@ import ca.uhn.fhir.util.BundleBuilder
 import com.google.common.collect.Multimap
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.function.Consumer
-import java.util.function.Supplier
-import java.util.stream.Stream
 import org.hl7.fhir.instance.model.api.*
 import org.opencds.cqf.fhir.utility.iterable.BundleIterator
 import org.slf4j.Logger
@@ -26,12 +23,12 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         resourceType: Class<T>?,
         id: I?,
         headers: MutableMap<String?, String?>?,
-    ): T? {
+    ): T {
         // Check local first, then go through the list if nothing is found
 
         var result: T? = null
         try {
-            result = local.read<T?, I?>(resourceType, id, headers)
+            result = local.read(resourceType, id, headers)
         } catch (e: Exception) {
             // TODO: handle exception
         }
@@ -39,7 +36,7 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         if (result == null) {
             for (repository in repositoryList) {
                 try {
-                    result = repository.read<T?, I?>(resourceType, id, headers)
+                    result = repository.read(resourceType, id, headers)
                     if (result != null) {
                         break
                     }
@@ -113,23 +110,17 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         val futureList: MutableList<CompletableFuture<MutableList<T?>?>?> =
             ArrayList<CompletableFuture<MutableList<T?>?>?>()
         futureList.add(
-            CompletableFuture.supplyAsync<MutableList<T?>?>(
-                Supplier {
-                    conductSearch(local, bundleType, resourceType, searchParameters, headers)
-                }
-            )
-        )
-        this.repositoryList.forEach(
-            Consumer { r: IRepository? ->
-                futureList.add(
-                    CompletableFuture.supplyAsync<MutableList<T?>?>(
-                        Supplier {
-                            conductSearch(r!!, bundleType, resourceType, searchParameters, headers)
-                        }
-                    )
-                )
+            CompletableFuture.supplyAsync<MutableList<T?>?> {
+                conductSearch(local, bundleType, resourceType, searchParameters, headers)
             }
         )
+        this.repositoryList.forEach { r ->
+            futureList.add(
+                CompletableFuture.supplyAsync<MutableList<T?>?> {
+                    conductSearch(r, bundleType, resourceType, searchParameters, headers)
+                }
+            )
+        }
 
         futureList
             .flatMap { obj -> obj!!.join()!! }
@@ -144,12 +135,9 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         url: String?,
         headers: MutableMap<String?, String?>?,
     ): B? {
-        return Stream.concat<IRepository?>(Stream.of<IRepository?>(local), repositoryList.stream())
-            .map<Optional<B>?> { repo -> tryLink(repo!!, bundleType, url, headers) }
-            .flatMap<B?> { obj: Optional<B>? -> obj!!.stream() }
-            .filter { bundle: B? -> this.hasResourceEntries(bundle!!) }
-            .findFirst()
-            .orElse(null)
+        return (listOf(local) + repositoryList)
+            .mapNotNull { repo -> tryLink(repo, bundleType, url, headers) }
+            .firstOrNull { bundle -> this.hasResourceEntries(bundle) }
     }
 
     private fun <B : IBaseBundle> tryLink(
@@ -157,23 +145,23 @@ class FederatedRepository(private val local: IRepository, vararg repositories: I
         type: Class<B>?,
         url: String?,
         headers: MutableMap<String?, String?>?,
-    ): Optional<B> {
+    ): B? {
         try {
-            return Optional.ofNullable(repo.link(type, url, headers))
+            return repo.link(type, url, headers)
         } catch (e: Exception) {
             // swallow and try next
             logger.debug(
                 "Encountered error attempting to fetch link from repository of type {}: {}",
-                repo.javaClass.getName(),
+                repo.javaClass.name,
                 e.message,
             )
-            return Optional.empty()
+            return null
         }
     }
 
     private fun hasResourceEntries(bundle: IBaseBundle): Boolean {
         val bundleFactory =
-            FhirContext.forCached(bundle.getStructureFhirVersionEnum()).newBundleFactory()
+            FhirContext.forCached(bundle.structureFhirVersionEnum).newBundleFactory()
         bundleFactory.initializeWithBundleResource(bundle)
         return bundleFactory.toListOfResources().isNotEmpty()
     }

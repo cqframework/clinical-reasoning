@@ -31,7 +31,7 @@ data class EncodingBehavior(
 
     companion object {
         private val DEFAULT_ENABLED_ENCODINGS: EnumSet<EncodingEnum?> =
-            EnumSet.of<EncodingEnum?>(EncodingEnum.JSON, EncodingEnum.XML)
+            EnumSet.of(EncodingEnum.JSON, EncodingEnum.XML)
 
         val DEFAULT: EncodingBehavior =
             EncodingBehavior(
@@ -44,7 +44,7 @@ data class EncodingBehavior(
             EncodingBehavior(
                 EncodingEnum.JSON,
                 PreserveEncoding.PRESERVE_ORIGINAL_ENCODING,
-                EnumSet.of<EncodingEnum?>(EncodingEnum.JSON),
+                EnumSet.of(EncodingEnum.JSON),
             )
     }
 }

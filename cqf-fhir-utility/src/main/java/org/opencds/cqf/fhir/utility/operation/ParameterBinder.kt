@@ -111,8 +111,8 @@ interface ParameterBinder {
 
             // First, let's check for parts. For lists this is correct.
             // For single-valued parameters, this is incorrect
-            val parts = terser.getValues(params.get(0), "part")
-            require(!(parameterClass != ParameterClass.LIST && !parts.isEmpty())) {
+            val parts = terser.getValues(params[0], "part")
+            require(!(parameterClass != ParameterClass.LIST && parts.isNotEmpty())) {
                 "Parameter " + this.name() + " is not the expected type " + parameter.type
             }
 
@@ -136,13 +136,8 @@ interface ParameterBinder {
             if (parameterClass == ParameterClass.LIST) {
                 val values = ArrayList<IBase?>()
                 for (part in parts) {
-                    val r =
-                        terser.getSingleValueOrNull<IBaseResource?>(
-                            part,
-                            "resource",
-                            IBaseResource::class.java,
-                        )
-                    val v = terser.getSingleValueOrNull<IBase?>(part, "value[x]", IBase::class.java)
+                    val r = terser.getSingleValueOrNull(part, "resource", IBaseResource::class.java)
+                    val v = terser.getSingleValueOrNull(part, "value[x]", IBase::class.java)
 
                     if (v != null) {
                         values.add(v)
@@ -160,14 +155,10 @@ interface ParameterBinder {
                 return values
             }
 
-            val param = params.get(0)
+            val param = params[0]
             val valueResource =
-                terser.getSingleValueOrNull<IBaseResource?>(
-                    param,
-                    "resource",
-                    IBaseResource::class.java,
-                )
-            val value = terser.getSingleValueOrNull<IBase?>(param, "value[x]", IBase::class.java)
+                terser.getSingleValueOrNull(param, "resource", IBaseResource::class.java)
+            val value = terser.getSingleValueOrNull(param, "value[x]", IBase::class.java)
             require(!(valueResource != null && value != null)) {
                 "Parameter " + this.name() + " has both a resource and a value. Only one is allowed"
             }

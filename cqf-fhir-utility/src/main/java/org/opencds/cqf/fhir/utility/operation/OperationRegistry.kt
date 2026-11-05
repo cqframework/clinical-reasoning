@@ -140,7 +140,7 @@ class OperationRegistry {
         typeName: String,
     ): InvocationContext<*> {
 
-        val normalizedName: String = Companion.normalizeName(name)
+        val normalizedName: String = normalizeName(name)
 
         val contexts = invocationContextByName.get(normalizedName)
         if (contexts.isEmpty()) {

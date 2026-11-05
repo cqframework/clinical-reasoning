@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors
-import java.util.stream.Stream
 import org.hl7.fhir.r4.model.Enumerations
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,7 +63,7 @@ data class IgConventions(
                 CompartmentMode.NONE,
                 CompartmentIsolation.FULL,
                 FilenameMode.TYPE_AND_ID,
-                EncodingBehavior.Companion.DEFAULT,
+                EncodingBehavior.DEFAULT,
             )
         @JvmField
         val STANDARD: IgConventions =
@@ -74,7 +73,7 @@ data class IgConventions(
                 CompartmentMode.NONE,
                 CompartmentIsolation.FULL,
                 FilenameMode.ID_ONLY,
-                EncodingBehavior.Companion.DEFAULT,
+                EncodingBehavior.DEFAULT,
             )
 
         @JvmField
@@ -85,7 +84,7 @@ data class IgConventions(
                 CompartmentMode.PATIENT,
                 CompartmentIsolation.FHIR,
                 FilenameMode.ID_ONLY,
-                EncodingBehavior.Companion.KALM,
+                EncodingBehavior.KALM,
             )
 
         private val FHIR_TYPE_NAMES: MutableList<String?> =
@@ -133,7 +132,7 @@ data class IgConventions(
             // If it exists, we will use that as the base path for further checks.
             path = path.resolve("input")
             require(Files.exists(path)) {
-                "The provided path does not contain an 'input' or 'src' directory: " + path
+                "The provided path does not contain an 'input' or 'src' directory: $path"
             }
 
             // A "category" hierarchy may exist in the ig file structure,
@@ -145,11 +144,9 @@ data class IgConventions(
             // Check all possible category paths and grab the first that exists,
             // or use the IG path if none exist.
             var categoryPath =
-                Stream.of<String?>("tests", "vocabulary", "resources")
-                    .map<Path> { other: String? -> path.resolve(other) }
-                    .filter { x: Path? -> x!!.toFile().exists() }
-                    .findFirst()
-                    .orElse(path)
+                listOf("tests", "vocabulary", "resources")
+                    .map { other -> path.resolve(other) }
+                    .firstOrNull { x -> x.toFile().exists() } ?: path
 
             val hasCategoryDirectory = path != categoryPath
 
@@ -195,9 +192,7 @@ data class IgConventions(
                         // specific one,
                         // e.g. tests/patient/123 (not just test/patient).
                         compartmentMode =
-                            CompartmentMode.Companion.fromType(
-                                compartment.parent.fileName.toString()
-                            )
+                            CompartmentMode.fromType(compartment.parent.fileName.toString())
 
                         require(compartmentMode != CompartmentMode.NONE) {
                             "The compartment directory does not match any known compartment type: $compartment"
@@ -243,7 +238,7 @@ data class IgConventions(
                     // we know it is FULL isolation.
                     CompartmentIsolation.FULL,
                     if (hasTypeFilename) FilenameMode.TYPE_AND_ID else FilenameMode.ID_ONLY,
-                    EncodingBehavior.Companion.DEFAULT,
+                    EncodingBehavior.DEFAULT,
                 )
 
             logger.info("Auto-detected repository configuration: {}", config)
@@ -258,13 +253,10 @@ data class IgConventions(
                         .filter { path -> Files.isRegularFile(path) }
                         .filter { innerFile -> fileNameMatchesType(innerFile) }
                         .filter { filePath ->
-                            Companion.claimedFhirType(filePath!!) != Enumerations.FHIRAllTypes.NULL
+                            claimedFhirType(filePath) != Enumerations.FHIRAllTypes.NULL
                         }
                         .anyMatch { filePath ->
-                            contentsMatchClaimedType(
-                                filePath,
-                                Companion.claimedFhirType(filePath!!),
-                            )
+                            contentsMatchClaimedType(filePath, claimedFhirType(filePath))
                         }
                 }
             } catch (exception: IOException) {

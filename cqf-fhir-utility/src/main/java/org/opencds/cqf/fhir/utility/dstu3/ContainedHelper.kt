@@ -74,10 +74,9 @@ object ContainedHelper {
         resource: Resource?
     ): Stream<Resource?> {
         if (resource !is DomainResource) {
-            return Stream.empty<Resource?>()
+            return Stream.empty()
         }
-        return resource
-            .getContained() // We don't need to re-add any resources
+        return resource.contained // We don't need to re-add any resources
             // that are already on the parent.
             .stream()
             .flatMap { obj -> ContainedHelper.streamAllContainedResources(obj) } // Get the
@@ -90,7 +89,7 @@ object ContainedHelper {
         if (resource !is DomainResource) {
             return Stream.empty<Resource?>()
         }
-        val contained = resource.getContained()
+        val contained = resource.contained
 
         return Stream.concat<Resource?>(
             contained.stream(),

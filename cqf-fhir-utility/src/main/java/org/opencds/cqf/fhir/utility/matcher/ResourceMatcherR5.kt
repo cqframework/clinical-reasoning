@@ -51,8 +51,7 @@ class ResourceMatcherR5 : ResourceMatcher {
             resolvedCodes.add(TokenParam(codeElement.value))
         } else if (codeElement is CodeableConcept) {
             resolvedCodes =
-                codeElement
-                    .getCoding()
+                codeElement.coding
                     .map { code -> TokenParam(code!!.system, code.code) }
                     .toMutableList()
         }

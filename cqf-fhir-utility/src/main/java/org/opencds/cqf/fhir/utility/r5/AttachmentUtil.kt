@@ -7,10 +7,10 @@ object AttachmentUtil {
     @JvmStatic
     fun getCqlLocation(resource: IBaseResource?): String? {
         val library = resource as Library
-        for (attachment in library.getContent()) {
+        for (attachment in library.content) {
             if (
                 attachment.hasContentType() &&
-                    attachment.getContentType() == "text/cql" &&
+                    attachment.contentType == "text/cql" &&
                     !attachment.url.isNullOrBlank()
             ) {
                 return attachment.url
@@ -23,8 +23,8 @@ object AttachmentUtil {
     fun addData(resource: IBaseResource?, text: String?): IBaseResource? {
         if (!text.isNullOrBlank()) {
             val library = resource as Library
-            for (attachment in library.getContent()) {
-                if (attachment.hasContentType() && attachment.getContentType() == "text/cql") {
+            for (attachment in library.content) {
+                if (attachment.hasContentType() && attachment.contentType == "text/cql") {
                     attachment.setData(text.toByteArray())
                     library.addContent(attachment)
                     return library as IBaseResource

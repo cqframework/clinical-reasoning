@@ -1,17 +1,14 @@
 package org.opencds.cqf.fhir.utility.repository.ig
 
-import com.google.common.collect.Sets
-
 internal enum class ResourceCategory {
     DATA,
     TERMINOLOGY,
     CONTENT;
 
     companion object {
-        private val TERMINOLOGY_RESOURCES: MutableSet<String?> =
-            Sets.newHashSet<String?>("ValueSet", "CodeSystem")
-        private val CONTENT_RESOURCES: MutableSet<String?> =
-            Sets.newHashSet<String?>(
+        private val TERMINOLOGY_RESOURCES = setOf("ValueSet", "CodeSystem")
+        private val CONTENT_RESOURCES =
+            setOf(
                 "Library",
                 "Questionnaire",
                 "Measure",

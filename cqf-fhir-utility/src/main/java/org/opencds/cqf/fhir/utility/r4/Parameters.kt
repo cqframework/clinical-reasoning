@@ -143,7 +143,7 @@ object Parameters {
         parameters: Parameters,
         name: String,
     ): MutableList<Parameters.ParametersParameterComponent?> {
-        return parameters.getParameter().filter { x -> name == x!!.getName() }.toMutableList()
+        return parameters.parameter.filter { x -> name == x!!.name }.toMutableList()
     }
 
     /**

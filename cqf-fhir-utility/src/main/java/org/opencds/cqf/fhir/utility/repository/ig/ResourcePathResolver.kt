@@ -22,7 +22,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
 
         // In the "preferred" case, we remap an 'unknown' assignment to 'shared'
         val effectiveAssignment: CompartmentAssignment =
-            (if (assignment.isUnknown) CompartmentAssignment.Companion.shared() else assignment)
+            (if (assignment.isUnknown) CompartmentAssignment.shared() else assignment)
         return directories(resourceType, effectiveAssignment).stream().findFirst().orElseThrow()
     }
 
@@ -65,7 +65,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
     ): MutableList<Path> {
         validateAssignment(resourceType, assignment)
 
-        val category = ResourceCategory.Companion.forType(resourceType.simpleName)
+        val category = ResourceCategory.forType(resourceType.simpleName)
         val bases = categoryDirectories(category)
 
         val typeSegment =
@@ -234,7 +234,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
         }
 
         if (assignment.isShared) {
-            return mutableListOf(base.resolve(CompartmentAssignment.Companion.SHARED_COMPARTMENT))
+            return mutableListOf(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT))
         }
 
         if (assignment.hasCompartmentId()) {
@@ -271,7 +271,7 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
             }
         }
 
-        paths.add(base.resolve(CompartmentAssignment.Companion.SHARED_COMPARTMENT))
+        paths.add(base.resolve(CompartmentAssignment.SHARED_COMPARTMENT))
 
         return paths
     }
@@ -297,42 +297,38 @@ class ResourcePathResolver(private val root: Path, private val conventions: IgCo
         private val BASE_DIRECTORIES:
             Table<CategoryLayout?, ResourceCategory?, MutableList<String?>?> =
             ImmutableTable.Builder<CategoryLayout?, ResourceCategory?, MutableList<String?>?>()
-                .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, mutableListOf<String?>("input"))
-                .put(
-                    CategoryLayout.FLAT,
-                    ResourceCategory.TERMINOLOGY,
-                    mutableListOf<String?>("input"),
-                )
-                .put(CategoryLayout.FLAT, ResourceCategory.DATA, mutableListOf<String?>("input"))
+                .put(CategoryLayout.FLAT, ResourceCategory.CONTENT, mutableListOf("input"))
+                .put(CategoryLayout.FLAT, ResourceCategory.TERMINOLOGY, mutableListOf("input"))
+                .put(CategoryLayout.FLAT, ResourceCategory.DATA, mutableListOf("input"))
                 .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.CONTENT,
-                    mutableListOf<String?>("input/resources", "input/tests"),
+                    mutableListOf("input/resources", "input/tests"),
                 )
                 .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.TERMINOLOGY,
-                    mutableListOf<String?>("input/vocabulary", "input/tests/vocabulary"),
+                    mutableListOf("input/vocabulary", "input/tests/vocabulary"),
                 )
                 .put(
                     CategoryLayout.DIRECTORY_PER_CATEGORY,
                     ResourceCategory.DATA,
-                    mutableListOf<String?>("input/tests", "input/resources"),
+                    mutableListOf("input/tests", "input/resources"),
                 )
                 .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.CONTENT,
-                    mutableListOf<String?>("src/fhir", "tests/data/fhir"),
+                    mutableListOf("src/fhir", "tests/data/fhir"),
                 )
                 .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.TERMINOLOGY,
-                    mutableListOf<String?>("src/fhir", "tests/data/fhir"),
+                    mutableListOf("src/fhir", "tests/data/fhir"),
                 )
                 .put(
                     CategoryLayout.DEFINITIONAL_AND_DATA,
                     ResourceCategory.DATA,
-                    mutableListOf<String?>("tests/data/fhir", "src/fhir"),
+                    mutableListOf("tests/data/fhir", "src/fhir"),
                 )
                 .build()
     }

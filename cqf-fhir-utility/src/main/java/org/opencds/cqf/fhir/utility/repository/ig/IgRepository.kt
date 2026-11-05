@@ -103,7 +103,7 @@ open class IgRepository
 constructor(
     private val fhirContext: FhirContext,
     private val root: Path,
-    private val conventions: IgConventions = IgConventions.Companion.autoDetect(root),
+    private val conventions: IgConventions = IgConventions.autoDetect(root),
     private var operationProvider: IRepositoryOperationProvider? = null,
 ) : IRepository {
     private val resourceMatcher = Repositories.getResourceMatcher(this.fhirContext)
@@ -755,12 +755,7 @@ constructor(
         @Suppress("UNCHECKED_CAST")
         val bundleClass =
             fhirContext.getResourceDefinition("Bundle").implementingClass as Class<IBaseBundle>
-        return this.search(
-            bundleClass,
-            resourceClass,
-            IgRepository.Companion.parseSearchQuery(queryString),
-            headers,
-        )!!
+        return this.search(bundleClass, resourceClass, parseSearchQuery(queryString), headers)!!
     }
 
     companion object {

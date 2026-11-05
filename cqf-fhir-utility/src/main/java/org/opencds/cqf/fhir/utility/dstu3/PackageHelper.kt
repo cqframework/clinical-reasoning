@@ -35,7 +35,7 @@ object PackageHelper : org.opencds.cqf.fhir.utility.PackageHelper() {
     ) {
         for (artifact in artifacts) {
             if (
-                artifact!!.getType() == RelatedArtifact.RelatedArtifactType.DEPENDSON &&
+                artifact!!.type == RelatedArtifact.RelatedArtifactType.DEPENDSON &&
                     artifact.hasResource()
             ) {
                 try {
@@ -49,7 +49,7 @@ object PackageHelper : org.opencds.cqf.fhir.utility.PackageHelper() {
                         if (
                             resource != null &&
                                 getEntryResources(bundle).none { r ->
-                                    r.idElement == resource.getIdElement()
+                                    r.idElement == resource.idElement
                                 }
                         ) {
                             addEntry(bundle, createEntry(resource, isPut))

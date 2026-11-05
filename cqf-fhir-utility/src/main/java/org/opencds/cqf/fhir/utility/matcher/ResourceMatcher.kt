@@ -172,20 +172,20 @@ interface ResourceMatcher {
              * r is likely a primitive (ie, single DateParam object).
              * But even if it's "something else", the isMatchDate method should handle it
              */
-            return isParamMatchAtPath(composite.getLeftValue(), r) &&
-                isParamMatchAtPath(composite.getRightValue(), r)
+            return isParamMatchAtPath(composite.leftValue, r) &&
+                isParamMatchAtPath(composite.rightValue, r)
         }
 
         // DateRange and NumberRange do not share a lot of commonality
         // so we have to handle them like special cases here
-        if (composite.getLeftValue() is DateParam) {
+        if (composite.leftValue is DateParam) {
             // search bounds
-            var searchStart = composite.getLeftValue() as DateParam
-            var searchEnd = composite.getRightValue() as DateParam
+            var searchStart = composite.leftValue as DateParam
+            var searchEnd = composite.rightValue as DateParam
             if (searchStart.value.after(searchEnd.value)) {
                 // in case order is mixed
                 searchStart = searchEnd
-                searchEnd = composite.getLeftValue() as DateParam
+                searchEnd = composite.leftValue as DateParam
             }
 
             val rangeParam = getDateRange(r)
@@ -214,7 +214,7 @@ interface ResourceMatcher {
         } else {
             throw NotImplementedException(
                 "Composite matching not implemented for search params of type " +
-                    composite.getLeftValue().javaClass.simpleName
+                    composite.leftValue.javaClass.simpleName
             )
         }
     }
@@ -234,7 +234,7 @@ interface ResourceMatcher {
     fun isMatchDate(param: DateParam, pathResult: IBase): Boolean {
         // date, dateTime and instant are PrimitiveType<Date>
         if (pathResult is IPrimitiveType<*>) {
-            val result: Any? = pathResult.getValue()
+            val result: Any? = pathResult.value
             if (result is Date) {
                 return isDateMatch(param, result)
             } else {
@@ -307,7 +307,7 @@ interface ResourceMatcher {
         }
 
         if (pathResult is IPrimitiveType<*>) {
-            return param.value == pathResult.getValue()
+            return param.value == pathResult.value
         }
 
         return false
@@ -338,7 +338,7 @@ interface ResourceMatcher {
             return false
         }
         if (pathResult is IPrimitiveType<*>) {
-            return param.value == pathResult.getValue()
+            return param.value == pathResult.value
         }
         throw UnsupportedOperationException(
             "Expected element of type url or uri, found " + pathResult.javaClass.simpleName
@@ -347,7 +347,7 @@ interface ResourceMatcher {
 
     fun isMatchString(param: StringParam, pathResult: Any): Boolean {
         if (pathResult is IPrimitiveType<*>) {
-            return param.value == pathResult.getValue()
+            return param.value == pathResult.value
         }
         throw UnsupportedOperationException(
             "Expected element of type string, found " + pathResult.javaClass.simpleName

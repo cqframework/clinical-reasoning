@@ -73,8 +73,7 @@ object ContainedHelper {
         if (resource !is DomainResource) {
             return Stream.empty()
         }
-        return resource
-            .getContained() // We don't need to re-add any resources
+        return resource.contained // We don't need to re-add any resources
             // that are already on the parent.
             .stream()
             .flatMap(ContainedHelper::streamAllContainedResources) // Get the
